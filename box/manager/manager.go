@@ -388,7 +388,7 @@ func (mgr *Manager) setupIdentifierMapping() {
 
 	if !bytes.Equal(content, mapping) {
 		z.Content = zettel.NewContent(mapping)
-		if err = mgr.UpdateZettel(ctx, z); err != nil {
+		if err = mgr.updateZettel(ctx, z); err != nil {
 			mgr.mgrLog.Error().Err(err).Msg("unable to write identifier mapping zettel")
 		} else {
 			mgr.mgrLog.Info().Msg("Mapping was updated")

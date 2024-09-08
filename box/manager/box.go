@@ -264,6 +264,9 @@ func (mgr *Manager) UpdateZettel(ctx context.Context, zettel zettel.Zettel) erro
 	if err := mgr.checkContinue(ctx); err != nil {
 		return err
 	}
+	return mgr.updateZettel(ctx, zettel)
+}
+func (mgr *Manager) updateZettel(ctx context.Context, zettel zettel.Zettel) error {
 	if box, isWriteBox := mgr.boxes[0].(box.WriteBox); isWriteBox {
 		zettel.Meta = mgr.cleanMetaProperties(zettel.Meta)
 		if err := box.UpdateZettel(ctx, zettel); err != nil {
