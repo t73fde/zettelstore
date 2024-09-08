@@ -5,7 +5,7 @@ go 1.23
 require (
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/yuin/goldmark v1.7.4
-	golang.org/x/crypto v0.26.0
+	golang.org/x/crypto v0.27.0
 	golang.org/x/term v0.24.0
 	golang.org/x/text v0.18.0
 	t73f.de/r/sx v0.0.0-20240814083626-4df0ec6454b5
