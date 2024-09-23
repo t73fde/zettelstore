@@ -16,7 +16,9 @@ package impl
 import (
 	"io"
 	"net/http"
+	"net/http/pprof"
 	"regexp"
+	rtprf "runtime/pprof"
 	"strings"
 
 	"zettelstore.de/z/auth"
@@ -63,6 +65,19 @@ func (rt *httpRouter) initializeRouter(log *logger.Logger, urlPrefix string, max
 	rt.reURL = regexp.MustCompile("^$")
 	rt.mux = http.NewServeMux()
 	rt.maxReqSize = maxRequestSize
+
+	rt.setRuntimeProfiling() // TODO: make configurable before release
+}
+
+func (rt *httpRouter) setRuntimeProfiling() {
+	rt.mux.HandleFunc("GET /debug/pprof", pprof.Index)
+	for _, profile := range rtprf.Profiles() {
+		rt.mux.Handle("GET /debug/"+profile.Name(), pprof.Handler(profile.Name()))
+	}
+	rt.mux.HandleFunc("GET /debug/cmdline", pprof.Cmdline)
+	rt.mux.HandleFunc("GET /debug/profile", pprof.Profile)
+	rt.mux.HandleFunc("GET /debug/symbol", pprof.Symbol)
+	rt.mux.HandleFunc("GET /debug/trace", pprof.Trace)
 }
 
 func (rt *httpRouter) addRoute(key byte, method server.Method, handler http.Handler, table *routingTable) {

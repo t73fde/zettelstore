@@ -42,6 +42,8 @@ func genMemoryC(context.Context, *compBox) []byte {
 	fmt.Fprintf(&buf, "|Heap Objects|%d\n", m.HeapObjects)
 	fmt.Fprintf(&buf, "|Heap Sys (KiB)|%d\n", m.HeapSys/1024)
 	fmt.Fprintf(&buf, "|Heap Inuse (KiB)|%d\n", m.HeapInuse/1024)
+	fmt.Fprintf(&buf, "|CPUs|%d\n", runtime.NumCPU())
+	fmt.Fprintf(&buf, "|Threads|%d\n", runtime.NumGoroutine())
 	debug := kernel.Main.GetConfig(kernel.CoreService, kernel.CoreDebug).(bool)
 	if debug {
 		for i, bysize := range m.BySize {
