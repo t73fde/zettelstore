@@ -326,7 +326,7 @@ func (mgr *Manager) deleteMapping(ctx context.Context, zidO id.Zid) error {
 	}
 	mgr.zidMapper.DeleteO(zidO)
 	mappingZettel.Content = zettel.NewContent(mgr.zidMapper.AsBytes())
-	if err = mgr.UpdateZettel(ctx, mappingZettel); err != nil {
+	if err = mgr.updateZettel(ctx, mappingZettel); err != nil {
 		mgr.mgrLog.Error().Err(err).Zid(zidO).Msg("Unable to update mapping zettel")
 		return err
 	}

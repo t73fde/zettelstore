@@ -146,7 +146,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	mgr := &Manager{
 		mgrLog:       boxLog.Clone().Str("box", "manager").Child(),
 		rtConfig:     rtConfig,
-		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
+		infos:        make(chan box.UpdateInfo, len(boxURIs)*1000+500), // TODO: refactor code to shrink size of channel
 		propertyKeys: propertyKeys,
 
 		idxLog:   boxLog.Clone().Str("box", "index").Child(),
