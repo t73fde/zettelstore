@@ -206,7 +206,7 @@ func (dp *dirBox) stopFileServices() {
 func (dp *dirBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
 	if notify := dp.cdata.Notify; notify != nil {
 		dp.log.Trace().Zid(zid).Uint("reason", uint64(reason)).Msg("notifyChanged")
-		notify(dp, zid, reason)
+		notify(dp, zid, reason, false)
 	}
 }
 

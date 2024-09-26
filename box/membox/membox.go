@@ -56,7 +56,7 @@ type memBox struct {
 
 func (mb *memBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
 	if notify := mb.cdata.Notify; notify != nil {
-		notify(mb, zid, reason)
+		notify(mb, zid, reason, false)
 	}
 }
 

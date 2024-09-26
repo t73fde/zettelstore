@@ -17,6 +17,7 @@ package manager
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/url"
 	"sync"
@@ -268,14 +269,22 @@ func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zidO id.Zid, isStarted b
 	case box.OnReload:
 		mgr.idxAr.Reset()
 	case box.OnZettel:
-		if isStarted && zidO != id.MappingZid {
-			if _, found := mgr.zidMapper.LookupZidN(zidO); !found {
-				mgr.createMapping(context.Background(), zidO)
+		if isStarted {
+			if zidO > id.MappingZid {
+				if _, found := mgr.zidMapper.LookupZidN(zidO); !found {
+					mgr.createMapping(context.Background(), zidO)
+				}
+			} else if zidO == id.MappingZid {
+				if _, err := mgr.getAndUpdateMapping(context.Background()); err != nil {
+					mgr.mgrLog.Error().Err(err).Msg("ID mapping update problem")
+				} else {
+					mgr.mgrLog.Info().Msg("ID mapping updated")
+				}
 			}
 		}
 		mgr.idxAr.EnqueueZettel(zidO)
 	case box.OnDelete:
-		if isStarted && zidO != id.MappingZid {
+		if isStarted && zidO > id.MappingZid {
 			mgr.deleteMapping(context.Background(), zidO)
 		}
 		mgr.idxAr.EnqueueZettel(zidO)
@@ -365,37 +374,44 @@ func (mgr *Manager) allBoxesStarted() bool {
 
 func (mgr *Manager) setupIdentifierMapping() {
 	ctx := context.Background()
-	z, err := mgr.getZettel(ctx, id.MappingZid)
+	z, err := mgr.getAndUpdateMapping(ctx)
 	if err != nil {
-		mgr.mgrLog.Error().Err(err).Msg("unable to get identifier mapping zettel")
-		return
-	}
-	if z.Content.IsBinary() {
-		mgr.mgrLog.Error().Msg("identifier mapping is non-text zettel")
-		return
-	}
-	z.Content.TrimSpace()
-	content := z.Content.AsBytes()
-	if err = mgr.zidMapper.parseAndUpdate(content); err != nil {
-		mgr.mgrLog.Error().Err(err).Msg("identifier zettel parsing")
+		mgr.mgrLog.Error().Err(err).Msg("error while reading and updating id mapping")
 	}
 
 	mapping, err := mgr.zidMapper.FetchAsBytes(ctx)
 	if err != nil {
-		mgr.mgrLog.Error().Err(err).Msg("unable to get current identifier mapping")
+		mgr.mgrLog.Error().Err(err).Msg("Unable to get current identifier mapping")
 		return
 	}
 
+	content := z.Content.AsBytes()
 	if !bytes.Equal(content, mapping) {
 		z.Content = zettel.NewContent(mapping)
 		if err = mgr.updateZettel(ctx, z); err != nil {
-			mgr.mgrLog.Error().Err(err).Msg("unable to write identifier mapping zettel")
+			mgr.mgrLog.Error().Err(err).Msg("Unable to write identifier mapping zettel")
 		} else {
 			mgr.mgrLog.Info().Msg("Mapping was updated")
 		}
 	} else {
 		mgr.mgrLog.Info().Msg("No mapping update")
 	}
+}
+
+func (mgr *Manager) getAndUpdateMapping(ctx context.Context) (zettel.Zettel, error) {
+	z, err := mgr.getZettel(ctx, id.MappingZid)
+	if err != nil {
+		return z, fmt.Errorf("get id mapping zettel: %w", err)
+	}
+	if z.Content.IsBinary() {
+		return z, fmt.Errorf("id mapping zettel is binary")
+	}
+	z.Content.TrimSpace()
+	content := z.Content.AsBytes()
+	if err = mgr.zidMapper.parseAndUpdate(content); err != nil {
+		err = fmt.Errorf("id mapping zettel parsing: %w", err)
+	}
+	return z, err
 }
 
 // Stop the started box. Now only the Start() function is allowed.
@@ -489,8 +505,8 @@ func (mgr *Manager) checkContinue(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (mgr *Manager) notifyChanged(bbox box.BaseBox, zid id.Zid, reason box.UpdateReason) {
-	if infos := mgr.infos; infos != nil && zid != id.MappingZid {
+func (mgr *Manager) notifyChanged(bbox box.BaseBox, zid id.Zid, reason box.UpdateReason, force bool) {
+	if infos := mgr.infos; infos != nil && (zid != id.MappingZid || force) {
 		mgr.infos <- box.UpdateInfo{Box: bbox, Reason: reason, Zid: zid}
 	}
 }
