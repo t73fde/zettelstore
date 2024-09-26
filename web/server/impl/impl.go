@@ -35,16 +35,36 @@ type myServer struct {
 	secureCookie     bool
 }
 
+type ServerData struct {
+	Log              *logger.Logger
+	ListenAddr       string
+	BaseURL          string
+	URLPrefix        string
+	MaxRequestSize   int64
+	Auth             auth.TokenManager
+	PersistentCookie bool
+	SecureCookie     bool
+	Profiling        bool
+}
+
 // New creates a new web server.
-func New(log *logger.Logger, listenAddr, baseURL, urlPrefix string, persistentCookie, secureCookie bool, maxRequestSize int64, auth auth.TokenManager) server.Server {
+func New(sd ServerData) server.Server {
 	srv := myServer{
-		log:              log,
-		baseURL:          baseURL,
-		persistentCookie: persistentCookie,
-		secureCookie:     secureCookie,
+		log:              sd.Log,
+		baseURL:          sd.BaseURL,
+		persistentCookie: sd.PersistentCookie,
+		secureCookie:     sd.SecureCookie,
 	}
-	srv.router.initializeRouter(log, urlPrefix, maxRequestSize, auth)
-	srv.server.initializeHTTPServer(listenAddr, &srv.router)
+
+	rd := routerData{
+		log:            sd.Log,
+		urlPrefix:      sd.URLPrefix,
+		maxRequestSize: sd.MaxRequestSize,
+		auth:           sd.Auth,
+		profiling:      sd.Profiling,
+	}
+	srv.router.initializeRouter(rd)
+	srv.server.initializeHTTPServer(sd.ListenAddr, &srv.router)
 	return &srv
 }
 

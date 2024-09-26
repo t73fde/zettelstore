@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240710183532
+modified: 20240926144803
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -50,9 +50,10 @@ The following keys are supported:
   If no ''box-uri-1'' key is given, the overall effect will be the same as if only ''box-uri-1'' was specified with the value ""dir://.zettel"".
   In this case, even a key ''box-uri-2'' will be ignored.
 ; [!debug-mode|''debug-mode'']
-: If set to [[true|00001006030500]], allows to debug the Zettelstore software (mostly used by the developers).
+: If set to [[true|00001006030500]], allows to debug the Zettelstore software (mostly used by Zettelstore developers).
   Disables any timeout values of the internal web server and does not send some security-related data.
   Sets [[''log-level''|#log-level]] to ""debug"".
+  Enables [[''runtime-profiling''|#runtime-profiling]].
 
   Do not enable it for a production server.
 
@@ -120,6 +121,11 @@ The following keys are supported:
   No changes are possible.
 
   Default: ""false"".
+; [!runtime-profiling|''runtime-profiling'']
+: A boolean value that enables a web interface to obtain [[runtime profiling information|00001004010200]].
+
+  Default: ""false"", but it is set to ""true"" if [[''debug-mode''|#debug-mode]] is enabled.
+  In this case, it cannot be disabled.
 ; [!secret|''secret'']
 : A string value to make the communication with external clients strong enough so that sessions of the [[web user interface|00001014000000]] or [[API access token|00001010040700]] cannot be altered by some external unfriendly party.
   The string must have a length of at least 16 bytes.

@@ -162,6 +162,7 @@ const (
 	keyAdminPort         = "admin-port"
 	keyAssetDir          = "asset-dir"
 	keyBaseURL           = "base-url"
+	keyBoxOneURI         = kernel.BoxURIs + "1"
 	keyDebug             = "debug-mode"
 	keyDefaultDirBoxType = "default-dir-box-type"
 	keyInsecureCookie    = "insecure-cookie"
@@ -171,8 +172,8 @@ const (
 	keyMaxRequestSize    = "max-request-size"
 	keyOwner             = "owner"
 	keyPersistentCookie  = "persistent-cookie"
-	keyBoxOneURI         = kernel.BoxURIs + "1"
 	keyReadOnly          = "read-only-mode"
+	keyRuntimeProfiling  = "runtime-profiling"
 	keyTokenLifetimeHTML = "token-lifetime-html"
 	keyTokenLifetimeAPI  = "token-lifetime-api"
 	keyURLPrefix         = "url-prefix"
@@ -209,9 +210,11 @@ func setServiceConfig(cfg *meta.Meta) bool {
 		err = setConfigValue(err, kernel.BoxService, key, val)
 	}
 
-	err = setConfigValue(err, kernel.ConfigService, kernel.ConfigInsecureHTML, cfg.GetDefault(keyInsecureHTML, kernel.ConfigSecureHTML))
+	err = setConfigValue(
+		err, kernel.ConfigService, kernel.ConfigInsecureHTML, cfg.GetDefault(keyInsecureHTML, kernel.ConfigSecureHTML))
 
-	err = setConfigValue(err, kernel.WebService, kernel.WebListenAddress, cfg.GetDefault(keyListenAddr, "127.0.0.1:23123"))
+	err = setConfigValue(
+		err, kernel.WebService, kernel.WebListenAddress, cfg.GetDefault(keyListenAddr, "127.0.0.1:23123"))
 	if val, found := cfg.Get(keyBaseURL); found {
 		err = setConfigValue(err, kernel.WebService, kernel.WebBaseURL, val)
 	}
@@ -227,6 +230,7 @@ func setServiceConfig(cfg *meta.Meta) bool {
 		err, kernel.WebService, kernel.WebTokenLifetimeAPI, cfg.GetDefault(keyTokenLifetimeAPI, ""))
 	err = setConfigValue(
 		err, kernel.WebService, kernel.WebTokenLifetimeHTML, cfg.GetDefault(keyTokenLifetimeHTML, ""))
+	err = setConfigValue(err, kernel.WebService, kernel.WebProfiling, debugMode || cfg.GetBool(keyRuntimeProfiling))
 	if val, found := cfg.Get(keyAssetDir); found {
 		err = setConfigValue(err, kernel.WebService, kernel.WebAssetDir, val)
 	}

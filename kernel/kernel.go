@@ -193,6 +193,7 @@ const (
 	WebBaseURL           = "base-url"
 	WebListenAddress     = "listen"
 	WebPersistentCookie  = "persistent"
+	WebProfiling         = "profiling"
 	WebMaxRequestSize    = "max-request-size"
 	WebSecureCookie      = "secure"
 	WebTokenLifetimeAPI  = "api-lifetime"

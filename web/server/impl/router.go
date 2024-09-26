@@ -55,29 +55,40 @@ type httpRouter struct {
 	maxReqSize  int64
 }
 
+type routerData struct {
+	log            *logger.Logger
+	urlPrefix      string
+	maxRequestSize int64
+	auth           auth.TokenManager
+	profiling      bool
+}
+
 // initializeRouter creates a new, empty router with the given root handler.
-func (rt *httpRouter) initializeRouter(log *logger.Logger, urlPrefix string, maxRequestSize int64, auth auth.TokenManager) {
-	rt.log = log
-	rt.urlPrefix = urlPrefix
-	rt.auth = auth
+func (rt *httpRouter) initializeRouter(rd routerData) {
+	rt.log = rd.log
+	rt.urlPrefix = rd.urlPrefix
+	rt.auth = rd.auth
 	rt.minKey = 255
 	rt.maxKey = 0
 	rt.reURL = regexp.MustCompile("^$")
 	rt.mux = http.NewServeMux()
-	rt.maxReqSize = maxRequestSize
+	rt.maxReqSize = rd.maxRequestSize
 
-	rt.setRuntimeProfiling() // TODO: make configurable before release
+	if rd.profiling {
+		rt.setRuntimeProfiling()
+	}
 }
 
 func (rt *httpRouter) setRuntimeProfiling() {
-	rt.mux.HandleFunc("GET /debug/pprof", pprof.Index)
+	rt.mux.HandleFunc("GET /rtp/", pprof.Index)
 	for _, profile := range rtprf.Profiles() {
-		rt.mux.Handle("GET /debug/"+profile.Name(), pprof.Handler(profile.Name()))
+		name := profile.Name()
+		rt.mux.Handle("GET /rtp/"+name, pprof.Handler(name))
 	}
-	rt.mux.HandleFunc("GET /debug/cmdline", pprof.Cmdline)
-	rt.mux.HandleFunc("GET /debug/profile", pprof.Profile)
-	rt.mux.HandleFunc("GET /debug/symbol", pprof.Symbol)
-	rt.mux.HandleFunc("GET /debug/trace", pprof.Trace)
+	rt.mux.HandleFunc("GET /rtp/cmdline", pprof.Cmdline)
+	rt.mux.HandleFunc("GET /rtp/profile", pprof.Profile)
+	rt.mux.HandleFunc("GET /rtp/symbol", pprof.Symbol)
+	rt.mux.HandleFunc("GET /rtp/trace", pprof.Trace)
 }
 
 func (rt *httpRouter) addRoute(key byte, method server.Method, handler http.Handler, table *routingTable) {

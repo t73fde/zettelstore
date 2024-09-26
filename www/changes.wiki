@@ -19,6 +19,9 @@
   *  Show new format zettel identifier in zettel view, info view and delete
      view.
      (minor: webui)
+  *  Allow to enable runtime profiling of the software, to be used by
+     developers.
+     (minor)
 
 <a id="0_18"></a>
 <h2>Changes for Version 0.18.0 (2024-07-11)</h2>

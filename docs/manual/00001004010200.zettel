@@ -1,0 +1,29 @@
+id: 00001004010200
+title: Zettelstore runtime profiling
+role: manual
+tags: #configuration #manual #zettelstore
+syntax: zmk
+created: 20240926144556
+modified: 20240926144951
+
+For debugging purposes, you can enable runtime profiling by setting the startup configuration [[''runtime-profiling''|00001004010000#runtime-profiling]].
+Typically, a Zettelstore developer will do this.
+In certain cases, a Zettelstore developer will ask you to enable runtime profiling, because you encountered a hard error.
+
+Runtime profiling will generate some data that can be retrieved through the builtin web server.
+The following URL paths are valid:
+
+|=Path|Description
+|''/rtp/''|Show an index page, where you can navigate to detailed information
+|''/rtp/allocs''|Show a sampling of all past memory allocations
+|''/rtp/block''|Show stack traces that led to internal blocking
+|''/rtp/cmdline''|Show the running Zettelstore command line, with arguments separated by NUL bytes
+|''/rtp/goroutine''|Show stack traces of all current internal activities
+|''/rtp/heap''|Show a sampling of memory allocations of live objects
+|''/rtp/mutex''|Show stack traces of holders of contended mutexes
+|''/rtp/profile''|Execute a CPU profile
+|''/rtp/symbol''|Shows function names for given program counter value
+|''/rtp/trace''|Show trace of execution of the current program
+|''/rtp/threadcreate''|Show stack traces that led to the creation of new OS threads
+
+See documentation for Go standard package [[''net/http/pprof''|https://pkg.go.dev/net/http/pprof]].

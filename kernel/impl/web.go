@@ -82,6 +82,7 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 			true},
 		kernel.WebMaxRequestSize:   {"Max Request Size", parseInt64, true},
 		kernel.WebPersistentCookie: {"Persistent cookie", parseBool, true},
+		kernel.WebProfiling:        {"Runtime profiling", parseBool, true},
 		kernel.WebSecureCookie:     {"Secure cookie", parseBool, true},
 		kernel.WebTokenLifetimeAPI: {
 			"Token lifetime API",
@@ -111,6 +112,7 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 		kernel.WebMaxRequestSize:    int64(16 * 1024 * 1024),
 		kernel.WebPersistentCookie:  false,
 		kernel.WebSecureCookie:      true,
+		kernel.WebProfiling:         false,
 		kernel.WebTokenLifetimeAPI:  1 * time.Hour,
 		kernel.WebTokenLifetimeHTML: 10 * time.Minute,
 		kernel.WebURLPrefix:         "/",
@@ -143,6 +145,7 @@ func (ws *webService) Start(kern *myKernel) error {
 	urlPrefix := ws.GetNextConfig(kernel.WebURLPrefix).(string)
 	persistentCookie := ws.GetNextConfig(kernel.WebPersistentCookie).(bool)
 	secureCookie := ws.GetNextConfig(kernel.WebSecureCookie).(bool)
+	profile := ws.GetNextConfig(kernel.WebProfiling).(bool)
 	maxRequestSize := ws.GetNextConfig(kernel.WebMaxRequestSize).(int64)
 	if maxRequestSize < 1024 {
 		maxRequestSize = 1024
@@ -158,7 +161,18 @@ func (ws *webService) Start(kern *myKernel) error {
 		ws.logger.Info().Str("listen", listenAddr).Msg("service may be reached from outside, but authentication is not enabled")
 	}
 
-	srvw := impl.New(ws.logger, listenAddr, baseURL, urlPrefix, persistentCookie, secureCookie, maxRequestSize, kern.auth.manager)
+	sd := impl.ServerData{
+		Log:              ws.logger,
+		ListenAddr:       listenAddr,
+		BaseURL:          baseURL,
+		URLPrefix:        urlPrefix,
+		MaxRequestSize:   maxRequestSize,
+		Auth:             kern.auth.manager,
+		PersistentCookie: persistentCookie,
+		SecureCookie:     secureCookie,
+		Profiling:        profile,
+	}
+	srvw := impl.New(sd)
 	err := kern.web.setupServer(srvw, kern.box.manager, kern.auth.manager, &kern.cfg)
 	if err != nil {
 		ws.logger.Error().Err(err).Msg("Unable to create")
