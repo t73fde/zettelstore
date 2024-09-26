@@ -94,7 +94,7 @@ type Kernel interface {
 	RestartService(Service) error
 
 	// StopService stop the given service.
-	StopService(Service) error
+	StopService(Service)
 
 	// GetServiceStatistics returns a key/value list with statistical data.
 	GetServiceStatistics(Service) []KeyValue

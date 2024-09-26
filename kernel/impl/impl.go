@@ -446,17 +446,16 @@ func (kern *myKernel) doRestartService(srvnum kernel.Service) error {
 	return nil
 }
 
-func (kern *myKernel) StopService(srvnum kernel.Service) error {
+func (kern *myKernel) StopService(srvnum kernel.Service) {
 	kern.mx.Lock()
 	defer kern.mx.Unlock()
-	return kern.doStopService(srvnum)
+	kern.doStopService(srvnum)
 }
 
-func (kern *myKernel) doStopService(srvnum kernel.Service) error {
+func (kern *myKernel) doStopService(srvnum kernel.Service) {
 	for _, srv := range kern.sortDependency(srvnum, kern.depStop, false) {
 		srv.Stop(kern)
 	}
-	return nil
 }
 
 func (kern *myKernel) sortDependency(

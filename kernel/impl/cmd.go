@@ -341,13 +341,8 @@ func cmdRestart(sess *cmdSession, cmd string, args []string) bool {
 }
 
 func cmdStop(sess *cmdSession, cmd string, args []string) bool {
-	srvnum, ok := lookupService(sess, cmd, args)
-	if !ok {
-		return true
-	}
-	err := sess.kern.doStopService(srvnum)
-	if err != nil {
-		sess.println(err.Error())
+	if srvnum, ok := lookupService(sess, cmd, args); ok {
+		sess.kern.doStopService(srvnum)
 	}
 	return true
 }
