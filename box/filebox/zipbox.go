@@ -35,7 +35,7 @@ type zipBox struct {
 	number   int
 	name     string
 	enricher box.Enricher
-	notify   chan<- box.UpdateInfo
+	notify   box.UpdateNotifier
 	dirSrv   *notify.DirService
 }
 

@@ -56,7 +56,7 @@ type DirService struct {
 	log      *logger.Logger
 	dirPath  string
 	notifier Notifier
-	infos    chan<- box.UpdateInfo
+	infos    box.UpdateNotifier
 	mx       sync.RWMutex // protects status, entries
 	state    DirServiceState
 	entries  entrySet
@@ -66,12 +66,12 @@ type DirService struct {
 var ErrNoDirectory = errors.New("unable to retrieve zettel directory information")
 
 // NewDirService creates a new directory service.
-func NewDirService(box box.ManagedBox, log *logger.Logger, notifier Notifier, chci chan<- box.UpdateInfo) *DirService {
+func NewDirService(box box.ManagedBox, log *logger.Logger, notifier Notifier, notify box.UpdateNotifier) *DirService {
 	return &DirService{
 		box:      box,
 		log:      log,
 		notifier: notifier,
-		infos:    chci,
+		infos:    notify,
 		state:    DsCreated,
 	}
 }
@@ -575,8 +575,8 @@ func newExtIsBetter(oldExt, newExt string) bool {
 }
 
 func (ds *DirService) notifyChange(zid id.Zid, reason box.UpdateReason) {
-	if chci := ds.infos; chci != nil {
+	if notify := ds.infos; notify != nil {
 		ds.log.Trace().Zid(zid).Uint("reason", uint64(reason)).Msg("notifyChange")
-		chci <- box.UpdateInfo{Box: ds.box, Reason: reason, Zid: zid}
+		notify(ds.box, zid, reason)
 	}
 }

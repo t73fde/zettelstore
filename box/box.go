@@ -220,6 +220,9 @@ type UpdateInfo struct {
 // UpdateFunc is a function to be called when a change is detected.
 type UpdateFunc func(UpdateInfo)
 
+// UpdateNotifier is an UpdateFunc, but with separate values.
+type UpdateNotifier func(BaseBox, id.Zid, UpdateReason)
+
 // Subject is a box that notifies observers about changes.
 type Subject interface {
 	// RegisterObserver registers an observer that will be notified

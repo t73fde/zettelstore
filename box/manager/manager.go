@@ -40,7 +40,7 @@ type ConnectData struct {
 	Number   int // number of the box, starting with 1.
 	Config   config.Config
 	Enricher box.Enricher
-	Notify   chan<- box.UpdateInfo
+	Notify   box.UpdateNotifier
 	Mapper   Mapper
 }
 
@@ -146,7 +146,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	mgr := &Manager{
 		mgrLog:       boxLog.Clone().Str("box", "manager").Child(),
 		rtConfig:     rtConfig,
-		infos:        make(chan box.UpdateInfo, len(boxURIs)*1000+500), // TODO: refactor code to shrink size of channel
+		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
 		propertyKeys: propertyKeys,
 
 		idxLog:   boxLog.Clone().Str("box", "index").Child(),
@@ -156,7 +156,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	}
 	mgr.zidMapper = NewZidMapper(mgr)
 
-	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.infos, Mapper: mgr.zidMapper}
+	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged, Mapper: mgr.zidMapper}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)
 	for _, uri := range boxURIs {
 		p, err := Connect(uri, authManager, &cdata)
@@ -487,4 +487,10 @@ func (mgr *Manager) checkContinue(ctx context.Context) error {
 		return box.ErrStopped
 	}
 	return ctx.Err()
+}
+
+func (mgr *Manager) notifyChanged(bbox box.BaseBox, zid id.Zid, reason box.UpdateReason) {
+	if infos := mgr.infos; infos != nil && zid != id.MappingZid {
+		mgr.infos <- box.UpdateInfo{Box: bbox, Reason: reason, Zid: zid}
+	}
 }
