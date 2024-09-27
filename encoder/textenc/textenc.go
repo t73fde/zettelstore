@@ -31,6 +31,7 @@ func init() {
 // Create an encoder.
 func Create() *Encoder { return &myTE }
 
+// Encoder contains all data needed for encoding.
 type Encoder struct{}
 
 var myTE Encoder // Only a singleton is required.
@@ -73,6 +74,7 @@ func writeTagSet(buf *encoder.EncWriter, tags []string) {
 
 }
 
+// WriteContent encodes the zettel content.
 func (te *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return te.WriteBlocks(w, &zn.Ast)
 }

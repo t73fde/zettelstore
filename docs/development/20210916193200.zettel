@@ -25,4 +25,5 @@ Otherwise you can install the software by hand:
 * [[shadow|https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/shadow]] via ``go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest``,
 * [[staticcheck|https://staticcheck.io/]] via ``go install honnef.co/go/tools/cmd/staticcheck@latest``,
 * [[unparam|https://mvdan.cc/unparam]][^[[GitHub|https://github.com/mvdan/unparam]]] via ``go install mvdan.cc/unparam@latest``,
+* [[revive|https://revive.run]] via ``go install github.com/mgechev/revive@vlatest``,
 * [[govulncheck|https://golang.org/x/vuln/cmd/govulncheck]] via ``go install golang.org/x/vuln/cmd/govulncheck@latest``,

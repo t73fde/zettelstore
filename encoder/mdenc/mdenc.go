@@ -37,6 +37,7 @@ func Create(params *encoder.CreateParameter) *Encoder {
 	return &Encoder{lang: params.Lang}
 }
 
+// Encoder contains all data needed for encoding.
 type Encoder struct {
 	lang string
 }
@@ -77,6 +78,7 @@ func (v *visitor) acceptMeta(m *meta.Meta, evalMeta encoder.EvalMetaFunc) {
 	}
 }
 
+// WriteContent encodes the zettel content.
 func (me *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return me.WriteBlocks(w, &zn.Ast)
 }

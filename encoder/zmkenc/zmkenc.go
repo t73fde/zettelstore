@@ -35,6 +35,7 @@ func init() {
 // Create an encoder.
 func Create() *Encoder { return &myZE }
 
+// Encoder contains all data needed for encoding.
 type Encoder struct{}
 
 var myZE Encoder
@@ -75,6 +76,7 @@ func (v *visitor) acceptMeta(m *meta.Meta, evalMeta encoder.EvalMetaFunc) {
 	}
 }
 
+// WriteContent encodes the zettel content.
 func (ze *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return ze.WriteBlocks(w, &zn.Ast)
 }

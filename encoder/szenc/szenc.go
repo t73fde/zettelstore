@@ -35,6 +35,7 @@ func Create() *Encoder {
 	return &Encoder{trans: NewTransformer()}
 }
 
+// Encoder contains all data needed for encoding.
 type Encoder struct {
 	trans *Transformer
 }
@@ -51,6 +52,7 @@ func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta, evalMeta encoder.EvalMe
 	return enc.trans.GetMeta(m, evalMeta).Print(w)
 }
 
+// WriteContent encodes the zettel content.
 func (enc *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return enc.WriteBlocks(w, &zn.Ast)
 }

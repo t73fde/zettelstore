@@ -24,6 +24,7 @@ import (
 	"zettelstore.de/z/zettel/meta"
 )
 
+// Some MIME encoding values.
 const (
 	UnknownMIME  = "application/octet-stream"
 	mimeGIF      = "image/gif"
@@ -100,6 +101,8 @@ var mime2syntax = map[string]string{
 	"text/javascript": "js",
 }
 
+// SyntaxFromMIME returns the syntax for a zettel based on MIME encoding value
+// and the actual data.
 func SyntaxFromMIME(m string, data []byte) string {
 	mt, _, _ := mime.ParseMediaType(m)
 	if syntax, found := mime2syntax[mt]; found {

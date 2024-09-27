@@ -32,10 +32,12 @@ func NewTransformer() *Transformer {
 	return &t
 }
 
+// Transformer contains all data needed to transform into a s-expression.
 type Transformer struct {
 	inVerse bool
 }
 
+// GetSz transforms the given node into a sx list.
 func (t *Transformer) GetSz(node ast.Node) *sx.Pair {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
@@ -361,6 +363,7 @@ var mapMetaTypeS = map[*meta.DescriptionType]*sx.Symbol{
 	meta.TypeZettelmarkup: sz.SymTypeZettelmarkup,
 }
 
+// GetMeta transforms the given metadata into a sx list.
 func (t *Transformer) GetMeta(m *meta.Meta, evalMeta encoder.EvalMetaFunc) *sx.Pair {
 	pairs := m.ComputedPairs()
 	objs := make(sx.Vector, 0, len(pairs))

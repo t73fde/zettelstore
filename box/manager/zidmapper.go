@@ -46,8 +46,8 @@ type zidfetcher interface {
 	fetchZids(context.Context) (*id.Set, error)
 }
 
-// NewZidMapper creates a new ZipMapper.
-func NewZidMapper(fetcher zidfetcher) *zidMapper {
+// newZidMapper creates a new ZipMapper.
+func newZidMapper(fetcher zidfetcher) *zidMapper {
 	defined := map[id.Zid]id.ZidN{
 		id.Invalid: id.InvalidN,
 		1:          id.MustParseN("0001"), // ZidVersion

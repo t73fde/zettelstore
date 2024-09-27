@@ -29,14 +29,17 @@ import (
 	"zettelstore.de/z/zettel/meta"
 )
 
+// ContentType specifies the HTTP content type for Atom.
 const ContentType = "application/atom+xml"
 
+// Configuration contains data to configure the Atom encoding.
 type Configuration struct {
 	Title            string
 	Generator        string
 	NewURLBuilderAbs func() *api.URLBuilder
 }
 
+// Setup initializes the Configuration.
 func (c *Configuration) Setup(cfg config.Config) {
 	baseURL := kernel.Main.GetConfig(kernel.WebService, kernel.WebBaseURL).(string)
 
@@ -47,6 +50,7 @@ func (c *Configuration) Setup(cfg config.Config) {
 	c.NewURLBuilderAbs = func() *api.URLBuilder { return api.NewURLBuilder(baseURL, 'h') }
 }
 
+// Marshal encodes the result of a query as Atom.
 func (c *Configuration) Marshal(q *query.Query, ml []*meta.Meta) []byte {
 	atomUpdated := encoding.LastUpdated(ml, time.RFC3339)
 	feedLink := c.NewURLBuilderAbs().String()

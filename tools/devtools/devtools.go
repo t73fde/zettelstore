@@ -39,6 +39,7 @@ func cmdTools() error {
 		{"govulncheck", "golang.org/x/vuln/cmd/govulncheck@latest"},
 		{"deadcode", "golang.org/x/tools/cmd/deadcode@latest"},
 		{"errcheck", "github.com/kisielk/errcheck@latest"},
+		{"revive", "https://github.com/mgechev/revive@latest"},
 	}
 	for _, tool := range tools {
 		err := doGoInstall(tool.pack)

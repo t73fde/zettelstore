@@ -149,6 +149,7 @@ func (pe *PrintEnv) printExprValues(key string, values []expValue) {
 	}
 }
 
+// Human returns the query as a human readable string.
 func (q *Query) Human() string {
 	var sb strings.Builder
 	q.PrintHuman(&sb)

@@ -26,10 +26,16 @@ import (
 	"zettelstore.de/z/strfun"
 )
 
-var EnvDirectProxy = []string{"GOPROXY=direct"}
-var EnvGoVCS = []string{"GOVCS=zettelstore.de:fossil,t73f.de:fossil"}
+// Some constants to make Go work with fossil.
+var (
+	EnvDirectProxy = []string{"GOPROXY=direct"}
+	EnvGoVCS       = []string{"GOVCS=zettelstore.de:fossil,t73f.de:fossil"}
+)
+
+// Verbose signals a verbose tool execution.
 var Verbose bool
 
+// ExecuteCommand executes a specific command.
 func ExecuteCommand(env []string, name string, arg ...string) (string, error) {
 	LogCommand("EXEC", env, name, arg)
 	var out strings.Builder
@@ -38,6 +44,7 @@ func ExecuteCommand(env []string, name string, arg ...string) (string, error) {
 	return out.String(), err
 }
 
+// ExecuteFilter executes an external program to be used as a filter.
 func ExecuteFilter(data []byte, env []string, name string, arg ...string) (string, string, error) {
 	LogCommand("EXEC", env, name, arg)
 	var stdout, stderr strings.Builder
@@ -46,6 +53,7 @@ func ExecuteFilter(data []byte, env []string, name string, arg ...string) (strin
 	return stdout.String(), stderr.String(), err
 }
 
+// PrepareCommand creates a commands to be executed.
 func PrepareCommand(env []string, name string, arg []string, in io.Reader, stdout, stderr io.Writer) *exec.Cmd {
 	if len(env) > 0 {
 		env = append(env, os.Environ()...)
@@ -57,6 +65,8 @@ func PrepareCommand(env []string, name string, arg []string, in io.Reader, stdou
 	cmd.Stderr = stderr
 	return cmd
 }
+
+// LogCommand logs the execution of a command.
 func LogCommand(exec string, env []string, name string, arg []string) {
 	if Verbose {
 		if len(env) > 0 {
@@ -68,6 +78,7 @@ func LogCommand(exec string, env []string, name string, arg []string) {
 	}
 }
 
+// Check the source with some linters.
 func Check(forRelease bool) error {
 	if err := CheckGoTest("./..."); err != nil {
 		return err
@@ -84,6 +95,9 @@ func Check(forRelease bool) error {
 	if err := checkUnparam(forRelease); err != nil {
 		return err
 	}
+	if err := checkRevive(); err != nil {
+		return err
+	}
 	if forRelease {
 		if err := checkGoVulncheck(); err != nil {
 			return err
@@ -92,6 +106,7 @@ func Check(forRelease bool) error {
 	return checkFossilExtra()
 }
 
+// CheckGoTest runs all internal unti tests.
 func CheckGoTest(pkg string, testParams ...string) error {
 	var env []string
 	env = append(env, EnvDirectProxy...)
@@ -139,6 +154,17 @@ func checkStaticcheck() error {
 	out, err := ExecuteCommand(EnvGoVCS, "staticcheck", "./...")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Some staticcheck problems found")
+		if len(out) > 0 {
+			fmt.Fprintln(os.Stderr, out)
+		}
+	}
+	return err
+}
+
+func checkRevive() error {
+	out, err := ExecuteCommand(EnvGoVCS, "revive", "./...")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Some revive problems found")
 		if len(out) > 0 {
 			fmt.Fprintln(os.Stderr, out)
 		}

@@ -41,6 +41,7 @@ func Create(params *encoder.CreateParameter) *Encoder {
 	}
 }
 
+// Encoder contains all data needed for encoding.
 type Encoder struct {
 	tx   *szenc.Transformer
 	th   *shtml.Evaluator
@@ -72,6 +73,7 @@ func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta, evalMeta encoder.EvalMe
 	return sx.Print(w, metaSHTML)
 }
 
+// WriteContent encodes the zettel content.
 func (enc *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return enc.WriteBlocks(w, &zn.Ast)
 }

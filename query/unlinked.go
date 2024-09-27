@@ -24,6 +24,7 @@ type UnlinkedSpec struct {
 	words []string
 }
 
+// Print the spec on the given print environment.
 func (spec *UnlinkedSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
 	pe.writeString(api.UnlinkedDirective)
@@ -32,6 +33,7 @@ func (spec *UnlinkedSpec) Print(pe *PrintEnv) {
 	}
 }
 
+// GetWords returns all title words of a given query result.
 func (spec *UnlinkedSpec) GetWords(metaSeq []*meta.Meta) []string {
 	if words := spec.words; len(words) > 0 {
 		result := make([]string, len(words))

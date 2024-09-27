@@ -30,8 +30,10 @@ import (
 	"zettelstore.de/z/zettel/meta"
 )
 
+// ContentType specifies the HTTP content type for RSS.
 const ContentType = "application/rss+xml"
 
+// Configuration contains data to configure the RSS encoding.
 type Configuration struct {
 	Title            string
 	Language         string
@@ -40,6 +42,7 @@ type Configuration struct {
 	NewURLBuilderAbs func() *api.URLBuilder
 }
 
+// Setup initializes the Configuration.
 func (c *Configuration) Setup(ctx context.Context, cfg config.Config) {
 	baseURL := kernel.Main.GetConfig(kernel.WebService, kernel.WebBaseURL).(string)
 	defVals := cfg.AddDefaultValues(ctx, &meta.Meta{})
@@ -53,6 +56,7 @@ func (c *Configuration) Setup(ctx context.Context, cfg config.Config) {
 	c.NewURLBuilderAbs = func() *api.URLBuilder { return api.NewURLBuilder(baseURL, 'h') }
 }
 
+// Marshal encodes the result of a query as Atom.
 func (c *Configuration) Marshal(q *query.Query, ml []*meta.Meta) []byte {
 	rssPublished := encoding.LastUpdated(ml, time.RFC1123Z)
 

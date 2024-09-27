@@ -18,6 +18,7 @@ import "t73f.de/r/zsc/api"
 // IdentSpec contains all specification values to calculate the ident directive.
 type IdentSpec struct{}
 
+// Print the spec on the given print environment.
 func (spec *IdentSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
 	pe.writeString(api.IdentDirective)
@@ -26,6 +27,7 @@ func (spec *IdentSpec) Print(pe *PrintEnv) {
 // ItemsSpec contains all specification values to calculate items.
 type ItemsSpec struct{}
 
+// Print the spec on the given print environment.
 func (spec *ItemsSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
 	pe.writeString(api.ItemsDirective)

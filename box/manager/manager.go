@@ -127,6 +127,7 @@ func (mgr *Manager) setState(newState box.StartState) {
 	mgr.stateMx.Unlock()
 }
 
+// State returns the box.StartState of the manager.
 func (mgr *Manager) State() box.StartState {
 	mgr.stateMx.RLock()
 	state := mgr.state
@@ -155,7 +156,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 		idxAr:    newAnteroomQueue(1000),
 		idxReady: make(chan struct{}, 1),
 	}
-	mgr.zidMapper = NewZidMapper(mgr)
+	mgr.zidMapper = newZidMapper(mgr)
 
 	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged, Mapper: mgr.zidMapper}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)

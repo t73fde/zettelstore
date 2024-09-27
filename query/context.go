@@ -34,6 +34,7 @@ type ContextSpec struct {
 // ContextDirection specifies the direction a context should be calculated.
 type ContextDirection uint8
 
+// Constants for ContextDirection.
 const (
 	ContextDirBoth ContextDirection = iota
 	ContextDirForward
@@ -46,6 +47,7 @@ type ContextPort interface {
 	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *Query) ([]*meta.Meta, error)
 }
 
+// Print the spec on the given print environment.
 func (spec *ContextSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
 	pe.writeString(api.ContextDirective)
@@ -65,6 +67,7 @@ func (spec *ContextSpec) Print(pe *PrintEnv) {
 	pe.printPosInt(api.MaxDirective, spec.MaxCount)
 }
 
+// Execute the specification.
 func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port ContextPort) []*meta.Meta {
 	maxCost := float64(spec.MaxCost)
 	if maxCost <= 0 {

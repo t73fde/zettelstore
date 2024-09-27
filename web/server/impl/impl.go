@@ -35,6 +35,7 @@ type myServer struct {
 	secureCookie     bool
 }
 
+// ServerData contains the data needed to configure a server.
 type ServerData struct {
 	Log              *logger.Logger
 	ListenAddr       string
