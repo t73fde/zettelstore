@@ -551,17 +551,17 @@ type kernelService struct {
 	kernel *myKernel
 }
 
-func (*kernelService) Initialize(*logger.Logger)                        {}
-func (ks *kernelService) GetLogger() *logger.Logger                     { return ks.kernel.logger }
-func (*kernelService) ConfigDescriptions() []serviceConfigDescription   { return nil }
-func (*kernelService) SetConfig(key, value string) error                { return errAlreadyFrozen }
-func (*kernelService) GetCurConfig(key string) interface{}              { return nil }
-func (*kernelService) GetNextConfig(key string) interface{}             { return nil }
-func (*kernelService) GetCurConfigList(all bool) []kernel.KeyDescrValue { return nil }
-func (*kernelService) GetNextConfigList() []kernel.KeyDescrValue        { return nil }
-func (*kernelService) GetStatistics() []kernel.KeyValue                 { return nil }
-func (*kernelService) Freeze()                                          {}
-func (*kernelService) Start(*myKernel) error                            { return nil }
-func (*kernelService) SwitchNextToCur()                                 {}
-func (*kernelService) IsStarted() bool                                  { return true }
-func (*kernelService) Stop(*myKernel)                                   {}
+func (*kernelService) Initialize(*logger.Logger)                      {}
+func (ks *kernelService) GetLogger() *logger.Logger                   { return ks.kernel.logger }
+func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return nil }
+func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
+func (*kernelService) GetCurConfig(string) interface{}                { return nil }
+func (*kernelService) GetNextConfig(string) interface{}               { return nil }
+func (*kernelService) GetCurConfigList(bool) []kernel.KeyDescrValue   { return nil }
+func (*kernelService) GetNextConfigList() []kernel.KeyDescrValue      { return nil }
+func (*kernelService) GetStatistics() []kernel.KeyValue               { return nil }
+func (*kernelService) Freeze()                                        {}
+func (*kernelService) Start(*myKernel) error                          { return nil }
+func (*kernelService) SwitchNextToCur()                               {}
+func (*kernelService) IsStarted() bool                                { return true }
+func (*kernelService) Stop(*myKernel)                                 {}

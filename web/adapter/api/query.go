@@ -104,19 +104,19 @@ func (a *API) MakeQueryHandler(
 	})
 }
 func queryAction(w io.Writer, enc zettelEncoder, ml []*meta.Meta, actions []string) error {
-	min, max := -1, -1
+	minVal, maxVal := -1, -1
 	if len(actions) > 0 {
 		acts := make([]string, 0, len(actions))
 		for _, act := range actions {
 			if strings.HasPrefix(act, api.MinAction) {
 				if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
-					min = num
+					minVal = num
 					continue
 				}
 			}
 			if strings.HasPrefix(act, api.MaxAction) {
 				if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
-					max = num
+					maxVal = num
 					continue
 				}
 			}
@@ -128,7 +128,7 @@ func queryAction(w io.Writer, enc zettelEncoder, ml []*meta.Meta, actions []stri
 			}
 			switch key := strings.ToLower(act); meta.Type(key) {
 			case meta.TypeWord, meta.TypeTagSet:
-				return encodeMetaKeyArrangement(w, enc, ml, key, min, max)
+				return encodeMetaKeyArrangement(w, enc, ml, key, minVal, maxVal)
 			}
 		}
 	}
@@ -145,11 +145,11 @@ func encodeKeysArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, act 
 	return enc.writeArrangement(w, act, arr)
 }
 
-func encodeMetaKeyArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, key string, min, max int) error {
+func encodeMetaKeyArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, key string, minVal, maxVal int) error {
 	arr0 := meta.CreateArrangement(ml, key)
 	arr := make(meta.Arrangement, len(arr0))
 	for k0, ml0 := range arr0 {
-		if len(ml0) < min || (max > 0 && len(ml0) > max) {
+		if len(ml0) < minVal || (maxVal > 0 && len(ml0) > maxVal) {
 			continue
 		}
 		arr[k0] = ml0

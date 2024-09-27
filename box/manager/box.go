@@ -177,6 +177,7 @@ func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {
 	return false
 }
 
+// GetMeta returns just the metadata of the zettel with the given identifier.
 func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
 	mgr.mgrLog.Debug().Zid(zid).Msg("GetMeta")
 	if err := mgr.checkContinue(ctx); err != nil {
@@ -185,6 +186,7 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 
 	m, err := mgr.idxStore.GetMeta(ctx, zid)
 	if err != nil {
+		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
 		return nil, err
 	}
 	mgr.Enrich(ctx, m, 0)

@@ -35,13 +35,13 @@ import (
 // QueryAction transforms a list of metadata according to query actions into a AST nested list.
 func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig config.Config) (ast.BlockNode, int) {
 	ap := actionPara{
-		ctx:   ctx,
-		q:     q,
-		ml:    ml,
-		kind:  ast.NestedListUnordered,
-		min:   -1,
-		max:   -1,
-		title: rtConfig.GetSiteName(),
+		ctx:    ctx,
+		q:      q,
+		ml:     ml,
+		kind:   ast.NestedListUnordered,
+		minVal: -1,
+		maxVal: -1,
+		title:  rtConfig.GetSiteName(),
 	}
 	actions := q.Actions()
 	if len(actions) == 0 {
@@ -56,13 +56,13 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig 
 		}
 		if strings.HasPrefix(act, api.MinAction) {
 			if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
-				ap.min = num
+				ap.minVal = num
 				continue
 			}
 		}
 		if strings.HasPrefix(act, api.MaxAction) {
 			if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
-				ap.max = num
+				ap.maxVal = num
 				continue
 			}
 		}
@@ -104,13 +104,13 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig 
 }
 
 type actionPara struct {
-	ctx   context.Context
-	q     *query.Query
-	ml    []*meta.Meta
-	kind  ast.NestedListKind
-	min   int
-	max   int
-	title string
+	ctx    context.Context
+	q      *query.Query
+	ml     []*meta.Meta
+	kind   ast.NestedListKind
+	minVal int
+	maxVal int
+	title  string
 }
 
 func (ap *actionPara) createBlockNodeWord(key string) (ast.BlockNode, int) {
@@ -174,17 +174,17 @@ func (ap *actionPara) createBlockNodeTagSet(key string) (ast.BlockNode, int) {
 }
 
 func (ap *actionPara) limitTags(ccs meta.CountedCategories) meta.CountedCategories {
-	if min, max := ap.min, ap.max; min > 0 || max > 0 {
-		if min < 0 {
-			min = ccs[len(ccs)-1].Count
+	if minVal, maxVal := ap.minVal, ap.maxVal; minVal > 0 || maxVal > 0 {
+		if minVal < 0 {
+			minVal = ccs[len(ccs)-1].Count
 		}
-		if max < 0 {
-			max = ccs[0].Count
+		if maxVal < 0 {
+			maxVal = ccs[0].Count
 		}
-		if ccs[len(ccs)-1].Count < min || max < ccs[0].Count {
+		if ccs[len(ccs)-1].Count < minVal || maxVal < ccs[0].Count {
 			temp := make(meta.CountedCategories, 0, len(ccs))
 			for _, cat := range ccs {
-				if min <= cat.Count && cat.Count <= max {
+				if minVal <= cat.Count && cat.Count <= maxVal {
 					temp = append(temp, cat)
 				}
 			}

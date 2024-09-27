@@ -32,7 +32,7 @@ import (
 func init() {
 	manager.Register(
 		" comp",
-		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
+		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return getCompBox(cdata.Number, cdata.Enricher, cdata.Mapper), nil
 		})
 }

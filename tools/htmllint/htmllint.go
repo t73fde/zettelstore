@@ -11,6 +11,7 @@
 // SPDX-FileCopyrightText: 2023-present Detlef Stern
 //-----------------------------------------------------------------------------
 
+// Package main provides a tool to check the validity of HTML zettel documents.
 package main
 
 import (
@@ -61,7 +62,7 @@ func cmdValidateHTML(args []string) error {
 			nmsgs, err = validateHTML(client, kd.uc, api.ZettelID(zid))
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "* error while validating zettel %v with: %v\n", zid, err)
-				msgCount += 1
+				msgCount++
 			} else {
 				msgCount += nmsgs
 			}

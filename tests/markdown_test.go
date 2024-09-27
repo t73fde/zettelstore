@@ -88,7 +88,7 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 	var sb strings.Builder
 	testID := tc.Example*100 + 1
 	for _, enc := range encodings {
-		t.Run(fmt.Sprintf("Encode %v %v", enc, testID), func(st *testing.T) {
+		t.Run(fmt.Sprintf("Encode %v %v", enc, testID), func(*testing.T) {
 			encoder.Create(enc, &encoder.CreateParameter{Lang: api.ValueLangEN}).WriteBlocks(&sb, ast)
 			sb.Reset()
 		})

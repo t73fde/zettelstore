@@ -22,8 +22,9 @@ import (
 	"zettelstore.de/z/web/adapter"
 )
 
+// MakeFaviconHandler creates a HTTP handler to retrieve the favicon.
 func (wui *WebUI) MakeFaviconHandler(baseDir string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		filename := filepath.Join(baseDir, "favicon.ico")
 		f, err := os.Open(filename)
 		if err != nil {

@@ -287,9 +287,8 @@ func (s *Set) Optimize() {
 func newFromSlice(seq Slice) *Set {
 	if l := len(seq); l == 0 {
 		return nil
-	} else {
-		return &Set{seq: seq}
 	}
+	return &Set{seq: seq}
 }
 
 func (s *Set) add(zid Zid) {

@@ -47,20 +47,20 @@ func GetQueryBool(u *url.URL, key string) bool {
 }
 
 // GetQueryInt is a helper function to extract int values of a specified range from a box URI.
-func GetQueryInt(u *url.URL, key string, min, def, max int) int {
+func GetQueryInt(u *url.URL, key string, minVal, defVal, maxVal int) int {
 	sVal := u.Query().Get(key)
 	if sVal == "" {
-		return def
+		return defVal
 	}
 	iVal, err := strconv.Atoi(sVal)
 	if err != nil {
-		return def
+		return defVal
 	}
-	if iVal < min {
-		return min
+	if iVal < minVal {
+		return minVal
 	}
-	if iVal > max {
-		return max
+	if iVal > maxVal {
+		return maxVal
 	}
 	return iVal
 }

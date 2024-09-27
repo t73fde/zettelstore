@@ -233,19 +233,19 @@ func parseBool(val string) (any, error) {
 }
 
 func parseInt64(val string) (any, error) {
-	if u64, err := strconv.ParseInt(val, 10, 64); err == nil {
+	u64, err := strconv.ParseInt(val, 10, 64)
+	if err == nil {
 		return u64, nil
-	} else {
-		return nil, err
 	}
+	return nil, err
 }
 
 func parseZid(val string) (any, error) {
-	if zid, err := id.Parse(val); err == nil {
+	zid, err := id.Parse(val)
+	if err == nil {
 		return zid, nil
-	} else {
-		return id.Invalid, err
 	}
+	return id.Invalid, err
 }
 
 func parseInvalidZid(val string) (any, error) {

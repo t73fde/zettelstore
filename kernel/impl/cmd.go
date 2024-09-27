@@ -144,7 +144,7 @@ var commands = map[string]command{
 	"config": {"show configuration keys", cmdConfig},
 	"crlf": {
 		"toggle crlf mode",
-		func(sess *cmdSession, cmd string, args []string) bool {
+		func(sess *cmdSession, _ string, _ []string) bool {
 			if len(sess.eol) == 1 {
 				sess.eol = []byte{'\r', '\n'}
 				sess.println("crlf is on")
@@ -159,7 +159,7 @@ var commands = map[string]command{
 	"dump-recover": {"show data of last recovery", cmdDumpRecover},
 	"echo": {
 		"toggle echo mode",
-		func(sess *cmdSession, cmd string, args []string) bool {
+		func(sess *cmdSession, _ string, _ []string) bool {
 			sess.echo = !sess.echo
 			if sess.echo {
 				sess.println("echo is on")
@@ -174,7 +174,7 @@ var commands = map[string]command{
 	"get-config":  {"show current configuration data", cmdGetConfig},
 	"header": {
 		"toggle table header",
-		func(sess *cmdSession, cmd string, args []string) bool {
+		func(sess *cmdSession, _ string, _ []string) bool {
 			sess.header = !sess.header
 			if sess.header {
 				sess.println("header are on")
@@ -194,7 +194,7 @@ var commands = map[string]command{
 	"set-config":  {"set next configuration data", cmdSetConfig},
 	"shutdown": {
 		"shutdown Zettelstore",
-		func(sess *cmdSession, cmd string, args []string) bool { sess.kern.Shutdown(false); return false },
+		func(sess *cmdSession, _ string, _ []string) bool { sess.kern.Shutdown(false); return false },
 	},
 	"start": {"start service", cmdStart},
 	"stat":  {"show service statistics", cmdStat},

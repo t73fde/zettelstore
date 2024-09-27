@@ -42,6 +42,7 @@ type entrySet map[id.Zid]*DirEntry
 // --Stop--> dsStopping
 type DirServiceState uint8
 
+// Constants for DirServiceState
 const (
 	DsCreated  DirServiceState = iota
 	DsStarting                 // Reading inital scan

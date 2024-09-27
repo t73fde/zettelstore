@@ -33,7 +33,7 @@ import (
 func init() {
 	manager.Register(
 		" const",
-		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
+		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return &constBox{
 				log: kernel.Main.GetLogger(kernel.BoxService).Clone().
 					Str("box", "const").Int("boxnum", int64(cdata.Number)).Child(),

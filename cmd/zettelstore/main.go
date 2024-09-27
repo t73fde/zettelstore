@@ -21,7 +21,7 @@ import (
 )
 
 // Version variable. Will be filled by build process.
-var version string = ""
+var version string
 
 func main() {
 	exitCode := cmd.Main("Zettelstore", version)

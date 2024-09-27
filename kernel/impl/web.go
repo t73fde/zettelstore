@@ -47,11 +47,11 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 			"Asset file  directory",
 			func(val string) (any, error) {
 				val = filepath.Clean(val)
-				if finfo, err := os.Stat(val); err == nil && finfo.IsDir() {
+				finfo, err := os.Stat(val)
+				if err == nil && finfo.IsDir() {
 					return val, nil
-				} else {
-					return nil, err
 				}
+				return nil, err
 			},
 			true,
 		},

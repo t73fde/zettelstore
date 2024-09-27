@@ -51,10 +51,10 @@ func (a *API) MakeGetZettelHandler(
 		ctx := r.Context()
 		switch enc, encStr := getEncoding(r, q); enc {
 		case api.EncoderPlain:
-			a.writePlainData(w, ctx, zid, part, getZettel)
+			a.writePlainData(ctx, w, zid, part, getZettel)
 
 		case api.EncoderData:
-			a.writeSzData(w, ctx, zid, part, getZettel)
+			a.writeSzData(ctx, w, zid, part, getZettel)
 
 		default:
 			var zn *ast.ZettelNode
@@ -77,7 +77,7 @@ func (a *API) MakeGetZettelHandler(
 	})
 }
 
-func (a *API) writePlainData(w http.ResponseWriter, ctx context.Context, zid id.Zid, part partType, getZettel usecase.GetZettel) {
+func (a *API) writePlainData(ctx context.Context, w http.ResponseWriter, zid id.Zid, part partType, getZettel usecase.GetZettel) {
 	var buf bytes.Buffer
 	var contentType string
 	var err error
@@ -117,7 +117,7 @@ func (a *API) writePlainData(w http.ResponseWriter, ctx context.Context, zid id.
 	}
 }
 
-func (a *API) writeSzData(w http.ResponseWriter, ctx context.Context, zid id.Zid, part partType, getZettel usecase.GetZettel) {
+func (a *API) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid, part partType, getZettel usecase.GetZettel) {
 	z, err := getZettel.Run(ctx, zid)
 	if err != nil {
 		a.reportUsecaseError(w, err)
