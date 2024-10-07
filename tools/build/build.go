@@ -250,6 +250,7 @@ func cmdRelease() error {
 		{"amd64", "linux", nil, "zettelstore"},
 		{"arm", "linux", []string{"GOARM=6"}, "zettelstore"},
 		{"arm64", "darwin", nil, "zettelstore"},
+		{"amd64", "darwin", nil, "zettelstore"},
 		{"amd64", "windows", nil, "zettelstore.exe"},
 		{"arm64", "android", nil, "zettelstore"},
 	}
