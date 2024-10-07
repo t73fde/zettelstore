@@ -163,7 +163,7 @@ func checkStaticcheck() error {
 
 func checkRevive() error {
 	out, err := ExecuteCommand(EnvGoVCS, "revive", "./...")
-	if err != nil {
+	if err != nil || out != "" {
 		fmt.Fprintln(os.Stderr, "Some revive problems found")
 		if len(out) > 0 {
 			fmt.Fprintln(os.Stderr, out)
