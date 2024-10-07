@@ -33,6 +33,7 @@ import (
 	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/zettel"
 	"zettelstore.de/z/zettel/id"
+	"zettelstore.de/z/zettel/id/mapper"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -105,7 +106,7 @@ type Manager struct {
 	done         chan struct{}
 	infos        chan box.UpdateInfo
 	propertyKeys strfun.Set // Set of property key names
-	zidMapper    *zidMapper
+	zidMapper    *mapper.Mapper
 	mappingMx    sync.Mutex // protects updates to mapping zettel
 
 	// Indexer data
@@ -156,7 +157,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 		idxAr:    newAnteroomQueue(1000),
 		idxReady: make(chan struct{}, 1),
 	}
-	mgr.zidMapper = newZidMapper(mgr)
+	mgr.zidMapper = mapper.Make(mgr)
 
 	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged, Mapper: mgr.zidMapper}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)
@@ -409,7 +410,7 @@ func (mgr *Manager) getAndUpdateMapping(ctx context.Context) (zettel.Zettel, err
 	}
 	z.Content.TrimSpace()
 	content := z.Content.AsBytes()
-	if err = mgr.zidMapper.parseAndUpdate(content); err != nil {
+	if err = mgr.zidMapper.ParseAndUpdate(content); err != nil {
 		err = fmt.Errorf("id mapping zettel parsing: %w", err)
 	}
 	return z, err

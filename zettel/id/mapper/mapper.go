@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2021-present Detlef Stern
+// Copyright (c) 2024-present Detlef Stern
 //
 // This file is part of Zettelstore.
 //
@@ -8,10 +8,12 @@
 // under this license.
 //
 // SPDX-License-Identifier: EUPL-1.2
-// SPDX-FileCopyrightText: 2021-present Detlef Stern
+// SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package manager
+// Package mapper provides a mechanism to map zettel identifier with 14 digits
+// to their successing identifier with four characters.
+package mapper
 
 import (
 	"bytes"
@@ -25,14 +27,14 @@ import (
 	"zettelstore.de/z/zettel/id"
 )
 
-// zidMapper transforms old-style zettel identifier (14 digits) into new one (4 alphanums).
+// Mapper transforms old-style zettel identifier (14 digits) into new one (4 alphanums).
 //
 // Since there are no new-style identifier defined, there is only support for old-style
 // identifier by checking, whether they are suported as new-style or not.
 //
 // This will change in later versions.
-type zidMapper struct {
-	fetcher   zidfetcher
+type Mapper struct {
+	fetcher   Fetcher
 	defined   map[id.Zid]id.ZidN // predefined mapping, constant after creation
 	mx        sync.RWMutex       // protect toNew ... nextZidN
 	toNew     map[id.Zid]id.ZidN // working mapping old->new
@@ -42,12 +44,14 @@ type zidMapper struct {
 	nextZidN  id.ZidN // next zid for normal zettel
 }
 
-type zidfetcher interface {
-	fetchZids(context.Context) (*id.Set, error)
+// Fetcher is an object that will fetch all identifier currently in user.
+type Fetcher interface {
+	// FetchZidsO fetch all old-style zettel identifier.
+	FetchZidsO(context.Context) (*id.Set, error)
 }
 
-// newZidMapper creates a new ZipMapper.
-func newZidMapper(fetcher zidfetcher) *zidMapper {
+// Make creates a new Mapper.
+func Make(fetcher Fetcher) *Mapper {
 	defined := map[id.Zid]id.ZidN{
 		id.Invalid: id.InvalidN,
 		1:          id.MustParseN("0001"), // ZidVersion
@@ -112,7 +116,7 @@ func newZidMapper(fetcher zidfetcher) *zidMapper {
 		toOld[n] = o
 	}
 
-	return &zidMapper{
+	return &Mapper{
 		fetcher:   fetcher,
 		defined:   defined,
 		toNew:     toNew,
@@ -126,7 +130,7 @@ func newZidMapper(fetcher zidfetcher) *zidMapper {
 // isWellDefined returns true, if the given zettel identifier is predefined
 // (as stated in the manual), or is part of the manual itself, or is greater than
 // 19699999999999.
-func (zm *zidMapper) isWellDefined(zid id.Zid) bool {
+func (zm *Mapper) isWellDefined(zid id.Zid) bool {
 	if _, found := zm.defined[zid]; found || (1000000000 <= zid && zid <= 1099999999) {
 		return true
 	}
@@ -137,13 +141,13 @@ func (zm *zidMapper) isWellDefined(zid id.Zid) bool {
 }
 
 // Warnings returns all zettel identifier with warnings.
-func (zm *zidMapper) Warnings(ctx context.Context) (*id.Set, error) {
-	allZids, err := zm.fetcher.fetchZids(ctx)
+func (zm *Mapper) Warnings(ctx context.Context) (*id.Set, error) {
+	allZidsO, err := zm.fetcher.FetchZidsO(ctx)
 	if err != nil {
 		return nil, err
 	}
 	warnings := id.NewSet()
-	allZids.ForEach(func(zid id.Zid) {
+	allZidsO.ForEach(func(zid id.Zid) {
 		if !zm.isWellDefined(zid) {
 			warnings = warnings.Add(zid)
 		}
@@ -151,7 +155,8 @@ func (zm *zidMapper) Warnings(ctx context.Context) (*id.Set, error) {
 	return warnings, nil
 }
 
-func (zm *zidMapper) LookupZidN(zidO id.Zid) (id.ZidN, bool) {
+// LookupZidN returns the new-style identifier for a given old-style identifier.
+func (zm *Mapper) LookupZidN(zidO id.Zid) (id.ZidN, bool) {
 	if !zidO.IsValid() {
 		panic(zidO)
 	}
@@ -161,7 +166,10 @@ func (zm *zidMapper) LookupZidN(zidO id.Zid) (id.ZidN, bool) {
 	return zidN, found
 }
 
-func (zm *zidMapper) GetZidN(zidO id.Zid) id.ZidN {
+// GetZidN returns a new-style identifier for a given old-style identifier.
+// If the old-style identifier is currently not mapped, the mapping will be
+// established.
+func (zm *Mapper) GetZidN(zidO id.Zid) id.ZidN {
 	if zidN, found := zm.LookupZidN(zidO); found {
 		return zidN
 	}
@@ -193,7 +201,8 @@ func (zm *zidMapper) GetZidN(zidO id.Zid) id.ZidN {
 	return zidN
 }
 
-func (zm *zidMapper) DeleteO(zidO id.Zid) {
+// DeleteO removes a mapping with the given old-style identifier.
+func (zm *Mapper) DeleteO(zidO id.Zid) {
 	if _, found := zm.defined[zidO]; found {
 		return
 	}
@@ -210,12 +219,12 @@ func (zm *zidMapper) DeleteO(zidO id.Zid) {
 
 // AsBytes returns the current mapping as lines, where each line contains the
 // old and the new zettel identifier.
-func (zm *zidMapper) AsBytes() []byte {
+func (zm *Mapper) AsBytes() []byte {
 	zm.mx.RLock()
 	defer zm.mx.RUnlock()
 	return zm.asBytes()
 }
-func (zm *zidMapper) asBytes() []byte {
+func (zm *Mapper) asBytes() []byte {
 	allZidsO := id.NewSetCap(len(zm.toNew))
 	for zidO := range zm.toNew {
 		allZidsO = allZidsO.Add(zidO)
@@ -237,19 +246,19 @@ func (zm *zidMapper) asBytes() []byte {
 
 // FetchAsBytes fetches all zettel identifier and returns the mapping as lines,
 // where each line contains the old zid and the new zid.
-func (zm *zidMapper) FetchAsBytes(ctx context.Context) ([]byte, error) {
-	allZids, err := zm.fetcher.fetchZids(ctx)
+func (zm *Mapper) FetchAsBytes(ctx context.Context) ([]byte, error) {
+	allZidsO, err := zm.fetcher.FetchZidsO(ctx)
 	if err != nil {
 		return nil, err
 	}
-	allZids.ForEach(func(zidO id.Zid) {
+	allZidsO.ForEach(func(zidO id.Zid) {
 		_ = zm.GetZidN(zidO)
 	})
 	zm.mx.Lock()
 	defer zm.mx.Unlock()
-	if len(zm.toNew) != allZids.Length() {
+	if len(zm.toNew) != allZidsO.Length() {
 		for zidO, zidN := range zm.toNew {
-			if allZids.Contains(zidO) {
+			if allZidsO.Contains(zidO) {
 				continue
 			}
 			delete(zm.toNew, zidO)
@@ -259,7 +268,8 @@ func (zm *zidMapper) FetchAsBytes(ctx context.Context) ([]byte, error) {
 	return zm.asBytes(), nil
 }
 
-func (zm *zidMapper) parseAndUpdate(content []byte) (err error) {
+// ParseAndUpdate parses the given content and updates the Mapping.
+func (zm *Mapper) ParseAndUpdate(content []byte) (err error) {
 	zm.mx.Lock()
 	defer zm.mx.Unlock()
 	inp := input.NewInput(content)

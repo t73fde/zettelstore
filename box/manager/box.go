@@ -162,6 +162,12 @@ func (mgr *Manager) fetchZids(ctx context.Context) (*id.Set, error) {
 	return result, nil
 }
 
+// FetchZidsO returns the set of all old-style zettel identifer managed by the box.
+func (mgr *Manager) FetchZidsO(ctx context.Context) (*id.Set, error) {
+	mgr.mgrLog.Debug().Msg("FetchZidsO")
+	return mgr.fetchZids(ctx)
+}
+
 func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {
 	mgr.mgrLog.Debug().Zid(zid).Msg("HasZettel")
 	if err := mgr.checkContinue(ctx); err != nil {
