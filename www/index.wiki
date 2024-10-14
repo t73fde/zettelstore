@@ -38,6 +38,7 @@ The software, including the manual, is licensed under the
 
 <hr>
 <h2>Build instructions</h2>
+
 Just install [https://go.dev/dl/|Go] and some Go-based tools. Please read
 the [./build.md|instructions] for details.
 

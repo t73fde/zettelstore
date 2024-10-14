@@ -11,7 +11,8 @@
      (breaking: api, webui)
   *  Fix wrong quote translation for markdown encoder.
      (minor)
-  *  Generate <th> in table header (was: <td>). Also applies to SHTML encoder.
+  *  Generate <code><th></code> in table header (was: <code><td></code>). Also
+     applies to SHTML encoder.
      (minor: webui, api)
   *  External links are now generatd in shtml and html with attribute
      rel="external" (previously: class="external").
