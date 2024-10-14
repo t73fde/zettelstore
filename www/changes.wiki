@@ -11,10 +11,9 @@
      (breaking: api, webui)
   *  Fix wrong quote translation for markdown encoder.
      (minor)
-  *  Generate <code><th></code> in table header (was: <code><td></code>). Also
-     applies to SHTML encoder.
-     (minor: webui, api)
-  *  External links are now generatd in shtml and html with attribute
+  *  Generate <code>&lt;th></code> in table header (was: <code>&lt;td></code>).
+     Also applies to SHTML encoder. (minor: webui, api)
+  *  External links are now generated in shtml and html with attribute
      rel="external" (previously: class="external").
      (minor: webui, api)
   *  Show new format zettel identifier in zettel view, info view and delete
