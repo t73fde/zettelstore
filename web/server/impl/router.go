@@ -101,7 +101,7 @@ func (rt *httpRouter) addRoute(key byte, method server.Method, handler http.Hand
 			rt.maxKey = key
 		}
 		rt.reURL = regexp.MustCompile(
-			"^/(?:([" + string(rt.minKey) + "-" + string(rt.maxKey) + "])(?:/(?:([0-9]{14})/?)?)?)$")
+			"^/(?:([" + string(rt.minKey) + "-" + string(rt.maxKey) + "])(?:/(?:((?:[0-9]{14})|(?:[0-9a-zA-Z]{4}))/?)?)?)$")
 	}
 
 	mh := table[key]
@@ -173,10 +173,13 @@ func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	key := match[1][0]
 	var mh *methodHandler
-	if match[2] == "" {
+	if sZid := match[2]; sZid == "" {
 		mh = rt.listTable[key]
 	} else {
 		mh = rt.zettelTable[key]
+		if len(sZid) == 4 {
+			rt.log.Info().Str("ZidN", sZid).Msg("need to translate into Zid")
+		}
 	}
 	method, ok := mapMethod[r.Method]
 	if ok && mh != nil {
