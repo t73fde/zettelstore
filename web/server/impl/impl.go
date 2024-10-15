@@ -21,6 +21,7 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"zettelstore.de/z/auth"
+	"zettelstore.de/z/box"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/web/server"
 	"zettelstore.de/z/zettel/meta"
@@ -46,6 +47,7 @@ type ServerData struct {
 	PersistentCookie bool
 	SecureCookie     bool
 	Profiling        bool
+	ZidMapper        box.Mapper
 }
 
 // New creates a new web server.
@@ -63,6 +65,7 @@ func New(sd ServerData) server.Server {
 		maxRequestSize: sd.MaxRequestSize,
 		auth:           sd.Auth,
 		profiling:      sd.Profiling,
+		zidmapper:      sd.ZidMapper,
 	}
 	srv.router.initializeRouter(rd)
 	srv.server.initializeHTTPServer(sd.ListenAddr, &srv.router)

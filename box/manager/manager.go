@@ -400,6 +400,9 @@ func (mgr *Manager) setupIdentifierMapping() {
 	}
 }
 
+// Mapper returns the mapper used in this manager box.
+func (mgr *Manager) Mapper() box.Mapper { return mgr.zidMapper }
+
 func (mgr *Manager) getAndUpdateMapping(ctx context.Context) (zettel.Zettel, error) {
 	z, err := mgr.getZettel(ctx, id.MappingZid)
 	if err != nil {

@@ -9,6 +9,11 @@
      more. If you search / query for zettel content, these zettel will not be
      returned.
      (breaking: api, webui)
+  *  Allow to use new-style zettel identifier in WebUI and API. Please remember
+     the new-style identifier are currently not stable. Therefore you should
+     not store them for future use, e.g. as a link to another zettel or as a
+     bookmark in your browser or in your database.
+     (major: api, webui)
   *  Fix wrong quote translation for markdown encoder.
      (minor)
   *  Generate <code>&lt;th></code> in table header (was: <code>&lt;td></code>).

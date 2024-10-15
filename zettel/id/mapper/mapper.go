@@ -201,6 +201,17 @@ func (zm *Mapper) GetZidN(zidO id.Zid) id.ZidN {
 	return zidN
 }
 
+// LookupZidO returns the old-style identifier for a new-style identifier.
+func (zm *Mapper) LookupZidO(zidN id.ZidN) (id.Zid, bool) {
+	if zm != nil {
+		zm.mx.RLock()
+		zidO, found := zm.toOld[zidN]
+		zm.mx.RUnlock()
+		return zidO, found
+	}
+	return id.Invalid, false
+}
+
 // DeleteO removes a mapping with the given old-style identifier.
 func (zm *Mapper) DeleteO(zidO id.Zid) {
 	if _, found := zm.defined[zidO]; found {

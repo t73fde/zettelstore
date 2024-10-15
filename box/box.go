@@ -196,6 +196,14 @@ type Manager interface {
 
 	// Dump internal data to a Writer.
 	Dump(w io.Writer)
+
+	// Return zid mapper
+	Mapper() Mapper
+}
+
+// Mapper is used for mapping old-style to and from new-style zettel identifier
+type Mapper interface {
+	LookupZidO(id.ZidN) (id.Zid, bool)
 }
 
 // UpdateReason gives an indication, why the ObserverFunc was called.
