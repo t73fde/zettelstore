@@ -14,5 +14,5 @@ possible attacks against this website.
 
 This website is hosted by [https://ionos.de|1&amp;1 IONOS SE].
 According to
-[https://www.ionos.de/hilfe/datenschutz/datenverarbeitung-von-webseitenbesuchern-ihres-11-ionos-produktes/andere-11-ionos-produkte/|their information],
+[https://www.ionos.de/hilfe/datenschutz/datenverarbeitung-von-webseitenbesuchern-ihres-ionos-produktes/andere-ionos-produkte/|their information],
 no processing of personal data is done by them.
