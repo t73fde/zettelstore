@@ -330,32 +330,39 @@ func cleanText(text []byte, cleanBS bool) string {
 }
 
 func (p *mdP) acceptCodeSpan(node *gmAst.CodeSpan) ast.InlineSlice {
+	var segBuf bytes.Buffer
+	for c := node.FirstChild(); c != nil; c = c.NextSibling() {
+		segment := c.(*gmAst.Text).Segment
+		segBuf.Write(segment.Value(p.source))
+	}
+	content := segBuf.Bytes()
+
+	// Clean code span
+	if len(content) == 0 {
+		content = nil
+	} else {
+		lastPos := 0
+		var buf bytes.Buffer
+		for pos, ch := range content {
+			if ch == '\n' {
+				buf.Write(content[lastPos:pos])
+				if pos < len(content)-1 {
+					buf.WriteByte(' ')
+				}
+				lastPos = pos + 1
+			}
+		}
+		buf.Write(content[lastPos:])
+		content = buf.Bytes()
+	}
+
 	return ast.InlineSlice{
 		&ast.LiteralNode{
 			Kind:    ast.LiteralProg,
 			Attrs:   nil, //TODO
-			Content: cleanCodeSpan(node.Text(p.source)),
+			Content: content,
 		},
 	}
-}
-
-func cleanCodeSpan(text []byte) []byte {
-	if len(text) == 0 {
-		return nil
-	}
-	lastPos := 0
-	var buf bytes.Buffer
-	for pos, ch := range text {
-		if ch == '\n' {
-			buf.Write(text[lastPos:pos])
-			if pos < len(text)-1 {
-				buf.WriteByte(' ')
-			}
-			lastPos = pos + 1
-		}
-	}
-	buf.Write(text[lastPos:])
-	return buf.Bytes()
 }
 
 func (p *mdP) acceptEmphasis(node *gmAst.Emphasis) ast.InlineSlice {
