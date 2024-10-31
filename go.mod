@@ -3,7 +3,7 @@ module zettelstore.de/z
 go 1.23
 
 require (
-	github.com/fsnotify/fsnotify v1.7.0
+	github.com/fsnotify/fsnotify v1.8.0
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/crypto v0.28.0
 	golang.org/x/term v0.25.0
