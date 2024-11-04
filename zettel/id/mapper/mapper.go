@@ -165,19 +165,18 @@ func (zm *Mapper) LookupZidN(zidO id.Zid) (id.ZidN, bool) {
 	return zidN, found
 }
 
-// GetZidN returns a new-style identifier for a given old-style identifier.
-// If the old-style identifier is currently not mapped, the mapping will be
-// established.
-func (zm *Mapper) GetZidN(zidO id.Zid) id.ZidN {
-	if zidN, found := zm.LookupZidN(zidO); found {
-		return zidN
+// AllocateZidN allocates a new new-style identifier, which is associated with
+// the given old-style identifier.
+func (zm *Mapper) AllocateZidN(zidO id.Zid) {
+	if _, found := zm.LookupZidN(zidO); found {
+		return
 	}
 
 	zm.mx.Lock()
 	defer zm.mx.Unlock()
 	// Double check to avoid races
-	if zidN, found := zm.toNew[zidO]; found {
-		return zidN
+	if _, found := zm.toNew[zidO]; found {
+		return
 	}
 
 	if 1000000000 <= zidO && zidO <= 1099999999 {
@@ -189,7 +188,7 @@ func (zm *Mapper) GetZidN(zidO id.Zid) id.ZidN {
 			zm.nextZidM++
 			zm.toNew[zidO] = zidN
 			zm.toOld[zidN] = zidO
-			return zidN
+			return
 		}
 	}
 
@@ -197,7 +196,6 @@ func (zm *Mapper) GetZidN(zidO id.Zid) id.ZidN {
 	zm.nextZidN++
 	zm.toNew[zidO] = zidN
 	zm.toOld[zidN] = zidO
-	return zidN
 }
 
 // LookupZidO returns the old-style identifier for a new-style identifier.
@@ -259,7 +257,7 @@ func (zm *Mapper) Fetch(ctx context.Context) error {
 		return err
 	}
 	allZidsO.ForEach(func(zidO id.Zid) {
-		_ = zm.GetZidN(zidO)
+		zm.AllocateZidN(zidO)
 	})
 	zm.mx.Lock()
 	defer zm.mx.Unlock()

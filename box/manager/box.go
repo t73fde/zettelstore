@@ -69,14 +69,11 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid
 		if err == nil {
 			mgr.idxUpdateZettel(ctx, ztl)
 
-			mgr.createMapping(zidO)
+			mgr.zidMapper.AllocateZidN(zidO)
 		}
 		return zidO, err
 	}
 	return id.Invalid, box.ErrReadOnly
-}
-func (mgr *Manager) createMapping(zidO id.Zid) {
-	_ = mgr.zidMapper.GetZidN(zidO)
 }
 
 // GetZettel retrieves a specific zettel.
@@ -299,7 +296,7 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zidO id.Zid) error {
 		if err == nil {
 			mgr.idxDeleteZettel(ctx, zidO)
 
-			mgr.deleteMapping(zidO)
+			mgr.zidMapper.DeleteO(zidO)
 			return err
 		}
 		var errZNF box.ErrZettelNotFound
@@ -308,9 +305,6 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zidO id.Zid) error {
 		}
 	}
 	return box.ErrZettelNotFound{Zid: zidO}
-}
-func (mgr *Manager) deleteMapping(zidO id.Zid) {
-	mgr.zidMapper.DeleteO(zidO)
 }
 
 // Remove all (computed) properties from metadata before storing the zettel.

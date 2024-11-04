@@ -271,15 +271,13 @@ func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zidO id.Zid, isStarted b
 	case box.OnZettel:
 		if isStarted {
 			if zidO >= id.DefaultHomeZid {
-				if _, found := mgr.zidMapper.LookupZidN(zidO); !found {
-					mgr.createMapping(zidO)
-				}
+				mgr.zidMapper.AllocateZidN(zidO)
 			}
 		}
 		mgr.idxAr.EnqueueZettel(zidO)
 	case box.OnDelete:
 		if isStarted && zidO >= id.DefaultHomeZid {
-			mgr.deleteMapping(zidO)
+			mgr.zidMapper.DeleteO(zidO)
 		}
 		mgr.idxAr.EnqueueZettel(zidO)
 	default:
