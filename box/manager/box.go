@@ -69,29 +69,14 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid
 		if err == nil {
 			mgr.idxUpdateZettel(ctx, ztl)
 
-			err = mgr.createMapping(ctx, zidO)
+			mgr.createMapping(zidO)
 		}
 		return zidO, err
 	}
 	return id.Invalid, box.ErrReadOnly
 }
-func (mgr *Manager) createMapping(ctx context.Context, zidO id.Zid) error {
-	mgr.mappingMx.Lock()
-	defer mgr.mappingMx.Unlock()
-	mappingZettel, err := mgr.getZettel(ctx, id.MappingZid)
-	if err != nil {
-		mgr.mgrLog.Error().Err(err).Msg("Unable to get mapping zettel")
-		return err
-	}
-
-	zidN := mgr.zidMapper.GetZidN(zidO)
-	mappingZettel.Content = zettel.NewContent(mgr.zidMapper.AsBytes())
-	if err = mgr.UpdateZettel(ctx, mappingZettel); err != nil {
-		mgr.mgrLog.Error().Err(err).Zid(zidO).Uint("zidN", uint64(zidN)).Msg("Unable to update mapping zettel")
-		return err
-	}
-	mgr.mgrLog.Debug().Zid(zidO).Msg("add to mapping zettel")
-	return nil
+func (mgr *Manager) createMapping(zidO id.Zid) {
+	_ = mgr.zidMapper.GetZidN(zidO)
 }
 
 // GetZettel retrieves a specific zettel.
@@ -314,7 +299,7 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zidO id.Zid) error {
 		if err == nil {
 			mgr.idxDeleteZettel(ctx, zidO)
 
-			err = mgr.deleteMapping(ctx, zidO)
+			mgr.deleteMapping(zidO)
 			return err
 		}
 		var errZNF box.ErrZettelNotFound
@@ -324,22 +309,8 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zidO id.Zid) error {
 	}
 	return box.ErrZettelNotFound{Zid: zidO}
 }
-func (mgr *Manager) deleteMapping(ctx context.Context, zidO id.Zid) error {
-	mgr.mappingMx.Lock()
-	defer mgr.mappingMx.Unlock()
-	mappingZettel, err := mgr.getZettel(ctx, id.MappingZid)
-	if err != nil {
-		mgr.mgrLog.Error().Err(err).Msg("Unable to get mapping zettel")
-		return err
-	}
+func (mgr *Manager) deleteMapping(zidO id.Zid) {
 	mgr.zidMapper.DeleteO(zidO)
-	mappingZettel.Content = zettel.NewContent(mgr.zidMapper.AsBytes())
-	if err = mgr.updateZettel(ctx, mappingZettel); err != nil {
-		mgr.mgrLog.Error().Err(err).Zid(zidO).Msg("Unable to update mapping zettel")
-		return err
-	}
-	mgr.mgrLog.Debug().Zid(zidO).Msg("remove from mapping zettel")
-	return nil
 }
 
 // Remove all (computed) properties from metadata before storing the zettel.

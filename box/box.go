@@ -229,7 +229,7 @@ type UpdateInfo struct {
 type UpdateFunc func(UpdateInfo)
 
 // UpdateNotifier is an UpdateFunc, but with separate values.
-type UpdateNotifier func(BaseBox, id.Zid, UpdateReason, bool)
+type UpdateNotifier func(BaseBox, id.Zid, UpdateReason)
 
 // Subject is a box that notifies observers about changes.
 type Subject interface {

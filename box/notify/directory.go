@@ -578,6 +578,6 @@ func newExtIsBetter(oldExt, newExt string) bool {
 func (ds *DirService) notifyChange(zid id.Zid, reason box.UpdateReason) {
 	if notify := ds.infos; notify != nil {
 		ds.log.Trace().Zid(zid).Uint("reason", uint64(reason)).Msg("notifyChange")
-		notify(ds.box, zid, reason, true)
+		notify(ds.box, zid, reason)
 	}
 }

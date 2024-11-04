@@ -15,9 +15,7 @@
 package manager
 
 import (
-	"bytes"
 	"context"
-	"fmt"
 	"io"
 	"net/url"
 	"sync"
@@ -31,7 +29,6 @@ import (
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/strfun"
-	"zettelstore.de/z/zettel"
 	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/id/mapper"
 	"zettelstore.de/z/zettel/meta"
@@ -50,7 +47,9 @@ type ConnectData struct {
 type Mapper interface {
 	Warnings(context.Context) (*id.Set, error) // Fetch problematic zettel identifier
 
-	FetchAsBytes(context.Context) ([]byte, error)
+	Fetch(context.Context) error
+
+	AsBytes() []byte
 }
 
 // Connect returns a handle to the specified box.
@@ -107,7 +106,6 @@ type Manager struct {
 	infos        chan box.UpdateInfo
 	propertyKeys strfun.Set // Set of property key names
 	zidMapper    *mapper.Mapper
-	mappingMx    sync.Mutex // protects updates to mapping zettel
 
 	// Indexer data
 	idxLog   *logger.Logger
@@ -272,22 +270,16 @@ func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zidO id.Zid, isStarted b
 		mgr.idxAr.Reset()
 	case box.OnZettel:
 		if isStarted {
-			if zidO > id.MappingZid {
+			if zidO >= id.DefaultHomeZid {
 				if _, found := mgr.zidMapper.LookupZidN(zidO); !found {
-					mgr.createMapping(context.Background(), zidO)
-				}
-			} else if zidO == id.MappingZid {
-				if _, err := mgr.getAndUpdateMapping(context.Background()); err != nil {
-					mgr.mgrLog.Error().Err(err).Msg("ID mapping update problem")
-				} else {
-					mgr.mgrLog.Info().Msg("ID mapping updated")
+					mgr.createMapping(zidO)
 				}
 			}
 		}
 		mgr.idxAr.EnqueueZettel(zidO)
 	case box.OnDelete:
-		if isStarted && zidO > id.MappingZid {
-			mgr.deleteMapping(context.Background(), zidO)
+		if isStarted && zidO >= id.DefaultHomeZid {
+			mgr.deleteMapping(zidO)
 		}
 		mgr.idxAr.EnqueueZettel(zidO)
 	default:
@@ -376,48 +368,18 @@ func (mgr *Manager) allBoxesStarted() bool {
 
 func (mgr *Manager) setupIdentifierMapping() {
 	ctx := context.Background()
-	z, err := mgr.getAndUpdateMapping(ctx)
-	if err != nil {
-		mgr.mgrLog.Error().Err(err).Msg("error while reading and updating id mapping")
-	}
+	// TODO: read external mapping into "content"
 
-	mapping, err := mgr.zidMapper.FetchAsBytes(ctx)
-	if err != nil {
+	if err := mgr.zidMapper.Fetch(ctx); err != nil {
 		mgr.mgrLog.Error().Err(err).Msg("Unable to get current identifier mapping")
 		return
 	}
 
-	content := z.Content.AsBytes()
-	if !bytes.Equal(content, mapping) {
-		z.Content = zettel.NewContent(mapping)
-		if err = mgr.updateZettel(ctx, z); err != nil {
-			mgr.mgrLog.Error().Err(err).Msg("Unable to write identifier mapping zettel")
-		} else {
-			mgr.mgrLog.Info().Msg("Mapping was updated")
-		}
-	} else {
-		mgr.mgrLog.Info().Msg("No mapping update")
-	}
+	// TODO: update mapping from content
 }
 
 // Mapper returns the mapper used in this manager box.
 func (mgr *Manager) Mapper() box.Mapper { return mgr.zidMapper }
-
-func (mgr *Manager) getAndUpdateMapping(ctx context.Context) (zettel.Zettel, error) {
-	z, err := mgr.getZettel(ctx, id.MappingZid)
-	if err != nil {
-		return z, fmt.Errorf("get id mapping zettel: %w", err)
-	}
-	if z.Content.IsBinary() {
-		return z, fmt.Errorf("id mapping zettel is binary")
-	}
-	z.Content.TrimSpace()
-	content := z.Content.AsBytes()
-	if err = mgr.zidMapper.ParseAndUpdate(content); err != nil {
-		err = fmt.Errorf("id mapping zettel parsing: %w", err)
-	}
-	return z, err
-}
 
 // Stop the started box. Now only the Start() function is allowed.
 func (mgr *Manager) Stop(ctx context.Context) {
@@ -510,8 +472,8 @@ func (mgr *Manager) checkContinue(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (mgr *Manager) notifyChanged(bbox box.BaseBox, zid id.Zid, reason box.UpdateReason, force bool) {
-	if infos := mgr.infos; infos != nil && (zid != id.MappingZid || force) {
+func (mgr *Manager) notifyChanged(bbox box.BaseBox, zid id.Zid, reason box.UpdateReason) {
+	if infos := mgr.infos; infos != nil {
 		mgr.infos <- box.UpdateInfo{Box: bbox, Reason: reason, Zid: zid}
 	}
 }

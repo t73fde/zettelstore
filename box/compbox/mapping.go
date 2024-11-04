@@ -29,20 +29,19 @@ import (
 // that is updated when a new zettel is created or an old zettel is deleted.
 
 func genMappingM(zid id.Zid) *meta.Meta {
-	m := getTitledMeta(zid, "Zettelstore Identifier Mapping View (TEMP for v0.19-dev)")
+	m := getTitledMeta(zid, "Zettelstore Identifier Mapping")
 	m.Set(api.KeySyntax, meta.SyntaxText)
 	m.Set(api.KeyVisibility, api.ValueVisibilityLogin)
 	return m
 }
 
 func genMappingC(ctx context.Context, cb *compBox) []byte {
-	src, err := cb.mapper.FetchAsBytes(ctx)
-	if err != nil {
+	if err := cb.mapper.Fetch(ctx); err != nil {
 		var buf bytes.Buffer
 		buf.WriteString("**Error while fetching: ")
 		buf.WriteString(err.Error())
 		buf.WriteString("**\n")
 		return buf.Bytes()
 	}
-	return src
+	return cb.mapper.AsBytes()
 }

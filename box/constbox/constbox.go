@@ -409,17 +409,6 @@ var constZettelMap = map[id.Zid]constZettel{
 			api.KeyVisibility: api.ValueVisibilityLogin,
 		},
 		zettel.NewContent(nil)},
-	id.MustParse(api.ZidMapping): {
-		constHeader{
-			api.KeyTitle:      "Zettelstore Identifier Mapping",
-			api.KeyRole:       api.ValueRoleConfiguration,
-			api.KeySyntax:     meta.SyntaxText,
-			api.KeyLang:       api.ValueLangEN,
-			api.KeyCreated:    "20240807114600",
-			api.KeyReadOnly:   api.ValueTrue,
-			api.KeyVisibility: api.ValueVisibilityLogin,
-		},
-		zettel.NewContent(nil)},
 	id.DefaultHomeZid: {
 		constHeader{
 			api.KeyTitle:   "Home",

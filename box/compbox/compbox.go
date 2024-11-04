@@ -66,7 +66,7 @@ var myZettel = map[id.Zid]struct {
 	id.MustParse(api.ZidParser):               {genParserM, genParserC},
 	id.MustParse(api.ZidStartupConfiguration): {genConfigZettelM, genConfigZettelC},
 	id.MustParse(api.ZidWarnings):             {genWarningsM, genWarningsC},
-	9999999996:                                {genMappingM, genMappingC}, // TEMP for v0.19-dev
+	id.MustParse(api.ZidMapping):              {genMappingM, genMappingC},
 }
 
 // Get returns the one program box.

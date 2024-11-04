@@ -101,7 +101,6 @@ func Make(fetcher Fetcher) *Mapper {
 		90003:      id.MustParseN("0019"), // New Tag
 		90004:      id.MustParseN("001a"), // New Role
 		// 100000000,   // Manual               -> 0020-00yz
-		9999999996:  id.MustParseN("00zw"), // Current ZidMapping, TEMP for v0.19-dev
 		9999999997:  id.MustParseN("00zx"), // ZidSession
 		9999999998:  id.MustParseN("00zy"), // ZidAppDirectory
 		9999999999:  id.MustParseN("00zz"), // ZidMapping
@@ -233,9 +232,7 @@ func (zm *Mapper) DeleteO(zidO id.Zid) {
 func (zm *Mapper) AsBytes() []byte {
 	zm.mx.RLock()
 	defer zm.mx.RUnlock()
-	return zm.asBytes()
-}
-func (zm *Mapper) asBytes() []byte {
+
 	allZidsO := id.NewSetCap(len(zm.toNew))
 	for zidO := range zm.toNew {
 		allZidsO = allZidsO.Add(zidO)
@@ -255,12 +252,11 @@ func (zm *Mapper) asBytes() []byte {
 	return buf.Bytes()
 }
 
-// FetchAsBytes fetches all zettel identifier and returns the mapping as lines,
-// where each line contains the old zid and the new zid.
-func (zm *Mapper) FetchAsBytes(ctx context.Context) ([]byte, error) {
+// Fetch all zettel and update the mapping.
+func (zm *Mapper) Fetch(ctx context.Context) error {
 	allZidsO, err := zm.fetcher.FetchZidsO(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	allZidsO.ForEach(func(zidO id.Zid) {
 		_ = zm.GetZidN(zidO)
@@ -276,7 +272,7 @@ func (zm *Mapper) FetchAsBytes(ctx context.Context) ([]byte, error) {
 			delete(zm.toOld, zidN)
 		}
 	}
-	return zm.asBytes(), nil
+	return nil
 }
 
 // ParseAndUpdate parses the given content and updates the Mapping.
