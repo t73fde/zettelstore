@@ -182,9 +182,9 @@ func (ct *contextTask) addPair(ctx context.Context, key, value string, curCost f
 func contextCost(key string) float64 {
 	switch key {
 	case api.KeyFolge, api.KeyPrecursor:
-		return 1
-	case api.KeySubordinates, api.KeySuperior:
-		return 1.5
+		return 0.1
+	case api.KeySequel, api.KeyPrequel:
+		return 1.0
 	case api.KeySuccessors, api.KeyPredecessor:
 		return 7
 	}

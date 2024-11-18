@@ -59,8 +59,6 @@ func (wui *WebUI) MakeGetCreateZettelHandler(
 
 		roleData, syntaxData := retrieveDataLists(ctx, ucListRoles, ucListSyntax)
 		switch op {
-		case actionChild:
-			wui.renderZettelForm(ctx, w, createZettel.PrepareChild(origZettel), "Child Zettel", "", roleData, syntaxData)
 		case actionCopy:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareCopy(origZettel), "Copy Zettel", "", roleData, syntaxData)
 		case actionFolge:
@@ -69,6 +67,8 @@ func (wui *WebUI) MakeGetCreateZettelHandler(
 			title := parser.NormalizedSpacedText(origZettel.Meta.GetTitle())
 			newTitle := parser.NormalizedSpacedText(q.Get(api.KeyTitle))
 			wui.renderZettelForm(ctx, w, createZettel.PrepareNew(origZettel, newTitle), title, "", roleData, syntaxData)
+		case actionSequel:
+			wui.renderZettelForm(ctx, w, createZettel.PrepareSequel(origZettel), "Sequel Zettel", "", roleData, syntaxData)
 		case actionVersion:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareVersion(origZettel), "Version Zettel", "", roleData, syntaxData)
 		}

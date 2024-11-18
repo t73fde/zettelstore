@@ -26,16 +26,16 @@
       ,@(ROLE-DEFAULT-actions (current-binding))
       ,@(if predecessor-refs `((br) "Predecessor: " ,predecessor-refs))
       ,@(if precursor-refs `((br) "Precursor: " ,precursor-refs))
-      ,@(if superior-refs `((br) "Superior: " ,superior-refs))
+      ,@(if prequel-refs `((br) "Prequel: " ,prequel-refs))
       ,@(ROLE-DEFAULT-heading (current-binding))
     )
   )
   ,@content
   ,endnotes
-  ,@(if (or folge-links subordinate-links back-links successor-links)
+  ,@(if (or folge-links sequel-links back-links successor-links)
     `((nav
       ,@(if folge-links `((details (@ (,folge-open)) (summary "Folgezettel") (ul ,@(map wui-item-link folge-links)))))
-      ,@(if subordinate-links `((details (@ (,subordinate-open)) (summary "Subordinates") (ul ,@(map wui-item-link subordinate-links)))))
+      ,@(if sequel-links `((details (@ (,sequel-open)) (summary "Sequel") (ul ,@(map wui-item-link sequel-links)))))
       ,@(if back-links `((details (@ (,back-open)) (summary "Incoming") (ul ,@(map wui-item-link back-links)))))
       ,@(if successor-links `((details (@ (,successor-open)) (summary "Successors") (ul ,@(map wui-item-link successor-links)))))
      ))

@@ -19,10 +19,10 @@ const queryKeyAction = "_action"
 
 // Values for queryKeyAction
 const (
-	valueActionChild   = "child"
 	valueActionCopy    = "copy"
 	valueActionFolge   = "folge"
 	valueActionNew     = "new"
+	valueActionSequel  = "sequel"
 	valueActionVersion = "version"
 )
 
@@ -30,15 +30,15 @@ const (
 type createAction uint8
 
 const (
-	actionChild createAction = iota
-	actionCopy
+	actionCopy createAction = iota
 	actionFolge
 	actionNew
+	actionSequel
 	actionVersion
 )
 
 var createActionMap = map[string]createAction{
-	valueActionChild:   actionChild,
+	valueActionSequel:  actionSequel,
 	valueActionCopy:    actionCopy,
 	valueActionFolge:   actionFolge,
 	valueActionNew:     actionNew,

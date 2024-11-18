@@ -254,7 +254,7 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 			rb.bindString("copy-url", sx.MakeString(newURLBuilder('c').SetZid(apiZid).AppendKVQuery(queryKeyAction, valueActionCopy).String()))
 		}
 		rb.bindString("version-url", sx.MakeString(newURLBuilder('c').SetZid(apiZid).AppendKVQuery(queryKeyAction, valueActionVersion).String()))
-		rb.bindString("child-url", sx.MakeString(newURLBuilder('c').SetZid(apiZid).AppendKVQuery(queryKeyAction, valueActionChild).String()))
+		rb.bindString("sequel-url", sx.MakeString(newURLBuilder('c').SetZid(apiZid).AppendKVQuery(queryKeyAction, valueActionSequel).String()))
 		rb.bindString("folge-url", sx.MakeString(newURLBuilder('c').SetZid(apiZid).AppendKVQuery(queryKeyAction, valueActionFolge).String()))
 	}
 	if wui.canDelete(ctx, user, m) {

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240711183409
+modified: 20241118175033
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -89,6 +89,9 @@ Most keys conform to a [[type|00001006030000]].
 : References the zettel that contains a previous version of the content.
   In contrast to [[''precursor''|#precurso]] / [[''folge''|#folge]], this is a reference because of technical reasons, not because of content-related reasons.
   Basically the inverse of key [[''successors''|#successors]].
+; [!prequel|''prequel'']
+: Specifies a zettel that is conceptually a prequel zettel.
+  This is a zettel that occured somehow before the current zettel.
 ; [!published|''published'']
 : This property contains the timestamp of the mast modification / creation of the zettel.
   If [[''modified''|#modified]] is set with a valid timestamp, it contains the its value.
@@ -111,8 +114,8 @@ Most keys conform to a [[type|00001006030000]].
   Can be used for selecting zettel.
   See [[supported zettel roles|00001006020100]].
   If not given, it is ignored.
-; [!subordinates|''subordinates'']
-: Is a property that contains identifier of all zettel that reference this zettel through the [[''superior''|#superior]] value.
+; [!sequel|''sequel'']
+: Is a property that contains identifier of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
 ; [!successors|''successors'']
 : Is a property that contains identifier of all zettel that reference this zettel through the [[''predecessor''|#predecessor]] value.
   Therefore, it references all zettel that contain a new version of the content and/or metadata.
@@ -122,9 +125,6 @@ Most keys conform to a [[type|00001006030000]].
 ; [!summary|''summary'']
 : Summarizes the content of the zettel.
   You may use all [[inline-structued elements|00001007040000]] of Zettelmarkup.
-; [!superior|''superior'']
-: Specifies a zettel that is conceptually a superior zettel.
-  This might be a more abstract zettel, or a zettel that should be higher in a hierarchy.
 ; [!syntax|''syntax'']
 : Specifies the syntax that should be used for interpreting the zettel.
   The zettel about [[other markup languages|00001008000000]] defines supported values.

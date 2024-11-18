@@ -83,15 +83,15 @@ func (*CreateZettel) PrepareFolge(origZettel zettel.Zettel) zettel.Zettel {
 	return zettel.Zettel{Meta: m, Content: zettel.NewContent(nil)}
 }
 
-// PrepareChild the zettel for further modification.
-func (*CreateZettel) PrepareChild(origZettel zettel.Zettel) zettel.Zettel {
+// PrepareSequel the zettel for further modification.
+func (*CreateZettel) PrepareSequel(origZettel zettel.Zettel) zettel.Zettel {
 	origMeta := origZettel.Meta
 	m := meta.New(id.Invalid)
 	if title, found := origMeta.Get(api.KeyTitle); found {
-		m.Set(api.KeyTitle, prependTitle(title, "Child", "Child of "))
+		m.Set(api.KeyTitle, prependTitle(title, "Sequel", "Sequel of "))
 	}
 	updateMetaRoleTagsSyntax(m, origMeta)
-	m.Set(api.KeySuperior, origMeta.Zid.String())
+	m.Set(api.KeyPrequel, origMeta.Zid.String())
 	return zettel.Zettel{Meta: m, Content: zettel.NewContent(nil)}
 }
 
