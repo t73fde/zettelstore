@@ -121,12 +121,6 @@ func GetSortedKeyDescriptions() []*DescriptionKey {
 // It is not an "official" key to be designed to last long.
 const KeyCreatedMissing = "created-missing"
 
-// Some deprecated keys
-const (
-	KeySubordinates = "subordinates"
-	KeySuperior     = "superior"
-)
-
 // Supported keys.
 func init() {
 	registerKey(api.KeyID, TypeID, usageComputed, "")
@@ -139,7 +133,7 @@ func init() {
 	registerKey(api.KeyFolge, TypeIDSet, usageProperty, "")
 	registerKey(api.KeySequel, TypeIDSet, usageProperty, "")
 	registerKey(api.KeySuccessors, TypeIDSet, usageProperty, "")
-	registerKey(KeySubordinates, TypeIDSet, usageProperty, "")
+	registerKey(api.KeySubordinates, TypeIDSet, usageProperty, "")
 
 	// Non-inverse keys
 	registerKey(api.KeyAuthor, TypeString, usageUser, "")
@@ -164,7 +158,7 @@ func init() {
 	registerKey(api.KeyQuery, TypeEmpty, usageUser, "")
 	registerKey(api.KeyReadOnly, TypeWord, usageUser, "")
 	registerKey(api.KeySummary, TypeZettelmarkup, usageUser, "")
-	registerKey(KeySuperior, TypeIDSet, usageUser, KeySubordinates)
+	registerKey(api.KeySuperior, TypeIDSet, usageUser, api.KeySubordinates)
 	registerKey(api.KeyURL, TypeURL, usageUser, "")
 	registerKey(api.KeyUselessFiles, TypeString, usageProperty, "")
 	registerKey(api.KeyUserID, TypeWord, usageUser, "")
