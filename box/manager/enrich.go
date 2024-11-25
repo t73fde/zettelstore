@@ -26,24 +26,21 @@ import (
 // Enrich computes additional properties and updates the given metadata.
 func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int) {
 	// Calculate new zid
+	zid := m.Zid
 	if m.ZidN.IsValid() {
-		if zidN, found := mgr.zidMapper.LookupZidN(m.Zid); found && m.ZidN != zidN {
-			mgr.mgrLog.Error().Zid(m.Zid).
-				Uint("stored", uint64(m.ZidN)).Uint("mapped", uint64(zidN)).
+		if zidN, found := mgr.zidMapper.LookupZidN(zid); found && m.ZidN != zidN {
+			mgr.mgrLog.Error().Zid(zid).
+				Uint("stored", uint64(zid)).Uint("mapped", uint64(zidN)).
 				Msg("mapped != stored")
 		}
 	} else {
-		if zidN, found := mgr.zidMapper.LookupZidN(m.Zid); found {
-			m.ZidN = zidN
-		} else {
-			mgr.mgrLog.Error().Zid(m.Zid).Msg("no mapping found")
-		}
+		m.ZidN = mgr.zidMapper.AllocateZidN(zid)
 	}
 
 	// Calculate computed, but stored values.
 	_, hasCreated := m.Get(api.KeyCreated)
 	if !hasCreated {
-		m.Set(api.KeyCreated, computeCreated(m.Zid))
+		m.Set(api.KeyCreated, computeCreated(zid))
 	}
 
 	if box.DoEnrich(ctx) {
