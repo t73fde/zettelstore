@@ -15,7 +15,6 @@
 package id_test
 
 import (
-	"strings"
 	"testing"
 
 	"zettelstore.de/z/zettel/id"
@@ -90,36 +89,4 @@ func BenchmarkBytes(b *testing.B) {
 		bs = id.Zid(12345678901200).Bytes()
 	}
 	bResult = bs
-}
-
-// ----- Base-36 identifier
-
-func TestIsValidN(t *testing.T) {
-	t.Parallel()
-	validIDs := []string{
-		"0001", "0020", "0300", "4000",
-		"zzzz", "ZZZZ", "Cafe", "bAbE",
-	}
-
-	for i, sid := range validIDs {
-		zid, err := id.ParseN(sid)
-		if err != nil {
-			t.Errorf("i=%d: sid=%q is not valid, but should be. err=%v", i, sid, err)
-		}
-		if s := zid.String(); !strings.EqualFold(s, sid) {
-			t.Errorf("i=%d: zid=%v does not format to %q, but to %q", i, zid, sid, s)
-		}
-	}
-
-	invalidIDs := []string{
-		"", "0", "a", "de", "dfg", "abcde",
-		"012.",
-		"+1234", "+123",
-	}
-
-	for i, sid := range invalidIDs {
-		if zid, err := id.ParseN(sid); err == nil {
-			t.Errorf("i=%d: sid=%q is valid (zid=%s), but should not be", i, sid, zid)
-		}
-	}
 }

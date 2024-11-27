@@ -5,6 +5,9 @@
   *  Remove support for renaming zettel, i.e. changing zettel identifier. Was
      announced as deprecated in version 0.18.
      (breaking: api, webui)
+  *  Format of zettel identifier will be not changed. The deprecation message
+  *  from version 0.18 is no longer valid.
+     (major)
   *  Zettel content for zettel with ID starting with 0000 is not indexed any
      more. If you search / query for zettel content, these zettel will not be
      returned.
