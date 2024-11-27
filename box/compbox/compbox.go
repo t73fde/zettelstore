@@ -33,7 +33,7 @@ func init() {
 	manager.Register(
 		" comp",
 		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
-			return getCompBox(cdata.Number, cdata.Enricher, cdata.Mapper), nil
+			return getCompBox(cdata.Number, cdata.Enricher), nil
 		})
 }
 
@@ -41,7 +41,6 @@ type compBox struct {
 	log      *logger.Logger
 	number   int
 	enricher box.Enricher
-	mapper   manager.Mapper
 }
 
 var myConfig *meta.Meta
@@ -65,18 +64,15 @@ var myZettel = map[id.Zid]struct {
 	id.MustParse(api.ZidMetadataKey):          {genKeysM, genKeysC},
 	id.MustParse(api.ZidParser):               {genParserM, genParserC},
 	id.MustParse(api.ZidStartupConfiguration): {genConfigZettelM, genConfigZettelC},
-	id.MustParse(api.ZidWarnings):             {genWarningsM, genWarningsC},
-	id.MustParse(api.ZidMapping):              {genMappingM, genMappingC},
 }
 
 // Get returns the one program box.
-func getCompBox(boxNumber int, mf box.Enricher, mapper manager.Mapper) *compBox {
+func getCompBox(boxNumber int, mf box.Enricher) *compBox {
 	return &compBox{
 		log: kernel.Main.GetLogger(kernel.BoxService).Clone().
 			Str("box", "comp").Int("boxnum", int64(boxNumber)).Child(),
 		number:   boxNumber,
 		enricher: mf,
-		mapper:   mapper,
 	}
 }
 

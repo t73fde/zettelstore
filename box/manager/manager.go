@@ -30,7 +30,6 @@ import (
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/zettel/id"
-	"zettelstore.de/z/zettel/id/mapper"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -40,16 +39,6 @@ type ConnectData struct {
 	Config   config.Config
 	Enricher box.Enricher
 	Notify   box.UpdateNotifier
-	Mapper   Mapper
-}
-
-// Mapper allows to inspect the mapping between old-style and new-style zettel identifier.
-type Mapper interface {
-	Warnings(context.Context) (*id.Set, error) // Fetch problematic zettel identifier
-
-	Fetch(context.Context) error
-
-	AsBytes() []byte
 }
 
 // Connect returns a handle to the specified box.
@@ -105,7 +94,6 @@ type Manager struct {
 	done         chan struct{}
 	infos        chan box.UpdateInfo
 	propertyKeys strfun.Set // Set of property key names
-	zidMapper    *mapper.Mapper
 
 	// Indexer data
 	idxLog   *logger.Logger
@@ -155,9 +143,8 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 		idxAr:    newAnteroomQueue(1000),
 		idxReady: make(chan struct{}, 1),
 	}
-	mgr.zidMapper = mapper.Make(mgr)
 
-	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged, Mapper: mgr.zidMapper}
+	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)
 	for _, uri := range boxURIs {
 		p, err := Connect(uri, authManager, &cdata)
@@ -229,7 +216,7 @@ func (mgr *Manager) notifier() {
 				}
 
 				isStarted := mgr.State() == box.StartStateStarted
-				mgr.idxEnqueue(reason, zid, isStarted)
+				mgr.idxEnqueue(reason, zid)
 				if ci.Box == nil {
 					ci.Box = mgr
 				}
@@ -262,23 +249,15 @@ func ignoreUpdate(cache destutterCache, now time.Time, reason box.UpdateReason, 
 	return false
 }
 
-func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zidO id.Zid, isStarted bool) {
+func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zidO id.Zid) {
 	switch reason {
 	case box.OnReady:
 		return
 	case box.OnReload:
 		mgr.idxAr.Reset()
 	case box.OnZettel:
-		if isStarted {
-			if zidO >= id.DefaultHomeZid {
-				mgr.zidMapper.AllocateZidN(zidO)
-			}
-		}
 		mgr.idxAr.EnqueueZettel(zidO)
 	case box.OnDelete:
-		if isStarted && zidO >= id.DefaultHomeZid {
-			mgr.zidMapper.DeleteO(zidO)
-		}
 		mgr.idxAr.EnqueueZettel(zidO)
 	default:
 		mgr.mgrLog.Error().Uint("reason", uint64(reason)).Zid(zidO).Msg("Unknown notification reason")
@@ -331,7 +310,6 @@ func (mgr *Manager) Start(ctx context.Context) error {
 	go mgr.notifier()
 
 	mgr.waitBoxesAreStarted()
-	mgr.setupIdentifierMapping()
 	mgr.setState(box.StartStateStarted)
 
 	mgr.notifyObserver(&box.UpdateInfo{Box: mgr, Reason: box.OnReady})
@@ -362,18 +340,6 @@ func (mgr *Manager) allBoxesStarted() bool {
 		}
 	}
 	return true
-}
-
-func (mgr *Manager) setupIdentifierMapping() {
-	ctx := context.Background()
-	// TODO: read external mapping into "content"
-
-	if err := mgr.zidMapper.Fetch(ctx); err != nil {
-		mgr.mgrLog.Error().Err(err).Msg("Unable to get current identifier mapping")
-		return
-	}
-
-	// TODO: update mapping from content
 }
 
 // Stop the started box. Now only the Start() function is allowed.

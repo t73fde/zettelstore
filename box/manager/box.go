@@ -68,8 +68,6 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid
 		zidO, err := box.CreateZettel(ctx, ztl)
 		if err == nil {
 			mgr.idxUpdateZettel(ctx, ztl)
-
-			mgr.zidMapper.AllocateZidN(zidO)
 		}
 		return zidO, err
 	}
@@ -295,8 +293,6 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zidO id.Zid) error {
 		err := p.DeleteZettel(ctx, zidO)
 		if err == nil {
 			mgr.idxDeleteZettel(ctx, zidO)
-
-			mgr.zidMapper.DeleteO(zidO)
 			return err
 		}
 		var errZNF box.ErrZettelNotFound
