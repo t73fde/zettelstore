@@ -376,9 +376,6 @@ func (mgr *Manager) setupIdentifierMapping() {
 	// TODO: update mapping from content
 }
 
-// Mapper returns the mapper used in this manager box.
-func (mgr *Manager) Mapper() box.Mapper { return mgr.zidMapper }
-
 // Stop the started box. Now only the Start() function is allowed.
 func (mgr *Manager) Stop(ctx context.Context) {
 	mgr.mgrMx.Lock()

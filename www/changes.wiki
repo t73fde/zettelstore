@@ -9,11 +9,6 @@
      more. If you search / query for zettel content, these zettel will not be
      returned.
      (breaking: api, webui)
-  *  Allow to use new-style zettel identifier in WebUI and API. Please remember
-     the new-style identifier are currently not stable. Therefore you should
-     not store them for future use, e.g. as a link to another zettel or as a
-     bookmark in your browser or in your database.
-     (major: api, webui)
   *  Metadata keys <code>superior</code> and <code>subordinate</code> are not
      supported from the WebUI any more. They are still typed as a set of zettel
      identifier, but are treated as ordinary links. Zettel should not form a

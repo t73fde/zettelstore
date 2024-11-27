@@ -171,7 +171,6 @@ func (ws *webService) Start(kern *myKernel) error {
 		PersistentCookie: persistentCookie,
 		SecureCookie:     secureCookie,
 		Profiling:        profile,
-		ZidMapper:        kern.box.manager.Mapper(),
 	}
 	srvw := impl.New(sd)
 	err := kern.web.setupServer(srvw, kern.box.manager, kern.auth.manager, &kern.cfg)

@@ -22,11 +22,9 @@ import (
 	"strings"
 
 	"zettelstore.de/z/auth"
-	"zettelstore.de/z/box"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/id"
 )
 
 type (
@@ -55,7 +53,6 @@ type httpRouter struct {
 	ur          server.UserRetriever
 	mux         *http.ServeMux
 	maxReqSize  int64
-	zidmapper   box.Mapper
 }
 
 type routerData struct {
@@ -64,7 +61,6 @@ type routerData struct {
 	maxRequestSize int64
 	auth           auth.TokenManager
 	profiling      bool
-	zidmapper      box.Mapper
 }
 
 // initializeRouter creates a new, empty router with the given root handler.
@@ -77,7 +73,6 @@ func (rt *httpRouter) initializeRouter(rd routerData) {
 	rt.reURL = regexp.MustCompile("^$")
 	rt.mux = http.NewServeMux()
 	rt.maxReqSize = rd.maxRequestSize
-	rt.zidmapper = rd.zidmapper
 
 	if rd.profiling {
 		rt.setRuntimeProfiling()
@@ -106,7 +101,7 @@ func (rt *httpRouter) addRoute(key byte, method server.Method, handler http.Hand
 			rt.maxKey = key
 		}
 		rt.reURL = regexp.MustCompile(
-			"^/(?:([" + string(rt.minKey) + "-" + string(rt.maxKey) + "])(?:/(?:((?:[0-9]{14})|(?:[0-9a-zA-Z]{4}))/?)?)?)$")
+			"^/(?:([" + string(rt.minKey) + "-" + string(rt.maxKey) + "])(?:/(?:([0-9]{14})/?)?)?)$")
 	}
 
 	mh := table[key]
@@ -178,17 +173,10 @@ func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	key := match[1][0]
 	var mh *methodHandler
-	if sZid := match[2]; sZid == "" {
+	if match[2] == "" {
 		mh = rt.listTable[key]
 	} else {
 		mh = rt.zettelTable[key]
-		if len(sZid) == 4 {
-			if zidN, err := id.ParseN(sZid); err == nil {
-				if zidO, found := rt.zidmapper.LookupZidO(zidN); found {
-					match[2] = zidO.String()
-				}
-			}
-		}
 	}
 	method, ok := mapMethod[r.Method]
 	if ok && mh != nil {
