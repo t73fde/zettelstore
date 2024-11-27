@@ -12,7 +12,7 @@
 ;;;----------------------------------------------------------------------------
 
 `(article
-  (header (h1 "Delete Zettel " ,zid " / " ,zid-n))
+  (header (h1 "Delete Zettel " ,zid))
   (p "Do you really want to delete this zettel?")
   ,@(if shadowed-box
     `((div (@ (class "zs-info"))

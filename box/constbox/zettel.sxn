@@ -16,7 +16,7 @@
     (h1 ,heading)
     (div (@ (class "zs-meta"))
       ,@(if (bound? 'edit-url) `((a (@ (href ,edit-url)) "Edit") (@H " &#183; ")))
-      ,zid " / " ,zid-n (@H " &#183; ")
+      ,zid (@H " &#183; ")
       (a (@ (href ,info-url)) "Info") (@H " &#183; ")
       "(" ,@(if (bound? 'role-url) `((a (@ (href ,role-url)) ,meta-role)))
           ,@(if (and (bound? 'folge-role-url) (bound? 'meta-folge-role))

@@ -27,9 +27,6 @@
   *  External links are now generated in shtml and html with attribute
      rel="external" (previously: class="external").
      (minor: webui, api)
-  *  Show new format zettel identifier in zettel view, info view and delete
-     view.
-     (minor: webui)
   *  Allow to enable runtime profiling of the software, to be used by
      developers.
      (minor)
