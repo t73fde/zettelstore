@@ -4,10 +4,10 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210721105704
-modified: 20240711183638
+modified: 20241128141327
 
 [[Zettel identifier|00001006050000]] are typically created by examine the current date and time.
-By renaming the name of the underlying zettel file, you are able to provide any sequence of 14 digits[^Zettel identifier format will be migrated to a new format after version 0.19.].
+By renaming the name of the underlying zettel file, you are able to provide any sequence of 14 digits.
 
 To make things easier, you must not use zettel identifier that begin with four zeroes (''0000'').
 
@@ -25,11 +25,11 @@ Its value is the zettel identifier of the zettel that configures your applicatio
 | 00000000000000 | 0000000000000 | This is an invalid zettel identifier
 | 00000000000001 | 0000099999999 | [[Predefined zettel|00001005090000]]
 | 00001000000000 | 0000109999999 | This [[Zettelstore manual|00001000000000]]
-| 00001100000000 | 0000899999999 | Reserved, do not use.
-| 00009000000000 | 0000999999999 | Reserved for applications (legacy)
+| 00001100000000 | 0000899999999 | Reserved, do not use
+| 00009000000000 | 0000999999999 | Reserved for applications
 
 Since the format of zettel identifier will change in the near future, no external application is allowed to use the range ''00000000000001'' &hellip; ''0000999999999''.
 
-==== External Applications (Legacy)
+==== External Applications
 |= From | To | Description
 | 00009000001000 | 00009000001999 | [[Zettel Presenter|https://zettelstore.de/contrib]], an application to display zettel as a HTML-based slideshow

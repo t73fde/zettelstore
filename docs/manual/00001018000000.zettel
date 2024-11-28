@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20240830155745
+modified: 20241128142457
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -15,7 +15,7 @@ This page lists some problems and their solutions that may occur when using your
    A dialog is then opened where you can acknowledge that you understand the possible risks when you start Zettelstore.
    This dialog is only resented once for a given Zettelstore executable.
 * **Problem:** When you double-click on the Zettelstore executable icon, Windows complains that Zettelstore is an application from an unknown developer.
-** **Solution:** Windows displays a dialog where you can acknowledge possible risks and allows to start Zettelstore.
+** **Solution:** Windows displays a dialog where you can acknowledge possible risks and allow to start Zettelstore.
 
 === Authentication
 * **Problem:** [[Authentication is enabled|00001010040100]] for a local running Zettelstore and there is a valid [[user zettel|00001010040200]] for the owner.

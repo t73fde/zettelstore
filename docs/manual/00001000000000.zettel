@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20231125185455
+modified: 20241128141924
 show-back-links: false
 
 * [[Introduction|00001001000000]]
@@ -22,6 +22,6 @@ show-back-links: false
 * [[Troubleshooting|00001018000000]]
 * Frequently asked questions
 
-Version: {{00001000000001}}.
+Version: {{00001000000001}}
 
 Licensed under the EUPL-1.2-or-later.

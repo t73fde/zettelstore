@@ -4,10 +4,10 @@ role: manual
 tags: #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20221018123622
+modified: 20241128142736
 
-Your zettel could contain sensitive content.
-You probably want to ensure that only authorized person can read and/or modify them.
+Your zettel may contain sensitive content.
+You probably want to ensure that only authorized persons can read and/or modify them.
 Zettelstore ensures this in various ways.
 
 === Local first

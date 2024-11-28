@@ -4,7 +4,7 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240711183257
+modified: 20241128141740
 
 Zettelstore is a software that manages your zettel.
 Since every zettel must be readable without any special tool, most zettel has to be stored as ordinary files within specific directories.
@@ -29,9 +29,9 @@ Nested directories are not supported (yet).
 
 Every file in this directory that should be monitored by Zettelstore must have a file name that begins with 14 digits (0-9), the [[zettel identifier|00001006050000]].
 If you create a new zettel via the [[web user interface|00001014000000]] or via the [[API|00001012053200]], the zettel identifier will be the timestamp of the current date and time (format is ''YYYYMMDDhhmmss'').
-This allows zettel to be sorted naturally by creation time.[^Zettel identifier format will be migrated to a new format after version 0.19, without reference to the creation date. See [[Alphanumeric Zettel Identifier|00001006050200]] for some details.]
+This allows zettel to be sorted naturally by creation time.
 
-Since the only restriction on zettel identifiers are the 14 digits, you are free to use other digit sequences.[^Zettel identifier format will be migrated to a new format after version 0.19, without reference to the creation date.]
+Since the only restriction on zettel identifiers are the 14 digits, you are free to use other digit sequences.
 The [[configuration zettel|00001004020000]] is one prominent example, as well as these manual zettel.
 You can create these special zettel by manually renaming the underlying zettel files.
 
