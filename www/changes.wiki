@@ -8,9 +8,11 @@
   *  Format of zettel identifier will be not changed. The deprecation message
      from version 0.18 is no longer valid.
      (major)
-  *  Zettel content for predefined zettel (ID less or equal than 0000099999999)
-     is not indexed any more. If you search / query for zettel content, these
-     zettel will not be returned. However, their metadata is still searchable.
+  *  Zettel content for most predefined zettel (ID less or equal than
+     0000099999899) is not indexed any more. If you search / query for zettel
+     content, these zettel will not be returned. However, their metadata is
+     still searchable. Content of predefined zettel with ID between
+     00000999999900 and 00000999999999 will be indexed..
      (breaking: api, webui)
   *  Metadata keys <code>superior</code> and <code>subordinate</code> are not
      supported on the WebUI any more. They are still typed as a set of zettel

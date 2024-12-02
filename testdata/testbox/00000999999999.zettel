@@ -1,12 +1,11 @@
-id: 00009999999998
+id: 00000999999999
 title: Zettelstore Application Directory
 role: configuration
 syntax: none
-app-zid: 00009999999998
+app-zid: 00000999999999
 created: 20240703235900
 lang: en
 modified: 20240708125724
 nozid-zid: 9999999998
-noappzid: 00009999999998
+noappzid: 00000999999999
 visibility: login
-

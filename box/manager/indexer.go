@@ -170,14 +170,7 @@ func (mgr *Manager) idxUpdateZettel(ctx context.Context, zettel zettel.Zettel) {
 }
 
 func mustIndexZettel(m *meta.Meta) bool {
-	zid := m.Zid
-	if zid >= id.DefaultHomeZid {
-		return true
-	}
-	if zid >= id.Zid(100000000) && zid < id.Zid(9999999997) {
-		return true
-	}
-	return false
+	return m.Zid >= id.Zid(999999900)
 }
 
 func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *store.ZettelIndex, cData *collectData) {

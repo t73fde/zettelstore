@@ -4,9 +4,13 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240711183318
+modified: 20241202102358
 
-The following table lists all predefined zettel with their purpose.[^Zettel identifier format will be migrated to a new format after version 0.19.]
+The following table lists all predefined zettel with their purpose.
+
+The content of most[^To be more exact: zettel with an identifier greater or equal ''00000999999900'' will have their content indexed.] of these zettel will not be indexed by Zettelstore.
+You will not find zettel when searched for some content, e.g. ""[[query:european]]"" will not find the [[Zettelstore License|00000000000004]].
+However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find the Zettelstore License zettel.
 
 |= Identifier :|= Title | Purpose
 | [[00000000000001]] | Zettelstore Version | Contains the version string of the running Zettelstore
@@ -23,7 +27,6 @@ The following table lists all predefined zettel with their purpose.[^Zettel iden
 | [[00000000000092]] | Zettelstore Supported Parser | Lists all supported values for metadata [[syntax|00001006020000#syntax]] that are recognized by Zettelstore
 | [[00000000000096]] | Zettelstore Startup Configuration | Contains the effective values of the [[startup configuration|00001004010000]]
 | [[00000000000100]] | Zettelstore Runtime Configuration | Allows to [[configure Zettelstore at runtime|00001004020000]]
-| [[00000000000102]] | Zettelstore Warnings | Warnings about potential problematic zettel identifier
 | [[00000000010100]] | Zettelstore Base HTML Template | Contains the general layout of the HTML view
 | [[00000000010200]] | Zettelstore Login Form HTML Template | Layout of the login form, when authentication is [[enabled|00001010040100]]
 | [[00000000010300]] | Zettelstore List Zettel HTML Template | Used when displaying a list of zettel
@@ -46,7 +49,7 @@ The following table lists all predefined zettel with their purpose.[^Zettel iden
 | [[00000000090002]] | New User | Template for a new [[user zettel|00001010040200]]
 | [[00000000090003]] | New Tag | Template for a new [[tag zettel|00001006020100#tag]]
 | [[00000000090004]] | New Role | Template for a new [[role zettel|00001006020100#role]]
-| [[00009999999998]] | Zettelstore Application Directory | Maps application name to application specific zettel
+| [[00000999999999]] | Zettelstore Application Directory | Maps application name to application specific zettel
 | [[00010000000000]] | Home | Default home zettel, contains some welcome information
 
 If a zettel is not linked, it is not accessible for the current user.

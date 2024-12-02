@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210811154251
-modified: 20221112111054
+modified: 20241202101206
 
 Image content is assumed, if an URL is used or if the referenced zettel contains an image.
 
@@ -24,5 +24,6 @@ One prominent example is to specify an explicit title attribute that is shown on
 
 Examples:
 * [!spin|``{{Spinning Emoji|00000000040001}}{title=Emoji width=30}``] is rendered as ::{{Spinning Emoji|00000000040001}}{title=Emoji width=30}::{=example}.
-* The above image is also the placeholder for a non-existent zettel:
-** ``{{00000000009999}}`` will be rendered as ::{{00000000009999}}::{=example}.
+* The above image is also the placeholder for a non-existing invalid zettel or for using an invalid zettel identifier:
+** ``{{99999999999999}}`` will be rendered as ::{{99999999999999}}::{=example}.
+** ``{{00000000000000}}`` will be rendered as ::{{00000000000000}}::{=example}.
