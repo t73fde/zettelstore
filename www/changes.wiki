@@ -6,14 +6,14 @@
      announced as deprecated in version 0.18.
      (breaking: api, webui)
   *  Format of zettel identifier will be not changed. The deprecation message
-  *  from version 0.18 is no longer valid.
+     from version 0.18 is no longer valid.
      (major)
-  *  Zettel content for zettel with ID starting with 0000 is not indexed any
-     more. If you search / query for zettel content, these zettel will not be
-     returned.
+  *  Zettel content for predefined zettel (ID less or equal than 0000099999999)
+     is not indexed any more. If you search / query for zettel content, these
+     zettel will not be returned. However, their metadata is still searchable.
      (breaking: api, webui)
   *  Metadata keys <code>superior</code> and <code>subordinate</code> are not
-     supported from the WebUI any more. They are still typed as a set of zettel
+     supported on the WebUI any more. They are still typed as a set of zettel
      identifier, but are treated as ordinary links. Zettel should not form a
      hierarchy, in most cases.
      (major: webui)
