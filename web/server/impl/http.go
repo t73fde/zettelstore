@@ -24,7 +24,7 @@ import (
 const (
 	shutdownTimeout = 5 * time.Second
 	readTimeout     = 5 * time.Second
-	writeTimeout    = 15 * time.Second
+	writeTimeout    = 20 * time.Second
 	idleTimeout     = 120 * time.Second
 )
 
@@ -46,7 +46,7 @@ func (srv *httpServer) initializeHTTPServer(addr string, handler http.Handler) {
 
 		// See: https://blog.cloudflare.com/exposing-go-on-the-internet/
 		ReadTimeout:  readTimeout,
-		WriteTimeout: writeTimeout + 200*time.Millisecond, // Give some time to detect timeout and to write an appropriate error message.
+		WriteTimeout: writeTimeout + 500*time.Millisecond, // Give some time to detect timeout and to write an appropriate error message.
 		IdleTimeout:  idleTimeout,
 	}
 	srv.origHandler = handler
