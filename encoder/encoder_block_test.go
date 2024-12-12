@@ -187,7 +187,7 @@ var tcsBlock = []zmkTestCase{
 		zmk:   "<<<\nToBeOr\n\nNotToBe\n<<< Romeo",
 		expect: expectMap{
 			encoderHTML:  "<blockquote><p>ToBeOr</p><p>NotToBe</p><cite>Romeo</cite></blockquote>",
-			encoderMD:    "> ToBeOr\n\n> NotToBe",
+			encoderMD:    "> ToBeOr\n>\n> NotToBe",
 			encoderSz:    `(BLOCK (REGION-QUOTE () ((PARA (TEXT "ToBeOr")) (PARA (TEXT "NotToBe"))) (TEXT "Romeo")))`,
 			encoderSHTML: `((blockquote (p "ToBeOr") (p "NotToBe") (cite "Romeo")))`,
 			encoderText:  "ToBeOr\nNotToBe\nRomeo",

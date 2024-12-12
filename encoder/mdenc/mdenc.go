@@ -223,7 +223,7 @@ func (v *visitor) visitRegion(rn *ast.RegionNode) {
 			continue
 		}
 		if !first {
-			v.b.WriteString("\n\n")
+			v.b.WriteString("\n>\n")
 		}
 		first = false
 		v.b.WriteString("> ")
