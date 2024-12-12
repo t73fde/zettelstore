@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20241128142457
+modified: 20241212153148
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -40,8 +40,8 @@ This page lists some problems and their solutions that may occur when using your
 * **Problem:** You have entered some HTML code as content for your Zettelstore, but this content is not shown on the Web User Interface.
 
   You may have entered a Zettel with syntax [[""html""|00001008000000#html]], or you have used an [[inline-zettel block|00001007031200]] with syntax ""html"", or you entered a Zettel with syntax [[""markdown""|00001008000000#markdown]] (or ""md"") and used some HTML code fragments.
-** **Explanation:** Working with HTML code from unknown sources may lead so severe security problems.
-   The HTML code may force web browsers to load more content from external server, it may contain malicious JavaScript code, it may reference to CSS artifacts that itself load from external servers and may contains malicious software.
+** **Explanation:** Working with HTML code from unknown sources may lead to severe security problems.
+   The HTML code may force web browsers to load more content from external server, it may contain malicious JavaScript code, it may reference to CSS artifacts that itself load from external servers and may contain malicious software.
    Zettelstore tries to do its best to ignore problematic HTML code, but it may fail.
    Either because of unknown bugs or because of yet unknown changes in the future.
 

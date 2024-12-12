@@ -4,12 +4,12 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220218131107
+modified: 20241212153641
 
 Tables are used to show some data in a two-dimensional fashion.
-In zettelmarkup, table are not specified explicitly, but by entering __table rows__.
+In zettelmarkup, tables are not specified explicitly, but by entering __table rows__.
 Therefore, a table can be seen as a sequence of table rows.
-A table row is nothing as a sequence of __table cells__.
+A table row is nothing but a sequence of __table cells__.
 The length of a table is the number of table rows, the width of a table is the maximum length of its rows.
 
 The first cell of a row must begin with the vertical bar character (""''|''"", U+007C) at the first position of a line.
