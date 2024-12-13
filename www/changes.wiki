@@ -1,7 +1,10 @@
 <title>Change Log</title>
 
+<a id="0_20"></a>
+<h2>Changes for Version 0.20.0 (pending)</h2>
+
 <a id="0_19"></a>
-<h2>Changes for Version 0.19.0 (pending)</h2>
+<h2>Changes for Version 0.19.0 (2024-12-13)</h2>
   *  Remove support for renaming zettel, i.e. changing zettel identifier. Was
      announced as deprecated in version 0.18.
      (breaking: api, webui)
@@ -42,6 +45,8 @@
   *  Allow to enable runtime profiling of the software, to be used by
      developers.
      (minor)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
 
 <a id="0_18"></a>
 <h2>Changes for Version 0.18.0 (2024-07-11)</h2>
