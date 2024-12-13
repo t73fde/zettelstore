@@ -3,50 +3,50 @@ title: Checklist for Release
 role: zettel
 syntax: zmk
 created: 20210916194900
-modified: 20231213194631
+modified: 20241213125640
 
-# Sync with the official repository
+# Sync with the official repository:
 #* ``fossil sync -u``
-# Make sure that there is no workspace defined.
+# Make sure that there is no workspace defined:
 #* ``ls ..`` must not have a file ''go.work'', in no parent folder.
-# Make sure that all dependencies are up-to-date.
+# Make sure that all dependencies are up-to-date:
 #* ``cat go.mod``
 # Clean up your Go workspace:
-#* ``go run tools/clean/clean.go`` (alternatively: ``make clean``).
+#* ``go run tools/clean/clean.go`` (alternatively: ``make clean``)
 # All internal tests must succeed:
-#* ``go run tools/check/check.go -r`` (alternatively: ``make relcheck``).
+#* ``go run tools/check/check.go -r`` (alternatively: ``make relcheck``)
 # The API tests must succeed on every development platform:
-#* ``go run tools/testapi/testapi.go`` (alternatively: ``make api``).
+#* ``go run tools/testapi/testapi.go`` (alternatively: ``make api``)
 # Run [[linkchecker|https://linkchecker.github.io/linkchecker/]] with the manual:
 #* ``go run -race cmd/zettelstore/main.go run -d docs/manual``
 #* ``linkchecker http://127.0.0.1:23123 2>&1 | tee lc.txt``
 #* Check all ""Error: 404 Not Found""
-#* Check all ""Error: 403 Forbidden"": allowed for endpoint ''/p'' with encoding ''html'' for those zettel that are accessible only in ''expert-mode''.
+#* Check all ""Error: 403 Forbidden"": allowed for endpoint ''/z'' for those zettel that are accessible only in ''expert-mode''
 #* Try to resolve other error messages and warnings
 #* Warnings about empty content can be ignored
 # On every development platform, the box with 10.000 zettel must run, with ''-race'' enabled:
-#* ``go run -race cmd/zettelstore/main.go run -d DIR``.
+#* ``go run -race cmd/zettelstore/main.go run -d DIR``
 # Create a development release:
-#* ``go run tools/build.go release`` (alternatively: ``make release``).
+#* ``go run tools/build.go release`` (alternatively: ``make release``)
 # On every platform (esp. macOS), the box with 10.000 zettel must run properly:
 #* ``./zettelstore -d DIR``
-# Update files in directory ''www''
-#* index.wiki
-#* download.wiki
-#* changes.wiki
-#* plan.wiki
+# Update files in directory ''www'':
+#* ''index.wiki''
+#* ''download.wiki''
+#* ''changes.wiki''
+#* ''plan.wiki''
 # Set file ''VERSION'' to the new release version.
-  It _must_ consist of three digits: MAJOR.MINOR.PATCH, even if PATCH is zero
+  It **must** consists of three numbers: ''MAJOR.MINOR.PATCH'', even if ''PATCH'' is zero.
 # Disable Fossil autosync mode:
 #* ``fossil setting autosync off``
 # Commit the new release version:
 #* ``fossil commit --tag release --tag vVERSION -m "Version VERSION"``
 #* **Important:** the tag must follow the given pattern, e.g. ''v0.0.15''.
-   Otherwise client will not be able to import ''zettelkasten.de/z''.
+   Otherwise client software will not be able to import ''zettelstore.de/z''.
 # Clean up your Go workspace:
-#* ``go run tools/clean/clean.go`` (alternatively: ``make clean``).
+#* ``go run tools/clean/clean.go`` (alternatively: ``make clean``)
 # Create the release:
-#* ``go run tools/build/build.go release`` (alternatively: ``make release``).
+#* ``go run tools/build/build.go release`` (alternatively: ``make release``)
 # Remove previous executables:
 #* ``fossil uv remove --glob '*-PREVVERSION*'``
 # Add executables for release:
