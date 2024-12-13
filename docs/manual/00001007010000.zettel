@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20211124175047
+modified: 20241213101524
 
 Any document can be thought as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
 Some of these blocks can contain other blocks, for example lists may contain other lists or paragraphs.
@@ -48,7 +48,7 @@ One example is to make space characters visible inside a inline literal element:
 
 To summarize:
 
-* With some exceptions, blocks-structural elements begins at the for position of a line with three identical characters.
+* With some exceptions, block-structural elements begins at the for position of a line with three identical characters.
 * The most important exception to this rule is the specification of lists.
 * If no block element is found, a paragraph with inline elements is assumed.
 * With some exceptions, inline-structural elements begins with two characters, quite often the same two characters.

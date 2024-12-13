@@ -4,7 +4,7 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241128141740
+modified: 20241213101751
 
 Zettelstore is a software that manages your zettel.
 Since every zettel must be readable without any special tool, most zettel has to be stored as ordinary files within specific directories.
@@ -18,7 +18,7 @@ You can view zettel details and relations between zettel.
 
 In addition, Zettelstore provides an ""application programming interface"" ([[API|00001012000000]]) that allows other software to communicate with the Zettelstore.
 Zettelstore becomes extensible by external software.
-For example, a more sophisticated user interface could be build, or an application for your mobile device that allows you to send content to your Zettelstore as new zettel.
+For example, a more sophisticated user interface could be built, or an application for your mobile device that allows you to send content to your Zettelstore as new zettel.
 
 === Where zettel are stored
 
@@ -49,7 +49,7 @@ For example, you want to store an important figure in the Zettelstore that is en
 Since each zettel contains some metadata, e.g. the title of the figure, the question arises where these data should be stores.
 The solution is a meta-file with the same zettel identifier, but without a filename extension.
 Zettelstore recognizes this situation and reads in both files for the one zettel containing the figure.
-It maintains this relationship as long as theses files exists.
+It maintains this relationship as long as these files exists.
 
 In case of some textual zettel content you do not want to store the metadata and the zettel content in two different files.
 Here the ''.zettel'' extension will signal that the metadata and the zettel content will be put in the same file, separated by an empty line or a line with three dashes (""''-\-\-''"", also known as ""YAML separator"").

@@ -4,7 +4,7 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20211125191727
-modified: 20220218125541
+modified: 20241213103259
 
 Windows is a complicated beast. There are several ways to automatically start Zettelstore.
 
@@ -35,7 +35,7 @@ The Windows Task scheduler allows you to start Zettelstore as an background task
 
 This is both an advantage and a disadvantage.
 
-On the plus side, Zettelstore runs in the background, and it does not disturbs you.
+On the plus side, Zettelstore runs in the background, and it does not disturb you.
 All you have to do is to open your web browser, enter the appropriate URL, and there you go.
 
 On the negative side, you will not be notified when you enter the wrong data in the Task scheduler and Zettelstore fails to start.
@@ -72,7 +72,7 @@ Create a new action.
 
 The next steps are the trickiest.
 
-If you did not created a startup configuration file, then create an action that starts a program.
+If you did not create a startup configuration file, then create an action that starts a program.
 Enter the file path where you placed the Zettelstore executable.
 The ""Browse ..."" button helps you with that.[^I store my Zettelstore executable in the sub-directory ''bin'' of my home directory.]
 
