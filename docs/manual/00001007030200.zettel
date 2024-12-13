@@ -4,11 +4,11 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220218133902
+modified: 20241213121000
 
-There are thee kinds of lists that can be nested: ordered lists, unordered lists, and quotation lists.
+There are three kinds of lists that can be nested: ordered lists, unordered lists, and quotation lists.
 
-Ordered lists are specified with the number sign (""''#''"", U+0023), unordered lists use the asterisk (""''*''"", U+002A), and quotation lists are specified with the greater-than sing (""''>''"", U+003E).
+Ordered lists are specified with the number sign (""''#''"", U+0023), unordered lists use the asterisk (""''*''"", U+002A), and quotation lists are specified with the greater-than sign (""''>''"", U+003E).
 Let's call these three characters __list characters__.
 
 Any nested list item is specified by a non-empty sequence of list characters, followed by a space character and a sequence of [[inline elements|00001007040000]].
@@ -17,8 +17,8 @@ The number / count of list characters gives the nesting of the lists.
 If the following lines should also be part of the list item, exactly the same number of spaces must be given at the beginning of each of the following lines as it is the lists are nested, plus one additional space character.
 In other words: the inline elements must begin at the same column as it was on the previous line.
 
-The resulting sequence on inline elements is merged into a paragraph.
-Appropriately indented paragraphs can specified after the first one.
+The resulting sequence of inline elements is merged into a paragraph.
+Appropriately indented paragraphs can be specified after the first one.
 Since each blocks-structured element has to be specified at the first position of a line, none of the nested list items may contain anything else than paragraphs.
 
 Some examples:
