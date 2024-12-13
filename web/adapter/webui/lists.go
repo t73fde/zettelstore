@@ -15,7 +15,6 @@ package webui
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"net/url"
 	"slices"
@@ -27,11 +26,7 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/shtml"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/encoding/atom"
-	"zettelstore.de/z/encoding/rss"
-	"zettelstore.de/z/encoding/xml"
 	"zettelstore.de/z/evaluator"
-	"zettelstore.de/z/query"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/server"
@@ -64,29 +59,19 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			wui.reportError(ctx, w, err)
 			return
 		}
-		if len(actions) > 0 {
-			if len(metaSeq) > 0 {
-				for _, act := range actions {
-					if act == api.RedirectAction {
-						ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid.ZettelID())
-						wui.redirectFound(w, r, ub)
-						return
-					}
+		if len(actions) > 0 && len(metaSeq) > 0 {
+			for _, act := range actions {
+				if act == api.RedirectAction {
+					ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid.ZettelID())
+					wui.redirectFound(w, r, ub)
+					return
 				}
-			}
-			switch actions[0] {
-			case api.AtomAction:
-				wui.renderAtom(w, q, metaSeq)
-				return
-			case api.RSSAction:
-				wui.renderRSS(ctx, w, q, metaSeq)
-				return
 			}
 		}
 
 		var content, endnotes *sx.Pair
 		numEntries := 0
-		if bn, cnt := evaluator.QueryAction(ctx, q, metaSeq, wui.rtConfig); bn != nil {
+		if bn, cnt := evaluator.QueryAction(ctx, q, metaSeq); bn != nil {
 			enc := wui.getSimpleHTMLEncoder(wui.rtConfig.Get(ctx, nil, api.KeyLang))
 			content, endnotes, err = enc.BlocksSxn(&ast.BlockSlice{bn})
 			if err != nil {
@@ -199,44 +184,6 @@ func (wui *WebUI) prependZettelLink(sxZtl *sx.Pair, name string, u *api.URLBuild
 		sxZtl = sxZtl.Cons(sx.MakeString(", "))
 	}
 	return sxZtl.Cons(link)
-}
-
-func (wui *WebUI) renderRSS(ctx context.Context, w http.ResponseWriter, q *query.Query, ml []*meta.Meta) {
-	var rssConfig rss.Configuration
-	rssConfig.Setup(ctx, wui.rtConfig)
-	if actions := q.Actions(); len(actions) > 2 && actions[1] == api.TitleAction {
-		rssConfig.Title = strings.Join(actions[2:], " ")
-	}
-	data := rssConfig.Marshal(q, ml)
-
-	adapter.PrepareHeader(w, rss.ContentType)
-	w.WriteHeader(http.StatusOK)
-	var err error
-	if _, err = io.WriteString(w, xml.Header); err == nil {
-		_, err = w.Write(data)
-	}
-	if err != nil {
-		wui.log.Error().Err(err).Msg("unable to write RSS data")
-	}
-}
-
-func (wui *WebUI) renderAtom(w http.ResponseWriter, q *query.Query, ml []*meta.Meta) {
-	var atomConfig atom.Configuration
-	atomConfig.Setup(wui.rtConfig)
-	if actions := q.Actions(); len(actions) > 2 && actions[1] == api.TitleAction {
-		atomConfig.Title = strings.Join(actions[2:], " ")
-	}
-	data := atomConfig.Marshal(q, ml)
-
-	adapter.PrepareHeader(w, atom.ContentType)
-	w.WriteHeader(http.StatusOK)
-	var err error
-	if _, err = io.WriteString(w, xml.Header); err == nil {
-		_, err = w.Write(data)
-	}
-	if err != nil {
-		wui.log.Error().Err(err).Msg("unable to write Atom data")
-	}
 }
 
 func (wui *WebUI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel *usecase.TagZettel, vals url.Values) bool {

@@ -336,7 +336,7 @@ func (q *Query) EnrichNeeded() bool {
 		return true
 	}
 	if len(q.actions) > 0 {
-		// Unknown, what an action will use. Example: RSS needs api.KeyPublished.
+		// Unknown, what an action may use. For examples: KEYS action uses all metadata.
 		return true
 	}
 	for _, term := range q.terms {

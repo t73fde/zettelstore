@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220809132350
-modified: 20240219161800
+modified: 20241213153229
 
 A query transclusion is specified by the following sequence, starting at the first position in a line: ''{{{query:query-expression}}}''.
 The line must literally start with the sequence ''{{{query:''.
@@ -38,15 +38,6 @@ The following actions are supported, parameter and aggregate actions:
 ; ''MAXn'' (parameter)
 : Emit only those values with at most __n__ aggregated values.
   __n__ must be a positive integer, ''MAX'' must be given in upper-case letters.
-; ''TITLE'' (parameter)
-: All words following ''TITLE'' are joined together to form a title.
-  It is used for the ''ATOM'' and ''RSS'' action.
-; ''ATOM'' (aggregate)
-: Transform the zettel list into an [[Atom 1.0|https://www.rfc-editor.org/rfc/rfc4287]]-conformant document / feed.
-  The document is embedded into the referencing zettel.
-; ''RSS'' (aggregate)
-: Transform the zettel list into a [[RSS 2.0|https://www.rssboard.org/rss-specification]]-conformant document / feed.
-  The document is embedded into the referencing zettel.
 ; ''KEYS'' (aggregate)
 : Emit a list of all metadata keys, together with the number of zettel having the key.
 ; ''REDIRECT'', ''REINDEX'' (aggregate)

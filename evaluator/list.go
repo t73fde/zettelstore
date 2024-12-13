@@ -24,16 +24,13 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/config"
-	"zettelstore.de/z/encoding/atom"
-	"zettelstore.de/z/encoding/rss"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel/meta"
 )
 
 // QueryAction transforms a list of metadata according to query actions into a AST nested list.
-func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig config.Config) (ast.BlockNode, int) {
+func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (ast.BlockNode, int) {
 	ap := actionPara{
 		ctx:    ctx,
 		q:      q,
@@ -41,7 +38,6 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig 
 		kind:   ast.NestedListUnordered,
 		minVal: -1,
 		maxVal: -1,
-		title:  rtConfig.GetSiteName(),
 	}
 	actions := q.Actions()
 	if len(actions) == 0 {
@@ -49,7 +45,7 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig 
 	}
 
 	acts := make([]string, 0, len(actions))
-	for i, act := range actions {
+	for _, act := range actions {
 		if strings.HasPrefix(act, api.NumberedAction[0:1]) {
 			ap.kind = ast.NestedListOrdered
 			continue
@@ -66,10 +62,6 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig 
 				continue
 			}
 		}
-		if act == api.TitleAction && i+1 < len(actions) {
-			ap.title = strings.Join(actions[i+1:], " ")
-			break
-		}
 		if act == api.ReIndexAction {
 			continue
 		}
@@ -78,10 +70,6 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta, rtConfig 
 	var firstUnknowAct string
 	for _, act := range acts {
 		switch act {
-		case api.AtomAction:
-			return ap.createBlockNodeAtom(rtConfig)
-		case api.RSSAction:
-			return ap.createBlockNodeRSS(rtConfig)
 		case api.KeysAction:
 			return ap.createBlockNodeMetaKeys()
 		}
@@ -110,7 +98,6 @@ type actionPara struct {
 	kind   ast.NestedListKind
 	minVal int
 	maxVal int
-	title  string
 }
 
 func (ap *actionPara) createBlockNodeWord(key string) (ast.BlockNode, int) {
@@ -350,29 +337,3 @@ func (*actionPara) calcFontSizes(ccs meta.CountedCategories) map[int]attrs.Attri
 }
 
 func calcBudget(total, curSize float64) float64 { return math.Round(total / (fontSizes64 - curSize)) }
-
-func (ap *actionPara) createBlockNodeRSS(cfg config.Config) (ast.BlockNode, int) {
-	var rssConfig rss.Configuration
-	rssConfig.Setup(ap.ctx, cfg)
-	rssConfig.Title = ap.title
-	data := rssConfig.Marshal(ap.q, ap.ml)
-
-	return &ast.VerbatimNode{
-		Kind:    ast.VerbatimProg,
-		Attrs:   attrs.Attributes{"lang": "xml"},
-		Content: data,
-	}, len(ap.ml)
-}
-
-func (ap *actionPara) createBlockNodeAtom(cfg config.Config) (ast.BlockNode, int) {
-	var atomConfig atom.Configuration
-	atomConfig.Setup(cfg)
-	atomConfig.Title = ap.title
-	data := atomConfig.Marshal(ap.q, ap.ml)
-
-	return &ast.VerbatimNode{
-		Kind:    ast.VerbatimProg,
-		Attrs:   attrs.Attributes{"lang": "xml"},
-		Content: data,
-	}, len(ap.ml)
-}

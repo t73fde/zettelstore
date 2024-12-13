@@ -296,7 +296,7 @@ func (e *evaluator) evalQueryTransclusion(expr string) ast.BlockNode {
 		}
 		return makeBlockNode(createInlineErrorText(nil, "Unable", "to", "search", "zettel"))
 	}
-	result, _ := QueryAction(e.ctx, q, ml, e.rtConfig)
+	result, _ := QueryAction(e.ctx, q, ml)
 	if result != nil {
 		ast.Walk(e, result)
 	}
