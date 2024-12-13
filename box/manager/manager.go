@@ -249,18 +249,18 @@ func ignoreUpdate(cache destutterCache, now time.Time, reason box.UpdateReason, 
 	return false
 }
 
-func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zidO id.Zid) {
+func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zid id.Zid) {
 	switch reason {
 	case box.OnReady:
 		return
 	case box.OnReload:
 		mgr.idxAr.Reset()
 	case box.OnZettel:
-		mgr.idxAr.EnqueueZettel(zidO)
+		mgr.idxAr.EnqueueZettel(zid)
 	case box.OnDelete:
-		mgr.idxAr.EnqueueZettel(zidO)
+		mgr.idxAr.EnqueueZettel(zid)
 	default:
-		mgr.mgrLog.Error().Uint("reason", uint64(reason)).Zid(zidO).Msg("Unknown notification reason")
+		mgr.mgrLog.Error().Uint("reason", uint64(reason)).Zid(zid).Msg("Unknown notification reason")
 		return
 	}
 	select {

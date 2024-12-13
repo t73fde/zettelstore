@@ -65,11 +65,11 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid
 	defer mgr.mgrMx.RUnlock()
 	if box, isWriteBox := mgr.boxes[0].(box.WriteBox); isWriteBox {
 		ztl.Meta = mgr.cleanMetaProperties(ztl.Meta)
-		zidO, err := box.CreateZettel(ctx, ztl)
+		zid, err := box.CreateZettel(ctx, ztl)
 		if err == nil {
 			mgr.idxUpdateZettel(ctx, ztl)
 		}
-		return zidO, err
+		return zid, err
 	}
 	return id.Invalid, box.ErrReadOnly
 }
@@ -140,12 +140,6 @@ func (mgr *Manager) fetchZids(ctx context.Context) (*id.Set, error) {
 		}
 	}
 	return result, nil
-}
-
-// FetchZidsO returns the set of all old-style zettel identifer managed by the box.
-func (mgr *Manager) FetchZidsO(ctx context.Context) (*id.Set, error) {
-	mgr.mgrLog.Debug().Msg("FetchZidsO")
-	return mgr.fetchZids(ctx)
 }
 
 func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {
@@ -282,17 +276,17 @@ func (mgr *Manager) CanDeleteZettel(ctx context.Context, zid id.Zid) bool {
 }
 
 // DeleteZettel removes the zettel from the box.
-func (mgr *Manager) DeleteZettel(ctx context.Context, zidO id.Zid) error {
-	mgr.mgrLog.Debug().Zid(zidO).Msg("DeleteZettel")
+func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
+	mgr.mgrLog.Debug().Zid(zid).Msg("DeleteZettel")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return err
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	for _, p := range mgr.boxes {
-		err := p.DeleteZettel(ctx, zidO)
+		err := p.DeleteZettel(ctx, zid)
 		if err == nil {
-			mgr.idxDeleteZettel(ctx, zidO)
+			mgr.idxDeleteZettel(ctx, zid)
 			return err
 		}
 		var errZNF box.ErrZettelNotFound
@@ -300,7 +294,7 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zidO id.Zid) error {
 			return err
 		}
 	}
-	return box.ErrZettelNotFound{Zid: zidO}
+	return box.ErrZettelNotFound{Zid: zid}
 }
 
 // Remove all (computed) properties from metadata before storing the zettel.
