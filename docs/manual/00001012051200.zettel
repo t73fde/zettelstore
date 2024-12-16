@@ -4,9 +4,9 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20230807170810
+modified: 20241216104355
 
-To list all zettel just send a HTTP GET request to the [[endpoint|00001012920000]] ''/z''[^If [[authentication is enabled|00001010040100]], you must include the a valid [[access token|00001012050200]] in the ''Authorization'' header].
+To list all zettel just send a HTTP GET request to the [[endpoint|00001012920000]] ''/z''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 Always use the endpoint ''/z'' to work with a list of zettel.
 
 Without further specifications, a plain text document is returned, with one line per zettel.

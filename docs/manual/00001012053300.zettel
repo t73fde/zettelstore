@@ -4,17 +4,17 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211004093206
-modified: 20230807170259
+modified: 20241216104429
 
 The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
-For example, to retrieve some data about this zettel you are currently viewing, just send a HTTP GET request to the endpoint ''/z/00001012053300''[^If [[authentication is enabled|00001010040100]], you must include the a valid [[access token|00001012050200]] in the ''Authorization'' header].
+For example, to retrieve some data about this zettel you are currently viewing, just send a HTTP GET request to the endpoint ''/z/00001012053300''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 
 ````sh
 # curl 'http://127.0.0.1:23123/z/00001012053300'
 The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
-For example, to retrieve some data about this zettel you are currently viewing, just send a HTTP GET request to the endpoint ''/z/00001012053300''[^If [[authentication is enabled|00001010040100]], you must include the a valid [[access token|00001012050200]] in the ''Authorization'' header].
+For example, to retrieve some data about this zettel you are currently viewing, just send a HTTP GET request to the endpoint ''/z/00001012053300''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 
 ```sh
 ...

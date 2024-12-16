@@ -1,13 +1,12 @@
 === Thank you for using Zettelstore!
 
 You will find the lastest information about Zettelstore at [[https://zettelstore.de]].
-Check that website regulary for [[upgrades|https://zettelstore.de/home/doc/trunk/www/download.wiki]] to the latest version.
-You should consult the [[change log|https://zettelstore.de/home/doc/trunk/www/changes.wiki]] before upgrading.
-Sometimes, you have to edit some of your Zettelstore-related zettel before upgrading.
-Since Zettelstore is currently in a development state, every upgrade might fix some of your problems.
+Check this website regularly for [[updates|https://zettelstore.de/home/doc/trunk/www/download.wiki]] to the latest version.
+You should consult the [[change log|https://zettelstore.de/home/doc/trunk/www/changes.wiki]] before updating.
+Sometimes, you have to edit some of your Zettelstore-related zettel before updating.
+Since Zettelstore is currently in a development state, every update might fix some of your problems.
 
-If you have problems concerning Zettelstore,
-do not hesitate to get in [[contact with the main developer|mailto:ds@zettelstore.de]].
+If you have problems concerning Zettelstore, do not hesitate to get in [[contact with the main developer|mailto:ds@zettelstore.de]].
 
 === Reporting errors
 If you have encountered an error, please include the content of the following zettel in your mail (if possible):

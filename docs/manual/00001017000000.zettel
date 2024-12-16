@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20220803170112
-modified: 20231012154803
+modified: 20241216105111
 
 === Welcome Zettel
 * **Problem:** You want to put your Zettelstore into the public and need a starting zettel for your users.
@@ -69,11 +69,11 @@ modified: 20231012154803
 
   (The ""''\\''"" is needed by the command line processor to mask the following character to be processed in unintended ways.)
 * **Discussion:** Zettel files are synchronized between your computers via iCloud.
-  Is does not matter, if one of your computer is offline / switched off.
+  Is does not matter, if one of your computers is offline or switched off.
   iCloud will synchronize the zettel files if it later comes online.
 
   However, if you use more than one computer simultaneously, you must be aware that synchronization takes some time.
-  It might take several seconds, maybe longer, that new new version of a zettel appears on the other computer.
+  It might take several seconds, maybe longer, that the new version of a zettel appears on the other computer.
   If you update the same zettel on multiple computers at nearly the same time, iCloud will not be able to synchronize the different versions in a safe manner.
   Zettelstore is intentionally not aware of any synchronization within its zettel boxes.
 

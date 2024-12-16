@@ -4,9 +4,9 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220103224858
-modified: 20220908163156
+modified: 20241216104549
 
-API clients typically wants to know, whether [[authentication is enabled|00001010040100]] or not.
+API clients typically want to know, whether [[authentication is enabled|00001010040100]] or not.
 If authentication is enabled, they present some form of user interface to get user name and password for the actual authentication.
 Then they try to [[obtain an access token|00001012050200]].
 If authentication is disabled, these steps are not needed.

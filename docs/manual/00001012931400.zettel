@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20240123120132
+modified: 20241216104739
 
 === ''PARA''
 :::syntax
@@ -47,7 +47,7 @@ If it is a block, it may contain a nested list.
 :::syntax
 __Description__ **=** ''(DESCRIPTION'' __DescriptionTerm__ __DescriptionValues__ __DescriptionTerm__ __DescriptionValues__ &hellip; '')''.
 :::
-A description is a sequence of one ore more terms and values.
+A description is a sequence of one or more terms and values.
 
 :::syntax
 __DescriptionTerm__ **=** ''('' [[__InlineElement__|00001012931600]] &hellip; '')''.
@@ -126,7 +126,7 @@ The inline typically describes author / source of the quotation.
 __VerseRegion__ **=** ''(REGION-VERSE'' [[__Attributes__|00001012931000#attribute]] ''('' [[__BlockElement__|00001012931400]] &hellip; '')'' [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 A block region just treats the block to contain a verse.
-Soft line break are transformed into hard line breaks to save the structure of the verse / poem.
+Soft line breaks are transformed into hard line breaks to save the structure of the verse / poem.
 Attributes may further specify something.
 The inline typically describes author / source of the verse.
 

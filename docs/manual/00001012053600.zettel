@@ -4,14 +4,14 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240620170909
+modified: 20241216104306
 
 The [[endpoint|00001012920000]] to work with parsed metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
 A __parsed__ zettel is basically an [[unevaluated|00001012053500]] zettel: the zettel is read and analyzed, but its content is not __evaluated__.
 By using this endpoint, you are able to retrieve the structure of a zettel before it is evaluated.
 
-For example, to retrieve some data about this zettel you are currently viewing, just send a HTTP GET request to the endpoint ''/z/00001012053600''[^If [[authentication is enabled|00001010040100]], you must include the a valid [[access token|00001012050200]] in the ''Authorization'' header] with the query parameter ''parseonly'' (and other appropriate query parameter).
+For example, to retrieve some data about this zettel you are currently viewing, just send a HTTP GET request to the endpoint ''/z/00001012053600''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header] with the query parameter ''parseonly'' (and other appropriate query parameter).
 For example:
 ```sh
 # curl 'http://127.0.0.1:23123/z/00001012053600?enc=sz&parseonly'

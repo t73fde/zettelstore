@@ -4,12 +4,12 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211230230441
-modified: 20220923104836
+modified: 20241216104624
 
 Zettelstore maintains some internal data to allow faster operations.
 
 One example is the [[content search|00001012051400]] for a term: Zettelstore does not need to scan all zettel to find all occurrences for the term.
-Instead, all word are stored internally, with a list of zettel where they occur.
+Instead, all words are stored internally, with a list of zettel where they occur.
 
 Another example is the way to determine which zettel are stored in a [[ZIP file|00001004011200]].
 Scanning a ZIP file is a lengthy operation, therefore Zettelstore maintains a directory of zettel for each ZIP file.

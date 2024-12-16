@@ -4,9 +4,9 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210726174524
-modified: 20230807170155
+modified: 20241216104120
 
-The [[endpoint|00001012920000]] to work with metadata of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]][^If [[authentication is enabled|00001010040100]], you must include the a valid [[access token|00001012050200]] in the ''Authorization'' header].
+The [[endpoint|00001012920000]] to work with metadata of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]][^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 
 To retrieve the plain metadata of a zettel, use the query parameter ''part=meta''
 

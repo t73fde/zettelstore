@@ -4,10 +4,10 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220912111111
-modified: 20240711161320
+modified: 20241216104329
 precursor: 00001012051200
 
-The [[endpoint|00001012920000]] ''/z'' also allows you to filter the list of all zettel[^If [[authentication is enabled|00001010040100]], you must include the a valid [[access token|00001012050200]] in the ''Authorization'' header] and optionally to provide some actions.
+The [[endpoint|00001012920000]] ''/z'' also allows you to filter the list of all zettel[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header] and optionally to provide some actions.
 
 A [[query|00001007700000]] is an optional [[search expression|00001007700000#search-expression]], together with an optional [[list of actions|00001007700000#action-list]] (described below).
 An empty search expression will select all zettel.

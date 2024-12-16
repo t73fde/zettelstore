@@ -411,11 +411,12 @@ var constZettelMap = map[id.Zid]constZettel{
 		zettel.NewContent(nil)},
 	id.DefaultHomeZid: {
 		constHeader{
-			api.KeyTitle:   "Home",
-			api.KeyRole:    api.ValueRoleZettel,
-			api.KeySyntax:  meta.SyntaxZmk,
-			api.KeyLang:    api.ValueLangEN,
-			api.KeyCreated: "20210210190757",
+			api.KeyTitle:    "Home",
+			api.KeyRole:     api.ValueRoleZettel,
+			api.KeySyntax:   meta.SyntaxZmk,
+			api.KeyLang:     api.ValueLangEN,
+			api.KeyCreated:  "20210210190757",
+			api.KeyModified: "20241216105800",
 		},
 		zettel.NewContent(contentHomeZettel)},
 }
