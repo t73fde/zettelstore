@@ -69,10 +69,12 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			}
 		}
 
+		userLang := wui.getUserLang(ctx)
+
 		var content, endnotes *sx.Pair
 		numEntries := 0
 		if bn, cnt := evaluator.QueryAction(ctx, q, metaSeq); bn != nil {
-			enc := wui.getSimpleHTMLEncoder(wui.rtConfig.Get(ctx, nil, api.KeyLang))
+			enc := wui.getSimpleHTMLEncoder(userLang)
 			content, endnotes, err = enc.BlocksSxn(&ast.BlockSlice{bn})
 			if err != nil {
 				wui.reportError(ctx, w, err)
@@ -81,13 +83,11 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			numEntries = cnt
 		}
 
+		siteName := wui.rtConfig.GetSiteName()
 		user := server.GetUser(ctx)
-		env, rb := wui.createRenderEnv(
-			ctx, "list",
-			wui.rtConfig.Get(ctx, nil, api.KeyLang),
-			wui.rtConfig.GetSiteName(), user)
+		env, rb := wui.createRenderEnv(ctx, "list", userLang, siteName, user)
 		if q == nil {
-			rb.bindString("heading", sx.MakeString(wui.rtConfig.GetSiteName()))
+			rb.bindString("heading", sx.MakeString(siteName))
 		} else {
 			var sb strings.Builder
 			q.PrintHuman(&sb)

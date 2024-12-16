@@ -127,6 +127,13 @@ func New(log *logger.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rtC
 	return wui
 }
 
+func (wui *WebUI) getConfig(ctx context.Context, m *meta.Meta, key string) string {
+	return wui.rtConfig.Get(ctx, m, key)
+}
+func (wui *WebUI) getUserLang(ctx context.Context) string {
+	return wui.getConfig(ctx, nil, api.KeyLang)
+}
+
 var (
 	symDetail     = sx.MakeSymbol("DETAIL")
 	symMetaHeader = sx.MakeSymbol("META-HEADER")

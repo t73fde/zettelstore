@@ -316,9 +316,9 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) (ls
 	return lst
 }
 func (wui *WebUI) calculateFooterSxn(ctx context.Context) *sx.Pair {
-	if footerZid, err := id.Parse(wui.rtConfig.Get(ctx, nil, config.KeyFooterZettel)); err == nil {
+	if footerZid, err := id.Parse(wui.getConfig(ctx, nil, config.KeyFooterZettel)); err == nil {
 		if zn, err2 := wui.evalZettel.Run(ctx, footerZid, ""); err2 == nil {
-			htmlEnc := wui.getSimpleHTMLEncoder(wui.rtConfig.Get(ctx, zn.InhMeta, api.KeyLang)).SetUnique("footer-")
+			htmlEnc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, api.KeyLang)).SetUnique("footer-")
 			if content, endnotes, err3 := htmlEnc.BlocksSxn(&zn.Ast); err3 == nil {
 				if content != nil && endnotes != nil {
 					content.LastPair().SetCdr(sx.Cons(endnotes, nil))

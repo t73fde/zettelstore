@@ -51,7 +51,8 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 			return
 		}
 
-		enc := wui.getSimpleHTMLEncoder(wui.rtConfig.Get(ctx, zn.InhMeta, api.KeyLang))
+		zettelLang := wui.getConfig(ctx, zn.InhMeta, api.KeyLang)
+		enc := wui.getSimpleHTMLEncoder(zettelLang)
 		metaObj := enc.MetaSxn(zn.InhMeta, createEvalMetadataFunc(ctx, evaluate))
 		content, endnotes, err := enc.BlocksSxn(&zn.Ast)
 		if err != nil {
@@ -63,7 +64,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		getTextTitle := wui.makeGetTextTitle(ctx, getZettel)
 
 		title := parser.NormalizedSpacedText(zn.InhMeta.GetTitle())
-		env, rb := wui.createRenderEnv(ctx, "zettel", wui.rtConfig.Get(ctx, zn.InhMeta, api.KeyLang), title, user)
+		env, rb := wui.createRenderEnv(ctx, "zettel", zettelLang, title, user)
 		rb.bindSymbol(symMetaHeader, metaObj)
 		rb.bindString("heading", sx.MakeString(title))
 		if role, found := zn.InhMeta.Get(api.KeyRole); found && role != "" {
@@ -122,7 +123,7 @@ func metaURLAssoc(m *meta.Meta) *sx.Pair {
 func (wui *WebUI) bindLinks(ctx context.Context, rb *renderBinder, varPrefix string, m *meta.Meta, key, configKey string, getTextTitle getTextTitleFunc) {
 	varLinks := varPrefix + "-links"
 	var symOpen *sx.Symbol
-	switch wui.rtConfig.Get(ctx, m, configKey) {
+	switch wui.getConfig(ctx, m, configKey) {
 	case "false":
 		rb.bindString(varLinks, sx.Nil())
 		return

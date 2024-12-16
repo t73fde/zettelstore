@@ -59,7 +59,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 			return
 		}
 
-		enc := wui.getSimpleHTMLEncoder(wui.rtConfig.Get(ctx, zn.InhMeta, api.KeyLang))
+		enc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, api.KeyLang))
 		getTextTitle := wui.makeGetTextTitle(ctx, ucGetZettel)
 		evalMeta := func(val string) ast.InlineSlice {
 			return ucEvaluate.RunMetadata(ctx, val)
@@ -97,7 +97,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		shadowLinks := getShadowLinks(ctx, zid, ucGetAllZettel)
 
 		user := server.GetUser(ctx)
-		env, rb := wui.createRenderEnv(ctx, "info", wui.rtConfig.Get(ctx, nil, api.KeyLang), title, user)
+		env, rb := wui.createRenderEnv(ctx, "info", wui.getUserLang(ctx), title, user)
 		rb.bindString("metadata", metadata)
 		rb.bindString("local-links", locLinks)
 		rb.bindString("query-links", queryLinks)

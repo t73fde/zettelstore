@@ -109,7 +109,7 @@ func (wui *WebUI) renderZettelForm(
 		sb.WriteString(p.Value)
 		sb.WriteByte('\n')
 	}
-	env, rb := wui.createRenderEnv(ctx, "form", wui.rtConfig.Get(ctx, nil, api.KeyLang), title, user)
+	env, rb := wui.createRenderEnv(ctx, "form", wui.getUserLang(ctx), title, user)
 	rb.bindString("heading", sx.MakeString(title))
 	rb.bindString("form-action-url", sx.MakeString(formActionURL))
 	rb.bindString("role-data", makeStringList(roleData))

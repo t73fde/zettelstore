@@ -38,7 +38,7 @@ func (wui *WebUI) MakeGetRootHandler(s getRootPort) http.Handler {
 			wui.reportError(ctx, w, adapter.ErrResourceNotFound{Path: p})
 			return
 		}
-		homeZid, _ := id.Parse(wui.rtConfig.Get(ctx, nil, config.KeyHomeZettel))
+		homeZid, _ := id.Parse(wui.getConfig(ctx, nil, config.KeyHomeZettel))
 		apiHomeZid := homeZid.ZettelID()
 		if homeZid != id.DefaultHomeZid {
 			if _, err := s.GetZettel(ctx, homeZid); err == nil {
