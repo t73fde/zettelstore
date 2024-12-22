@@ -124,7 +124,12 @@ func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, 
 		if err != nil {
 			continue
 		}
-		for _, ref := range collect.Order(zn) {
+		for _, ln := range collect.Order(zn) {
+			ref := ln.Ref
+			if !ref.IsZettel() {
+				continue
+			}
+
 			if collectedZid, err2 := id.Parse(ref.URL.Path); err2 == nil {
 				if z, err3 := uc.port.GetZettel(ctx, collectedZid); err3 == nil {
 					result = append(result, z.Meta)

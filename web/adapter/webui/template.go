@@ -294,9 +294,13 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) (ls
 	if err != nil {
 		return nil
 	}
-	refs := collect.Order(parser.ParseZettel(ctx, menu, "", wui.rtConfig))
-	for i := len(refs) - 1; i >= 0; i-- {
-		zid, err2 := id.Parse(refs[i].URL.Path)
+	links := collect.Order(parser.ParseZettel(ctx, menu, "", wui.rtConfig))
+	for i := len(links) - 1; i >= 0; i-- {
+		ref := links[i].Ref
+		if !ref.IsZettel() {
+			continue
+		}
+		zid, err2 := id.Parse(ref.URL.Path)
 		if err2 != nil {
 			continue
 		}

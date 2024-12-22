@@ -16,8 +16,8 @@ package collect
 
 import "zettelstore.de/z/ast"
 
-// Order of internal reference within the given zettel.
-func Order(zn *ast.ZettelNode) (result []*ast.Reference) {
+// Order of internal links within the given zettel.
+func Order(zn *ast.ZettelNode) (result []*ast.LinkNode) {
 	for _, bn := range zn.Ast {
 		ln, ok := bn.(*ast.NestedListNode)
 		if !ok {
@@ -26,8 +26,8 @@ func Order(zn *ast.ZettelNode) (result []*ast.Reference) {
 		switch ln.Kind {
 		case ast.NestedListOrdered, ast.NestedListUnordered:
 			for _, is := range ln.Items {
-				if ref := firstItemZettelReference(is); ref != nil {
-					result = append(result, ref)
+				if ln := firstItemZettelLink(is); ln != nil {
+					result = append(result, ln)
 				}
 			}
 		}
@@ -35,36 +35,33 @@ func Order(zn *ast.ZettelNode) (result []*ast.Reference) {
 	return result
 }
 
-func firstItemZettelReference(is ast.ItemSlice) *ast.Reference {
+func firstItemZettelLink(is ast.ItemSlice) *ast.LinkNode {
 	for _, in := range is {
 		if pn, ok := in.(*ast.ParaNode); ok {
-			if ref := firstInlineZettelReference(pn.Inlines); ref != nil {
-				return ref
+			if ln := firstInlineZettelLink(pn.Inlines); ln != nil {
+				return ln
 			}
 		}
 	}
 	return nil
 }
 
-func firstInlineZettelReference(is ast.InlineSlice) (result *ast.Reference) {
+func firstInlineZettelLink(is ast.InlineSlice) (result *ast.LinkNode) {
 	for _, inl := range is {
 		switch in := inl.(type) {
 		case *ast.LinkNode:
-			if ref := in.Ref; ref.IsZettel() {
-				return ref
-			}
-			result = firstInlineZettelReference(in.Inlines)
+			return in
 		case *ast.EmbedRefNode:
-			result = firstInlineZettelReference(in.Inlines)
+			result = firstInlineZettelLink(in.Inlines)
 		case *ast.EmbedBLOBNode:
-			result = firstInlineZettelReference(in.Inlines)
+			result = firstInlineZettelLink(in.Inlines)
 		case *ast.CiteNode:
-			result = firstInlineZettelReference(in.Inlines)
+			result = firstInlineZettelLink(in.Inlines)
 		case *ast.FootnoteNode:
 			// Ignore references in footnotes
 			continue
 		case *ast.FormatNode:
-			result = firstInlineZettelReference(in.Inlines)
+			result = firstInlineZettelLink(in.Inlines)
 		default:
 			continue
 		}
