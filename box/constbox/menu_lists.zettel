@@ -1,0 +1,7 @@
+This zettel lists all entries of the ""Lists"" menu.
+
+* [[List Zettel|query:]]
+* [[List Roles|query:|role]]
+* [[List Tags|query:|tags]]
+
+An additional ""Refresh"" menu item is automatically added if appropriate.

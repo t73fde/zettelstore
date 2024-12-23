@@ -303,6 +303,16 @@ var constZettelMap = map[id.Zid]constZettel{
 			api.KeyVisibility: api.ValueVisibilityPublic,
 		},
 		zettel.NewContent(contentEmoji)},
+	id.TOCListsMenuZid: {
+		constHeader{
+			api.KeyTitle:      "Lists Menu",
+			api.KeyRole:       api.ValueRoleConfiguration,
+			api.KeySyntax:     meta.SyntaxZmk,
+			api.KeyLang:       api.ValueLangEN,
+			api.KeyCreated:    "20241223205400",
+			api.KeyVisibility: api.ValueVisibilityCreator,
+		},
+		zettel.NewContent(contentMenuListsZettel)},
 	id.TOCNewTemplateZid: {
 		constHeader{
 			api.KeyTitle:      "New Menu",
@@ -313,7 +323,7 @@ var constZettelMap = map[id.Zid]constZettel{
 			api.KeyModified:   "20231129111800",
 			api.KeyVisibility: api.ValueVisibilityCreator,
 		},
-		zettel.NewContent(contentNewTOCZettel)},
+		zettel.NewContent(contentMenuNewZettel)},
 	id.MustParse(api.ZidTemplateNewZettel): {
 		constHeader{
 			api.KeyTitle:                 "New Zettel",
@@ -469,8 +479,11 @@ var contentBaseCSS []byte
 //go:embed emoji_spin.gif
 var contentEmoji []byte
 
-//go:embed newtoc.zettel
-var contentNewTOCZettel []byte
+//go:embed menu_lists.zettel
+var contentMenuListsZettel []byte
+
+//go:embed menu_new.zettel
+var contentMenuNewZettel []byte
 
 //go:embed rolezettel.zettel
 var contentRoleZettel []byte

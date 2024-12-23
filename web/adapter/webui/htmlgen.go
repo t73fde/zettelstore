@@ -122,11 +122,14 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 		if err != nil {
 			return obj
 		}
-		q := ur.Query().Get(api.QueryKeyQuery)
-		if q == "" {
+		urlQuery := ur.Query()
+		if !urlQuery.Has(api.QueryKeyQuery) {
 			return obj
 		}
-		u := builder.NewURLBuilder('h').AppendQuery(q)
+		u := builder.NewURLBuilder('h')
+		if q := urlQuery.Get(api.QueryKeyQuery); q != "" {
+			u = u.AppendQuery(q)
+		}
 		assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
 		return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
 	})
