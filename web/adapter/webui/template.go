@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxbuiltins"
@@ -295,8 +296,8 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) (ls
 		return nil
 	}
 	links := collect.Order(parser.ParseZettel(ctx, menu, "", wui.rtConfig))
-	for i := len(links) - 1; i >= 0; i-- {
-		ref := links[i].Ref
+	for _, ln := range slices.Backward(links) {
+		ref := ln.Ref
 		if !ref.IsZettel() {
 			continue
 		}
@@ -319,6 +320,7 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) (ls
 	}
 	return lst
 }
+
 func (wui *WebUI) calculateFooterSxn(ctx context.Context) *sx.Pair {
 	if footerZid, err := id.Parse(wui.getConfig(ctx, nil, config.KeyFooterZettel)); err == nil {
 		if zn, err2 := wui.evalZettel.Run(ctx, footerZid, ""); err2 == nil {
