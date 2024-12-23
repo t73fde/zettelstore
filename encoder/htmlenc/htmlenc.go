@@ -109,7 +109,7 @@ func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder
 
 	doc := sx.MakeList(
 		sxhtml.SymDoctype,
-		sx.MakeList(shtml.SymHtml, head.List(), body.List()),
+		sx.MakeList(shtml.SymHTML, head.List(), body.List()),
 	)
 
 	gen := sxhtml.NewGenerator().SetNewline()
