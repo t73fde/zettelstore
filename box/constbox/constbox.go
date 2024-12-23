@@ -310,7 +310,7 @@ var constZettelMap = map[id.Zid]constZettel{
 			api.KeySyntax:     meta.SyntaxZmk,
 			api.KeyLang:       api.ValueLangEN,
 			api.KeyCreated:    "20241223205400",
-			api.KeyVisibility: api.ValueVisibilityCreator,
+			api.KeyVisibility: api.ValueVisibilityPublic,
 		},
 		zettel.NewContent(contentMenuListsZettel)},
 	id.TOCNewTemplateZid: {

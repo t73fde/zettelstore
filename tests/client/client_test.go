@@ -59,7 +59,7 @@ func TestListZettel(t *testing.T) {
 		writerZettel     = ownerZettel - 25
 		readerZettel     = ownerZettel - 25
 		creatorZettel    = 11
-		publicZettel     = 5
+		publicZettel     = 6
 	)
 
 	testdata := []struct {
@@ -419,7 +419,7 @@ func TestRoleZettel(t *testing.T) {
 func TestRedirect(t *testing.T) {
 	t.Parallel()
 	c := getClient()
-	search := api.OrderDirective + " " + api.ReverseDirective + " " + api.KeyID + api.ActionSeparator + api.RedirectAction
+	search := "emoji" + api.ActionSeparator + api.RedirectAction
 	ub := c.NewURLBuilder('z').AppendQuery(search)
 	respRedirect, err := http.Get(ub.String())
 	if err != nil {
