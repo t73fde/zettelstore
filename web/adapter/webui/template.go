@@ -181,7 +181,7 @@ func (wui *WebUI) createRenderEnv(ctx context.Context, name, lang, title string,
 	rb.bindString("user-ident", sx.MakeString(userIdent))
 	rb.bindString("login-url", sx.MakeString(wui.loginURL))
 	rb.bindString("logout-url", sx.MakeString(wui.logoutURL))
-	rb.bindString("list-urls", wui.buildListsMenuSxn(ctx))
+	rb.bindString("list-urls", wui.buildListsMenuSxn(ctx, lang))
 	if wui.canRefresh(user) {
 		rb.bindString("refresh-url", sx.MakeString(wui.refreshURL))
 	}
@@ -283,13 +283,13 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	rb.bindString("metapairs", metaPairs.List())
 }
 
-func (wui *WebUI) buildListsMenuSxn(ctx context.Context) *sx.Pair {
+func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {
 	ctx = box.NoEnrichContext(ctx)
 	ztl, err := wui.box.GetZettel(ctx, id.TOCListsMenuZid)
 	if err != nil {
 		return nil
 	}
-	htmlgen := wui.getSimpleHTMLEncoder("")
+	htmlgen := wui.getSimpleHTMLEncoder(lang)
 	var lb sx.ListBuilder
 	for _, ln := range collect.Order(parser.ParseZettel(ctx, ztl, "", wui.rtConfig)) {
 		lb.Add(htmlgen.nodeSxHTML(ln))
