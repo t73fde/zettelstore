@@ -57,9 +57,6 @@ type WebUI struct {
 	cssBaseURL    string
 	cssUserURL    string
 	homeURL       string
-	listZettelURL string
-	listRolesURL  string
-	listTagsURL   string
 	refreshURL    string
 	withAuth      bool
 	loginURL      string
@@ -108,9 +105,6 @@ func New(log *logger.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rtC
 		cssBaseURL:    ab.NewURLBuilder('z').SetZid(api.ZidBaseCSS).String(),
 		cssUserURL:    ab.NewURLBuilder('z').SetZid(api.ZidUserCSS).String(),
 		homeURL:       ab.NewURLBuilder('/').String(),
-		listZettelURL: ab.NewURLBuilder('h').String(),
-		listRolesURL:  ab.NewURLBuilder('h').AppendQuery(api.ActionSeparator + api.KeyRole).String(),
-		listTagsURL:   ab.NewURLBuilder('h').AppendQuery(api.ActionSeparator + api.KeyTags).String(),
 		refreshURL:    ab.NewURLBuilder('g').AppendKVQuery("_c", "r").String(),
 		withAuth:      authz.WithAuth(),
 		loginURL:      loginoutBase.String(),

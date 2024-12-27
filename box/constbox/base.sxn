@@ -40,9 +40,7 @@
     (div (@ (class "zs-dropdown"))
       (button "Lists")
       (nav (@ (class "zs-dropdown-content"))
-        (a (@ (href ,list-zettel-url)) "List Zettel")
-        (a (@ (href ,list-roles-url)) "List Roles")
-        (a (@ (href ,list-tags-url)) "List Tags")
+        ,@list-urls
         ,@(if (bound? 'refresh-url) `((a (@ (href ,refresh-url)) "Refresh")))
     ))
     ,@(if new-zettel-links

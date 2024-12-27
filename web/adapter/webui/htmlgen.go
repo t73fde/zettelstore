@@ -286,9 +286,13 @@ func (g *htmlGenerator) InlinesSxHTML(is *ast.InlineSlice) *sx.Pair {
 	if is == nil || len(*is) == 0 {
 		return nil
 	}
-	sx := g.tx.GetSz(is)
+	return g.nodeSxHTML(is)
+}
+
+func (g *htmlGenerator) nodeSxHTML(node ast.Node) *sx.Pair {
+	sz := g.tx.GetSz(node)
 	env := shtml.MakeEnvironment(g.lang)
-	sh, err := g.th.Evaluate(sx, &env)
+	sh, err := g.th.Evaluate(sz, &env)
 	if err != nil {
 		return nil
 	}
