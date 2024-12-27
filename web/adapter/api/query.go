@@ -228,21 +228,22 @@ func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error 
 	return err
 }
 func (dze *dataZettelEncoder) writeArrangement(w io.Writer, act string, arr meta.Arrangement) error {
-	result := sx.Nil()
+	var lb sx.ListBuilder
+	lb.Add(sx.SymbolList)
 	for aggKey, metaList := range arr {
-		sxMeta := sx.Nil()
-		for i := len(metaList) - 1; i >= 0; i-- {
-			sxMeta = sxMeta.Cons(sx.Int64(metaList[i].Zid))
+		var lbMeta sx.ListBuilder
+		lbMeta.Add(sx.MakeString(aggKey))
+		for _, m := range metaList {
+			lbMeta.Add(sx.Int64(m.Zid))
 		}
-		sxMeta = sxMeta.Cons(sx.MakeString(aggKey))
-		result = result.Cons(sxMeta)
+		lb.Add(lbMeta.List())
 	}
 	_, err := sx.Print(w, sx.MakeList(
 		sx.MakeSymbol("aggregate"),
 		sx.MakeString(act),
 		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
 		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),
-		result.Cons(sx.SymbolList),
+		lb.List(),
 	))
 	return err
 }

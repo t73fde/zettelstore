@@ -64,12 +64,11 @@ func (wui *WebUI) MakeGetInfoHandler(
 		evalMeta := func(val string) ast.InlineSlice {
 			return ucEvaluate.RunMetadata(ctx, val)
 		}
-		pairs := zn.Meta.ComputedPairs()
-		metadata := sx.Nil()
-		for i := len(pairs) - 1; i >= 0; i-- {
-			key := pairs[i].Key
-			sxval := wui.writeHTMLMetaValue(key, pairs[i].Value, getTextTitle, evalMeta, enc)
-			metadata = metadata.Cons(sx.Cons(sx.MakeString(key), sxval))
+		var lbMetadata sx.ListBuilder
+		for _, pair := range zn.Meta.ComputedPairs() {
+			key := pair.Key
+			sxval := wui.writeHTMLMetaValue(key, pair.Value, getTextTitle, evalMeta, enc)
+			lbMetadata.Add(sx.Cons(sx.MakeString(key), sxval))
 		}
 
 		summary := collect.References(zn)
@@ -98,7 +97,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 
 		user := server.GetUser(ctx)
 		env, rb := wui.createRenderEnv(ctx, "info", wui.getUserLang(ctx), title, user)
-		rb.bindString("metadata", metadata)
+		rb.bindString("metadata", lbMetadata.List())
 		rb.bindString("local-links", locLinks)
 		rb.bindString("query-links", queryLinks)
 		rb.bindString("ext-links", extLinks)
@@ -121,23 +120,23 @@ func (wui *WebUI) MakeGetInfoHandler(
 }
 
 func (wui *WebUI) splitLocSeaExtLinks(links []*ast.Reference) (locLinks, queries, extLinks *sx.Pair) {
-	for i := len(links) - 1; i >= 0; i-- {
-		ref := links[i]
+	var lbLoc, lbQueries, lbExt sx.ListBuilder
+	for _, ref := range links {
 		switch ref.State {
 		case ast.RefStateHosted, ast.RefStateBased: // Local
-			locLinks = locLinks.Cons(sx.MakeString(ref.String()))
+			lbLoc.Add(sx.MakeString(ref.String()))
 
 		case ast.RefStateQuery:
-			queries = queries.Cons(
+			lbQueries.Add(
 				sx.Cons(
 					sx.MakeString(ref.Value),
 					sx.MakeString(wui.NewURLBuilder('h').AppendQuery(ref.Value).String())))
 
 		case ast.RefStateExternal:
-			extLinks = extLinks.Cons(sx.MakeString(ref.String()))
+			lbExt.Add(sx.MakeString(ref.String()))
 		}
 	}
-	return locLinks, queries, extLinks
+	return lbLoc.List(), lbQueries.List(), lbExt.List()
 }
 
 func createUnlinkedQuery(zid id.Zid, phrase string) *query.Query {
@@ -217,13 +216,13 @@ func (wui *WebUI) infoAPIMatrixParsed(zid id.Zid, encTexts []string) *sx.Pair {
 }
 
 func getShadowLinks(ctx context.Context, zid id.Zid, getAllZettel usecase.GetAllZettel) *sx.Pair {
-	result := sx.Nil()
+	var lb sx.ListBuilder
 	if zl, err := getAllZettel.Run(ctx, zid); err == nil {
-		for i := len(zl) - 1; i >= 1; i-- {
-			if boxNo, ok := zl[i].Meta.Get(api.KeyBoxNumber); ok {
-				result = result.Cons(sx.MakeString(boxNo))
+		for _, ztl := range zl {
+			if boxNo, ok := ztl.Meta.Get(api.KeyBoxNumber); ok {
+				lb.Add(sx.MakeString(boxNo))
 			}
 		}
 	}
-	return result
+	return lb.List()
 }

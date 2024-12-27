@@ -449,12 +449,9 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 }
 
 func makeStringList(sl []string) *sx.Pair {
-	if len(sl) == 0 {
-		return nil
+	var lb sx.ListBuilder
+	for _, s := range sl {
+		lb.Add(sx.MakeString(s))
 	}
-	result := sx.Nil()
-	for i := len(sl) - 1; i >= 0; i-- {
-		result = result.Cons(sx.MakeString(sl[i]))
-	}
-	return result
+	return lb.List()
 }

@@ -14,14 +14,15 @@
 package webui
 
 import (
+	"maps"
 	"net/url"
+	"slices"
 	"strings"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
-	"t73f.de/r/zsc/maps"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
 	"zettelstore.de/z/ast"
@@ -245,12 +246,11 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta, evalMeta encoder.EvalMetaFunc) *sx
 		a = a.Set("name", newName)
 		metaMap[newName] = g.th.EvaluateMeta(a)
 	}
-	result := sx.Nil()
-	keys := maps.Keys(metaMap)
-	for i := len(keys) - 1; i >= 0; i-- {
-		result = result.Cons(metaMap[keys[i]])
+	var lb sx.ListBuilder
+	for _, key := range slices.Sorted(maps.Keys(metaMap)) {
+		lb.Add(metaMap[key])
 	}
-	return result
+	return lb.List()
 }
 
 func (g *htmlGenerator) transformMetaTags(tags string) *sx.Pair {

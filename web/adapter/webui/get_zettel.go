@@ -147,9 +147,9 @@ func (wui *WebUI) zettelLinksSxn(m *meta.Meta, key string, getTextTitle getTextT
 	return wui.zidLinksSxn(values, getTextTitle)
 }
 
-func (wui *WebUI) zidLinksSxn(values []string, getTextTitle getTextTitleFunc) (lst *sx.Pair) {
-	for i := len(values) - 1; i >= 0; i-- {
-		val := values[i]
+func (wui *WebUI) zidLinksSxn(values []string, getTextTitle getTextTitleFunc) *sx.Pair {
+	var lb sx.ListBuilder
+	for _, val := range values {
 		zid, err := id.Parse(val)
 		if err != nil {
 			continue
@@ -157,11 +157,11 @@ func (wui *WebUI) zidLinksSxn(values []string, getTextTitle getTextTitleFunc) (l
 		if title, found := getTextTitle(zid); found > 0 {
 			url := sx.MakeString(wui.NewURLBuilder('h').SetZid(zid.ZettelID()).String())
 			if title == "" {
-				lst = lst.Cons(sx.Cons(sx.MakeString(val), url))
+				lb.Add(sx.Cons(sx.MakeString(val), url))
 			} else {
-				lst = lst.Cons(sx.Cons(sx.MakeString(title), url))
+				lb.Add(sx.Cons(sx.MakeString(title), url))
 			}
 		}
 	}
-	return lst
+	return lb.List()
 }
