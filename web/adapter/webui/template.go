@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"slices"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxbuiltins"
@@ -286,7 +285,7 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	rb.bindString("metapairs", metaPairs.List())
 }
 
-func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) (lst *sx.Pair) {
+func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) *sx.Pair {
 	if !wui.canCreate(ctx, user) {
 		return nil
 	}
@@ -295,8 +294,8 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) (ls
 	if err != nil {
 		return nil
 	}
-	links := collect.Order(parser.ParseZettel(ctx, menu, "", wui.rtConfig))
-	for _, ln := range slices.Backward(links) {
+	var lb sx.ListBuilder
+	for _, ln := range collect.Order(parser.ParseZettel(ctx, menu, "", wui.rtConfig)) {
 		ref := ln.Ref
 		if !ref.IsZettel() {
 			continue
@@ -316,9 +315,9 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) (ls
 		link := sx.MakeString(wui.NewURLBuilder('c').SetZid(zid.ZettelID()).
 			AppendKVQuery(queryKeyAction, valueActionNew).String())
 
-		lst = lst.Cons(sx.Cons(text, link))
+		lb.Add(sx.Cons(text, link))
 	}
-	return lst
+	return lb.List()
 }
 
 func (wui *WebUI) calculateFooterSxn(ctx context.Context) *sx.Pair {
