@@ -77,11 +77,13 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		rb.bindString("predecessor-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPredecessor, getTextTitle))
 		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPrecursor, getTextTitle))
 		rb.bindString("prequel-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPrequel, getTextTitle))
+		rb.bindString("superior-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeySuperior, getTextTitle))
 		rb.bindString("urls", metaURLAssoc(zn.InhMeta))
 		rb.bindString("content", content)
 		rb.bindString("endnotes", endnotes)
 		wui.bindLinks(ctx, &rb, "folge", zn.InhMeta, api.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, api.KeySequel, config.KeyShowSequelLinks, getTextTitle)
+		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, api.KeySubordinates, config.KeyShowSubordinateLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, api.KeyBack, config.KeyShowBackLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, api.KeySuccessors, config.KeyShowSuccessorLinks, getTextTitle)
 		if role, found := zn.InhMeta.Get(api.KeyRole); found && role != "" {

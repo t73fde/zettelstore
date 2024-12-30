@@ -24,6 +24,7 @@
       ")"
       ,@(if tag-refs `((@H " &#183; ") ,@tag-refs))
       ,@(ROLE-DEFAULT-actions (current-binding))
+      ,@(if superior-refs `((br) "Superior: " ,superior-refs))
       ,@(if predecessor-refs `((br) "Predecessor: " ,predecessor-refs))
       ,@(if precursor-refs `((br) "Precursor: " ,precursor-refs))
       ,@(if prequel-refs `((br) "Prequel: " ,prequel-refs))
@@ -32,12 +33,13 @@
   )
   ,@content
   ,endnotes
-  ,@(if (or folge-links sequel-links back-links successor-links)
+  ,@(if (or folge-links sequel-links back-links successor-links subordinate-links)
     `((nav
-      ,@(if folge-links `((details (@ (,folge-open)) (summary "Folgezettel") (ul ,@(map wui-item-link folge-links)))))
+      ,@(if subordinate-links `((details (@ (,subordinate-open)) (summary "Subordinates") (ul ,@(map wui-item-link subordinate-links)))))
       ,@(if sequel-links `((details (@ (,sequel-open)) (summary "Sequel") (ul ,@(map wui-item-link sequel-links)))))
-      ,@(if back-links `((details (@ (,back-open)) (summary "Incoming") (ul ,@(map wui-item-link back-links)))))
+      ,@(if folge-links `((details (@ (,folge-open)) (summary "Folgezettel") (ul ,@(map wui-item-link folge-links)))))
       ,@(if successor-links `((details (@ (,successor-open)) (summary "Successors") (ul ,@(map wui-item-link successor-links)))))
+      ,@(if back-links `((details (@ (,back-open)) (summary "Incoming") (ul ,@(map wui-item-link back-links)))))
      ))
   )
 )

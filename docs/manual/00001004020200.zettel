@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20221205155521
-modified: 20241118175124
+modified: 20241230211553
 
 Some metadata of the [[runtime configuration|00001004020000]] may be overwritten in an [[user zettel|00001010040200]].
 A subset of those may be overwritten in zettel that is currently used.
@@ -19,4 +19,5 @@ The following metadata keys are supported to provide a more specific behavior:
 |[[''show-back-links''|00001004020000#show-back-links]]|Y|Y|
 |[[''show-folge-links''|00001004020000#show-folge-links]]|Y|Y|
 |[[''show-sequel-links''|00001004020000#show-sequel-links]]|Y|Y|
+|[[''show-subordinate-links''|00001004020000#show-subordinate-links]]|Y|Y|
 |[[''show-successor-links''|00001004020000#show-successor-links]]|Y|Y|
