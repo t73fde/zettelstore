@@ -4,7 +4,7 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102174000
+modified: 20250102221851
 
 This sub-command is used to create a hashed password for users to be authenticated.
 
@@ -18,7 +18,7 @@ zettelstore password IDENT ZETTEL-ID
 ``IDENT`` is the identification for the user that should be authenticated.
 ``ZETTEL-ID`` is the [[identifier of the zettel|00001006050000]] that later acts as a user zettel.
 
-See [[Creating an user zettel|00001010040200]] for some background information.
+See [[Creating a user zettel|00001010040200]] for some background information.
 
 An example:
 

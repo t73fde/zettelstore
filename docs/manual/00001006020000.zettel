@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102205333
+modified: 20250102222212
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -141,7 +141,7 @@ Most keys conform to a [[type|00001006030000]].
 : Specifies the title of the zettel.
   If not given, the value of [[''id''|#id]] will be used.
 ; [!url|''url'']
-: Defines an URL / URI for this zettel that possibly references external material.
+: Defines a URL / URI for this zettel that possibly references external material.
   One use case is to specify the document that the current zettel comments on.
   The URL will be rendered special in the [[web user interface|00001014000000]] if you use the default template.
 ; [!useless-files|''useless-files'']

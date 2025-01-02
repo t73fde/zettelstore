@@ -4,10 +4,10 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102213001
+modified: 20250102221633
 
 === ``zettelstore run-simple``
-This sub-command is implicitly called, when an user starts Zettelstore by double-clicking on its GUI icon.
+This sub-command is implicitly called, when a user starts Zettelstore by double-clicking on its GUI icon.
 It is a simplified variant of the [[''run'' sub-command|00001004051000]].
 
 First, this sub-command checks if it can read a [[Zettelstore startup configuration|00001004010000]] file by trying the [[default values|00001004051000#c]].

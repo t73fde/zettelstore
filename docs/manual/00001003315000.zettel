@@ -4,7 +4,7 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20220114181521
-modified: 20220307104944
+modified: 20250102221716
 
 Since there is no such thing as the one Linux, there are too many different ways to automatically start Zettelstore.
 
@@ -19,7 +19,7 @@ Since there is no such thing as the one Linux, there are too many different ways
 If you use a different desktop environment, it often helps to to provide its name and the string ""autostart"" to google for it with the search engine of your choice.
 
 Yet another way is to make use of the middleware that is provided.
-Many Linux distributions make use of [[systemd|https://systemd.io/]], which allows to start processes on behalf of an user.
+Many Linux distributions make use of [[systemd|https://systemd.io/]], which allows to start processes on behalf of a user.
 On the command line, adapt the following script to your own needs and execute it:
 ```
 # mkdir -p "$HOME/.config/systemd/user"

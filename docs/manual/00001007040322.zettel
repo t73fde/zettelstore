@@ -4,9 +4,9 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210811154251
-modified: 20241202101206
+modified: 20250102222115
 
-Image content is assumed, if an URL is used or if the referenced zettel contains an image.
+Image content is assumed, if a URL is used or if the referenced zettel contains an image.
 
 Supported formats are:
 

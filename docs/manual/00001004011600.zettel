@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20220307112918
-modified: 20220307122554
+modified: 20250102222236
 
 Under most circumstances, it is preferable to further configure a memory box.
 This is done by appending query parameters after the base box URI ''mem:''.
@@ -17,7 +17,7 @@ The following parameters are supported:
 
 The default values are somehow arbitrarily, but applicable for many use cases.
 
-While the number of zettel should be easily calculable by an user, the number of bytes might be a little more difficult.
+While the number of zettel should be easily calculable by a user, the number of bytes might be a little more difficult.
 
 Metadata consumes 6 bytes for the zettel identifier and for each metadata value one byte for the separator, plus the length of key and data.
 Then size of the content is its size in bytes.

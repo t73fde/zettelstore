@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161845
-modified: 20241216104906
+modified: 20250102221540
 
 === ''TEXT''
 :::syntax
@@ -191,7 +191,7 @@ The string contains text that should be treated as HTML code.
 :::syntax
 __InputLiteral__ **=** ''(LITERAL-INPUT'' [[__Attributes__|00001012931000#attribute]] String '')''.
 :::
-The string contains text that should be treated as input entered by an user.
+The string contains text that should be treated as input entered by a user.
 
 :::syntax
 __MathLiteral__ **=** ''(LITERAL-MATH'' [[__Attributes__|00001012931000#attribute]] String '')''.
@@ -201,7 +201,7 @@ The string contains text that should be treated as special code to be interprete
 :::syntax
 __OutputLiteral__ **=** ''(LITERAL-OUTPUT'' [[__Attributes__|00001012931000#attribute]] String '')''.
 :::
-The string contains text that should be treated as computer output to be read by an user.
+The string contains text that should be treated as computer output to be read by a user.
 
 :::syntax
 __ZettelLiteral__ **=** ''(LITERAL-ZETTEL'' [[__Attributes__|00001012931000#attribute]] String '')''.

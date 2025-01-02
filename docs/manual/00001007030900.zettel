@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20230807170858
+modified: 20250102222357
 
 Comment blocks are quite similar to [[verbatim blocks|00001007030500]]: both are used to enter text that should not be interpreted.
 While the text entered inside a verbatim block will be processed somehow, text inside a comment block will be ignored[^Well, not completely ignored: text is read, but it will typically not rendered visible.].
@@ -34,4 +34,4 @@ will be completely ignored, while
 Will be rendered
 %%%
 ```
-will be rendered as some kind of comment[^This cannot be shown here, because a HTML comment will not be rendered visible; it will be in the HTML text.].
+will be rendered as some kind of comment[^This cannot be shown here, because an HTML comment will not be rendered visible; it will be in the HTML text.].

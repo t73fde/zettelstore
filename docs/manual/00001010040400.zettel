@@ -4,9 +4,9 @@ role: manual
 tags: #authentication #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20211127174943
+modified: 20250102222012
 
-When someone tries to authenticate itself with an user identifier / ""user name"" and a password, the following process is executed:
+When someone tries to authenticate itself with a user identifier / ""user name"" and a password, the following process is executed:
 
 # If meta key ''owner'' of the configuration zettel does not have a valid [[zettel identifier|00001006050000]] as value, authentication fails.
 # Retrieve all zettel, where the meta key ''user-id'' has the same value as the given user identification. If the list is empty, authentication fails.

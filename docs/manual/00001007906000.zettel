@@ -4,7 +4,7 @@ role: manual
 tags: #manual #tutorial #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220811115501
-modified: 20220926183427
+modified: 20250102221931
 
 After you have [[learned|00001007903000]] the basic concepts and markup of Zettelmarkup (paragraphs, emphasized text, and lists), this zettel introduces you into the concepts of links, thematic breaks, and headings.
 
@@ -20,7 +20,7 @@ A connection can be specified within a paragraph via [[Links|00001007040310]].
   This is done by prepending the description before the reference and use the vertical bar character to separate both: ''[[First Steps|00001007903000]]''.
 
 You are not restricted to reference your zettel.
-Alternatively, you might specify an URL of an external website: ''[[Zettelstore|https://zettelstore.de]]''.
+Alternatively, you might specify a URL of an external website: ''[[Zettelstore|https://zettelstore.de]]''.
 Of course, if you just want to specify the URL, you are allowed to omit the description: ''[[https://zettelstore.de]]''
 
 |= Zettelmarkup | Rendered output | Remark
