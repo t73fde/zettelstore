@@ -4,18 +4,18 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20220803170112
-modified: 20241216105111
+modified: 20250102190553
 
 === Welcome Zettel
 * **Problem:** You want to put your Zettelstore into the public and need a starting zettel for your users.
   In addition, you still want a ""home zettel"", with all your references to internal, non-public zettel.
-  Zettelstore only allows to specify one [[''home-zettel''|00001004020000#home-zettel]].
+  Zettelstore only allows specifying one [[''home-zettel''|00001004020000#home-zettel]].
 * **Solution 1:**
 *# Create a new zettel with all your references to internal, non-public zettel.
    Let's assume this zettel receives the zettel identifier ''20220803182600''.
 *# Create the zettel that should serve as the starting zettel for your users.
    It must have syntax [[Zettelmarkup|00001008000000#zmk]], i.e. the syntax metadata must be set to ''zmk''.
-   If needed, set the runtime configuration [[''home-zettel|00001004020000#home-zettel]] to the value of the identifier of this zettel.
+   If needed, set the runtime configuration [[''home-zettel''|00001004020000#home-zettel]] to the value of the identifier of this zettel.
 *# At the beginning of the start zettel, add the following [[Zettelmarkup|00001007000000]] text in a separate paragraph: ``{{{20220803182600}}}`` (you have to adapt to the actual value of the zettel identifier for your non-public home zettel).
 * **Discussion:** As stated in the description for a [[transclusion|00001007031100]], a transclusion will be ignored, if the transcluded zettel is not visible to the current user.
   In effect, the transclusion statement (above paragraph that contained ''{{{...}}}'') is ignored when rendering the zettel.
@@ -48,16 +48,16 @@ modified: 20241216105111
   For example, if you made zettel with a specific role public visible, the CSS zettel must also have a [[''visibility: public''|00001010070200]] metadata.
 
 === Zettel synchronization with iCloud (Apple)
-* **Problem:** You use Zettelstore on various macOS computers and you want to use the sameset of zettel across all computers.
+* **Problem:** You use Zettelstore on various macOS computers and you want to use the same set of zettel across all computers.
 * **Solution:** Place your zettel in an iCloud folder.
 
-  To configure Zettelstore to use the folder, you must specify its location within you directory structure as [[''box-uri-X''|00001004010000#box-uri-x]] (replace ''X'' with an appropriate number).
+  To configure Zettelstore to use the folder, you must specify its location within your directory structure as [[''box-uri-X''|00001004010000#box-uri-x]] (replace ''X'' with an appropriate number).
   Your iCloud folder is typically placed in the folder ''~/Library/Mobile Documents/com~apple~CloudDocs''.
   The ""''~''"" is a shortcut and specifies your home folder.
 
   Unfortunately, Zettelstore does not yet support this shortcut.
   Therefore you must replace it with the absolute name of your home folder.
-  In addition, a space character is not allowed in an URI.
+  In addition, a space character is not allowed in a URI.
   You have to replace it with the sequence ""''%20''"".
 
   Let us assume, that you stored your zettel box inside the folder ""zettel"", which is located top-level in your iCloud folder.
@@ -69,7 +69,7 @@ modified: 20241216105111
 
   (The ""''\\''"" is needed by the command line processor to mask the following character to be processed in unintended ways.)
 * **Discussion:** Zettel files are synchronized between your computers via iCloud.
-  Is does not matter, if one of your computers is offline or switched off.
+  It does not matter, if one of your computers is offline or switched off.
   iCloud will synchronize the zettel files if it later comes online.
 
   However, if you use more than one computer simultaneously, you must be aware that synchronization takes some time.

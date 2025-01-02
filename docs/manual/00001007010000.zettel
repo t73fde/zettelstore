@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241213101524
+modified: 20250102205927
 
 Any document can be thought as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
 Some of these blocks can contain other blocks, for example lists may contain other lists or paragraphs.
@@ -58,4 +58,4 @@ To summarize:
 * Block elements have a higher priority than inline elements.
 
 These principles makes automatic recognizing zettelmarkup an (relatively) easy task.
-By looking at the reference implementation, a moderately skilled software developer should be able to create a appropriate software in a different programming language.
+By looking at the reference implementation, a moderately skilled software developer should be able to create an appropriate software in a different programming language.

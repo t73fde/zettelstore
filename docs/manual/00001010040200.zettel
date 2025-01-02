@@ -4,9 +4,9 @@ role: manual
 tags: #authentication #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20221205160251
+modified: 20250102172906
 
-All data to be used for authenticating a user is store in a special zettel called ""user zettel"". 
+All data used for authenticating a user is stored in a special zettel called ""user zettel"". 
 A user zettel must have set the following two metadata fields:
 
 ; ''user-id'' (""user identification"")
@@ -28,7 +28,7 @@ A user zettel can only be created by the owner of the Zettelstore.
 The owner should execute the following steps to create a new user zettel:
 
 # Create a new zettel.
-# Save the zettel to get a [[identifier|00001006050000]] for this zettel.
+# Save the zettel to get an [[identifier|00001006050000]] for this zettel.
 # Choose a unique identification for the user.
 #* If the identifier is not unique, authentication will not work for this user.
 # Execute the [[``zettelstore password``|00001004051400]] command.

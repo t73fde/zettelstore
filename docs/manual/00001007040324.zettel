@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210811154251
-modified: 20231222164501
+modified: 20250102183508
 
 Inline-mode transclusion applies to all zettel that are parsed in a non-trivial way, e.g. as structured textual content.
 For example, textual content is assumed if the [[syntax|00001006020000#syntax]] of a zettel is ""zmk"" ([[Zettelmarkup|00001007000000]]), or ""markdown"" / ""md"" ([[Markdown|00001008010000]]).
@@ -18,7 +18,7 @@ Instead an error message replaces the transclude specification.
 
 The result of this (indirect) transclusion is searched for inline-structured elements.
 
-* If only an [[zettel identifier|00001006050000]] was specified, the first top-level [[paragraph|00001007030000#paragraphs]] is used.
+* If only a [[zettel identifier|00001006050000]] was specified, the first top-level [[paragraph|00001007030000#paragraphs]] is used.
   Since a paragraph is basically a sequence of inline-structured elements, these elements will replace the transclude specification.
 
   Example: ``{{00010000000000}}`` (see [[00010000000000]]) is rendered as ::{{00010000000000}}::{=example}.
@@ -33,7 +33,7 @@ The result of this (indirect) transclusion is searched for inline-structured ele
 
    Example: ``{{00001007040322#spin}}`` is rendered as ::{{00001007040322#spin}}::{=example}.
 
-** Just specifying the fragment identifier will reference something in the current page.
+** Just specifying the fragment identifier will reference something on the current page.
    This is not allowed, to prevent a possible endless recursion.
 
 * If the reference is a [[hosted or based|00001007040310#link-specifications]] link / URL to an image, that image will be rendered.
@@ -42,7 +42,7 @@ The result of this (indirect) transclusion is searched for inline-structured ele
 
 If no inline-structured elements are found, the transclude specification is replaced by an error message.
 
-To avoid an exploding ""transclusion bomb"", a form of a [[billion laughs attack|https://en.wikipedia.org/wiki/Billion_laughs_attack]] (also known as ""XML bomb""), the total number of transclusions / expansions is limited.
+To avoid an exploding ""transclusion bomb"", a form of [[billion laughs attack|https://en.wikipedia.org/wiki/Billion_laughs_attack]] (also known as ""XML bomb""), the total number of transclusions / expansions is limited.
 The limit can be controlled by setting the value [[''max-transclusions''|00001004020000#max-transclusions]] of the runtime configuration zettel.
 
 === See also

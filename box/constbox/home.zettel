@@ -1,6 +1,6 @@
 === Thank you for using Zettelstore!
 
-You will find the lastest information about Zettelstore at [[https://zettelstore.de]].
+You will find the latest information about Zettelstore at [[https://zettelstore.de]].
 Check this website regularly for [[updates|https://zettelstore.de/home/doc/trunk/www/download.wiki]] to the latest version.
 You should consult the [[change log|https://zettelstore.de/home/doc/trunk/www/changes.wiki]] before updating.
 Sometimes, you have to edit some of your Zettelstore-related zettel before updating.
@@ -15,15 +15,15 @@ If you have encountered an error, please include the content of the following ze
 * [[Zettelstore Startup Configuration|00000000000096]]
 * [[Zettelstore Runtime Configuration|00000000000100]]
 
-Additionally, you have to describe, what you have done before that error occurs
-and what you have expected instead.
+Additionally, you have to describe, what you did before that error occurs
+and what you expected instead.
 Please do not forget to include the error message, if there is one.
 
 Some of above Zettelstore zettel can only be retrieved if you enabled ""expert mode"".
 Otherwise, only some zettel are linked.
 To enable expert mode, edit the zettel [[Zettelstore Runtime Configuration|00000000000100]]:
 please set the metadata value of the key ''expert-mode'' to true.
-To do you, enter the string ''expert-mode:true'' inside the edit view of the metadata.
+To do so, enter the string ''expert-mode:true'' inside the edit view of the metadata.
 
 === Information about this zettel
 This zettel is your home zettel.

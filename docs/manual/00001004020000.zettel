@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241230211205
+modified: 20250102185826
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -51,7 +51,7 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
 
   Default: ""en"".
 
-  This value is used as a default value, if it is not set in an user's zettel or in a zettel.
+  This value is used as a default value, if it is not set in a user's zettel or in a zettel.
   It is also used to specify the language for all non-zettel content, e.g. lists or search results.
 
   Use values according to the language definition of [[RFC-5646|https://tools.ietf.org/html/rfc5646]].

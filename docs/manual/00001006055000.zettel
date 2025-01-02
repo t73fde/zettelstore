@@ -4,14 +4,14 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210721105704
-modified: 20241202100917
+modified: 20250102170039
 
-[[Zettel identifier|00001006050000]] are typically created by examine the current date and time.
+[[Zettel identifier|00001006050000]] are typically created by examining the current date and time.
 By renaming the name of the underlying zettel file, you are able to provide any sequence of 14 digits.
 
 To make things easier, you must not use zettel identifier that begin with four zeroes (''0000'').
 
-All zettel provided by an empty zettelstore begin with six zeroes[^Exception: the predefined home zettel ''00010000000000''. But you can [[configure|00001004020000#home-zettel]] another zettel with another identifier as the new home zettel.].
+All zettel provided by an empty zettelstore begin with six zeroes[^Exception: the predefined home zettel is ''00010000000000''. But you can [[configure|00001004020000#home-zettel]] another zettel with another identifier as the new home zettel.].
 Zettel identifier of this manual have be chosen to begin with ''000010''.
 
 However, some external applications may need at least one defined zettel identifier to work properly.

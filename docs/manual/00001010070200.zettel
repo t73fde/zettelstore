@@ -4,7 +4,7 @@ role: manual
 tags: #authorization #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220923104643
+modified: 20250102170611
 
 For every zettel you can specify under which condition the zettel is visible to others.
 This is controlled with the metadata key [[''visibility''|00001006020000#visibility]].
@@ -32,7 +32,7 @@ When you install a Zettelstore, only [[some zettel|query:visibility:public]] hav
 One is the zettel that contains [[CSS|00000000020001]] for displaying the [[web user interface|00001014000000]].
 This is to ensure that the web interface looks nice even for not authenticated users.
 Another is the zettel containing the Zettelstore [[license|00000000000004]].
-The [[default image|00000000040001]], used if an image reference is invalid, is also public visible.
+The [[default image|00000000040001]], used if an image reference is invalid, is also publicly visible.
 
 Please note: if [[authentication is not enabled|00001010040100]], every user has the same rights as the owner of a Zettelstore.
 This is also true, if the Zettelstore runs additionally in [[read-only mode|00001004010000#read-only-mode]].

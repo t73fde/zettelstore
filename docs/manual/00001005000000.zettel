@@ -4,15 +4,15 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241213101751
+modified: 20250102191502
 
 Zettelstore is a software that manages your zettel.
-Since every zettel must be readable without any special tool, most zettel has to be stored as ordinary files within specific directories.
-Typically, file names and file content must comply to specific rules so that Zettelstore can manage them.
+Since every zettel must be readable without any special tool, most zettel have to be stored as ordinary files within specific directories.
+Typically, file names and file content must comply with specific rules so that Zettelstore can manage them.
 If you add, delete, or change zettel files with other tools, e.g. a text editor, Zettelstore will monitor these actions.
 
 Zettelstore provides additional services to the user.
-Via the builtin [[web user interface|00001014000000]] you can work with zettel in various ways.
+Via the built-in [[web user interface|00001014000000]] you can work with zettel in various ways.
 For example, you are able to list zettel, to create new zettel, to edit them, or to delete them.
 You can view zettel details and relations between zettel.
 
@@ -41,24 +41,24 @@ These are ignored by Zettelstore.
 Two filename extensions are used by Zettelstore:
 # ''.zettel'' is a format that stores metadata and content together in one file,
 # the empty file extension is used, when the content must be stored in its own file, e.g. image data;
-  in this case, the filename just the 14 digits of the zettel identifier, and optional characters except the period ''"."''.  
+  in this case, the filename contains just the 14 digits of the zettel identifier, and optional characters except the period ''"."''.  
 Other filename extensions are used to determine the ""syntax"" of a zettel.
 This allows to use other content within the Zettelstore, e.g. images or HTML templates.
 
 For example, you want to store an important figure in the Zettelstore that is encoded as a ''.png'' file.
-Since each zettel contains some metadata, e.g. the title of the figure, the question arises where these data should be stores.
+Since each zettel contains some metadata, e.g. the title of the figure, the question arises where these data should be stored.
 The solution is a meta-file with the same zettel identifier, but without a filename extension.
 Zettelstore recognizes this situation and reads in both files for the one zettel containing the figure.
-It maintains this relationship as long as these files exists.
+It maintains this relationship as long as these files exist.
 
 In case of some textual zettel content you do not want to store the metadata and the zettel content in two different files.
-Here the ''.zettel'' extension will signal that the metadata and the zettel content will be put in the same file, separated by an empty line or a line with three dashes (""''-\-\-''"", also known as ""YAML separator"").
+Here the ''.zettel'' extension will signal that the metadata and the zettel content will be stored in the same file, separated by an empty line or a line with three dashes (""''-\-\-''"", also known as ""YAML separator"").
 
 === Predefined zettel
 
 Zettelstore contains some [[predefined zettel|00001005090000]] to work properly.
 The [[configuration zettel|00001004020000]] is one example.
-To render the builtin [[web user interface|00001014000000]], some templates are used, as well as a [[layout specification in CSS|00000000020001]].
+To render the built-in [[web user interface|00001014000000]], some templates are used, as well as a [[layout specification in CSS|00000000020001]].
 The icon that visualizes a broken image is a [[predefined GIF image|00000000040001]].
 All of these are visible to the Zettelstore as zettel.
 
@@ -69,7 +69,7 @@ They are stored within the Zettelstore software itself, because one [[design goa
 But data stored within an executable program cannot be changed later[^Well, it can, but it is a very bad idea to allow this. Mostly for security reasons.].
 
 To allow changing predefined zettel, both the file store and the internal zettel store are internally chained together.
-If you change a zettel, it will be always stored as a file.
+If you change a zettel, it will be stored as a file.
 If a zettel is requested, Zettelstore will first try to read that zettel from a file.
 If such a file was not found, the internal zettel store is searched secondly.
 
@@ -80,7 +80,7 @@ Now we have two places where zettel are stored: in the specific directory and wi
 * [[List of predefined zettel|00001005090000]]
 
 === Boxes: alternative ways to store zettel
-As described above, a zettel may be stored as a file inside a directory or inside the Zettelstore software itself.
+As described above, a zettel may be stored either as a file inside a directory or within the Zettelstore software itself.
 Zettelstore allows other ways to store zettel by providing an abstraction called __box__.[^Formerly, zettel were stored physically in boxes, often made of wood.]
 
 A file directory which stores zettel is called a ""directory box"".

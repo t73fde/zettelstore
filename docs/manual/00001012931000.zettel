@@ -4,13 +4,13 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403153903
-modified: 20240123120319
+modified: 20250102213403
 
 Zettel in a [[Sz encoding|00001012920516]] are represented as a [[symbolic expression|00001012930000]].
 To process these symbolic expressions, you need to know, how a specific part of a zettel is represented by a symbolic expression.
 
 Basically, each part of a zettel is represented as a list, often a nested list.
-The first element of that list is always an unique symbol, which denotes that part.
+The first element of that list is always a unique symbol, which denotes that part.
 The meaning / semantic of all other elements depend on that symbol.
 
 === Zettel

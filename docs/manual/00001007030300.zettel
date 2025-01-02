@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220218133755
+modified: 20250102210039
 
 To specify a (sub-) section of a zettel, you should use the headings syntax: at
 the beginning of a new line type at least three equal signs (""''=''"", U+003D), plus at least one
@@ -30,7 +30,7 @@ This renders in HTML as:
 
 === Notes
 
-The heading level is translated to a HTML heading by adding 1 to the level, e.g. ``=== Level 1 Heading``{=zmk} translates to ==<h2>Level 1 Heading</h2>=={=html}.
+The heading level is translated to an HTML heading by adding 1 to the level, e.g. ``=== Level 1 Heading``{=zmk} translates to ==<h2>Level 1 Heading</h2>=={=html}.
 The ==<h1>=={=html} tag is rendered for the zettel title.
 
 This syntax is often used in a similar way in wiki implementation.

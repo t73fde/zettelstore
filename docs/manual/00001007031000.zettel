@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241212153641
+modified: 20250102210107
 
 Tables are used to show some data in a two-dimensional fashion.
 In zettelmarkup, tables are not specified explicitly, but by entering __table rows__.
@@ -33,7 +33,7 @@ will be rendered in HTML as:
 :::
 
 === Header row
-If any cell in the first row of a table contains an equal sing character (""''=''"", U+003D) as the very first character, then this first row will be interpreted as a __table header__ row.
+If any cell in the first row of a table contains an equal sign character (""''=''"", U+003D) as the very first character, then this first row will be interpreted as a __table header__ row.
 
 For example:
 ```zmk

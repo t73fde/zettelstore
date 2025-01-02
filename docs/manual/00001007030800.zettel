@@ -4,9 +4,9 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220323190829
+modified: 20250102180106
 
-Region blocks does not directly have a visual representation.
+Region blocks do not directly have a visual representation.
 They just group a range of lines.
 You can use region blocks to enter [[attributes|00001007050000]] that apply only to this range of lines.
 One example is to enter a multi-line warning that should be visible.

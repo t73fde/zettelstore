@@ -4,10 +4,10 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220920143243
+modified: 20250102182659
 
-Most characters you type is concerned with inline-structured elements.
-The content of a zettel contains is many cases just ordinary text, lightly formatted.
+Most characters you type are concerned with inline-structured elements.
+The content of a zettel contains in many cases just ordinary text, lightly formatted.
 Inline-structured elements allow to format your text and add some helpful links or images.
 Sometimes, you want to enter characters that have no representation on your keyboard.
 
@@ -17,7 +17,7 @@ Sometimes, you want to enter characters that have no representation on your keyb
   Some of these elements explicitly support [[attributes|00001007050000]].
 
 ; Literal-like formatting
-: Sometime you want to enter the text as it is.
+: Sometimes, you want to enter the text as it is.
 : This is the core motivation of [[literal-like formatting|00001007040200]].
 
 ; Reference-like text
@@ -35,7 +35,7 @@ It ends at the end of the line where it begins.
 
 ==== Backslash
 The backslash character (""''\\''"", U+005C) gives the next character another meaning.
-* If a space character follows, it is converted in a non-breaking space (U+00A0).
+* If a space character follows, it is converted into a non-breaking space (U+00A0).
 * If a line ending follows the backslash character, the line break is converted from a __soft break__ into a __hard break__.
 * Every other character is taken as itself, but without the interpretation of a Zettelmarkup element.
   For example, if you want to enter a ""'']''"" into a [[footnote text|00001007040330]], you should escape it with a backslash.
@@ -45,7 +45,7 @@ Sometimes it is not easy to enter special characters.
 If you know the Unicode code point of that character, or its name according to the [[HTML standard|https://html.spec.whatwg.org/multipage/named-characters.html]], you can enter it by number or by name.
 
 Regardless which method you use, an entity always begins with an ampersand character (""''&''"", U+0026) and ends with a semicolon character (""'';''"", U+003B).
-If you know the HTML name of the character you want to enter, put it between these two character.
+If you know the HTML name of the character you want to enter, put it between these two characters.
 Example: ``&amp;`` is rendered as ::&amp;::{=example}.
 
 If you want to enter its numeric code point, a number sign character must follow the ampersand character, followed by digits to base 10.
@@ -57,7 +57,7 @@ Example: ``&#x26;`` is rendered in HTML as ::&#x26;::{=example}.
 According to the [[HTML Standard|https://html.spec.whatwg.org/multipage/syntax.html#character-references]], some numeric code points are not allowed.
 These are all code point below the numeric value 32 (decimal) or 0x20 (hex) and all code points for [[noncharacter|https://infra.spec.whatwg.org/#noncharacter]] values.
 
-Since some Unicode character are used quite often, a special notation is introduced for them:
+Since some Unicode characters are used quite often, a special notation is introduced for them:
 
 * Two consecutive hyphen-minus characters result in an __en-dash__ character.
   It is typically used in numeric ranges.

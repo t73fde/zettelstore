@@ -4,16 +4,16 @@ role: manual
 tags: #design #goal #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20230624171152
+modified: 20250102191434
 
 Zettelstore supports the following design goals:
 
 ; Longevity of stored notes / zettel
 : Every zettel you create should be readable without the help of any tool, even without Zettelstore.
-: It should be not hard to write other software that works with your zettel.
+: It should not hard to write other software that works with your zettel.
 : Normal zettel should be stored in a single file.
   If this is not possible: at most in two files: one for the metadata, one for the content.
-  The only exception are [[predefined zettel|00001005090000]] stored in the Zettelstore executable.
+  The only exceptions are [[predefined zettel|00001005090000]] stored in the Zettelstore executable.
 : There is no additional database.
 ; Single user
 : All zettel belong to you, only to you.
@@ -28,16 +28,16 @@ Zettelstore supports the following design goals:
 : If you decide to use multiple directories, you are free to configure Zettelstore appropriately.
 ; Multiple modes of operation
 : You can use Zettelstore as a standalone software on your device, but you are not restricted to it.
-: You can install the software on a central server, or you can install it on all your devices with no restrictions how to synchronize your zettel.
+: You can install the software on a central server, or you can install it on all your devices with no restrictions on how to synchronize your zettel.
 ; Multiple user interfaces
 : Zettelstore provides a default [[web-based user interface|00001014000000]].
-  Anybody can provide alternative user interfaces, e.g. for special purposes.
+  Anyone can provide alternative user interfaces, e.g. for special purposes.
 ; Simple service
 : The purpose of Zettelstore is to safely store your zettel and to provide some initial relations between them.
 : External software can be written to deeply analyze your zettel and the structures they form.
 ; Security by default
 : Without any customization, Zettelstore provides its services in a safe and secure manner and does not expose you (or other users) to security risks.
-: If you know what use are doing, Zettelstore allows you to relax some security-related preferences.
+: If you know what you are doing, Zettelstore allows you to relax some security-related preferences.
   However, even in this case, the more secure way is chosen.
 : The Zettelstore software uses a minimal design and uses other software dependencies only is essential needed.
 : There will be no plugin mechanism, which allows external software to control the inner workings of the Zettelstore software.

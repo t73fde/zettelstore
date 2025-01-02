@@ -4,13 +4,13 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210810155955
-modified: 20220218133447
+modified: 20250102210258
 
 A citation key references some external material that is part of a bibliographical collection.
 
 Currently, Zettelstore implements this only partially, it is ""work in progress"".
 
-However, the syntax is: beginning with a left square bracket and followed by an at sign character (""''@''"", U+0040), a the citation key is given.
+However, the syntax is: beginning with a left square bracket and followed by an at sign character (""''@''"", U+0040), the citation key is given.
 The key is typically a sequence of letters and digits.
 If a comma character (""'',''"", U+002C) or a vertical bar character is given, the following is interpreted as [[inline elements|00001007040000]].
 A right square bracket ends the text and the citation key element.

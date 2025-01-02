@@ -89,7 +89,7 @@
      (minor: webui)
   *  Add expert-mode zettel &ldquo;Zettelstore Identifier Mapping&rdquo; to
      show a possible mapping from the old identifier format to the new one.
-     This should help users to possibly rename some zettel for a metter
+     This should help users to possibly rename some zettel for a better
      mapping.
      (minor: webui)
   *  Add metadata key <code>created-missing</code> to list zettel without

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20230612183900
+modified: 20250102220057
 
 Values of this type denote a numeric integer value.
 
@@ -14,7 +14,7 @@ Must be a sequence of digits (""0""--""9""), optionally prefixed with a ""-"" or
 === Query comparison
 [[Search operators|00001007705000]] for equality (""equal"" or ""not equal"", ""has"" or ""not has""), for lesser values (""less"" or ""not less""), or for greater values (""greater"" or ""not greater"") are executed by converting both the [[search value|00001007706000]] and the metadata value into integer values and then comparing them numerically.
 Integer values must be in the range -9223372036854775808 &hellip; 9223372036854775807.
-Comparisons with metadata values outside this range always returns a negative match.
+Comparisons with metadata values outside this range always return a negative match.
 Comparisons with search values outside this range will be executed as a comparison of the string representation values.
 
 All other comparisons (""match"", ""not match"", ""prefix"", ""not prefix"", ""suffix"", and ""not suffix"") are done on the given string representation of the number.

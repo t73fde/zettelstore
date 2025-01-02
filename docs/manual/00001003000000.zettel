@@ -4,24 +4,24 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241213101917
+modified: 20250102185359
 
 === The curious user
 You just want to check out the Zettelstore software
 
-* Grab the appropriate executable and copy it into any directory
+* Grab the appropriate executable and copy it to any directory
 * Start the Zettelstore software, e.g. with a double click[^On Windows and macOS, the operating system tries to protect you from possible malicious software.
-  If you encounter a problem, please take a look on the [[Troubleshooting|00001018000000]] page.]
+  If you encounter a problem, please refer to the [[Troubleshooting|00001018000000]] page.]
 * A sub-directory ""zettel"" will be created in the directory where you put the executable.
   It will contain your future zettel.
 * Open the URI [[http://localhost:23123]] with your web browser.
-  It will present you a mostly empty Zettelstore.
+  A mostly empty Zettelstore is presented.
   There will be a zettel titled ""[[Home|00010000000000]]"" that contains some helpful information.
 * Please read the instructions for the [[web-based user interface|00001014000000]] and learn about the various ways to write zettel.
 * If you restart your device, please make sure to start your Zettelstore again.
 
 === The intermediate user
-You already tried the Zettelstore software and now you want to use it permanently.
+You have already tried the Zettelstore software and now you want to use it permanently.
 Zettelstore should start automatically when you log into your computer.
 
 Please follow [[these instructions|00001003300000]].

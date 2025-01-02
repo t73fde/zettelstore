@@ -4,9 +4,9 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20210510153233
+modified: 20250102181034
 
-There are some levels to change the behavior and/or the appearance of Zettelstore.
+There are several levels to change the behavior and/or the appearance of Zettelstore.
 
 # The first level is the way to start Zettelstore services and to manage it via command line (and, in part, via a graphical user interface).
 #* [[Command line parameters|00001004050000]]

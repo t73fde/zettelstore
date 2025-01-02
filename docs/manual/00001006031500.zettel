@@ -4,9 +4,9 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20230419175525
+modified: 20250102164729
 
-Values of this type are just a sequence of character, possibly an empty sequence.
+Values of this type are just a sequence of characters, possibly an empty sequence.
 
 An EString is the most general metadata key type, as it places no restrictions to the character sequence.[^Well, there are some minor restrictions that follow from the [[metadata syntax|00001006010000]].]
 

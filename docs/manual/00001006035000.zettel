@@ -4,12 +4,12 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20230419175725
+modified: 20250102205855
 
-Values of this type denote an URL.
+Values of this type denote a URL.
 
 === Allowed values
-All characters of an URL / URI are allowed.
+All characters of a URL / URI are allowed.
 
 === Query comparison
 All comparisons are done case-insensitive.

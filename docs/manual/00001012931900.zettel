@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230405123046
-modified: 20240122094720
+modified: 20250102172048
 
 A reference is encoded as the actual reference value, and a symbol describing the state of that actual reference value.
 
@@ -30,7 +30,7 @@ The meaning of the state symbols corresponds to that of the symbols used for the
 : The reference value is a valid reference to an existing zettel.
   This value is only possible after evaluating the zettel.
 ; ''BROKEN''
-: The reference value is a valid reference to an missing zettel.
+: The reference value is a valid reference to a missing zettel.
   This value is only possible after evaluating the zettel.
 ; ''HOSTED''
 : The reference value starts with one slash character, denoting an absolute local reference.

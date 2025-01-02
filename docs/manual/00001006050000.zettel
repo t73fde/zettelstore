@@ -4,27 +4,24 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241128141443
+modified: 20250102165749
 
 Each zettel is given a unique identifier.
 To some degree, the zettel identifier is part of the metadata.
 Basically, the identifier is given by the [[Zettelstore|00001005000000]] software.
 
 Every zettel identifier consists of 14 digits.
-They resemble a timestamp: the first four digits could represent the year, the
-next two represent the month, following by day, hour, minute, and second.
+They resemble a timestamp: the first four digits could represent the year, the next two represent the month, followed by day, hour, minute, and second.
 
 This allows to order zettel chronologically in a canonical way.
 
 In most cases the zettel identifier is the timestamp when the zettel was created.
 
 However, the Zettelstore software just checks for exactly 14 digits.
-Anybody is free to assign a ""non-timestamp"" identifier to a zettel, e.g. with
-a month part of ""35"" or with ""99"" as the last two digits.
+Anybody is free to assign a ""non-timestamp"" identifier to a zettel, e.g. with a month part of ""35"" or with ""99"" as the last two digits.
 
 Some zettel identifier are [[reserved|00001006055000]] and should not be used otherwise.
 All identifiers of zettel initially provided by an empty Zettelstore begin with ""000000"", except the home zettel ''00010000000000''.
-Zettel identifier of this manual have be chosen to begin with ""000010"".
+Zettel identifier of this manual have been chosen to begin with ""000010"".
 
-A zettel can have any identifier that contains 14 digits and that is not in use
-by another zettel managed by the same Zettelstore.
+A zettel can have any identifier that contains 14 digits and that is not in use by another zettel managed by the same Zettelstore.

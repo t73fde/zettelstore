@@ -4,7 +4,7 @@ role: manual
 tags: #introduction #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240710184612
+modified: 20250102181246
 
 [[Personal knowledge management|https://en.wikipedia.org/wiki/Personal_knowledge_management]] involves collecting, classifying, storing, searching, retrieving, assessing, evaluating, and sharing knowledge as a daily activity.
 It's done by most individuals, not necessarily as part of their main business.
@@ -13,5 +13,5 @@ Many hobbyists build up a significant amount of knowledge, even if they do not n
 Personal knowledge management can be seen as a prerequisite for many kinds of collaboration.
 
 Zettelstore is software that collects and relates your notes (""zettel"") to represent and enhance your knowledge, supporting the ""[[Zettelkasten method|https://en.wikipedia.org/wiki/Zettelkasten]]"".
-The method is based on creating many individual notes, each with one idea or piece of information, that is related to each other.
+The method is based on creating many individual notes, each containing one idea or piece of information, which are related to each other.
 Since knowledge is typically built up gradually, one major focus is a long-term store of these notes, hence the name ""Zettelstore"".

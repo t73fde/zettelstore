@@ -4,9 +4,9 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20211125191727
-modified: 20220114175754
+modified: 20250102190221
 
-You already tried the Zettelstore software and now you want to use it permanently.
+You have already tried the Zettelstore software and now you want to use it permanently.
 Zettelstore should start automatically when you log into your computer.
 
 * Grab the appropriate executable and copy it into the appropriate directory
@@ -19,7 +19,7 @@ Zettelstore should start automatically when you log into your computer.
 *** On Windows execute the command ``zettelstore.exe run -c CONFIG_FILE``
 *** On macOS execute the command ``./zettelstore run -c CONFIG_FILE``
 *** On Linux execute the command ``./zettelstore run -c CONFIG_FILE``
-** In all cases ''CONFIG_FILE'' must be substituted by file name where you wrote the startup configuration.
+** In all cases ''CONFIG_FILE'' must be replaced with the file name where you wrote the startup configuration.
 ** If you encounter some error messages, update the startup configuration, and try again.
 * Depending on your operating system, there are different ways to register Zettelstore to start automatically:
 ** [[Windows|00001003305000]]

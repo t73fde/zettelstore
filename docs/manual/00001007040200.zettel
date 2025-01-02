@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220311185110
+modified: 20250102174215
 
 There are some reasons to mark text that should be rendered as uninterpreted:
 * Mark text as literal, sometimes as part of a program.
@@ -50,7 +50,7 @@ Attributes can be specified, the default attribute has the same semantic as for 
 === Inline-zettel snippet
 To specify an inline snippet in a different [[syntax|00001008000000]], delimit your text with two at-sign characters (""''@''"", U+0040) on each side.
 
-You can add some [[attributes|00001007050000]] immediate after the two closing at-sign characters to specify the syntax to use.
+You can add some [[attributes|00001007050000]] immediately after the two closing at-sign characters to specify the syntax to use.
 Either use the attribute key ""syntax"" or use the generic attribute to specify the syntax value.
 If no value is provided, ""[[text|00001008000000#text]]"" is assumed.
 
@@ -64,7 +64,7 @@ For HTML syntax, the same rules apply.
 === Math mode / $$\TeX$$ input
 This allows to enter text, that is typically interpreted by $$\TeX$$ or similar software.
 The main difference to all other literal-like formatting above is that the backslash character (""''\\''"", U+005C) has no special meaning.
-Therefore it is well suited the enter text with a lot of backslash characters.
+Therefore it is well suited to enter text with a lot of backslash characters.
 
 Math mode text is delimited with two dollar signs (""''$''"", U+0024) on each side.
 

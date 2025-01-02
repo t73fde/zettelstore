@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20241212153148
+modified: 20250102190434
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -13,7 +13,7 @@ This page lists some problems and their solutions that may occur when using your
   Therefore, it will not start Zettelstore.
 ** **Solution:** Press the ''Ctrl'' key while opening the context menu of the Zettelstore executable with a right-click.
    A dialog is then opened where you can acknowledge that you understand the possible risks when you start Zettelstore.
-   This dialog is only resented once for a given Zettelstore executable.
+   This dialog is only presented once for a given Zettelstore executable.
 * **Problem:** When you double-click on the Zettelstore executable icon, Windows complains that Zettelstore is an application from an unknown developer.
 ** **Solution:** Windows displays a dialog where you can acknowledge possible risks and allow to start Zettelstore.
 
@@ -23,7 +23,7 @@ This page lists some problems and their solutions that may occur when using your
 ** **Explanation:** A local running Zettelstore typically means, that you are accessing the Zettelstore using an URL with schema ''http://'', and not ''https://'', for example ''http://localhost:23123''.
    The difference between these two is the missing encryption of user name / password and for the answer of the Zettelstore if you use the ''http://'' schema.
    To be secure by default, the Zettelstore will not work in an insecure environment.
-** **Solution 1:** If you are sure that your communication medium is safe, even if you use the ''http:/\/'' schema (for example, you are running the Zettelstore on the same computer you are working on, or if the Zettelstore is running on a computer in your protected local network), then you could add the entry ''insecure-cookie: true'' in you [[startup configuration|00001004010000#insecure-cookie]] file.
+** **Solution 1:** If you are sure that your communication medium is safe, even if you use the ''http:/\/'' schema (for example, you are running the Zettelstore on the same computer you are working on, or if the Zettelstore is running on a computer in your protected local network), then you could add the entry ''insecure-cookie: true'' in your [[startup configuration|00001004010000#insecure-cookie]] file.
 ** **Solution 2:** If you are not sure about the security of your communication medium (for example, if unknown persons might use your local network), then you should run an [[external server|00001010090100]] in front of your Zettelstore to enable the use of the ''https://'' schema.
 
 === Working with Zettel Files
@@ -31,7 +31,7 @@ This page lists some problems and their solutions that may occur when using your
   If you access the zettel via Zettelstore, an error is reported.
 ** **Explanation:** Sometimes, the operating system does not tell Zettelstore about the removed zettel.
    This occurs mostly under MacOS.
-** **Solution 1:** If you are running Zettelstore in [[""simple-mode""|00001004051100]] or if you have enabled [[''expert-mode''|00001004020000#expert-mode]], you are allowed to refresh the internal data by selecting ""Refresh"" in the Web User Interface (you find it in the menu ""Lists"").
+** **Solution 1:** If you are running Zettelstore in [[""simple-mode""|00001004051100]] or if you have enabled [[''expert-mode''|00001004020000#expert-mode]], you are allowed to refresh the internal data by selecting ""Refresh"" in the Web User Interface (you can find in the menu ""Lists"").
 ** **Solution 2:** There is an [[API|00001012080500]] call to make Zettelstore aware of this change.
 ** **Solution 3:** If you have an enabled [[Administrator Console|00001004100000]] you can use the command [[''refresh''|00001004101000#refresh]] to make your changes visible.
 ** **Solution 4:** You configure the zettel box as [[""simple""|00001004011400]].

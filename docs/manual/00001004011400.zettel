@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240710180215
+modified: 20250102180416
 
 Under certain circumstances, it is preferable to further configure a file directory box.
 This is done by appending query parameters after the base box URI ''dir:\//DIR''.
@@ -13,7 +13,7 @@ The following parameters are supported:
 
 |= Parameter:|Description|Default value:|
 |type|(Sub-) Type of the directory service|(value of ""[[default-dir-box-type|00001004010000#default-dir-box-type]]"")
-|worker|Number of worker that can access the directory in parallel|7
+|worker|Number of workers that can access the directory in parallel|7
 |readonly|Allow only operations that do not create or change zettel|n/a
 
 === Type

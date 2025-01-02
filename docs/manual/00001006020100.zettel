@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20231129173620
+modified: 20250102175032
 
 The [[''role'' key|00001006020000#role]] defines what kind of zettel you are writing.
 You are free to define your own roles.
@@ -20,10 +20,10 @@ Some roles are defined for technical reasons:
   This role is only used in this specific Zettelstore.
 ; [!role|''role'']
 : A zettel with the role ""role"" and a title, which names a [[role|00001006020000#role]], is treated as a __role zettel__.
-  Basically, role zettel describe the role, and form a hierarchiy of meta-roles.
+  Basically, role zettel describe the role, and form a hierarchy of meta-roles.
 ; [!tag|''tag'']
 : A zettel with the role ""tag"" and a title, which names a [[tag|00001006020000#tags]], is treated as a __tag zettel__.
-  Basically, tag zettel describe the tag, and form a hierarchiy of meta-tags.
+  Basically, tag zettel describe the tag, and form a hierarchy of meta-tags.
 ; [!zettel|''zettel'']
 : A zettel that contains your own thoughts.
   The real reason to use this software.

@@ -4,9 +4,9 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20210712234305
+modified: 20250102174000
 
-This sub-command is used to create a hashed password for to be authenticated users.
+This sub-command is used to create a hashed password for users to be authenticated.
 
 It reads a password from standard input (two times, both must be equal) and writes the hashed password to standard output.
 
@@ -35,5 +35,5 @@ This will produce a hashed password (""credential"") for the new user ""bob"" to
 You should copy the relevant output to the zettel of the user to be secured, especially by setting the meta keys ''credential'' and ''user-id'' to the copied values.
 
 Please note that the generated hashed password is tied to the given user identification (''user-id'') and to the identifier of its zettel.
-Changing one of those will stop authenticating the user with the given password.
+Changing one of these will prevent the user from being authenticated with the given password.
 In this case you have to re-run this sub-command.

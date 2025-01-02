@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240926144803
+modified: 20250102180346
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -26,7 +26,7 @@ The following keys are supported:
 
   Default: ""0""
 ; [!asset-dir|''asset-dir'']
-: Allows to specify a directory whose files are allowed be transferred directly with the help of the web server.
+: Allows to specify a directory whose files are allowed to be transferred directly with the help of the web server.
   The URL prefix for these files is ''/assets/''.
   You can use this if you want to transfer files that are too large for a zettel, such as presentation, PDF, music or video files.
 

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241223214236
+modified: 20250102170335
 
 The following table lists all predefined zettel with their purpose.
 
@@ -22,7 +22,7 @@ However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find 
 | [[00000000000007]] | Zettelstore Log | Lists the last 8192 log messages
 | [[00000000000008]] | Zettelstore Memory | Some statistics about main memory usage
 | [[00000000000009]] | Zettelstore Sx Engine | Statistics about the [[Sx|https://t73f.de/r/sx]] engine, which interprets symbolic expressions
-| [[00000000000020]] | Zettelstore Box Manager | Contains some statistics about zettel boxes and the the index process
+| [[00000000000020]] | Zettelstore Box Manager | Contains some statistics about zettel boxes and the index process
 | [[00000000000090]] | Zettelstore Supported Metadata Keys | Contains all supported metadata keys, their [[types|00001006030000]], and more
 | [[00000000000092]] | Zettelstore Supported Parser | Lists all supported values for metadata [[syntax|00001006020000#syntax]] that are recognized by Zettelstore
 | [[00000000000096]] | Zettelstore Startup Configuration | Contains the effective values of the [[startup configuration|00001004010000]]
@@ -41,7 +41,7 @@ However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find 
 | [[00000000025001]] | Zettelstore User CSS | User-defined CSS file that is included by the [[Base HTML Template|00000000010100]]
 | [[00000000040001]] | Generic Emoji | Image that is shown if [[original image reference|00001007040322]] is invalid
 | [[00000000060010]] | zettel | [[Role zettel|00001012051800]] for the role ""[[zettel|00001006020100#zettel]]""
-| [[00000000060020]] | confguration | [[Role zettel|00001012051800]] for the role ""[[confguration|00001006020100#confguration]]""
+| [[00000000060020]] | configuration | [[Role zettel|00001012051800]] for the role ""[[confguration|00001006020100#configuration]]""
 | [[00000000060030]] | role | [[Role zettel|00001012051800]] for the role ""[[role|00001006020100#role]]""
 | [[00000000060040]] | tag | [[Role zettel|00001012051800]] for the role ""[[tag|00001006020100#tag]]""
 | [[00000000080001]] | Lists Menu | Contains the items of the ""Lists"" menu
@@ -56,4 +56,4 @@ However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find 
 If a zettel is not linked, it is not accessible for the current user.
 In most cases, you must at least enable [[''expert-mode''|00001004020000#expert-mode]].
 
-**Important:** All identifier may change until a stable version of the software is released.
+**Important:** All identifiers may change until a stable version of the software is released.

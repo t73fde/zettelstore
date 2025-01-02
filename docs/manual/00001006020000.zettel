@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241230211417
+modified: 20250102205333
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -33,7 +33,7 @@ Most keys conform to a [[type|00001006030000]].
   This is a computed value.
   There is no need to set it via Zettelstore.
   
-  If it is not stored within a zettel, it will be computed based on the value of the [[Zettel Identifier|00001006050000]]: if it contains a value >= 19700101000000, it will be coerced to da date/time; otherwise the version time of the running software will be used.
+  If it is not stored within a zettel, it will be computed based on the value of the [[Zettel Identifier|00001006050000]]: if it contains a value >= 19700101000000, it will be coerced to a date/time; otherwise the version time of the running software will be used.
 
   Please note that the value von ''created'' will be different (in most cases) to the value of [[''id''|#id]] / the zettel identifier, because it is exact up to the second.
   When calculating a zettel identifier, Zettelstore tries to set the second value to zero, if possible.
@@ -52,7 +52,7 @@ Most keys conform to a [[type|00001006030000]].
 : Property that contains all references that does __not__ identify a zettel.
 ; [!expire|''expire'']
 : A user-entered time stamp that document the point in time when the zettel should expire.
-  When a zettel is expires, Zettelstore does nothing.
+  When a zettel expires, Zettelstore does nothing.
   It is up to you to define required actions.
   ''expire'' is just a documentation.
   You could define a query and execute it regularly, for example [[query:expire? ORDER expire]].
@@ -91,9 +91,9 @@ Most keys conform to a [[type|00001006030000]].
   Basically the inverse of key [[''successors''|#successors]].
 ; [!prequel|''prequel'']
 : Specifies a zettel that is conceptually a prequel zettel.
-  This is a zettel that occured somehow before the current zettel.
+  This is a zettel that occurred somehow before the current zettel.
 ; [!published|''published'']
-: This property contains the timestamp of the mast modification / creation of the zettel.
+: This property contains the timestamp of the last modification / creation of the zettel.
   If [[''modified''|#modified]] is set with a valid timestamp, it contains the its value.
   Otherwise, if [[''created''|#created]] is set with a valid timestamp, it contains the its value.
   Otherwise, if the zettel identifier contains a valid timestamp, the identifier is used.
@@ -126,7 +126,7 @@ Most keys conform to a [[type|00001006030000]].
   The [[query reference|00001007040310]] [[query:backward? successors?]] lists all such zettel.
 ; [!summary|''summary'']
 : Summarizes the content of the zettel.
-  You may use all [[inline-structued elements|00001007040000]] of Zettelmarkup.
+  You may use all [[inline-structured elements|00001007040000]] of Zettelmarkup.
 ; [!superior|''superior'']
 : Specifies a zettel that is conceptually a superior zettel.
   This might be a more abstract zettel, or a zettel that should be higher in a hierarchy.

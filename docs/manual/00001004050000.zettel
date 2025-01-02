@@ -4,10 +4,10 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20221128161932
+modified: 20250102174436
 
 Zettelstore is not just a service that provides services of a zettelkasten.
-It allows to some tasks to be executed at the command line.
+It allows some tasks to be executed at the command line.
 Typically, the task (""sub-command"") will be given at the command line as the first parameter.
 
 If no parameter is given, the Zettelstore is called as
@@ -19,12 +19,12 @@ This is equivalent to call it this way:
 mkdir -p ./zettel
 zettelstore run -d ./zettel -c ./.zscfg
 ```
-Typically this is done by starting Zettelstore via a graphical user interface by double-clicking to its file icon.
+Typically this is done by starting Zettelstore via a graphical user interface by double-clicking its file icon.
 === Sub-commands
 * [[``zettelstore help``|00001004050200]] lists all available sub-commands.
 * [[``zettelstore version``|00001004050400]] to display version information of Zettelstore.
 * [[``zettelstore run``|00001004051000]] to start the Zettelstore service.
-* [[``zettelstore run-simple``|00001004051100]] is typically called, when you start Zettelstore by a double.click in your GUI.
+* [[``zettelstore run-simple``|00001004051100]] is typically called, when you start Zettelstore by double-clicking in your GUI.
 * [[``zettelstore file``|00001004051200]] to render files manually without activated/running Zettelstore services.
 * [[``zettelstore password``|00001004051400]] to calculate data for [[user authentication|00001010040200]].
 

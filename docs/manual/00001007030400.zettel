@@ -4,14 +4,14 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220825185533
+modified: 20250102220220
 
 To signal a thematic break, you can specify a horizontal rule.
 This is done by entering at least three hyphen-minus characters (""''-''"", U+002D) at the first position of a line.
 You can add some [[attributes|00001007050000]], although the horizontal rule does not support the default attribute.
 Any other characters in this line will be ignored.
 
-If you do not enter the three hyphen-minus character at the very first position of a line, the are interpreted as [[inline elements|00001007040000]], typically as an ""en-dash" followed by a hyphen-minus.
+If you do not enter the three hyphen-minus character at the very first position of a line, they are interpreted as [[inline elements|00001007040000]], typically as an ""en-dash"" followed by a hyphen-minus.
 
 Example:
 

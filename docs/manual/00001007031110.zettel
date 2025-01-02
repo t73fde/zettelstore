@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220809132350
-modified: 20220926183331
+modified: 20250102165258
 
 A zettel transclusion is specified by the following sequence, starting at the first position in a line: ''{{{zettel-identifier}}}''.
 
@@ -18,7 +18,7 @@ The maximum number of transclusion can be controlled by setting the value [[''ma
 
 If everything went well, the referenced, expanded zettel will replace the transclusion element.
 
-For example, to include the text of the Zettel titled ""Zettel identifier"", just specify its identifier [[''00001006050000''|00001006050000]] in the transclude element:
+For example, to include the text of the Zettel titled ""Zettel identifier"", just specify its identifier [[''00001006050000''|00001006050000]] in the transclusion element:
 ```zmk
 {{{00001006050000}}}
 ```
@@ -37,7 +37,7 @@ This allows to create a zettel with content that seems to be changed, depending 
 
 ---
 Any [[attributes|00001007050000]] added to the transclusion will set/overwrite the appropriate metadata of the included zettel.
-Of course, this applies only to thoes attribtues, which have a valid name for a metadata key.
+Of course, this applies only to those attributes, which have a valid name for a metadata key.
 This allows to control the evaluation of the included zettel, especially for zettel containing a diagram description.
 
 === See also

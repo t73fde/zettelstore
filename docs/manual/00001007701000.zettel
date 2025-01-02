@@ -4,9 +4,9 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707205043
-modified: 20230707210039
+modified: 20250102210324
 
-In its simplest form, a search expression just contains a string to be search for with the help of a full-text search.
+In its simplest form, a search expression just contains a string to be searched for with the help of a full-text search.
 For example, the string ''syntax'' will search for all zettel containing the word ""syntax"".
 
 If you want to search for all zettel with a title containing the word ""syntax"", you must specify ''title:syntax''.

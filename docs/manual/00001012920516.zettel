@@ -4,17 +4,17 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20220422181104
-modified: 20230403161458
+modified: 20250102214350
 
 A zettel representation that is a [[s-expression|00001012930000]] (also known as symbolic expression).
 
-It is (relatively) easy to parse and contain all relevant information of a zettel, metadata and content.
-For example, take a look at the Sz encoding of this page, which is available via the ""Info"" sub-page of this zettel: 
+It is (relatively) easy to parse and contains all relevant information of metadata, content or the whole zettel.
+For example, take a look at the Sz encoding of this page, which is available on the ""Info"" sub-page of this zettel: 
 
 * [[//z/00001012920516?enc=sz&part=zettel]],
 * [[//z/00001012920516?enc=sz&part=meta]],
 * [[//z/00001012920516?enc=sz&part=content]].
 
-Some zettel describe the [[Sz encoding|00001012931000]] in a more detailed way.
+Some zettel provide a more detailed description of the [[Sz encoding|00001012931000]].
 
 If transferred via HTTP, the content type will be ''text/plain''.

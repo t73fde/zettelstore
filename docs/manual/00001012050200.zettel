@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20230412150544
+modified: 20250102215926
 
 Authentication for future API calls is done by sending a [[user identification|00001010040200]] and a password to the Zettelstore to obtain an [[access token|00001010040700]].
 This token has to be used for other API calls.
@@ -28,13 +28,13 @@ If you do not want to use Basic Authentication, you can also send user identific
 ("Bearer" "eyJhbGciOiJIUzUxMiJ9.eyJfdGsiOjEsImV4cCI6MTY4MTMwNDA4OCwiaWF0IjoxNjgxMzA0MDI4LCJzdWIiOiJvd25lciIsInppZCI6IjIwMjEwNjI5MTYzMzAwIn0.qIEyOMFXykCApWtBaqbSESwTL96stWl2LRICiRNAXUjcY-mwx_SSl9L5Fj2FvmrI1K1RBvWehjoq8KZUNjhJ9Q" 600)
 ```
 
-In all cases, you will receive a list with three elements that will contain all [[relevant data|00001012921000]] to be used for further API calls.
+In all cases, you will receive a list containing three elements with all [[relevant data|00001012921000]] needed for further API calls.
 
 **Important:** obtaining a token is a time-intensive process.
 Zettelstore will delay every request to obtain a token for a certain amount of time.
 Please take into account that this request will take approximately 500 milliseconds, under certain circumstances more.
 
-However, if [[authentication is not enabled|00001010040100]] and you send an authentication request, no user identification/password checking is done and you receive an artificial token immediate, without any delay:
+However, if [[authentication is not enabled|00001010040100]] and you send an authentication request, no user identification/password checking is done and you receive an artificial token immediately, without any delay:
 
 ```sh
 # curl -X POST -u IDENT:PASSWORD http://127.0.0.1:23123/a
@@ -47,7 +47,7 @@ In this case, it is even possible to omit the user identification/password.
 In all cases of successful authentication, a list is returned, which contains the token as the second element.
 A successful authentication is signaled with the HTTP status code 200, as usual.
 
-Other status codes possibly send by the Zettelstore:
+Other status codes possibly sent by the Zettelstore:
 ; ''400''
 : Unable to process the request.
   In most cases the form data was invalid.

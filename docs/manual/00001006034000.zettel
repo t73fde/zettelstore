@@ -4,14 +4,14 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20230419175642
+modified: 20250102205826
 
 Values of this type denote a (sorted) set of tags.
 
 A set is different to a list, as no duplicate values are allowed.
 
 === Allowed values
-Every tag must must begin with the number sign character (""''#''"", U+0023), followed by at least one printable character.
+Every tag must begin with the number sign character (""''#''"", U+0023), followed by at least one printable character.
 Tags are separated by space characters.
 
 All characters are mapped to their lower case values.

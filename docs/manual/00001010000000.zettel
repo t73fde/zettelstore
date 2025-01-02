@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241213102811
+modified: 20250102212014
 
 Your zettel may contain sensitive content.
 You probably want to ensure that only authorized persons can read and/or modify them.
@@ -44,22 +44,22 @@ But as an owner, you can create ""user zettel"" to allow others to access your Z
 Even if you do not want to share your Zettelstore with other persons, creating user zettel can be useful if you plan to access your Zettelstore via the [[API|00001012000000]].
 
 Additionally, you can specify that a zettel is publicly visible.
-In this case no one has to authenticate itself to see the content of the zettel.
+In this case, nobody has to authenticate themselves to see the contents of the note.
 Or you can specify that a zettel is visible only to the owner.
 In this case, no authenticated user will be able to read and change that protected zettel.
 
 * [[Visibility rules for zettel|00001010070200]]
-* [[User roles|00001010070300]] define basic rights of an user
+* [[User roles|00001010070300]] define basic rights of a user
 * [[Authorization and read-only mode|00001010070400]]
 * [[Access rules|00001010070600]] define the policy which user is allowed to do what operation.
 
 === Encryption
 When Zettelstore is accessed remotely, the messages that are sent between Zettelstore and the client must be encrypted.
-Otherwise, an eavesdropper could fetch sensible data, such as passwords or precious content that is not for the public.
+Otherwise, an eavesdropper could fetch sensitive data, such as passwords or precious content that is not for the public.
 
 The Zettelstore itself does not encrypt messages.
 But you can put a server in front of it, which is able to handle encryption.
-Most generic web server software do allow this.
+Most generic web server software allow this.
 
 To enforce encryption, [[authenticated sessions|00001010040700]] are marked as secure by default.
 If you still want to access the Zettelstore remotely without encryption, you must change the startup configuration.

@@ -4,13 +4,13 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220307121547
+modified: 20250102185551
 
 A Zettelstore must store its zettel somehow and somewhere.
 In most cases you want to store your zettel as files in a directory.
 Under certain circumstances you may want to store your zettel elsewhere.
 
-An example are the [[predefined zettel|00001005090000]] that come with a Zettelstore.
+An example is the [[predefined zettel|00001005090000]] that come with a Zettelstore.
 They are stored within the software itself.
 In another situation you may want to store your zettel volatile, e.g. if you want to provide a sandbox for experimenting.
 

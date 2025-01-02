@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211230230441
-modified: 20241216104624
+modified: 20250102212703
 
 Zettelstore maintains some internal data to allow faster operations.
 
@@ -15,7 +15,7 @@ Another example is the way to determine which zettel are stored in a [[ZIP file|
 Scanning a ZIP file is a lengthy operation, therefore Zettelstore maintains a directory of zettel for each ZIP file.
 
 All these internal data may become stale.
-This should not happen, but when it comes e.g. to file handling, every operating systems behaves differently in very subtle ways.
+This should not happen, but when it comes e.g. to file handling, every operating system behaves differently in very subtle ways.
 
 To avoid stopping and re-starting Zettelstore, you can use the API to force Zettelstore to refresh its internal data if you think it is needed.
 To do this, you must send a HTTP POST request to the [[endpoint|00001012920000]] ''/x'' and you must specify the query parameter ''cmd=refresh''.

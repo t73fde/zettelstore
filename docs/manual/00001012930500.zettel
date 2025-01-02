@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20230403151127
-modified: 20240413160345
+modified: 20250102175559
 
 === Syntax of lists
 A list always starts with the left parenthesis (""''(''"", U+0028) and ends with a right parenthesis (""'')''"", U+0029).
@@ -57,21 +57,21 @@ The smallest number is ``0``, there are no negative numbers.
 
 === Syntax of symbols (atom)
 A symbol is a non-empty sequence of printable characters, except left or right parenthesis.
-Unicode characters of the following categories contains printable characters in the above sense: letter (L), number (N), punctuation (P), symbol (S).
+Unicode characters of the following categories contain printable characters in the above sense: letter (L), number (N), punctuation (P), symbol (S).
 Symbols are case-sensitive, i.e. ""''ZETTEL''"" and ""''zettel''"" denote different symbols.
 
-=== Syntax of string (atom)
+=== Syntax of strings (atom)
 
 A string starts with a quotation mark (""''"''"", U+0022), contains a possibly empty sequence of Unicode characters, and ends with a quotation mark.
-To allow a string to contain a quotations mark, it must be prefixed by one backslash (""''\\''"", U+005C).
+To allow a string to contain a quotation mark, it must be prefixed by one backslash (""''\\''"", U+005C).
 To allow a string to contain a backslash, it also must be prefixed by one backslash.
-Unicode characters with a code less than U+FF are encoded by by the sequence ""''\\xNM''"", where ''NM'' is the hex encoding of the character.
-Unicode characters with a code less than U+FFFF are encoded by by the sequence ""''\\uNMOP''"", where ''NMOP'' is the hex encoding of the character.
-Unicode characters with a code less than U+FFFFFF are encoded by by the sequence ""''\\UNMOPQR''"", where ''NMOPQR'' is the hex encoding of the character.
+Unicode characters with a code less than U+FF are encoded by the sequence ""''\\xNM''"", where ''NM'' is the hex encoding of the character.
+Unicode characters with a code less than U+FFFF are encoded by the sequence ""''\\uNMOP''"", where ''NMOP'' is the hex encoding of the character.
+Unicode characters with a code less than U+FFFFFF are encoded by the sequence ""''\\UNMOPQR''"", where ''NMOPQR'' is the hex encoding of the character.
 In addition, the sequence ""''\\t''"" encodes a horizontal tab (U+0009), the sequence ""''\\n''"" encodes a line feed (U+000A).
 
 === See also
 * Currently, Zettelstore uses [[Sx|https://t73f.de/r/sx]] (""Symbolic eXpression framework"") to implement symbolic expressions.
   The project page might contain additional information about the full syntax.
 
-  Zettelstore only uses lists, numbers, string, and symbols to represent zettel.
+  Zettelstore only uses lists, numbers, strings, and symbols to represent zettel.
