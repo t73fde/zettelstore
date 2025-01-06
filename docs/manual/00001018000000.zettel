@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20250102190434
+modified: 20250106180049
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -27,7 +27,7 @@ This page lists some problems and their solutions that may occur when using your
 ** **Solution 2:** If you are not sure about the security of your communication medium (for example, if unknown persons might use your local network), then you should run an [[external server|00001010090100]] in front of your Zettelstore to enable the use of the ''https://'' schema.
 
 === Working with Zettel Files
-* **Problem:** When you delete a zettel file by removing it from the ""disk"", e.g. by dropping it into the trash folder, by dragging into another folder, or by removing it from the command line, Zettelstore sometimes did not detect that change.
+* **Problem:** When you delete a zettel file by removing it from the ""disk"", e.g. by dropping it into the trash folder, by dragging into another folder, or by removing it from the command line, Zettelstore sometimes does not detect the change.
   If you access the zettel via Zettelstore, an error is reported.
 ** **Explanation:** Sometimes, the operating system does not tell Zettelstore about the removed zettel.
    This occurs mostly under MacOS.

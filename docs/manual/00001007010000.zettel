@@ -4,9 +4,9 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102205927
+modified: 20250106174703
 
-Any document can be thought as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
+Any document can be thought of as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
 Some of these blocks can contain other blocks, for example lists may contain other lists or paragraphs.
 Other blocks contain [[inline-structured elements|00001007040000]] (""inlines""), such as text, [[links|00001007040310]], emphasized text, and images.
 
@@ -16,15 +16,15 @@ List blocks also begin at the first position of a line, but may need one or more
 Non-list blocks are either fully specified on that line or they span multiple lines and are delimited with the same three or more character.
 It depends on the block kind, whether blocks are specified on one line or on at least two lines.
 
-If a line does not begin with an explicit block element. the line is treated as a (implicit) paragraph block element that contains inline elements.
+If a line does not begin with an explicit block element, the line is treated as a (implicit) paragraph block element that contains inline elements.
 This paragraph ends when a block element is detected at the beginning of a next line or when an empty line occurs.
 Some blocks may also contain inline elements, e.g. a heading.
 
-Inline elements mostly begins with two non-space, often identical characters.
+Inline elements mostly begin with two non-space, often identical characters.
 With some exceptions, two identical non-space characters begins a formatting range that is ended with the same two characters.
 
 Exceptions are: links, images, edits, comments, and both the ""en-dash"" and the ""horizontal ellipsis"".
-A link is given with ``[[...]]``{=zmk}, an images with ``{{...}}``{=zmk}, and an edit formatting with ``((...))``{=zmk}.
+A link is given with ``[[...]]``{=zmk}, an image with ``{{...}}``{=zmk}, and an edit formatting with ``((...))``{=zmk}.
 An inline comment, beginning with the sequence ``%%``{=zmk}, always ends at the end of the line where it begins.
 The ""en-dash"" (""--"") is specified as ``--``{=zmk}, the ""horizontal ellipsis"" (""..."") as ``...``{=zmk}[^If put at the end of non-space text.].
 
@@ -39,7 +39,7 @@ For example, an ""n-dash"" could also be specified as ``&ndash;``{==zmk}.
 The backslash character (""``\\``"") possibly gives the next character a special meaning.
 This allows to resolve some left ambiguities.
 For example, a list of depth 2 will begin a line with ``** Item 2.2``{=zmk}.
-An inline element to strongly emphasize some text begin with a space will be specified as ``** Text**``{=zmk}.
+An inline element to strongly emphasize some text that begins with a space will be specified as ``** Text**``{=zmk}.
 To force the inline element formatting at the beginning of a line, ``**\\ Text**``{=zmk} should better be specified.
 
 Many block and inline elements can be refined by additional [[attributes|00001007050000]].
@@ -51,11 +51,11 @@ To summarize:
 * With some exceptions, block-structural elements begins at the for position of a line with three identical characters.
 * The most important exception to this rule is the specification of lists.
 * If no block element is found, a paragraph with inline elements is assumed.
-* With some exceptions, inline-structural elements begins with two characters, quite often the same two characters.
+* With some exceptions, inline-structural elements begin with two characters, quite often the same two characters.
 * The most important exceptions are links.
 * The backslash character can help to resolve possible ambiguities.
 * Attributes refine some block and inline elements.
 * Block elements have a higher priority than inline elements.
 
-These principles makes automatic recognizing zettelmarkup an (relatively) easy task.
+These principles make automatic recognizing zettelmarkup an (relatively) easy task.
 By looking at the reference implementation, a moderately skilled software developer should be able to create an appropriate software in a different programming language.
