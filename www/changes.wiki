@@ -2,6 +2,11 @@
 
 <a id="0_20"></a>
 <h2>Changes for Version 0.20.0 (pending)</h2>
+  *  Metadata with keys that have the suffix <code>-title</code> are no longer
+     interpreted as Zettelmarkup. This is a leftover from [#0_11|v0.11], when
+     type of metadata <code>title</code> was changed from Zettelmarkup to a
+     possibly empty string.
+     (breaking)
   *  Query aggregates <code>ATOM</code> and <code>RSS</code> are removed, as
      well as the accompanying <code>TITLE</code> query action (parameter).
      Were announced as deprecated in version 0.19.

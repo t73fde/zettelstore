@@ -78,7 +78,6 @@ var (
 		"-number":     TypeNumber,
 		SuffixKeyRole: TypeWord,
 		"-time":       TypeTimestamp,
-		"-title":      TypeZettelmarkup,
 		SuffixKeyURL:  TypeURL,
 		"-zettel":     TypeID,
 		"-zid":        TypeID,
