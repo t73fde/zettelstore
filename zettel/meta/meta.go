@@ -117,10 +117,6 @@ func GetSortedKeyDescriptions() []*DescriptionKey {
 	return result
 }
 
-// KeyCreatedMissing is temporary until migration to B36 has ended.
-// It is not an "official" key to be designed to last long.
-const KeyCreatedMissing = "created-missing"
-
 // Supported keys.
 func init() {
 	registerKey(api.KeyID, TypeID, usageComputed, "")
@@ -143,7 +139,6 @@ func init() {
 	registerKey(api.KeyCopyright, TypeString, usageUser, "")
 	registerKey(api.KeyCreated, TypeTimestamp, usageComputed, "")
 	registerKey(api.KeyCredential, TypeCredential, usageUser, "")
-	registerKey(KeyCreatedMissing, TypeWord, usageProperty, "")
 	registerKey(api.KeyDead, TypeIDSet, usageProperty, "")
 	registerKey(api.KeyExpire, TypeTimestamp, usageUser, "")
 	registerKey(api.KeyFolgeRole, TypeWord, usageUser, "")

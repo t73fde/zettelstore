@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102222212
+modified: 20250113181030
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -37,12 +37,6 @@ Most keys conform to a [[type|00001006030000]].
 
   Please note that the value von ''created'' will be different (in most cases) to the value of [[''id''|#id]] / the zettel identifier, because it is exact up to the second.
   When calculating a zettel identifier, Zettelstore tries to set the second value to zero, if possible.
-; [!created-missing|''created-missing'']
-: If set to ""true"", the value of [[''created''|#created]] was not stored within a zettel.
-  To allow the migration of [[zettel identifier|00001006050000]] to a new scheme, you should update the value of ''created'' to a reasonable value.
-  Otherwise you might lose that information in future releases.
-
-  This key will be removed when the migration to a new zettel identifier format has been completed.
 ; [!credential|''credential'']
 : Contains the hashed password, as it was emitted by [[``zettelstore password``|00001004051400]].
   It is internally created by hashing the password, the [[zettel identifier|00001006050000]], and the value of the ''ident'' key.
