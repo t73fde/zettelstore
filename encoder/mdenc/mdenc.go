@@ -395,7 +395,7 @@ func (v *visitor) visitLiteral(ln *ast.LiteralNode) {
 		v.b.WriteByte('`')
 		v.b.Write(ln.Content)
 		v.b.WriteByte('`')
-	case ast.LiteralComment, ast.LiteralHTML: // ignore everything
+	case ast.LiteralComment: // ignore everything
 	default:
 		v.b.Write(ln.Content)
 	}

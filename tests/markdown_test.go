@@ -131,7 +131,7 @@ func TestAdditionalMarkdown(t *testing.T) {
 		md  string
 		exp string
 	}{
-		{`abc<br>def`, `abc@@<br>@@{="html"}def`},
+		{`abc<br>def`, "abc``<br>``{=\"html\"}def"},
 	}
 	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
 	var sb strings.Builder

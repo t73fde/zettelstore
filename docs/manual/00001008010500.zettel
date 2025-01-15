@@ -4,7 +4,7 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 20220113183435
-modified: 20250102221612
+modified: 20250115200458
 url: https://commonmark.org/
 
 [[CommonMark|https://commonmark.org/]] is a Markdown dialect, an [[attempt|https://xkcd.com/927/]] to unify all the different, divergent dialects of Markdown by providing an unambiguous syntax specification for Markdown, together with a suite of comprehensive tests to validate implementation.
@@ -16,14 +16,15 @@ Other software adopts CommonMark somehow, notably [[GitHub Flavored Markdown|htt
 But they provide proprietary extensions, which makes it harder to change to another CommonMark implementation if needed.
 Plus, they sometimes build on an older specification of CommonMark.
 
-Zettelstore supports the latest CommonMark [[specification version 0.30 (2021-06-19)|https://spec.commonmark.org/0.30/]].
+Zettelstore supports the latest CommonMark [[specification version 0.31.2 (2024-01-28)|https://spec.commonmark.org/0.31.2/]].
 If possible, Zettelstore will adapt to newer versions when they are available.
 
 To provide CommonMark support, Zettelstore uses currently the [[Goldmark|https://github.com/yuin/goldmark]] implementation, which passes all validation tests of CommonMark.
-Internally, CommonMark is translated into some kind of super-set of [[Zettelmarkup|00001007000000]], which additionally allows to use HTML code.[^Effectively, Markdown and CommonMark are itself super-sets of HTML.]
-This Zettelmarkup super-set is later [[encoded|00001012920500]], often into [[HTML|00001012920510]].
-Because Zettelstore HTML encoding philosophy differs a little bit to that of CommonMark, Zettelstore itself will not pass the CommonMark test suite fully.
-However, no CommonMark language element will fail to be encoded as HTML.
-In most cases, the differences are not visible for a user, but only by comparing the generated HTML code.
+Effectively, Markdown and CommonMark are super-sets of HTML.
+Internally, CommonMark is translated into [[Zettelmarkup|00001007000000]].
+Since Zettelmarkup supports HTML content only at the block level via [[Inline Zettel|00001007031200]], most uses of HTML within a CommonMark zettel are not translated as expected.
+Instead, inline level HTML is translated into [[literal text|00001007040200#literal-text]] with a [[generic attribute|00001007050000]] set to ``html``.
 
-Be aware, depending on the value of the startup configuration key [[''insecure-html''|00001004010000#insecure-html]], HTML code found within a CommonMark document or within the mentioned kind of super-set of Zettelmarkup will typically be ignored for security-related reasons.
+Therefore, Zettelstore itself will not pass the CommonMark test suite fully.
+However, no CommonMark language element except inline HTML will fail to be encoded as HTML.
+In most cases, the differences are not visible for a user, but only by comparing the generated HTML code.

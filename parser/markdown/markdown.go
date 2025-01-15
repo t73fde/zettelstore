@@ -439,8 +439,8 @@ func (p *mdP) acceptRawHTML(node *gmAst.RawHTML) ast.InlineSlice {
 	}
 	return ast.InlineSlice{
 		&ast.LiteralNode{
-			Kind:    ast.LiteralHTML,
-			Attrs:   nil, // TODO: add HTML as language
+			Kind:    ast.LiteralProg,
+			Attrs:   attrs.Attributes{"": "html"},
 			Content: bytes.Join(segs, nil),
 		},
 	}

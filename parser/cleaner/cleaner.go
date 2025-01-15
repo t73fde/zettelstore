@@ -115,24 +115,6 @@ func (cv *cleanVisitor) visitInlineSlice(is *ast.InlineSlice) {
 	for _, bn := range *is {
 		ast.Walk(cv, bn)
 	}
-
-	fromPos, toPos := 0, 0
-	for fromPos < len(*is) {
-		(*is)[toPos] = (*is)[fromPos]
-		fromPos++
-		switch in := (*is)[toPos].(type) {
-		case *ast.LiteralNode:
-			if in.Kind != ast.LiteralHTML {
-				toPos++
-			}
-		default:
-			toPos++
-		}
-	}
-	for pos := toPos; pos < len(*is); pos++ {
-		(*is)[pos] = nil // Allow excess nodes to be garbage collected.
-	}
-	*is = (*is)[:toPos:toPos]
 }
 
 func (cv *cleanVisitor) visitHeading(hn *ast.HeadingNode) {

@@ -201,7 +201,6 @@ const (
 	LiteralInput               // Computer input, e.g. Keyboard strokes
 	LiteralOutput              // Computer output
 	LiteralComment             // Inline comment
-	LiteralHTML                // Inline HTML, e.g. for Markdown
 	LiteralMath                // Inline math mode
 )
 

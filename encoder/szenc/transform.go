@@ -143,7 +143,6 @@ var mapLiteralKindS = map[ast.LiteralKind]*sx.Symbol{
 	ast.LiteralInput:   sz.SymLiteralInput,
 	ast.LiteralOutput:  sz.SymLiteralOutput,
 	ast.LiteralComment: sz.SymLiteralComment,
-	ast.LiteralHTML:    sz.SymLiteralHTML,
 	ast.LiteralMath:    sz.SymLiteralMath,
 }
 

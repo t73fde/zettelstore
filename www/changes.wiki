@@ -20,6 +20,10 @@
   *  Remove support for inline zettel snippets. Mostyl used for some HTML
      trinks, which hinders portability and encoding in other formats.
      (breaking: zettelmarkup)
+  *  Remove support for inline HTML text within Markdown text. Such HTML code
+     (did I ever say that Markdown is just a super-set of HTML?) is now
+     translated into literal text.
+     (breaking: markdown/CommonMark)
   *  Query aggregates <code>ATOM</code> and <code>RSS</code> are removed, as
      well as the accompanying <code>TITLE</code> query action (parameter).
      Were announced as deprecated in version 0.19.
