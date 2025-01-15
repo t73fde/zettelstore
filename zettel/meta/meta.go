@@ -152,7 +152,7 @@ func init() {
 	registerKey(api.KeyPublished, TypeTimestamp, usageProperty, "")
 	registerKey(api.KeyQuery, TypeEmpty, usageUser, "")
 	registerKey(api.KeyReadOnly, TypeWord, usageUser, "")
-	registerKey(api.KeySummary, TypeZettelmarkup, usageUser, "")
+	registerKey(api.KeySummary, TypeString, usageUser, "")
 	registerKey(api.KeySuperior, TypeIDSet, usageUser, api.KeySubordinates)
 	registerKey(api.KeyURL, TypeURL, usageUser, "")
 	registerKey(api.KeyUselessFiles, TypeString, usageProperty, "")

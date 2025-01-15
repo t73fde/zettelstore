@@ -18,6 +18,9 @@
      on WebUI (again). Partially reverses the removal of support for these
      values in v0.19. However, creating child zettel is still unsupported.
      (major: webui)
+  *  Type of metadata key <code>summary</code> changed from Zettelmarkup to
+     plain text. You might need to update your zettel that contain this key.
+     (minor)
   *  Remove metadata key <code>created-missing</code>, which was used to
      support the cancelled migration process into a four letter zettel
      identifier format.

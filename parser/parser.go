@@ -111,13 +111,13 @@ func ParseInlines(inp *input.Input, syntax string) ast.InlineSlice {
 }
 
 // ParseMetadata parses a string as Zettelmarkup, resulting in an inline slice.
-// Typically used to parse the title or other metadata of type Zettelmarkup.
 func ParseMetadata(value string) ast.InlineSlice {
 	return ParseInlines(input.NewInput([]byte(value)), meta.SyntaxZmk)
 }
 
 // ParseSpacedText returns an inline slice that consists just of test and space node.
-// No Zettelmarkup parsing is done. It is typically used to transform the zettel title into an inline slice.
+// No Zettelmarkup parsing is done. It is typically used to transform the zettel
+// description into an inline slice.
 func ParseSpacedText(s string) ast.InlineSlice {
 	return ast.InlineSlice{&ast.TextNode{Text: strings.Join(meta.ListFromValue(s), " ")}}
 }
@@ -131,15 +131,13 @@ func ParseDescription(m *meta.Meta) ast.InlineSlice {
 	if m == nil {
 		return nil
 	}
-	if descr, found := m.Get(api.KeySummary); found {
-		in := ParseMetadata(descr)
-		cleaner.CleanInlineLinks(&in)
-		return in
+	if summary, found := m.Get(api.KeySummary); found {
+		return ParseSpacedText(summary)
 	}
 	if title, found := m.Get(api.KeyTitle); found {
 		return ParseSpacedText(title)
 	}
-	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title: " + m.Zid.String()}}
+	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title/summary: " + m.Zid.String()}}
 }
 
 // ParseZettel parses the zettel based on the syntax.

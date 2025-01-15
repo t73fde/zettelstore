@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250113181030
+modified: 20250115163835
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -119,8 +119,7 @@ Most keys conform to a [[type|00001006030000]].
   In most cases, zettel referencing the current zettel should be updated to reference a successor zettel.
   The [[query reference|00001007040310]] [[query:backward? successors?]] lists all such zettel.
 ; [!summary|''summary'']
-: Summarizes the content of the zettel.
-  You may use all [[inline-structured elements|00001007040000]] of Zettelmarkup.
+: Summarizes the content of the zettel using plain text.
 ; [!superior|''superior'']
 : Specifies a zettel that is conceptually a superior zettel.
   This might be a more abstract zettel, or a zettel that should be higher in a hierarchy.
