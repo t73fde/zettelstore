@@ -68,13 +68,6 @@ func (uc *Evaluate) RunBlockNode(ctx context.Context, bn ast.BlockNode) ast.Bloc
 	return bns
 }
 
-// RunMetadata executes the use case for a metadata value.
-func (uc *Evaluate) RunMetadata(ctx context.Context, value string) ast.InlineSlice {
-	is := parser.ParseMetadata(value)
-	evaluator.EvaluateInline(ctx, uc, uc.rtConfig, &is)
-	return is
-}
-
 // GetZettel retrieves the full zettel of a given zettel identifier.
 func (uc *Evaluate) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
 	return uc.ucGetZettel.Run(ctx, zid)

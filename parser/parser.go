@@ -110,11 +110,6 @@ func ParseInlines(inp *input.Input, syntax string) ast.InlineSlice {
 	return Get(syntax).ParseInlines(inp, syntax)
 }
 
-// ParseMetadata parses a string as Zettelmarkup, resulting in an inline slice.
-func ParseMetadata(value string) ast.InlineSlice {
-	return ParseInlines(input.NewInput([]byte(value)), meta.SyntaxZmk)
-}
-
 // ParseSpacedText returns an inline slice that consists just of test and space node.
 // No Zettelmarkup parsing is done. It is typically used to transform the zettel
 // description into an inline slice.

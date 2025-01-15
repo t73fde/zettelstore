@@ -45,17 +45,16 @@ func registerType(name string, isSet bool) *DescriptionType {
 
 // Supported key types.
 var (
-	TypeCredential   = registerType(api.MetaCredential, false)
-	TypeEmpty        = registerType(api.MetaEmpty, false)
-	TypeID           = registerType(api.MetaID, false)
-	TypeIDSet        = registerType(api.MetaIDSet, true)
-	TypeNumber       = registerType(api.MetaNumber, false)
-	TypeString       = registerType(api.MetaString, false)
-	TypeTagSet       = registerType(api.MetaTagSet, true)
-	TypeTimestamp    = registerType(api.MetaTimestamp, false)
-	TypeURL          = registerType(api.MetaURL, false)
-	TypeWord         = registerType(api.MetaWord, false)
-	TypeZettelmarkup = registerType(api.MetaZettelmarkup, false)
+	TypeCredential = registerType(api.MetaCredential, false)
+	TypeEmpty      = registerType(api.MetaEmpty, false)
+	TypeID         = registerType(api.MetaID, false)
+	TypeIDSet      = registerType(api.MetaIDSet, true)
+	TypeNumber     = registerType(api.MetaNumber, false)
+	TypeString     = registerType(api.MetaString, false)
+	TypeTagSet     = registerType(api.MetaTagSet, true)
+	TypeTimestamp  = registerType(api.MetaTimestamp, false)
+	TypeURL        = registerType(api.MetaURL, false)
+	TypeWord       = registerType(api.MetaWord, false)
 )
 
 // Type returns a type hint for the given key. If no type hint is specified,

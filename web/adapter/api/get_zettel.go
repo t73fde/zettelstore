@@ -25,7 +25,6 @@ import (
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/encoder"
-	"zettelstore.de/z/parser"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/content"
@@ -58,21 +57,16 @@ func (a *API) MakeGetZettelHandler(
 
 		default:
 			var zn *ast.ZettelNode
-			var em func(value string) ast.InlineSlice
 			if q.Has(api.QueryKeyParseOnly) {
 				zn, err = parseZettel.Run(ctx, zid, q.Get(api.KeySyntax))
-				em = parser.ParseMetadata
 			} else {
 				zn, err = evaluate.Run(ctx, zid, q.Get(api.KeySyntax))
-				em = func(value string) ast.InlineSlice {
-					return evaluate.RunMetadata(ctx, value)
-				}
 			}
 			if err != nil {
 				a.reportUsecaseError(w, err)
 				return
 			}
-			a.writeEncodedZettelPart(ctx, w, zn, em, enc, encStr, part)
+			a.writeEncodedZettelPart(ctx, w, zn, enc, encStr, part)
 		}
 	})
 }
@@ -148,7 +142,6 @@ func (a *API) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid
 func (a *API) writeEncodedZettelPart(
 	ctx context.Context,
 	w http.ResponseWriter, zn *ast.ZettelNode,
-	evalMeta encoder.EvalMetaFunc,
 	enc api.EncodingEnum, encStr string, part partType,
 ) {
 	encdr := encoder.Create(
@@ -164,9 +157,9 @@ func (a *API) writeEncodedZettelPart(
 	var buf bytes.Buffer
 	switch part {
 	case partZettel:
-		_, err = encdr.WriteZettel(&buf, zn, evalMeta)
+		_, err = encdr.WriteZettel(&buf, zn)
 	case partMeta:
-		_, err = encdr.WriteMeta(&buf, zn.InhMeta, evalMeta)
+		_, err = encdr.WriteMeta(&buf, zn.InhMeta)
 	case partContent:
 		_, err = encdr.WriteContent(&buf, zn)
 	}

@@ -191,7 +191,6 @@ func filterByZid(candidates []*meta.Meta, ignoreSeq *id.Set) []*meta.Meta {
 
 func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, words []string) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
-candLoop:
 	for _, cand := range candidates {
 		zettel, err := uc.port.GetZettel(ctx, cand.Zid)
 		if err != nil {
@@ -202,18 +201,6 @@ candLoop:
 			found: false,
 		}
 		v.text = v.joinWords(words)
-
-		for _, pair := range zettel.Meta.Pairs() {
-			if meta.Type(pair.Key) != meta.TypeZettelmarkup {
-				continue
-			}
-			is := uc.ucEvaluate.RunMetadata(ctx, pair.Value)
-			ast.Walk(&v, &is)
-			if v.found {
-				result = append(result, cand)
-				continue candLoop
-			}
-		}
 
 		syntax := zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)
 		if !parser.IsASTParser(syntax) {

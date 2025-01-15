@@ -41,15 +41,15 @@ type Encoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	content := enc.trans.GetSz(&zn.Ast)
-	meta := enc.trans.GetMeta(zn.InhMeta, evalMeta)
+	meta := enc.trans.GetMeta(zn.InhMeta)
 	return sx.MakeList(meta, content).Print(w)
 }
 
 // WriteMeta encodes meta data as s-expression.
-func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta, evalMeta encoder.EvalMetaFunc) (int, error) {
-	return enc.trans.GetMeta(m, evalMeta).Print(w)
+func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+	return enc.trans.GetMeta(m).Print(w)
 }
 
 // WriteContent encodes the zettel content.

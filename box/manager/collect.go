@@ -38,10 +38,6 @@ func collectZettelIndexData(zn *ast.ZettelNode, data *collectData) {
 	ast.Walk(data, &zn.Ast)
 }
 
-func collectInlineIndexData(is *ast.InlineSlice, data *collectData) {
-	ast.Walk(data, is)
-}
-
 func (data *collectData) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.VerbatimNode:

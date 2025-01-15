@@ -58,9 +58,9 @@ type Encoder struct {
 }
 
 // WriteZettel encodes a full zettel as HTML5.
-func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(he.tx.GetMeta(zn.InhMeta, evalMeta), &env)
+	hm, err := he.th.Evaluate(he.tx.GetMeta(zn.InhMeta), &env)
 	if err != nil {
 		return 0, err
 	}
@@ -117,9 +117,9 @@ func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder
 }
 
 // WriteMeta encodes meta data as HTML5.
-func (he *Encoder) WriteMeta(w io.Writer, m *meta.Meta, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (he *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(he.tx.GetMeta(m, evalMeta), &env)
+	hm, err := he.th.Evaluate(he.tx.GetMeta(m), &env)
 	if err != nil {
 		return 0, err
 	}

@@ -59,15 +59,11 @@ func (wui *WebUI) MakeGetInfoHandler(
 			return
 		}
 
-		enc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, api.KeyLang))
 		getTextTitle := wui.makeGetTextTitle(ctx, ucGetZettel)
-		evalMeta := func(val string) ast.InlineSlice {
-			return ucEvaluate.RunMetadata(ctx, val)
-		}
 		var lbMetadata sx.ListBuilder
 		for _, pair := range zn.Meta.ComputedPairs() {
 			key := pair.Key
-			sxval := wui.writeHTMLMetaValue(key, pair.Value, getTextTitle, evalMeta, enc)
+			sxval := wui.writeHTMLMetaValue(key, pair.Value, getTextTitle)
 			lbMetadata.Add(sx.Cons(sx.MakeString(key), sxval))
 		}
 
@@ -85,6 +81,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 			return
 		}
 
+		enc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, api.KeyLang))
 		entries, _ := evaluator.QueryAction(ctx, nil, unlinkedMeta)
 		bns := ucEvaluate.RunBlockNode(ctx, entries)
 		unlinkedContent, _, err := enc.BlocksSxn(&bns)

@@ -26,7 +26,6 @@ import (
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/encoder"
 	"zettelstore.de/z/encoder/szenc"
 	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/zettel/meta"
@@ -196,8 +195,8 @@ var mapMetaKey = map[string]string{
 	api.KeyLicense:   "license",
 }
 
-func (g *htmlGenerator) MetaSxn(m *meta.Meta, evalMeta encoder.EvalMetaFunc) *sx.Pair {
-	tm := g.tx.GetMeta(m, evalMeta)
+func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
+	tm := g.tx.GetMeta(m)
 	env := shtml.MakeEnvironment(g.lang)
 	hm, err := g.th.Evaluate(tm, &env)
 	if err != nil {

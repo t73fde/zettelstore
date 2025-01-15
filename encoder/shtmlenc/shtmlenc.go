@@ -49,9 +49,9 @@ type Encoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	env := shtml.MakeEnvironment(enc.lang)
-	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(zn.InhMeta, evalMeta), &env)
+	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(zn.InhMeta), &env)
 	if err != nil {
 		return 0, err
 	}
@@ -64,9 +64,9 @@ func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encode
 }
 
 // WriteMeta encodes meta data as s-expression.
-func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	env := shtml.MakeEnvironment(enc.lang)
-	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(m, evalMeta), &env)
+	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(m), &env)
 	if err != nil {
 		return 0, err
 	}

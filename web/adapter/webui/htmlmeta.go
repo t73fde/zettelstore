@@ -21,7 +21,6 @@ import (
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/shtml"
-	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/usecase"
@@ -32,8 +31,6 @@ import (
 func (wui *WebUI) writeHTMLMetaValue(
 	key, value string,
 	getTextTitle getTextTitleFunc,
-	evalMetadata evalMetadataFunc,
-	gen *htmlGenerator,
 ) sx.Object {
 	switch kt := meta.Type(key); kt {
 	case meta.TypeCredential:
@@ -66,8 +63,6 @@ func (wui *WebUI) writeHTMLMetaValue(
 		return wui.url2html(sx.MakeString(value))
 	case meta.TypeWord:
 		return wui.transformKeyValueText(key, value, value)
-	case meta.TypeZettelmarkup:
-		return wui.transformZmkMetadata(value, evalMetadata, gen)
 	default:
 		return sx.MakeList(shtml.SymSTRONG, sx.MakeString("Unhandled type: "), sx.MakeString(kt.Name))
 	}
@@ -147,12 +142,6 @@ func buildHref(ub *api.URLBuilder, text string) *sx.Pair {
 	)
 }
 
-type evalMetadataFunc = func(string) ast.InlineSlice
-
-func createEvalMetadataFunc(ctx context.Context, evaluate *usecase.Evaluate) evalMetadataFunc {
-	return func(value string) ast.InlineSlice { return evaluate.RunMetadata(ctx, value) }
-}
-
 type getTextTitleFunc func(id.Zid) (string, int)
 
 func (wui *WebUI) makeGetTextTitle(ctx context.Context, getZettel usecase.GetZettel) getTextTitleFunc {
@@ -166,9 +155,4 @@ func (wui *WebUI) makeGetTextTitle(ctx context.Context, getZettel usecase.GetZet
 		}
 		return parser.NormalizedSpacedText(z.Meta.GetTitle()), 1
 	}
-}
-
-func (wui *WebUI) transformZmkMetadata(value string, evalMetadata evalMetadataFunc, gen *htmlGenerator) sx.Object {
-	is := evalMetadata(value)
-	return gen.InlinesSxHTML(&is).Cons(shtml.SymSPAN)
 }

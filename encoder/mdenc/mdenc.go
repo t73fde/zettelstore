@@ -43,9 +43,9 @@ type Encoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (me *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (me *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	v := newVisitor(w, me.lang)
-	v.acceptMeta(zn.InhMeta, evalMeta)
+	v.acceptMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {
 		v.b.WriteString("---\n")
 	} else {
@@ -57,24 +57,16 @@ func (me *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder
 }
 
 // WriteMeta encodes meta data as markdown.
-func (me *Encoder) WriteMeta(w io.Writer, m *meta.Meta, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (me *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	v := newVisitor(w, me.lang)
-	v.acceptMeta(m, evalMeta)
+	v.acceptMeta(m)
 	length, err := v.b.Flush()
 	return length, err
 }
 
-func (v *visitor) acceptMeta(m *meta.Meta, evalMeta encoder.EvalMetaFunc) {
+func (v *visitor) acceptMeta(m *meta.Meta) {
 	for _, p := range m.ComputedPairs() {
-		key := p.Key
-		v.b.WriteStrings(key, ": ")
-		if meta.Type(key) == meta.TypeZettelmarkup {
-			is := evalMeta(p.Value)
-			ast.Walk(v, &is)
-		} else {
-			v.b.WriteString(p.Value)
-		}
-		v.b.WriteByte('\n')
+		v.b.WriteStrings(p.Key, ": ", p.Value, "\n")
 	}
 }
 

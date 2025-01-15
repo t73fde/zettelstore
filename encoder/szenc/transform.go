@@ -22,7 +22,6 @@ import (
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/sz"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/encoder"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -350,21 +349,20 @@ func getReference(ref *ast.Reference) *sx.Pair {
 }
 
 var mapMetaTypeS = map[*meta.DescriptionType]*sx.Symbol{
-	meta.TypeCredential:   sz.SymTypeCredential,
-	meta.TypeEmpty:        sz.SymTypeEmpty,
-	meta.TypeID:           sz.SymTypeID,
-	meta.TypeIDSet:        sz.SymTypeIDSet,
-	meta.TypeNumber:       sz.SymTypeNumber,
-	meta.TypeString:       sz.SymTypeString,
-	meta.TypeTagSet:       sz.SymTypeTagSet,
-	meta.TypeTimestamp:    sz.SymTypeTimestamp,
-	meta.TypeURL:          sz.SymTypeURL,
-	meta.TypeWord:         sz.SymTypeWord,
-	meta.TypeZettelmarkup: sz.SymTypeZettelmarkup,
+	meta.TypeCredential: sz.SymTypeCredential,
+	meta.TypeEmpty:      sz.SymTypeEmpty,
+	meta.TypeID:         sz.SymTypeID,
+	meta.TypeIDSet:      sz.SymTypeIDSet,
+	meta.TypeNumber:     sz.SymTypeNumber,
+	meta.TypeString:     sz.SymTypeString,
+	meta.TypeTagSet:     sz.SymTypeTagSet,
+	meta.TypeTimestamp:  sz.SymTypeTimestamp,
+	meta.TypeURL:        sz.SymTypeURL,
+	meta.TypeWord:       sz.SymTypeWord,
 }
 
 // GetMeta transforms the given metadata into a sx list.
-func (t *Transformer) GetMeta(m *meta.Meta, evalMeta encoder.EvalMetaFunc) *sx.Pair {
+func (t *Transformer) GetMeta(m *meta.Meta) *sx.Pair {
 	pairs := m.ComputedPairs()
 	objs := make(sx.Vector, 0, len(pairs))
 	for _, p := range pairs {
@@ -379,9 +377,6 @@ func (t *Transformer) GetMeta(m *meta.Meta, evalMeta encoder.EvalMetaFunc) *sx.P
 				setObjs[i] = sx.MakeString(val)
 			}
 			obj = sx.MakeList(setObjs...)
-		} else if ty == meta.TypeZettelmarkup {
-			is := evalMeta(p.Value)
-			obj = t.getInlineList(is)
 		} else {
 			obj = sx.MakeString(p.Value)
 		}

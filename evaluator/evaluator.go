@@ -527,7 +527,7 @@ func createInlineErrorImage(en *ast.EmbedRefNode) *ast.EmbedRefNode {
 	errorZid := id.EmojiZid
 	en.Ref = ast.ParseReference(errorZid.String())
 	if len(en.Inlines) == 0 {
-		en.Inlines = parser.ParseMetadata("Error placeholder")
+		en.Inlines = ast.InlineSlice{&ast.TextNode{Text: "Error placeholder"}}
 	}
 	return en
 }

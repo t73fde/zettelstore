@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161618
-modified: 20240219161848
+modified: 20250115172406
 
 A single metadata (""metadatum"") is represented by a triple: a symbol representing the type, a symbol representing the key, and either a string or a list that represent the value.
 
@@ -24,7 +24,6 @@ The following table maps key types to symbols and to the type of the value repre
 | [[Timestamp|00001006034500]] | ''TIMESTAMP'' | string
 | [[URL|00001006035000]] | ''URL'' | string
 | [[Word|00001006035500]] | ''WORD'' | string
-| [[Zettelmarkup|00001006036500]] | ''ZETTELMARKUP'' | string
 
 :::syntax
 __ListValue__ **=** ''('' String,,1,, String,,2,, &hellip; String,,n,, '')''.

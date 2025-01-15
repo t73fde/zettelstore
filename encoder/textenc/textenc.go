@@ -37,25 +37,21 @@ type Encoder struct{}
 var myTE Encoder // Only a singleton is required.
 
 // WriteZettel writes metadata and content.
-func (te *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (te *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	v := newVisitor(w)
-	te.WriteMeta(&v.b, zn.InhMeta, evalMeta)
+	te.WriteMeta(&v.b, zn.InhMeta)
 	v.visitBlockSlice(&zn.Ast)
 	length, err := v.b.Flush()
 	return length, err
 }
 
 // WriteMeta encodes metadata as text.
-func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta, evalMeta encoder.EvalMetaFunc) (int, error) {
+func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	buf := encoder.NewEncWriter(w)
 	for _, pair := range m.ComputedPairs() {
-		switch meta.Type(pair.Key) {
-		case meta.TypeTagSet:
+		if meta.Type(pair.Key) == meta.TypeTagSet {
 			writeTagSet(&buf, meta.ListFromValue(pair.Value))
-		case meta.TypeZettelmarkup:
-			is := evalMeta(pair.Value)
-			te.WriteInlines(&buf, &is)
-		default:
+		} else {
 			buf.WriteString(pair.Value)
 		}
 		buf.WriteByte('\n')

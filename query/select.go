@@ -17,11 +17,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
-	"zettelstore.de/z/encoder/textenc"
-	"zettelstore.de/z/parser"
-	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -124,8 +120,6 @@ func createMatchFunc(key string, values []expValue, addSearch addSearchFunc) mat
 		return createMatchTagSetFunc(values, addSearch)
 	case meta.TypeWord:
 		return createMatchWordFunc(values, addSearch)
-	case meta.TypeZettelmarkup:
-		return createMatchZmkFunc(values, addSearch)
 	}
 	return createMatchStringFunc(values, addSearch)
 }
@@ -248,78 +242,6 @@ func sliceToLower(sl []expValue) []expValue {
 		})
 	}
 	return result
-}
-
-func createMatchZmkFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
-	normPreds := make([]stringPredicate, 0, len(values))
-	negPreds := make([]stringPredicate, 0, len(values))
-	for _, v := range values {
-		for _, word := range strfun.NormalizeWords(v.value) {
-			if cmpOp := v.op; cmpOp.isNegated() {
-				cmpOp = cmpOp.negate()
-				negPreds = append(negPreds, createWordCompareFunc(word, cmpOp))
-			} else {
-				normPreds = append(normPreds, createWordCompareFunc(word, cmpOp))
-				addSearch(expValue{word, cmpOp}) // addSearch only for positive selections
-			}
-		}
-	}
-	return func(metaValue string) bool {
-		temp := strings.Fields(zmk2text(metaValue))
-		values := make([]string, 0, len(temp))
-		for _, s := range temp {
-			values = append(values, strfun.NormalizeWords(s)...)
-		}
-		for _, pred := range normPreds {
-			if noneOf(pred, values) {
-				return false
-			}
-		}
-		for _, pred := range negPreds {
-			for _, val := range values {
-				if pred(val) {
-					return false
-				}
-			}
-		}
-		return true
-	}
-}
-
-func noneOf(pred stringPredicate, values []string) bool {
-	for _, value := range values {
-		if pred(value) {
-			return false
-		}
-	}
-	return true
-}
-
-func zmk2text(zmk string) string {
-	isASCII, hasUpper, needParse := true, false, false
-	for i := range len(zmk) {
-		ch := zmk[i]
-		if ch >= utf8.RuneSelf {
-			isASCII = false
-			break
-		}
-		hasUpper = hasUpper || ('A' <= ch && ch <= 'Z')
-		needParse = needParse || !(('A' <= ch && ch <= 'Z') || ('a' <= ch && ch <= 'z') || ('0' <= ch && ch <= '9') || ch == ' ')
-	}
-	if isASCII {
-		if !needParse {
-			if !hasUpper {
-				return zmk
-			}
-			return strings.ToLower(zmk)
-		}
-	}
-	is := parser.ParseMetadata(zmk)
-	var sb strings.Builder
-	if _, err := textenc.Create().WriteInlines(&sb, &is); err != nil {
-		return strings.ToLower(zmk)
-	}
-	return strings.ToLower(sb.String())
 }
 
 func preprocessSet(set []expValue) [][]expValue {

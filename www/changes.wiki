@@ -7,6 +7,16 @@
      type of metadata <code>title</code> was changed from Zettelmarkup to a
      possibly empty string.
      (breaking)
+  *  Type of metadata key <code>summary</code> changed from Zettelmarkup to
+     plain text. You might need to update your zettel that contain this key.
+     (breaking)
+  *  Remove support for metadata type <code>Zettelmarkup</code>. It made
+     implementation too complex, and it was seldom used (see above).
+     (breaking)
+  *  Remove metadata key <code>created-missing</code>, which was used to
+     support the cancelled migration process into a four letter zettel
+     identifier format.
+     (breaking)
   *  Query aggregates <code>ATOM</code> and <code>RSS</code> are removed, as
      well as the accompanying <code>TITLE</code> query action (parameter).
      Were announced as deprecated in version 0.19.
@@ -18,13 +28,6 @@
      on WebUI (again). Partially reverses the removal of support for these
      values in v0.19. However, creating child zettel is still unsupported.
      (major: webui)
-  *  Type of metadata key <code>summary</code> changed from Zettelmarkup to
-     plain text. You might need to update your zettel that contain this key.
-     (minor)
-  *  Remove metadata key <code>created-missing</code>, which was used to
-     support the cancelled migration process into a four letter zettel
-     identifier format.
-     (minor)
 
 <a id="0_19"></a>
 <h2>Changes for Version 0.19.0 (2024-12-13)</h2>

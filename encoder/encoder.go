@@ -27,16 +27,12 @@ import (
 
 // Encoder is an interface that allows to encode different parts of a zettel.
 type Encoder interface {
-	WriteZettel(io.Writer, *ast.ZettelNode, EvalMetaFunc) (int, error)
-	WriteMeta(io.Writer, *meta.Meta, EvalMetaFunc) (int, error)
+	WriteZettel(io.Writer, *ast.ZettelNode) (int, error)
+	WriteMeta(io.Writer, *meta.Meta) (int, error)
 	WriteContent(io.Writer, *ast.ZettelNode) (int, error)
 	WriteBlocks(io.Writer, *ast.BlockSlice) (int, error)
 	WriteInlines(io.Writer, *ast.InlineSlice) (int, error)
 }
-
-// EvalMetaFunc is a function that takes a string of metadata and returns
-// a list of syntax elements.
-type EvalMetaFunc func(string) ast.InlineSlice
 
 // Some errors to signal when encoder methods are not implemented.
 var (

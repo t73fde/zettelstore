@@ -126,7 +126,7 @@ func checkMetaFile(t *testing.T, resultName string, zn *ast.ZettelNode, enc api.
 
 	if enc := encoder.Create(enc, &encoder.CreateParameter{Lang: api.ValueLangEN}); enc != nil {
 		var sf strings.Builder
-		enc.WriteMeta(&sf, zn.Meta, parser.ParseMetadata)
+		enc.WriteMeta(&sf, zn.Meta)
 		checkFileContent(t, resultName, sf.String())
 		return
 	}
