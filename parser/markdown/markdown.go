@@ -40,18 +40,12 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 }
 
 func parseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	p := parseMarkdown(inp)
 	return p.acceptBlockChildren(p.docNode)
-}
-
-func parseInlines(inp *input.Input, syntax string) ast.InlineSlice {
-	bs := parseBlocks(inp, nil, syntax)
-	return bs.FirstParagraphInlines()
 }
 
 func parseMarkdown(inp *input.Input) *mdP {

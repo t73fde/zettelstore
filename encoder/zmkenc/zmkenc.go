@@ -464,8 +464,6 @@ func (v *visitor) visitFormat(fn *ast.FormatNode) {
 
 func (v *visitor) visitLiteral(ln *ast.LiteralNode) {
 	switch ln.Kind {
-	case ast.LiteralZettel:
-		v.writeLiteral('@', ln.Attrs, ln.Content)
 	case ast.LiteralProg:
 		v.writeLiteral('`', ln.Attrs, ln.Content)
 	case ast.LiteralMath:

@@ -330,7 +330,7 @@ func TestFormat(t *testing.T) {
 
 func TestLiteral(t *testing.T) {
 	t.Parallel()
-	for _, ch := range []string{"@", "`", "'", "="} {
+	for _, ch := range []string{"`", "'", "="} {
 		checkTcs(t, replace(ch, TestCases{
 			{"$", "(PARA $)"},
 			{"$$", "(PARA $$)"},
@@ -992,7 +992,6 @@ var mapFormatKind = map[ast.FormatKind]rune{
 }
 
 var mapLiteralKind = map[ast.LiteralKind]rune{
-	ast.LiteralZettel:  '@',
 	ast.LiteralProg:    '`',
 	ast.LiteralInput:   '\'',
 	ast.LiteralOutput:  '=',

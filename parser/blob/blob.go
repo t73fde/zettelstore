@@ -29,7 +29,6 @@ func init() {
 		IsTextFormat:  false,
 		IsImageFormat: true,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.SyntaxJPEG,
@@ -38,7 +37,6 @@ func init() {
 		IsTextFormat:  false,
 		IsImageFormat: true,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.SyntaxPNG,
@@ -47,7 +45,6 @@ func init() {
 		IsTextFormat:  false,
 		IsImageFormat: true,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.SyntaxWebp,
@@ -56,7 +53,6 @@ func init() {
 		IsTextFormat:  false,
 		IsImageFormat: true,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 }
 
@@ -70,5 +66,3 @@ func parseBlocks(inp *input.Input, m *meta.Meta, syntax string) ast.BlockSlice {
 		Blob:        []byte(inp.Src),
 	}}
 }
-
-func parseInlines(*input.Input, string) ast.InlineSlice { return nil }

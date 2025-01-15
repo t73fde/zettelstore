@@ -27,13 +27,12 @@ import (
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/zettel/meta"
 
-	_ "zettelstore.de/z/encoder/htmlenc"  // Allow to use HTML encoder.
-	_ "zettelstore.de/z/encoder/mdenc"    // Allow to use markdown encoder.
-	_ "zettelstore.de/z/encoder/shtmlenc" // Allow to use SHTML encoder.
-	_ "zettelstore.de/z/encoder/szenc"    // Allow to use sz encoder.
-	_ "zettelstore.de/z/encoder/textenc"  // Allow to use text encoder.
-	_ "zettelstore.de/z/encoder/zmkenc"   // Allow to use zmk encoder.
-	"zettelstore.de/z/parser/cleaner"
+	_ "zettelstore.de/z/encoder/htmlenc"   // Allow to use HTML encoder.
+	_ "zettelstore.de/z/encoder/mdenc"     // Allow to use markdown encoder.
+	_ "zettelstore.de/z/encoder/shtmlenc"  // Allow to use SHTML encoder.
+	_ "zettelstore.de/z/encoder/szenc"     // Allow to use sz encoder.
+	_ "zettelstore.de/z/encoder/textenc"   // Allow to use text encoder.
+	_ "zettelstore.de/z/encoder/zmkenc"    // Allow to use zmk encoder.
 	_ "zettelstore.de/z/parser/zettelmark" // Allow to use zettelmark parser.
 )
 
@@ -66,13 +65,18 @@ func TestEncoder(t *testing.T) {
 func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 	for testNum, tc := range testCases {
 		inp := input.NewInput([]byte(tc.zmk))
+		bs := parser.ParseBlocks(inp, nil, meta.SyntaxZmk, config.NoHTML)
 		var pe parserEncoder
 		if tc.inline {
-			is := parser.ParseInlines(inp, meta.SyntaxZmk)
-			cleaner.CleanInlineSlice(&is)
+			var is ast.InlineSlice
+			if len(bs) > 0 {
+				if pn, ok := bs[0].(*ast.ParaNode); ok {
+					is = pn.Inlines
+				}
+			}
 			pe = &peInlines{is: is}
 		} else {
-			pe = &peBlocks{bs: parser.ParseBlocks(inp, nil, meta.SyntaxZmk, config.NoHTML)}
+			pe = &peBlocks{bs: bs}
 		}
 		checkEncodings(t, testNum, pe, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, pe, tc.descr)

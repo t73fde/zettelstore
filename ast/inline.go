@@ -197,7 +197,6 @@ type LiteralKind int
 // Constants for LiteralCode
 const (
 	_              LiteralKind = iota
-	LiteralZettel              // Zettel content
 	LiteralProg                // Inline program code
 	LiteralInput               // Computer input, e.g. Keyboard strokes
 	LiteralOutput              // Computer output

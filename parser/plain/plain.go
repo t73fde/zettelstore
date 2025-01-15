@@ -33,7 +33,6 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.SyntaxHTML,
@@ -42,7 +41,6 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocksHTML,
-		ParseInlines:  parseInlinesHTML,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.SyntaxCSS,
@@ -51,7 +49,6 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.SyntaxSVG,
@@ -60,7 +57,6 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: true,
 		ParseBlocks:   parseSVGBlocks,
-		ParseInlines:  parseSVGInlines,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.SyntaxSxn,
@@ -69,7 +65,6 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseSxnBlocks,
-		ParseInlines:  parseSxnInlines,
 	})
 }
 
@@ -87,21 +82,6 @@ func doParseBlocks(inp *input.Input, syntax string, kind ast.VerbatimKind) ast.B
 			Content: inp.ScanLineContent(),
 		},
 	}
-}
-
-func parseInlines(inp *input.Input, syntax string) ast.InlineSlice {
-	return doParseInlines(inp, syntax, ast.LiteralProg)
-}
-func parseInlinesHTML(inp *input.Input, syntax string) ast.InlineSlice {
-	return doParseInlines(inp, syntax, ast.LiteralHTML)
-}
-func doParseInlines(inp *input.Input, syntax string, kind ast.LiteralKind) ast.InlineSlice {
-	inp.SkipToEOL()
-	return ast.InlineSlice{&ast.LiteralNode{
-		Kind:    kind,
-		Attrs:   attrs.Attributes{"": syntax},
-		Content: append([]byte(nil), inp.Src[0:inp.Pos]...),
-	}}
 }
 
 func parseSVGBlocks(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
@@ -153,13 +133,4 @@ func parseSxnBlocks(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlic
 		}))
 	}
 	return result
-}
-
-func parseSxnInlines(inp *input.Input, syntax string) ast.InlineSlice {
-	inp.SkipToEOL()
-	return ast.InlineSlice{&ast.LiteralNode{
-		Kind:    ast.LiteralProg,
-		Attrs:   attrs.Attributes{"": syntax},
-		Content: append([]byte(nil), inp.Src[0:inp.Pos]...),
-	}}
 }

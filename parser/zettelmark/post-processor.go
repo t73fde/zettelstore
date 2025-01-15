@@ -25,12 +25,6 @@ func postProcessBlocks(bs *ast.BlockSlice) {
 	ast.Walk(&pp, bs)
 }
 
-// postProcessInlines is the entry point for post-processing a list of inline nodes.
-func postProcessInlines(is *ast.InlineSlice) {
-	pp := postProcessor{}
-	ast.Walk(&pp, is)
-}
-
 // postProcessor is a visitor that cleans the abstract syntax tree.
 type postProcessor struct {
 	inVerse bool

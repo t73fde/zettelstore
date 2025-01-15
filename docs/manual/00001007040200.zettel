@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102174215
+modified: 20250115180425
 
 There are some reasons to mark text that should be rendered as uninterpreted:
 * Mark text as literal, sometimes as part of a program.
@@ -46,20 +46,6 @@ Examples:
 * ``==The result is: 42=={-}`` renders in HTML as ::==The result is: 42=={-}::{=example}.
 
 Attributes can be specified, the default attribute has the same semantic as for literal text.
-
-=== Inline-zettel snippet
-To specify an inline snippet in a different [[syntax|00001008000000]], delimit your text with two at-sign characters (""''@''"", U+0040) on each side.
-
-You can add some [[attributes|00001007050000]] immediately after the two closing at-sign characters to specify the syntax to use.
-Either use the attribute key ""syntax"" or use the generic attribute to specify the syntax value.
-If no value is provided, ""[[text|00001008000000#text]]"" is assumed.
-
-Examples:
-* ``A @@-->@@ B`` renders in HTML as ::A @@-->@@ B::{=example}.
-* ``@@<small>@@{=html}Small@@</small>@@{=html}`` renders in HTML as ::@@<small>@@{=html}Small@@</small>@@{=html}::{=example}.
-
-To some degree, an inline-zettel snippet is the @@<small>@@{=html}smaller@@</small>@@{=html} sibling of the [[inline-zettel block|00001007031200]].
-For HTML syntax, the same rules apply.
 
 === Math mode / $$\TeX$$ input
 This allows to enter text, that is typically interpreted by $$\TeX$$ or similar software.

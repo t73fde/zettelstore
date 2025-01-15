@@ -139,7 +139,6 @@ var mapFormatKindS = map[ast.FormatKind]*sx.Symbol{
 }
 
 var mapLiteralKindS = map[ast.LiteralKind]*sx.Symbol{
-	ast.LiteralZettel:  sz.SymLiteralZettel,
 	ast.LiteralProg:    sz.SymLiteralProg,
 	ast.LiteralInput:   sz.SymLiteralInput,
 	ast.LiteralOutput:  sz.SymLiteralOutput,

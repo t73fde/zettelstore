@@ -40,7 +40,6 @@ type Info struct {
 	IsTextFormat  bool
 	IsImageFormat bool
 	ParseBlocks   func(*input.Input, *meta.Meta, string) ast.BlockSlice
-	ParseInlines  func(*input.Input, string) ast.InlineSlice
 }
 
 var registry = map[string]*Info{}
@@ -102,12 +101,6 @@ func ParseBlocks(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLIn
 	bs := Get(syntax).ParseBlocks(inp, m, syntax)
 	cleaner.CleanBlockSlice(&bs, hi.AllowHTML(syntax))
 	return bs
-}
-
-// ParseInlines parses some input and returns a slice of inline nodes.
-func ParseInlines(inp *input.Input, syntax string) ast.InlineSlice {
-	// Do not clean, because we don't know the context where this function will be called.
-	return Get(syntax).ParseInlines(inp, syntax)
 }
 
 // ParseSpacedText returns an inline slice that consists just of test and space node.

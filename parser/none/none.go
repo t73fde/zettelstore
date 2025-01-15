@@ -28,14 +28,6 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: false,
-		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
+		ParseBlocks:   func(*input.Input, *meta.Meta, string) ast.BlockSlice { return nil },
 	})
-}
-
-func parseBlocks(*input.Input, *meta.Meta, string) ast.BlockSlice { return nil }
-
-func parseInlines(inp *input.Input, _ string) ast.InlineSlice {
-	inp.SkipToEOL()
-	return nil
 }

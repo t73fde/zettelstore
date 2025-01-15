@@ -18,24 +18,9 @@ import (
 	"fmt"
 	"strings"
 
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/zettel/meta"
 )
-
-// parseInlineSlice parses a sequence of Inlines until EOS.
-func (cp *zmkP) parseInlineSlice() (ins ast.InlineSlice) {
-	inp := cp.inp
-	for inp.Ch != input.EOS {
-		in := cp.parseInline()
-		if in == nil {
-			break
-		}
-		ins = append(ins, in)
-	}
-	return ins
-}
 
 func (cp *zmkP) parseInline() ast.InlineNode {
 	inp := cp.inp
@@ -72,7 +57,7 @@ func (cp *zmkP) parseInline() ast.InlineNode {
 			in, success = cp.parseComment()
 		case '_', '*', '>', '~', '^', ',', '"', '#', ':':
 			in, success = cp.parseFormat()
-		case '@', '\'', '`', '=', runeModGrave:
+		case '\'', '`', '=', runeModGrave:
 			in, success = cp.parseLiteral()
 		case '$':
 			in, success = cp.parseLiteralMath()
@@ -103,7 +88,7 @@ func (cp *zmkP) parseText() *ast.TextNode {
 		switch inp.Ch {
 		// The following case must contain all runes that occur in parseInline!
 		// Plus the closing brackets ] and } and ) and the middle |
-		case input.EOS, '\n', '\r', '[', ']', '{', '}', '(', ')', '|', '%', '_', '*', '>', '~', '^', ',', '"', '#', ':', '\'', '@', '`', runeModGrave, '$', '=', '\\', '-', '&':
+		case input.EOS, '\n', '\r', '[', ']', '{', '}', '(', ')', '|', '%', '_', '*', '>', '~', '^', ',', '"', '#', ':', '\'', '`', runeModGrave, '$', '=', '\\', '-', '&':
 			return &ast.TextNode{Text: string(inp.Src[pos:inp.Pos])}
 		}
 	}
@@ -445,7 +430,6 @@ func (cp *zmkP) parseFormat() (res ast.InlineNode, success bool) {
 }
 
 var mapRuneLiteral = map[rune]ast.LiteralKind{
-	'@':          ast.LiteralZettel,
 	'`':          ast.LiteralProg,
 	runeModGrave: ast.LiteralProg,
 	'\'':         ast.LiteralInput,
@@ -474,7 +458,11 @@ func (cp *zmkP) parseLiteral() (res ast.InlineNode, success bool) {
 			if inp.Peek() == fch {
 				inp.Next()
 				inp.Next()
-				return createLiteralNode(kind, cp.parseInlineAttributes(), buf.Bytes()), true
+				return &ast.LiteralNode{
+					Kind:    kind,
+					Attrs:   cp.parseInlineAttributes(),
+					Content: buf.Bytes(),
+				}, true
 			}
 			buf.WriteRune(fch)
 			inp.Next()
@@ -482,20 +470,6 @@ func (cp *zmkP) parseLiteral() (res ast.InlineNode, success bool) {
 			tn := cp.parseText()
 			buf.WriteString(tn.Text)
 		}
-	}
-}
-
-func createLiteralNode(kind ast.LiteralKind, a attrs.Attributes, content []byte) *ast.LiteralNode {
-	if kind == ast.LiteralZettel {
-		if val, found := a.Get(""); found && val == meta.SyntaxHTML {
-			kind = ast.LiteralHTML
-			a = a.Remove("")
-		}
-	}
-	return &ast.LiteralNode{
-		Kind:    kind,
-		Attrs:   a,
-		Content: content,
 	}
 }
 

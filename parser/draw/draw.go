@@ -35,7 +35,6 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 }
 
@@ -68,23 +67,6 @@ func parseBlocks(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
 		Description: parser.ParseDescription(m),
 		Syntax:      meta.SyntaxSVG,
 		Blob:        svg,
-	}}
-}
-
-func parseInlines(inp *input.Input, _ string) ast.InlineSlice {
-	canvas, err := newCanvas(inp.Src[inp.Pos:])
-	if err != nil {
-		return canvasErrMsg(err)
-	}
-	svg := canvasToSVG(canvas, defaultFont, defaultScaleX, defaultScaleY)
-	if len(svg) == 0 {
-		return noSVGErrMsg()
-	}
-	return ast.InlineSlice{&ast.EmbedBLOBNode{
-		Attrs:   nil,
-		Syntax:  meta.SyntaxSVG,
-		Blob:    svg,
-		Inlines: nil,
 	}}
 }
 

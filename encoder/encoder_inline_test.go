@@ -638,30 +638,6 @@ var tcsInline = []zmkTestCase{
 		},
 	},
 	{
-		descr: "Inline HTML Zettel",
-		zmk:   `@@<hr>@@{="html"}`,
-		expect: expectMap{
-			encoderHTML:  ``,
-			encoderMD:    "",
-			encoderSz:    `(INLINE)`,
-			encoderSHTML: `()`,
-			encoderText:  ``,
-			encoderZmk:   ``,
-		},
-	},
-	{
-		descr: "Inline Text Zettel",
-		zmk:   `@@<hr>@@{="text"}`,
-		expect: expectMap{
-			encoderHTML:  ``,
-			encoderMD:    "<hr>",
-			encoderSz:    `(INLINE (LITERAL-ZETTEL (("" . "text")) "<hr>"))`,
-			encoderSHTML: `(())`,
-			encoderText:  `<hr>`,
-			encoderZmk:   useZmk,
-		},
-	},
-	{
 		descr: "",
 		zmk:   ``,
 		expect: expectMap{

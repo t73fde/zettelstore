@@ -27,7 +27,6 @@ import (
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
-	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
@@ -332,8 +331,6 @@ func (e *evaluator) visitInlineSlice(is *ast.InlineSlice) {
 			(*is)[i] = e.evalLinkNode(n)
 		case *ast.EmbedRefNode:
 			i += embedNode(is, i, e.evalEmbedRefNode(n))
-		case *ast.LiteralNode:
-			i += embedNode(is, i, e.evalLiteralNode(n))
 		}
 	}
 }
@@ -507,22 +504,6 @@ func (e *evaluator) updateImageRefNode(en *ast.EmbedRefNode, m *meta.Meta, synta
 	}
 }
 
-func (e *evaluator) evalLiteralNode(ln *ast.LiteralNode) ast.InlineNode {
-	if ln.Kind != ast.LiteralZettel {
-		return ln
-	}
-	e.transcludeCount++
-	result := e.evaluateEmbeddedInline(ln.Content, getSyntax(ln.Attrs, meta.SyntaxText))
-	if len(result) == 0 {
-		return &ast.LiteralNode{
-			Kind:    ast.LiteralComment,
-			Attrs:   map[string]string{"-": ""},
-			Content: []byte("Nothing to transclude"),
-		}
-	}
-	return &result
-}
-
 func createInlineErrorImage(en *ast.EmbedRefNode) *ast.EmbedRefNode {
 	errorZid := id.EmojiZid
 	en.Ref = ast.ParseReference(errorZid.String())
@@ -562,12 +543,6 @@ func createEmbeddedNodeLocal(ref *ast.Reference) *ast.EmbedRefNode {
 		Ref:    ref,
 		Syntax: ext,
 	}
-}
-
-func (e *evaluator) evaluateEmbeddedInline(content []byte, syntax string) ast.InlineSlice {
-	is := parser.ParseInlines(input.NewInput(content), syntax)
-	ast.Walk(e, &is)
-	return is
 }
 
 func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.ZettelNode {

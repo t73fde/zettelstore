@@ -17,6 +17,9 @@
      support the cancelled migration process into a four letter zettel
      identifier format.
      (breaking)
+  *  Remove support for inline zettel snippets. Mostyl used for some HTML
+     trinks, which hinders portability and encoding in other formats.
+     (breaking: zettelmarkup)
   *  Query aggregates <code>ATOM</code> and <code>RSS</code> are removed, as
      well as the accompanying <code>TITLE</code> query action (parameter).
      Were announced as deprecated in version 0.19.

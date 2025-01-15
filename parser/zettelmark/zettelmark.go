@@ -33,7 +33,6 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocks,
-		ParseInlines:  parseInlines,
 	})
 }
 
@@ -42,13 +41,6 @@ func parseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	bs := parser.parseBlockSlice()
 	postProcessBlocks(&bs)
 	return bs
-}
-
-func parseInlines(inp *input.Input, _ string) ast.InlineSlice {
-	parser := &zmkP{inp: inp}
-	is := parser.parseInlineSlice()
-	postProcessInlines(&is)
-	return is
 }
 
 type zmkP struct {
