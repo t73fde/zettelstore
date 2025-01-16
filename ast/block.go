@@ -23,11 +23,9 @@ type BlockSlice []BlockNode
 func (*BlockSlice) blockNode() { /* Just a marker */ }
 
 // WalkChildren walks down to the descriptions.
-func (bs *BlockSlice) WalkChildren(v Visitor) {
-	if bs != nil {
-		for _, bn := range *bs {
-			Walk(v, bn)
-		}
+func (bs BlockSlice) WalkChildren(v Visitor) {
+	for _, bn := range bs {
+		Walk(v, bn)
 	}
 }
 
