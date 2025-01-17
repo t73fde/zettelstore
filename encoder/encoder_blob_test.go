@@ -57,7 +57,7 @@ func TestBlob(t *testing.T) {
 	m.Set(api.KeyTitle, "PNG")
 	for testNum, tc := range pngTestCases {
 		inp := input.NewInput(tc.blob)
-		pe := &peBlocks{bs: parser.ParseBlocks(inp, m, "png", config.NoHTML)}
-		checkEncodings(t, testNum, pe, tc.descr, tc.expect, "???")
+		bs := parser.ParseBlocks(inp, m, "png", config.NoHTML)
+		checkEncodings(t, testNum, bs, false, tc.descr, tc.expect, "???")
 	}
 }
