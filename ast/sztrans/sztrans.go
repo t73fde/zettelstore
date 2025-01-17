@@ -351,13 +351,16 @@ func handleDescription(rest *sx.Pair) (sx.Object, bool) {
 func handleTable(rest *sx.Pair) (sx.Object, bool) {
 	if rest != nil {
 		header := collectRow(rest.Head())
+		cols := len(header)
 
 		var rows []ast.TableRow
 		for curr := rest.Tail(); curr != nil; curr = curr.Tail() {
-			rows = append(rows, collectRow(curr.Head()))
+			row := collectRow(curr.Head())
+			rows = append(rows, row)
+			cols = max(cols, len(row))
 		}
-		align := make([]ast.Alignment, len(rows))
-		for i := range rows {
+		align := make([]ast.Alignment, cols)
+		for i := range cols {
 			align[i] = ast.AlignDefault
 		}
 
@@ -470,7 +473,6 @@ func collectReference(pair *sx.Pair) *ast.Reference {
 						ref.State = ast.RefStateQuery
 					case sz.SymRefStateExternal:
 						ref.State = ast.RefStateExternal
-						return nil
 					}
 					return ref
 				}
