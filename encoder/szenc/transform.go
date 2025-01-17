@@ -208,10 +208,9 @@ func isCompactList(itemSlice []ast.ItemSlice) bool {
 }
 
 func (t *Transformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair {
-	dlObjs := make(sx.Vector, 2*len(dn.Descriptions)+1)
-	dlObjs[0] = sz.SymDescription
+	dlObjs := make(sx.Vector, 2*len(dn.Descriptions))
 	for i, def := range dn.Descriptions {
-		dlObjs[2*i+1] = t.getInlineList(def.Term)
+		dlObjs[2*i] = t.getInlineList(def.Term)
 		descObjs := make(sx.Vector, len(def.Descriptions))
 		for j, b := range def.Descriptions {
 			dVal := make(sx.Vector, len(b))
@@ -220,9 +219,9 @@ func (t *Transformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair {
 			}
 			descObjs[j] = sx.MakeList(dVal...).Cons(sz.SymBlock)
 		}
-		dlObjs[2*i+2] = sx.MakeList(descObjs...).Cons(sz.SymBlock)
+		dlObjs[2*i+1] = sx.MakeList(descObjs...).Cons(sz.SymBlock)
 	}
-	return sx.MakeList(dlObjs...)
+	return sx.MakeList(dlObjs...).Cons(sz.SymDescription)
 }
 
 func (t *Transformer) getTable(tn *ast.TableNode) *sx.Pair {

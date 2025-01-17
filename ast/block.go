@@ -23,9 +23,11 @@ type BlockSlice []BlockNode
 func (*BlockSlice) blockNode() { /* Just a marker */ }
 
 // WalkChildren walks down to the descriptions.
-func (bs BlockSlice) WalkChildren(v Visitor) {
-	for _, bn := range bs {
-		Walk(v, bn)
+func (bs *BlockSlice) WalkChildren(v Visitor) {
+	if bs != nil {
+		for _, bn := range *bs {
+			Walk(v, bn)
+		}
 	}
 }
 
@@ -251,7 +253,7 @@ func (*TableNode) blockNode() { /* Just a marker */ }
 func (tn *TableNode) WalkChildren(v Visitor) {
 	if header := tn.Header; header != nil {
 		for i := range header {
-			Walk(v, &header[i].Inlines) // Otherwise changes will not go back
+			Walk(v, header[i]) // Otherwise changes will not go back
 		}
 	}
 	if rows := tn.Rows; rows != nil {
@@ -261,6 +263,11 @@ func (tn *TableNode) WalkChildren(v Visitor) {
 			}
 		}
 	}
+}
+
+// WalkChildren walks the list of inline elements.
+func (cell *TableCell) WalkChildren(v Visitor) {
+	Walk(v, &cell.Inlines) // Otherwise changes will not go back
 }
 
 //--------------------------------------------------------------------------

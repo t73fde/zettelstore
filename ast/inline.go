@@ -25,9 +25,11 @@ type InlineSlice []InlineNode
 func (*InlineSlice) inlineNode() { /* Just a marker */ }
 
 // WalkChildren walks down to the list.
-func (is InlineSlice) WalkChildren(v Visitor) {
-	for _, in := range is {
-		Walk(v, in)
+func (is *InlineSlice) WalkChildren(v Visitor) {
+	if is != nil {
+		for _, in := range *is {
+			Walk(v, in)
+		}
 	}
 }
 
