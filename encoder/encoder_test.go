@@ -18,10 +18,14 @@ import (
 	"strings"
 	"testing"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/sz/zmk"
 	"zettelstore.de/z/ast"
+	"zettelstore.de/z/ast/sztrans"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/encoder"
 	"zettelstore.de/z/parser"
@@ -65,18 +69,39 @@ func TestEncoder(t *testing.T) {
 func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 	for testNum, tc := range testCases {
 		inp := input.NewInput([]byte(tc.zmk))
+		szb := zmk.ParseBlocks(inp)
+		node, err := sztrans.GetNode(szb)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		inp.SetPos(0)
 		bs := parser.ParseBlocks(inp, nil, meta.SyntaxZmk, config.NoHTML)
 		var pe parserEncoder
 		if tc.inline {
-			var is ast.InlineSlice
+			var is, is2 ast.InlineSlice
 			if len(bs) > 0 {
 				if pn, ok := bs[0].(*ast.ParaNode); ok {
 					is = pn.Inlines
 				}
 			}
-			pe = &peInlines{is: is}
+			if bs2, isBs := node.(*ast.BlockSlice); isBs && len(*bs2) > 0 {
+				if pn2, ok := (*bs2)[0].(*ast.ParaNode); ok {
+					is2 = pn2.Inlines
+				}
+			}
+			var szi *sx.Pair
+			if rest := szb.Tail(); rest != nil {
+				szi = rest.Head()
+				szi.SetCar(sz.SymInline)
+			}
+			pe = &peInlines{is: is, is2: is2, szi: szi}
 		} else {
-			pe = &peBlocks{bs: bs}
+			if bs2, isBs := node.(*ast.BlockSlice); isBs {
+				pe = &peBlocks{bs: bs, bs2: *bs2, szb: szb}
+			} else {
+				pe = &peBlocks{bs: bs, bs2: nil, szb: szb}
+			}
 		}
 		checkEncodings(t, testNum, pe, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, pe, tc.descr)
@@ -86,7 +111,7 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 func checkEncodings(t *testing.T, testNum int, pe parserEncoder, descr string, expected expectMap, zmkDefault string) {
 	for enc, exp := range expected {
 		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: api.ValueLangEN})
-		got, err := pe.encode(encdr)
+		got, _, err := pe.encode(encdr)
 		if err != nil {
 			prefix := fmt.Sprintf("Test #%d", testNum)
 			if d := descr; d != "" {
@@ -113,7 +138,7 @@ func checkEncodings(t *testing.T, testNum int, pe parserEncoder, descr string, e
 func checkSz(t *testing.T, testNum int, pe parserEncoder, descr string) {
 	t.Helper()
 	encdr := encoder.Create(encoderSz, nil)
-	exp, err := pe.encode(encdr)
+	exp, _, err := pe.encode(encdr)
 	if err != nil {
 		t.Error(err)
 		return
@@ -132,37 +157,61 @@ func checkSz(t *testing.T, testNum int, pe parserEncoder, descr string) {
 		prefix += "\nMode:     " + pe.mode()
 		t.Errorf("%s\n\nExpected: %q\nGot:      %q", prefix, exp, got)
 	}
+
+	// if exp2 != "" && exp != exp2 {
+	// 	t.Errorf("Test #%d\nExpected: %q\nGot:      %q", testNum, exp, exp2)
+	// }
 }
 
 type parserEncoder interface {
-	encode(encoder.Encoder) (string, error)
+	encode(encoder.Encoder) (string, string, error)
 	mode() string
+	szc() *sx.Pair
 }
 
 type peInlines struct {
-	is ast.InlineSlice
+	is  ast.InlineSlice
+	is2 ast.InlineSlice
+	szi *sx.Pair
 }
 
-func (in peInlines) encode(encdr encoder.Encoder) (string, error) {
+func (in peInlines) encode(encdr encoder.Encoder) (string, string, error) {
 	var sb strings.Builder
 	if _, err := encdr.WriteInlines(&sb, &in.is); err != nil {
-		return "", err
+		return "", "", err
 	}
-	return sb.String(), nil
+	if len(in.is2) == 0 {
+		return sb.String(), "", nil
+	}
+	var sb2 strings.Builder
+	if _, err := encdr.WriteInlines(&sb2, &in.is2); err != nil {
+		return "", "", err
+	}
+	return sb.String(), sb2.String(), nil
 }
 
-func (peInlines) mode() string { return "inline" }
+func (peInlines) mode() string     { return "inline" }
+func (in peInlines) szc() *sx.Pair { return in.szi }
 
 type peBlocks struct {
-	bs ast.BlockSlice
+	bs  ast.BlockSlice
+	bs2 ast.BlockSlice
+	szb *sx.Pair
 }
 
-func (bl peBlocks) encode(encdr encoder.Encoder) (string, error) {
+func (bl peBlocks) encode(encdr encoder.Encoder) (string, string, error) {
 	var sb strings.Builder
 	if _, err := encdr.WriteBlocks(&sb, &bl.bs); err != nil {
-		return "", err
+		return "", "", err
 	}
-	return sb.String(), nil
-
+	if len(bl.bs2) == 0 {
+		return sb.String(), "", nil
+	}
+	var sb2 strings.Builder
+	if _, err := encdr.WriteBlocks(&sb2, &bl.bs2); err != nil {
+		return "", "", err
+	}
+	return sb.String(), sb2.String(), nil
 }
-func (peBlocks) mode() string { return "block" }
+func (peBlocks) mode() string     { return "block" }
+func (bl peBlocks) szc() *sx.Pair { return bl.szb }
