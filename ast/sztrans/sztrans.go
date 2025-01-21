@@ -26,17 +26,22 @@ import (
 
 type transformer struct{}
 
-// GetNode returns an AST node for a given sz representation.
-func GetNode(pair *sx.Pair) (ast.Node, error) {
+// GetBlockSlice returns the sz representations as a AST BlockSlice
+func GetBlockSlice(pair *sx.Pair) (ast.BlockSlice, error) {
 	if pair == nil {
 		return nil, nil
 	}
 	var t transformer
-	obj := sz.Walk(&t, pair, sx.Nil())
-	if sxn, isNode := obj.(sxNode); isNode {
-		return sxn.node, nil
+	if obj := sz.Walk(&t, pair, nil); !obj.IsNil() {
+		if sxn, isNode := obj.(sxNode); isNode {
+			if bs, ok := sxn.node.(*ast.BlockSlice); ok {
+				return *bs, nil
+			}
+			return nil, fmt.Errorf("no BlockSlice AST: %T/%v for %v", sxn.node, sxn.node, pair)
+		}
+		return nil, fmt.Errorf("no AST for %v: %v", pair, obj)
 	}
-	return nil, fmt.Errorf("no AST for %v: %v", pair, obj)
+	return nil, fmt.Errorf("error walking %v", pair)
 }
 
 func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
