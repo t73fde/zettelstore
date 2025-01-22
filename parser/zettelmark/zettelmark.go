@@ -15,12 +15,15 @@
 package zettelmark
 
 import (
+	"log"
 	"strings"
 	"unicode"
 
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsc/sz/zmk"
 	"zettelstore.de/z/ast"
+	"zettelstore.de/z/ast/sztrans"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/zettel/meta"
 )
@@ -34,6 +37,14 @@ func init() {
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocks,
 	})
+	// parser.Register(&parser.Info{
+	// 	Name:          meta.SyntaxZmk,
+	// 	AltNames:      nil,
+	// 	IsASTParser:   true,
+	// 	IsTextFormat:  true,
+	// 	IsImageFormat: false,
+	// 	ParseBlocks:   parseZmkBlocks,
+	// })
 }
 
 func parseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
@@ -41,6 +52,17 @@ func parseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	bs := parser.parseBlockSlice()
 	postProcessBlocks(&bs)
 	return bs
+}
+
+func parseZmkBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
+	if obj := zmk.ParseBlocks(inp); obj != nil {
+		bs, err := sztrans.GetBlockSlice(obj)
+		if err == nil {
+			return bs
+		}
+		log.Printf("sztrans error: %v, for %v\n", err, obj)
+	}
+	return nil
 }
 
 type zmkP struct {

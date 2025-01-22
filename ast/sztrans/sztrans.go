@@ -68,7 +68,7 @@ func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 		case sz.SymLiteralOutput:
 			return handleLiteral(ast.LiteralOutput, pair.Tail())
 		case sz.SymThematic:
-			return sxNode{&ast.HRuleNode{Attrs: sz.GetAttributes(pair.Tail())}}, true
+			return sxNode{&ast.HRuleNode{Attrs: sz.GetAttributes(pair.Tail().Head())}}, true
 		case sz.SymVerbatimComment:
 			return handleVerbatim(ast.VerbatimComment, pair.Tail())
 		case sz.SymVerbatimEval:
