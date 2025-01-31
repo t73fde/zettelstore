@@ -27,6 +27,7 @@ import (
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/shtml"
+	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/collect"
 	"zettelstore.de/z/config"
@@ -284,14 +285,24 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 }
 
 func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {
-	ctx = box.NoEnrichContext(ctx)
-	ztl, err := wui.box.GetZettel(ctx, id.TOCListsMenuZid)
-	if err != nil {
-		return nil
+	var zn *ast.ZettelNode
+	if menuZid, err := id.Parse(wui.getConfig(ctx, nil, config.KeyListsMenuZettel)); err == nil {
+		if zn, err = wui.evalZettel.Run(ctx, menuZid, ""); err != nil {
+			zn = nil
+		}
 	}
+	if zn == nil {
+		ctx = box.NoEnrichContext(ctx)
+		ztl, err := wui.box.GetZettel(ctx, id.TOCListsMenuZid)
+		if err != nil {
+			return nil
+		}
+		zn = wui.evalZettel.RunZettel(ctx, ztl, "")
+	}
+
 	htmlgen := wui.getSimpleHTMLEncoder(lang)
 	var lb sx.ListBuilder
-	for _, ln := range collect.Order(parser.ParseZettel(ctx, ztl, "", wui.rtConfig)) {
+	for _, ln := range collect.Order(zn) {
 		lb.Add(htmlgen.nodeSxHTML(ln))
 	}
 	return lb.List()

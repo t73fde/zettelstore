@@ -28,8 +28,10 @@
      well as the accompanying <code>TITLE</code> query action (parameter).
      Were announced as deprecated in version 0.19.
      (major)
-  *  &ldquo;Lists&rdquo; menu is build by reading zettel <em>Lists Menu</em>
-     (<code>00000000080001</code>) instead of being hard coded.
+  *  &ldquo;Lists&rdquo; menu is build by reading a zettel with menu items
+     (Default: <code>00000000080001</code>) instead of being hard coded. Can be
+     customized with runtime and user configuration
+     <code>lists-menu-zettel</code>.
      (major: webui)
   *  Show metadata values <code>superior</code> and <code>subordinate</code>
      on WebUI (again). Partially reverses the removal of support for these

@@ -24,6 +24,7 @@ import (
 const (
 	KeyFooterZettel         = "footer-zettel"
 	KeyHomeZettel           = "home-zettel"
+	KeyListsMenuZettel      = "lists-menu-zettel"
 	KeyShowBackLinks        = "show-back-links"
 	KeyShowFolgeLinks       = "show-folge-links"
 	KeyShowSequelLinks      = "show-sequel-links"

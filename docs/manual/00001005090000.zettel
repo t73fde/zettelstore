@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102170335
+modified: 20250131151733
 
 The following table lists all predefined zettel with their purpose.
 
@@ -44,7 +44,7 @@ However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find 
 | [[00000000060020]] | configuration | [[Role zettel|00001012051800]] for the role ""[[confguration|00001006020100#configuration]]""
 | [[00000000060030]] | role | [[Role zettel|00001012051800]] for the role ""[[role|00001006020100#role]]""
 | [[00000000060040]] | tag | [[Role zettel|00001012051800]] for the role ""[[tag|00001006020100#tag]]""
-| [[00000000080001]] | Lists Menu | Contains the items of the ""Lists"" menu
+| [[00000000080001]] | Lists Menu | Default items of the ""Lists"" menu; see [[lists-menu-zettel|00001004020000#lists-menu-zettel]] for customization options
 | [[00000000090000]] | New Menu | Contains items that should be in the zettel template menu
 | [[00000000090001]] | New Zettel | Template for a new zettel with role ""[[zettel|00001006020100#zettel]]""
 | [[00000000090002]] | New User | Template for a new [[user zettel|00001010040200]]

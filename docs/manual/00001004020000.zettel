@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102185826
+modified: 20250131151530
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -41,11 +41,10 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
 
   Default: (an invalid zettel identifier)
 ; [!home-zettel|''home-zettel'']
-: Specifies the identifier of the zettel, that should be presented for the default view / home view.
+: Specifies the identifier of the zettel that should be presented for the default view / home view.
   If not given or if the identifier does not identify a zettel, the zettel with the identifier ''00010000000000'' is shown.
 
   May be [[overwritten|00001004020200]] in a user zettel.
-
 ; [!lang|''lang'']
 : Language to be used when displaying content.
 
@@ -55,6 +54,15 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   It is also used to specify the language for all non-zettel content, e.g. lists or search results.
 
   Use values according to the language definition of [[RFC-5646|https://tools.ietf.org/html/rfc5646]].
+; [!lists-menu-zettel|''lists-menu-zettel'']
+: Identifier of the zettel that specifies entries of the ""Lists"" menu (in the [[Web user interface|00001014000000]]).
+  Every list item with a [[link|00001007040310]] is translated into a menu entry.
+
+  If not given or if the identifier does not identify a zettel, or the zettel is not accessible for the current user, the zettel with the identifier ''00000000080001'' is used.
+
+  May be [[overwritten|00001004020200]] in a user zettel.
+
+  Default: ""00000000080001"".
 ; [!max-transclusions|''max-transclusions'']
 : Maximum number of indirect transclusion.
   This is used to avoid an exploding ""transclusion bomb"", a form of a [[billion laughs attack|https://en.wikipedia.org/wiki/Billion_laughs_attack]].
