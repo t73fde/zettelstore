@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707204706
-modified: 20241118174741
+modified: 20250202172633
 
 A context directive calculates the __context__ of a list of zettel identifier.
 It starts with the keyword ''CONTEXT''.
@@ -16,6 +16,8 @@ These are:
 * ''FORWARD'': search for context only through forward links,
 * ''COST'': one or more space characters, and a positive integer: set the maximum __cost__ (default: 17),
 * ''MAX'': one or more space characters, and a positive integer: set the maximum number of context zettel (default: 200).
+* ''MIN'': one or more space characters, and a positive integer: set the minimum number of context zettel (default: 0).
+  Takes precedence over ''COST'' and ''MAX''.
 
 If no ''BACKWARD'' and ''FORWARD'' is specified, a search for context zettel will be done though backward and forward links.
 

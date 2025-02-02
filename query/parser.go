@@ -232,7 +232,13 @@ func (ps *parserState) parseContext(q *Query) *Query {
 		}
 		inp.SetPos(pos)
 		if ps.acceptKwArgs(api.MaxDirective) {
-			if ps.parseCount(spec) {
+			if ps.parseMaxCount(spec) {
+				continue
+			}
+		}
+		inp.SetPos(pos)
+		if ps.acceptKwArgs(api.MinDirective) {
+			if ps.parseMinCount(spec) {
 				continue
 			}
 		}
@@ -254,13 +260,23 @@ func (ps *parserState) parseCost(spec *ContextSpec) bool {
 	}
 	return true
 }
-func (ps *parserState) parseCount(spec *ContextSpec) bool {
+func (ps *parserState) parseMaxCount(spec *ContextSpec) bool {
 	num, ok := ps.scanPosInt()
 	if !ok {
 		return false
 	}
 	if spec.MaxCount == 0 || spec.MaxCount >= num {
 		spec.MaxCount = num
+	}
+	return true
+}
+func (ps *parserState) parseMinCount(spec *ContextSpec) bool {
+	num, ok := ps.scanPosInt()
+	if !ok {
+		return false
+	}
+	if spec.MinCount == 0 || spec.MinCount <= num {
+		spec.MinCount = num
 	}
 	return true
 }

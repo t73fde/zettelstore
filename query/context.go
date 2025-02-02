@@ -28,6 +28,7 @@ type ContextSpec struct {
 	Direction ContextDirection
 	MaxCost   int
 	MaxCount  int
+	MinCount  int
 	Full      bool
 }
 
@@ -65,6 +66,7 @@ func (spec *ContextSpec) Print(pe *PrintEnv) {
 	}
 	pe.printPosInt(api.CostDirective, spec.MaxCost)
 	pe.printPosInt(api.MaxDirective, spec.MaxCount)
+	pe.printPosInt(api.MinDirective, spec.MinCount)
 }
 
 // Execute the specification.
@@ -77,40 +79,70 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 	if maxCount <= 0 {
 		maxCount = 200
 	}
-	tasks := newQueue(startSeq, maxCost, maxCount, port)
+	tasks := newQueue(startSeq, maxCost, maxCount, spec.MinCount, port)
 	isBackward := spec.Direction == ContextDirBoth || spec.Direction == ContextDirBackward
 	isForward := spec.Direction == ContextDirBoth || spec.Direction == ContextDirForward
-	result := []*meta.Meta{}
+	result := make([]*meta.Meta, 0, max(spec.MinCount, 16))
 	for {
-		m, cost := tasks.next()
+		m, cost, level := tasks.next()
 		if m == nil {
 			break
 		}
 		result = append(result, m)
 
 		for _, p := range m.ComputedPairsRest() {
-			tasks.addPair(ctx, p.Key, p.Value, cost, isBackward, isForward)
+			tasks.addPair(ctx, p.Key, p.Value, cost, level, isBackward, isForward)
 		}
 		if !spec.Full {
 			continue
 		}
 		if tags, found := m.GetList(api.KeyTags); found {
-			tasks.addTags(ctx, tags, cost)
+			tasks.addTags(ctx, tags, cost, level)
 		}
 	}
 	return result
 }
 
 type ztlCtxItem struct {
-	cost float64
-	meta *meta.Meta
+	cost  float64
+	meta  *meta.Meta
+	level uint
 }
 type ztlCtxQueue []ztlCtxItem
 
-func (q ztlCtxQueue) Len() int           { return len(q) }
-func (q ztlCtxQueue) Less(i, j int) bool { return q[i].cost < q[j].cost }
-func (q ztlCtxQueue) Swap(i, j int)      { q[i], q[j] = q[j], q[i] }
-func (q *ztlCtxQueue) Push(x any)        { *q = append(*q, x.(ztlCtxItem)) }
+func (q ztlCtxQueue) Len() int { return len(q) }
+func (q ztlCtxQueue) Less(i, j int) bool {
+	levelI, levelJ := q[i].level, q[j].level
+	if levelI == 0 {
+		if levelJ == 0 {
+			return q[i].meta.Zid < q[j].meta.Zid
+		}
+		return true
+	}
+	if levelI == 1 {
+		if levelJ == 0 {
+			return false
+		}
+		if levelJ == 1 {
+			costI, costJ := q[i].cost, q[j].cost
+			if costI == costJ {
+				return q[i].meta.Zid < q[j].meta.Zid
+			}
+			return costI < costJ
+		}
+		return true
+	}
+	if levelJ == 0 || levelJ == 1 {
+		return false
+	}
+	costI, costJ := q[i].cost, q[j].cost
+	if costI == costJ {
+		return q[i].meta.Zid < q[j].meta.Zid
+	}
+	return costI < costJ
+}
+func (q ztlCtxQueue) Swap(i, j int) { q[i], q[j] = q[j], q[i] }
+func (q *ztlCtxQueue) Push(x any)   { *q = append(*q, x.(ztlCtxItem)) }
 func (q *ztlCtxQueue) Pop() any {
 	old := *q
 	n := len(old)
@@ -125,18 +157,20 @@ type contextTask struct {
 	seen     *id.Set
 	queue    ztlCtxQueue
 	maxCost  float64
-	limit    int
+	maxCount int
+	minCount int
 	tagMetas map[string][]*meta.Meta
 	tagZids  map[string]*id.Set    // just the zids of tagMetas
 	metaZid  map[id.Zid]*meta.Meta // maps zid to meta for all meta retrieved with tags
 }
 
-func newQueue(startSeq []*meta.Meta, maxCost float64, limit int, port ContextPort) *contextTask {
+func newQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
 	result := &contextTask{
 		port:     port,
 		seen:     id.NewSet(),
 		maxCost:  maxCost,
-		limit:    limit,
+		maxCount: max(maxCount, minCount),
+		minCount: minCount,
 		tagMetas: make(map[string][]*meta.Meta),
 		tagZids:  make(map[string]*id.Set),
 		metaZid:  make(map[id.Zid]*meta.Meta),
@@ -151,20 +185,20 @@ func newQueue(startSeq []*meta.Meta, maxCost float64, limit int, port ContextPor
 	return result
 }
 
-func (ct *contextTask) addPair(ctx context.Context, key, value string, curCost float64, isBackward, isForward bool) {
+func (ct *contextTask) addPair(ctx context.Context, key, value string, curCost float64, level uint, isBackward, isForward bool) {
 	if key == api.KeyBack {
 		return
 	}
 	newCost := curCost + contextCost(key)
 	if key == api.KeyBackward {
 		if isBackward {
-			ct.addIDSet(ctx, newCost, value)
+			ct.addIDSet(ctx, newCost, level, value)
 		}
 		return
 	}
 	if key == api.KeyForward {
 		if isForward {
-			ct.addIDSet(ctx, newCost, value)
+			ct.addIDSet(ctx, newCost, level, value)
 		}
 		return
 	}
@@ -173,9 +207,9 @@ func (ct *contextTask) addPair(ctx context.Context, key, value string, curCost f
 		return
 	}
 	if t := meta.Type(key); t == meta.TypeID {
-		ct.addID(ctx, newCost, value)
+		ct.addID(ctx, newCost, level, value)
 	} else if t == meta.TypeIDSet {
-		ct.addIDSet(ctx, newCost, value)
+		ct.addIDSet(ctx, newCost, level, value)
 	}
 }
 
@@ -191,39 +225,34 @@ func contextCost(key string) float64 {
 	return 2
 }
 
-func (ct *contextTask) addID(ctx context.Context, newCost float64, value string) {
+func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, value string) {
 	if zid, errParse := id.Parse(value); errParse == nil {
 		if m, errGetMeta := ct.port.GetMeta(ctx, zid); errGetMeta == nil {
-			ct.addMeta(m, newCost)
+			ct.addMeta(m, newCost, level)
 		}
 	}
 }
 
-func (ct *contextTask) addMeta(m *meta.Meta, newCost float64) {
-	// If len(zc.seen) <= 1, the initial zettel is processed. In this case allow all
-	// other zettel that are directly reachable, without taking the cost into account.
-	// Of course, the limit ist still relevant.
-	if !ct.hasLimit() && (ct.seen.Length() <= 1 || ct.maxCost == 0 || newCost <= ct.maxCost) {
-		if !ct.seen.Contains(m.Zid) {
-			heap.Push(&ct.queue, ztlCtxItem{cost: newCost, meta: m})
-		}
+func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint) {
+	if !ct.seen.Contains(m.Zid) {
+		heap.Push(&ct.queue, ztlCtxItem{cost: newCost, meta: m, level: level + 1})
 	}
 }
 
-func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, value string) {
+func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, value string) {
 	elems := meta.ListFromValue(value)
 	refCost := referenceCost(newCost, len(elems))
 	for _, val := range elems {
-		ct.addID(ctx, refCost, val)
+		ct.addID(ctx, refCost, level, val)
 	}
 }
 
 func referenceCost(baseCost float64, numReferences int) float64 {
 	nRefs := float64(numReferences)
-	return nRefs*math.Log2(nRefs+1) + baseCost
+	return nRefs*math.Log2(nRefs+1) + baseCost - 1
 }
 
-func (ct *contextTask) addTags(ctx context.Context, tags []string, baseCost float64) {
+func (ct *contextTask) addTags(ctx context.Context, tags []string, baseCost float64, level uint) {
 	var zidSet *id.Set
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)
@@ -242,7 +271,7 @@ func (ct *contextTask) addTags(ctx context.Context, tags []string, baseCost floa
 				costFactor /= 1.1
 			}
 		}
-		ct.addMeta(ct.metaZid[zid], minCost*costFactor)
+		ct.addMeta(ct.metaZid[zid], minCost*costFactor, level)
 	})
 }
 
@@ -270,13 +299,10 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *id.Set {
 
 func tagCost(baseCost float64, numTags int) float64 {
 	nTags := float64(numTags)
-	return nTags*math.Log2(nTags+1) + baseCost
+	return nTags*math.Log2(nTags+1) + baseCost - 1
 }
 
-func (ct *contextTask) next() (*meta.Meta, float64) {
-	if ct.hasLimit() {
-		return nil, -1
-	}
+func (ct *contextTask) next() (*meta.Meta, float64, uint) {
 	for len(ct.queue) > 0 {
 		item := heap.Pop(&ct.queue).(ztlCtxItem)
 		m := item.meta
@@ -284,13 +310,28 @@ func (ct *contextTask) next() (*meta.Meta, float64) {
 		if ct.seen.Contains(zid) {
 			continue
 		}
+		cost, level := item.cost, item.level
+		if ct.hasEnough(cost, level) {
+			break
+		}
 		ct.seen.Add(zid)
-		return m, item.cost
+		return m, cost, item.level
 	}
-	return nil, -1
+	return nil, -1, 0
 }
 
-func (ct *contextTask) hasLimit() bool {
-	limit := ct.limit
-	return limit > 0 && ct.seen.Length() >= limit
+func (ct *contextTask) hasEnough(cost float64, level uint) bool {
+	if level <= 1 {
+		// Always add direct descendants of the initial zettel
+		return false
+	}
+	length := ct.seen.Length()
+	if minCount := ct.minCount; 0 < minCount && minCount > length {
+		return false
+	}
+	if maxCount := ct.maxCount; 0 < maxCount && maxCount <= length {
+		return true
+	}
+	maxCost := ct.maxCost
+	return maxCost == 0.0 || maxCost <= cost
 }
