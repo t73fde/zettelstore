@@ -21,6 +21,7 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
+	"t73f.de/r/zsc/domain/id/idslice"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -46,7 +47,7 @@ type Searcher interface {
 // Query specifies a mechanism for querying zettel.
 type Query struct {
 	// Präfixed zettel identifier.
-	zids []id.Zid
+	zids idslice.Slice
 
 	// Querydirectives, like CONTEXT, ...
 	directives []Directive
@@ -70,13 +71,11 @@ type Query struct {
 }
 
 // GetZids returns a slide of all specified zettel identifier.
-func (q *Query) GetZids() []id.Zid {
+func (q *Query) GetZids() idslice.Slice {
 	if q == nil || len(q.zids) == 0 {
 		return nil
 	}
-	result := make([]id.Zid, len(q.zids))
-	copy(result, q.zids)
-	return result
+	return q.zids.Clone()
 }
 
 // Directive are executed to process the list of metadata.
@@ -143,14 +142,8 @@ func (q *Query) Clone() *Query {
 		return nil
 	}
 	c := new(Query)
-	if len(q.zids) > 0 {
-		c.zids = make([]id.Zid, len(q.zids))
-		copy(c.zids, q.zids)
-	}
-	if len(q.directives) > 0 {
-		c.directives = make([]Directive, len(q.directives))
-		copy(c.directives, q.directives)
-	}
+	c.zids = q.zids.Clone()
+	c.directives = q.GetDirectives()
 
 	c.preMatch = q.preMatch
 	c.terms = make([]conjTerms, len(q.terms))
@@ -416,7 +409,7 @@ func metaList2idSet(ml []*meta.Meta) *idset.Set {
 	if ml == nil {
 		return nil
 	}
-	result := idset.NewSetCap(len(ml))
+	result := idset.NewCap(len(ml))
 	for _, m := range ml {
 		result = result.Add(m.Zid)
 	}
@@ -432,7 +425,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.S
 			if pred == nil {
 				pred = startSet.ContainsOrNil
 			} else {
-				predSet := idset.NewSetCap(startSet.Length())
+				predSet := idset.NewCap(startSet.Length())
 				startSet.ForEach(func(zid id.Zid) {
 					if pred(zid) {
 						predSet = predSet.Add(zid)

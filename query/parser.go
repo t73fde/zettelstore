@@ -81,7 +81,7 @@ func (ps *parserState) parse(q *Query) *Query {
 		return q
 	}
 	firstPos := inp.Pos
-	zidSet := idset.NewSet()
+	zidSet := idset.New()
 	for {
 		pos := inp.Pos
 		zid, found := ps.scanZid()

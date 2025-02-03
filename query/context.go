@@ -168,7 +168,7 @@ type contextTask struct {
 func newQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
 	result := &contextTask{
 		port:     port,
-		seen:     idset.NewSet(),
+		seen:     idset.New(),
 		maxCost:  maxCost,
 		maxCount: max(maxCount, minCount),
 		minCount: minCount,
@@ -286,7 +286,7 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Set
 		ml = nil
 	}
 	ct.tagMetas[tag] = ml
-	zids := idset.NewSetCap(len(ml))
+	zids := idset.NewCap(len(ml))
 	for _, m := range ml {
 		zid := m.Zid
 		zids = zids.Add(zid)

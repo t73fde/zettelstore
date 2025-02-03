@@ -22,6 +22,7 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
+	"t73f.de/r/zsc/domain/id/idslice"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/collect"
@@ -72,7 +73,7 @@ func (uc *Query) Run(ctx context.Context, q *query.Query) ([]*meta.Meta, error) 
 	return nil, nil
 }
 
-func (uc *Query) getMetaZid(ctx context.Context, zids []id.Zid) ([]*meta.Meta, error) {
+func (uc *Query) getMetaZid(ctx context.Context, zids idslice.Slice) ([]*meta.Meta, error) {
 	metaSeq := make([]*meta.Meta, 0, len(zids))
 	for _, zid := range zids {
 		m, err := uc.port.GetMeta(ctx, zid)
@@ -156,8 +157,8 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	if err != nil {
 		return nil
 	}
-	metaZids := idset.NewSetCap(len(metaSeq))
-	refZids := idset.NewSetCap(len(metaSeq) * 4) // Assumption: there are four zids per zettel
+	metaZids := idset.NewCap(len(metaSeq))
+	refZids := idset.NewCap(len(metaSeq) * 4) // Assumption: there are four zids per zettel
 	for _, m := range metaSeq {
 		metaZids.Add(m.Zid)
 		refZids.Add(m.Zid)

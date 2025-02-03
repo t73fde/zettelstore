@@ -28,6 +28,7 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idslice"
 	"zettelstore.de/z/kernel"
 )
 
@@ -243,16 +244,16 @@ func TestGetZettelContext(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	checkZidList(t, []id.Zid{ownerZid, allUserZid, writerZid}, rl)
+	checkZidList(t, idslice.Slice{ownerZid, allUserZid, writerZid}, rl)
 
 	rl, err = c.QueryZettel(context.Background(), ownerZid.String()+" CONTEXT BACKWARD")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	checkZidList(t, []id.Zid{ownerZid, allUserZid}, rl)
+	checkZidList(t, idslice.Slice{ownerZid, allUserZid}, rl)
 }
-func checkZidList(t *testing.T, exp []id.Zid, got [][]byte) {
+func checkZidList(t *testing.T, exp idslice.Slice, got [][]byte) {
 	t.Helper()
 	if len(exp) != len(got) {
 		t.Errorf("expected a list fo length %d, but got %d", len(exp), len(got))

@@ -141,7 +141,7 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 func (ms *mapStore) SearchEqual(word string) *idset.Set {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
-	result := idset.NewSet()
+	result := idset.New()
 	if refs, ok := ms.words[word]; ok {
 		result = result.IUnion(refs)
 	}
@@ -239,7 +239,7 @@ func (ms *mapStore) SearchContains(s string) *idset.Set {
 
 func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) *idset.Set {
 	// Must only be called if ms.mx is read-locked!
-	result := idset.NewSet()
+	result := idset.New()
 	for word, refs := range ms.words {
 		if !pred(word, s) {
 			continue

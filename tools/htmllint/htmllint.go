@@ -29,6 +29,7 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idslice"
 	"zettelstore.de/z/tools"
 )
 
@@ -77,8 +78,8 @@ func cmdValidateHTML(args []string) error {
 	return nil
 }
 
-func calculateZids(metaList []api.ZidMetaRights) ([]id.Zid, []int) {
-	zids := make([]id.Zid, len(metaList))
+func calculateZids(metaList []api.ZidMetaRights) (idslice.Slice, []int) {
+	zids := make(idslice.Slice, len(metaList))
 	for i, m := range metaList {
 		zids[i] = m.ID
 	}
@@ -86,14 +87,14 @@ func calculateZids(metaList []api.ZidMetaRights) ([]id.Zid, []int) {
 	return zids, rand.Perm(len(metaList))
 }
 
-func zidsToUse(zids []id.Zid, perm []int, sampleSize int) []id.Zid {
+func zidsToUse(zids idslice.Slice, perm []int, sampleSize int) idslice.Slice {
 	if sampleSize < 0 || len(perm) <= sampleSize {
 		return zids
 	}
 	if sampleSize == 0 {
 		return nil
 	}
-	result := make([]id.Zid, sampleSize)
+	result := make(idslice.Slice, sampleSize)
 	for i := range sampleSize {
 		result[i] = zids[perm[i]]
 	}

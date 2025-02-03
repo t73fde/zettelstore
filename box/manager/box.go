@@ -133,7 +133,7 @@ func (mgr *Manager) fetchZids(ctx context.Context) (*idset.Set, error) {
 		p.ReadStats(&mbstats)
 		numZettel += mbstats.Zettel
 	}
-	result := idset.NewSetCap(numZettel)
+	result := idset.NewCap(numZettel)
 	for _, p := range mgr.boxes {
 		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Add(zid) }, query.AlwaysIncluded)
 		if err != nil {
@@ -193,7 +193,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *que
 	}
 	selected := map[id.Zid]*meta.Meta{}
 	for _, term := range compSearch.Terms {
-		rejected := idset.NewSet()
+		rejected := idset.New()
 		handleMeta := func(m *meta.Meta) {
 			zid := m.Zid
 			if rejected.Contains(zid) {

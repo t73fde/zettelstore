@@ -35,9 +35,9 @@ func NewZettelIndex(m *meta.Meta) *ZettelIndex {
 	return &ZettelIndex{
 		Zid:         m.Zid,
 		meta:        m,
-		backrefs:    idset.NewSet(),
+		backrefs:    idset.New(),
 		inverseRefs: make(map[string]*idset.Set),
-		deadrefs:    idset.NewSet(),
+		deadrefs:    idset.New(),
 	}
 }
 
@@ -52,7 +52,7 @@ func (zi *ZettelIndex) AddInverseRef(key string, zid id.Zid) {
 		zids.Add(zid)
 		return
 	}
-	zi.inverseRefs[key] = idset.NewSet(zid)
+	zi.inverseRefs[key] = idset.New(zid)
 }
 
 // AddDeadRef adds a dead reference to a zettel.

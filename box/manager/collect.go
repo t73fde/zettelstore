@@ -30,7 +30,7 @@ type collectData struct {
 }
 
 func (data *collectData) initialize() {
-	data.refs = idset.NewSet()
+	data.refs = idset.New()
 	data.words = store.NewWordSet()
 	data.urls = store.NewWordSet()
 }
