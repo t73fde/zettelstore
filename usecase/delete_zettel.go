@@ -16,8 +16,8 @@ package usecase
 import (
 	"context"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/logger"
-	"zettelstore.de/z/zettel/id"
 )
 
 // DeleteZettelPort is the interface used by this use case.

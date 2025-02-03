@@ -17,8 +17,8 @@ package ast
 import (
 	"net/url"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

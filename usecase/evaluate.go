@@ -16,13 +16,13 @@ package usecase
 import (
 	"context"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/evaluator"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

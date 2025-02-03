@@ -16,20 +16,21 @@ package manager
 import (
 	"strings"
 
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box/manager/store"
 	"zettelstore.de/z/strfun"
-	"zettelstore.de/z/zettel/id"
 )
 
 type collectData struct {
-	refs  *id.Set
+	refs  *idset.Set
 	words store.WordSet
 	urls  store.WordSet
 }
 
 func (data *collectData) initialize() {
-	data.refs = id.NewSet()
+	data.refs = idset.NewSet()
 	data.words = store.NewWordSet()
 	data.urls = store.NewWordSet()
 }

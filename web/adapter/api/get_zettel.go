@@ -21,6 +21,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/sexp"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
@@ -28,7 +29,6 @@ import (
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/content"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

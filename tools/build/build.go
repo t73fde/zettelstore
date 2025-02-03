@@ -27,10 +27,10 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/tools"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

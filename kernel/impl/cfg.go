@@ -22,12 +22,12 @@ import (
 	"sync"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -110,7 +110,7 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		keyDefaultVisibility:           meta.VisibilityLogin,
 		keyExpertMode:                  false,
 		config.KeyFooterZettel:         id.Invalid,
-		config.KeyHomeZettel:           id.DefaultHomeZid,
+		config.KeyHomeZettel:           api.ZidDefaultHome,
 		kernel.ConfigInsecureHTML:      config.NoHTML,
 		api.KeyLang:                    api.ValueLangEN,
 		keyMaxTransclusions:            int64(1024),
@@ -130,7 +130,7 @@ func (cs *configService) GetLogger() *logger.Logger { return cs.logger }
 
 func (cs *configService) Start(*myKernel) error {
 	cs.logger.Info().Msg("Start Service")
-	data := meta.New(id.ConfigurationZid)
+	data := meta.New(api.ZidConfiguration)
 	for _, kv := range cs.GetNextConfigList() {
 		data.Set(kv.Key, kv.Value)
 	}
@@ -163,11 +163,11 @@ func (cs *configService) setBox(mgr box.Manager) {
 	cs.manager = mgr
 	cs.mxService.Unlock()
 	mgr.RegisterObserver(cs.observe)
-	cs.observe(box.UpdateInfo{Box: mgr, Reason: box.OnZettel, Zid: id.ConfigurationZid})
+	cs.observe(box.UpdateInfo{Box: mgr, Reason: box.OnZettel, Zid: api.ZidConfiguration})
 }
 
 func (cs *configService) doUpdate(p box.BaseBox) error {
-	z, err := p.GetZettel(context.Background(), id.ConfigurationZid)
+	z, err := p.GetZettel(context.Background(), api.ZidConfiguration)
 	cs.logger.Trace().Err(err).Msg("got config meta")
 	if err != nil {
 		return err
@@ -188,7 +188,7 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 }
 
 func (cs *configService) observe(ci box.UpdateInfo) {
-	if (ci.Reason != box.OnZettel && ci.Reason != box.OnDelete) || ci.Zid == id.ConfigurationZid {
+	if (ci.Reason != box.OnZettel && ci.Reason != box.OnDelete) || ci.Zid == api.ZidConfiguration {
 		cs.logger.Debug().Uint("reason", uint64(ci.Reason)).Zid(ci.Zid).Msg("observe")
 		go func() {
 			cs.mxService.RLock()

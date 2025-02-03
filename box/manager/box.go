@@ -18,10 +18,11 @@ import (
 	"errors"
 	"strings"
 
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -116,7 +117,7 @@ func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zett
 }
 
 // FetchZids returns the set of all zettel identifer managed by the box.
-func (mgr *Manager) FetchZids(ctx context.Context) (*id.Set, error) {
+func (mgr *Manager) FetchZids(ctx context.Context) (*idset.Set, error) {
 	mgr.mgrLog.Debug().Msg("FetchZids")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
@@ -125,14 +126,14 @@ func (mgr *Manager) FetchZids(ctx context.Context) (*id.Set, error) {
 	defer mgr.mgrMx.RUnlock()
 	return mgr.fetchZids(ctx)
 }
-func (mgr *Manager) fetchZids(ctx context.Context) (*id.Set, error) {
+func (mgr *Manager) fetchZids(ctx context.Context) (*idset.Set, error) {
 	numZettel := 0
 	for _, p := range mgr.boxes {
 		var mbstats box.ManagedBoxStats
 		p.ReadStats(&mbstats)
 		numZettel += mbstats.Zettel
 	}
-	result := id.NewSetCap(numZettel)
+	result := idset.NewSetCap(numZettel)
 	for _, p := range mgr.boxes {
 		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Add(zid) }, query.AlwaysIncluded)
 		if err != nil {
@@ -192,7 +193,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *que
 	}
 	selected := map[id.Zid]*meta.Meta{}
 	for _, term := range compSearch.Terms {
-		rejected := id.NewSet()
+		rejected := idset.NewSet()
 		handleMeta := func(m *meta.Meta) {
 			zid := m.Zid
 			if rejected.Contains(zid) {

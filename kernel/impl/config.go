@@ -21,10 +21,10 @@ import (
 	"strings"
 	"sync"
 
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
-	"zettelstore.de/z/zettel/id"
 )
 
 type parseFunc func(string) (any, error)

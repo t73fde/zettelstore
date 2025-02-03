@@ -18,12 +18,12 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -62,7 +62,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		wui.bindCommonZettelData(ctx, &rb, user, m, nil)
 
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.DeleteTemplateZid, env)
+			err = wui.renderSxnTemplate(ctx, w, api.ZidDeleteTemplate, env)
 		} else {
 			err = rb.err
 		}

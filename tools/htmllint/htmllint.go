@@ -28,6 +28,7 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/tools"
 )
 
@@ -59,7 +60,7 @@ func cmdValidateHTML(args []string) error {
 		fmt.Fprintf(os.Stderr, "Now checking: %s\n", kd.text)
 		for _, zid := range zidsToUse(zids, perm, kd.sampleSize) {
 			var nmsgs int
-			nmsgs, err = validateHTML(client, kd.uc, api.ZettelID(zid))
+			nmsgs, err = validateHTML(client, kd.uc, zid)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "* error while validating zettel %v with: %v\n", zid, err)
 				msgCount++
@@ -76,23 +77,23 @@ func cmdValidateHTML(args []string) error {
 	return nil
 }
 
-func calculateZids(metaList []api.ZidMetaRights) ([]string, []int) {
-	zids := make([]string, len(metaList))
+func calculateZids(metaList []api.ZidMetaRights) ([]id.Zid, []int) {
+	zids := make([]id.Zid, len(metaList))
 	for i, m := range metaList {
-		zids[i] = string(m.ID)
+		zids[i] = m.ID
 	}
 	slices.Sort(zids)
 	return zids, rand.Perm(len(metaList))
 }
 
-func zidsToUse(zids []string, perm []int, sampleSize int) []string {
+func zidsToUse(zids []id.Zid, perm []int, sampleSize int) []id.Zid {
 	if sampleSize < 0 || len(perm) <= sampleSize {
 		return zids
 	}
 	if sampleSize == 0 {
 		return nil
 	}
-	result := make([]string, sampleSize)
+	result := make([]id.Zid, sampleSize)
 	for i := range sampleSize {
 		result[i] = zids[perm[i]]
 	}
@@ -113,21 +114,21 @@ var keyDescr = []struct {
 	{createJustKey('d'), "zettel delete dialog", 200},
 }
 
-type urlCreator func(*client.Client, api.ZettelID) *api.URLBuilder
+type urlCreator func(*client.Client, id.Zid) *api.URLBuilder
 
 func createJustKey(key byte) urlCreator {
-	return func(c *client.Client, zid api.ZettelID) *api.URLBuilder {
+	return func(c *client.Client, zid id.Zid) *api.URLBuilder {
 		return c.NewURLBuilder(key).SetZid(zid)
 	}
 }
 
-func getHTMLZettel(client *client.Client, zid api.ZettelID) *api.URLBuilder {
+func getHTMLZettel(client *client.Client, zid id.Zid) *api.URLBuilder {
 	return client.NewURLBuilder('z').SetZid(zid).
 		AppendKVQuery(api.QueryKeyEncoding, api.EncodingHTML).
 		AppendKVQuery(api.QueryKeyPart, api.PartZettel)
 }
 
-func validateHTML(client *client.Client, uc urlCreator, zid api.ZettelID) (int, error) {
+func validateHTML(client *client.Client, uc urlCreator, zid id.Zid) (int, error) {
 	ub := uc(client, zid)
 	if tools.Verbose {
 		fmt.Fprintf(os.Stderr, "GET %v\n", ub)

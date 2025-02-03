@@ -17,8 +17,9 @@ import (
 	"strconv"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/input"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -80,7 +81,7 @@ func (ps *parserState) parse(q *Query) *Query {
 		return q
 	}
 	firstPos := inp.Pos
-	zidSet := id.NewSet()
+	zidSet := idset.NewSet()
 	for {
 		pos := inp.Pos
 		zid, found := ps.scanZid()

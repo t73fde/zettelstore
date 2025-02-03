@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager"
 	"zettelstore.de/z/box/notify"
@@ -29,7 +30,6 @@ import (
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

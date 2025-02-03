@@ -20,11 +20,13 @@ import (
 
 	"t73f.de/r/sx/sxeval"
 	"t73f.de/r/zsc/api"
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idgraph"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/zettel/meta"
 )
 
-func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (id.Digraph, *sxeval.Binding, error) {
+func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (idgraph.Digraph, *sxeval.Binding, error) {
 	// getMeta MUST currently use GetZettel, because GetMeta just uses the
 	// Index, which might not be current.
 	getMeta := func(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
@@ -34,13 +36,13 @@ func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (id.Digraph, *sxeval
 		}
 		return z.Meta, nil
 	}
-	dg := buildSxnCodeDigraph(ctx, id.StartSxnZid, getMeta)
+	dg := buildSxnCodeDigraph(ctx, api.ZidSxnStart, getMeta)
 	if dg == nil {
 		return nil, wui.rootBinding, nil
 	}
-	dg = dg.AddVertex(id.BaseSxnZid).AddEdge(id.StartSxnZid, id.BaseSxnZid)
-	dg = dg.AddVertex(id.PreludeSxnZid).AddEdge(id.BaseSxnZid, id.PreludeSxnZid)
-	dg = dg.TransitiveClosure(id.StartSxnZid)
+	dg = dg.AddVertex(api.ZidSxnBase).AddEdge(api.ZidSxnStart, api.ZidSxnBase)
+	dg = dg.AddVertex(api.ZidSxnPrelude).AddEdge(api.ZidSxnBase, api.ZidSxnPrelude)
+	dg = dg.TransitiveClosure(api.ZidSxnStart)
 
 	if zid, isDAG := dg.IsDAG(); !isDAG {
 		return nil, nil, fmt.Errorf("zettel %v is part of a dependency cycle", zid)
@@ -56,14 +58,14 @@ func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (id.Digraph, *sxeval
 
 type getMetaFunc func(context.Context, id.Zid) (*meta.Meta, error)
 
-func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFunc) id.Digraph {
+func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFunc) idgraph.Digraph {
 	m, err := getMeta(ctx, startZid)
 	if err != nil {
 		return nil
 	}
-	var marked *id.Set
+	var marked *idset.Set
 	stack := []*meta.Meta{m}
-	dg := id.Digraph(nil).AddVertex(startZid)
+	dg := idgraph.Digraph(nil).AddVertex(startZid)
 	for pos := len(stack) - 1; pos >= 0; pos = len(stack) - 1 {
 		curr := stack[pos]
 		stack = stack[:pos]

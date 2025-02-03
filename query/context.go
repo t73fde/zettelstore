@@ -19,7 +19,8 @@ import (
 	"math"
 
 	"t73f.de/r/zsc/api"
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -154,25 +155,25 @@ func (q *ztlCtxQueue) Pop() any {
 
 type contextTask struct {
 	port     ContextPort
-	seen     *id.Set
+	seen     *idset.Set
 	queue    ztlCtxQueue
 	maxCost  float64
 	maxCount int
 	minCount int
 	tagMetas map[string][]*meta.Meta
-	tagZids  map[string]*id.Set    // just the zids of tagMetas
+	tagZids  map[string]*idset.Set // just the zids of tagMetas
 	metaZid  map[id.Zid]*meta.Meta // maps zid to meta for all meta retrieved with tags
 }
 
 func newQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
 	result := &contextTask{
 		port:     port,
-		seen:     id.NewSet(),
+		seen:     idset.NewSet(),
 		maxCost:  maxCost,
 		maxCount: max(maxCount, minCount),
 		minCount: minCount,
 		tagMetas: make(map[string][]*meta.Meta),
-		tagZids:  make(map[string]*id.Set),
+		tagZids:  make(map[string]*idset.Set),
 		metaZid:  make(map[id.Zid]*meta.Meta),
 	}
 
@@ -253,7 +254,7 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 }
 
 func (ct *contextTask) addTags(ctx context.Context, tags []string, baseCost float64, level uint) {
-	var zidSet *id.Set
+	var zidSet *idset.Set
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)
 		zidSet = zidSet.IUnion(zs)
@@ -275,7 +276,7 @@ func (ct *contextTask) addTags(ctx context.Context, tags []string, baseCost floa
 	})
 }
 
-func (ct *contextTask) updateTagData(ctx context.Context, tag string) *id.Set {
+func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Set {
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}
@@ -285,7 +286,7 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *id.Set {
 		ml = nil
 	}
 	ct.tagMetas[tag] = ml
-	zids := id.NewSetCap(len(ml))
+	zids := idset.NewSetCap(len(ml))
 	for _, m := range ml {
 		zid := m.Zid
 		zids = zids.Add(zid)

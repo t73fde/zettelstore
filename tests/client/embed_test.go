@@ -19,11 +19,12 @@ import (
 	"testing"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 )
 
 const (
-	abcZid   = api.ZettelID("20211020121000")
-	abc10Zid = api.ZettelID("20211020121100")
+	abcZid   = id.Zid(20211020121000)
+	abc10Zid = id.Zid(20211020121100)
 )
 
 func TestZettelTransclusion(t *testing.T) {
@@ -31,12 +32,12 @@ func TestZettelTransclusion(t *testing.T) {
 	c := getClient()
 	c.SetAuth("owner", "owner")
 
-	const abc10000Zid = api.ZettelID("20211020121400")
-	contentMap := map[api.ZettelID]int{
-		abcZid:                         1,
-		abc10Zid:                       10,
-		api.ZettelID("20211020121145"): 100,
-		api.ZettelID("20211020121300"): 1000,
+	const abc10000Zid = id.Zid(20211020121400)
+	contentMap := map[id.Zid]int{
+		abcZid:                 1,
+		abc10Zid:               10,
+		id.Zid(20211020121145): 100,
+		id.Zid(20211020121300): 1000,
 	}
 	content, err := c.GetZettel(context.Background(), abcZid, api.PartContent)
 	if err != nil {
@@ -122,11 +123,11 @@ func TestRecursiveTransclusion(t *testing.T) {
 	c.SetAuth("owner", "owner")
 
 	const (
-		selfRecursiveZid      = api.ZettelID("20211020182600")
-		indirectRecursive1Zid = api.ZettelID("20211020183700")
-		indirectRecursive2Zid = api.ZettelID("20211020183800")
+		selfRecursiveZid      = id.Zid(20211020182600)
+		indirectRecursive1Zid = id.Zid(20211020183700)
+		indirectRecursive2Zid = id.Zid(20211020183800)
 	)
-	recursiveZettel := map[api.ZettelID]api.ZettelID{
+	recursiveZettel := map[id.Zid]id.Zid{
 		selfRecursiveZid:      selfRecursiveZid,
 		indirectRecursive1Zid: indirectRecursive2Zid,
 		indirectRecursive2Zid: indirectRecursive1Zid,
@@ -139,7 +140,7 @@ func TestRecursiveTransclusion(t *testing.T) {
 		}
 		sContent := string(content)
 		checkContentContains(t, zid, sContent, "Recursive transclusion")
-		checkContentContains(t, zid, sContent, string(errZid))
+		checkContentContains(t, zid, sContent, errZid.String())
 	}
 }
 func TestNothingToTransclude(t *testing.T) {
@@ -148,8 +149,8 @@ func TestNothingToTransclude(t *testing.T) {
 	c.SetAuth("owner", "owner")
 
 	const (
-		transZid = api.ZettelID("20211020184342")
-		emptyZid = api.ZettelID("20211020184300")
+		transZid = id.Zid(20211020184342)
+		emptyZid = id.Zid(20211020184300)
 	)
 	content, err := c.GetEvaluatedZettel(context.Background(), transZid, api.EncoderHTML)
 	if err != nil {
@@ -158,7 +159,7 @@ func TestNothingToTransclude(t *testing.T) {
 	}
 	sContent := string(content)
 	checkContentContains(t, transZid, sContent, "<!-- Nothing to transclude")
-	checkContentContains(t, transZid, sContent, string(emptyZid))
+	checkContentContains(t, transZid, sContent, emptyZid.String())
 }
 
 func TestSelfEmbedRef(t *testing.T) {
@@ -166,7 +167,7 @@ func TestSelfEmbedRef(t *testing.T) {
 	c := getClient()
 	c.SetAuth("owner", "owner")
 
-	const selfEmbedZid = api.ZettelID("20211020185400")
+	const selfEmbedZid = id.Zid(20211020185400)
 	content, err := c.GetEvaluatedZettel(context.Background(), selfEmbedZid, api.EncoderHTML)
 	if err != nil {
 		t.Error(err)
@@ -175,7 +176,7 @@ func TestSelfEmbedRef(t *testing.T) {
 	checkContentContains(t, selfEmbedZid, string(content), "Self embed reference")
 }
 
-func checkContentContains(t *testing.T, zid api.ZettelID, content, expected string) {
+func checkContentContains(t *testing.T, zid id.Zid, content, expected string) {
 	if !strings.Contains(content, expected) {
 		t.Helper()
 		t.Errorf("Zettel %q should contain %q, but does not: %q", zid, expected, content)

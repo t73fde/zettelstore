@@ -17,11 +17,11 @@ import (
 	"context"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

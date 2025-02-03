@@ -17,10 +17,10 @@ import (
 	"errors"
 	"sync"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
-	"zettelstore.de/z/zettel/id"
 )
 
 type authService struct {

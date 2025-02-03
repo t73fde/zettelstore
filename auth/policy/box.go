@@ -16,13 +16,14 @@ package policy
 import (
 	"context"
 
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/web/server"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -78,7 +79,7 @@ func (pp *polBox) GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zettel
 	return pp.box.GetAllZettel(ctx, zid)
 }
 
-func (pp *polBox) FetchZids(ctx context.Context) (*id.Set, error) {
+func (pp *polBox) FetchZids(ctx context.Context) (*idset.Set, error) {
 	return nil, box.NewErrNotAllowed("fetch-zids", server.GetUser(ctx), id.Invalid)
 }
 

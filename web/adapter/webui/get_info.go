@@ -21,6 +21,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/collect"
@@ -31,7 +32,6 @@ import (
 	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/id"
 )
 
 // MakeGetInfoHandler creates a new HTTP handler for the use case "get zettel".
@@ -106,7 +106,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		rb.bindString("shadow-links", shadowLinks)
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.InfoTemplateZid, env)
+			err = wui.renderSxnTemplate(ctx, w, api.ZidInfoTemplate, env)
 		} else {
 			err = rb.err
 		}
@@ -168,7 +168,7 @@ var apiParts = []string{api.PartZettel, api.PartMeta, api.PartContent}
 
 func (wui *WebUI) infoAPIMatrix(zid id.Zid, parseOnly bool, encTexts []string) *sx.Pair {
 	matrix := sx.Nil()
-	u := wui.NewURLBuilder('z').SetZid(zid.ZettelID())
+	u := wui.NewURLBuilder('z').SetZid(zid)
 	for ip := len(apiParts) - 1; ip >= 0; ip-- {
 		part := apiParts[ip]
 		row := sx.Nil()
@@ -189,7 +189,7 @@ func (wui *WebUI) infoAPIMatrix(zid id.Zid, parseOnly bool, encTexts []string) *
 
 func (wui *WebUI) infoAPIMatrixParsed(zid id.Zid, encTexts []string) *sx.Pair {
 	matrix := wui.infoAPIMatrix(zid, true, encTexts)
-	u := wui.NewURLBuilder('z').SetZid(zid.ZettelID())
+	u := wui.NewURLBuilder('z').SetZid(zid)
 
 	for i, row := 0, matrix; i < len(apiParts) && row != nil; row = row.Tail() {
 		line, isLine := sx.GetPair(row.Car())

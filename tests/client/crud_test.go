@@ -20,6 +20,7 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
+	"t73f.de/r/zsc/domain/id"
 )
 
 // ---------------------------------------------------------------------------
@@ -180,7 +181,7 @@ func TestUpdateZettelData(t *testing.T) {
 	doDelete(t, c, api.ZidDefaultHome)
 }
 
-func doDelete(t *testing.T, c *client.Client, zid api.ZettelID) {
+func doDelete(t *testing.T, c *client.Client, zid id.Zid) {
 	err := c.DeleteZettel(context.Background(), zid)
 	if err != nil {
 		t.Helper()

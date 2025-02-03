@@ -19,15 +19,15 @@ import (
 	"fmt"
 	"strings"
 
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/strfun"
-	"zettelstore.de/z/zettel/id"
 )
 
 type searchOp struct {
 	s  string
 	op compareOp
 }
-type searchFunc func(string) *id.Set
+type searchFunc func(string) *idset.Set
 type searchCallMap map[searchOp]searchFunc
 
 var cmpPred = map[compareOp]func(string, string) bool{
@@ -104,18 +104,18 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 	return false
 }
 
-func retrievePositives(normCalls, plainCalls searchCallMap) *id.Set {
+func retrievePositives(normCalls, plainCalls searchCallMap) *idset.Set {
 	if isSuperset(normCalls, plainCalls) {
-		var normResult *id.Set
+		var normResult *idset.Set
 		for c, sf := range normCalls {
 			normResult = normResult.IntersectOrSet(sf(c.s))
 		}
 		return normResult
 	}
 
-	type searchResults map[searchOp]*id.Set
+	type searchResults map[searchOp]*idset.Set
 	var cache searchResults
-	var plainResult *id.Set
+	var plainResult *idset.Set
 	for c, sf := range plainCalls {
 		result := sf(c.s)
 		if _, found := normCalls[c]; found {
@@ -126,7 +126,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *id.Set {
 		}
 		plainResult = plainResult.IntersectOrSet(result)
 	}
-	var normResult *id.Set
+	var normResult *idset.Set
 	for c, sf := range normCalls {
 		if cache != nil {
 			if result, found := cache[c]; found {
@@ -148,8 +148,8 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 	return true
 }
 
-func retrieveNegatives(negCalls searchCallMap) *id.Set {
-	var negatives *id.Set
+func retrieveNegatives(negCalls searchCallMap) *idset.Set {
+	var negatives *idset.Set
 	for val, sf := range negCalls {
 		negatives = negatives.IUnion(sf(val.s))
 	}

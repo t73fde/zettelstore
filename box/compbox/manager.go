@@ -18,8 +18,8 @@ import (
 	"context"
 	"fmt"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/kernel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

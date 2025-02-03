@@ -19,12 +19,12 @@ import (
 	"net/url"
 	"time"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/id"
 )
 
 // Kernel is the main internal service.

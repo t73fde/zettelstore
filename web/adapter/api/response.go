@@ -18,8 +18,8 @@ import (
 	"net/http"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/web/content"
-	"zettelstore.de/z/zettel/id"
 )
 
 func (a *API) writeObject(w http.ResponseWriter, zid id.Zid, obj sx.Object) error {

@@ -20,7 +20,7 @@ import (
 	"sync"
 
 	"t73f.de/r/zsc/api"
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
 )
 
 // Message presents a message to log.

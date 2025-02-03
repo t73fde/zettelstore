@@ -20,13 +20,13 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/shtml"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -93,7 +93,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		}
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.ZettelTemplateZid, env)
+			err = wui.renderSxnTemplate(ctx, w, api.ZidZettelTemplate, env)
 		} else {
 			err = rb.err
 		}
@@ -157,7 +157,7 @@ func (wui *WebUI) zidLinksSxn(values []string, getTextTitle getTextTitleFunc) *s
 			continue
 		}
 		if title, found := getTextTitle(zid); found > 0 {
-			url := sx.MakeString(wui.NewURLBuilder('h').SetZid(zid.ZettelID()).String())
+			url := sx.MakeString(wui.NewURLBuilder('h').SetZid(zid).String())
 			if title == "" {
 				lb.Add(sx.Cons(sx.MakeString(val), url))
 			} else {

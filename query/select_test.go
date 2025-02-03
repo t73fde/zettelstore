@@ -18,17 +18,18 @@ import (
 	"testing"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/query"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
 func TestMatchZidNegate(t *testing.T) {
-	q := query.Parse(api.KeyID + api.SearchOperatorHasNot + string(api.ZidVersion) + " " + api.KeyID + api.SearchOperatorHasNot + string(api.ZidLicense))
+	q := query.Parse(api.KeyID + api.SearchOperatorHasNot + api.ZidVersion.String() + " " +
+		api.KeyID + api.SearchOperatorHasNot + api.ZidLicense.String())
 	compiled := q.RetrieveAndCompile(context.Background(), nil, nil)
 
 	testCases := []struct {
-		zid api.ZettelID
+		zid id.Zid
 		exp bool
 	}{
 		{api.ZidVersion, false},
@@ -36,7 +37,7 @@ func TestMatchZidNegate(t *testing.T) {
 		{api.ZidAuthors, true},
 	}
 	for i, tc := range testCases {
-		m := meta.New(id.MustParse(tc.zid))
+		m := meta.New(tc.zid)
 		if compiled.Terms[0].Match(m) != tc.exp {
 			if tc.exp {
 				t.Errorf("%d: meta %v must match %q", i, m.Zid, q)

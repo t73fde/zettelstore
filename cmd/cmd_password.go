@@ -21,8 +21,8 @@ import (
 	"golang.org/x/term"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/auth/cred"
-	"zettelstore.de/z/zettel/id"
 )
 
 // ---------- Subcommand: password -------------------------------------------

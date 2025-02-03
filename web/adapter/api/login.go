@@ -18,10 +18,10 @@ import (
 	"time"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
-	"zettelstore.de/z/zettel/id"
 )
 
 // MakePostLoginHandler creates a new HTTP handler to authenticate the given user via API.

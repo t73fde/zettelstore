@@ -17,10 +17,10 @@ import (
 	"net/http"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 )
 
 // MakeUpdateZettelHandler creates a new HTTP handler to update a zettel.

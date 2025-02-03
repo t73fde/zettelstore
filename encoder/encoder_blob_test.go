@@ -17,10 +17,10 @@ import (
 	"testing"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/parser"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 
 	_ "zettelstore.de/z/parser/blob" // Allow to use BLOB parser.

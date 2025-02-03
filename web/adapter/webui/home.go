@@ -18,12 +18,13 @@ import (
 	"errors"
 	"net/http"
 
+	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/server"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 )
 
 type getRootPort interface {
@@ -39,17 +40,16 @@ func (wui *WebUI) MakeGetRootHandler(s getRootPort) http.Handler {
 			return
 		}
 		homeZid, _ := id.Parse(wui.getConfig(ctx, nil, config.KeyHomeZettel))
-		apiHomeZid := homeZid.ZettelID()
-		if homeZid != id.DefaultHomeZid {
+		if homeZid != api.ZidDefaultHome {
 			if _, err := s.GetZettel(ctx, homeZid); err == nil {
-				wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(apiHomeZid))
+				wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(homeZid))
 				return
 			}
-			homeZid = id.DefaultHomeZid
+			homeZid = api.ZidDefaultHome
 		}
 		_, err := s.GetZettel(ctx, homeZid)
 		if err == nil {
-			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(apiHomeZid))
+			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(homeZid))
 			return
 		}
 		if errors.Is(err, &box.ErrNotAllowed{}) && wui.authz.WithAuth() && server.GetUser(ctx) == nil {

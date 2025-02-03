@@ -16,7 +16,8 @@ package manager
 import (
 	"sync"
 
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 )
 
 type arAction int
@@ -29,7 +30,7 @@ const (
 
 type anteroom struct {
 	next    *anteroom
-	waiting *id.Set
+	waiting *idset.Set
 	curLoad int
 	reload  bool
 }
@@ -77,7 +78,7 @@ func (ar *anteroomQueue) makeAnteroom(zid id.Zid) *anteroom {
 	if zid == id.Invalid {
 		panic(zid)
 	}
-	waiting := id.NewSetCap(max(ar.maxLoad, 100), zid)
+	waiting := idset.NewSetCap(max(ar.maxLoad, 100), zid)
 	return &anteroom{next: nil, waiting: waiting, curLoad: 1, reload: false}
 }
 
@@ -88,7 +89,7 @@ func (ar *anteroomQueue) Reset() {
 	ar.last = ar.first
 }
 
-func (ar *anteroomQueue) Reload(allZids *id.Set) {
+func (ar *anteroomQueue) Reload(allZids *idset.Set) {
 	ar.mx.Lock()
 	defer ar.mx.Unlock()
 	ar.deleteReloadedRooms()

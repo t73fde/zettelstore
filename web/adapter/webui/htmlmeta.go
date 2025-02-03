@@ -20,11 +20,11 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/shtml"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/usecase"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -77,7 +77,7 @@ func (wui *WebUI) transformIdentifier(val string, getTextTitle getTextTitleFunc)
 	title, found := getTextTitle(zid)
 	switch {
 	case found > 0:
-		ub := wui.NewURLBuilder('h').SetZid(zid.ZettelID())
+		ub := wui.NewURLBuilder('h').SetZid(zid)
 		attrs := sx.Nil()
 		if title != "" {
 			attrs = attrs.Cons(sx.Cons(shtml.SymAttrTitle, sx.MakeString(title)))

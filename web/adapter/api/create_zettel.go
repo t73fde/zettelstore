@@ -18,11 +18,11 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/content"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 )
 
 // MakePostCreateZettelHandler creates a new HTTP handler to store content of
@@ -56,7 +56,7 @@ func (a *API) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel) ht
 
 		var result []byte
 		var contentType string
-		location := a.NewURLBuilder('z').SetZid(newZid.ZettelID())
+		location := a.NewURLBuilder('z').SetZid(newZid)
 		switch enc {
 		case api.EncoderPlain:
 			result = newZid.Bytes()

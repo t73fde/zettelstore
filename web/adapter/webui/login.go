@@ -18,10 +18,10 @@ import (
 	"net/http"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zsc/api"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
-	"zettelstore.de/z/zettel/id"
 )
 
 // MakeGetLoginOutHandler creates a new HTTP handler to display the HTML login view,
@@ -42,7 +42,7 @@ func (wui *WebUI) renderLoginForm(ctx context.Context, w http.ResponseWriter, re
 	env, rb := wui.createRenderEnv(ctx, "login", wui.getUserLang(ctx), "Login", nil)
 	rb.bindString("retry", sx.MakeBoolean(retry))
 	if rb.err == nil {
-		rb.err = wui.renderSxnTemplate(ctx, w, id.LoginTemplateZid, env)
+		rb.err = wui.renderSxnTemplate(ctx, w, api.ZidLoginTemplate, env)
 	}
 	if err := rb.err; err != nil {
 		wui.reportError(ctx, w, err)

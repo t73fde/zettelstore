@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/api"
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

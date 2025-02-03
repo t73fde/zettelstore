@@ -19,13 +19,13 @@ import (
 	"net/url"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -48,22 +48,22 @@ var myZettel = map[id.Zid]struct {
 	meta    func(id.Zid) *meta.Meta
 	content func(context.Context, *compBox) []byte
 }{
-	id.MustParse(api.ZidVersion):         {genVersionBuildM, genVersionBuildC},
-	id.MustParse(api.ZidHost):            {genVersionHostM, genVersionHostC},
-	id.MustParse(api.ZidOperatingSystem): {genVersionOSM, genVersionOSC},
-	id.MustParse(api.ZidLog):             {genLogM, genLogC},
-	id.MustParse(api.ZidMemory):          {genMemoryM, genMemoryC},
-	id.MustParse(api.ZidSx):              {genSxM, genSxC},
-	// id.MustParse(api.ZidHTTP):                 {genHttpM, genHttpC},
-	// id.MustParse(api.ZidAPI):                  {genApiM, genApiC},
-	// id.MustParse(api.ZidWebUI):                {genWebUiM, genWebUiC},
-	// id.MustParse(api.ZidConsole):              {genConsoleM, genConsoleC},
-	id.MustParse(api.ZidBoxManager): {genManagerM, genManagerC},
-	// id.MustParse(api.ZidIndex):                {genIndexM, genIndexC},
-	// id.MustParse(api.ZidQuery):                {genQueryM, genQueryC},
-	id.MustParse(api.ZidMetadataKey):          {genKeysM, genKeysC},
-	id.MustParse(api.ZidParser):               {genParserM, genParserC},
-	id.MustParse(api.ZidStartupConfiguration): {genConfigZettelM, genConfigZettelC},
+	api.ZidVersion:         {genVersionBuildM, genVersionBuildC},
+	api.ZidHost:            {genVersionHostM, genVersionHostC},
+	api.ZidOperatingSystem: {genVersionOSM, genVersionOSC},
+	api.ZidLog:             {genLogM, genLogC},
+	api.ZidMemory:          {genMemoryM, genMemoryC},
+	api.ZidSx:              {genSxM, genSxC},
+	// api.ZidHTTP:                 {genHttpM, genHttpC},
+	// api.ZidAPI:                  {genApiM, genApiC},
+	// api.ZidWebUI:                {genWebUiM, genWebUiC},
+	// api.ZidConsole:              {genConsoleM, genConsoleC},
+	api.ZidBoxManager: {genManagerM, genManagerC},
+	// api.ZidIndex:                {genIndexM, genIndexC},
+	// api.ZidQuery:                {genQueryM, genQueryC},
+	api.ZidMetadataKey:          {genKeysM, genKeysC},
+	api.ZidParser:               {genParserM, genParserC},
+	api.ZidStartupConfiguration: {genConfigZettelM, genConfigZettelC},
 }
 
 // Get returns the one program box.

@@ -20,13 +20,13 @@ import (
 	"io"
 	"strings"
 
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/notify"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

@@ -16,7 +16,8 @@ package manager
 import (
 	"testing"
 
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 )
 
 func TestSimple(t *testing.T) {
@@ -62,7 +63,7 @@ func TestReset(t *testing.T) {
 	if action != arReload || zid != id.Invalid {
 		t.Errorf("Expected reload & invalid Zid, but got %v/%v", action, zid)
 	}
-	ar.Reload(id.NewSet(3, 4))
+	ar.Reload(idset.NewSet(3, 4))
 	ar.EnqueueZettel(id.Zid(5))
 	ar.EnqueueZettel(id.Zid(5))
 	if ar.first == ar.last || ar.first.next != ar.last /*|| ar.first.next.next != ar.last*/ {
@@ -89,7 +90,7 @@ func TestReset(t *testing.T) {
 	}
 
 	ar = newAnteroomQueue(1)
-	ar.Reload(id.NewSet(id.Zid(6)))
+	ar.Reload(idset.NewSet(id.Zid(6)))
 	action, zid, _ = ar.Dequeue()
 	if zid != id.Zid(6) || action != arZettel {
 		t.Errorf("Expected 6/arZettel, but got %v/%v", zid, action)

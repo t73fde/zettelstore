@@ -17,7 +17,7 @@ import (
 	"math/rand/v2"
 	"slices"
 
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

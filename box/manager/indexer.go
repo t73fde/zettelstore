@@ -19,19 +19,20 @@ import (
 	"net/url"
 	"time"
 
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager/store"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NKFD, trimmed and not empty.
-func (mgr *Manager) SearchEqual(word string) *id.Set {
+func (mgr *Manager) SearchEqual(word string) *idset.Set {
 	found := mgr.idxStore.SearchEqual(word)
 	mgr.idxLog.Debug().Str("word", word).Int("found", int64(found.Length())).Msg("SearchEqual")
 	if msg := mgr.idxLog.Trace(); msg.Enabled() {
@@ -42,7 +43,7 @@ func (mgr *Manager) SearchEqual(word string) *id.Set {
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NKFD, trimmed and not empty.
-func (mgr *Manager) SearchPrefix(prefix string) *id.Set {
+func (mgr *Manager) SearchPrefix(prefix string) *idset.Set {
 	found := mgr.idxStore.SearchPrefix(prefix)
 	mgr.idxLog.Debug().Str("prefix", prefix).Int("found", int64(found.Length())).Msg("SearchPrefix")
 	if msg := mgr.idxLog.Trace(); msg.Enabled() {
@@ -53,7 +54,7 @@ func (mgr *Manager) SearchPrefix(prefix string) *id.Set {
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NKFD, trimmed and not empty.
-func (mgr *Manager) SearchSuffix(suffix string) *id.Set {
+func (mgr *Manager) SearchSuffix(suffix string) *idset.Set {
 	found := mgr.idxStore.SearchSuffix(suffix)
 	mgr.idxLog.Debug().Str("suffix", suffix).Int("found", int64(found.Length())).Msg("SearchSuffix")
 	if msg := mgr.idxLog.Trace(); msg.Enabled() {
@@ -64,7 +65,7 @@ func (mgr *Manager) SearchSuffix(suffix string) *id.Set {
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NKFD, trimmed and not empty.
-func (mgr *Manager) SearchContains(s string) *id.Set {
+func (mgr *Manager) SearchContains(s string) *idset.Set {
 	found := mgr.idxStore.SearchContains(s)
 	mgr.idxLog.Debug().Str("s", s).Int("found", int64(found.Length())).Msg("SearchContains")
 	if msg := mgr.idxLog.Trace(); msg.Enabled() {
@@ -245,7 +246,7 @@ func (mgr *Manager) idxDeleteZettel(ctx context.Context, zid id.Zid) {
 	mgr.idxCheckZettel(toCheck)
 }
 
-func (mgr *Manager) idxCheckZettel(s *id.Set) {
+func (mgr *Manager) idxCheckZettel(s *idset.Set) {
 	s.ForEach(func(zid id.Zid) {
 		mgr.idxAr.EnqueueZettel(zid)
 	})

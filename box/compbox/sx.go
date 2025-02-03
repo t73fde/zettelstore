@@ -19,7 +19,7 @@ import (
 	"fmt"
 
 	"t73f.de/r/sx"
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/zettel/meta"
 )
 

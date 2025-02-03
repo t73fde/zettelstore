@@ -27,22 +27,17 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/kernel"
 )
 
-func nextZid(zid api.ZettelID) api.ZettelID {
-	numVal, err := strconv.ParseUint(string(zid), 10, 64)
-	if err != nil {
-		panic(err)
-	}
-	return api.ZettelID(fmt.Sprintf("%014d", numVal+1))
-}
+func nextZid(zid id.Zid) id.Zid { return zid + 1 }
 
 func TestNextZid(t *testing.T) {
 	testCases := []struct {
-		zid, exp api.ZettelID
+		zid, exp id.Zid
 	}{
-		{api.ZettelID("00000000000000"), api.ZettelID("00000000000001")},
+		{1, 2},
 	}
 	for i, tc := range testCases {
 		if got := nextZid(tc.zid); got != tc.exp {
@@ -128,7 +123,8 @@ func compareZettelList(t *testing.T, pl [][]byte, l []api.ZidMetaRights) {
 		t.Errorf("Different list lenght: Plain=%d, Data=%d", len(pl), len(l))
 	} else {
 		for i, line := range pl {
-			if got := api.ZettelID(line[:14]); got != l[i].ID {
+			got, err := id.Parse(string(line[:14]))
+			if err == nil && got != l[i].ID {
 				t.Errorf("%d: Data=%q, got=%q", i, l[i].ID, got)
 			}
 		}
@@ -204,9 +200,9 @@ func TestGetParsedEvaluatedZettel(t *testing.T) {
 	}
 }
 
-func checkListZid(t *testing.T, l []api.ZidMetaRights, pos int, expected api.ZettelID) {
+func checkListZid(t *testing.T, l []api.ZidMetaRights, pos int, expected id.Zid) {
 	t.Helper()
-	if got := api.ZettelID(l[pos].ID); got != expected {
+	if got := l[pos].ID; got != expected {
 		t.Errorf("Expected result[%d]=%v, but got %v", pos, expected, got)
 	}
 }
@@ -215,7 +211,7 @@ func TestGetZettelOrder(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	_, _, metaSeq, err := c.QueryZettelData(context.Background(), string(api.ZidTOCNewTemplate)+" "+api.ItemsDirective)
+	_, _, metaSeq, err := c.QueryZettelData(context.Background(), api.ZidTOCNewTemplate.String()+" "+api.ItemsDirective)
 	if err != nil {
 		t.Error(err)
 		return
@@ -232,38 +228,39 @@ func TestGetZettelOrder(t *testing.T) {
 
 func TestGetZettelContext(t *testing.T) {
 	const (
-		allUserZid = api.ZettelID("20211019200500")
-		ownerZid   = api.ZettelID("20210629163300")
-		writerZid  = api.ZettelID("20210629165000")
-		readerZid  = api.ZettelID("20210629165024")
-		creatorZid = api.ZettelID("20210629165050")
+		allUserZid = id.Zid(20211019200500)
+		ownerZid   = id.Zid(20210629163300)
+		writerZid  = id.Zid(20210629165000)
+		readerZid  = id.Zid(20210629165024)
+		creatorZid = id.Zid(20210629165050)
 		limitAll   = 3
 	)
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	rl, err := c.QueryZettel(context.Background(), string(ownerZid)+" CONTEXT LIMIT "+strconv.Itoa(limitAll))
+	rl, err := c.QueryZettel(context.Background(), ownerZid.String()+" CONTEXT LIMIT "+strconv.Itoa(limitAll))
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	checkZidList(t, []api.ZettelID{ownerZid, allUserZid, writerZid}, rl)
+	checkZidList(t, []id.Zid{ownerZid, allUserZid, writerZid}, rl)
 
-	rl, err = c.QueryZettel(context.Background(), string(ownerZid)+" CONTEXT BACKWARD")
+	rl, err = c.QueryZettel(context.Background(), ownerZid.String()+" CONTEXT BACKWARD")
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	checkZidList(t, []api.ZettelID{ownerZid, allUserZid}, rl)
+	checkZidList(t, []id.Zid{ownerZid, allUserZid}, rl)
 }
-func checkZidList(t *testing.T, exp []api.ZettelID, got [][]byte) {
+func checkZidList(t *testing.T, exp []id.Zid, got [][]byte) {
 	t.Helper()
 	if len(exp) != len(got) {
 		t.Errorf("expected a list fo length %d, but got %d", len(exp), len(got))
 		return
 	}
 	for i, expZid := range exp {
-		if gotZid := api.ZettelID(got[i][:14]); expZid != gotZid {
+		gotZid, err := id.Parse(string(got[i][:14]))
+		if err != nil || expZid != gotZid {
 			t.Errorf("lists differ at pos %d: expected id %v, but got %v", i, expZid, gotZid)
 		}
 	}
@@ -273,7 +270,7 @@ func TestGetUnlinkedReferences(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	_, _, metaSeq, err := c.QueryZettelData(context.Background(), string(api.ZidDefaultHome)+" "+api.UnlinkedDirective)
+	_, _, metaSeq, err := c.QueryZettelData(context.Background(), api.ZidDefaultHome.String()+" "+api.UnlinkedDirective)
 	if err != nil {
 		t.Error(err)
 		return
@@ -363,11 +360,11 @@ func TestTagZettel(t *testing.T) {
 	zid, err := c.TagZettel(ctx, "nosuchtag")
 	if err != nil {
 		t.Error(err)
-	} else if zid != "" {
+	} else if zid != id.Invalid {
 		t.Errorf("no zid expected, but got %q", zid)
 	}
 	zid, err = c.TagZettel(ctx, "#test")
-	exp := api.ZettelID("20230929102100")
+	exp := id.Zid(20230929102100)
 	if err != nil {
 		t.Error(err)
 	} else if zid != exp {
@@ -404,11 +401,11 @@ func TestRoleZettel(t *testing.T) {
 	zid, err := c.RoleZettel(ctx, "nosuchrole")
 	if err != nil {
 		t.Error("AAA", err)
-	} else if zid != "" {
+	} else if zid != id.Invalid {
 		t.Errorf("no zid expected, but got %q", zid)
 	}
 	zid, err = c.RoleZettel(ctx, "zettel")
-	exp := api.ZettelID("00000000060010")
+	exp := id.Zid(60010)
 	if err != nil {
 		t.Error(err)
 	} else if zid != exp {

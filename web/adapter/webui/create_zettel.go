@@ -21,6 +21,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/encoder/zmkenc"
 	"zettelstore.de/z/evaluator"
@@ -29,7 +30,6 @@ import (
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/server"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -120,7 +120,7 @@ func (wui *WebUI) renderZettelForm(
 	}
 	wui.bindCommonZettelData(ctx, &rb, user, m, &ztl.Content)
 	if rb.err == nil {
-		rb.err = wui.renderSxnTemplate(ctx, w, id.FormTemplateZid, env)
+		rb.err = wui.renderSxnTemplate(ctx, w, api.ZidFormTemplate, env)
 	}
 	if err := rb.err; err != nil {
 		wui.reportError(ctx, w, err)
@@ -150,9 +150,9 @@ func (wui *WebUI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel
 			return
 		}
 		if reEdit {
-			wui.redirectFound(w, r, wui.NewURLBuilder('e').SetZid(newZid.ZettelID()))
+			wui.redirectFound(w, r, wui.NewURLBuilder('e').SetZid(newZid))
 		} else {
-			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(newZid.ZettelID()))
+			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(newZid))
 		}
 	})
 }

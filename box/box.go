@@ -22,9 +22,10 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -132,7 +133,7 @@ type Box interface {
 	WriteBox
 
 	// FetchZids returns the set of all zettel identifer managed by the box.
-	FetchZids(ctx context.Context) (*id.Set, error)
+	FetchZids(ctx context.Context) (*idset.Set, error)
 
 	// GetMeta returns the metadata of the zettel with the given identifier.
 	GetMeta(context.Context, id.Zid) (*meta.Meta, error)

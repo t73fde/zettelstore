@@ -17,10 +17,10 @@ import (
 	"context"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -64,7 +64,7 @@ func (uc *UpdateZettel) Run(ctx context.Context, zettel zettel.Zettel, hasConten
 	m.SetNow(api.KeyModified)
 
 	m.YamlSep = oldZettel.Meta.YamlSep
-	if m.Zid == id.ConfigurationZid {
+	if m.Zid == api.ZidConfiguration {
 		m.Set(api.KeySyntax, meta.SyntaxNone)
 	}
 

@@ -30,7 +30,6 @@ import (
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -62,7 +61,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		if len(actions) > 0 && len(metaSeq) > 0 {
 			for _, act := range actions {
 				if act == api.RedirectAction {
-					ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid.ZettelID())
+					ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid)
 					wui.redirectFound(w, r, ub)
 					return
 				}
@@ -132,7 +131,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			}
 		}
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.ListTemplateZid, env)
+			err = wui.renderSxnTemplate(ctx, w, api.ZidListTemplate, env)
 		} else {
 			err = rb.err
 		}
@@ -197,7 +196,7 @@ func (wui *WebUI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZet
 		wui.reportError(ctx, w, err)
 		return true
 	}
-	wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(z.Meta.Zid.ZettelID()))
+	wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(z.Meta.Zid))
 	return true
 }
 
@@ -212,6 +211,6 @@ func (wui *WebUI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZ
 		wui.reportError(ctx, w, err)
 		return true
 	}
-	wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(z.Meta.Zid.ZettelID()))
+	wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(z.Meta.Zid))
 	return true
 }

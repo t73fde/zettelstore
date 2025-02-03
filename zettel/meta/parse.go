@@ -17,10 +17,10 @@ import (
 	"strings"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/strfun"
-	"zettelstore.de/z/zettel/id"
 )
 
 // NewFromInput parses the meta data of a zettel.

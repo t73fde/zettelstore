@@ -19,8 +19,8 @@ import (
 	"strings"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/maps"
-	"zettelstore.de/z/zettel/id"
 )
 
 var op2string = map[compareOp]string{

@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"t73f.de/r/zsc/api"
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
 )
 
 // QueryPrefix is the prefix that denotes a query expression.

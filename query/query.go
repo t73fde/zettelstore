@@ -19,7 +19,8 @@ import (
 	"math/rand/v2"
 	"slices"
 
-	"zettelstore.de/z/zettel/id"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/id/idset"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -27,19 +28,19 @@ import (
 type Searcher interface {
 	// Select all zettel that contains the given exact word.
 	// The word must be normalized through Unicode NKFD, trimmed and not empty.
-	SearchEqual(word string) *id.Set
+	SearchEqual(word string) *idset.Set
 
 	// Select all zettel that have a word with the given prefix.
 	// The prefix must be normalized through Unicode NKFD, trimmed and not empty.
-	SearchPrefix(prefix string) *id.Set
+	SearchPrefix(prefix string) *idset.Set
 
 	// Select all zettel that have a word with the given suffix.
 	// The suffix must be normalized through Unicode NKFD, trimmed and not empty.
-	SearchSuffix(suffix string) *id.Set
+	SearchSuffix(suffix string) *idset.Set
 
 	// Select all zettel that contains the given string.
 	// The string must be normalized through Unicode NKFD, trimmed and not empty.
-	SearchContains(s string) *id.Set
+	SearchContains(s string) *idset.Set
 }
 
 // Query specifies a mechanism for querying zettel.
@@ -411,18 +412,18 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq
 	return result
 }
 
-func metaList2idSet(ml []*meta.Meta) *id.Set {
+func metaList2idSet(ml []*meta.Meta) *idset.Set {
 	if ml == nil {
 		return nil
 	}
-	result := id.NewSetCap(len(ml))
+	result := idset.NewSetCap(len(ml))
 	for _, m := range ml {
 		result = result.Add(m.Zid)
 	}
 	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *id.Set) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.Set) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
 	var pred RetrievePredicate
 	if searcher != nil {
@@ -431,7 +432,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *id.Set)
 			if pred == nil {
 				pred = startSet.ContainsOrNil
 			} else {
-				predSet := id.NewSetCap(startSet.Length())
+				predSet := idset.NewSetCap(startSet.Length())
 				startSet.ForEach(func(zid id.Zid) {
 					if pred(zid) {
 						predSet = predSet.Add(zid)

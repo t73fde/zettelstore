@@ -27,6 +27,7 @@ import (
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
@@ -35,7 +36,6 @@ import (
 	"zettelstore.de/z/parser/draw"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -505,7 +505,7 @@ func (e *evaluator) updateImageRefNode(en *ast.EmbedRefNode, m *meta.Meta, synta
 }
 
 func createInlineErrorImage(en *ast.EmbedRefNode) *ast.EmbedRefNode {
-	errorZid := id.EmojiZid
+	errorZid := api.ZidEmoji
 	en.Ref = ast.ParseReference(errorZid.String())
 	if len(en.Inlines) == 0 {
 		en.Inlines = ast.InlineSlice{&ast.TextNode{Text: "Error placeholder"}}

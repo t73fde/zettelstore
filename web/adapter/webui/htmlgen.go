@@ -23,6 +23,7 @@ import (
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
 	"zettelstore.de/z/ast"
@@ -77,8 +78,12 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 		if !ok {
 			return obj
 		}
-		zid, fragment, hasFragment := strings.Cut(href.GetValue(), "#")
-		u := builder.NewURLBuilder('h').SetZid(api.ZettelID(zid))
+		strZid, fragment, hasFragment := strings.Cut(href.GetValue(), "#")
+		zid, err := id.Parse(strZid)
+		u := builder.NewURLBuilder('h')
+		if err == nil {
+			u = u.SetZid(zid)
+		}
 		if hasFragment {
 			u = u.SetFragment(fragment)
 		}
@@ -160,8 +165,8 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 		if !isString {
 			return obj
 		}
-		zid := api.ZettelID(src.GetValue())
-		if !zid.IsValid() {
+		zid, err := id.Parse(src.GetValue())
+		if err != nil {
 			return obj
 		}
 		u := builder.NewURLBuilder('z').SetZid(zid)

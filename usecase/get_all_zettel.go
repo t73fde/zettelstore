@@ -16,8 +16,8 @@ package usecase
 import (
 	"context"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/id"
 )
 
 // GetAllZettelPort is the interface used by this use case.

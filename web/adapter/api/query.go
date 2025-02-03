@@ -24,12 +24,12 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/sexp"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/content"
-	"zettelstore.de/z/zettel/id"
 	"zettelstore.de/z/zettel/meta"
 )
 
@@ -64,7 +64,7 @@ func (a *API) MakeQueryHandler(
 				for _, act := range actions {
 					if act == api.RedirectAction {
 						zid := metaSeq[0].Zid
-						ub := a.NewURLBuilder('z').SetZid(zid.ZettelID())
+						ub := a.NewURLBuilder('z').SetZid(zid)
 						a.redirectFound(w, r, ub, zid)
 						return
 					}
@@ -260,7 +260,7 @@ func (a *API) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel 
 		return true
 	}
 	zid := z.Meta.Zid
-	newURL := a.NewURLBuilder('z').SetZid(zid.ZettelID())
+	newURL := a.NewURLBuilder('z').SetZid(zid)
 	for key, slVals := range vals {
 		if key == api.QueryKeyTag {
 			continue
@@ -285,7 +285,7 @@ func (a *API) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZette
 		return true
 	}
 	zid := z.Meta.Zid
-	newURL := a.NewURLBuilder('z').SetZid(zid.ZettelID())
+	newURL := a.NewURLBuilder('z').SetZid(zid)
 	for key, slVals := range vals {
 		if key == api.QueryKeyRole {
 			continue

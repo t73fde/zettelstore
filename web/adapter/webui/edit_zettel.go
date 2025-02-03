@@ -16,10 +16,10 @@ package webui
 import (
 	"net/http"
 
+	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
-	"zettelstore.de/z/zettel/id"
 )
 
 // MakeEditGetZettelHandler creates a new HTTP handler to display the
@@ -78,9 +78,9 @@ func (wui *WebUI) MakeEditSetZettelHandler(updateZettel *usecase.UpdateZettel) h
 		}
 
 		if reEdit {
-			wui.redirectFound(w, r, wui.NewURLBuilder('e').SetZid(zid.ZettelID()))
+			wui.redirectFound(w, r, wui.NewURLBuilder('e').SetZid(zid))
 		} else {
-			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(zid.ZettelID()))
+			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(zid))
 		}
 	})
 }
