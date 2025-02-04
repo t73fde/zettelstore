@@ -18,9 +18,9 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // BaseManager allows to check some base auth modes.

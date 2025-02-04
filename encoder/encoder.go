@@ -21,8 +21,8 @@ import (
 	"io"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // Encoder is an interface that allows to encode different parts of a zettel.

@@ -18,6 +18,7 @@ import (
 	"flag"
 	"net/http"
 
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
@@ -26,7 +27,6 @@ import (
 	"zettelstore.de/z/web/adapter/api"
 	"zettelstore.de/z/web/adapter/webui"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // ---------- Subcommand: run ------------------------------------------------

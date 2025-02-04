@@ -14,9 +14,9 @@
 package policy
 
 import (
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/config"
-	"zettelstore.de/z/zettel/meta"
 )
 
 type anonPolicy struct {

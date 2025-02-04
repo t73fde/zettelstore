@@ -14,7 +14,7 @@
 // Package zettel provides specific types, constants, and functions for zettel.
 package zettel
 
-import "zettelstore.de/z/zettel/meta"
+import "t73f.de/r/zsc/domain/meta"
 
 // Zettel is the main data object of a zettelstore.
 type Zettel struct {

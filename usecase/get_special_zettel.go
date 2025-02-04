@@ -18,9 +18,9 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // TagZettel is the usecase of retrieving a "tag zettel", i.e. a zettel that

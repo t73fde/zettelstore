@@ -18,7 +18,7 @@ import (
 	"context"
 
 	"t73f.de/r/zsc/domain/id"
-	"zettelstore.de/z/zettel/meta"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 func genConfigZettelM(zid id.Zid) *meta.Meta {

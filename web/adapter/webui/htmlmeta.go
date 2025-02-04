@@ -21,11 +21,11 @@ import (
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/usecase"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func (wui *WebUI) writeHTMLMetaValue(

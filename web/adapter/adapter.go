@@ -18,8 +18,8 @@ import (
 	"context"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/usecase"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // TryReIndex executes a re-index if the appropriate query action is given.

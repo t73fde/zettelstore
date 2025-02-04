@@ -20,8 +20,8 @@ import (
 	"net/http"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // Some MIME encoding values.

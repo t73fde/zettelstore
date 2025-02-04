@@ -25,12 +25,12 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sexp"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/content"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // MakeQueryHandler creates a new HTTP handler to perform a query.

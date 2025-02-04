@@ -20,9 +20,9 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/attrs"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // NewTransformer returns a new transformer to create s-expressions from AST nodes.

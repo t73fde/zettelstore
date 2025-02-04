@@ -18,7 +18,7 @@ import (
 	"slices"
 
 	"t73f.de/r/zsc/domain/id"
-	"zettelstore.de/z/zettel/meta"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 // Compiled is a compiled query, to be used in a Box

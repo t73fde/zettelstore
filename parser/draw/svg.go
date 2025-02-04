@@ -28,7 +28,7 @@ import (
 	"io"
 	"strings"
 
-	"zettelstore.de/z/strfun"
+	"t73f.de/r/zsc/strfun"
 )
 
 // canvasToSVG renders the supplied asciitosvg.Canvas to SVG, based on the supplied options.

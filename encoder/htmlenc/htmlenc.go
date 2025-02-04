@@ -21,13 +21,13 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/encoder"
 	"zettelstore.de/z/encoder/szenc"
 	"zettelstore.de/z/encoder/textenc"
 	"zettelstore.de/z/parser"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func init() {

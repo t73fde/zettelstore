@@ -20,10 +20,10 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // Conatains all box.Box related functions

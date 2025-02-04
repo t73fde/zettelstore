@@ -20,10 +20,10 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/meta"
 )
 
 type myServer struct {

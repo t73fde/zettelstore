@@ -13,7 +13,7 @@
 
 package policy
 
-import "zettelstore.de/z/zettel/meta"
+import "t73f.de/r/zsc/domain/meta"
 
 type roPolicy struct{}
 

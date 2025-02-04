@@ -18,7 +18,7 @@ import (
 	"strconv"
 
 	"t73f.de/r/zsc/api"
-	"zettelstore.de/z/zettel/meta"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 type sortFunc func(i, j *meta.Meta) int

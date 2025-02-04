@@ -20,12 +20,12 @@ import (
 
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/encoder"
 	"zettelstore.de/z/parser"
-	"zettelstore.de/z/zettel/meta"
 
 	_ "zettelstore.de/z/encoder/htmlenc"   // Allow to use HTML encoder.
 	_ "zettelstore.de/z/encoder/mdenc"     // Allow to use markdown encoder.

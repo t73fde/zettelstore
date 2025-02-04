@@ -28,10 +28,10 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
-	"zettelstore.de/z/strfun"
+	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/tools"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func readVersionFile() (string, error) {

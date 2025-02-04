@@ -24,12 +24,12 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsc/strfun"
 	"t73f.de/r/zsc/sz"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/encoder/szenc"
-	"zettelstore.de/z/strfun"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // Builder allows to build new URLs for the web service.

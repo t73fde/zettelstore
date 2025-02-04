@@ -22,12 +22,12 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idslice"
+	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/query"
-	"zettelstore.de/z/strfun"
 )
 
 type entrySet map[id.Zid]*DirEntry

@@ -23,9 +23,9 @@ import (
 	"strings"
 
 	"t73f.de/r/zsc/maps"
+	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
-	"zettelstore.de/z/strfun"
 )
 
 type cmdSession struct {

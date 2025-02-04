@@ -21,8 +21,8 @@ import (
 	"runtime"
 
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/kernel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func genMemoryM(zid id.Zid) *meta.Meta {

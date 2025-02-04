@@ -28,6 +28,7 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
@@ -36,7 +37,6 @@ import (
 	"zettelstore.de/z/parser/draw"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // Port contains all methods to retrieve zettel (or part of it) to evaluate a zettel.

@@ -19,9 +19,9 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/encoder"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func init() {

@@ -18,13 +18,13 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/query"
 	"zettelstore.de/z/web/server"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // BoxWithPolicy wraps the given box inside a policy box.

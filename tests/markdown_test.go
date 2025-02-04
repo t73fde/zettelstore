@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/config"
@@ -35,7 +36,6 @@ import (
 	"zettelstore.de/z/parser"
 	_ "zettelstore.de/z/parser/markdown"
 	_ "zettelstore.de/z/parser/zettelmark"
-	"zettelstore.de/z/zettel/meta"
 )
 
 type markdownTestCase struct {

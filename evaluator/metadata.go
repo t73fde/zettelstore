@@ -14,8 +14,8 @@
 package evaluator
 
 import (
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/ast"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func evaluateMetadata(m *meta.Meta) ast.BlockSlice {

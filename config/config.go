@@ -17,7 +17,7 @@ package config
 import (
 	"context"
 
-	"zettelstore.de/z/zettel/meta"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 // Key values that are supported by Config.Get

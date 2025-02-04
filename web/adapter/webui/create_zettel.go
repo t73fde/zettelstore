@@ -22,6 +22,7 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/encoder/zmkenc"
 	"zettelstore.de/z/evaluator"
@@ -30,7 +31,6 @@ import (
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/server"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // MakeGetCreateZettelHandler creates a new HTTP handler to display the

@@ -27,6 +27,7 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/auth/impl"
@@ -37,7 +38,6 @@ import (
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/meta"
 )
 
 const strRunSimple = "run-simple"

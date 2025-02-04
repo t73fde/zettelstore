@@ -17,10 +17,10 @@ import (
 	"context"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/query"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // -------- List syntax ------------------------------------------------------

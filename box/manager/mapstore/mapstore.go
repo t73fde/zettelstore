@@ -26,10 +26,10 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/id/idslice"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager/store"
-	"zettelstore.de/z/zettel/meta"
 )
 
 type zettelData struct {

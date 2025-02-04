@@ -19,10 +19,10 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // CreateZettelPort is the interface used by this use case.

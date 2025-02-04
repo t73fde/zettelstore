@@ -23,7 +23,7 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idgraph"
 	"t73f.de/r/zsc/domain/id/idset"
-	"zettelstore.de/z/zettel/meta"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (idgraph.Digraph, *sxeval.Binding, error) {

@@ -15,10 +15,10 @@
 package none
 
 import (
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/parser"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func init() {

@@ -23,9 +23,9 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/maps"
+	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
-	"zettelstore.de/z/strfun"
 )
 
 type coreService struct {

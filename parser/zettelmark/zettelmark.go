@@ -20,12 +20,12 @@ import (
 	"unicode"
 
 	"t73f.de/r/zsc/attrs"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/sz/zmk"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/ast/sztrans"
 	"zettelstore.de/z/parser"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func init() {

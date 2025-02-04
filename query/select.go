@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"strings"
 
-	"zettelstore.de/z/zettel/meta"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 type matchValueFunc func(value string) bool

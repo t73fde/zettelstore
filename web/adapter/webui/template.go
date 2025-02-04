@@ -27,6 +27,7 @@ import (
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
@@ -36,7 +37,6 @@ import (
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/server"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 func (wui *WebUI) createRenderBinding() *sxeval.Binding {

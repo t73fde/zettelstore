@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"t73f.de/r/zsc/domain/id/idset"
-	"zettelstore.de/z/strfun"
+	"t73f.de/r/zsc/strfun"
 )
 
 type searchOp struct {

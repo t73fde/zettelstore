@@ -20,7 +20,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
-	"zettelstore.de/z/zettel/meta"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 func genSxM(zid id.Zid) *meta.Meta {

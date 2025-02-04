@@ -21,10 +21,10 @@ import (
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/sexp"
 	"zettelstore.de/z/zettel"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // getEncoding returns the data encoding selected by the caller.

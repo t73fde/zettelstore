@@ -22,6 +22,8 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager/mapstore"
@@ -29,8 +31,6 @@ import (
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
-	"zettelstore.de/z/strfun"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // ConnectData contains all administration related values.

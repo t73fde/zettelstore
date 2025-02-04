@@ -21,13 +21,13 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/config"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/web/adapter"
 	"zettelstore.de/z/web/server"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // API holds all data and methods for delivering API call results.

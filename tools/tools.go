@@ -23,7 +23,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"zettelstore.de/z/strfun"
+	"t73f.de/r/zsc/strfun"
 )
 
 // Some constants to make Go work with fossil.

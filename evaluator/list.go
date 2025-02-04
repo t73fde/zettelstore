@@ -23,10 +23,10 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/query"
-	"zettelstore.de/z/zettel/meta"
 )
 
 // QueryAction transforms a list of metadata according to query actions into a AST nested list.
