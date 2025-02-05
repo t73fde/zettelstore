@@ -45,10 +45,10 @@ func NewTagZettel(port GetZettelPort, query *Query) TagZettel {
 }
 
 // Run executes the use case.
-func (uc TagZettel) Run(ctx context.Context, tag string) (zettel.Zettel, error) {
-	tag = meta.NormalizeTag(tag)
+func (uc TagZettel) Run(ctx context.Context, tag meta.Value) (zettel.Zettel, error) {
+	tag = tag.NormalizeTag()
 	q := query.Parse(
-		api.KeyTitle + api.SearchOperatorEqual + tag + " " +
+		api.KeyTitle + api.SearchOperatorEqual + string(tag) + " " +
 			api.KeyRole + api.SearchOperatorHas + api.ValueRoleTag)
 	ml, err := uc.query.Run(ctx, q)
 	if err != nil {
@@ -64,9 +64,9 @@ func (uc TagZettel) Run(ctx context.Context, tag string) (zettel.Zettel, error) 
 }
 
 // ErrTagZettelNotFound is returned if a tag zettel was not found.
-type ErrTagZettelNotFound struct{ Tag string }
+type ErrTagZettelNotFound struct{ Tag meta.Value }
 
-func (etznf ErrTagZettelNotFound) Error() string { return "tag zettel not found: " + etznf.Tag }
+func (etznf ErrTagZettelNotFound) Error() string { return "tag zettel not found: " + string(etznf.Tag) }
 
 // RoleZettel is the usecase of retrieving a "role zettel", i.e. a zettel that
 // describes a given role. A role zettel must have the role's name in its title
@@ -90,9 +90,9 @@ func NewRoleZettel(port GetZettelPort, query *Query) RoleZettel {
 }
 
 // Run executes the use case.
-func (uc RoleZettel) Run(ctx context.Context, role string) (zettel.Zettel, error) {
+func (uc RoleZettel) Run(ctx context.Context, role meta.Value) (zettel.Zettel, error) {
 	q := query.Parse(
-		api.KeyTitle + api.SearchOperatorEqual + role + " " +
+		api.KeyTitle + api.SearchOperatorEqual + string(role) + " " +
 			api.KeyRole + api.SearchOperatorHas + api.ValueRoleRole)
 	ml, err := uc.query.Run(ctx, q)
 	if err != nil {
@@ -108,6 +108,8 @@ func (uc RoleZettel) Run(ctx context.Context, role string) (zettel.Zettel, error
 }
 
 // ErrRoleZettelNotFound is returned if a role zettel was not found.
-type ErrRoleZettelNotFound struct{ Role string }
+type ErrRoleZettelNotFound struct{ Role meta.Value }
 
-func (etznf ErrRoleZettelNotFound) Error() string { return "role zettel not found: " + etznf.Role }
+func (etznf ErrRoleZettelNotFound) Error() string {
+	return "role zettel not found: " + string(etznf.Role)
+}

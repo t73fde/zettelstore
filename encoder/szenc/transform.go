@@ -368,14 +368,14 @@ func (t *Transformer) GetMeta(m *meta.Meta) *sx.Pair {
 		symType := mapGetS(mapMetaTypeS, ty)
 		var obj sx.Object
 		if ty.IsSet {
-			setList := meta.ListFromValue(p.Value)
+			setList := p.Value.ListFromValue()
 			setObjs := make(sx.Vector, len(setList))
 			for i, val := range setList {
 				setObjs[i] = sx.MakeString(val)
 			}
 			obj = sx.MakeList(setObjs...)
 		} else {
-			obj = sx.MakeString(p.Value)
+			obj = sx.MakeString(string(p.Value))
 		}
 		objs = append(objs, sx.Nil().Cons(obj).Cons(sx.MakeSymbol(key)).Cons(symType))
 	}

@@ -97,7 +97,7 @@ func (a *API) writePlainData(ctx context.Context, w http.ResponseWriter, zid id.
 		_, err = z.Meta.Write(&buf)
 
 	case partContent:
-		contentType = content.MIMEFromSyntax(z.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax))
+		contentType = content.MIMEFromSyntax(string(z.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)))
 		_, err = z.Content.Write(&buf)
 	}
 

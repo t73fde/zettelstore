@@ -201,7 +201,7 @@ func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
 	if user == nil {
 		return false, "", ""
 	}
-	return true, wui.NewURLBuilder('h').SetZid(user.Zid).String(), user.GetDefault(api.KeyUserID, "")
+	return true, wui.NewURLBuilder('h').SetZid(user.Zid).String(), string(user.GetDefault(api.KeyUserID, ""))
 }
 
 type renderBinder struct {
@@ -222,10 +222,10 @@ func (rb *renderBinder) bindSymbol(sym *sx.Symbol, obj sx.Object) {
 		rb.err = rb.binding.Bind(sym, obj)
 	}
 }
-func (rb *renderBinder) bindKeyValue(key string, value string) {
-	rb.bindString("meta-"+key, sx.MakeString(value))
+func (rb *renderBinder) bindKeyValue(key string, value meta.Value) {
+	rb.bindString("meta-"+key, sx.MakeString(string(value)))
 	if kt := meta.Type(key); kt.IsSet {
-		rb.bindString("set-meta-"+key, makeStringList(meta.ListFromValue(value)))
+		rb.bindString("set-meta-"+key, makeStringList(value.ListFromValue()))
 	}
 }
 func (rb *renderBinder) rebindResolved(key, defKey string) {
@@ -259,7 +259,7 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 		rb.bindString("delete-url", sx.MakeString(newURLBuilder('d').SetZid(zid).String()))
 	}
 	if val, found := m.Get(api.KeyUselessFiles); found {
-		rb.bindString("useless", sx.Cons(sx.MakeString(val), nil))
+		rb.bindString("useless", sx.Cons(sx.MakeString(string(val)), nil))
 	}
 	queryContext := strZid + " " + api.ContextDirective
 	rb.bindString("context-url", sx.MakeString(newURLBuilder('h').AppendQuery(queryContext).String()))
@@ -278,7 +278,7 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	var metaPairs sx.ListBuilder
 	for _, p := range m.ComputedPairs() {
 		key, value := p.Key, p.Value
-		metaPairs.Add(sx.Cons(sx.MakeString(key), sx.MakeString(value)))
+		metaPairs.Add(sx.Cons(sx.MakeString(key), sx.MakeString(string(value))))
 		rb.bindKeyValue(key, value)
 	}
 	rb.bindString("metapairs", metaPairs.List())

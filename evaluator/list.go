@@ -109,11 +109,11 @@ func (ap *actionPara) createBlockNodeWord(key string) (ast.BlockNode, int) {
 	items := make([]ast.ItemSlice, 0, len(ccs))
 	ccs.SortByName()
 	for _, cat := range ccs {
-		buf.WriteString(cat.Name)
+		buf.WriteString(string(cat.Name))
 		items = append(items, ast.ItemSlice{ast.CreateParaNode(&ast.LinkNode{
 			Attrs:   nil,
 			Ref:     ast.ParseReference(buf.String()),
-			Inlines: ast.InlineSlice{&ast.TextNode{Text: cat.Name}},
+			Inlines: ast.InlineSlice{&ast.TextNode{Text: string(cat.Name)}},
 		})})
 		buf.Truncate(bufLen)
 	}
@@ -140,13 +140,13 @@ func (ap *actionPara) createBlockNodeTagSet(key string) (ast.BlockNode, int) {
 		if i > 0 {
 			para = append(para, &ast.TextNode{Text: " "})
 		}
-		buf.WriteString(cat.Name)
+		buf.WriteString(string(cat.Name))
 		para = append(para,
 			&ast.LinkNode{
 				Attrs: countMap[cat.Count],
 				Ref:   ast.ParseReference(buf.String()),
 				Inlines: ast.InlineSlice{
-					&ast.TextNode{Text: cat.Name},
+					&ast.TextNode{Text: string(cat.Name)},
 				},
 			},
 			&ast.FormatNode{
@@ -198,12 +198,12 @@ func (ap *actionPara) createBlockNodeMetaKeys() (ast.BlockNode, int) {
 	bufLen := ap.prepareSimpleQuery(&buf)
 	items := make([]ast.ItemSlice, 0, len(ccs))
 	for _, cat := range ccs {
-		buf.WriteString(cat.Name)
+		buf.WriteString(string(cat.Name))
 		buf.WriteString(api.ExistOperator)
 		q1 := buf.String()
 		buf.Truncate(bufLen)
 		buf.WriteString(api.ActionSeparator)
-		buf.WriteString(cat.Name)
+		buf.WriteString(string(cat.Name))
 		q2 := buf.String()
 		buf.Truncate(bufLen)
 
@@ -211,7 +211,7 @@ func (ap *actionPara) createBlockNodeMetaKeys() (ast.BlockNode, int) {
 			&ast.LinkNode{
 				Attrs:   nil,
 				Ref:     ast.ParseReference(q1),
-				Inlines: ast.InlineSlice{&ast.TextNode{Text: cat.Name}},
+				Inlines: ast.InlineSlice{&ast.TextNode{Text: string(cat.Name)}},
 			},
 			&ast.TextNode{Text: " "},
 			&ast.TextNode{Text: "(" + strconv.Itoa(cat.Count) + ", "},

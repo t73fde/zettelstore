@@ -107,11 +107,11 @@ func ParseBlocks(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLIn
 // No Zettelmarkup parsing is done. It is typically used to transform the zettel
 // description into an inline slice.
 func ParseSpacedText(s string) ast.InlineSlice {
-	return ast.InlineSlice{&ast.TextNode{Text: strings.Join(meta.ListFromValue(s), " ")}}
+	return ast.InlineSlice{&ast.TextNode{Text: strings.Join(strings.Fields(s), " ")}}
 }
 
 // NormalizedSpacedText returns the given string, but normalize multiple spaces to one space.
-func NormalizedSpacedText(s string) string { return strings.Join(meta.ListFromValue(s), " ") }
+func NormalizedSpacedText(s string) string { return strings.Join(strings.Fields(s), " ") }
 
 // ParseDescription returns a suitable description stored in the metadata as an inline slice.
 // This is done for an image in most cases.
@@ -120,10 +120,10 @@ func ParseDescription(m *meta.Meta) ast.InlineSlice {
 		return nil
 	}
 	if summary, found := m.Get(api.KeySummary); found {
-		return ParseSpacedText(summary)
+		return ParseSpacedText(string(summary))
 	}
 	if title, found := m.Get(api.KeyTitle); found {
-		return ParseSpacedText(title)
+		return ParseSpacedText(string(title))
 	}
 	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title/summary: " + m.Zid.String()}}
 }
@@ -136,7 +136,7 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 		inhMeta = rtConfig.AddDefaultValues(ctx, inhMeta)
 	}
 	if syntax == "" {
-		syntax = inhMeta.GetDefault(api.KeySyntax, meta.DefaultSyntax)
+		syntax = string(inhMeta.GetDefault(api.KeySyntax, meta.DefaultSyntax))
 	}
 	parseMeta := inhMeta
 	if syntax == meta.SyntaxNone {

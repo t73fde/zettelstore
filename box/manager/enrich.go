@@ -33,13 +33,13 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int) {
 	if box.DoEnrich(ctx) {
 		computePublished(m)
 		if boxNumber > 0 {
-			m.Set(api.KeyBoxNumber, strconv.Itoa(boxNumber))
+			m.Set(api.KeyBoxNumber, meta.Value(strconv.Itoa(boxNumber)))
 		}
 		mgr.idxStore.Enrich(ctx, m)
 	}
 }
 
-func computeCreated(zid id.Zid) string {
+func computeCreated(zid id.Zid) meta.Value {
 	if zid <= 10101000000 {
 		// A year 0000 is not allowed and therefore an artificial Zid.
 		// In the year 0001, the month must be > 0.
@@ -67,7 +67,7 @@ func computeCreated(zid id.Zid) string {
 	year := zid / 100
 	month, day = sanitizeMonthDay(year, month, day)
 	created := ((((year*100+month)*100+day)*100+hours)*100+minutes)*100 + seconds
-	return created.String()
+	return meta.Value(created.String())
 }
 
 func sanitizeMonthDay(year, month, day id.Zid) (id.Zid, id.Zid) {
@@ -109,20 +109,20 @@ func computePublished(m *meta.Meta) {
 		return
 	}
 	if modified, ok := m.Get(api.KeyModified); ok {
-		if _, ok = meta.TimeValue(modified); ok {
+		if _, ok = modified.TimeValue(); ok {
 			m.Set(api.KeyPublished, modified)
 			return
 		}
 	}
 	if created, ok := m.Get(api.KeyCreated); ok {
-		if _, ok = meta.TimeValue(created); ok {
+		if _, ok = created.TimeValue(); ok {
 			m.Set(api.KeyPublished, created)
 			return
 		}
 	}
-	zid := m.Zid.String()
-	if _, ok := meta.TimeValue(zid); ok {
-		m.Set(api.KeyPublished, zid)
+	zidValue := meta.Value(m.Zid.String())
+	if _, ok := zidValue.TimeValue(); ok {
+		m.Set(api.KeyPublished, zidValue)
 		return
 	}
 

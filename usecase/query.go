@@ -122,7 +122,7 @@ func (uc *Query) processContextDirective(ctx context.Context, spec *query.Contex
 func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, metaSeq []*meta.Meta) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(metaSeq))
 	for _, m := range metaSeq {
-		zn, err := uc.ucEvaluate.Run(ctx, m.Zid, m.GetDefault(api.KeySyntax, meta.DefaultSyntax))
+		zn, err := uc.ucEvaluate.Run(ctx, m.Zid, string(m.GetDefault(api.KeySyntax, meta.DefaultSyntax)))
 		if err != nil {
 			continue
 		}
@@ -165,11 +165,11 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 		for _, pair := range m.ComputedPairsRest() {
 			switch meta.Type(pair.Key) {
 			case meta.TypeID:
-				if zid, errParse := id.Parse(pair.Value); errParse == nil {
+				if zid, errParse := id.Parse(string(pair.Value)); errParse == nil {
 					refZids.Add(zid)
 				}
 			case meta.TypeIDSet:
-				for _, value := range meta.ListFromValue(pair.Value) {
+				for _, value := range pair.Value.ListFromValue() {
 					if zid, errParse := id.Parse(value); errParse == nil {
 						refZids.Add(zid)
 					}
@@ -204,7 +204,7 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 		}
 		v.text = v.joinWords(words)
 
-		syntax := zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)
+		syntax := string(zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax))
 		if !parser.IsASTParser(syntax) {
 			continue
 		}

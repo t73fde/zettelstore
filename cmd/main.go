@@ -125,9 +125,9 @@ func getConfig(fs *flag.FlagSet) (string, *meta.Meta) {
 	fs.Visit(func(flg *flag.Flag) {
 		switch flg.Name {
 		case "p":
-			cfg.Set(keyListenAddr, net.JoinHostPort("127.0.0.1", flg.Value.String()))
+			cfg.Set(keyListenAddr, meta.Value(net.JoinHostPort("127.0.0.1", flg.Value.String())))
 		case "a":
-			cfg.Set(keyAdminPort, flg.Value.String())
+			cfg.Set(keyAdminPort, meta.Value(flg.Value.String()))
 		case "d":
 			val := flg.Value.String()
 			if strings.HasPrefix(val, "/") {
@@ -136,15 +136,15 @@ func getConfig(fs *flag.FlagSet) (string, *meta.Meta) {
 				val = "dir:" + val
 			}
 			deleteConfiguredBoxes(cfg)
-			cfg.Set(keyBoxOneURI, val)
+			cfg.Set(keyBoxOneURI, meta.Value(val))
 		case "l":
-			cfg.Set(keyLogLevel, flg.Value.String())
+			cfg.Set(keyLogLevel, meta.Value(flg.Value.String()))
 		case "debug":
-			cfg.Set(keyDebug, flg.Value.String())
+			cfg.Set(keyDebug, meta.Value(flg.Value.String()))
 		case "r":
-			cfg.Set(keyReadOnly, flg.Value.String())
+			cfg.Set(keyReadOnly, meta.Value(flg.Value.String()))
 		case "v":
-			cfg.Set(keyVerbose, flg.Value.String())
+			cfg.Set(keyVerbose, meta.Value(flg.Value.String()))
 		}
 	})
 	return filename, cfg
@@ -186,7 +186,7 @@ func setServiceConfig(cfg *meta.Meta) bool {
 		kernel.Main.SetLogLevel(logger.DebugLevel.String())
 	}
 	if logLevel, found := cfg.Get(keyLogLevel); found {
-		kernel.Main.SetLogLevel(logLevel)
+		kernel.Main.SetLogLevel(string(logLevel))
 	}
 	err := setConfigValue(nil, kernel.CoreService, kernel.CoreDebug, debugMode)
 	err = setConfigValue(err, kernel.CoreService, kernel.CoreVerbose, cfg.GetBool(keyVerbose))
@@ -281,11 +281,11 @@ func executeCommand(name string, args ...string) int {
 		return 2
 	}
 	cfg.Delete("secret")
-	secret = fmt.Sprintf("%x", sha256.Sum256([]byte(secret)))
+	secretHash := fmt.Sprintf("%x", sha256.Sum256([]byte(string(secret))))
 
 	kern.SetCreators(
 		func(readonly bool, owner id.Zid) (auth.Manager, error) {
-			return impl.New(readonly, owner, secret), nil
+			return impl.New(readonly, owner, secretHash), nil
 		},
 		createManager,
 		func(srv server.Server, plMgr box.Manager, authMgr auth.Manager, rtConfig config.Config) error {

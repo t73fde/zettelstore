@@ -87,7 +87,7 @@ func (a *testAuthzManager) GetUserRole(user *meta.Meta) meta.UserRole {
 		return meta.UserRoleOwner
 	}
 	if val, ok := user.Get(api.KeyUserRole); ok {
-		if ur := meta.GetUserRole(val); ur != meta.UserRoleUnknown {
+		if ur := val.GetUserRole(); ur != meta.UserRoleUnknown {
 			return ur
 		}
 	}
@@ -100,8 +100,8 @@ func (ac *authConfig) GetSimpleMode() bool { return ac.simple }
 func (ac *authConfig) GetExpertMode() bool { return ac.expert }
 
 func (*authConfig) GetVisibility(m *meta.Meta) meta.Visibility {
-	if vis, ok := m.Get(api.KeyVisibility); ok {
-		return meta.GetVisibility(vis)
+	if val, ok := m.Get(api.KeyVisibility); ok {
+		return val.GetVisibility()
 	}
 	return meta.VisibilityLogin
 }

@@ -43,7 +43,7 @@ func (d *defaultPolicy) canChange(user, m *meta.Meta) bool {
 
 		// No authentication: check for owner-like restriction, because the user
 		// acts as an owner
-		return metaRo != api.ValueUserRoleOwner && !meta.BoolValue(metaRo)
+		return metaRo != api.ValueUserRoleOwner && !metaRo.BoolValue()
 	}
 
 	userRole := d.manager.GetUserRole(user)
@@ -55,5 +55,5 @@ func (d *defaultPolicy) canChange(user, m *meta.Meta) bool {
 	case api.ValueUserRoleOwner:
 		return userRole > meta.UserRoleOwner
 	}
-	return !meta.BoolValue(metaRo)
+	return !metaRo.BoolValue()
 }

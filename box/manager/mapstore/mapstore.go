@@ -109,28 +109,28 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 	}
 	var updated bool
 	if !zi.dead.IsEmpty() {
-		m.Set(api.KeyDead, zi.dead.MetaString())
+		m.Set(api.KeyDead, zi.dead.MetaValue())
 		updated = true
 	}
 	back := removeOtherMetaRefs(m, zi.backward.Clone())
 	if !zi.backward.IsEmpty() {
-		m.Set(api.KeyBackward, zi.backward.MetaString())
+		m.Set(api.KeyBackward, zi.backward.MetaValue())
 		updated = true
 	}
 	if !zi.forward.IsEmpty() {
-		m.Set(api.KeyForward, zi.forward.MetaString())
+		m.Set(api.KeyForward, zi.forward.MetaValue())
 		back.ISubstract(zi.forward)
 		updated = true
 	}
 	for k, refs := range zi.otherRefs {
 		if !refs.backward.IsEmpty() {
-			m.Set(k, refs.backward.MetaString())
+			m.Set(k, refs.backward.MetaValue())
 			back.ISubstract(refs.backward)
 			updated = true
 		}
 	}
 	if !back.IsEmpty() {
-		m.Set(api.KeyBack, back.MetaString())
+		m.Set(api.KeyBack, back.MetaValue())
 		updated = true
 	}
 	return updated
@@ -269,11 +269,11 @@ func removeOtherMetaRefs(m *meta.Meta, back *idset.Set) *idset.Set {
 	for _, p := range m.PairsRest() {
 		switch meta.Type(p.Key) {
 		case meta.TypeID:
-			if zid, err := id.Parse(p.Value); err == nil {
+			if zid, err := id.Parse(string(p.Value)); err == nil {
 				back = back.Remove(zid)
 			}
 		case meta.TypeIDSet:
-			for _, val := range meta.ListFromValue(p.Value) {
+			for _, val := range p.Value.ListFromValue() {
 				if zid, err := id.Parse(val); err == nil {
 					back = back.Remove(zid)
 				}
@@ -347,7 +347,7 @@ func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 	for _, p := range origM.Pairs() {
 		key := ms.internString(p.Key)
 		if isInternableValue(key) {
-			copyM.Set(key, ms.internString(p.Value))
+			copyM.Set(key, meta.Value(ms.internString(string(p.Value))))
 		} else if key == api.KeyBoxNumber || !meta.IsComputed(key) {
 			copyM.Set(key, p.Value)
 		}

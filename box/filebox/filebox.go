@@ -59,16 +59,16 @@ func getFilepathFromURL(u *url.URL) string {
 	return fileName
 }
 
-var alternativeSyntax = map[string]string{
+var alternativeSyntax = map[string]meta.Value{
 	"htm": "html",
 }
 
-func calculateSyntax(ext string) string {
+func calculateSyntax(ext string) meta.Value {
 	ext = strings.ToLower(ext)
 	if syntax, ok := alternativeSyntax[ext]; ok {
 		return syntax
 	}
-	return ext
+	return meta.Value(ext)
 }
 
 // CalcDefaultMeta returns metadata with default values for the given entry.
@@ -92,6 +92,6 @@ func CleanupMeta(m *meta.Meta, zid id.Zid, ext string, inMeta bool, uselessFiles
 	}
 
 	if len(uselessFiles) > 0 {
-		m.Set(api.KeyUselessFiles, strings.Join(uselessFiles, " "))
+		m.Set(api.KeyUselessFiles, meta.Value(strings.Join(uselessFiles, " ")))
 	}
 }

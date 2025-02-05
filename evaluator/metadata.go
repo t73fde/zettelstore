@@ -27,7 +27,7 @@ func evaluateMetadata(m *meta.Meta) ast.BlockSlice {
 	return ast.BlockSlice{descrlist}
 }
 
-func getMetadataDescription(key, value string) ast.Description {
+func getMetadataDescription(key string, value meta.Value) ast.Description {
 	is := convertMetavalueToInlineSlice(value, meta.Type(key))
 	return ast.Description{
 		Term:         ast.InlineSlice{&ast.TextNode{Text: key}},
@@ -35,15 +35,15 @@ func getMetadataDescription(key, value string) ast.Description {
 	}
 }
 
-func convertMetavalueToInlineSlice(value string, dt *meta.DescriptionType) ast.InlineSlice {
+func convertMetavalueToInlineSlice(value meta.Value, dt *meta.DescriptionType) ast.InlineSlice {
 	var sliceData []string
 	if dt.IsSet {
-		sliceData = meta.ListFromValue(value)
+		sliceData = value.ListFromValue()
 		if len(sliceData) == 0 {
 			return nil
 		}
 	} else {
-		sliceData = []string{value}
+		sliceData = []string{string(value)}
 	}
 	makeLink := dt == meta.TypeID || dt == meta.TypeIDSet
 

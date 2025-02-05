@@ -106,7 +106,7 @@ func (wui *WebUI) renderZettelForm(
 	for _, p := range m.PairsRest() {
 		sb.WriteString(p.Key)
 		sb.WriteString(": ")
-		sb.WriteString(p.Value)
+		sb.WriteString(string(p.Value))
 		sb.WriteByte('\n')
 	}
 	env, rb := wui.createRenderEnv(ctx, "form", wui.getUserLang(ctx), title, user)
@@ -184,10 +184,10 @@ func (wui *WebUI) MakeGetZettelFromListHandler(
 		}
 
 		m := meta.New(id.Invalid)
-		m.Set(api.KeyTitle, q.Human())
+		m.Set(api.KeyTitle, meta.Value(q.Human()))
 		m.Set(api.KeySyntax, api.ValueSyntaxZmk)
 		if qval := q.String(); qval != "" {
-			m.Set(api.KeyQuery, qval)
+			m.Set(api.KeyQuery, meta.Value(qval))
 		}
 		zettel := zettel.Zettel{Meta: m, Content: zettel.NewContent(zmkContent.Bytes())}
 		roleData, syntaxData := retrieveDataLists(ctx, ucListRoles, ucListSyntax)

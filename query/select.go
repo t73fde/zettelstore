@@ -21,9 +21,9 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 )
 
-type matchValueFunc func(value string) bool
+type matchValueFunc func(value meta.Value) bool
 
-func matchValueNever(string) bool { return false }
+func matchValueNever(meta.Value) bool { return false }
 
 type matchSpec struct {
 	key   string
@@ -126,7 +126,7 @@ func createMatchFunc(key string, values []expValue, addSearch addSearchFunc) mat
 
 func createMatchIDFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	preds := valuesToIDPredicates(values, addSearch)
-	return func(value string) bool {
+	return func(value meta.Value) bool {
 		for _, pred := range preds {
 			if !pred(value) {
 				return false
@@ -138,8 +138,8 @@ func createMatchIDFunc(values []expValue, addSearch addSearchFunc) matchValueFun
 
 func createMatchIDSetFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	predList := valuesToSetPredicates(preprocessSet(values), addSearch)
-	return func(value string) bool {
-		ids := meta.ListFromValue(value)
+	return func(value meta.Value) bool {
+		ids := value.ListFromValue()
 		for _, preds := range predList {
 			for _, pred := range preds {
 				if !pred(ids) {
@@ -152,8 +152,8 @@ func createMatchIDSetFunc(values []expValue, addSearch addSearchFunc) matchValue
 }
 func createMatchTimestampFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	preds := valuesToTimestampPredicates(values, addSearch)
-	return func(value string) bool {
-		value = meta.ExpandTimestamp(value)
+	return func(value meta.Value) bool {
+		value = meta.Value(meta.ExpandTimestamp(value))
 		for _, pred := range preds {
 			if !pred(value) {
 				return false
@@ -165,7 +165,7 @@ func createMatchTimestampFunc(values []expValue, addSearch addSearchFunc) matchV
 
 func createMatchNumberFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	preds := valuesToNumberPredicates(values, addSearch)
-	return func(value string) bool {
+	return func(value meta.Value) bool {
 		for _, pred := range preds {
 			if !pred(value) {
 				return false
@@ -177,8 +177,8 @@ func createMatchNumberFunc(values []expValue, addSearch addSearchFunc) matchValu
 
 func createMatchTagSetFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	predList := valuesToSetPredicates(processTagSet(preprocessSet(sliceToLower(values))), addSearch)
-	return func(value string) bool {
-		tags := meta.TagsFromValue(value)
+	return func(value meta.Value) bool {
+		tags := value.TagsFromValue()
 		for _, preds := range predList {
 			for _, pred := range preds {
 				if !pred(tags) {
@@ -196,7 +196,7 @@ func processTagSet(valueSet [][]expValue) [][]expValue {
 		tags := make([]expValue, len(values))
 		for j, val := range values {
 			if tval := val.value; tval != "" && tval[0] == '#' {
-				tval = meta.CleanTag(tval)
+				tval = tval.CleanTag()
 				tags[j] = expValue{value: tval, op: val.op}
 			} else {
 				tags[j] = expValue{value: tval, op: val.op}
@@ -209,8 +209,8 @@ func processTagSet(valueSet [][]expValue) [][]expValue {
 
 func createMatchWordFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	preds := valuesToWordPredicates(sliceToLower(values), addSearch)
-	return func(value string) bool {
-		value = strings.ToLower(value)
+	return func(value meta.Value) bool {
+		value = meta.Value(strings.ToLower(string(value)))
 		for _, pred := range preds {
 			if !pred(value) {
 				return false
@@ -222,8 +222,8 @@ func createMatchWordFunc(values []expValue, addSearch addSearchFunc) matchValueF
 
 func createMatchStringFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	preds := valuesToStringPredicates(sliceToLower(values), addSearch)
-	return func(value string) bool {
-		value = strings.ToLower(value)
+	return func(value meta.Value) bool {
+		value = meta.Value(strings.ToLower(string(value)))
 		for _, pred := range preds {
 			if !pred(value) {
 				return false
@@ -237,7 +237,7 @@ func sliceToLower(sl []expValue) []expValue {
 	result := make([]expValue, 0, len(sl))
 	for _, s := range sl {
 		result = append(result, expValue{
-			value: strings.ToLower(s.value),
+			value: meta.Value(strings.ToLower(string(s.value))),
 			op:    s.op,
 		})
 	}
@@ -247,12 +247,12 @@ func sliceToLower(sl []expValue) []expValue {
 func preprocessSet(set []expValue) [][]expValue {
 	result := make([][]expValue, 0, len(set))
 	for _, elem := range set {
-		splitElems := strings.Split(elem.value, ",")
+		splitElems := strings.Split(string(elem.value), ",")
 		valueElems := make([]expValue, 0, len(splitElems))
 		for _, se := range splitElems {
 			e := strings.TrimSpace(se)
 			if len(e) > 0 {
-				valueElems = append(valueElems, expValue{value: e, op: elem.op})
+				valueElems = append(valueElems, expValue{value: meta.Value(e), op: elem.op})
 			}
 		}
 		if len(valueElems) > 0 {
@@ -262,7 +262,7 @@ func preprocessSet(set []expValue) [][]expValue {
 	return result
 }
 
-type stringPredicate func(string) bool
+type stringPredicate func(meta.Value) bool
 
 func valuesToIDPredicates(values []expValue, addSearch addSearchFunc) []stringPredicate {
 	result := make([]stringPredicate, len(values))
@@ -273,12 +273,12 @@ func valuesToIDPredicates(values []expValue, addSearch addSearchFunc) []stringPr
 		}
 		switch op := disambiguatedIDOp(v.op); op {
 		case cmpLess, cmpNoLess, cmpGreater, cmpNoGreater:
-			if isDigits(value) {
+			if isDigits(string(value)) {
 				// Never add the strValue to search.
 				// Append enough zeroes to make it comparable as string.
 				// (an ID and a timestamp always have 14 digits)
-				strValue := value + "00000000000000"[:14-len(value)]
-				result[i] = createIDCompareFunc(strValue, op)
+				strValue := string(value) + "00000000000000"[:14-len(value)]
+				result[i] = createIDCompareFunc(meta.Value(strValue), op)
 				continue
 			}
 			fallthrough
@@ -304,7 +304,7 @@ func isDigits(s string) bool {
 
 func disambiguatedIDOp(cmpOp compareOp) compareOp { return disambiguateWordOp(cmpOp) }
 
-func createIDCompareFunc(cmpVal string, cmpOp compareOp) stringPredicate {
+func createIDCompareFunc(cmpVal meta.Value, cmpOp compareOp) stringPredicate {
 	return createWordCompareFunc(cmpVal, cmpOp)
 }
 
@@ -316,7 +316,7 @@ func valuesToTimestampPredicates(values []expValue, addSearch addSearchFunc) []s
 		case cmpLess, cmpNoLess, cmpGreater, cmpNoGreater:
 			if isDigits(value) {
 				// Never add the value to search.
-				result[i] = createTimestampCompareFunc(value, op)
+				result[i] = createTimestampCompareFunc(meta.Value(value), op)
 				continue
 			}
 			fallthrough
@@ -325,7 +325,7 @@ func valuesToTimestampPredicates(values []expValue, addSearch addSearchFunc) []s
 			if !op.isNegated() {
 				addSearch(v) // addSearch only for positive selections
 			}
-			result[i] = createWordCompareFunc(value, op)
+			result[i] = createWordCompareFunc(meta.Value(value), op)
 		}
 	}
 	return result
@@ -333,7 +333,7 @@ func valuesToTimestampPredicates(values []expValue, addSearch addSearchFunc) []s
 
 func disambiguatedTimestampOp(cmpOp compareOp) compareOp { return disambiguateWordOp(cmpOp) }
 
-func createTimestampCompareFunc(cmpVal string, cmpOp compareOp) stringPredicate {
+func createTimestampCompareFunc(cmpVal meta.Value, cmpOp compareOp) stringPredicate {
 	return createWordCompareFunc(cmpVal, cmpOp)
 }
 
@@ -342,7 +342,7 @@ func valuesToNumberPredicates(values []expValue, addSearch addSearchFunc) []stri
 	for i, v := range values {
 		switch op := disambiguatedNumberOp(v.op); op {
 		case cmpEqual, cmpNotEqual, cmpLess, cmpNoLess, cmpGreater, cmpNoGreater:
-			iValue, err := strconv.ParseInt(v.value, 10, 64)
+			iValue, err := strconv.ParseInt(string(v.value), 10, 64)
 			if err == nil {
 				// Never add the strValue to search.
 				result[i] = createNumberCompareFunc(iValue, op)
@@ -380,8 +380,8 @@ func createNumberCompareFunc(cmpVal int64, cmpOp compareOp) stringPredicate {
 	default:
 		panic(fmt.Sprintf("Unknown compare operation %d with value %q", cmpOp, cmpVal))
 	}
-	return func(metaVal string) bool {
-		iMetaVal, err := strconv.ParseInt(metaVal, 10, 64)
+	return func(metaVal meta.Value) bool {
+		iMetaVal, err := strconv.ParseInt(string(metaVal), 10, 64)
 		if err != nil {
 			return false
 		}
@@ -412,7 +412,7 @@ func disambiguatedStringOp(cmpOp compareOp) compareOp {
 	}
 }
 
-func createStringCompareFunc(cmpVal string, cmpOp compareOp) stringPredicate {
+func createStringCompareFunc(cmpVal meta.Value, cmpOp compareOp) stringPredicate {
 	return createWordCompareFunc(cmpVal, cmpOp)
 }
 
@@ -439,32 +439,32 @@ func disambiguateWordOp(cmpOp compareOp) compareOp {
 	}
 }
 
-func createWordCompareFunc(cmpVal string, cmpOp compareOp) stringPredicate {
+func createWordCompareFunc(cmpVal meta.Value, cmpOp compareOp) stringPredicate {
 	switch cmpOp {
 	case cmpEqual:
-		return func(metaVal string) bool { return metaVal == cmpVal }
+		return func(metaVal meta.Value) bool { return metaVal == cmpVal }
 	case cmpNotEqual:
-		return func(metaVal string) bool { return metaVal != cmpVal }
+		return func(metaVal meta.Value) bool { return metaVal != cmpVal }
 	case cmpPrefix:
-		return func(metaVal string) bool { return strings.HasPrefix(metaVal, cmpVal) }
+		return func(metaVal meta.Value) bool { return strings.HasPrefix(string(metaVal), string(cmpVal)) }
 	case cmpNoPrefix:
-		return func(metaVal string) bool { return !strings.HasPrefix(metaVal, cmpVal) }
+		return func(metaVal meta.Value) bool { return !strings.HasPrefix(string(metaVal), string(cmpVal)) }
 	case cmpSuffix:
-		return func(metaVal string) bool { return strings.HasSuffix(metaVal, cmpVal) }
+		return func(metaVal meta.Value) bool { return strings.HasSuffix(string(metaVal), string(cmpVal)) }
 	case cmpNoSuffix:
-		return func(metaVal string) bool { return !strings.HasSuffix(metaVal, cmpVal) }
+		return func(metaVal meta.Value) bool { return !strings.HasSuffix(string(metaVal), string(cmpVal)) }
 	case cmpMatch:
-		return func(metaVal string) bool { return strings.Contains(metaVal, cmpVal) }
+		return func(metaVal meta.Value) bool { return strings.Contains(string(metaVal), string(cmpVal)) }
 	case cmpNoMatch:
-		return func(metaVal string) bool { return !strings.Contains(metaVal, cmpVal) }
+		return func(metaVal meta.Value) bool { return !strings.Contains(string(metaVal), string(cmpVal)) }
 	case cmpLess:
-		return func(metaVal string) bool { return metaVal < cmpVal }
+		return func(metaVal meta.Value) bool { return metaVal < cmpVal }
 	case cmpNoLess:
-		return func(metaVal string) bool { return metaVal >= cmpVal }
+		return func(metaVal meta.Value) bool { return metaVal >= cmpVal }
 	case cmpGreater:
-		return func(metaVal string) bool { return metaVal > cmpVal }
+		return func(metaVal meta.Value) bool { return metaVal > cmpVal }
 	case cmpNoGreater:
-		return func(metaVal string) bool { return metaVal <= cmpVal }
+		return func(metaVal meta.Value) bool { return metaVal <= cmpVal }
 	case cmpHas, cmpHasNot:
 		panic(fmt.Sprintf("operator %d not disambiguated with value %q", cmpOp, cmpVal))
 	default:
@@ -522,10 +522,10 @@ func stringGreater(val1, val2 string) bool { return val1 > val2 }
 
 type compareStringFunc func(val1, val2 string) bool
 
-func makeStringSetPredicate(neededValue string, compare compareStringFunc, foundResult bool) stringSetPredicate {
+func makeStringSetPredicate(neededValue meta.Value, compare compareStringFunc, foundResult bool) stringSetPredicate {
 	return func(metaVals []string) bool {
 		for _, metaVal := range metaVals {
-			if compare(metaVal, neededValue) {
+			if compare(metaVal, string(neededValue)) {
 				return foundResult
 			}
 		}

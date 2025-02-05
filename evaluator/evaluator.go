@@ -209,13 +209,13 @@ func (e *evaluator) evalVerbatimZettel(vn *ast.VerbatimNode) ast.BlockNode {
 	return &zn.Ast
 }
 
-func getSyntax(a attrs.Attributes, defSyntax string) string {
+func getSyntax(a attrs.Attributes, defSyntax meta.Value) meta.Value {
 	if a != nil {
 		if val, ok := a.Get(api.KeySyntax); ok {
-			return val
+			return meta.Value(val)
 		}
 		if val, ok := a.Get(""); ok {
-			return val
+			return meta.Value(val)
 		}
 	}
 	return defSyntax
@@ -317,7 +317,7 @@ func makeBlockNode(in ast.InlineNode) ast.BlockNode { return ast.CreateParaNode(
 func setMetadataFromAttributes(m *meta.Meta, a attrs.Attributes) {
 	for aKey, aVal := range a {
 		if meta.KeyIsValid(aKey) {
-			m.Set(aKey, aVal)
+			m.Set(aKey, meta.Value(aVal))
 		}
 	}
 }
@@ -439,7 +439,7 @@ func (e *evaluator) evalEmbedRefNode(en *ast.EmbedRefNode) ast.InlineNode {
 		return createInlineErrorImage(en)
 	}
 
-	if syntax := zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax); parser.IsImageFormat(syntax) {
+	if syntax := string(zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)); parser.IsImageFormat(syntax) {
 		e.updateImageRefNode(en, zettel.Meta, syntax)
 		return en
 	} else if !parser.IsASTParser(syntax) {
@@ -546,7 +546,7 @@ func createEmbeddedNodeLocal(ref *ast.Reference) *ast.EmbedRefNode {
 }
 
 func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.ZettelNode {
-	zn := parser.ParseZettel(e.ctx, zettel, zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax), e.rtConfig)
+	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
 	ast.Walk(e, &zn.Ast)
 	return zn
 }

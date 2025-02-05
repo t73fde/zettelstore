@@ -412,19 +412,19 @@ func (ps *parserState) parseText(q *Query) *Query {
 	q = createIfNeeded(q)
 	if hasOp {
 		if key == nil {
-			q.addSearch(expValue{string(text), op})
+			q.addSearch(expValue{meta.Value(string(text)), op})
 		} else {
 			last := len(q.terms) - 1
 			if q.terms[last].mvals == nil {
-				q.terms[last].mvals = expMetaValues{string(key): {expValue{string(text), op}}}
+				q.terms[last].mvals = expMetaValues{string(key): {expValue{meta.Value(string(text)), op}}}
 			} else {
 				sKey := string(key)
-				q.terms[last].mvals[sKey] = append(q.terms[last].mvals[sKey], expValue{string(text), op})
+				q.terms[last].mvals[sKey] = append(q.terms[last].mvals[sKey], expValue{meta.Value(string(text)), op})
 			}
 		}
 	} else {
 		// Assert key == nil
-		q.addSearch(expValue{string(text), cmpMatch})
+		q.addSearch(expValue{meta.Value(string(text)), cmpMatch})
 	}
 	return q
 }

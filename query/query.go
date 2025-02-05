@@ -232,7 +232,7 @@ var negativeMap = map[compareOp]bool{
 func (op compareOp) isNegated() bool { return negativeMap[op] }
 
 type expValue struct {
-	value string
+	value meta.Value
 	op    compareOp
 }
 
@@ -254,7 +254,7 @@ var missingMap = map[compareOp]bool{
 // GetMetaValues returns the slice of all values specified for a given metadata key.
 // If `withMissing` is true, all values are returned. Otherwise only those,
 // where the comparison operator will positively search for a value.
-func (q *Query) GetMetaValues(key string, withMissing bool) (vals []string) {
+func (q *Query) GetMetaValues(key string, withMissing bool) (vals []meta.Value) {
 	if q == nil {
 		return nil
 	}

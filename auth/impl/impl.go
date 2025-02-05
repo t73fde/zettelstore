@@ -92,7 +92,7 @@ func (a *myAuth) GetToken(ident *meta.Meta, d time.Duration, kind auth.TokenKind
 	now := time.Now().Round(time.Second)
 	sClaim := sx.MakeList(
 		sx.Int64(kind),
-		sx.MakeString(subject),
+		sx.MakeString(string(subject)),
 		sx.Int64(now.Unix()),
 		sx.Int64(now.Add(d).Unix()),
 		sx.Int64(ident.Zid),
@@ -168,7 +168,7 @@ func (a *myAuth) GetUserRole(user *meta.Meta) meta.UserRole {
 		return meta.UserRoleOwner
 	}
 	if val, ok := user.Get(api.KeyUserRole); ok {
-		if ur := meta.GetUserRole(val); ur != meta.UserRoleUnknown {
+		if ur := val.GetUserRole(); ur != meta.UserRoleUnknown {
 			return ur
 		}
 	}

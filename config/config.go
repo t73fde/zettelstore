@@ -57,7 +57,7 @@ type Config interface {
 	GetYAMLHeader() bool
 
 	// GetZettelFileSyntax returns the current value of the "zettel-file-syntax" key.
-	GetZettelFileSyntax() []string
+	GetZettelFileSyntax() []meta.Value
 }
 
 // AuthConfig are relevant configuration values for authentication.

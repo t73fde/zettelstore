@@ -68,12 +68,18 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		rb.bindSymbol(symMetaHeader, metaObj)
 		rb.bindString("heading", sx.MakeString(title))
 		if role, found := zn.InhMeta.Get(api.KeyRole); found && role != "" {
-			rb.bindString("role-url", sx.MakeString(wui.NewURLBuilder('h').AppendQuery(api.KeyRole+api.SearchOperatorHas+role).String()))
+			rb.bindString(
+				"role-url",
+				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(
+					api.KeyRole+api.SearchOperatorHas+string(role)).String()))
 		}
 		if folgeRole, found := zn.InhMeta.Get(api.KeyFolgeRole); found && folgeRole != "" {
-			rb.bindString("folge-role-url", sx.MakeString(wui.NewURLBuilder('h').AppendQuery(api.KeyRole+api.SearchOperatorHas+folgeRole).String()))
+			rb.bindString(
+				"folge-role-url",
+				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(
+					api.KeyRole+api.SearchOperatorHas+string(folgeRole)).String()))
 		}
-		rb.bindString("tag-refs", wui.transformTagSet(api.KeyTags, meta.ListFromValue(zn.InhMeta.GetDefault(api.KeyTags, ""))))
+		rb.bindString("tag-refs", wui.transformTagSet(api.KeyTags, zn.InhMeta.GetDefault(api.KeyTags, "").ListFromValue()))
 		rb.bindString("predecessor-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPredecessor, getTextTitle))
 		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPrecursor, getTextTitle))
 		rb.bindString("prequel-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPrequel, getTextTitle))
@@ -88,7 +94,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, api.KeySuccessors, config.KeyShowSuccessorLinks, getTextTitle)
 		if role, found := zn.InhMeta.Get(api.KeyRole); found && role != "" {
 			for _, part := range []string{"meta", "actions", "heading"} {
-				rb.rebindResolved("ROLE-"+role+"-"+part, "ROLE-DEFAULT-"+part)
+				rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-DEFAULT-"+part)
 			}
 		}
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
@@ -115,7 +121,7 @@ func metaURLAssoc(m *meta.Meta) *sx.Pair {
 	for _, p := range m.PairsRest() {
 		if key := p.Key; strings.HasSuffix(key, meta.SuffixKeyURL) {
 			if val := p.Value; val != "" {
-				result.Add(sx.Cons(sx.MakeString(capitalizeMetaKey(key)), sx.MakeString(val)))
+				result.Add(sx.Cons(sx.MakeString(capitalizeMetaKey(key)), sx.MakeString(string(val))))
 			}
 		}
 	}

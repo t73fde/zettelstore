@@ -158,7 +158,7 @@ func (cb *compBox) ReadStats(st *box.ManagedBoxStats) {
 
 func getTitledMeta(zid id.Zid, title string) *meta.Meta {
 	m := meta.New(zid)
-	m.Set(api.KeyTitle, title)
+	m.Set(api.KeyTitle, meta.Value(title))
 	return m
 }
 
@@ -168,7 +168,7 @@ func updateMeta(m *meta.Meta) {
 	}
 	m.Set(api.KeyRole, api.ValueRoleConfiguration)
 	if _, ok := m.Get(api.KeyCreated); !ok {
-		m.Set(api.KeyCreated, kernel.Main.GetConfig(kernel.CoreService, kernel.CoreStarted).(string))
+		m.Set(api.KeyCreated, meta.Value(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreStarted).(string)))
 	}
 	m.Set(api.KeyLang, api.ValueLangEN)
 	m.Set(api.KeyReadOnly, api.ValueTrue)

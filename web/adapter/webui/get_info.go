@@ -217,7 +217,7 @@ func getShadowLinks(ctx context.Context, zid id.Zid, getAllZettel usecase.GetAll
 	if zl, err := getAllZettel.Run(ctx, zid); err == nil {
 		for _, ztl := range zl {
 			if boxNo, ok := ztl.Meta.Get(api.KeyBoxNumber); ok {
-				lb.Add(sx.MakeString(boxNo))
+				lb.Add(sx.MakeString(string(boxNo)))
 			}
 		}
 	}

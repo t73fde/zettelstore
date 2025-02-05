@@ -141,30 +141,32 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 	})
 }
 
-func (wui *WebUI) transformTagZettelList(ctx context.Context, tagZettel *usecase.TagZettel, tags []string) (withZettel, withoutZettel *sx.Pair) {
+func (wui *WebUI) transformTagZettelList(ctx context.Context, tagZettel *usecase.TagZettel, tags []meta.Value) (withZettel, withoutZettel *sx.Pair) {
 	slices.Reverse(tags)
 	for _, tag := range tags {
-		tag = meta.NormalizeTag(tag)
+		tag = tag.NormalizeTag()
 		if _, err := tagZettel.Run(ctx, tag); err == nil {
-			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyTag, tag)
-			withZettel = wui.prependZettelLink(withZettel, tag, u)
+			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyTag, string(tag))
+			withZettel = wui.prependZettelLink(withZettel, string(tag), u)
 		} else {
-			u := wui.NewURLBuilder('c').SetZid(api.ZidTemplateNewTag).AppendKVQuery(queryKeyAction, valueActionNew).AppendKVQuery(api.KeyTitle, tag)
-			withoutZettel = wui.prependZettelLink(withoutZettel, tag, u)
+			u := wui.NewURLBuilder('c').SetZid(api.ZidTemplateNewTag).AppendKVQuery(
+				queryKeyAction, valueActionNew).AppendKVQuery(api.KeyTitle, string(tag))
+			withoutZettel = wui.prependZettelLink(withoutZettel, string(tag), u)
 		}
 	}
 	return withZettel, withoutZettel
 }
 
-func (wui *WebUI) transformRoleZettelList(ctx context.Context, roleZettel *usecase.RoleZettel, roles []string) (withZettel, withoutZettel *sx.Pair) {
+func (wui *WebUI) transformRoleZettelList(ctx context.Context, roleZettel *usecase.RoleZettel, roles []meta.Value) (withZettel, withoutZettel *sx.Pair) {
 	slices.Reverse(roles)
 	for _, role := range roles {
 		if _, err := roleZettel.Run(ctx, role); err == nil {
-			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyRole, role)
-			withZettel = wui.prependZettelLink(withZettel, role, u)
+			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyRole, string(role))
+			withZettel = wui.prependZettelLink(withZettel, string(role), u)
 		} else {
-			u := wui.NewURLBuilder('c').SetZid(api.ZidTemplateNewRole).AppendKVQuery(queryKeyAction, valueActionNew).AppendKVQuery(api.KeyTitle, role)
-			withoutZettel = wui.prependZettelLink(withoutZettel, role, u)
+			u := wui.NewURLBuilder('c').SetZid(api.ZidTemplateNewRole).AppendKVQuery(
+				queryKeyAction, valueActionNew).AppendKVQuery(api.KeyTitle, string(role))
+			withoutZettel = wui.prependZettelLink(withoutZettel, string(role), u)
 		}
 	}
 	return withZettel, withoutZettel
@@ -191,7 +193,7 @@ func (wui *WebUI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZet
 		return false
 	}
 	ctx := r.Context()
-	z, err := tagZettel.Run(ctx, tag)
+	z, err := tagZettel.Run(ctx, meta.Value(tag))
 	if err != nil {
 		wui.reportError(ctx, w, err)
 		return true
@@ -206,7 +208,7 @@ func (wui *WebUI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZ
 		return false
 	}
 	ctx := r.Context()
-	z, err := roleZettel.Run(ctx, role)
+	z, err := roleZettel.Run(ctx, meta.Value(role))
 	if err != nil {
 		wui.reportError(ctx, w, err)
 		return true

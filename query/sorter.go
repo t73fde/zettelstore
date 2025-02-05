@@ -113,7 +113,7 @@ func createSortNumberFunc(key string, descending bool) sortFunc {
 
 func getNum(m *meta.Meta, key string) (int64, bool) {
 	if s, ok := m.Get(key); ok {
-		if i, err := strconv.ParseInt(s, 10, 64); err == nil {
+		if i, err := strconv.ParseInt(string(s), 10, 64); err == nil {
 			return i, true
 		}
 	}

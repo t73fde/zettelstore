@@ -61,7 +61,7 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		keyDefaultVisibility: {
 			"Default zettel visibility",
 			func(val string) (any, error) {
-				vis := meta.GetVisibility(val)
+				vis := meta.Value(val).GetVisibility()
 				if vis == meta.VisibilityUnknown {
 					return nil, errUnknownVisibility
 				}
@@ -132,7 +132,7 @@ func (cs *configService) Start(*myKernel) error {
 	cs.logger.Info().Msg("Start Service")
 	data := meta.New(api.ZidConfiguration)
 	for _, kv := range cs.GetNextConfigList() {
-		data.Set(kv.Key, kv.Value)
+		data.Set(kv.Key, meta.Value(kv.Value))
 	}
 	cs.mxService.Lock()
 	cs.orig = data
@@ -177,9 +177,9 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 	for _, pair := range cs.orig.Pairs() {
 		key := pair.Key
 		if val, ok := m.Get(key); ok {
-			cs.SetConfig(key, val)
+			cs.SetConfig(key, string(val))
 		} else if defVal, defFound := cs.orig.Get(key); defFound {
-			cs.SetConfig(key, defVal)
+			cs.SetConfig(key, string(defVal))
 		}
 	}
 	cs.mxService.Unlock()
@@ -208,12 +208,12 @@ func (cs *configService) observe(ci box.UpdateInfo) {
 func (cs *configService) Get(ctx context.Context, m *meta.Meta, key string) string {
 	if m != nil {
 		if val, found := m.Get(key); found {
-			return val
+			return string(val)
 		}
 	}
 	if user := server.GetUser(ctx); user != nil {
 		if val, found := user.Get(key); found {
-			return val
+			return string(val)
 		}
 	}
 	result := cs.GetCurConfig(key)
@@ -266,11 +266,11 @@ func (cs *configService) AddDefaultValues(ctx context.Context, m *meta.Meta) *me
 	cs.mxService.RUnlock()
 	return result
 }
-func updateMeta(result, m *meta.Meta, key, val string) *meta.Meta {
+func updateMeta(result, m *meta.Meta, key string, val string) *meta.Meta {
 	if result == m {
 		result = m.Clone()
 	}
-	result.Set(key, val)
+	result.Set(key, meta.Value(val))
 	return result
 }
 
@@ -290,9 +290,14 @@ func (cs *configService) GetMaxTransclusions() int {
 func (cs *configService) GetYAMLHeader() bool { return cs.GetCurConfig(keyYAMLHeader).(bool) }
 
 // GetZettelFileSyntax returns the current value of the "zettel-file-syntax" key.
-func (cs *configService) GetZettelFileSyntax() []string {
+func (cs *configService) GetZettelFileSyntax() []meta.Value {
 	if zfs := cs.GetCurConfig(keyZettelFileSyntax); zfs != nil {
-		return zfs.([]string)
+		zfsAS := zfs.([]string)
+		result := make([]meta.Value, len(zfsAS))
+		for i, fs := range zfsAS {
+			result[i] = meta.Value(fs)
+		}
+		return result
 	}
 	return nil
 }
@@ -308,7 +313,7 @@ func (cs *configService) GetExpertMode() bool { return cs.GetCurConfig(keyExpert
 // GetVisibility returns the visibility value, or "login" if none is given.
 func (cs *configService) GetVisibility(m *meta.Meta) meta.Visibility {
 	if val, ok := m.Get(api.KeyVisibility); ok {
-		if vis := meta.GetVisibility(val); vis != meta.VisibilityUnknown {
+		if vis := val.GetVisibility(); vis != meta.VisibilityUnknown {
 			return vis
 		}
 	}
@@ -319,7 +324,7 @@ func (cs *configService) GetVisibility(m *meta.Meta) meta.Visibility {
 	}
 	cs.mxService.RLock()
 	val, _ := cs.orig.Get(keyDefaultVisibility)
-	vis = meta.GetVisibility(val)
+	vis = val.GetVisibility()
 	cs.mxService.RUnlock()
 	return vis
 }

@@ -186,7 +186,7 @@ func newQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, po
 	return result
 }
 
-func (ct *contextTask) addPair(ctx context.Context, key, value string, curCost float64, level uint, isBackward, isForward bool) {
+func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value, curCost float64, level uint, isBackward, isForward bool) {
 	if key == api.KeyBack {
 		return
 	}
@@ -226,8 +226,8 @@ func contextCost(key string) float64 {
 	return 2
 }
 
-func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, value string) {
-	if zid, errParse := id.Parse(value); errParse == nil {
+func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, value meta.Value) {
+	if zid, errParse := id.Parse(string(value)); errParse == nil {
 		if m, errGetMeta := ct.port.GetMeta(ctx, zid); errGetMeta == nil {
 			ct.addMeta(m, newCost, level)
 		}
@@ -240,11 +240,11 @@ func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint) {
 	}
 }
 
-func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, value string) {
-	elems := meta.ListFromValue(value)
+func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, value meta.Value) {
+	elems := value.ListFromValue()
 	refCost := referenceCost(newCost, len(elems))
 	for _, val := range elems {
-		ct.addID(ctx, refCost, level, val)
+		ct.addID(ctx, refCost, level, meta.Value(val))
 	}
 }
 

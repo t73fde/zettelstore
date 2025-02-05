@@ -69,7 +69,7 @@ func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	var htitle *sx.Pair
 	plainTitle, hasTitle := zn.InhMeta.Get(api.KeyTitle)
 	if hasTitle {
-		isTitle = parser.ParseSpacedText(plainTitle)
+		isTitle = parser.ParseSpacedText(string(plainTitle))
 		xtitle := he.tx.GetSz(&isTitle)
 		htitle, err = he.th.Evaluate(xtitle, &env)
 		if err != nil {

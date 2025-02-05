@@ -257,9 +257,9 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 	return lb.List()
 }
 
-func (g *htmlGenerator) transformMetaTags(tags string) *sx.Pair {
+func (g *htmlGenerator) transformMetaTags(tags meta.Value) *sx.Pair {
 	var sb strings.Builder
-	for i, val := range meta.ListFromValue(tags) {
+	for i, val := range tags.ListFromValue() {
 		if i > 0 {
 			sb.WriteString(", ")
 		}

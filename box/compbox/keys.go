@@ -26,7 +26,7 @@ import (
 
 func genKeysM(zid id.Zid) *meta.Meta {
 	m := getTitledMeta(zid, "Zettelstore Supported Metadata Keys")
-	m.Set(api.KeyCreated, kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVTime).(string))
+	m.Set(api.KeyCreated, meta.Value(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVTime).(string)))
 	m.Set(api.KeyVisibility, api.ValueVisibilityLogin)
 	return m
 }

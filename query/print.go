@@ -143,7 +143,7 @@ func (pe *PrintEnv) printExprValues(key string, values []expValue) {
 				pe.writeString("%" + strconv.Itoa(int(op)))
 			}
 		}
-		if s := val.value; s != "" {
+		if s := string(val.value); s != "" {
 			pe.writeString(s)
 		}
 	}
@@ -256,7 +256,7 @@ func (pe *PrintEnv) printHumanSelectExprValues(values []expValue) {
 		if val.value == "" {
 			pe.writeString("NOTHING")
 		} else {
-			pe.writeString(val.value)
+			pe.writeString(string(val.value))
 		}
 	}
 }

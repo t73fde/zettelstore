@@ -64,7 +64,7 @@ func (*CreateZettel) PrepareCopy(origZettel zettel.Zettel) zettel.Zettel {
 func (*CreateZettel) PrepareVersion(origZettel zettel.Zettel) zettel.Zettel {
 	origMeta := origZettel.Meta
 	m := origMeta.Clone()
-	m.Set(api.KeyPredecessor, origMeta.Zid.String())
+	m.Set(api.KeyPredecessor, meta.Value(origMeta.Zid.String()))
 	setReadonly(m)
 	content := origZettel.Content
 	content.TrimSpace()
@@ -79,7 +79,7 @@ func (*CreateZettel) PrepareFolge(origZettel zettel.Zettel) zettel.Zettel {
 		m.Set(api.KeyTitle, prependTitle(title, "Folge", "Folge of "))
 	}
 	updateMetaRoleTagsSyntax(m, origMeta)
-	m.Set(api.KeyPrecursor, origMeta.Zid.String())
+	m.Set(api.KeyPrecursor, meta.Value(origMeta.Zid.String()))
 	return zettel.Zettel{Meta: m, Content: zettel.NewContent(nil)}
 }
 
@@ -91,7 +91,7 @@ func (*CreateZettel) PrepareSequel(origZettel zettel.Zettel) zettel.Zettel {
 		m.Set(api.KeyTitle, prependTitle(title, "Sequel", "Sequel of "))
 	}
 	updateMetaRoleTagsSyntax(m, origMeta)
-	m.Set(api.KeyPrequel, origMeta.Zid.String())
+	m.Set(api.KeyPrequel, meta.Value(origMeta.Zid.String()))
 	return zettel.Zettel{Meta: m, Content: zettel.NewContent(nil)}
 }
 
@@ -109,7 +109,7 @@ func (*CreateZettel) PrepareNew(origZettel zettel.Zettel, newTitle string) zette
 		}
 	}
 	if newTitle != "" {
-		m.Set(api.KeyTitle, newTitle)
+		m.Set(api.KeyTitle, meta.Value(newTitle))
 	}
 	content := origZettel.Content
 	content.TrimSpace()
@@ -122,7 +122,7 @@ func updateMetaRoleTagsSyntax(m, orig *meta.Meta) {
 	m.SetNonEmpty(api.KeySyntax, orig.GetDefault(api.KeySyntax, meta.DefaultSyntax))
 }
 
-func prependTitle(title, s0, s1 string) string {
+func prependTitle(title, s0, s1 meta.Value) meta.Value {
 	if len(title) > 0 {
 		return s1 + title
 	}
@@ -147,7 +147,7 @@ func (uc *CreateZettel) Run(ctx context.Context, zettel zettel.Zettel) (id.Zid, 
 		return m.Zid, nil // TODO: new error: already exists
 	}
 
-	m.Set(api.KeyCreated, time.Now().Local().Format(id.TimestampLayout))
+	m.Set(api.KeyCreated, meta.Value(time.Now().Local().Format(id.TimestampLayout)))
 	m.Delete(api.KeyModified)
 	m.YamlSep = uc.rtConfig.GetYAMLHeader()
 

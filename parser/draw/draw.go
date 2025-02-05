@@ -59,7 +59,7 @@ func parseBlocks(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
 	if err != nil {
 		return ast.BlockSlice{ast.CreateParaNode(canvasErrMsg(err)...)}
 	}
-	svg := canvasToSVG(canvas, font, int(scaleX), int(scaleY))
+	svg := canvasToSVG(canvas, string(font), int(scaleX), int(scaleY))
 	if len(svg) == 0 {
 		return ast.BlockSlice{ast.CreateParaNode(noSVGErrMsg()...)}
 	}

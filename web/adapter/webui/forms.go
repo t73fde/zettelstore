@@ -55,12 +55,12 @@ func parseZettelForm(r *http.Request, zid id.Zid) (bool, zettel.Zettel, error) {
 		m = meta.New(zid)
 	}
 	if postTitle, ok := trimmedFormValue(r, "title"); ok {
-		m.Set(api.KeyTitle, meta.RemoveNonGraphic(postTitle))
+		m.Set(api.KeyTitle, meta.Value(meta.RemoveNonGraphic(postTitle)))
 	}
 	if postTags, ok := trimmedFormValue(r, "tags"); ok {
-		if tags := meta.ListFromValue(meta.RemoveNonGraphic(postTags)); len(tags) > 0 {
+		if tags := meta.Value(meta.RemoveNonGraphic(postTags)).ListFromValue(); len(tags) > 0 {
 			for i, tag := range tags {
-				tags[i] = meta.NormalizeTag(tag)
+				tags[i] = string(meta.Value(tag).NormalizeTag())
 			}
 			m.SetList(api.KeyTags, tags)
 		}
@@ -118,7 +118,7 @@ func uploadedContent(r *http.Request, m *meta.Meta) ([]byte, *meta.Meta) {
 				ct := cts[0]
 				if fileSyntax := content.SyntaxFromMIME(ct, data); fileSyntax != "" {
 					m = m.Clone()
-					m.Set(api.KeySyntax, fileSyntax)
+					m.Set(api.KeySyntax, meta.Value(fileSyntax))
 				}
 			}
 			return data, m
@@ -132,7 +132,7 @@ func allowEmptyContent(m *meta.Meta) bool {
 		if syntax == api.ValueSyntaxNone {
 			return true
 		}
-		if pinfo := parser.Get(syntax); pinfo != nil {
+		if pinfo := parser.Get(string(syntax)); pinfo != nil {
 			return pinfo.IsTextFormat
 		}
 	}

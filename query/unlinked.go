@@ -46,7 +46,7 @@ func (spec *UnlinkedSpec) GetWords(metaSeq []*meta.Meta) []string {
 		if !hasTitle {
 			continue
 		}
-		result = append(result, strfun.MakeWords(title)...)
+		result = append(result, strfun.MakeWords(string(title))...)
 	}
 	return result
 }

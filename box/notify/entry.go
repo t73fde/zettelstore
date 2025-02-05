@@ -51,7 +51,7 @@ func (e *DirEntry) HasMetaInContent() bool {
 }
 
 // SetupFromMetaContent fills entry data based on metadata and zettel content.
-func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, getZettelFileSyntax func() []string) {
+func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, getZettelFileSyntax func() []meta.Value) {
 	if e.Zid != m.Zid {
 		panic("Zid differ")
 	}
@@ -83,21 +83,21 @@ func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, ge
 	}
 }
 
-func contentExtWithMeta(syntax string, content zettel.Content) string {
-	p := parser.Get(syntax)
+func contentExtWithMeta(syntax meta.Value, content zettel.Content) string {
+	p := parser.Get(string(syntax))
 	if content.IsBinary() {
 		if p.IsImageFormat {
-			return syntax
+			return string(syntax)
 		}
 		return extBin
 	}
 	if p.IsImageFormat {
 		return extTxt
 	}
-	return syntax
+	return string(syntax)
 }
 
-func calcContentExt(syntax string, yamlSep bool, getZettelFileSyntax func() []string) string {
+func calcContentExt(syntax meta.Value, yamlSep bool, getZettelFileSyntax func() []meta.Value) string {
 	if yamlSep {
 		return extZettel
 	}
@@ -110,7 +110,7 @@ func calcContentExt(syntax string, yamlSep bool, getZettelFileSyntax func() []st
 			return extZettel
 		}
 	}
-	return syntax
+	return string(syntax)
 
 }
 

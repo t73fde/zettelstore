@@ -64,7 +64,7 @@ func (*Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 
 func (v *visitor) acceptMeta(m *meta.Meta) {
 	for _, p := range m.ComputedPairs() {
-		v.b.WriteStrings(p.Key, ": ", p.Value, "\n")
+		v.b.WriteStrings(p.Key, ": ", string(p.Value), "\n")
 	}
 }
 

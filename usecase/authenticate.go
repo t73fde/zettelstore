@@ -58,7 +58,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	}
 
 	if hashCred, ok := identMeta.Get(api.KeyCredential); ok {
-		ok, err = cred.CompareHashAndCredential(hashCred, identMeta.Zid, ident, credential)
+		ok, err = cred.CompareHashAndCredential(string(hashCred), identMeta.Zid, ident, credential)
 		if err != nil {
 			uc.log.Info().Str("ident", ident).Err(err).HTTPIP(r).Msg("Error while comparing credentials")
 			return nil, err

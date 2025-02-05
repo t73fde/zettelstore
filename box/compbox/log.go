@@ -26,7 +26,7 @@ import (
 func genLogM(zid id.Zid) *meta.Meta {
 	m := getTitledMeta(zid, "Zettelstore Log")
 	m.Set(api.KeySyntax, meta.SyntaxText)
-	m.Set(api.KeyModified, kernel.Main.GetLastLogTime().Local().Format(id.TimestampLayout))
+	m.Set(api.KeyModified, meta.Value(kernel.Main.GetLastLogTime().Local().Format(id.TimestampLayout)))
 	return m
 }
 

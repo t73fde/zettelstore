@@ -29,26 +29,26 @@ import (
 )
 
 func (wui *WebUI) writeHTMLMetaValue(
-	key, value string,
+	key string, value meta.Value,
 	getTextTitle getTextTitleFunc,
 ) sx.Object {
 	switch kt := meta.Type(key); kt {
 	case meta.TypeCredential:
-		return sx.MakeString(value)
+		return sx.MakeString(string(value))
 	case meta.TypeEmpty:
-		return sx.MakeString(value)
+		return sx.MakeString(string(value))
 	case meta.TypeID:
 		return wui.transformIdentifier(value, getTextTitle)
 	case meta.TypeIDSet:
-		return wui.transformIdentifierSet(meta.ListFromValue(value), getTextTitle)
+		return wui.transformIdentifierSet(value.ListFromValue(), getTextTitle)
 	case meta.TypeNumber:
-		return wui.transformKeyValueText(key, value, value)
+		return wui.transformKeyValueText(key, value, string(value))
 	case meta.TypeString:
-		return sx.MakeString(value)
+		return sx.MakeString(string(value))
 	case meta.TypeTagSet:
-		return wui.transformTagSet(key, meta.ListFromValue(value))
+		return wui.transformTagSet(key, value.ListFromValue())
 	case meta.TypeTimestamp:
-		if ts, ok := meta.TimeValue(value); ok {
+		if ts, ok := value.TimeValue(); ok {
 			return sx.MakeList(
 				sx.MakeSymbol("time"),
 				sx.MakeList(
@@ -60,17 +60,17 @@ func (wui *WebUI) writeHTMLMetaValue(
 		}
 		return sx.Nil()
 	case meta.TypeURL:
-		return wui.url2html(sx.MakeString(value))
+		return wui.url2html(sx.MakeString(string(value)))
 	case meta.TypeWord:
-		return wui.transformKeyValueText(key, value, value)
+		return wui.transformKeyValueText(key, value, string(value))
 	default:
 		return sx.MakeList(shtml.SymSTRONG, sx.MakeString("Unhandled type: "), sx.MakeString(kt.Name))
 	}
 }
 
-func (wui *WebUI) transformIdentifier(val string, getTextTitle getTextTitleFunc) sx.Object {
-	text := sx.MakeString(val)
-	zid, err := id.Parse(val)
+func (wui *WebUI) transformIdentifier(val meta.Value, getTextTitle getTextTitleFunc) sx.Object {
+	text := sx.MakeString(string(val))
+	zid, err := id.Parse(string(val))
 	if err != nil {
 		return text
 	}
@@ -98,7 +98,7 @@ func (wui *WebUI) transformIdentifierSet(vals []string, getTextTitle getTextTitl
 	var space = sx.MakeString(" ")
 	text := make(sx.Vector, 0, 2*len(vals))
 	for _, val := range vals {
-		text = append(text, space, wui.transformIdentifier(val, getTextTitle))
+		text = append(text, space, wui.transformIdentifier(meta.Value(val), getTextTitle))
 	}
 	return sx.MakeList(text[1:]...).Cons(shtml.SymSPAN)
 }
@@ -110,7 +110,7 @@ func (wui *WebUI) transformTagSet(key string, tags []string) *sx.Pair {
 	var space = sx.MakeString(" ")
 	text := make(sx.Vector, 0, 2*len(tags)+2)
 	for _, tag := range tags {
-		text = append(text, space, wui.transformKeyValueText(key, tag, tag))
+		text = append(text, space, wui.transformKeyValueText(key, meta.Value(tag), tag))
 	}
 	if len(tags) > 1 {
 		text = append(text, space, wui.transformKeyValuesText(key, tags, "(all)"))
@@ -118,8 +118,8 @@ func (wui *WebUI) transformTagSet(key string, tags []string) *sx.Pair {
 	return sx.MakeList(text[1:]...).Cons(shtml.SymSPAN)
 }
 
-func (wui *WebUI) transformKeyValueText(key, value, text string) *sx.Pair {
-	ub := wui.NewURLBuilder('h').AppendQuery(key + api.SearchOperatorHas + value)
+func (wui *WebUI) transformKeyValueText(key string, value meta.Value, text string) *sx.Pair {
+	ub := wui.NewURLBuilder('h').AppendQuery(key + api.SearchOperatorHas + string(value))
 	return buildHref(ub, text)
 }
 

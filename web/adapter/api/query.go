@@ -175,7 +175,7 @@ func (*plainZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error {
 }
 func (*plainZettelEncoder) writeArrangement(w io.Writer, _ string, arr meta.Arrangement) error {
 	for key, ml := range arr {
-		_, err := io.WriteString(w, key)
+		_, err := io.WriteString(w, string(key))
 		if err != nil {
 			return err
 		}
@@ -232,7 +232,7 @@ func (dze *dataZettelEncoder) writeArrangement(w io.Writer, act string, arr meta
 	lb.Add(sx.SymbolList)
 	for aggKey, metaList := range arr {
 		var lbMeta sx.ListBuilder
-		lbMeta.Add(sx.MakeString(aggKey))
+		lbMeta.Add(sx.MakeString(string(aggKey)))
 		for _, m := range metaList {
 			lbMeta.Add(sx.Int64(m.Zid))
 		}
@@ -254,7 +254,7 @@ func (a *API) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel 
 		return false
 	}
 	ctx := r.Context()
-	z, err := tagZettel.Run(ctx, tag)
+	z, err := tagZettel.Run(ctx, meta.Value(tag))
 	if err != nil {
 		a.reportUsecaseError(w, err)
 		return true
@@ -279,7 +279,7 @@ func (a *API) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZette
 		return false
 	}
 	ctx := r.Context()
-	z, err := roleZettel.Run(ctx, role)
+	z, err := roleZettel.Run(ctx, meta.Value(role))
 	if err != nil {
 		a.reportUsecaseError(w, err)
 		return true
