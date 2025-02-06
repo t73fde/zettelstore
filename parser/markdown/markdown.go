@@ -34,8 +34,8 @@ import (
 
 func init() {
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxMarkdown,
-		AltNames:      []string{meta.SyntaxMD},
+		Name:          meta.ValueSyntaxMarkdown,
+		AltNames:      []string{meta.ValueSyntaxMD},
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,

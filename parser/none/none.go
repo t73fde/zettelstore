@@ -23,7 +23,7 @@ import (
 
 func init() {
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxNone,
+		Name:          meta.ValueSyntaxNone,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  false,

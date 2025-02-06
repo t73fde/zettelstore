@@ -18,7 +18,6 @@ import (
 	"context"
 	"fmt"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/kernel"
@@ -26,8 +25,8 @@ import (
 
 func genKeysM(zid id.Zid) *meta.Meta {
 	m := getTitledMeta(zid, "Zettelstore Supported Metadata Keys")
-	m.Set(api.KeyCreated, meta.Value(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVTime).(string)))
-	m.Set(api.KeyVisibility, api.ValueVisibilityLogin)
+	m.Set(meta.KeyCreated, meta.Value(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVTime).(string)))
+	m.Set(meta.KeyVisibility, meta.ValueVisibilityLogin)
 	return m
 }
 

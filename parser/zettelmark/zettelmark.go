@@ -30,7 +30,7 @@ import (
 
 func init() {
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxZmk,
+		Name:          meta.ValueSyntaxZmk,
 		AltNames:      nil,
 		IsASTParser:   true,
 		IsTextFormat:  true,
@@ -38,7 +38,7 @@ func init() {
 		ParseBlocks:   parseBlocks,
 	})
 	// parser.Register(&parser.Info{
-	// 	Name:          meta.SyntaxZmk,
+	// 	Name:          meta.ValueSyntaxZmk,
 	// 	AltNames:      nil,
 	// 	IsASTParser:   true,
 	// 	IsTextFormat:  true,

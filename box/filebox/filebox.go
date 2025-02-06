@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
@@ -74,24 +73,24 @@ func calculateSyntax(ext string) meta.Value {
 // CalcDefaultMeta returns metadata with default values for the given entry.
 func CalcDefaultMeta(zid id.Zid, ext string) *meta.Meta {
 	m := meta.New(zid)
-	m.Set(api.KeySyntax, calculateSyntax(ext))
+	m.Set(meta.KeySyntax, calculateSyntax(ext))
 	return m
 }
 
 // CleanupMeta enhances the given metadata.
 func CleanupMeta(m *meta.Meta, zid id.Zid, ext string, inMeta bool, uselessFiles []string) {
 	if inMeta {
-		if syntax, ok := m.Get(api.KeySyntax); !ok || syntax == "" {
+		if syntax, ok := m.Get(meta.KeySyntax); !ok || syntax == "" {
 			dm := CalcDefaultMeta(zid, ext)
-			syntax, ok = dm.Get(api.KeySyntax)
+			syntax, ok = dm.Get(meta.KeySyntax)
 			if !ok {
 				panic("Default meta must contain syntax")
 			}
-			m.Set(api.KeySyntax, syntax)
+			m.Set(meta.KeySyntax, syntax)
 		}
 	}
 
 	if len(uselessFiles) > 0 {
-		m.Set(api.KeyUselessFiles, meta.Value(strings.Join(uselessFiles, " ")))
+		m.Set(meta.KeyUselessFiles, meta.Value(strings.Join(uselessFiles, " ")))
 	}
 }

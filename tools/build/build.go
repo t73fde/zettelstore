@@ -26,7 +26,6 @@ import (
 	"strings"
 	"time"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
@@ -217,7 +216,7 @@ func createManualZipEntry(path string, entry fs.DirEntry, zipWriter *zip.Writer)
 	}
 	inp := input.NewInput(data)
 	m := meta.NewFromInput(id.MustParse(versionZid), inp)
-	m.SetNow(api.KeyModified)
+	m.SetNow(meta.KeyModified)
 
 	var buf bytes.Buffer
 	if _, err = fmt.Fprintf(&buf, "id: %s\n", versionZid); err != nil {

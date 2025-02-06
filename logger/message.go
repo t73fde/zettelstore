@@ -19,8 +19,8 @@ import (
 	"strconv"
 	"sync"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 // Message presents a message to log.
@@ -116,7 +116,7 @@ func (m *Message) User(ctx context.Context) *Message {
 		if up := m.logger.uProvider; up != nil {
 			if user := up.GetUser(ctx); user != nil {
 				m.buf = append(m.buf, ", user="...)
-				if userID, found := user.Get(api.KeyUserID); found {
+				if userID, found := user.Get(meta.KeyUserID); found {
 					m.buf = append(m.buf, userID...)
 				} else {
 					m.buf = append(m.buf, user.Zid.Bytes()...)

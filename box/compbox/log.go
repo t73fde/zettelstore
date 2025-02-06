@@ -17,7 +17,6 @@ import (
 	"bytes"
 	"context"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/kernel"
@@ -25,8 +24,8 @@ import (
 
 func genLogM(zid id.Zid) *meta.Meta {
 	m := getTitledMeta(zid, "Zettelstore Log")
-	m.Set(api.KeySyntax, meta.SyntaxText)
-	m.Set(api.KeyModified, meta.Value(kernel.Main.GetLastLogTime().Local().Format(id.TimestampLayout)))
+	m.Set(meta.KeySyntax, meta.ValueSyntaxText)
+	m.Set(meta.KeyModified, meta.Value(kernel.Main.GetLastLogTime().Local().Format(id.TimestampLayout)))
 	return m
 }
 

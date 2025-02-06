@@ -40,15 +40,15 @@ func (wui *WebUI) writeHTMLMetaValue(
 	case meta.TypeID:
 		return wui.transformIdentifier(value, getTextTitle)
 	case meta.TypeIDSet:
-		return wui.transformIdentifierSet(value.ListFromValue(), getTextTitle)
+		return wui.transformIdentifierSet(value.AsList(), getTextTitle)
 	case meta.TypeNumber:
 		return wui.transformKeyValueText(key, value, string(value))
 	case meta.TypeString:
 		return sx.MakeString(string(value))
 	case meta.TypeTagSet:
-		return wui.transformTagSet(key, value.ListFromValue())
+		return wui.transformTagSet(key, value.AsList())
 	case meta.TypeTimestamp:
-		if ts, ok := value.TimeValue(); ok {
+		if ts, ok := value.AsTime(); ok {
 			return sx.MakeList(
 				sx.MakeSymbol("time"),
 				sx.MakeList(

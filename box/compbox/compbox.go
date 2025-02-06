@@ -18,7 +18,6 @@ import (
 	"context"
 	"net/url"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
@@ -48,22 +47,22 @@ var myZettel = map[id.Zid]struct {
 	meta    func(id.Zid) *meta.Meta
 	content func(context.Context, *compBox) []byte
 }{
-	api.ZidVersion:         {genVersionBuildM, genVersionBuildC},
-	api.ZidHost:            {genVersionHostM, genVersionHostC},
-	api.ZidOperatingSystem: {genVersionOSM, genVersionOSC},
-	api.ZidLog:             {genLogM, genLogC},
-	api.ZidMemory:          {genMemoryM, genMemoryC},
-	api.ZidSx:              {genSxM, genSxC},
-	// api.ZidHTTP:                 {genHttpM, genHttpC},
-	// api.ZidAPI:                  {genApiM, genApiC},
-	// api.ZidWebUI:                {genWebUiM, genWebUiC},
-	// api.ZidConsole:              {genConsoleM, genConsoleC},
-	api.ZidBoxManager: {genManagerM, genManagerC},
-	// api.ZidIndex:                {genIndexM, genIndexC},
-	// api.ZidQuery:                {genQueryM, genQueryC},
-	api.ZidMetadataKey:          {genKeysM, genKeysC},
-	api.ZidParser:               {genParserM, genParserC},
-	api.ZidStartupConfiguration: {genConfigZettelM, genConfigZettelC},
+	id.ZidVersion:         {genVersionBuildM, genVersionBuildC},
+	id.ZidHost:            {genVersionHostM, genVersionHostC},
+	id.ZidOperatingSystem: {genVersionOSM, genVersionOSC},
+	id.ZidLog:             {genLogM, genLogC},
+	id.ZidMemory:          {genMemoryM, genMemoryC},
+	id.ZidSx:              {genSxM, genSxC},
+	// id.ZidHTTP:                 {genHttpM, genHttpC},
+	// id.ZidAPI:                  {genApiM, genApiC},
+	// id.ZidWebUI:                {genWebUiM, genWebUiC},
+	// id.ZidConsole:              {genConsoleM, genConsoleC},
+	id.ZidBoxManager: {genManagerM, genManagerC},
+	// id.ZidIndex:                {genIndexM, genIndexC},
+	// id.ZidQuery:                {genQueryM, genQueryC},
+	id.ZidMetadataKey:          {genKeysM, genKeysC},
+	id.ZidParser:               {genParserM, genParserC},
+	id.ZidStartupConfiguration: {genConfigZettelM, genConfigZettelC},
 }
 
 // Get returns the one program box.
@@ -158,21 +157,21 @@ func (cb *compBox) ReadStats(st *box.ManagedBoxStats) {
 
 func getTitledMeta(zid id.Zid, title string) *meta.Meta {
 	m := meta.New(zid)
-	m.Set(api.KeyTitle, meta.Value(title))
+	m.Set(meta.KeyTitle, meta.Value(title))
 	return m
 }
 
 func updateMeta(m *meta.Meta) {
-	if _, ok := m.Get(api.KeySyntax); !ok {
-		m.Set(api.KeySyntax, meta.SyntaxZmk)
+	if _, ok := m.Get(meta.KeySyntax); !ok {
+		m.Set(meta.KeySyntax, meta.ValueSyntaxZmk)
 	}
-	m.Set(api.KeyRole, api.ValueRoleConfiguration)
-	if _, ok := m.Get(api.KeyCreated); !ok {
-		m.Set(api.KeyCreated, meta.Value(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreStarted).(string)))
+	m.Set(meta.KeyRole, meta.ValueRoleConfiguration)
+	if _, ok := m.Get(meta.KeyCreated); !ok {
+		m.Set(meta.KeyCreated, meta.Value(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreStarted).(string)))
 	}
-	m.Set(api.KeyLang, api.ValueLangEN)
-	m.Set(api.KeyReadOnly, api.ValueTrue)
-	if _, ok := m.Get(api.KeyVisibility); !ok {
-		m.Set(api.KeyVisibility, api.ValueVisibilityExpert)
+	m.Set(meta.KeyLang, meta.ValueLangEN)
+	m.Set(meta.KeyReadOnly, meta.ValueTrue)
+	if _, ok := m.Get(meta.KeyVisibility); !ok {
+		m.Set(meta.KeyVisibility, meta.ValueVisibilityExpert)
 	}
 }

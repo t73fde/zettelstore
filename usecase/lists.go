@@ -42,12 +42,12 @@ func NewListSyntax(port ListSyntaxPort) ListSyntax {
 
 // Run executes the use case.
 func (uc ListSyntax) Run(ctx context.Context) (meta.Arrangement, error) {
-	q := query.Parse(api.KeySyntax + api.ExistOperator) // We look for all metadata with a syntax key
+	q := query.Parse(meta.KeySyntax + api.ExistOperator) // We look for all metadata with a syntax key
 	metas, err := uc.port.SelectMeta(box.NoEnrichContext(ctx), nil, q)
 	if err != nil {
 		return nil, err
 	}
-	result := meta.CreateArrangement(metas, api.KeySyntax)
+	result := meta.CreateArrangement(metas, meta.KeySyntax)
 	for _, syn := range parser.GetSyntaxes() {
 		if _, found := result[syn]; !found {
 			delete(result, syn)
@@ -75,10 +75,10 @@ func NewListRoles(port ListRolesPort) ListRoles {
 
 // Run executes the use case.
 func (uc ListRoles) Run(ctx context.Context) (meta.Arrangement, error) {
-	q := query.Parse(api.KeyRole + api.ExistOperator) // We look for all metadata with an existing role key
+	q := query.Parse(meta.KeyRole + api.ExistOperator) // We look for all metadata with an existing role key
 	metas, err := uc.port.SelectMeta(box.NoEnrichContext(ctx), nil, q)
 	if err != nil {
 		return nil, err
 	}
-	return meta.CreateArrangement(metas, api.KeyRole), nil
+	return meta.CreateArrangement(metas, meta.KeyRole), nil
 }

@@ -17,7 +17,6 @@ import (
 	"context"
 	"time"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/config"
@@ -51,8 +50,8 @@ func NewCreateZettel(log *logger.Logger, rtConfig config.Config, port CreateZett
 func (*CreateZettel) PrepareCopy(origZettel zettel.Zettel) zettel.Zettel {
 	origMeta := origZettel.Meta
 	m := origMeta.Clone()
-	if title, found := origMeta.Get(api.KeyTitle); found {
-		m.Set(api.KeyTitle, prependTitle(title, "Copy", "Copy of "))
+	if title, found := origMeta.Get(meta.KeyTitle); found {
+		m.Set(meta.KeyTitle, prependTitle(title, "Copy", "Copy of "))
 	}
 	setReadonly(m)
 	content := origZettel.Content
@@ -64,7 +63,7 @@ func (*CreateZettel) PrepareCopy(origZettel zettel.Zettel) zettel.Zettel {
 func (*CreateZettel) PrepareVersion(origZettel zettel.Zettel) zettel.Zettel {
 	origMeta := origZettel.Meta
 	m := origMeta.Clone()
-	m.Set(api.KeyPredecessor, meta.Value(origMeta.Zid.String()))
+	m.Set(meta.KeyPredecessor, meta.Value(origMeta.Zid.String()))
 	setReadonly(m)
 	content := origZettel.Content
 	content.TrimSpace()
@@ -75,11 +74,11 @@ func (*CreateZettel) PrepareVersion(origZettel zettel.Zettel) zettel.Zettel {
 func (*CreateZettel) PrepareFolge(origZettel zettel.Zettel) zettel.Zettel {
 	origMeta := origZettel.Meta
 	m := meta.New(id.Invalid)
-	if title, found := origMeta.Get(api.KeyTitle); found {
-		m.Set(api.KeyTitle, prependTitle(title, "Folge", "Folge of "))
+	if title, found := origMeta.Get(meta.KeyTitle); found {
+		m.Set(meta.KeyTitle, prependTitle(title, "Folge", "Folge of "))
 	}
 	updateMetaRoleTagsSyntax(m, origMeta)
-	m.Set(api.KeyPrecursor, meta.Value(origMeta.Zid.String()))
+	m.Set(meta.KeyPrecursor, meta.Value(origMeta.Zid.String()))
 	return zettel.Zettel{Meta: m, Content: zettel.NewContent(nil)}
 }
 
@@ -87,11 +86,11 @@ func (*CreateZettel) PrepareFolge(origZettel zettel.Zettel) zettel.Zettel {
 func (*CreateZettel) PrepareSequel(origZettel zettel.Zettel) zettel.Zettel {
 	origMeta := origZettel.Meta
 	m := meta.New(id.Invalid)
-	if title, found := origMeta.Get(api.KeyTitle); found {
-		m.Set(api.KeyTitle, prependTitle(title, "Sequel", "Sequel of "))
+	if title, found := origMeta.Get(meta.KeyTitle); found {
+		m.Set(meta.KeyTitle, prependTitle(title, "Sequel", "Sequel of "))
 	}
 	updateMetaRoleTagsSyntax(m, origMeta)
-	m.Set(api.KeyPrequel, meta.Value(origMeta.Zid.String()))
+	m.Set(meta.KeyPrequel, meta.Value(origMeta.Zid.String()))
 	return zettel.Zettel{Meta: m, Content: zettel.NewContent(nil)}
 }
 
@@ -99,7 +98,7 @@ func (*CreateZettel) PrepareSequel(origZettel zettel.Zettel) zettel.Zettel {
 func (*CreateZettel) PrepareNew(origZettel zettel.Zettel, newTitle string) zettel.Zettel {
 	m := meta.New(id.Invalid)
 	om := origZettel.Meta
-	m.SetNonEmpty(api.KeyTitle, om.GetDefault(api.KeyTitle, ""))
+	m.SetNonEmpty(meta.KeyTitle, om.GetDefault(meta.KeyTitle, ""))
 	updateMetaRoleTagsSyntax(m, om)
 
 	const prefixLen = len(meta.NewPrefix)
@@ -109,7 +108,7 @@ func (*CreateZettel) PrepareNew(origZettel zettel.Zettel, newTitle string) zette
 		}
 	}
 	if newTitle != "" {
-		m.Set(api.KeyTitle, meta.Value(newTitle))
+		m.Set(meta.KeyTitle, meta.Value(newTitle))
 	}
 	content := origZettel.Content
 	content.TrimSpace()
@@ -117,9 +116,9 @@ func (*CreateZettel) PrepareNew(origZettel zettel.Zettel, newTitle string) zette
 }
 
 func updateMetaRoleTagsSyntax(m, orig *meta.Meta) {
-	m.SetNonEmpty(api.KeyRole, orig.GetDefault(api.KeyRole, ""))
-	m.SetNonEmpty(api.KeyTags, orig.GetDefault(api.KeyTags, ""))
-	m.SetNonEmpty(api.KeySyntax, orig.GetDefault(api.KeySyntax, meta.DefaultSyntax))
+	m.SetNonEmpty(meta.KeyRole, orig.GetDefault(meta.KeyRole, ""))
+	m.SetNonEmpty(meta.KeyTags, orig.GetDefault(meta.KeyTags, ""))
+	m.SetNonEmpty(meta.KeySyntax, orig.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 }
 
 func prependTitle(title, s0, s1 meta.Value) meta.Value {
@@ -130,13 +129,13 @@ func prependTitle(title, s0, s1 meta.Value) meta.Value {
 }
 
 func setReadonly(m *meta.Meta) {
-	if _, found := m.Get(api.KeyReadOnly); found {
+	if _, found := m.Get(meta.KeyReadOnly); found {
 		// Currently, "false" is a safe value.
 		//
 		// If the current user and its role is known, a more elaborative calculation
 		// could be done: set it to a value, so that the current user will be able
 		// to modify it later.
-		m.Set(api.KeyReadOnly, api.ValueFalse)
+		m.Set(meta.KeyReadOnly, meta.ValueFalse)
 	}
 }
 
@@ -147,8 +146,8 @@ func (uc *CreateZettel) Run(ctx context.Context, zettel zettel.Zettel) (id.Zid, 
 		return m.Zid, nil // TODO: new error: already exists
 	}
 
-	m.Set(api.KeyCreated, meta.Value(time.Now().Local().Format(id.TimestampLayout)))
-	m.Delete(api.KeyModified)
+	m.Set(meta.KeyCreated, meta.Value(time.Now().Local().Format(id.TimestampLayout)))
+	m.Delete(meta.KeyModified)
 	m.YamlSep = uc.rtConfig.GetYAMLHeader()
 
 	zettel.Content.TrimSpace()

@@ -19,7 +19,6 @@ import (
 	"io"
 
 	"t73f.de/r/sx/sxeval"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idgraph"
 	"t73f.de/r/zsc/domain/id/idset"
@@ -36,13 +35,13 @@ func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (idgraph.Digraph, *s
 		}
 		return z.Meta, nil
 	}
-	dg := buildSxnCodeDigraph(ctx, api.ZidSxnStart, getMeta)
+	dg := buildSxnCodeDigraph(ctx, id.ZidSxnStart, getMeta)
 	if dg == nil {
 		return nil, wui.rootBinding, nil
 	}
-	dg = dg.AddVertex(api.ZidSxnBase).AddEdge(api.ZidSxnStart, api.ZidSxnBase)
-	dg = dg.AddVertex(api.ZidSxnPrelude).AddEdge(api.ZidSxnBase, api.ZidSxnPrelude)
-	dg = dg.TransitiveClosure(api.ZidSxnStart)
+	dg = dg.AddVertex(id.ZidSxnBase).AddEdge(id.ZidSxnStart, id.ZidSxnBase)
+	dg = dg.AddVertex(id.ZidSxnPrelude).AddEdge(id.ZidSxnBase, id.ZidSxnPrelude)
+	dg = dg.TransitiveClosure(id.ZidSxnStart)
 
 	if zid, isDAG := dg.IsDAG(); !isDAG {
 		return nil, nil, fmt.Errorf("zettel %v is part of a dependency cycle", zid)
@@ -73,7 +72,7 @@ func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFu
 			continue
 		}
 		marked = marked.Add(curr.Zid)
-		if precursors, hasPrecursor := curr.GetList(api.KeyPrecursor); hasPrecursor && len(precursors) > 0 {
+		if precursors, hasPrecursor := curr.GetList(meta.KeyPrecursor); hasPrecursor && len(precursors) > 0 {
 			for _, pre := range precursors {
 				if preZid, errParse := id.Parse(pre); errParse == nil {
 					m, err = getMeta(ctx, preZid)

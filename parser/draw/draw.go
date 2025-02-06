@@ -29,7 +29,7 @@ import (
 
 func init() {
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxDraw,
+		Name:          meta.ValueSyntaxDraw,
 		AltNames:      []string{},
 		IsASTParser:   true,
 		IsTextFormat:  true,
@@ -65,7 +65,7 @@ func parseBlocks(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
 	}
 	return ast.BlockSlice{&ast.BLOBNode{
 		Description: parser.ParseDescription(m),
-		Syntax:      meta.SyntaxSVG,
+		Syntax:      meta.ValueSyntaxSVG,
 		Blob:        svg,
 	}}
 }
@@ -95,7 +95,7 @@ func ParseDrawBlock(vn *ast.VerbatimNode) ast.BlockNode {
 	}
 	return &ast.BLOBNode{
 		Description: nil, // TODO: look for attribute "summary" / "title"
-		Syntax:      meta.SyntaxSVG,
+		Syntax:      meta.ValueSyntaxSVG,
 		Blob:        svg,
 	}
 }

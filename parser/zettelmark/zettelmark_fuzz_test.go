@@ -26,6 +26,6 @@ func FuzzParseBlocks(f *testing.F) {
 	f.Fuzz(func(t *testing.T, src []byte) {
 		t.Parallel()
 		inp := input.NewInput(src)
-		parser.ParseBlocks(inp, nil, meta.SyntaxZmk, config.NoHTML)
+		parser.ParseBlocks(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
 	})
 }

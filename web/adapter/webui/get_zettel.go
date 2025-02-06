@@ -45,13 +45,13 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		}
 
 		q := r.URL.Query()
-		zn, err := evaluate.Run(ctx, zid, q.Get(api.KeySyntax))
+		zn, err := evaluate.Run(ctx, zid, q.Get(meta.KeySyntax))
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return
 		}
 
-		zettelLang := wui.getConfig(ctx, zn.InhMeta, api.KeyLang)
+		zettelLang := wui.getConfig(ctx, zn.InhMeta, meta.KeyLang)
 		enc := wui.getSimpleHTMLEncoder(zettelLang)
 		metaObj := enc.MetaSxn(zn.InhMeta)
 		content, endnotes, err := enc.BlocksSxn(&zn.Ast)
@@ -67,39 +67,39 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		env, rb := wui.createRenderEnv(ctx, "zettel", zettelLang, title, user)
 		rb.bindSymbol(symMetaHeader, metaObj)
 		rb.bindString("heading", sx.MakeString(title))
-		if role, found := zn.InhMeta.Get(api.KeyRole); found && role != "" {
+		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
 			rb.bindString(
 				"role-url",
 				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(
-					api.KeyRole+api.SearchOperatorHas+string(role)).String()))
+					meta.KeyRole+api.SearchOperatorHas+string(role)).String()))
 		}
-		if folgeRole, found := zn.InhMeta.Get(api.KeyFolgeRole); found && folgeRole != "" {
+		if folgeRole, found := zn.InhMeta.Get(meta.KeyFolgeRole); found && folgeRole != "" {
 			rb.bindString(
 				"folge-role-url",
 				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(
-					api.KeyRole+api.SearchOperatorHas+string(folgeRole)).String()))
+					meta.KeyRole+api.SearchOperatorHas+string(folgeRole)).String()))
 		}
-		rb.bindString("tag-refs", wui.transformTagSet(api.KeyTags, zn.InhMeta.GetDefault(api.KeyTags, "").ListFromValue()))
-		rb.bindString("predecessor-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPredecessor, getTextTitle))
-		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPrecursor, getTextTitle))
-		rb.bindString("prequel-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeyPrequel, getTextTitle))
-		rb.bindString("superior-refs", wui.identifierSetAsLinks(zn.InhMeta, api.KeySuperior, getTextTitle))
+		rb.bindString("tag-refs", wui.transformTagSet(meta.KeyTags, zn.InhMeta.GetDefault(meta.KeyTags, "").AsList()))
+		rb.bindString("predecessor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPredecessor, getTextTitle))
+		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrecursor, getTextTitle))
+		rb.bindString("prequel-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrequel, getTextTitle))
+		rb.bindString("superior-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeySuperior, getTextTitle))
 		rb.bindString("urls", metaURLAssoc(zn.InhMeta))
 		rb.bindString("content", content)
 		rb.bindString("endnotes", endnotes)
-		wui.bindLinks(ctx, &rb, "folge", zn.InhMeta, api.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, api.KeySequel, config.KeyShowSequelLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, api.KeySubordinates, config.KeyShowSubordinateLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, api.KeyBack, config.KeyShowBackLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, api.KeySuccessors, config.KeyShowSuccessorLinks, getTextTitle)
-		if role, found := zn.InhMeta.Get(api.KeyRole); found && role != "" {
+		wui.bindLinks(ctx, &rb, "folge", zn.InhMeta, meta.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
+		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)
+		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinates, config.KeyShowSubordinateLinks, getTextTitle)
+		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
+		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, meta.KeySuccessors, config.KeyShowSuccessorLinks, getTextTitle)
+		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
 			for _, part := range []string{"meta", "actions", "heading"} {
 				rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-DEFAULT-"+part)
 			}
 		}
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, api.ZidZettelTemplate, env)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidZettelTemplate, env)
 		} else {
 			err = rb.err
 		}

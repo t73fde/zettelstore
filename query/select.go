@@ -139,7 +139,7 @@ func createMatchIDFunc(values []expValue, addSearch addSearchFunc) matchValueFun
 func createMatchIDSetFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	predList := valuesToSetPredicates(preprocessSet(values), addSearch)
 	return func(value meta.Value) bool {
-		ids := value.ListFromValue()
+		ids := value.AsList()
 		for _, preds := range predList {
 			for _, pred := range preds {
 				if !pred(ids) {
@@ -178,7 +178,7 @@ func createMatchNumberFunc(values []expValue, addSearch addSearchFunc) matchValu
 func createMatchTagSetFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	predList := valuesToSetPredicates(processTagSet(preprocessSet(sliceToLower(values))), addSearch)
 	return func(value meta.Value) bool {
-		tags := value.TagsFromValue()
+		tags := value.AsTags()
 		for _, preds := range predList {
 			for _, pred := range preds {
 				if !pred(tags) {

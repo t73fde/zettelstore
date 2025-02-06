@@ -201,7 +201,7 @@ func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
 	if user == nil {
 		return false, "", ""
 	}
-	return true, wui.NewURLBuilder('h').SetZid(user.Zid).String(), string(user.GetDefault(api.KeyUserID, ""))
+	return true, wui.NewURLBuilder('h').SetZid(user.Zid).String(), string(user.GetDefault(meta.KeyUserID, ""))
 }
 
 type renderBinder struct {
@@ -225,7 +225,7 @@ func (rb *renderBinder) bindSymbol(sym *sx.Symbol, obj sx.Object) {
 func (rb *renderBinder) bindKeyValue(key string, value meta.Value) {
 	rb.bindString("meta-"+key, sx.MakeString(string(value)))
 	if kt := meta.Type(key); kt.IsSet {
-		rb.bindString("set-meta-"+key, makeStringList(value.ListFromValue()))
+		rb.bindString("set-meta-"+key, makeStringList(value.AsList()))
 	}
 }
 func (rb *renderBinder) rebindResolved(key, defKey string) {
@@ -258,7 +258,7 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	if wui.canDelete(ctx, user, m) {
 		rb.bindString("delete-url", sx.MakeString(newURLBuilder('d').SetZid(zid).String()))
 	}
-	if val, found := m.Get(api.KeyUselessFiles); found {
+	if val, found := m.Get(meta.KeyUselessFiles); found {
 		rb.bindString("useless", sx.Cons(sx.MakeString(string(val)), nil))
 	}
 	queryContext := strZid + " " + api.ContextDirective
@@ -271,10 +271,10 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	}
 
 	// Ensure to have title, role, tags, and syntax included as "meta-*"
-	rb.bindKeyValue(api.KeyTitle, m.GetDefault(api.KeyTitle, ""))
-	rb.bindKeyValue(api.KeyRole, m.GetDefault(api.KeyRole, ""))
-	rb.bindKeyValue(api.KeyTags, m.GetDefault(api.KeyTags, ""))
-	rb.bindKeyValue(api.KeySyntax, m.GetDefault(api.KeySyntax, meta.DefaultSyntax))
+	rb.bindKeyValue(meta.KeyTitle, m.GetDefault(meta.KeyTitle, ""))
+	rb.bindKeyValue(meta.KeyRole, m.GetDefault(meta.KeyRole, ""))
+	rb.bindKeyValue(meta.KeyTags, m.GetDefault(meta.KeyTags, ""))
+	rb.bindKeyValue(meta.KeySyntax, m.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 	var metaPairs sx.ListBuilder
 	for _, p := range m.ComputedPairs() {
 		key, value := p.Key, p.Value
@@ -293,7 +293,7 @@ func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {
 	}
 	if zn == nil {
 		ctx = box.NoEnrichContext(ctx)
-		ztl, err := wui.box.GetZettel(ctx, api.ZidTOCListsMenu)
+		ztl, err := wui.box.GetZettel(ctx, id.ZidTOCListsMenu)
 		if err != nil {
 			return nil
 		}
@@ -313,7 +313,7 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) *sx
 		return nil
 	}
 	ctx = box.NoEnrichContext(ctx)
-	menu, err := wui.box.GetZettel(ctx, api.ZidTOCNewTemplate)
+	menu, err := wui.box.GetZettel(ctx, id.ZidTOCNewTemplate)
 	if err != nil {
 		return nil
 	}
@@ -346,7 +346,7 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) *sx
 func (wui *WebUI) calculateFooterSxn(ctx context.Context) *sx.Pair {
 	if footerZid, err := id.Parse(wui.getConfig(ctx, nil, config.KeyFooterZettel)); err == nil {
 		if zn, err2 := wui.evalZettel.Run(ctx, footerZid, ""); err2 == nil {
-			htmlEnc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, api.KeyLang)).SetUnique("footer-")
+			htmlEnc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, meta.KeyLang)).SetUnique("footer-")
 			if content, endnotes, err3 := htmlEnc.BlocksSxn(&zn.Ast); err3 == nil {
 				if content != nil && endnotes != nil {
 					content.LastPair().SetCdr(sx.Cons(endnotes, nil))
@@ -414,7 +414,7 @@ func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWr
 	}
 	bind.Bind(symDetail, detailObj)
 
-	pageObj, err := wui.evalSxnTemplate(ctx, api.ZidBaseTemplate, bind)
+	pageObj, err := wui.evalSxnTemplate(ctx, id.ZidBaseTemplate, bind)
 	if err != nil {
 		return err
 	}
@@ -445,11 +445,11 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 		wui.log.Debug().Err(err).Msg("reportError")
 	}
 	user := server.GetUser(ctx)
-	env, rb := wui.createRenderEnv(ctx, "error", api.ValueLangEN, "Error", user)
+	env, rb := wui.createRenderEnv(ctx, "error", meta.ValueLangEN, "Error", user)
 	rb.bindString("heading", sx.MakeString(http.StatusText(code)))
 	rb.bindString("message", sx.MakeString(text))
 	if rb.err == nil {
-		rb.err = wui.renderSxnTemplateStatus(ctx, w, code, api.ZidErrorTemplate, env)
+		rb.err = wui.renderSxnTemplateStatus(ctx, w, code, id.ZidErrorTemplate, env)
 	}
 	errSx := rb.err
 	if errSx == nil {

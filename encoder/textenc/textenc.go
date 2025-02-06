@@ -50,7 +50,7 @@ func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	buf := encoder.NewEncWriter(w)
 	for _, pair := range m.ComputedPairs() {
 		if meta.Type(pair.Key) == meta.TypeTagSet {
-			writeTagSet(&buf, pair.Value.ListFromValue())
+			writeTagSet(&buf, pair.Value.AsList())
 		} else {
 			buf.WriteString(string(pair.Value))
 		}

@@ -24,17 +24,17 @@ import (
 )
 
 func TestMatchZidNegate(t *testing.T) {
-	q := query.Parse(api.KeyID + api.SearchOperatorHasNot + api.ZidVersion.String() + " " +
-		api.KeyID + api.SearchOperatorHasNot + api.ZidLicense.String())
+	q := query.Parse(meta.KeyID + api.SearchOperatorHasNot + id.ZidVersion.String() + " " +
+		meta.KeyID + api.SearchOperatorHasNot + id.ZidLicense.String())
 	compiled := q.RetrieveAndCompile(context.Background(), nil, nil)
 
 	testCases := []struct {
 		zid id.Zid
 		exp bool
 	}{
-		{api.ZidVersion, false},
-		{api.ZidLicense, false},
-		{api.ZidAuthors, true},
+		{id.ZidVersion, false},
+		{id.ZidLicense, false},
+		{id.ZidAuthors, true},
 	}
 	for i, tc := range testCases {
 		m := meta.New(tc.zid)

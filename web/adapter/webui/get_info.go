@@ -22,6 +22,7 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
@@ -53,7 +54,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 			return
 		}
 
-		zn, err := ucParseZettel.Run(ctx, zid, q.Get(api.KeySyntax))
+		zn, err := ucParseZettel.Run(ctx, zid, q.Get(meta.KeySyntax))
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return
@@ -81,7 +82,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 			return
 		}
 
-		enc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, api.KeyLang))
+		enc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, meta.KeyLang))
 		entries, _ := evaluator.QueryAction(ctx, nil, unlinkedMeta)
 		bns := ucEvaluate.RunBlockNode(ctx, entries)
 		unlinkedContent, _, err := enc.BlocksSxn(&bns)
@@ -106,7 +107,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		rb.bindString("shadow-links", shadowLinks)
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, api.ZidInfoTemplate, env)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidInfoTemplate, env)
 		} else {
 			err = rb.err
 		}
@@ -150,7 +151,7 @@ func createUnlinkedQuery(zid id.Zid, phrase string) *query.Query {
 	sb.WriteByte(' ')
 	sb.WriteString(api.OrderDirective)
 	sb.WriteByte(' ')
-	sb.WriteString(api.KeyID)
+	sb.WriteString(meta.KeyID)
 	return query.Parse(sb.String())
 }
 
@@ -216,7 +217,7 @@ func getShadowLinks(ctx context.Context, zid id.Zid, getAllZettel usecase.GetAll
 	var lb sx.ListBuilder
 	if zl, err := getAllZettel.Run(ctx, zid); err == nil {
 		for _, ztl := range zl {
-			if boxNo, ok := ztl.Meta.Get(api.KeyBoxNumber); ok {
+			if boxNo, ok := ztl.Meta.Get(meta.KeyBoxNumber); ok {
 				lb.Add(sx.MakeString(string(boxNo)))
 			}
 		}

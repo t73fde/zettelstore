@@ -17,7 +17,6 @@ import (
 	"cmp"
 	"strconv"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 )
 
@@ -28,7 +27,7 @@ func buildSortFunc(order []sortOrder) sortFunc {
 	sortFuncs := make([]sortFunc, 0, len(order)+1)
 	for _, o := range order {
 		sortFuncs = append(sortFuncs, o.buildSortfunc())
-		if o.key == api.KeyID {
+		if o.key == meta.KeyID {
 			hasID = true
 			break
 		}
@@ -52,7 +51,7 @@ func buildSortFunc(order []sortOrder) sortFunc {
 func (so *sortOrder) buildSortfunc() sortFunc {
 	key := so.key
 	keyType := meta.Type(key)
-	if key == api.KeyID || keyType == meta.TypeCredential {
+	if key == meta.KeyID || keyType == meta.TypeCredential {
 		if so.descending {
 			return defaultMetaSort
 		}

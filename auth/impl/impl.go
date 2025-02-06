@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sexp"
@@ -84,7 +83,7 @@ var ErrNoZid = errors.New("auth: missing zettel id")
 
 // GetToken returns a token to be used for authentification.
 func (a *myAuth) GetToken(ident *meta.Meta, d time.Duration, kind auth.TokenKind) ([]byte, error) {
-	subject, ok := ident.Get(api.KeyUserID)
+	subject, ok := ident.Get(meta.KeyUserID)
 	if !ok || subject == "" {
 		return nil, ErrNoIdent
 	}
@@ -167,8 +166,8 @@ func (a *myAuth) GetUserRole(user *meta.Meta) meta.UserRole {
 	if a.IsOwner(user.Zid) {
 		return meta.UserRoleOwner
 	}
-	if val, ok := user.Get(api.KeyUserRole); ok {
-		if ur := val.GetUserRole(); ur != meta.UserRoleUnknown {
+	if val, ok := user.Get(meta.KeyUserRole); ok {
+		if ur := val.AsUserRole(); ur != meta.UserRoleUnknown {
 			return ur
 		}
 	}

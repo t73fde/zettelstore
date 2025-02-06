@@ -29,6 +29,7 @@ import (
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idslice"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/kernel"
 )
 
@@ -91,7 +92,7 @@ func TestListZettel(t *testing.T) {
 			}
 		})
 	}
-	search := api.KeyRole + api.SearchOperatorHas + api.ValueRoleConfiguration + " ORDER id"
+	search := meta.KeyRole + api.SearchOperatorHas + meta.ValueRoleConfiguration + " ORDER id"
 	q, h, l, err := c.QueryZettelData(context.Background(), search)
 	if err != nil {
 		t.Error(err)
@@ -136,7 +137,7 @@ func TestGetZettelData(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	z, err := c.GetZettelData(context.Background(), api.ZidDefaultHome)
+	z, err := c.GetZettelData(context.Background(), id.ZidDefaultHome)
 	if err != nil {
 		t.Error(err)
 		return
@@ -148,7 +149,7 @@ func TestGetZettelData(t *testing.T) {
 		t.Errorf("Expect non-empty content, but empty encoding (got %q)", z.Encoding)
 	}
 
-	mr, err := c.GetMetaData(context.Background(), api.ZidDefaultHome)
+	mr, err := c.GetMetaData(context.Background(), id.ZidDefaultHome)
 	if err != nil {
 		t.Error(err)
 		return
@@ -182,7 +183,7 @@ func TestGetParsedEvaluatedZettel(t *testing.T) {
 		api.EncoderText,
 	}
 	for _, enc := range encodings {
-		content, err := c.GetParsedZettel(context.Background(), api.ZidDefaultHome, enc)
+		content, err := c.GetParsedZettel(context.Background(), id.ZidDefaultHome, enc)
 		if err != nil {
 			t.Error(err)
 			continue
@@ -190,7 +191,7 @@ func TestGetParsedEvaluatedZettel(t *testing.T) {
 		if len(content) == 0 {
 			t.Errorf("Empty content for parsed encoding %v", enc)
 		}
-		content, err = c.GetEvaluatedZettel(context.Background(), api.ZidDefaultHome, enc)
+		content, err = c.GetEvaluatedZettel(context.Background(), id.ZidDefaultHome, enc)
 		if err != nil {
 			t.Error(err)
 			continue
@@ -212,7 +213,7 @@ func TestGetZettelOrder(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	_, _, metaSeq, err := c.QueryZettelData(context.Background(), api.ZidTOCNewTemplate.String()+" "+api.ItemsDirective)
+	_, _, metaSeq, err := c.QueryZettelData(context.Background(), id.ZidTOCNewTemplate.String()+" "+api.ItemsDirective)
 	if err != nil {
 		t.Error(err)
 		return
@@ -221,10 +222,10 @@ func TestGetZettelOrder(t *testing.T) {
 		t.Errorf("Expected list of length 4, got %d", got)
 		return
 	}
-	checkListZid(t, metaSeq, 0, api.ZidTemplateNewZettel)
-	checkListZid(t, metaSeq, 1, api.ZidTemplateNewRole)
-	checkListZid(t, metaSeq, 2, api.ZidTemplateNewTag)
-	checkListZid(t, metaSeq, 3, api.ZidTemplateNewUser)
+	checkListZid(t, metaSeq, 0, id.ZidTemplateNewZettel)
+	checkListZid(t, metaSeq, 1, id.ZidTemplateNewRole)
+	checkListZid(t, metaSeq, 2, id.ZidTemplateNewTag)
+	checkListZid(t, metaSeq, 3, id.ZidTemplateNewUser)
 }
 
 func TestGetZettelContext(t *testing.T) {
@@ -271,7 +272,7 @@ func TestGetUnlinkedReferences(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	_, _, metaSeq, err := c.QueryZettelData(context.Background(), api.ZidDefaultHome.String()+" "+api.UnlinkedDirective)
+	_, _, metaSeq, err := c.QueryZettelData(context.Background(), id.ZidDefaultHome.String()+" "+api.UnlinkedDirective)
 	if err != nil {
 		t.Error(err)
 		return
@@ -322,7 +323,7 @@ func TestListTags(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	agg, err := c.QueryAggregate(context.Background(), api.ActionSeparator+api.KeyTags)
+	agg, err := c.QueryAggregate(context.Background(), api.ActionSeparator+meta.KeyTags)
 	if err != nil {
 		t.Error(err)
 		return
@@ -377,7 +378,7 @@ func TestListRoles(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	agg, err := c.QueryAggregate(context.Background(), api.ActionSeparator+api.KeyRole)
+	agg, err := c.QueryAggregate(context.Background(), api.ActionSeparator+meta.KeyRole)
 	if err != nil {
 		t.Error(err)
 		return
@@ -430,7 +431,7 @@ func TestRedirect(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	ub.ClearQuery().SetZid(api.ZidEmoji)
+	ub.ClearQuery().SetZid(id.ZidEmoji)
 	respEmoji, err := http.Get(ub.String())
 	if err != nil {
 		t.Error(err)
@@ -470,8 +471,8 @@ func TestApplicationZid(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if zid != api.ZidAppDirectory {
-		t.Errorf("c.GetApplicationZid(\"app\") should result in %q, but got: %q", api.ZidAppDirectory, zid)
+	if zid != id.ZidAppDirectory {
+		t.Errorf("c.GetApplicationZid(\"app\") should result in %q, but got: %q", id.ZidAppDirectory, zid)
 	}
 	if zid, err = c.GetApplicationZid(context.Background(), "noappzid"); err == nil {
 		t.Errorf(`c.GetApplicationZid("nozid") should result in error, but got: %v`, zid)

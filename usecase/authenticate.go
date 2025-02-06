@@ -19,7 +19,6 @@ import (
 	"net/http"
 	"time"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
@@ -57,7 +56,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 		return nil, err
 	}
 
-	if hashCred, ok := identMeta.Get(api.KeyCredential); ok {
+	if hashCred, ok := identMeta.Get(meta.KeyCredential); ok {
 		ok, err = cred.CompareHashAndCredential(string(hashCred), identMeta.Zid, ident, credential)
 		if err != nil {
 			uc.log.Info().Str("ident", ident).Err(err).HTTPIP(r).Msg("Error while comparing credentials")

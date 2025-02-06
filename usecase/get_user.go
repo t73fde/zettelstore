@@ -53,11 +53,11 @@ func (uc GetUser) Run(ctx context.Context, ident string) (*meta.Meta, error) {
 	// could give herself the same ''ident''. Second, in most cases the owner
 	// will authenticate.
 	identZettel, err := uc.port.GetZettel(ctx, uc.authz.Owner())
-	if err == nil && string(identZettel.Meta.GetDefault(api.KeyUserID, "")) == ident {
+	if err == nil && string(identZettel.Meta.GetDefault(meta.KeyUserID, "")) == ident {
 		return identZettel.Meta, nil
 	}
 	// Owner was not found or has another ident. Try via list search.
-	q := query.Parse(api.KeyUserID + api.SearchOperatorHas + ident + " " + api.SearchOperatorHas + ident)
+	q := query.Parse(meta.KeyUserID + api.SearchOperatorHas + ident + " " + api.SearchOperatorHas + ident)
 	metaList, err := uc.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		return nil, err
@@ -94,7 +94,7 @@ func (uc GetUserByZid) GetUser(ctx context.Context, zid id.Zid, ident string) (*
 	}
 
 	userMeta := userZettel.Meta
-	if val, ok := userMeta.Get(api.KeyUserID); !ok || string(val) != ident {
+	if val, ok := userMeta.Get(meta.KeyUserID); !ok || string(val) != ident {
 		return nil, nil
 	}
 	return userMeta, nil

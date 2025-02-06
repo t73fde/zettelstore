@@ -22,7 +22,6 @@ import (
 	"strings"
 	"unicode"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
@@ -55,21 +54,21 @@ func parseZettelForm(r *http.Request, zid id.Zid) (bool, zettel.Zettel, error) {
 		m = meta.New(zid)
 	}
 	if postTitle, ok := trimmedFormValue(r, "title"); ok {
-		m.Set(api.KeyTitle, meta.Value(meta.RemoveNonGraphic(postTitle)))
+		m.Set(meta.KeyTitle, meta.Value(meta.RemoveNonGraphic(postTitle)))
 	}
 	if postTags, ok := trimmedFormValue(r, "tags"); ok {
-		if tags := meta.Value(meta.RemoveNonGraphic(postTags)).ListFromValue(); len(tags) > 0 {
+		if tags := meta.Value(meta.RemoveNonGraphic(postTags)).AsList(); len(tags) > 0 {
 			for i, tag := range tags {
 				tags[i] = string(meta.Value(tag).NormalizeTag())
 			}
-			m.SetList(api.KeyTags, tags)
+			m.SetList(meta.KeyTags, tags)
 		}
 	}
 	if postRole, ok := trimmedFormValue(r, "role"); ok {
-		m.SetWord(api.KeyRole, meta.RemoveNonGraphic(postRole))
+		m.SetWord(meta.KeyRole, meta.RemoveNonGraphic(postRole))
 	}
 	if postSyntax, ok := trimmedFormValue(r, "syntax"); ok {
-		m.SetWord(api.KeySyntax, meta.RemoveNonGraphic(postSyntax))
+		m.SetWord(meta.KeySyntax, meta.RemoveNonGraphic(postSyntax))
 	}
 
 	if data := textContent(r); data != nil {
@@ -118,7 +117,7 @@ func uploadedContent(r *http.Request, m *meta.Meta) ([]byte, *meta.Meta) {
 				ct := cts[0]
 				if fileSyntax := content.SyntaxFromMIME(ct, data); fileSyntax != "" {
 					m = m.Clone()
-					m.Set(api.KeySyntax, meta.Value(fileSyntax))
+					m.Set(meta.KeySyntax, meta.Value(fileSyntax))
 				}
 			}
 			return data, m
@@ -128,8 +127,8 @@ func uploadedContent(r *http.Request, m *meta.Meta) ([]byte, *meta.Meta) {
 }
 
 func allowEmptyContent(m *meta.Meta) bool {
-	if syntax, found := m.Get(api.KeySyntax); found {
-		if syntax == api.ValueSyntaxNone {
+	if syntax, found := m.Get(meta.KeySyntax); found {
+		if syntax == meta.ValueSyntaxNone {
 			return true
 		}
 		if pinfo := parser.Get(string(syntax)); pinfo != nil {

@@ -18,7 +18,6 @@ import (
 	"errors"
 	"net/http"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/config"
@@ -40,12 +39,12 @@ func (wui *WebUI) MakeGetRootHandler(s getRootPort) http.Handler {
 			return
 		}
 		homeZid, _ := id.Parse(wui.getConfig(ctx, nil, config.KeyHomeZettel))
-		if homeZid != api.ZidDefaultHome {
+		if homeZid != id.ZidDefaultHome {
 			if _, err := s.GetZettel(ctx, homeZid); err == nil {
 				wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(homeZid))
 				return
 			}
-			homeZid = api.ZidDefaultHome
+			homeZid = id.ZidDefaultHome
 		}
 		_, err := s.GetZettel(ctx, homeZid)
 		if err == nil {

@@ -20,8 +20,8 @@ import (
 
 	"golang.org/x/term"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth/cred"
 )
 
@@ -63,8 +63,8 @@ func cmdPassword(fs *flag.FlagSet) (int, error) {
 		return 2, err
 	}
 	fmt.Printf("%v: %s\n%v: %s\n",
-		api.KeyCredential, hashedPassword,
-		api.KeyUserID, ident,
+		meta.KeyCredential, hashedPassword,
+		meta.KeyUserID, ident,
 	)
 	return 0, nil
 }

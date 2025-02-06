@@ -20,7 +20,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	_ "zettelstore.de/z/cmd"
@@ -59,7 +58,7 @@ func getAllParser() (result []*parser.Info) {
 
 func getAllEncoder() (result []encoder.Encoder) {
 	for _, enc := range encoder.GetEncodings() {
-		e := encoder.Create(enc, &encoder.CreateParameter{Lang: api.ValueLangEN})
+		e := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
 		result = append(result, e)
 	}
 	return result

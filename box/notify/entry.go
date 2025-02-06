@@ -16,7 +16,6 @@ package notify
 import (
 	"path/filepath"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/parser"
@@ -62,7 +61,7 @@ func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, ge
 		return
 	}
 
-	syntax := m.GetDefault(api.KeySyntax, meta.DefaultSyntax)
+	syntax := m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)
 	ext := calcContentExt(syntax, m.YamlSep, getZettelFileSyntax)
 	metaName := e.MetaName
 	eimc := extIsMetaAndContent(ext)
@@ -102,7 +101,7 @@ func calcContentExt(syntax meta.Value, yamlSep bool, getZettelFileSyntax func() 
 		return extZettel
 	}
 	switch syntax {
-	case meta.SyntaxNone, meta.SyntaxZmk:
+	case meta.ValueSyntaxNone, meta.ValueSyntaxZmk:
 		return extZettel
 	}
 	for _, s := range getZettelFileSyntax() {

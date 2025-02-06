@@ -14,7 +14,6 @@
 package policy
 
 import (
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/config"
@@ -37,7 +36,7 @@ func (o *ownerPolicy) userCanCreate(user, newMeta *meta.Meta) bool {
 	if o.manager.GetUserRole(user) == meta.UserRoleReader {
 		return false
 	}
-	if _, ok := newMeta.Get(api.KeyUserID); ok {
+	if _, ok := newMeta.Get(meta.KeyUserID); ok {
 		return false
 	}
 	return true
@@ -63,7 +62,7 @@ func (o *ownerPolicy) userCanRead(user, m *meta.Meta, vis meta.Visibility) bool 
 	if user == nil {
 		return false
 	}
-	if _, ok := m.Get(api.KeyUserID); ok {
+	if _, ok := m.Get(meta.KeyUserID); ok {
 		// Only the user can read its own zettel
 		return user.Zid == m.Zid
 	}
@@ -78,10 +77,10 @@ func (o *ownerPolicy) userCanRead(user, m *meta.Meta, vis meta.Visibility) bool 
 }
 
 var noChangeUser = []string{
-	api.KeyID,
-	api.KeyRole,
-	api.KeyUserID,
-	api.KeyUserRole,
+	meta.KeyID,
+	meta.KeyRole,
+	meta.KeyUserID,
+	meta.KeyUserRole,
 }
 
 func (o *ownerPolicy) CanWrite(user, oldMeta, newMeta *meta.Meta) bool {
@@ -98,7 +97,7 @@ func (o *ownerPolicy) CanWrite(user, oldMeta, newMeta *meta.Meta) bool {
 	if !o.userCanRead(user, oldMeta, vis) {
 		return false
 	}
-	if _, ok := oldMeta.Get(api.KeyUserID); ok {
+	if _, ok := oldMeta.Get(meta.KeyUserID); ok {
 		// Here we know, that user.Zid == newMeta.Zid (because of userCanRead) and
 		// user.Zid == newMeta.Zid (because oldMeta.Zid == newMeta.Zid)
 		for _, key := range noChangeUser {
@@ -149,7 +148,7 @@ func (o *ownerPolicy) userIsOwner(user *meta.Meta) bool {
 	if o.manager.IsOwner(user.Zid) {
 		return true
 	}
-	if val, ok := user.Get(api.KeyUserRole); ok && val == api.ValueUserRoleOwner {
+	if val, ok := user.Get(meta.KeyUserRole); ok && val == meta.ValueUserRoleOwner {
 		return true
 	}
 	return false

@@ -55,23 +55,23 @@ func MIMEFromEncoding(enc api.EncodingEnum) string {
 }
 
 var syntax2mime = map[string]string{
-	meta.SyntaxCSS:      "text/css; charset=utf-8",
-	meta.SyntaxDraw:     PlainText,
-	meta.SyntaxGif:      mimeGIF,
-	meta.SyntaxHTML:     mimeHTML,
-	meta.SyntaxJPEG:     mimeJPEG,
-	meta.SyntaxJPG:      mimeJPEG,
-	meta.SyntaxMarkdown: mimeMarkdown,
-	meta.SyntaxMD:       mimeMarkdown,
-	meta.SyntaxNone:     "",
-	meta.SyntaxPlain:    PlainText,
-	meta.SyntaxPNG:      mimePNG,
-	meta.SyntaxSVG:      "image/svg+xml",
-	meta.SyntaxSxn:      SXPF,
-	meta.SyntaxText:     PlainText,
-	meta.SyntaxTxt:      PlainText,
-	meta.SyntaxWebp:     mimeWEBP,
-	meta.SyntaxZmk:      "text/x-zmk; charset=utf-8",
+	meta.ValueSyntaxCSS:      "text/css; charset=utf-8",
+	meta.ValueSyntaxDraw:     PlainText,
+	meta.ValueSyntaxGif:      mimeGIF,
+	meta.ValueSyntaxHTML:     mimeHTML,
+	meta.ValueSyntaxJPEG:     mimeJPEG,
+	meta.ValueSyntaxJPG:      mimeJPEG,
+	meta.ValueSyntaxMarkdown: mimeMarkdown,
+	meta.ValueSyntaxMD:       mimeMarkdown,
+	meta.ValueSyntaxNone:     "",
+	meta.ValueSyntaxPlain:    PlainText,
+	meta.ValueSyntaxPNG:      mimePNG,
+	meta.ValueSyntaxSVG:      "image/svg+xml",
+	meta.ValueSyntaxSxn:      SXPF,
+	meta.ValueSyntaxText:     PlainText,
+	meta.ValueSyntaxTxt:      PlainText,
+	meta.ValueSyntaxWebp:     mimeWEBP,
+	meta.ValueSyntaxZmk:      "text/x-zmk; charset=utf-8",
 
 	// Additional syntaxes that are parsed as plain text.
 	"js":  "text/javascript; charset=utf-8",
@@ -88,13 +88,13 @@ func MIMEFromSyntax(syntax string) string {
 }
 
 var mime2syntax = map[string]string{
-	mimeGIF:         meta.SyntaxGif,
-	mimeJPEG:        meta.SyntaxJPEG,
-	mimePNG:         meta.SyntaxPNG,
-	mimeWEBP:        meta.SyntaxWebp,
-	"text/html":     meta.SyntaxHTML,
-	"text/markdown": meta.SyntaxMarkdown,
-	"text/plain":    meta.SyntaxText,
+	mimeGIF:         meta.ValueSyntaxGif,
+	mimeJPEG:        meta.ValueSyntaxJPEG,
+	mimePNG:         meta.ValueSyntaxPNG,
+	mimeWEBP:        meta.ValueSyntaxWebp,
+	"text/html":     meta.ValueSyntaxHTML,
+	"text/markdown": meta.ValueSyntaxMarkdown,
+	"text/plain":    meta.ValueSyntaxText,
 
 	// Additional syntaxes
 	"application/pdf": "pdf",

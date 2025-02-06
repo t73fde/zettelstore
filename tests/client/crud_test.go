@@ -21,6 +21,7 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 // ---------------------------------------------------------------------------
@@ -86,8 +87,8 @@ func TestCreateGetDeleteZettelData(t *testing.T) {
 	wrongModified := "19691231115959"
 	zid, err := c.CreateZettelData(context.Background(), api.ZettelData{
 		Meta: api.ZettelMeta{
-			api.KeyTitle:    "A\nTitle", // \n must be converted into a space
-			api.KeyModified: wrongModified,
+			meta.KeyTitle:    "A\nTitle", // \n must be converted into a space
+			meta.KeyModified: wrongModified,
 		},
 	})
 	if err != nil {
@@ -99,10 +100,10 @@ func TestCreateGetDeleteZettelData(t *testing.T) {
 		t.Error("Cannot get zettel:", zid, err)
 	} else {
 		exp := "A Title"
-		if got := z.Meta[api.KeyTitle]; got != exp {
+		if got := z.Meta[meta.KeyTitle]; got != exp {
 			t.Errorf("Expected title %q, but got %q", exp, got)
 		}
-		if got := z.Meta[api.KeyModified]; got != "" {
+		if got := z.Meta[meta.KeyModified]; got != "" {
 			t.Errorf("Create allowed to set the modified key: %q", got)
 		}
 	}
@@ -112,7 +113,7 @@ func TestCreateGetDeleteZettelData(t *testing.T) {
 func TestUpdateZettel(t *testing.T) {
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	z, err := c.GetZettel(context.Background(), api.ZidDefaultHome, api.PartZettel)
+	z, err := c.GetZettel(context.Background(), id.ZidDefaultHome, api.PartZettel)
 	if err != nil {
 		t.Error(err)
 		return
@@ -126,12 +127,12 @@ role: zettel
 syntax: zmk
 
 Empty`
-	err = c.UpdateZettel(context.Background(), api.ZidDefaultHome, []byte(newZettel))
+	err = c.UpdateZettel(context.Background(), id.ZidDefaultHome, []byte(newZettel))
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	zt, err := c.GetZettel(context.Background(), api.ZidDefaultHome, api.PartZettel)
+	zt, err := c.GetZettel(context.Background(), id.ZidDefaultHome, api.PartZettel)
 	if err != nil {
 		t.Error(err)
 		return
@@ -140,45 +141,45 @@ Empty`
 		t.Errorf("Expected zettel %q, got %q", newZettel, zt)
 	}
 	// Must delete to clean up for next tests
-	doDelete(t, c, api.ZidDefaultHome)
+	doDelete(t, c, id.ZidDefaultHome)
 }
 
 func TestUpdateZettelData(t *testing.T) {
 	c := getClient()
 	c.SetAuth("writer", "writer")
-	z, err := c.GetZettelData(context.Background(), api.ZidDefaultHome)
+	z, err := c.GetZettelData(context.Background(), id.ZidDefaultHome)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if got := z.Meta[api.KeyTitle]; got != "Home" {
+	if got := z.Meta[meta.KeyTitle]; got != "Home" {
 		t.Errorf("Title of zettel is not \"Home\", but %q", got)
 		return
 	}
 	newTitle := "New Home"
-	z.Meta[api.KeyTitle] = newTitle
+	z.Meta[meta.KeyTitle] = newTitle
 	wrongModified := "19691231235959"
-	z.Meta[api.KeyModified] = wrongModified
-	err = c.UpdateZettelData(context.Background(), api.ZidDefaultHome, z)
+	z.Meta[meta.KeyModified] = wrongModified
+	err = c.UpdateZettelData(context.Background(), id.ZidDefaultHome, z)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	zt, err := c.GetZettelData(context.Background(), api.ZidDefaultHome)
+	zt, err := c.GetZettelData(context.Background(), id.ZidDefaultHome)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if got := zt.Meta[api.KeyTitle]; got != newTitle {
+	if got := zt.Meta[meta.KeyTitle]; got != newTitle {
 		t.Errorf("Title of zettel is not %q, but %q", newTitle, got)
 	}
-	if got := zt.Meta[api.KeyModified]; got == wrongModified {
+	if got := zt.Meta[meta.KeyModified]; got == wrongModified {
 		t.Errorf("Update did not change the modified key: %q", got)
 	}
 
 	// Must delete to clean up for next tests
 	c.SetAuth("owner", "owner")
-	doDelete(t, c, api.ZidDefaultHome)
+	doDelete(t, c, id.ZidDefaultHome)
 }
 
 func doDelete(t *testing.T, c *client.Client, zid id.Zid) {

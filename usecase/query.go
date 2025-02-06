@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"strings"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/id/idslice"
@@ -122,7 +121,7 @@ func (uc *Query) processContextDirective(ctx context.Context, spec *query.Contex
 func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, metaSeq []*meta.Meta) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(metaSeq))
 	for _, m := range metaSeq {
-		zn, err := uc.ucEvaluate.Run(ctx, m.Zid, string(m.GetDefault(api.KeySyntax, meta.DefaultSyntax)))
+		zn, err := uc.ucEvaluate.Run(ctx, m.Zid, string(m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)))
 		if err != nil {
 			continue
 		}
@@ -169,7 +168,7 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 					refZids.Add(zid)
 				}
 			case meta.TypeIDSet:
-				for _, value := range pair.Value.ListFromValue() {
+				for _, value := range pair.Value.AsList() {
 					if zid, errParse := id.Parse(value); errParse == nil {
 						refZids.Add(zid)
 					}
@@ -204,7 +203,7 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 		}
 		v.text = v.joinWords(words)
 
-		syntax := string(zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax))
+		syntax := string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 		if !parser.IsASTParser(syntax) {
 			continue
 		}

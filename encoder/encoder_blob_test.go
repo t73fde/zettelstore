@@ -16,7 +16,6 @@ package encoder_test
 import (
 	"testing"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
@@ -54,7 +53,7 @@ var pngTestCases = []blobTestCase{
 
 func TestBlob(t *testing.T) {
 	m := meta.New(id.Invalid)
-	m.Set(api.KeyTitle, "PNG")
+	m.Set(meta.KeyTitle, "PNG")
 	for testNum, tc := range pngTestCases {
 		inp := input.NewInput(tc.blob)
 		bs := parser.ParseBlocks(inp, m, "png", config.NoHTML)

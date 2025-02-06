@@ -22,7 +22,6 @@ import (
 	"strings"
 	"sync"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/id/idslice"
@@ -109,16 +108,16 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 	}
 	var updated bool
 	if !zi.dead.IsEmpty() {
-		m.Set(api.KeyDead, zi.dead.MetaValue())
+		m.Set(meta.KeyDead, zi.dead.MetaValue())
 		updated = true
 	}
 	back := removeOtherMetaRefs(m, zi.backward.Clone())
 	if !zi.backward.IsEmpty() {
-		m.Set(api.KeyBackward, zi.backward.MetaValue())
+		m.Set(meta.KeyBackward, zi.backward.MetaValue())
 		updated = true
 	}
 	if !zi.forward.IsEmpty() {
-		m.Set(api.KeyForward, zi.forward.MetaValue())
+		m.Set(meta.KeyForward, zi.forward.MetaValue())
 		back.ISubstract(zi.forward)
 		updated = true
 	}
@@ -130,7 +129,7 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 		}
 	}
 	if !back.IsEmpty() {
-		m.Set(api.KeyBack, back.MetaValue())
+		m.Set(meta.KeyBack, back.MetaValue())
 		updated = true
 	}
 	return updated
@@ -273,7 +272,7 @@ func removeOtherMetaRefs(m *meta.Meta, back *idset.Set) *idset.Set {
 				back = back.Remove(zid)
 			}
 		case meta.TypeIDSet:
-			for _, val := range p.Value.ListFromValue() {
+			for _, val := range p.Value.AsList() {
 				if zid, err := id.Parse(val); err == nil {
 					back = back.Remove(zid)
 				}
@@ -319,11 +318,11 @@ func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex)
 }
 
 var internableKeys = map[string]bool{
-	api.KeyRole:      true,
-	api.KeySyntax:    true,
-	api.KeyFolgeRole: true,
-	api.KeyLang:      true,
-	api.KeyReadOnly:  true,
+	meta.KeyRole:      true,
+	meta.KeySyntax:    true,
+	meta.KeyFolgeRole: true,
+	meta.KeyLang:      true,
+	meta.KeyReadOnly:  true,
 }
 
 func isInternableValue(key string) bool {
@@ -348,7 +347,7 @@ func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 		key := ms.internString(p.Key)
 		if isInternableValue(key) {
 			copyM.Set(key, meta.Value(ms.internString(string(p.Value))))
-		} else if key == api.KeyBoxNumber || !meta.IsComputed(key) {
+		} else if key == meta.KeyBoxNumber || !meta.IsComputed(key) {
 			copyM.Set(key, p.Value)
 		}
 	}

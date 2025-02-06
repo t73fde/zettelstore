@@ -97,7 +97,7 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		if !spec.Full {
 			continue
 		}
-		if tags, found := m.GetList(api.KeyTags); found {
+		if tags, found := m.GetList(meta.KeyTags); found {
 			tasks.addTags(ctx, tags, cost, level)
 		}
 	}
@@ -187,17 +187,17 @@ func newQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, po
 }
 
 func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value, curCost float64, level uint, isBackward, isForward bool) {
-	if key == api.KeyBack {
+	if key == meta.KeyBack {
 		return
 	}
 	newCost := curCost + contextCost(key)
-	if key == api.KeyBackward {
+	if key == meta.KeyBackward {
 		if isBackward {
 			ct.addIDSet(ctx, newCost, level, value)
 		}
 		return
 	}
-	if key == api.KeyForward {
+	if key == meta.KeyForward {
 		if isForward {
 			ct.addIDSet(ctx, newCost, level, value)
 		}
@@ -216,11 +216,11 @@ func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value
 
 func contextCost(key string) float64 {
 	switch key {
-	case api.KeyFolge, api.KeyPrecursor:
+	case meta.KeyFolge, meta.KeyPrecursor:
 		return 0.1
-	case api.KeySequel, api.KeyPrequel:
+	case meta.KeySequel, meta.KeyPrequel:
 		return 1.0
-	case api.KeySuccessors, api.KeyPredecessor:
+	case meta.KeySuccessors, meta.KeyPredecessor:
 		return 7
 	}
 	return 2
@@ -241,7 +241,7 @@ func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint) {
 }
 
 func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, value meta.Value) {
-	elems := value.ListFromValue()
+	elems := value.AsList()
 	refCost := referenceCost(newCost, len(elems))
 	for _, val := range elems {
 		ct.addID(ctx, refCost, level, meta.Value(val))
@@ -280,7 +280,7 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Set
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}
-	q := Parse(api.KeyTags + api.SearchOperatorHas + tag + " ORDER REVERSE " + api.KeyID)
+	q := Parse(meta.KeyTags + api.SearchOperatorHas + tag + " ORDER REVERSE " + meta.KeyID)
 	ml, err := ct.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		ml = nil

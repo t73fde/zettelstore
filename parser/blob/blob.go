@@ -23,7 +23,7 @@ import (
 
 func init() {
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxGif,
+		Name:          meta.ValueSyntaxGif,
 		AltNames:      nil,
 		IsASTParser:   false,
 		IsTextFormat:  false,
@@ -31,15 +31,15 @@ func init() {
 		ParseBlocks:   parseBlocks,
 	})
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxJPEG,
-		AltNames:      []string{meta.SyntaxJPG},
+		Name:          meta.ValueSyntaxJPEG,
+		AltNames:      []string{meta.ValueSyntaxJPG},
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
 		ParseBlocks:   parseBlocks,
 	})
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxPNG,
+		Name:          meta.ValueSyntaxPNG,
 		AltNames:      nil,
 		IsASTParser:   false,
 		IsTextFormat:  false,
@@ -47,7 +47,7 @@ func init() {
 		ParseBlocks:   parseBlocks,
 	})
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxWebp,
+		Name:          meta.ValueSyntaxWebp,
 		AltNames:      nil,
 		IsASTParser:   false,
 		IsTextFormat:  false,

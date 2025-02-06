@@ -100,12 +100,13 @@ func (hi HTMLInsecurity) String() string {
 func (hi HTMLInsecurity) AllowHTML(syntax string) bool {
 	switch hi {
 	case SyntaxHTML:
-		return syntax == meta.SyntaxHTML
+		return syntax == meta.ValueSyntaxHTML
 	case MarkdownHTML:
-		return syntax == meta.SyntaxHTML || syntax == meta.SyntaxMarkdown || syntax == meta.SyntaxMD
+		return syntax == meta.ValueSyntaxHTML || syntax == meta.ValueSyntaxMarkdown ||
+			syntax == meta.ValueSyntaxMD
 	case ZettelmarkupHTML:
-		return syntax == meta.SyntaxZmk || syntax == meta.SyntaxHTML ||
-			syntax == meta.SyntaxMarkdown || syntax == meta.SyntaxMD
+		return syntax == meta.ValueSyntaxZmk || syntax == meta.ValueSyntaxHTML ||
+			syntax == meta.ValueSyntaxMarkdown || syntax == meta.ValueSyntaxMD
 	}
 	return false
 }

@@ -58,9 +58,9 @@ func (a *API) MakeGetZettelHandler(
 		default:
 			var zn *ast.ZettelNode
 			if q.Has(api.QueryKeyParseOnly) {
-				zn, err = parseZettel.Run(ctx, zid, q.Get(api.KeySyntax))
+				zn, err = parseZettel.Run(ctx, zid, q.Get(meta.KeySyntax))
 			} else {
-				zn, err = evaluate.Run(ctx, zid, q.Get(api.KeySyntax))
+				zn, err = evaluate.Run(ctx, zid, q.Get(meta.KeySyntax))
 			}
 			if err != nil {
 				a.reportUsecaseError(w, err)
@@ -97,7 +97,7 @@ func (a *API) writePlainData(ctx context.Context, w http.ResponseWriter, zid id.
 		_, err = z.Meta.Write(&buf)
 
 	case partContent:
-		contentType = content.MIMEFromSyntax(string(z.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)))
+		contentType = content.MIMEFromSyntax(string(z.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)))
 		_, err = z.Content.Write(&buf)
 	}
 
@@ -147,7 +147,7 @@ func (a *API) writeEncodedZettelPart(
 	encdr := encoder.Create(
 		enc,
 		&encoder.CreateParameter{
-			Lang: a.rtConfig.Get(ctx, zn.InhMeta, api.KeyLang),
+			Lang: a.rtConfig.Get(ctx, zn.InhMeta, meta.KeyLang),
 		})
 	if encdr == nil {
 		adapter.BadRequest(w, fmt.Sprintf("Zettel %q not available in encoding %q", zn.Meta.Zid, encStr))

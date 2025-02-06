@@ -196,8 +196,8 @@ func rebind(ev *shtml.Evaluator, sym *sx.Symbol, fn func(sx.Object) sx.Object) {
 func (g *htmlGenerator) SetUnique(s string) *htmlGenerator { g.th.SetUnique(s); return g }
 
 var mapMetaKey = map[string]string{
-	api.KeyCopyright: "copyright",
-	api.KeyLicense:   "license",
+	meta.KeyCopyright: "copyright",
+	meta.KeyLicense:   "license",
 }
 
 func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
@@ -208,11 +208,11 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 		return nil
 	}
 
-	ignore := strfun.NewSet(api.KeyTitle, api.KeyLang)
+	ignore := strfun.NewSet(meta.KeyTitle, meta.KeyLang)
 	metaMap := make(map[string]*sx.Pair, m.Length())
-	if tags, ok := m.Get(api.KeyTags); ok {
-		metaMap[api.KeyTags] = g.transformMetaTags(tags)
-		ignore.Set(api.KeyTags)
+	if tags, ok := m.Get(meta.KeyTags); ok {
+		metaMap[meta.KeyTags] = g.transformMetaTags(tags)
+		ignore.Set(meta.KeyTags)
 	}
 
 	for elem := hm; elem != nil; elem = elem.Tail() {
@@ -259,7 +259,7 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 
 func (g *htmlGenerator) transformMetaTags(tags meta.Value) *sx.Pair {
 	var sb strings.Builder
-	for i, val := range tags.ListFromValue() {
+	for i, val := range tags.AsList() {
 		if i > 0 {
 			sb.WriteString(", ")
 		}

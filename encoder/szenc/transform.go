@@ -260,7 +260,7 @@ func (t *Transformer) getCell(cell *ast.TableCell) *sx.Pair {
 
 func (t *Transformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
 	var lastObj sx.Object
-	if bn.Syntax == meta.SyntaxSVG {
+	if bn.Syntax == meta.ValueSyntaxSVG {
 		lastObj = sx.MakeString(string(bn.Blob))
 	} else {
 		lastObj = getBase64String(bn.Blob)
@@ -294,7 +294,7 @@ func (t *Transformer) getLink(ln *ast.LinkNode) *sx.Pair {
 
 func (t *Transformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
 	tail := t.getInlineList(en.Inlines)
-	if en.Syntax == meta.SyntaxSVG {
+	if en.Syntax == meta.ValueSyntaxSVG {
 		tail = tail.Cons(sx.MakeString(string(en.Blob)))
 	} else {
 		tail = tail.Cons(getBase64String(en.Blob))
@@ -368,7 +368,7 @@ func (t *Transformer) GetMeta(m *meta.Meta) *sx.Pair {
 		symType := mapGetS(mapMetaTypeS, ty)
 		var obj sx.Object
 		if ty.IsSet {
-			setList := p.Value.ListFromValue()
+			setList := p.Value.AsList()
 			setObjs := make(sx.Vector, len(setList))
 			for i, val := range setList {
 				setObjs[i] = sx.MakeString(val)

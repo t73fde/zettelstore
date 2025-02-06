@@ -21,7 +21,6 @@ import (
 	"io"
 	"time"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
@@ -291,11 +290,11 @@ func (err *ErrNotAllowed) Error() string {
 	if err.Zid.IsValid() {
 		return fmt.Sprintf(
 			"operation %q on zettel %v not allowed for user %v/%v",
-			err.Op, err.Zid, err.User.GetDefault(api.KeyUserID, "?"), err.User.Zid)
+			err.Op, err.Zid, err.User.GetDefault(meta.KeyUserID, "?"), err.User.Zid)
 	}
 	return fmt.Sprintf(
 		"operation %q not allowed for user %v/%v",
-		err.Op, err.User.GetDefault(api.KeyUserID, "?"), err.User.Zid)
+		err.Op, err.User.GetDefault(meta.KeyUserID, "?"), err.User.Zid)
 }
 
 // Is return true, if the error is of type ErrNotAllowed.

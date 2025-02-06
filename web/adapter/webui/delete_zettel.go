@@ -17,7 +17,6 @@ import (
 	"net/http"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/maps"
@@ -53,7 +52,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		env, rb := wui.createRenderEnv(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
 		if len(zs) > 1 {
-			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(api.KeyBoxNumber, "???"))))
+			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxNumber, "???"))))
 			rb.bindString("incoming", nil)
 		} else {
 			rb.bindString("shadowed-box", nil)
@@ -62,7 +61,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		wui.bindCommonZettelData(ctx, &rb, user, m, nil)
 
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, api.ZidDeleteTemplate, env)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidDeleteTemplate, env)
 		} else {
 			err = rb.err
 		}
@@ -74,7 +73,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 
 func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *sx.Pair {
 	zidMap := make(strfun.Set)
-	addListValues(zidMap, m, api.KeyBackward)
+	addListValues(zidMap, m, meta.KeyBackward)
 	for _, kd := range meta.GetSortedKeyDescriptions() {
 		inverseKey := kd.Inverse
 		if inverseKey == "" {

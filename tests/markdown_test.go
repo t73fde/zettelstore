@@ -51,7 +51,7 @@ func TestEncoderAvailability(t *testing.T) {
 	t.Parallel()
 	encoderMissing := false
 	for _, enc := range encodings {
-		enc := encoder.Create(enc, &encoder.CreateParameter{Lang: api.ValueLangEN})
+		enc := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
 		if enc == nil {
 			t.Errorf("No encoder for %q found", enc)
 			encoderMissing = true
@@ -81,7 +81,7 @@ func TestMarkdownSpec(t *testing.T) {
 }
 
 func createMDBlockSlice(markdown string, hi config.HTMLInsecurity) ast.BlockSlice {
-	return parser.ParseBlocks(input.NewInput([]byte(markdown)), nil, meta.SyntaxMarkdown, hi)
+	return parser.ParseBlocks(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, hi)
 }
 
 func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
@@ -89,7 +89,7 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 	testID := tc.Example*100 + 1
 	for _, enc := range encodings {
 		t.Run(fmt.Sprintf("Encode %v %v", enc, testID), func(*testing.T) {
-			encoder.Create(enc, &encoder.CreateParameter{Lang: api.ValueLangEN}).WriteBlocks(&sb, ast)
+			encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN}).WriteBlocks(&sb, ast)
 			sb.Reset()
 		})
 	}
@@ -105,7 +105,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// gotFirst := buf.String()
 
 		testID = tc.Example*100 + 2
-		secondAst := parser.ParseBlocks(input.NewInput(buf.Bytes()), nil, meta.SyntaxZmk, config.NoHTML)
+		secondAst := parser.ParseBlocks(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		zmkEncoder.WriteBlocks(&buf, &secondAst)
 		gotSecond := buf.String()
@@ -115,7 +115,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// }
 
 		testID = tc.Example*100 + 3
-		thirdAst := parser.ParseBlocks(input.NewInput(buf.Bytes()), nil, meta.SyntaxZmk, config.NoHTML)
+		thirdAst := parser.ParseBlocks(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		zmkEncoder.WriteBlocks(&buf, &thirdAst)
 		gotThird := buf.String()

@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
@@ -65,7 +64,7 @@ func (wui *WebUI) MakeGetCreateZettelHandler(
 			wui.renderZettelForm(ctx, w, createZettel.PrepareFolge(origZettel), "Folge Zettel", "", roleData, syntaxData)
 		case actionNew:
 			title := parser.NormalizedSpacedText(origZettel.Meta.GetTitle())
-			newTitle := parser.NormalizedSpacedText(q.Get(api.KeyTitle))
+			newTitle := parser.NormalizedSpacedText(q.Get(meta.KeyTitle))
 			wui.renderZettelForm(ctx, w, createZettel.PrepareNew(origZettel, newTitle), title, "", roleData, syntaxData)
 		case actionSequel:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareSequel(origZettel), "Sequel Zettel", "", roleData, syntaxData)
@@ -120,7 +119,7 @@ func (wui *WebUI) renderZettelForm(
 	}
 	wui.bindCommonZettelData(ctx, &rb, user, m, &ztl.Content)
 	if rb.err == nil {
-		rb.err = wui.renderSxnTemplate(ctx, w, api.ZidFormTemplate, env)
+		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidFormTemplate, env)
 	}
 	if err := rb.err; err != nil {
 		wui.reportError(ctx, w, err)
@@ -184,10 +183,10 @@ func (wui *WebUI) MakeGetZettelFromListHandler(
 		}
 
 		m := meta.New(id.Invalid)
-		m.Set(api.KeyTitle, meta.Value(q.Human()))
-		m.Set(api.KeySyntax, api.ValueSyntaxZmk)
+		m.Set(meta.KeyTitle, meta.Value(q.Human()))
+		m.Set(meta.KeySyntax, meta.ValueSyntaxZmk)
 		if qval := q.String(); qval != "" {
-			m.Set(api.KeyQuery, meta.Value(qval))
+			m.Set(meta.KeyQuery, meta.Value(qval))
 		}
 		zettel := zettel.Zettel{Meta: m, Content: zettel.NewContent(zmkContent.Bytes())}
 		roleData, syntaxData := retrieveDataLists(ctx, ucListRoles, ucListSyntax)

@@ -103,8 +103,8 @@ func New(log *logger.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rtC
 		templateCache: make(map[id.Zid]sxeval.Expr, 32),
 
 		tokenLifetime: kernel.Main.GetConfig(kernel.WebService, kernel.WebTokenLifetimeHTML).(time.Duration),
-		cssBaseURL:    ab.NewURLBuilder('z').SetZid(api.ZidBaseCSS).String(),
-		cssUserURL:    ab.NewURLBuilder('z').SetZid(api.ZidUserCSS).String(),
+		cssBaseURL:    ab.NewURLBuilder('z').SetZid(id.ZidBaseCSS).String(),
+		cssUserURL:    ab.NewURLBuilder('z').SetZid(id.ZidUserCSS).String(),
 		homeURL:       ab.NewURLBuilder('/').String(),
 		refreshURL:    ab.NewURLBuilder('g').AppendKVQuery("_c", "r").String(),
 		withAuth:      authz.WithAuth(),
@@ -126,7 +126,7 @@ func (wui *WebUI) getConfig(ctx context.Context, m *meta.Meta, key string) strin
 	return wui.rtConfig.Get(ctx, m, key)
 }
 func (wui *WebUI) getUserLang(ctx context.Context) string {
-	return wui.getConfig(ctx, nil, api.KeyLang)
+	return wui.getConfig(ctx, nil, meta.KeyLang)
 }
 
 var (

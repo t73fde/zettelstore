@@ -24,6 +24,7 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"zettelstore.de/z/ast"
@@ -93,7 +94,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			rb.bindString("heading", sx.MakeString(sb.String()))
 		}
 		rb.bindString("query-value", sx.MakeString(q.String()))
-		if tzl := q.GetMetaValues(api.KeyTags, false); len(tzl) > 0 {
+		if tzl := q.GetMetaValues(meta.KeyTags, false); len(tzl) > 0 {
 			sxTzl, sxNoTzl := wui.transformTagZettelList(ctx, tagZettel, tzl)
 			if !sx.IsNil(sxTzl) {
 				rb.bindString("tag-zettel", sxTzl)
@@ -102,7 +103,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 				rb.bindString("create-tag-zettel", sxNoTzl)
 			}
 		}
-		if rzl := q.GetMetaValues(api.KeyRole, false); len(rzl) > 0 {
+		if rzl := q.GetMetaValues(meta.KeyRole, false); len(rzl) > 0 {
 			sxRzl, sxNoRzl := wui.transformRoleZettelList(ctx, roleZettel, rzl)
 			if !sx.IsNil(sxRzl) {
 				rb.bindString("role-zettel", sxRzl)
@@ -131,7 +132,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			}
 		}
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, api.ZidListTemplate, env)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidListTemplate, env)
 		} else {
 			err = rb.err
 		}
@@ -149,8 +150,8 @@ func (wui *WebUI) transformTagZettelList(ctx context.Context, tagZettel *usecase
 			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyTag, string(tag))
 			withZettel = wui.prependZettelLink(withZettel, string(tag), u)
 		} else {
-			u := wui.NewURLBuilder('c').SetZid(api.ZidTemplateNewTag).AppendKVQuery(
-				queryKeyAction, valueActionNew).AppendKVQuery(api.KeyTitle, string(tag))
+			u := wui.NewURLBuilder('c').SetZid(id.ZidTemplateNewTag).AppendKVQuery(
+				queryKeyAction, valueActionNew).AppendKVQuery(meta.KeyTitle, string(tag))
 			withoutZettel = wui.prependZettelLink(withoutZettel, string(tag), u)
 		}
 	}
@@ -164,8 +165,8 @@ func (wui *WebUI) transformRoleZettelList(ctx context.Context, roleZettel *useca
 			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyRole, string(role))
 			withZettel = wui.prependZettelLink(withZettel, string(role), u)
 		} else {
-			u := wui.NewURLBuilder('c').SetZid(api.ZidTemplateNewRole).AppendKVQuery(
-				queryKeyAction, valueActionNew).AppendKVQuery(api.KeyTitle, string(role))
+			u := wui.NewURLBuilder('c').SetZid(id.ZidTemplateNewRole).AppendKVQuery(
+				queryKeyAction, valueActionNew).AppendKVQuery(meta.KeyTitle, string(role))
 			withoutZettel = wui.prependZettelLink(withoutZettel, string(role), u)
 		}
 	}

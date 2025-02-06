@@ -27,15 +27,15 @@ import (
 
 func init() {
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxTxt,
-		AltNames:      []string{meta.SyntaxPlain, meta.SyntaxText},
+		Name:          meta.ValueSyntaxTxt,
+		AltNames:      []string{meta.ValueSyntaxPlain, meta.ValueSyntaxText},
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		ParseBlocks:   parseBlocks,
 	})
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxHTML,
+		Name:          meta.ValueSyntaxHTML,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,
@@ -43,7 +43,7 @@ func init() {
 		ParseBlocks:   parseBlocksHTML,
 	})
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxCSS,
+		Name:          meta.ValueSyntaxCSS,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,
@@ -51,7 +51,7 @@ func init() {
 		ParseBlocks:   parseBlocks,
 	})
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxSVG,
+		Name:          meta.ValueSyntaxSVG,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,
@@ -59,7 +59,7 @@ func init() {
 		ParseBlocks:   parseSVGBlocks,
 	})
 	parser.Register(&parser.Info{
-		Name:          meta.SyntaxSxn,
+		Name:          meta.ValueSyntaxSxn,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,

@@ -65,7 +65,7 @@ func TestEncoder(t *testing.T) {
 func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 	for testNum, tc := range testCases {
 		inp := input.NewInput([]byte(tc.zmk))
-		bs := parser.ParseBlocks(inp, nil, meta.SyntaxZmk, config.NoHTML)
+		bs := parser.ParseBlocks(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
 		checkEncodings(t, testNum, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, bs, tc.inline, tc.descr)
 	}
@@ -73,7 +73,7 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 
 func checkEncodings(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string, expected expectMap, zmkDefault string) {
 	for enc, exp := range expected {
-		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: api.ValueLangEN})
+		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
 		got, err := encode(encdr, bs, isInline)
 		if err != nil {
 			prefix := fmt.Sprintf("Test #%d", testNum)

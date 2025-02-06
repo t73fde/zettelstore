@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"strings"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"zettelstore.de/z/ast"
@@ -119,10 +118,10 @@ func ParseDescription(m *meta.Meta) ast.InlineSlice {
 	if m == nil {
 		return nil
 	}
-	if summary, found := m.Get(api.KeySummary); found {
+	if summary, found := m.Get(meta.KeySummary); found {
 		return ParseSpacedText(string(summary))
 	}
-	if title, found := m.Get(api.KeyTitle); found {
+	if title, found := m.Get(meta.KeyTitle); found {
 		return ParseSpacedText(string(title))
 	}
 	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title/summary: " + m.Zid.String()}}
@@ -136,10 +135,10 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 		inhMeta = rtConfig.AddDefaultValues(ctx, inhMeta)
 	}
 	if syntax == "" {
-		syntax = string(inhMeta.GetDefault(api.KeySyntax, meta.DefaultSyntax))
+		syntax = string(inhMeta.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 	}
 	parseMeta := inhMeta
-	if syntax == meta.SyntaxNone {
+	if syntax == meta.ValueSyntaxNone {
 		parseMeta = m
 	}
 

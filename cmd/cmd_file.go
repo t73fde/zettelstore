@@ -43,12 +43,12 @@ func cmdFile(fs *flag.FlagSet) (int, error) {
 			Meta:    m,
 			Content: zettel.NewContent(inp.Src[inp.Pos:]),
 		},
-		string(m.GetDefault(api.KeySyntax, meta.DefaultSyntax)),
+		string(m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)),
 		nil,
 	)
 	encdr := encoder.Create(
 		api.Encoder(enc),
-		&encoder.CreateParameter{Lang: string(m.GetDefault(api.KeyLang, api.ValueLangEN))})
+		&encoder.CreateParameter{Lang: string(m.GetDefault(meta.KeyLang, meta.ValueLangEN))})
 	if encdr == nil {
 		fmt.Fprintf(os.Stderr, "Unknown format %q\n", enc)
 		return 2, nil

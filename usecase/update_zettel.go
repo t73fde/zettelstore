@@ -16,7 +16,6 @@ package usecase
 import (
 	"context"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
@@ -56,16 +55,16 @@ func (uc *UpdateZettel) Run(ctx context.Context, zettel zettel.Zettel, hasConten
 	}
 
 	// Update relevant computed, but stored values.
-	if _, found := m.Get(api.KeyCreated); !found {
-		if val, crFound := oldZettel.Meta.Get(api.KeyCreated); crFound {
-			m.Set(api.KeyCreated, val)
+	if _, found := m.Get(meta.KeyCreated); !found {
+		if val, crFound := oldZettel.Meta.Get(meta.KeyCreated); crFound {
+			m.Set(meta.KeyCreated, val)
 		}
 	}
-	m.SetNow(api.KeyModified)
+	m.SetNow(meta.KeyModified)
 
 	m.YamlSep = oldZettel.Meta.YamlSep
-	if m.Zid == api.ZidConfiguration {
-		m.Set(api.KeySyntax, meta.SyntaxNone)
+	if m.Zid == id.ZidConfiguration {
+		m.Set(meta.KeySyntax, meta.ValueSyntaxNone)
 	}
 
 	if !hasContent {

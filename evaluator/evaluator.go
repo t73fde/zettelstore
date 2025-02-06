@@ -25,7 +25,6 @@ import (
 
 	"t73f.de/r/sx/sxbuiltins"
 	"t73f.de/r/sx/sxreader"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -49,10 +48,10 @@ type Port interface {
 // given ports, and the given environment.
 func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *ast.ZettelNode) {
 	switch zn.Syntax {
-	case meta.SyntaxNone:
+	case meta.ValueSyntaxNone:
 		// AST is empty, evaluate to a description list of metadata.
 		zn.Ast = evaluateMetadata(zn.Meta)
-	case meta.SyntaxSxn:
+	case meta.ValueSyntaxSxn:
 		zn.Ast = evaluateSxn(zn.Ast)
 	default:
 		EvaluateBlock(ctx, port, rtConfig, &zn.Ast)
@@ -64,7 +63,7 @@ func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
 	if len(bs) == 1 {
 		// If len(bs) > 1 --> an error was found during parsing
 		if vn, isVerbatim := bs[0].(*ast.VerbatimNode); isVerbatim && vn.Kind == ast.VerbatimProg {
-			if classAttr, hasClass := vn.Attrs.Get(""); hasClass && classAttr == meta.SyntaxSxn {
+			if classAttr, hasClass := vn.Attrs.Get(""); hasClass && classAttr == meta.ValueSyntaxSxn {
 				rd := sxreader.MakeReader(bytes.NewReader(vn.Content))
 				if objs, err := rd.ReadAll(); err == nil {
 					result := make(ast.BlockSlice, len(objs))
@@ -190,7 +189,7 @@ func (e *evaluator) evalVerbatimNode(vn *ast.VerbatimNode) ast.BlockNode {
 	case ast.VerbatimZettel:
 		return e.evalVerbatimZettel(vn)
 	case ast.VerbatimEval:
-		if syntax, found := vn.Attrs.Get(""); found && syntax == meta.SyntaxDraw {
+		if syntax, found := vn.Attrs.Get(""); found && syntax == meta.ValueSyntaxDraw {
 			return draw.ParseDrawBlock(vn)
 		}
 	}
@@ -199,7 +198,7 @@ func (e *evaluator) evalVerbatimNode(vn *ast.VerbatimNode) ast.BlockNode {
 
 func (e *evaluator) evalVerbatimZettel(vn *ast.VerbatimNode) ast.BlockNode {
 	m := meta.New(id.Invalid)
-	m.Set(api.KeySyntax, getSyntax(vn.Attrs, meta.SyntaxText))
+	m.Set(meta.KeySyntax, getSyntax(vn.Attrs, meta.ValueSyntaxText))
 	zettel := zettel.Zettel{
 		Meta:    m,
 		Content: zettel.NewContent(vn.Content),
@@ -211,7 +210,7 @@ func (e *evaluator) evalVerbatimZettel(vn *ast.VerbatimNode) ast.BlockNode {
 
 func getSyntax(a attrs.Attributes, defSyntax meta.Value) meta.Value {
 	if a != nil {
-		if val, ok := a.Get(api.KeySyntax); ok {
+		if val, ok := a.Get(meta.KeySyntax); ok {
 			return meta.Value(val)
 		}
 		if val, ok := a.Get(""); ok {
@@ -439,7 +438,7 @@ func (e *evaluator) evalEmbedRefNode(en *ast.EmbedRefNode) ast.InlineNode {
 		return createInlineErrorImage(en)
 	}
 
-	if syntax := string(zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)); parser.IsImageFormat(syntax) {
+	if syntax := string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)); parser.IsImageFormat(syntax) {
 		e.updateImageRefNode(en, zettel.Meta, syntax)
 		return en
 	} else if !parser.IsASTParser(syntax) {
@@ -505,7 +504,7 @@ func (e *evaluator) updateImageRefNode(en *ast.EmbedRefNode, m *meta.Meta, synta
 }
 
 func createInlineErrorImage(en *ast.EmbedRefNode) *ast.EmbedRefNode {
-	errorZid := api.ZidEmoji
+	errorZid := id.ZidEmoji
 	en.Ref = ast.ParseReference(errorZid.String())
 	if len(en.Inlines) == 0 {
 		en.Inlines = ast.InlineSlice{&ast.TextNode{Text: "Error placeholder"}}
@@ -546,7 +545,7 @@ func createEmbeddedNodeLocal(ref *ast.Reference) *ast.EmbedRefNode {
 }
 
 func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.ZettelNode {
-	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(api.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
+	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
 	ast.Walk(e, &zn.Ast)
 	return zn
 }

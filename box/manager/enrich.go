@@ -17,7 +17,6 @@ import (
 	"context"
 	"strconv"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
@@ -26,14 +25,14 @@ import (
 // Enrich computes additional properties and updates the given metadata.
 func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int) {
 	// Calculate computed, but stored values.
-	if _, hasCreated := m.Get(api.KeyCreated); !hasCreated {
-		m.Set(api.KeyCreated, computeCreated(m.Zid))
+	if _, hasCreated := m.Get(meta.KeyCreated); !hasCreated {
+		m.Set(meta.KeyCreated, computeCreated(m.Zid))
 	}
 
 	if box.DoEnrich(ctx) {
 		computePublished(m)
 		if boxNumber > 0 {
-			m.Set(api.KeyBoxNumber, meta.Value(strconv.Itoa(boxNumber)))
+			m.Set(meta.KeyBoxNumber, meta.Value(strconv.Itoa(boxNumber)))
 		}
 		mgr.idxStore.Enrich(ctx, m)
 	}
@@ -105,24 +104,24 @@ func sanitizeMonthDay(year, month, day id.Zid) (id.Zid, id.Zid) {
 }
 
 func computePublished(m *meta.Meta) {
-	if _, ok := m.Get(api.KeyPublished); ok {
+	if _, ok := m.Get(meta.KeyPublished); ok {
 		return
 	}
-	if modified, ok := m.Get(api.KeyModified); ok {
-		if _, ok = modified.TimeValue(); ok {
-			m.Set(api.KeyPublished, modified)
+	if modified, ok := m.Get(meta.KeyModified); ok {
+		if _, ok = modified.AsTime(); ok {
+			m.Set(meta.KeyPublished, modified)
 			return
 		}
 	}
-	if created, ok := m.Get(api.KeyCreated); ok {
-		if _, ok = created.TimeValue(); ok {
-			m.Set(api.KeyPublished, created)
+	if created, ok := m.Get(meta.KeyCreated); ok {
+		if _, ok = created.AsTime(); ok {
+			m.Set(meta.KeyPublished, created)
 			return
 		}
 	}
 	zidValue := meta.Value(m.Zid.String())
-	if _, ok := zidValue.TimeValue(); ok {
-		m.Set(api.KeyPublished, zidValue)
+	if _, ok := zidValue.AsTime(); ok {
+		m.Set(meta.KeyPublished, zidValue)
 		return
 	}
 

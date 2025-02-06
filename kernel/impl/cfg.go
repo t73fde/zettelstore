@@ -21,7 +21,6 @@ import (
 	"strings"
 	"sync"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
@@ -61,7 +60,7 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		keyDefaultVisibility: {
 			"Default zettel visibility",
 			func(val string) (any, error) {
-				vis := meta.Value(val).GetVisibility()
+				vis := meta.Value(val).AsVisibility()
 				if vis == meta.VisibilityUnknown {
 					return nil, errUnknownVisibility
 				}
@@ -87,7 +86,7 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 			}),
 			true,
 		},
-		api.KeyLang:         {"Language", parseString, true},
+		meta.KeyLang:        {"Language", parseString, true},
 		keyMaxTransclusions: {"Maximum transclusions", parseInt64, true},
 		keySiteName:         {"Site name", parseString, true},
 		keyYAMLHeader:       {"YAML header", parseBool, true},
@@ -110,15 +109,15 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		keyDefaultVisibility:           meta.VisibilityLogin,
 		keyExpertMode:                  false,
 		config.KeyFooterZettel:         id.Invalid,
-		config.KeyHomeZettel:           api.ZidDefaultHome,
+		config.KeyHomeZettel:           id.ZidDefaultHome,
 		kernel.ConfigInsecureHTML:      config.NoHTML,
-		api.KeyLang:                    api.ValueLangEN,
+		meta.KeyLang:                   meta.ValueLangEN,
 		keyMaxTransclusions:            int64(1024),
 		keySiteName:                    "Zettelstore",
 		keyYAMLHeader:                  false,
 		keyZettelFileSyntax:            nil,
 		kernel.ConfigSimpleMode:        false,
-		config.KeyListsMenuZettel:      api.ZidTOCListsMenu,
+		config.KeyListsMenuZettel:      id.ZidTOCListsMenu,
 		config.KeyShowBackLinks:        "",
 		config.KeyShowFolgeLinks:       "",
 		config.KeyShowSequelLinks:      "",
@@ -130,7 +129,7 @@ func (cs *configService) GetLogger() *logger.Logger { return cs.logger }
 
 func (cs *configService) Start(*myKernel) error {
 	cs.logger.Info().Msg("Start Service")
-	data := meta.New(api.ZidConfiguration)
+	data := meta.New(id.ZidConfiguration)
 	for _, kv := range cs.GetNextConfigList() {
 		data.Set(kv.Key, meta.Value(kv.Value))
 	}
@@ -163,11 +162,11 @@ func (cs *configService) setBox(mgr box.Manager) {
 	cs.manager = mgr
 	cs.mxService.Unlock()
 	mgr.RegisterObserver(cs.observe)
-	cs.observe(box.UpdateInfo{Box: mgr, Reason: box.OnZettel, Zid: api.ZidConfiguration})
+	cs.observe(box.UpdateInfo{Box: mgr, Reason: box.OnZettel, Zid: id.ZidConfiguration})
 }
 
 func (cs *configService) doUpdate(p box.BaseBox) error {
-	z, err := p.GetZettel(context.Background(), api.ZidConfiguration)
+	z, err := p.GetZettel(context.Background(), id.ZidConfiguration)
 	cs.logger.Trace().Err(err).Msg("got config meta")
 	if err != nil {
 		return err
@@ -188,7 +187,7 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 }
 
 func (cs *configService) observe(ci box.UpdateInfo) {
-	if (ci.Reason != box.OnZettel && ci.Reason != box.OnDelete) || ci.Zid == api.ZidConfiguration {
+	if (ci.Reason != box.OnZettel && ci.Reason != box.OnDelete) || ci.Zid == id.ZidConfiguration {
 		cs.logger.Debug().Uint("reason", uint64(ci.Reason)).Zid(ci.Zid).Msg("observe")
 		go func() {
 			cs.mxService.RLock()
@@ -225,9 +224,9 @@ func (cs *configService) Get(ctx context.Context, m *meta.Meta, key string) stri
 		return val
 	case bool:
 		if val {
-			return api.ValueTrue
+			return meta.ValueTrue
 		}
-		return api.ValueFalse
+		return meta.ValueFalse
 	case id.Zid:
 		return val.String()
 	case int:
@@ -251,17 +250,17 @@ func (cs *configService) AddDefaultValues(ctx context.Context, m *meta.Meta) *me
 	}
 	result := m
 	cs.mxService.RLock()
-	if _, found := m.Get(api.KeyCopyright); !found {
-		result = updateMeta(result, m, api.KeyCopyright, cs.GetCurConfig(keyDefaultCopyright).(string))
+	if _, found := m.Get(meta.KeyCopyright); !found {
+		result = updateMeta(result, m, meta.KeyCopyright, cs.GetCurConfig(keyDefaultCopyright).(string))
 	}
-	if _, found := m.Get(api.KeyLang); !found {
-		result = updateMeta(result, m, api.KeyLang, cs.Get(ctx, nil, api.KeyLang))
+	if _, found := m.Get(meta.KeyLang); !found {
+		result = updateMeta(result, m, meta.KeyLang, cs.Get(ctx, nil, meta.KeyLang))
 	}
-	if _, found := m.Get(api.KeyLicense); !found {
-		result = updateMeta(result, m, api.KeyLicense, cs.GetCurConfig(keyDefaultLicense).(string))
+	if _, found := m.Get(meta.KeyLicense); !found {
+		result = updateMeta(result, m, meta.KeyLicense, cs.GetCurConfig(keyDefaultLicense).(string))
 	}
-	if _, found := m.Get(api.KeyVisibility); !found {
-		result = updateMeta(result, m, api.KeyVisibility, cs.GetCurConfig(keyDefaultVisibility).(meta.Visibility).String())
+	if _, found := m.Get(meta.KeyVisibility); !found {
+		result = updateMeta(result, m, meta.KeyVisibility, cs.GetCurConfig(keyDefaultVisibility).(meta.Visibility).String())
 	}
 	cs.mxService.RUnlock()
 	return result
@@ -312,8 +311,8 @@ func (cs *configService) GetExpertMode() bool { return cs.GetCurConfig(keyExpert
 
 // GetVisibility returns the visibility value, or "login" if none is given.
 func (cs *configService) GetVisibility(m *meta.Meta) meta.Visibility {
-	if val, ok := m.Get(api.KeyVisibility); ok {
-		if vis := val.GetVisibility(); vis != meta.VisibilityUnknown {
+	if val, ok := m.Get(meta.KeyVisibility); ok {
+		if vis := val.AsVisibility(); vis != meta.VisibilityUnknown {
 			return vis
 		}
 	}
@@ -324,7 +323,7 @@ func (cs *configService) GetVisibility(m *meta.Meta) meta.Visibility {
 	}
 	cs.mxService.RLock()
 	val, _ := cs.orig.Get(keyDefaultVisibility)
-	vis = val.GetVisibility()
+	vis = val.AsVisibility()
 	cs.mxService.RUnlock()
 	return vis
 }

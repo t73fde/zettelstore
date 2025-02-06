@@ -52,15 +52,15 @@ func TestSeekZid(t *testing.T) {
 func TestNewExtIsBetter(t *testing.T) {
 	extVals := []string{
 		// Main Formats
-		meta.SyntaxZmk, meta.SyntaxDraw, meta.SyntaxMarkdown, meta.SyntaxMD,
+		meta.ValueSyntaxZmk, meta.ValueSyntaxDraw, meta.ValueSyntaxMarkdown, meta.ValueSyntaxMD,
 		// Other supported text formats
-		meta.SyntaxCSS, meta.SyntaxSxn, meta.SyntaxTxt, meta.SyntaxHTML,
-		meta.SyntaxText, meta.SyntaxPlain,
+		meta.ValueSyntaxCSS, meta.ValueSyntaxSxn, meta.ValueSyntaxTxt, meta.ValueSyntaxHTML,
+		meta.ValueSyntaxText, meta.ValueSyntaxPlain,
 		// Supported text graphics formats
-		meta.SyntaxSVG,
-		meta.SyntaxNone,
+		meta.ValueSyntaxSVG,
+		meta.ValueSyntaxNone,
 		// Supported binary graphic formats
-		meta.SyntaxGif, meta.SyntaxPNG, meta.SyntaxJPEG, meta.SyntaxWebp, meta.SyntaxJPG,
+		meta.ValueSyntaxGif, meta.ValueSyntaxPNG, meta.ValueSyntaxJPEG, meta.ValueSyntaxWebp, meta.ValueSyntaxJPG,
 
 		// Unsupported syntax values
 		"gz", "cpp", "tar", "cppc",

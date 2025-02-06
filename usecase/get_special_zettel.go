@@ -48,8 +48,8 @@ func NewTagZettel(port GetZettelPort, query *Query) TagZettel {
 func (uc TagZettel) Run(ctx context.Context, tag meta.Value) (zettel.Zettel, error) {
 	tag = tag.NormalizeTag()
 	q := query.Parse(
-		api.KeyTitle + api.SearchOperatorEqual + string(tag) + " " +
-			api.KeyRole + api.SearchOperatorHas + api.ValueRoleTag)
+		meta.KeyTitle + api.SearchOperatorEqual + string(tag) + " " +
+			meta.KeyRole + api.SearchOperatorHas + meta.ValueRoleTag)
 	ml, err := uc.query.Run(ctx, q)
 	if err != nil {
 		return zettel.Zettel{}, err
@@ -92,8 +92,8 @@ func NewRoleZettel(port GetZettelPort, query *Query) RoleZettel {
 // Run executes the use case.
 func (uc RoleZettel) Run(ctx context.Context, role meta.Value) (zettel.Zettel, error) {
 	q := query.Parse(
-		api.KeyTitle + api.SearchOperatorEqual + string(role) + " " +
-			api.KeyRole + api.SearchOperatorHas + api.ValueRoleRole)
+		meta.KeyTitle + api.SearchOperatorEqual + string(role) + " " +
+			meta.KeyRole + api.SearchOperatorHas + meta.ValueRoleRole)
 	ml, err := uc.query.Run(ctx, q)
 	if err != nil {
 		return zettel.Zettel{}, err
