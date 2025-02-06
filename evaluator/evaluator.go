@@ -62,7 +62,7 @@ func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
 	// Check for structure made in parser/plain/plain.go:parseSxnBlocks
 	if len(bs) == 1 {
 		// If len(bs) > 1 --> an error was found during parsing
-		if vn, isVerbatim := bs[0].(*ast.VerbatimNode); isVerbatim && vn.Kind == ast.VerbatimProg {
+		if vn, isVerbatim := bs[0].(*ast.VerbatimNode); isVerbatim && vn.Kind == ast.VerbatimCode {
 			if classAttr, hasClass := vn.Attrs.Get(""); hasClass && classAttr == meta.ValueSyntaxSxn {
 				rd := sxreader.MakeReader(bytes.NewReader(vn.Content))
 				if objs, err := rd.ReadAll(); err == nil {
@@ -71,7 +71,7 @@ func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
 						var buf bytes.Buffer
 						sxbuiltins.Print(&buf, obj)
 						result[i] = &ast.VerbatimNode{
-							Kind:    ast.VerbatimProg,
+							Kind:    ast.VerbatimCode,
 							Attrs:   attrs.Attributes{"": classAttr},
 							Content: buf.Bytes(),
 						}

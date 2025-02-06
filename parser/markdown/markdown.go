@@ -125,7 +125,7 @@ func (*mdP) acceptThematicBreak() *ast.HRuleNode {
 
 func (p *mdP) acceptCodeBlock(node *gmAst.CodeBlock) *ast.VerbatimNode {
 	return &ast.VerbatimNode{
-		Kind:    ast.VerbatimProg,
+		Kind:    ast.VerbatimCode,
 		Attrs:   nil, //TODO
 		Content: p.acceptRawText(node),
 	}
@@ -137,7 +137,7 @@ func (p *mdP) acceptFencedCodeBlock(node *gmAst.FencedCodeBlock) *ast.VerbatimNo
 		a = a.Set("class", "language-"+cleanText(language, true))
 	}
 	return &ast.VerbatimNode{
-		Kind:    ast.VerbatimProg,
+		Kind:    ast.VerbatimCode,
 		Attrs:   a,
 		Content: p.acceptRawText(node),
 	}
@@ -352,7 +352,7 @@ func (p *mdP) acceptCodeSpan(node *gmAst.CodeSpan) ast.InlineSlice {
 
 	return ast.InlineSlice{
 		&ast.LiteralNode{
-			Kind:    ast.LiteralProg,
+			Kind:    ast.LiteralCode,
 			Attrs:   nil, //TODO
 			Content: content,
 		},
@@ -439,7 +439,7 @@ func (p *mdP) acceptRawHTML(node *gmAst.RawHTML) ast.InlineSlice {
 	}
 	return ast.InlineSlice{
 		&ast.LiteralNode{
-			Kind:    ast.LiteralProg,
+			Kind:    ast.LiteralCode,
 			Attrs:   attrs.Attributes{"": "html"},
 			Content: bytes.Join(segs, nil),
 		},

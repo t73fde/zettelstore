@@ -202,7 +202,7 @@ func (cp *zmkP) parseVerbatim() (rn *ast.VerbatimNode, success bool) {
 	case '@':
 		kind = ast.VerbatimZettel
 	case '`', runeModGrave:
-		kind = ast.VerbatimProg
+		kind = ast.VerbatimCode
 	case '%':
 		kind = ast.VerbatimComment
 	case '~':

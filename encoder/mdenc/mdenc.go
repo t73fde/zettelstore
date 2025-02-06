@@ -174,7 +174,7 @@ func (v *visitor) visitBlockSlice(bs *ast.BlockSlice) {
 
 func (v *visitor) visitVerbatim(vn *ast.VerbatimNode) {
 	lc := len(vn.Content)
-	if vn.Kind != ast.VerbatimProg || lc == 0 {
+	if vn.Kind != ast.VerbatimCode || lc == 0 {
 		return
 	}
 	v.writeSpaces(4)
@@ -391,7 +391,7 @@ func (v *visitor) writeQuote(fn *ast.FormatNode) {
 
 func (v *visitor) visitLiteral(ln *ast.LiteralNode) {
 	switch ln.Kind {
-	case ast.LiteralProg, ast.LiteralInput, ast.LiteralOutput:
+	case ast.LiteralCode, ast.LiteralInput, ast.LiteralOutput:
 		v.b.WriteByte('`')
 		v.b.Write(ln.Content)
 		v.b.WriteByte('`')

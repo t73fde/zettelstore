@@ -954,7 +954,7 @@ func (tv *TestVisitor) Visit(node ast.Node) ast.Visitor {
 
 var mapVerbatimKind = map[ast.VerbatimKind]string{
 	ast.VerbatimZettel:  "(ZETTEL",
-	ast.VerbatimProg:    "(PROG",
+	ast.VerbatimCode:    "(PROG",
 	ast.VerbatimEval:    "(EVAL",
 	ast.VerbatimMath:    "(MATH",
 	ast.VerbatimComment: "(COMMENT",
@@ -992,7 +992,7 @@ var mapFormatKind = map[ast.FormatKind]rune{
 }
 
 var mapLiteralKind = map[ast.LiteralKind]rune{
-	ast.LiteralProg:    '`',
+	ast.LiteralCode:    '`',
 	ast.LiteralInput:   '\'',
 	ast.LiteralOutput:  '=',
 	ast.LiteralComment: '%',

@@ -57,8 +57,8 @@ func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 			return sxNode{&ast.BreakNode{Hard: false}}, true
 		case sz.SymHard:
 			return sxNode{&ast.BreakNode{Hard: true}}, true
-		case sz.SymLiteralProg:
-			return handleLiteral(ast.LiteralProg, pair.Tail())
+		case sz.SymLiteralCode:
+			return handleLiteral(ast.LiteralCode, pair.Tail())
 		case sz.SymLiteralComment:
 			return handleLiteral(ast.LiteralComment, pair.Tail())
 		case sz.SymLiteralInput:
@@ -77,8 +77,8 @@ func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 			return handleVerbatim(ast.VerbatimHTML, pair.Tail())
 		case sz.SymVerbatimMath:
 			return handleVerbatim(ast.VerbatimMath, pair.Tail())
-		case sz.SymVerbatimProg:
-			return handleVerbatim(ast.VerbatimProg, pair.Tail())
+		case sz.SymVerbatimCode:
+			return handleVerbatim(ast.VerbatimCode, pair.Tail())
 		case sz.SymVerbatimZettel:
 			return handleVerbatim(ast.VerbatimZettel, pair.Tail())
 		case sz.SymTransclude:

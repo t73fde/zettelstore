@@ -80,7 +80,7 @@ type VerbatimKind int
 const (
 	_               VerbatimKind = iota
 	VerbatimZettel               // Zettel content
-	VerbatimProg                 // Program code
+	VerbatimCode                 // Program code
 	VerbatimEval                 // Code to be externally interpreted. Syntax is stored in default attribute.
 	VerbatimComment              // Block comment
 	VerbatimHTML                 // Block HTML, e.g. for Markdown

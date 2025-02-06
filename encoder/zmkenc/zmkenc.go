@@ -181,7 +181,7 @@ var mapVerbatimKind = map[ast.VerbatimKind]string{
 	ast.VerbatimZettel:  "@@@",
 	ast.VerbatimComment: "%%%",
 	ast.VerbatimHTML:    "@@@", // Attribute is set to {="html"}
-	ast.VerbatimProg:    "```",
+	ast.VerbatimCode:    "```",
 	ast.VerbatimEval:    "~~~",
 	ast.VerbatimMath:    "$$$",
 }
@@ -464,7 +464,7 @@ func (v *visitor) visitFormat(fn *ast.FormatNode) {
 
 func (v *visitor) visitLiteral(ln *ast.LiteralNode) {
 	switch ln.Kind {
-	case ast.LiteralProg:
+	case ast.LiteralCode:
 		v.writeLiteral('`', ln.Attrs, ln.Content)
 	case ast.LiteralMath:
 		v.b.WriteStrings("$$", string(ln.Content), "$$")

@@ -430,8 +430,8 @@ func (cp *zmkP) parseFormat() (res ast.InlineNode, success bool) {
 }
 
 var mapRuneLiteral = map[rune]ast.LiteralKind{
-	'`':          ast.LiteralProg,
-	runeModGrave: ast.LiteralProg,
+	'`':          ast.LiteralCode,
+	runeModGrave: ast.LiteralCode,
 	'\'':         ast.LiteralInput,
 	'=':          ast.LiteralOutput,
 	// No '$': ast.LiteralMath, because paring literal math is a little different

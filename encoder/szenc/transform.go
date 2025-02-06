@@ -119,7 +119,7 @@ func (t *Transformer) GetSz(node ast.Node) *sx.Pair {
 
 var mapVerbatimKindS = map[ast.VerbatimKind]*sx.Symbol{
 	ast.VerbatimZettel:  sz.SymVerbatimZettel,
-	ast.VerbatimProg:    sz.SymVerbatimProg,
+	ast.VerbatimCode:    sz.SymVerbatimCode,
 	ast.VerbatimEval:    sz.SymVerbatimEval,
 	ast.VerbatimMath:    sz.SymVerbatimMath,
 	ast.VerbatimComment: sz.SymVerbatimComment,
@@ -139,7 +139,7 @@ var mapFormatKindS = map[ast.FormatKind]*sx.Symbol{
 }
 
 var mapLiteralKindS = map[ast.LiteralKind]*sx.Symbol{
-	ast.LiteralProg:    sz.SymLiteralProg,
+	ast.LiteralCode:    sz.SymLiteralCode,
 	ast.LiteralInput:   sz.SymLiteralInput,
 	ast.LiteralOutput:  sz.SymLiteralOutput,
 	ast.LiteralComment: sz.SymLiteralComment,

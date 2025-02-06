@@ -69,7 +69,7 @@ func init() {
 }
 
 func parseBlocks(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
-	return doParseBlocks(inp, syntax, ast.VerbatimProg)
+	return doParseBlocks(inp, syntax, ast.VerbatimCode)
 }
 func parseBlocksHTML(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
 	return doParseBlocks(inp, syntax, ast.VerbatimHTML)
@@ -122,7 +122,7 @@ func parseSxnBlocks(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlic
 	_, err := rd.ReadAll()
 	result := ast.BlockSlice{
 		&ast.VerbatimNode{
-			Kind:    ast.VerbatimProg,
+			Kind:    ast.VerbatimCode,
 			Attrs:   attrs.Attributes{"": syntax},
 			Content: inp.ScanLineContent(),
 		},
