@@ -276,10 +276,9 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	rb.bindKeyValue(meta.KeyTags, m.GetDefault(meta.KeyTags, ""))
 	rb.bindKeyValue(meta.KeySyntax, m.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 	var metaPairs sx.ListBuilder
-	for _, p := range m.ComputedPairs() {
-		key, value := p.Key, p.Value
-		metaPairs.Add(sx.Cons(sx.MakeString(key), sx.MakeString(string(value))))
-		rb.bindKeyValue(key, value)
+	for key, val := range m.Computed() {
+		metaPairs.Add(sx.Cons(sx.MakeString(key), sx.MakeString(string(val))))
+		rb.bindKeyValue(key, val)
 	}
 	rb.bindString("metapairs", metaPairs.List())
 }

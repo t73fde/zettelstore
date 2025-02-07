@@ -173,8 +173,7 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 	}
 	m := z.Meta
 	cs.mxService.Lock()
-	for _, pair := range cs.orig.Pairs() {
-		key := pair.Key
+	for key := range cs.orig.All() {
 		if val, ok := m.Get(key); ok {
 			cs.SetConfig(key, string(val))
 		} else if defVal, defFound := cs.orig.Get(key); defFound {

@@ -175,29 +175,29 @@ func mustIndexZettel(m *meta.Meta) bool {
 }
 
 func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *store.ZettelIndex, cData *collectData) {
-	for _, pair := range m.ComputedPairs() {
-		descr := meta.GetDescription(pair.Key)
+	for key, val := range m.Computed() {
+		descr := meta.GetDescription(key)
 		if descr.IsProperty() {
 			continue
 		}
 		switch descr.Type {
 		case meta.TypeID:
-			mgr.idxUpdateValue(ctx, descr.Inverse, string(pair.Value), zi)
+			mgr.idxUpdateValue(ctx, descr.Inverse, string(val), zi)
 		case meta.TypeIDSet:
-			for _, val := range pair.Value.AsList() {
+			for _, val := range val.AsList() {
 				mgr.idxUpdateValue(ctx, descr.Inverse, val, zi)
 			}
 		case meta.TypeURL:
-			if _, err := url.Parse(string(pair.Value)); err == nil {
-				cData.urls.Add(string(pair.Value))
+			if _, err := url.Parse(string(val)); err == nil {
+				cData.urls.Add(string(val))
 			}
 		default:
 			if descr.Type.IsSet {
-				for _, val := range pair.Value.AsList() {
+				for _, val := range val.AsList() {
 					idxCollectMetaValue(cData.words, val)
 				}
 			} else {
-				idxCollectMetaValue(cData.words, string(pair.Value))
+				idxCollectMetaValue(cData.words, string(val))
 			}
 		}
 	}

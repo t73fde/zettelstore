@@ -161,14 +161,14 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	for _, m := range metaSeq {
 		metaZids.Add(m.Zid)
 		refZids.Add(m.Zid)
-		for _, pair := range m.ComputedPairsRest() {
-			switch meta.Type(pair.Key) {
+		for key, val := range m.ComputedRest() {
+			switch meta.Type(key) {
 			case meta.TypeID:
-				if zid, errParse := id.Parse(string(pair.Value)); errParse == nil {
+				if zid, errParse := id.Parse(string(val)); errParse == nil {
 					refZids.Add(zid)
 				}
 			case meta.TypeIDSet:
-				for _, value := range pair.Value.AsList() {
+				for _, value := range val.AsList() {
 					if zid, errParse := id.Parse(value); errParse == nil {
 						refZids.Add(zid)
 					}

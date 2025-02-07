@@ -30,16 +30,18 @@ func genConfigZettelM(zid id.Zid) *meta.Meta {
 
 func genConfigZettelC(context.Context, *compBox) []byte {
 	var buf bytes.Buffer
-	for i, p := range myConfig.Pairs() {
-		if i > 0 {
+	second := false
+	for key, val := range myConfig.All() {
+		if second {
 			buf.WriteByte('\n')
 		}
+		second = true
 		buf.WriteString("; ''")
-		buf.WriteString(p.Key)
+		buf.WriteString(key)
 		buf.WriteString("''")
-		if p.Value != "" {
+		if val != "" {
 			buf.WriteString("\n: ``")
-			for _, r := range p.Value {
+			for _, r := range val {
 				if r == '`' {
 					buf.WriteByte('\\')
 				}

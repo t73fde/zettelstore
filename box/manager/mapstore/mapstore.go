@@ -265,14 +265,14 @@ func addBackwardZids(result *idset.Set, zid id.Zid, zi *zettelData) *idset.Set {
 }
 
 func removeOtherMetaRefs(m *meta.Meta, back *idset.Set) *idset.Set {
-	for _, p := range m.PairsRest() {
-		switch meta.Type(p.Key) {
+	for key, val := range m.Rest() {
+		switch meta.Type(key) {
 		case meta.TypeID:
-			if zid, err := id.Parse(string(p.Value)); err == nil {
+			if zid, err := id.Parse(string(val)); err == nil {
 				back = back.Remove(zid)
 			}
 		case meta.TypeIDSet:
-			for _, val := range p.Value.AsList() {
+			for _, val := range val.AsList() {
 				if zid, err := id.Parse(val); err == nil {
 					back = back.Remove(zid)
 				}
@@ -343,12 +343,12 @@ func (ms *mapStore) internString(s string) string {
 func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 	origM := zidx.GetMeta()
 	copyM := meta.New(origM.Zid)
-	for _, p := range origM.Pairs() {
-		key := ms.internString(p.Key)
+	for key, val := range origM.All() {
+		key = ms.internString(key)
 		if isInternableValue(key) {
-			copyM.Set(key, meta.Value(ms.internString(string(p.Value))))
+			copyM.Set(key, meta.Value(ms.internString(string(val))))
 		} else if key == meta.KeyBoxNumber || !meta.IsComputed(key) {
-			copyM.Set(key, p.Value)
+			copyM.Set(key, val)
 		}
 	}
 	return copyM

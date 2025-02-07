@@ -118,9 +118,9 @@ func (wui *WebUI) identifierSetAsLinks(m *meta.Meta, key string, getTextTitle ge
 
 func metaURLAssoc(m *meta.Meta) *sx.Pair {
 	var result sx.ListBuilder
-	for _, p := range m.PairsRest() {
-		if key := p.Key; strings.HasSuffix(key, meta.SuffixKeyURL) {
-			if val := p.Value; val != "" {
+	for key, val := range m.Rest() {
+		if strings.HasSuffix(key, meta.SuffixKeyURL) {
+			if val != "" {
 				result.Add(sx.Cons(sx.MakeString(capitalizeMetaKey(key)), sx.MakeString(string(val))))
 			}
 		}

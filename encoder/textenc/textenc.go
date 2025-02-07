@@ -48,11 +48,11 @@ func (te *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 // WriteMeta encodes metadata as text.
 func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	buf := encoder.NewEncWriter(w)
-	for _, pair := range m.ComputedPairs() {
-		if meta.Type(pair.Key) == meta.TypeTagSet {
-			writeTagSet(&buf, pair.Value.AsList())
+	for key, val := range m.Computed() {
+		if meta.Type(key) == meta.TypeTagSet {
+			writeTagSet(&buf, val.AsList())
 		} else {
-			buf.WriteString(string(pair.Value))
+			buf.WriteString(string(val))
 		}
 		buf.WriteByte('\n')
 	}

@@ -151,8 +151,8 @@ func getConfig(fs *flag.FlagSet) (string, *meta.Meta) {
 }
 
 func deleteConfiguredBoxes(cfg *meta.Meta) {
-	for _, p := range cfg.PairsRest() {
-		if key := p.Key; strings.HasPrefix(key, kernel.BoxURIs) {
+	for key := range cfg.Rest() {
+		if strings.HasPrefix(key, kernel.BoxURIs) {
 			cfg.Delete(key)
 		}
 	}

@@ -301,9 +301,9 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 // Remove all (computed) properties from metadata before storing the zettel.
 func (mgr *Manager) cleanMetaProperties(m *meta.Meta) *meta.Meta {
 	result := m.Clone()
-	for _, p := range result.ComputedPairsRest() {
-		if mgr.propertyKeys.Has(p.Key) {
-			result.Delete(p.Key)
+	for key := range result.ComputedRest() {
+		if mgr.propertyKeys.Has(key) {
+			result.Delete(key)
 		}
 	}
 	return result

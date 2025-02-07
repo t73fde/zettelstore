@@ -20,9 +20,9 @@ import (
 
 func evaluateMetadata(m *meta.Meta) ast.BlockSlice {
 	descrlist := &ast.DescriptionListNode{}
-	for _, p := range m.Pairs() {
+	for key, val := range m.All() {
 		descrlist.Descriptions = append(
-			descrlist.Descriptions, getMetadataDescription(p.Key, p.Value))
+			descrlist.Descriptions, getMetadataDescription(key, val))
 	}
 	return ast.BlockSlice{descrlist}
 }

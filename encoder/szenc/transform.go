@@ -360,22 +360,20 @@ var mapMetaTypeS = map[*meta.DescriptionType]*sx.Symbol{
 
 // GetMeta transforms the given metadata into a sx list.
 func (t *Transformer) GetMeta(m *meta.Meta) *sx.Pair {
-	pairs := m.ComputedPairs()
-	objs := make(sx.Vector, 0, len(pairs))
-	for _, p := range pairs {
-		key := p.Key
+	objs := sx.Vector{}
+	for key, val := range m.Computed() {
 		ty := m.Type(key)
 		symType := mapGetS(mapMetaTypeS, ty)
 		var obj sx.Object
 		if ty.IsSet {
-			setList := p.Value.AsList()
+			setList := val.AsList()
 			setObjs := make(sx.Vector, len(setList))
 			for i, val := range setList {
 				setObjs[i] = sx.MakeString(val)
 			}
 			obj = sx.MakeList(setObjs...)
 		} else {
-			obj = sx.MakeString(string(p.Value))
+			obj = sx.MakeString(string(val))
 		}
 		objs = append(objs, sx.Nil().Cons(obj).Cons(sx.MakeSymbol(key)).Cons(symType))
 	}

@@ -91,8 +91,8 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		}
 		result = append(result, m)
 
-		for _, p := range m.ComputedPairsRest() {
-			tasks.addPair(ctx, p.Key, p.Value, cost, level, isBackward, isForward)
+		for key, val := range m.ComputedRest() {
+			tasks.addPair(ctx, key, val, cost, level, isBackward, isForward)
 		}
 		if !spec.Full {
 			continue
