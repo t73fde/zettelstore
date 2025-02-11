@@ -15,12 +15,13 @@ package query
 
 import (
 	"io"
+	"maps"
+	"slices"
 	"strconv"
 	"strings"
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id/idslice"
-	"t73f.de/r/zsc/maps"
 )
 
 var op2string = map[compareOp]string{
@@ -62,7 +63,7 @@ func (q *Query) Print(w io.Writer) {
 		if i > 0 {
 			env.writeString(" OR")
 		}
-		for _, name := range maps.Keys(term.keys) {
+		for _, name := range slices.Sorted(maps.Keys(term.keys)) {
 			env.printSpace()
 			env.writeString(name)
 			if op := term.keys[name]; op == cmpExist || op == cmpNotExist {
@@ -71,7 +72,7 @@ func (q *Query) Print(w io.Writer) {
 				env.writeStrings(api.ExistOperator, " ", name, api.ExistNotOperator)
 			}
 		}
-		for _, name := range maps.Keys(term.mvals) {
+		for _, name := range slices.Sorted(maps.Keys(term.mvals)) {
 			env.printExprValues(name, term.mvals[name])
 		}
 		if len(term.search) > 0 {
@@ -171,7 +172,7 @@ func (q *Query) PrintHuman(w io.Writer) {
 			env.writeString(" OR ")
 			env.space = false
 		}
-		for _, name := range maps.Keys(term.keys) {
+		for _, name := range slices.Sorted(maps.Keys(term.keys)) {
 			if env.space {
 				env.writeString(" AND ")
 			}
@@ -186,7 +187,7 @@ func (q *Query) PrintHuman(w io.Writer) {
 			}
 			env.space = true
 		}
-		for _, name := range maps.Keys(term.mvals) {
+		for _, name := range slices.Sorted(maps.Keys(term.mvals)) {
 			if env.space {
 				env.writeString(" AND ")
 			}

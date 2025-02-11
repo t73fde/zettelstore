@@ -15,8 +15,9 @@ package cmd
 
 import (
 	"flag"
+	"maps"
+	"slices"
 
-	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/logger"
 )
 
@@ -66,4 +67,4 @@ func Get(name string) (Command, bool) {
 }
 
 // List returns a sorted list of all registered command names.
-func List() []string { return maps.Keys(commands) }
+func List() []string { return slices.Sorted(maps.Keys(commands)) }

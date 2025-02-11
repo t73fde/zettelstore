@@ -16,13 +16,13 @@ package impl
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 )
@@ -59,7 +59,7 @@ type srvConfig struct {
 func (cfg *srvConfig) ConfigDescriptions() []serviceConfigDescription {
 	cfg.mxConfig.RLock()
 	defer cfg.mxConfig.RUnlock()
-	keys := maps.Keys(cfg.descr)
+	keys := slices.Sorted(maps.Keys(cfg.descr))
 	result := make([]serviceConfigDescription, 0, len(keys))
 	for _, k := range keys {
 		text := cfg.descr[k].text

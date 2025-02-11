@@ -16,13 +16,13 @@ package impl
 import (
 	"fmt"
 	"io"
+	"maps"
 	"os"
 	"runtime/metrics"
 	"slices"
 	"strconv"
 	"strings"
 
-	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
 	"zettelstore.de/z/strfun"
@@ -202,9 +202,8 @@ var commands = map[string]command{
 }
 
 func cmdHelp(sess *cmdSession, _ string, _ []string) bool {
-	cmds := maps.Keys(commands)
 	table := [][]string{{"Command", "Description"}}
-	for _, cmd := range cmds {
+	for _, cmd := range slices.Sorted(maps.Keys(commands)) {
 		table = append(table, []string{cmd, commands[cmd].Text})
 	}
 	sess.printTable(table)
@@ -556,7 +555,9 @@ func cmdEnvironment(sess *cmdSession, _ string, _ []string) bool {
 	return true
 }
 
-func sortedServiceNames(sess *cmdSession) []string { return maps.Keys(sess.kern.srvNames) }
+func sortedServiceNames(sess *cmdSession) []string {
+	return slices.Sorted(maps.Keys(sess.kern.srvNames))
+}
 
 func getService(sess *cmdSession, name string) (serviceData, bool) {
 	srvD, found := sess.kern.srvNames[name]

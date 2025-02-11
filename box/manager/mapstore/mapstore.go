@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"maps"
 	"slices"
 	"strings"
 	"sync"
@@ -26,7 +27,6 @@ import (
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/id/idslice"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/maps"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager/store"
 )
@@ -667,7 +667,7 @@ func dumpStringRefs(w io.Writer, title, preString, postString string, srefs stri
 		return
 	}
 	fmt.Fprintln(w, "====", title)
-	for _, s := range maps.Keys(srefs) {
+	for _, s := range slices.Sorted(maps.Keys(srefs)) {
 		fmt.Fprintf(w, "; %s%s%s\n", preString, s, postString)
 		fmt.Fprintln(w, ":", srefs[s])
 	}
