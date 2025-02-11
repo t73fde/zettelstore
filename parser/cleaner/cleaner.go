@@ -18,9 +18,9 @@ import (
 	"strconv"
 	"strings"
 
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/encoder/textenc"
+	"zettelstore.de/z/strfun"
 )
 
 // CleanBlockSlice cleans the given block list.

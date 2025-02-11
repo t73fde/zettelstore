@@ -18,9 +18,9 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box/manager/store"
+	"zettelstore.de/z/strfun"
 )
 
 type collectData struct {

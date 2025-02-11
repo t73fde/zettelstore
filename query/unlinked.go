@@ -16,7 +16,7 @@ package query
 import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/strfun"
+	"zettelstore.de/z/strfun"
 )
 
 // UnlinkedSpec contains all specification values to calculate unlinked references.

@@ -22,11 +22,11 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager/store"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/parser"
+	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/zettel"
 )
 

@@ -23,7 +23,6 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/collect"
@@ -31,6 +30,7 @@ import (
 	"zettelstore.de/z/evaluator"
 	"zettelstore.de/z/parser"
 	"zettelstore.de/z/query"
+	"zettelstore.de/z/strfun"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/server"
 )
