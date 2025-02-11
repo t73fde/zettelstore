@@ -130,10 +130,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
-=== Sx, SxWebs, Webs, Zettelstore-Client
+=== App, Sx, SxWebs, Webs, Zettelstore-Client
 These are companion projects, written by the main developer of Zettelstore.
 They are published under the same license, [[EUPL v1.2, or later|00000000000004]].
 
+; URL & Source App
+: [[https://t73f.de/r/app]]
 ; URL & Source Sx
 : [[https://t73f.de/r/sx]]
 ; URL & Source SxWebs

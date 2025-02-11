@@ -156,7 +156,7 @@ var constZettelMap = map[id.Zid]constZettel{
 			meta.KeyReadOnly:   meta.ValueTrue,
 			meta.KeyVisibility: meta.ValueVisibilityPublic,
 			meta.KeyCreated:    "20210504135842",
-			meta.KeyModified:   "20240418095500",
+			meta.KeyModified:   "20250211105300",
 		},
 		zettel.NewContent(contentDependencies)},
 	id.ZidBaseTemplate: {

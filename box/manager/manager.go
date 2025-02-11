@@ -21,9 +21,9 @@ import (
 	"sync"
 	"time"
 
+	"t73f.de/r/app/set"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/auth"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager/mapstore"
@@ -93,7 +93,7 @@ type Manager struct {
 	mxObserver   sync.RWMutex
 	done         chan struct{}
 	infos        chan box.UpdateInfo
-	propertyKeys strfun.Set // Set of property key names
+	propertyKeys *set.Set[string] // Set of property key names
 
 	// Indexer data
 	idxLog   *logger.Logger
@@ -125,10 +125,10 @@ func (mgr *Manager) State() box.StartState {
 // New creates a new managing box.
 func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Config) (*Manager, error) {
 	descrs := meta.GetSortedKeyDescriptions()
-	propertyKeys := make(strfun.Set, len(descrs))
+	propertyKeys := set.New[string]()
 	for _, kd := range descrs {
 		if kd.IsProperty() {
-			propertyKeys.Set(kd.Name)
+			propertyKeys.Add(kd.Name)
 		}
 	}
 	boxLog := kernel.Main.GetLogger(kernel.BoxService)

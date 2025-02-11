@@ -19,10 +19,10 @@ import (
 	"io"
 	"strings"
 
+	"t73f.de/r/app/set"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/encoder"
 	"zettelstore.de/z/encoder/textenc"
@@ -350,7 +350,7 @@ func (v *visitor) visitBLOB(bn *ast.BLOBNode) {
 	v.b.WriteStrings("%% Unable to display BLOB with description '", sb.String(), "' and syntax '", bn.Syntax, "'.")
 }
 
-var escapeSeqs = strfun.NewSet(
+var escapeSeqs = set.New(
 	"\\", "__", "**", "~~", "^^", ",,", ">>", `""`, "::", "''", "``", "++", "==", "##",
 )
 
@@ -365,7 +365,7 @@ func (v *visitor) visitText(tn *ast.TextNode) {
 		}
 		if i < len(tn.Text)-1 {
 			s := tn.Text[i : i+2]
-			if escapeSeqs.Has(s) {
+			if escapeSeqs.Contains(s) {
 				v.b.WriteString(tn.Text[last:i])
 				for j := range len(s) {
 					v.b.WriteBytes('\\', s[j])

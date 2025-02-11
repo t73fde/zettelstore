@@ -302,7 +302,7 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 func (mgr *Manager) cleanMetaProperties(m *meta.Meta) *meta.Meta {
 	result := m.Clone()
 	for key := range result.ComputedRest() {
-		if mgr.propertyKeys.Has(key) {
+		if mgr.propertyKeys.Contains(key) {
 			result.Delete(key)
 		}
 	}

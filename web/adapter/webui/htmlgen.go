@@ -19,6 +19,7 @@ import (
 	"slices"
 	"strings"
 
+	"t73f.de/r/app/set"
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
@@ -26,7 +27,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
-	"t73f.de/r/zsc/strfun"
 	"t73f.de/r/zsc/sz"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/encoder/szenc"
@@ -208,11 +208,11 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 		return nil
 	}
 
-	ignore := strfun.NewSet(meta.KeyTitle, meta.KeyLang)
+	ignore := set.New(meta.KeyTitle, meta.KeyLang)
 	metaMap := make(map[string]*sx.Pair, m.Length())
 	if tags, ok := m.Get(meta.KeyTags); ok {
 		metaMap[meta.KeyTags] = g.transformMetaTags(tags)
-		ignore.Set(meta.KeyTags)
+		ignore.Add(meta.KeyTags)
 	}
 
 	for elem := hm; elem != nil; elem = elem.Tail() {
@@ -239,7 +239,7 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 			}
 		}
 		name, found := a.Get("name")
-		if !found || ignore.Has(name) {
+		if !found || ignore.Contains(name) {
 			continue
 		}
 

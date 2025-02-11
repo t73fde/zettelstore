@@ -15,12 +15,12 @@ package webui
 
 import (
 	"net/http"
+	"slices"
 
+	"t73f.de/r/app/set"
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/maps"
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/usecase"
 	"zettelstore.de/z/web/server"
@@ -72,7 +72,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 }
 
 func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *sx.Pair {
-	zidMap := make(strfun.Set)
+	zidMap := set.New[string]()
 	addListValues(zidMap, m, meta.KeyBackward)
 	for _, kd := range meta.GetSortedKeyDescriptions() {
 		inverseKey := kd.Inverse
@@ -83,19 +83,19 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *s
 		switch ikd.Type {
 		case meta.TypeID:
 			if val, ok := m.Get(inverseKey); ok {
-				zidMap.Set(string(val))
+				zidMap.Add(string(val))
 			}
 		case meta.TypeIDSet:
 			addListValues(zidMap, m, inverseKey)
 		}
 	}
-	return wui.zidLinksSxn(maps.Keys(zidMap), getTextTitle)
+	return wui.zidLinksSxn(slices.Sorted(zidMap.Values()), getTextTitle)
 }
 
-func addListValues(zidMap strfun.Set, m *meta.Meta, key string) {
+func addListValues(zidMap *set.Set[string], m *meta.Meta, key string) {
 	if values, ok := m.GetList(key); ok {
 		for _, val := range values {
-			zidMap.Set(val)
+			zidMap.Add(val)
 		}
 	}
 }

@@ -20,9 +20,9 @@ import (
 	"regexp"
 	"sync"
 
+	"t73f.de/r/app/set"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idslice"
-	"t73f.de/r/zsc/strfun"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
@@ -528,21 +528,21 @@ func newNameIsBetter(oldName, newName string) bool {
 	return oldName > newName
 }
 
-var supportedSyntax, primarySyntax strfun.Set
+var supportedSyntax, primarySyntax *set.Set[string]
 
 func init() {
 	syntaxList := parser.GetSyntaxes()
-	supportedSyntax = strfun.NewSet(syntaxList...)
-	primarySyntax = make(map[string]struct{}, len(syntaxList))
+	supportedSyntax = set.New(syntaxList...)
+	primarySyntax = set.New[string]()
 	for _, syntax := range syntaxList {
 		if parser.Get(syntax).Name == syntax {
-			primarySyntax.Set(syntax)
+			primarySyntax.Add(syntax)
 		}
 	}
 }
 func newExtIsBetter(oldExt, newExt string) bool {
-	oldSyntax := supportedSyntax.Has(oldExt)
-	if oldSyntax != supportedSyntax.Has(newExt) {
+	oldSyntax := supportedSyntax.Contains(oldExt)
+	if oldSyntax != supportedSyntax.Contains(newExt) {
 		return !oldSyntax
 	}
 	if oldSyntax {
@@ -563,7 +563,7 @@ func newExtIsBetter(oldExt, newExt string) bool {
 		if oldImageFormat := oldInfo.IsImageFormat; oldImageFormat != newInfo.IsImageFormat {
 			return oldImageFormat
 		}
-		if oldPrimary := primarySyntax.Has(oldExt); oldPrimary != primarySyntax.Has(newExt) {
+		if oldPrimary := primarySyntax.Contains(oldExt); oldPrimary != primarySyntax.Contains(newExt) {
 			return !oldPrimary
 		}
 	}

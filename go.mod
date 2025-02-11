@@ -7,9 +7,10 @@ require (
 	github.com/yuin/goldmark v1.7.8
 	golang.org/x/crypto v0.32.0
 	golang.org/x/term v0.28.0
+	t73f.de/r/app v0.0.0-20250211101311-8c260ae72b76
 	t73f.de/r/sx v0.0.0-20240814083626-4df0ec6454b5
 	t73f.de/r/sxwebs v0.0.0-20241031144449-53c3b2ed1a6f
-	t73f.de/r/zsc v0.0.0-20250207155158-e7e8aa300cc1
+	t73f.de/r/zsc v0.0.0-20250211101446-b42217cdded0
 )
 
 require (
