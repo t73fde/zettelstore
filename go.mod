@@ -1,6 +1,6 @@
 module zettelstore.de/z
 
-go 1.23
+go 1.24
 
 require (
 	github.com/fsnotify/fsnotify v1.8.0
@@ -8,13 +8,13 @@ require (
 	golang.org/x/crypto v0.33.0
 	golang.org/x/term v0.29.0
 	golang.org/x/text v0.22.0
-	t73f.de/r/app v0.0.0-20250211101311-8c260ae72b76
-	t73f.de/r/sx v0.0.0-20240814083626-4df0ec6454b5
-	t73f.de/r/sxwebs v0.0.0-20241031144449-53c3b2ed1a6f
-	t73f.de/r/zsc v0.0.0-20250211120602-3eb36c701784
+	t73f.de/r/sx v0.0.0-20250212190351-f6694aacfb8b
+	t73f.de/r/sxwebs v0.0.0-20250212190616-2b5ef50a2b43
+	t73f.de/r/zero v0.0.0-20250212175659-d84175bc23d7
+	t73f.de/r/zsc v0.0.0-20250212191845-6878d8109a7e
 )
 
 require (
 	golang.org/x/sys v0.30.0 // indirect
-	t73f.de/r/webs v0.0.0-20250105160757-b6b002b44f34 // indirect
+	t73f.de/r/webs v0.0.0-20250212190304-df32612d2cdd // indirect
 )

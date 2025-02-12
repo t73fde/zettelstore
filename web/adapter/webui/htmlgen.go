@@ -19,9 +19,9 @@ import (
 	"slices"
 	"strings"
 
-	"t73f.de/r/app/set"
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
+	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/id"

@@ -20,7 +20,7 @@ import (
 	"regexp"
 	"sync"
 
-	"t73f.de/r/app/set"
+	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idslice"
 	"zettelstore.de/z/box"

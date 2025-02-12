@@ -21,7 +21,7 @@ import (
 	"sync"
 	"time"
 
-	"t73f.de/r/app/set"
+	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/auth"
