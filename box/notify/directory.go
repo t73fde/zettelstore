@@ -22,7 +22,6 @@ import (
 
 	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idslice"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/kernel"
 	"zettelstore.de/z/logger"
@@ -277,15 +276,15 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 	return newEntries, true
 }
 
-func getNewZids(entries entrySet) idslice.Slice {
-	zids := make(idslice.Slice, 0, len(entries))
+func getNewZids(entries entrySet) []id.Zid {
+	zids := make([]id.Zid, 0, len(entries))
 	for zid := range entries {
 		zids = append(zids, zid)
 	}
 	return zids
 }
 
-func (ds *DirService) onCreateDirectory(zids idslice.Slice, prevEntries entrySet) {
+func (ds *DirService) onCreateDirectory(zids []id.Zid, prevEntries entrySet) {
 	for _, zid := range zids {
 		ds.notifyChange(zid, box.OnZettel)
 		delete(prevEntries, zid)

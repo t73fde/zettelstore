@@ -25,7 +25,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
-	"t73f.de/r/zsc/domain/id/idslice"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/box"
 	"zettelstore.de/z/box/manager/store"
@@ -595,11 +594,11 @@ func (ms *mapStore) dumpIndex(w io.Writer) {
 		return
 	}
 	io.WriteString(w, "==== Zettel Index\n")
-	zids := make(idslice.Slice, 0, len(ms.idx))
+	zids := make([]id.Zid, 0, len(ms.idx))
 	for id := range ms.idx {
 		zids = append(zids, id)
 	}
-	zids.Sort()
+	slices.Sort(zids)
 	for _, id := range zids {
 		fmt.Fprintln(w, "=====", id)
 		zi := ms.idx[id]
@@ -629,11 +628,11 @@ func (ms *mapStore) dumpDead(w io.Writer) {
 		return
 	}
 	fmt.Fprintf(w, "==== Dead References\n")
-	zids := make(idslice.Slice, 0, len(ms.dead))
+	zids := make([]id.Zid, 0, len(ms.dead))
 	for id := range ms.dead {
 		zids = append(zids, id)
 	}
-	zids.Sort()
+	slices.Sort(zids)
 	for _, id := range zids {
 		fmt.Fprintln(w, ";", id)
 		fmt.Fprintln(w, ":", ms.dead[id])

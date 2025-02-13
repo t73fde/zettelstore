@@ -21,7 +21,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
-	"t73f.de/r/zsc/domain/id/idslice"
 	"t73f.de/r/zsc/domain/meta"
 )
 
@@ -47,7 +46,7 @@ type Searcher interface {
 // Query specifies a mechanism for querying zettel.
 type Query struct {
 	// Präfixed zettel identifier.
-	zids idslice.Slice
+	zids []id.Zid
 
 	// Querydirectives, like CONTEXT, ...
 	directives []Directive
@@ -71,11 +70,11 @@ type Query struct {
 }
 
 // GetZids returns a slide of all specified zettel identifier.
-func (q *Query) GetZids() idslice.Slice {
+func (q *Query) GetZids() []id.Zid {
 	if q == nil || len(q.zids) == 0 {
 		return nil
 	}
-	return q.zids.Clone()
+	return slices.Clone(q.zids)
 }
 
 // Directive are executed to process the list of metadata.
@@ -142,7 +141,7 @@ func (q *Query) Clone() *Query {
 		return nil
 	}
 	c := new(Query)
-	c.zids = q.zids.Clone()
+	c.zids = q.GetZids()
 	c.directives = q.GetDirectives()
 
 	c.preMatch = q.preMatch

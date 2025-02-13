@@ -21,7 +21,7 @@ import (
 	"strings"
 
 	"t73f.de/r/zsc/api"
-	"t73f.de/r/zsc/domain/id/idslice"
+	"t73f.de/r/zsc/domain/id"
 )
 
 var op2string = map[compareOp]string{
@@ -109,7 +109,7 @@ func (pe *PrintEnv) writeStrings(sSeq ...string) {
 	}
 }
 
-func (pe *PrintEnv) printZids(zids idslice.Slice) {
+func (pe *PrintEnv) printZids(zids []id.Zid) {
 	for i, zid := range zids {
 		if i > 0 {
 			pe.printSpace()

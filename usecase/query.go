@@ -21,7 +21,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
-	"t73f.de/r/zsc/domain/id/idslice"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/ast"
 	"zettelstore.de/z/box"
@@ -72,7 +71,7 @@ func (uc *Query) Run(ctx context.Context, q *query.Query) ([]*meta.Meta, error) 
 	return nil, nil
 }
 
-func (uc *Query) getMetaZid(ctx context.Context, zids idslice.Slice) ([]*meta.Meta, error) {
+func (uc *Query) getMetaZid(ctx context.Context, zids []id.Zid) ([]*meta.Meta, error) {
 	metaSeq := make([]*meta.Meta, 0, len(zids))
 	for _, zid := range zids {
 		m, err := uc.port.GetMeta(ctx, zid)
