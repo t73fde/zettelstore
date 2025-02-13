@@ -57,7 +57,7 @@ func parseZettelForm(r *http.Request, zid id.Zid) (bool, zettel.Zettel, error) {
 		m.Set(meta.KeyTitle, meta.Value(meta.RemoveNonGraphic(postTitle)))
 	}
 	if postTags, ok := trimmedFormValue(r, "tags"); ok {
-		if tags := meta.Value(meta.RemoveNonGraphic(postTags)).AsList(); len(tags) > 0 {
+		if tags := meta.Value(meta.RemoveNonGraphic(postTags)).AsSlice(); len(tags) > 0 {
 			for i, tag := range tags {
 				tags[i] = string(meta.Value(tag).NormalizeTag())
 			}

@@ -16,7 +16,9 @@ package query
 import (
 	"container/heap"
 	"context"
+	"iter"
 	"math"
+	"slices"
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
@@ -97,9 +99,7 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		if !spec.Full {
 			continue
 		}
-		if tags, found := m.GetList(meta.KeyTags); found {
-			tasks.addTags(ctx, tags, cost, level)
-		}
+		tasks.addTags(ctx, m.GetFields(meta.KeyTags), cost, level)
 	}
 	return result
 }
@@ -241,7 +241,7 @@ func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint) {
 }
 
 func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, value meta.Value) {
-	elems := value.AsList()
+	elems := value.AsSlice()
 	refCost := referenceCost(newCost, len(elems))
 	for _, val := range elems {
 		ct.addID(ctx, refCost, level, meta.Value(val))
@@ -253,7 +253,8 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 	return nRefs*math.Log2(nRefs+1) + baseCost - 1
 }
 
-func (ct *contextTask) addTags(ctx context.Context, tags []string, baseCost float64, level uint) {
+func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint) {
+	tags := slices.Collect(tagiter)
 	var zidSet *idset.Set
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)

@@ -16,6 +16,7 @@ package webui
 import (
 	"context"
 	"errors"
+	"iter"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
@@ -40,13 +41,13 @@ func (wui *WebUI) writeHTMLMetaValue(
 	case meta.TypeID:
 		return wui.transformIdentifier(value, getTextTitle)
 	case meta.TypeIDSet:
-		return wui.transformIdentifierSet(value.AsList(), getTextTitle)
+		return wui.transformIdentifierSet(value.Fields(), getTextTitle)
 	case meta.TypeNumber:
 		return wui.transformKeyValueText(key, value, string(value))
 	case meta.TypeString:
 		return sx.MakeString(string(value))
 	case meta.TypeTagSet:
-		return wui.transformTagSet(key, value.AsList())
+		return wui.transformTagSet(key, value.AsSlice())
 	case meta.TypeTimestamp:
 		if ts, ok := value.AsTime(); ok {
 			return sx.MakeList(
@@ -91,31 +92,39 @@ func (wui *WebUI) transformIdentifier(val meta.Value, getTextTitle getTextTitleF
 	}
 }
 
-func (wui *WebUI) transformIdentifierSet(vals []string, getTextTitle getTextTitleFunc) *sx.Pair {
-	if len(vals) == 0 {
-		return nil
+var space = sx.MakeString(" ")
+
+func (wui *WebUI) transformIdentifierSet(vals iter.Seq[string], getTextTitle getTextTitleFunc) *sx.Pair {
+	var lb sx.ListBuilder
+	lb.Add(shtml.SymSPAN)
+	hadValue := false
+	for val := range vals {
+		if hadValue {
+			lb.Add(space)
+		}
+		hadValue = true
+		lb.Add(wui.transformIdentifier(meta.Value(val), getTextTitle))
 	}
-	var space = sx.MakeString(" ")
-	text := make(sx.Vector, 0, 2*len(vals))
-	for _, val := range vals {
-		text = append(text, space, wui.transformIdentifier(meta.Value(val), getTextTitle))
+	if hadValue {
+		return lb.List()
 	}
-	return sx.MakeList(text[1:]...).Cons(shtml.SymSPAN)
+	return nil
 }
 
 func (wui *WebUI) transformTagSet(key string, tags []string) *sx.Pair {
-	if len(tags) == 0 {
-		return nil
-	}
-	var space = sx.MakeString(" ")
-	text := make(sx.Vector, 0, 2*len(tags)+2)
-	for _, tag := range tags {
-		text = append(text, space, wui.transformKeyValueText(key, meta.Value(tag), tag))
+	var lb sx.ListBuilder
+	lb.Add(shtml.SymSPAN)
+	for i, tag := range tags {
+		if i > 0 {
+			lb.Add(space)
+		}
+		lb.Add(wui.transformKeyValueText(key, meta.Value(tag), tag))
 	}
 	if len(tags) > 1 {
-		text = append(text, space, wui.transformKeyValuesText(key, tags, "(all)"))
+		lb.Add(space)
+		lb.Add(wui.transformKeyValuesText(key, tags, "(all)"))
 	}
-	return sx.MakeList(text[1:]...).Cons(shtml.SymSPAN)
+	return lb.List()
 }
 
 func (wui *WebUI) transformKeyValueText(key string, value meta.Value, text string) *sx.Pair {

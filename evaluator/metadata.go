@@ -38,7 +38,7 @@ func getMetadataDescription(key string, value meta.Value) ast.Description {
 func convertMetavalueToInlineSlice(value meta.Value, dt *meta.DescriptionType) ast.InlineSlice {
 	var sliceData []string
 	if dt.IsSet {
-		sliceData = value.AsList()
+		sliceData = value.AsSlice()
 		if len(sliceData) == 0 {
 			return nil
 		}

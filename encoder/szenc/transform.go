@@ -366,7 +366,7 @@ func (t *Transformer) GetMeta(m *meta.Meta) *sx.Pair {
 		symType := mapGetS(mapMetaTypeS, ty)
 		var obj sx.Object
 		if ty.IsSet {
-			setList := val.AsList()
+			setList := val.AsSlice()
 			setObjs := make(sx.Vector, len(setList))
 			for i, val := range setList {
 				setObjs[i] = sx.MakeString(val)

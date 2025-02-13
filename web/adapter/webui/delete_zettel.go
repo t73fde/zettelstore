@@ -93,10 +93,8 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *s
 }
 
 func addListValues(zidMap *set.Set[string], m *meta.Meta, key string) {
-	if values, ok := m.GetList(key); ok {
-		for _, val := range values {
-			zidMap.Add(val)
-		}
+	for val := range m.GetFields(key) {
+		zidMap.Add(val)
 	}
 }
 

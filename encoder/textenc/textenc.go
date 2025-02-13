@@ -16,6 +16,7 @@ package textenc
 
 import (
 	"io"
+	"iter"
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
@@ -50,7 +51,7 @@ func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	buf := encoder.NewEncWriter(w)
 	for key, val := range m.Computed() {
 		if meta.Type(key) == meta.TypeTagSet {
-			writeTagSet(&buf, val.AsList())
+			writeTagSet(&buf, val.Elems())
 		} else {
 			buf.WriteString(string(val))
 		}
@@ -60,12 +61,14 @@ func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	return length, err
 }
 
-func writeTagSet(buf *encoder.EncWriter, tags []string) {
-	for i, tag := range tags {
-		if i > 0 {
+func writeTagSet(buf *encoder.EncWriter, tags iter.Seq[meta.Value]) {
+	first := true
+	for tag := range tags {
+		if !first {
 			buf.WriteByte(' ')
 		}
-		buf.WriteString(string(meta.Value(tag).CleanTag()))
+		first = false
+		buf.WriteString(string(tag.CleanTag()))
 	}
 
 }

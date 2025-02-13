@@ -184,7 +184,7 @@ func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *st
 		case meta.TypeID:
 			mgr.idxUpdateValue(ctx, descr.Inverse, string(val), zi)
 		case meta.TypeIDSet:
-			for _, val := range val.AsList() {
+			for val := range val.Fields() {
 				mgr.idxUpdateValue(ctx, descr.Inverse, val, zi)
 			}
 		case meta.TypeURL:
@@ -193,7 +193,7 @@ func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *st
 			}
 		default:
 			if descr.Type.IsSet {
-				for _, val := range val.AsList() {
+				for val := range val.Fields() {
 					idxCollectMetaValue(cData.words, val)
 				}
 			} else {

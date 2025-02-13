@@ -225,7 +225,7 @@ func (rb *renderBinder) bindSymbol(sym *sx.Symbol, obj sx.Object) {
 func (rb *renderBinder) bindKeyValue(key string, value meta.Value) {
 	rb.bindString("meta-"+key, sx.MakeString(string(value)))
 	if kt := meta.Type(key); kt.IsSet {
-		rb.bindString("set-meta-"+key, makeStringList(value.AsList()))
+		rb.bindString("set-meta-"+key, makeStringList(value.AsSlice()))
 	}
 }
 func (rb *renderBinder) rebindResolved(key, defKey string) {

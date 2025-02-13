@@ -10,8 +10,8 @@ require (
 	golang.org/x/text v0.22.0
 	t73f.de/r/sx v0.0.0-20250212190351-f6694aacfb8b
 	t73f.de/r/sxwebs v0.0.0-20250212190616-2b5ef50a2b43
-	t73f.de/r/zero v0.0.0-20250212175659-d84175bc23d7
-	t73f.de/r/zsc v0.0.0-20250212191845-6878d8109a7e
+	t73f.de/r/zero v0.0.0-20250213090129-255dd458b5c7
+	t73f.de/r/zsc v0.0.0-20250213090510-39d0d0b9f058
 )
 
 require (

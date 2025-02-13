@@ -168,8 +168,8 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 					refZids.Add(zid)
 				}
 			case meta.TypeIDSet:
-				for _, value := range val.AsList() {
-					if zid, errParse := id.Parse(value); errParse == nil {
+				for val := range val.Fields() {
+					if zid, errParse := id.Parse(val); errParse == nil {
 						refZids.Add(zid)
 					}
 				}

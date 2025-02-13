@@ -259,11 +259,13 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 
 func (g *htmlGenerator) transformMetaTags(tags meta.Value) *sx.Pair {
 	var sb strings.Builder
-	for i, val := range tags.AsList() {
-		if i > 0 {
+	first := true
+	for val := range tags.Elems() {
+		if !first {
 			sb.WriteString(", ")
 		}
-		sb.WriteString(strings.TrimPrefix(val, "#"))
+		first = false
+		sb.WriteString(string(val.CleanTag()))
 	}
 	metaTags := sb.String()
 	if len(metaTags) == 0 {

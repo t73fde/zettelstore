@@ -272,7 +272,7 @@ func removeOtherMetaRefs(m *meta.Meta, back *idset.Set) *idset.Set {
 				back = back.Remove(zid)
 			}
 		case meta.TypeIDSet:
-			for _, val := range val.AsList() {
+			for val := range val.Fields() {
 				if zid, err := id.Parse(val); err == nil {
 					back = back.Remove(zid)
 				}

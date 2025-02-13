@@ -16,6 +16,7 @@ package webui
 import (
 	"context"
 	"net/http"
+	"slices"
 	"strings"
 
 	"t73f.de/r/sx"
@@ -79,7 +80,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(
 					meta.KeyRole+api.SearchOperatorHas+string(folgeRole)).String()))
 		}
-		rb.bindString("tag-refs", wui.transformTagSet(meta.KeyTags, zn.InhMeta.GetDefault(meta.KeyTags, "").AsList()))
+		rb.bindString("tag-refs", wui.transformTagSet(meta.KeyTags, zn.InhMeta.GetDefault(meta.KeyTags, "").AsSlice()))
 		rb.bindString("predecessor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPredecessor, getTextTitle))
 		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrecursor, getTextTitle))
 		rb.bindString("prequel-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrequel, getTextTitle))
@@ -110,10 +111,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 }
 
 func (wui *WebUI) identifierSetAsLinks(m *meta.Meta, key string, getTextTitle getTextTitleFunc) *sx.Pair {
-	if values, ok := m.GetList(key); ok {
-		return wui.transformIdentifierSet(values, getTextTitle)
-	}
-	return nil
+	return wui.transformIdentifierSet(m.GetFields(key), getTextTitle)
 }
 
 func metaURLAssoc(m *meta.Meta) *sx.Pair {
@@ -148,11 +146,10 @@ func (wui *WebUI) bindLinks(ctx context.Context, rb *renderBinder, varPrefix str
 }
 
 func (wui *WebUI) zettelLinksSxn(m *meta.Meta, key string, getTextTitle getTextTitleFunc) *sx.Pair {
-	values, ok := m.GetList(key)
-	if !ok || len(values) == 0 {
-		return nil
+	if values := slices.Collect(m.GetFields(key)); len(values) > 0 {
+		return wui.zidLinksSxn(values, getTextTitle)
 	}
-	return wui.zidLinksSxn(values, getTextTitle)
+	return nil
 }
 
 func (wui *WebUI) zidLinksSxn(values []string, getTextTitle getTextTitleFunc) *sx.Pair {

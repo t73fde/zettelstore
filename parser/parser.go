@@ -106,7 +106,7 @@ func ParseBlocks(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLIn
 // No Zettelmarkup parsing is done. It is typically used to transform the zettel
 // description into an inline slice.
 func ParseSpacedText(s string) ast.InlineSlice {
-	return ast.InlineSlice{&ast.TextNode{Text: strings.Join(strings.Fields(s), " ")}}
+	return ast.InlineSlice{&ast.TextNode{Text: NormalizedSpacedText(s)}}
 }
 
 // NormalizedSpacedText returns the given string, but normalize multiple spaces to one space.

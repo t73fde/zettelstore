@@ -139,7 +139,7 @@ func createMatchIDFunc(values []expValue, addSearch addSearchFunc) matchValueFun
 func createMatchIDSetFunc(values []expValue, addSearch addSearchFunc) matchValueFunc {
 	predList := valuesToSetPredicates(preprocessSet(values), addSearch)
 	return func(value meta.Value) bool {
-		ids := value.AsList()
+		ids := value.AsSlice()
 		for _, preds := range predList {
 			for _, pred := range preds {
 				if !pred(ids) {
