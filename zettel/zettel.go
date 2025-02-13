@@ -22,9 +22,9 @@ type Zettel struct {
 	Content Content    // The content of the zettel itself.
 }
 
-// Length returns the number of bytes to store the zettel (in a zettel view,
+// ByteSize returns the number of bytes to store the zettel (in a zettel view,
 // not in a technical view).
-func (z Zettel) Length() int { return z.Meta.Length() + z.Content.Length() }
+func (z Zettel) ByteSize() int { return z.Meta.ByteSize() + z.Content.Length() }
 
 // Equal compares two zettel for equality.
 func (z Zettel) Equal(o Zettel, allowComputed bool) bool {

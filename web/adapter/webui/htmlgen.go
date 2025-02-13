@@ -209,7 +209,7 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 	}
 
 	ignore := set.New(meta.KeyTitle, meta.KeyLang)
-	metaMap := make(map[string]*sx.Pair, m.Length())
+	metaMap := make(map[string]*sx.Pair, 32)
 	if tags, ok := m.Get(meta.KeyTags); ok {
 		metaMap[meta.KeyTags] = g.transformMetaTags(tags)
 		ignore.Add(meta.KeyTags)

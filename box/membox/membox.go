@@ -96,7 +96,7 @@ func (mb *memBox) CanCreateZettel(context.Context) bool {
 
 func (mb *memBox) CreateZettel(_ context.Context, zettel zettel.Zettel) (id.Zid, error) {
 	mb.mx.Lock()
-	newBytes := mb.curBytes + zettel.Length()
+	newBytes := mb.curBytes + zettel.ByteSize()
 	if mb.maxZettel < len(mb.zettel) || mb.maxBytes < newBytes {
 		mb.mx.Unlock()
 		return id.Invalid, box.ErrCapacity
@@ -174,9 +174,9 @@ func (mb *memBox) CanUpdateZettel(_ context.Context, zettel zettel.Zettel) bool 
 		return false
 	}
 
-	newBytes := mb.curBytes + zettel.Length()
+	newBytes := mb.curBytes + zettel.ByteSize()
 	if prevZettel, found := mb.zettel[zid]; found {
-		newBytes -= prevZettel.Length()
+		newBytes -= prevZettel.ByteSize()
 	}
 	return newBytes < mb.maxBytes
 }
@@ -188,9 +188,9 @@ func (mb *memBox) UpdateZettel(_ context.Context, zettel zettel.Zettel) error {
 	}
 
 	mb.mx.Lock()
-	newBytes := mb.curBytes + zettel.Length()
+	newBytes := mb.curBytes + zettel.ByteSize()
 	if prevZettel, found := mb.zettel[m.Zid]; found {
-		newBytes -= prevZettel.Length()
+		newBytes -= prevZettel.ByteSize()
 	}
 	if mb.maxBytes < newBytes {
 		mb.mx.Unlock()
@@ -221,7 +221,7 @@ func (mb *memBox) DeleteZettel(_ context.Context, zid id.Zid) error {
 		return box.ErrZettelNotFound{Zid: zid}
 	}
 	delete(mb.zettel, zid)
-	mb.curBytes -= oldZettel.Length()
+	mb.curBytes -= oldZettel.ByteSize()
 	mb.mx.Unlock()
 	mb.notifyChanged(zid, box.OnDelete)
 	mb.log.Trace().Msg("DeleteZettel")
