@@ -54,7 +54,11 @@ func parseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	return bs
 }
 
-func parseZmkBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
+// ParseZmkBlocks parses input with the external parser.
+//
+// Note: this function is currently exported to keep some linter silent.
+// In the future, this function will become private.
+func ParseZmkBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	if obj := zmk.ParseBlocks(inp); obj != nil {
 		bs, err := sztrans.GetBlockSlice(obj)
 		if err == nil {
