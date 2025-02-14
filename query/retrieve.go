@@ -113,28 +113,23 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.Set {
 		return normResult
 	}
 
-	type searchResults map[searchOp]*idset.Set
-	var cache searchResults
+	cache := make(map[searchOp]*idset.Set)
+
 	var plainResult *idset.Set
 	for c, sf := range plainCalls {
 		result := sf(c.s)
 		if _, found := normCalls[c]; found {
-			if cache == nil {
-				cache = make(searchResults)
-			}
 			cache[c] = result
 		}
 		plainResult = plainResult.IntersectOrSet(result)
 	}
 	var normResult *idset.Set
 	for c, sf := range normCalls {
-		if cache != nil {
-			if result, found := cache[c]; found {
-				normResult = normResult.IntersectOrSet(result)
-				continue
-			}
+		if result, found := cache[c]; found {
+			normResult = normResult.IntersectOrSet(result)
+		} else {
+			normResult = normResult.IntersectOrSet(sf(c.s))
 		}
-		normResult = normResult.IntersectOrSet(sf(c.s))
 	}
 	return normResult.IUnion(plainResult)
 }
