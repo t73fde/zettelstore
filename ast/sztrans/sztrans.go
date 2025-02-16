@@ -230,8 +230,8 @@ func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 }
 
 func collectBlocks(lst *sx.Pair) (result ast.BlockSlice) {
-	for curr := lst; curr != nil; curr = curr.Tail() {
-		if sxn, isNode := curr.Car().(sxNode); isNode {
+	for val := range lst.Values() {
+		if sxn, isNode := val.(sxNode); isNode {
 			if bn, isInline := sxn.node.(ast.BlockNode); isInline {
 				result = append(result, bn)
 			}
@@ -241,8 +241,8 @@ func collectBlocks(lst *sx.Pair) (result ast.BlockSlice) {
 }
 
 func collectInlines(lst *sx.Pair) (result ast.InlineSlice) {
-	for curr := lst; curr != nil; curr = curr.Tail() {
-		if sxn, isNode := curr.Car().(sxNode); isNode {
+	for val := range lst.Values() {
+		if sxn, isNode := val.(sxNode); isNode {
 			if in, isInline := sxn.node.(ast.InlineNode); isInline {
 				result = append(result, in)
 			}
@@ -279,8 +279,8 @@ func handleHeading(rest *sx.Pair) (sx.Object, bool) {
 }
 
 func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
-	for curr := lst; curr != nil; curr = curr.Tail() {
-		if sxn, isNode := curr.Car().(sxNode); isNode {
+	for val := range lst.Values() {
+		if sxn, isNode := val.(sxNode); isNode {
 			if bns, isBlockSlice := sxn.node.(*ast.BlockSlice); isBlockSlice {
 				items := make(ast.ItemSlice, len(*bns))
 				for i, bn := range *bns {
@@ -359,7 +359,7 @@ func handleTable(rest *sx.Pair) (sx.Object, bool) {
 		cols := len(header)
 
 		var rows []ast.TableRow
-		for curr := rest.Tail(); curr != nil; curr = curr.Tail() {
+		for curr := range rest.Tail().Pairs() {
 			row := collectRow(curr.Head())
 			rows = append(rows, row)
 			cols = max(cols, len(row))
@@ -380,8 +380,8 @@ func handleTable(rest *sx.Pair) (sx.Object, bool) {
 }
 
 func collectRow(lst *sx.Pair) (row ast.TableRow) {
-	for curr := lst; curr != nil; curr = curr.Tail() {
-		if sxn, isNode := curr.Car().(sxNode); isNode {
+	for curr := range lst.Values() {
+		if sxn, isNode := curr.(sxNode); isNode {
 			if cell, isCell := sxn.node.(*ast.TableCell); isCell {
 				row = append(row, cell)
 			}

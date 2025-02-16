@@ -215,8 +215,8 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 		ignore.Add(meta.KeyTags)
 	}
 
-	for elem := hm; elem != nil; elem = elem.Tail() {
-		mlst, isPair := sx.GetPair(elem.Car())
+	for elem := range hm.Values() {
+		mlst, isPair := sx.GetPair(elem)
 		if !isPair {
 			continue
 		}
@@ -228,8 +228,8 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 			continue
 		}
 		a := make(attrs.Attributes, 32)
-		for aelem := att.Tail(); aelem != nil; aelem = aelem.Tail() {
-			if p, ok := sx.GetPair(aelem.Car()); ok {
+		for aelem := range att.Tail().Values() {
+			if p, ok := sx.GetPair(aelem); ok {
 				key := p.Car()
 				val := p.Cdr()
 				if tail, isTail := sx.GetPair(val); isTail {
