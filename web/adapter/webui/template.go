@@ -126,7 +126,7 @@ var (
 		&sxbuiltins.Apply,          // apply
 		&sxbuiltins.Concat,         // concat
 		&sxbuiltins.BoundP,         // bound?
-		&sxbuiltins.Defined,        // defined?
+		&sxbuiltins.DefinedP,       // defined?
 		&sxbuiltins.CurrentBinding, // current-binding
 		&sxbuiltins.BindingLookup,  // binding-lookup
 	}
