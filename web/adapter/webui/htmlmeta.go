@@ -121,8 +121,7 @@ func (wui *WebUI) transformTagSet(key string, tags []string) *sx.Pair {
 		lb.Add(wui.transformKeyValueText(key, meta.Value(tag), tag))
 	}
 	if len(tags) > 1 {
-		lb.Add(space)
-		lb.Add(wui.transformKeyValuesText(key, tags, "(all)"))
+		lb.AddN(space, wui.transformKeyValuesText(key, tags, "(all)"))
 	}
 	return lb.List()
 }

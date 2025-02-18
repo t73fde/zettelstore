@@ -85,8 +85,10 @@ func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	hen := shtml.Endnotes(&env)
 
 	var head sx.ListBuilder
-	head.Add(shtml.SymHead)
-	head.Add(sx.Nil().Cons(sx.Nil().Cons(sx.Cons(sx.MakeSymbol("charset"), sx.MakeString("utf-8"))).Cons(sxhtml.SymAttr)).Cons(shtml.SymMeta))
+	head.AddN(
+		shtml.SymHead,
+		sx.Nil().Cons(sx.Nil().Cons(sx.Cons(sx.MakeSymbol("charset"), sx.MakeString("utf-8"))).Cons(sxhtml.SymAttr)).Cons(shtml.SymMeta),
+	)
 	head.ExtendBang(hm)
 	var sb strings.Builder
 	if hasTitle {
@@ -103,8 +105,7 @@ func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	}
 	body.ExtendBang(hast)
 	if hen != nil {
-		body.Add(sx.Cons(shtml.SymHR, nil))
-		body.Add(hen)
+		body.AddN(sx.Cons(shtml.SymHR, nil), hen)
 	}
 
 	doc := sx.MakeList(
