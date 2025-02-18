@@ -79,11 +79,11 @@ func localState(path string) (RefState, bool) {
 
 // String returns the string representation of a reference.
 func (r Reference) String() string {
-	if r.URL != nil {
-		return r.URL.String()
-	}
 	if r.State == RefStateQuery {
 		return QueryPrefix + r.Value
+	}
+	if r.URL != nil {
+		return r.URL.String()
 	}
 	return r.Value
 }

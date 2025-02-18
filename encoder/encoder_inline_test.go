@@ -267,7 +267,7 @@ var tcsInline = []zmkTestCase{
 		},
 	},
 	{
-		descr: "HTML in Code formatting",
+		descr: "HTML in code formatting",
 		zmk:   "``<script `` abc",
 		expect: expectMap{
 			encoderHTML:  "<code>&lt;script </code> abc",
@@ -387,7 +387,7 @@ var tcsInline = []zmkTestCase{
 	},
 	{
 		descr: "Comment after text",
-		zmk:   `Text %%{-} comment`,
+		zmk:   `Text%%{-} comment`,
 		expect: expectMap{
 			encoderHTML:  `Text<!-- comment -->`,
 			encoderMD:    "Text",
@@ -399,7 +399,7 @@ var tcsInline = []zmkTestCase{
 	},
 	{
 		descr: "Comment after text and with -->",
-		zmk:   `Text %%{-} comment --> end`,
+		zmk:   `Text%%{-} comment --> end`,
 		expect: expectMap{
 			encoderHTML:  `Text<!-- comment -&#45;> end -->`,
 			encoderMD:    "Text",

@@ -474,9 +474,6 @@ func (v *visitor) visitLiteral(ln *ast.LiteralNode) {
 	case ast.LiteralOutput:
 		v.writeLiteral('=', ln.Attrs, ln.Content)
 	case ast.LiteralComment:
-		if v.inlinePos > 0 {
-			v.b.WriteByte(' ')
-		}
 		v.b.WriteString("%%")
 		v.visitAttributes(ln.Attrs)
 		v.b.WriteByte(' ')

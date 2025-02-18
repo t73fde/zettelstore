@@ -315,7 +315,14 @@ func handleDescription(rest *sx.Pair) (sx.Object, bool) {
 			break
 		}
 
-		sxn, isNode := curr.Car().(sxNode)
+		car := curr.Car()
+		if sx.IsNil(car) {
+			descs = append(descs, ast.Description{Term: term, Descriptions: nil})
+			curr = curr.Tail()
+			continue
+		}
+
+		sxn, isNode := car.(sxNode)
 		if !isNode {
 			descs = nil
 			break

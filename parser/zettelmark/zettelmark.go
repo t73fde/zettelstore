@@ -29,25 +29,29 @@ import (
 )
 
 func init() {
-	parser.Register(&parser.Info{
-		Name:          meta.ValueSyntaxZmk,
-		AltNames:      nil,
-		IsASTParser:   true,
-		IsTextFormat:  true,
-		IsImageFormat: false,
-		ParseBlocks:   parseBlocks,
-	})
 	// parser.Register(&parser.Info{
 	// 	Name:          meta.ValueSyntaxZmk,
 	// 	AltNames:      nil,
 	// 	IsASTParser:   true,
 	// 	IsTextFormat:  true,
 	// 	IsImageFormat: false,
-	// 	ParseBlocks:   parseZmkBlocks,
+	// 	ParseBlocks:   ParseBlocks,
 	// })
+	parser.Register(&parser.Info{
+		Name:          meta.ValueSyntaxZmk,
+		AltNames:      nil,
+		IsASTParser:   true,
+		IsTextFormat:  true,
+		IsImageFormat: false,
+		ParseBlocks:   ParseZmkBlocks,
+	})
 }
 
-func parseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
+// ParseBlocks parses input with the internal parser.
+//
+// Note: this function is currently exported to keep some linter silent.
+// In the future, this function will be removed.
+func ParseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	parser := &zmkP{inp: inp}
 	bs := parser.parseBlockSlice()
 	postProcessBlocks(&bs)
