@@ -36,7 +36,7 @@ func (data *collectData) initialize() {
 }
 
 func collectZettelIndexData(zn *ast.ZettelNode, data *collectData) {
-	ast.Walk(data, &zn.Ast)
+	ast.Walk(data, &zn.BlocksAST)
 }
 
 func (data *collectData) Visit(node ast.Node) ast.Visitor {

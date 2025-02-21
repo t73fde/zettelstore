@@ -55,7 +55,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		zettelLang := wui.getConfig(ctx, zn.InhMeta, meta.KeyLang)
 		enc := wui.getSimpleHTMLEncoder(zettelLang)
 		metaObj := enc.MetaSxn(zn.InhMeta)
-		content, endnotes, err := enc.BlocksSxn(&zn.Ast)
+		content, endnotes, err := enc.BlocksSxn(&zn.BlocksAST)
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return

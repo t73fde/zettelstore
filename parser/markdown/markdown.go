@@ -39,7 +39,7 @@ func init() {
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		ParseBlocks:   parseBlocks,
+		Parse:         parseBlocks,
 	})
 }
 

@@ -18,7 +18,7 @@ import "zettelstore.de/z/ast"
 
 // Order of internal links within the given zettel.
 func Order(zn *ast.ZettelNode) (result []*ast.LinkNode) {
-	for _, bn := range zn.Ast {
+	for _, bn := range zn.BlocksAST {
 		ln, ok := bn.(*ast.NestedListNode)
 		if !ok {
 			continue

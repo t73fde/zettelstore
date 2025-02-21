@@ -41,7 +41,7 @@ var myTE Encoder // Only a singleton is required.
 func (te *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	v := newVisitor(w)
 	te.WriteMeta(&v.b, zn.InhMeta)
-	v.visitBlockSlice(&zn.Ast)
+	v.visitBlockSlice(&zn.BlocksAST)
 	length, err := v.b.Flush()
 	return length, err
 }
@@ -75,7 +75,7 @@ func writeTagSet(buf *encoder.EncWriter, tags iter.Seq[meta.Value]) {
 
 // WriteContent encodes the zettel content.
 func (te *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return te.WriteBlocks(w, &zn.Ast)
+	return te.WriteBlocks(w, &zn.BlocksAST)
 }
 
 // WriteBlocks writes the content of a block slice to the writer.

@@ -49,7 +49,7 @@ func (*Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	} else {
 		v.b.WriteByte('\n')
 	}
-	ast.Walk(v, &zn.Ast)
+	ast.Walk(v, &zn.BlocksAST)
 	length, err := v.b.Flush()
 	return length, err
 }
@@ -70,7 +70,7 @@ func (v *visitor) acceptMeta(m *meta.Meta) {
 
 // WriteContent encodes the zettel content.
 func (ze *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return ze.WriteBlocks(w, &zn.Ast)
+	return ze.WriteBlocks(w, &zn.BlocksAST)
 }
 
 // WriteBlocks writes the content of a block slice to the writer.

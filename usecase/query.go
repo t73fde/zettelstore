@@ -207,7 +207,7 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 			continue
 		}
 		zn := uc.ucEvaluate.RunZettel(ctx, zettel, syntax)
-		ast.Walk(&v, &zn.Ast)
+		ast.Walk(&v, &zn.BlocksAST)
 		if v.found {
 			result = append(result, cand)
 		}

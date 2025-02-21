@@ -32,7 +32,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		ParseBlocks:   parseBlocks,
+		Parse:         parseBlocks,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.ValueSyntaxHTML,
@@ -40,7 +40,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		ParseBlocks:   parseBlocksHTML,
+		Parse:         parseBlocksHTML,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.ValueSyntaxCSS,
@@ -48,7 +48,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		ParseBlocks:   parseBlocks,
+		Parse:         parseBlocks,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.ValueSyntaxSVG,
@@ -56,7 +56,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: true,
-		ParseBlocks:   parseSVGBlocks,
+		Parse:         parseSVGBlocks,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.ValueSyntaxSxn,
@@ -64,7 +64,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		ParseBlocks:   parseSxnBlocks,
+		Parse:         parseSxnBlocks,
 	})
 }
 

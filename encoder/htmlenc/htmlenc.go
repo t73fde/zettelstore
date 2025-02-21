@@ -77,7 +77,7 @@ func (he *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 		}
 	}
 
-	xast := he.tx.GetSz(&zn.Ast)
+	xast := he.tx.GetSz(&zn.BlocksAST)
 	hast, err := he.th.Evaluate(xast, &env)
 	if err != nil {
 		return 0, err
@@ -130,7 +130,7 @@ func (he *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 
 // WriteContent encodes the zettel content.
 func (he *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return he.WriteBlocks(w, &zn.Ast)
+	return he.WriteBlocks(w, &zn.BlocksAST)
 }
 
 // WriteBlocks encodes a block slice.

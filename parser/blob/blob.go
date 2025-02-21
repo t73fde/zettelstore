@@ -28,7 +28,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		ParseBlocks:   parseBlocks,
+		Parse:         parseBlocks,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.ValueSyntaxJPEG,
@@ -36,7 +36,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		ParseBlocks:   parseBlocks,
+		Parse:         parseBlocks,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.ValueSyntaxPNG,
@@ -44,7 +44,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		ParseBlocks:   parseBlocks,
+		Parse:         parseBlocks,
 	})
 	parser.Register(&parser.Info{
 		Name:          meta.ValueSyntaxWebp,
@@ -52,7 +52,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		ParseBlocks:   parseBlocks,
+		Parse:         parseBlocks,
 	})
 }
 

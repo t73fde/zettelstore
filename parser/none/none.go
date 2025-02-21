@@ -28,6 +28,6 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: false,
-		ParseBlocks:   func(*input.Input, *meta.Meta, string) ast.BlockSlice { return nil },
+		Parse:         func(*input.Input, *meta.Meta, string) ast.BlockSlice { return nil },
 	})
 }

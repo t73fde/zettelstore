@@ -38,7 +38,7 @@ type Info struct {
 	IsASTParser   bool
 	IsTextFormat  bool
 	IsImageFormat bool
-	ParseBlocks   func(*input.Input, *meta.Meta, string) ast.BlockSlice
+	Parse         func(*input.Input, *meta.Meta, string) ast.BlockSlice
 }
 
 var registry = map[string]*Info{}
@@ -97,7 +97,7 @@ func IsImageFormat(syntax string) bool {
 
 // ParseBlocks parses some input and returns a slice of block nodes.
 func ParseBlocks(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) ast.BlockSlice {
-	bs := Get(syntax).ParseBlocks(inp, m, syntax)
+	bs := Get(syntax).Parse(inp, m, syntax)
 	cleaner.CleanBlockSlice(&bs, hi.AllowHTML(syntax))
 	return bs
 }
@@ -146,12 +146,13 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 	if rtConfig != nil {
 		hi = rtConfig.GetHTMLInsecurity()
 	}
+	bs := ParseBlocks(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
 	return &ast.ZettelNode{
-		Meta:    m,
-		Content: zettel.Content,
-		Zid:     m.Zid,
-		InhMeta: inhMeta,
-		Ast:     ParseBlocks(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi),
-		Syntax:  syntax,
+		Meta:      m,
+		Content:   zettel.Content,
+		Zid:       m.Zid,
+		InhMeta:   inhMeta,
+		BlocksAST: bs,
+		Syntax:    syntax,
 	}
 }

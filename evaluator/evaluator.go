@@ -50,11 +50,11 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	switch zn.Syntax {
 	case meta.ValueSyntaxNone:
 		// AST is empty, evaluate to a description list of metadata.
-		zn.Ast = evaluateMetadata(zn.Meta)
+		zn.BlocksAST = evaluateMetadata(zn.Meta)
 	case meta.ValueSyntaxSxn:
-		zn.Ast = evaluateSxn(zn.Ast)
+		zn.BlocksAST = evaluateSxn(zn.BlocksAST)
 	default:
-		EvaluateBlock(ctx, port, rtConfig, &zn.Ast)
+		EvaluateBlock(ctx, port, rtConfig, &zn.BlocksAST)
 	}
 }
 
@@ -205,7 +205,7 @@ func (e *evaluator) evalVerbatimZettel(vn *ast.VerbatimNode) ast.BlockNode {
 	}
 	e.transcludeCount++
 	zn := e.evaluateEmbeddedZettel(zettel)
-	return &zn.Ast
+	return &zn.BlocksAST
 }
 
 func getSyntax(a attrs.Attributes, defSyntax meta.Value) meta.Value {
@@ -282,7 +282,7 @@ func (e *evaluator) evalTransclusionNode(tn *ast.TranscludeNode) ast.BlockNode {
 	if ec := cost.ec; ec > 0 {
 		e.transcludeCount += cost.ec
 	}
-	return &zn.Ast
+	return &zn.BlocksAST
 }
 
 func (e *evaluator) evalQueryTransclusion(expr string) ast.BlockNode {
@@ -465,7 +465,7 @@ func (e *evaluator) evalEmbedRefNode(en *ast.EmbedRefNode) ast.InlineNode {
 	result, ok := e.embedMap[ref.Value]
 	if !ok {
 		// Search for text to be embedded.
-		result = findInlineSlice(&zn.Ast, ref.URL.Fragment)
+		result = findInlineSlice(&zn.BlocksAST, ref.URL.Fragment)
 		e.embedMap[ref.Value] = result
 	}
 	if len(result) == 0 {
@@ -546,7 +546,7 @@ func createEmbeddedNodeLocal(ref *ast.Reference) *ast.EmbedRefNode {
 
 func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.ZettelNode {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
-	ast.Walk(e, &zn.Ast)
+	ast.Walk(e, &zn.BlocksAST)
 	return zn
 }
 
