@@ -18,5 +18,5 @@ t73f.de/r/webs v0.0.0-20250213131522-cacd35cfa01a h1:hZF5UX2+XV8DP63xT1dCQ46lfYf
 t73f.de/r/webs v0.0.0-20250213131522-cacd35cfa01a/go.mod h1:zk92hSKB4iWyT290+163seNzu350TA9XLATC9kOldqo=
 t73f.de/r/zero v0.0.0-20250213131408-74aa11527e0b h1:7o+HMhkCGdgCEiA4by/VVVNtE8hCQBnl0Lx5gHUwhVw=
 t73f.de/r/zero v0.0.0-20250213131408-74aa11527e0b/go.mod h1:T1vFcHoymUQcr7+vENBkS1yryZRZ3YB8uRtnMy8yRBA=
-t73f.de/r/zsc v0.0.0-20250224111351-bfb53b97f7ef h1:YzCFKRqRczu3roG3doQNTFtGFQh5azthvWEpwJuU+DY=
-t73f.de/r/zsc v0.0.0-20250224111351-bfb53b97f7ef/go.mod h1:c2/2nI3+iDyMmQKtok0a/KECsfxPlesXSystvx/mDds=
+t73f.de/r/zsc v0.0.0-20250224130617-e60c0d63e963 h1:ldVsDa2mzd9pCqtw1d2tkBpwPlanqZ08A0bAAtelVI0=
+t73f.de/r/zsc v0.0.0-20250224130617-e60c0d63e963/go.mod h1:c2/2nI3+iDyMmQKtok0a/KECsfxPlesXSystvx/mDds=

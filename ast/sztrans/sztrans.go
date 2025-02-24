@@ -447,12 +447,16 @@ func handleEmbed(rest *sx.Pair) (sx.Object, bool) {
 		attrs := sz.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if ref := collectReference(curr.Head()); ref != nil {
-				return sxNode{&ast.EmbedRefNode{
-					Attrs:   attrs,
-					Ref:     ref,
-					Syntax:  "",
-					Inlines: collectInlines(curr.Tail()),
-				}}, true
+				if curr = curr.Tail(); curr != nil {
+					if syntax, isString := sx.GetString(curr.Car()); isString {
+						return sxNode{&ast.EmbedRefNode{
+							Attrs:   attrs,
+							Ref:     ref,
+							Syntax:  syntax.GetValue(),
+							Inlines: collectInlines(curr.Tail()),
+						}}, true
+					}
+				}
 			}
 		}
 	}
