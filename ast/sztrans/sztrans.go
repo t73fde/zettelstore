@@ -133,31 +133,31 @@ func handleTransclude(rest *sx.Pair) (sx.Object, bool) {
 	return nil, false
 }
 
-func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
+func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
 	if sym, isSymbol := sx.GetSymbol(pair.Car()); isSymbol {
 		switch sym {
 		case sz.SymBlock:
 			bns := collectBlocks(pair.Tail())
-			return sxNode{&bns}, true
+			return sxNode{&bns}
 		case sz.SymPara:
-			return sxNode{&ast.ParaNode{Inlines: collectInlines(pair.Tail())}}, true
+			return sxNode{&ast.ParaNode{Inlines: collectInlines(pair.Tail())}}
 		case sz.SymHeading:
 			return handleHeading(pair.Tail())
 		case sz.SymListOrdered:
 			return sxNode{&ast.NestedListNode{
 				Kind:  ast.NestedListOrdered,
 				Items: collectItemSlices(pair.Tail()),
-				Attrs: nil}}, true
+				Attrs: nil}}
 		case sz.SymListUnordered:
 			return sxNode{&ast.NestedListNode{
 				Kind:  ast.NestedListUnordered,
 				Items: collectItemSlices(pair.Tail()),
-				Attrs: nil}}, true
+				Attrs: nil}}
 		case sz.SymListQuote:
 			return sxNode{&ast.NestedListNode{
 				Kind:  ast.NestedListQuote,
 				Items: collectItemSlices(pair.Tail()),
-				Attrs: nil}}, true
+				Attrs: nil}}
 		case sz.SymDescription:
 			return handleDescription(pair.Tail())
 		case sz.SymTable:
@@ -226,7 +226,7 @@ func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 		}
 		log.Println("MISS", pair)
 	}
-	return sxNode{}, false
+	return pair
 }
 
 func collectBlocks(lst *sx.Pair) (result ast.BlockSlice) {
@@ -251,7 +251,7 @@ func collectInlines(lst *sx.Pair) (result ast.InlineSlice) {
 	return result
 }
 
-func handleHeading(rest *sx.Pair) (sx.Object, bool) {
+func handleHeading(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		if num, isNumber := rest.Car().(sx.Int64); isNumber && num > 0 && num < 6 {
 			if curr := rest.Tail(); curr != nil {
@@ -266,7 +266,7 @@ func handleHeading(rest *sx.Pair) (sx.Object, bool) {
 									Slug:     sSlug.GetValue(),
 									Fragment: sUniq.GetValue(),
 									Inlines:  collectInlines(curr.Tail()),
-								}}, true
+								}}
 							}
 						}
 					}
@@ -275,7 +275,7 @@ func handleHeading(rest *sx.Pair) (sx.Object, bool) {
 		}
 	}
 	log.Println("HEAD", rest)
-	return nil, false
+	return rest
 }
 
 func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
@@ -304,7 +304,7 @@ func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
 	return result
 }
 
-func handleDescription(rest *sx.Pair) (sx.Object, bool) {
+func handleDescription(rest *sx.Pair) sx.Object {
 	var descs []ast.Description
 	for curr := rest; curr != nil; {
 		term := collectInlines(curr.Head())
@@ -354,13 +354,13 @@ func handleDescription(rest *sx.Pair) (sx.Object, bool) {
 		curr = curr.Tail()
 	}
 	if len(descs) > 0 {
-		return sxNode{&ast.DescriptionListNode{Descriptions: descs}}, true
+		return sxNode{&ast.DescriptionListNode{Descriptions: descs}}
 	}
 	log.Println("DESC", rest)
-	return nil, false
+	return rest
 }
 
-func handleTable(rest *sx.Pair) (sx.Object, bool) {
+func handleTable(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		header := collectRow(rest.Head())
 		cols := len(header)
@@ -380,10 +380,10 @@ func handleTable(rest *sx.Pair) (sx.Object, bool) {
 			Header: header,
 			Align:  align,
 			Rows:   rows,
-		}}, true
+		}}
 	}
 	log.Println("TABL", rest)
-	return nil, false
+	return rest
 }
 
 func collectRow(lst *sx.Pair) (row ast.TableRow) {
@@ -397,14 +397,14 @@ func collectRow(lst *sx.Pair) (row ast.TableRow) {
 	return row
 }
 
-func handleCell(align ast.Alignment, rest *sx.Pair) (sx.Object, bool) {
+func handleCell(align ast.Alignment, rest *sx.Pair) sx.Object {
 	return sxNode{&ast.TableCell{
 		Align:   align,
 		Inlines: collectInlines(rest),
-	}}, true
+	}}
 }
 
-func handleRegion(kind ast.RegionKind, rest *sx.Pair) (sx.Object, bool) {
+func handleRegion(kind ast.RegionKind, rest *sx.Pair) sx.Object {
 	if rest != nil {
 		attrs := sz.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
@@ -414,15 +414,15 @@ func handleRegion(kind ast.RegionKind, rest *sx.Pair) (sx.Object, bool) {
 					Attrs:   attrs,
 					Blocks:  collectBlocks(blockList),
 					Inlines: collectInlines(curr.Tail()),
-				}}, true
+				}}
 			}
 		}
 	}
 	log.Println("REGI", rest)
-	return nil, false
+	return rest
 }
 
-func handleLink(state ast.RefState, rest *sx.Pair) (sx.Object, bool) {
+func handleLink(state ast.RefState, rest *sx.Pair) sx.Object {
 	if rest != nil {
 		attrs := sz.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
@@ -434,15 +434,15 @@ func handleLink(state ast.RefState, rest *sx.Pair) (sx.Object, bool) {
 					Attrs:   attrs,
 					Ref:     ref,
 					Inlines: ins,
-				}}, true
+				}}
 			}
 		}
 	}
 	log.Println("LINK", state, rest)
-	return nil, false
+	return rest
 }
 
-func handleEmbed(rest *sx.Pair) (sx.Object, bool) {
+func handleEmbed(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		attrs := sz.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
@@ -454,14 +454,14 @@ func handleEmbed(rest *sx.Pair) (sx.Object, bool) {
 							Ref:     ref,
 							Syntax:  syntax.GetValue(),
 							Inlines: collectInlines(curr.Tail()),
-						}}, true
+						}}
 					}
 				}
 			}
 		}
 	}
 	log.Println("EMBE", rest)
-	return nil, false
+	return rest
 }
 
 func collectReference(pair *sx.Pair) *ast.Reference {
@@ -498,7 +498,7 @@ func collectReference(pair *sx.Pair) *ast.Reference {
 	return nil
 }
 
-func handleCite(rest *sx.Pair) (sx.Object, bool) {
+func handleCite(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		attrs := sz.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
@@ -507,15 +507,15 @@ func handleCite(rest *sx.Pair) (sx.Object, bool) {
 					Attrs:   attrs,
 					Key:     sKey.GetValue(),
 					Inlines: collectInlines(curr.Tail()),
-				}}, true
+				}}
 			}
 		}
 	}
 	log.Println("CITE", rest)
-	return nil, false
+	return rest
 }
 
-func handleMark(rest *sx.Pair) (sx.Object, bool) {
+func handleMark(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		if sMark, isMarkS := sx.GetString(rest.Car()); isMarkS {
 			if curr := rest.Tail(); curr != nil {
@@ -527,7 +527,7 @@ func handleMark(rest *sx.Pair) (sx.Object, bool) {
 								Slug:     sSlug.GetValue(),
 								Fragment: sUniq.GetValue(),
 								Inlines:  collectInlines(curr.Tail()),
-							}}, true
+							}}
 						}
 					}
 				}
@@ -535,32 +535,32 @@ func handleMark(rest *sx.Pair) (sx.Object, bool) {
 		}
 	}
 	log.Println("MARK", rest)
-	return nil, false
+	return rest
 }
 
-func handleEndnote(rest *sx.Pair) (sx.Object, bool) {
+func handleEndnote(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		attrs := sz.GetAttributes(rest.Head())
 		return sxNode{&ast.FootnoteNode{
 			Attrs:   attrs,
 			Inlines: collectInlines(rest.Tail()),
-		}}, true
+		}}
 	}
 	log.Println("ENDN", rest)
-	return nil, false
+	return rest
 }
 
-func handleFormat(kind ast.FormatKind, rest *sx.Pair) (sx.Object, bool) {
+func handleFormat(kind ast.FormatKind, rest *sx.Pair) sx.Object {
 	if rest != nil {
 		attrs := sz.GetAttributes(rest.Head())
 		return sxNode{&ast.FormatNode{
 			Kind:    kind,
 			Attrs:   attrs,
 			Inlines: collectInlines(rest.Tail()),
-		}}, true
+		}}
 	}
 	log.Println("FORM", kind, rest)
-	return nil, false
+	return rest
 }
 
 type sxNode struct {
