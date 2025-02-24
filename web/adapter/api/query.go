@@ -207,44 +207,41 @@ type dataZettelEncoder struct {
 }
 
 func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error {
-	result := make(sx.Vector, len(ml)+1)
-	result[0] = sx.SymbolList
+	var lb sx.ListBuilder
+	lb.AddN(
+		sx.MakeSymbol("meta-list"),
+		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
+		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),
+	)
 	symID, symZettel := sx.MakeSymbol("id"), sx.MakeSymbol("zettel")
-	for i, m := range ml {
+	for _, m := range ml {
 		msz := sexp.EncodeMetaRights(api.MetaRights{
 			Meta:   m.Map(),
 			Rights: dze.getRights(m),
 		})
 		msz = sx.Cons(sx.MakeList(symID, sx.Int64(m.Zid)), msz.Cdr()).Cons(symZettel)
-		result[i+1] = msz
+		lb.Add(msz)
 	}
-
-	_, err := sx.Print(w, sx.MakeList(
-		sx.MakeSymbol("meta-list"),
-		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
-		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),
-		sx.MakeList(result...),
-	))
+	_, err := sx.Print(w, lb.List())
 	return err
 }
 func (dze *dataZettelEncoder) writeArrangement(w io.Writer, act string, arr meta.Arrangement) error {
 	var lb sx.ListBuilder
-	lb.Add(sx.SymbolList)
+	lb.AddN(
+		sx.MakeSymbol("meta-list"),
+		sx.MakeString(act),
+		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
+		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),
+	)
 	for aggKey, metaList := range arr {
 		var lbMeta sx.ListBuilder
-		lbMeta.Add(sx.MakeString(string(aggKey)))
+		lbMeta.Add(sx.MakeString(aggKey))
 		for _, m := range metaList {
 			lbMeta.Add(sx.Int64(m.Zid))
 		}
 		lb.Add(lbMeta.List())
 	}
-	_, err := sx.Print(w, sx.MakeList(
-		sx.MakeSymbol("aggregate"),
-		sx.MakeString(act),
-		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
-		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),
-		lb.List(),
-	))
+	_, err := sx.Print(w, lb.List())
 	return err
 }
 

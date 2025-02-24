@@ -3,7 +3,7 @@
 <a id="0_20"></a>
 <h2>Changes for Version 0.20.0 (pending)</h2>
   *  Metadata with keys that have the suffix <code>-title</code> are no longer
-     interpreted as Zettelmarkup. This is a leftover from [#0_11|v0.11], when
+     interpreted as Zettelmarkup. This was a leftover from [#0_11|v0.11], when
      type of metadata <code>title</code> was changed from Zettelmarkup to a
      possibly empty string.
      (breaking)
@@ -27,7 +27,12 @@
   *  Query aggregates <code>ATOM</code> and <code>RSS</code> are removed, as
      well as the accompanying <code>TITLE</code> query action (parameter).
      Were announced as deprecated in version 0.19.
-     (major)
+     (breaking)
+  *  Query data encoding and aggregate data encoding were changed to remove the
+     superfluous <code>(list ...)</code>. Instead, the result list is now
+     spliced into the returned s-expression list. If you use the Zettelstore
+     Client, it will handle that for you.
+     (breaking: api)
   *  &ldquo;Lists&rdquo; menu is build by reading a zettel with menu items
      (Default: <code>00000000080001</code>) instead of being hard coded. Can be
      customized with runtime and user configuration

@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241216104355
+modified: 20250224120441
 
 To list all zettel just send a HTTP GET request to the [[endpoint|00001012920000]] ''/z''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 Always use the endpoint ''/z'' to work with a list of zettel.
@@ -33,33 +33,34 @@ Alternatively, you may retrieve the zettel list as a parseable object / a [[symb
 
 ```sh
 # curl 'http://127.0.0.1:23123/z?enc=data'
-(meta-list (query "") (human "") (list (zettel (id "00001012921200") (meta (title "API: Encoding of Zettel Access Rights") (role "manual") (tags "#api #manual #reference #zettelstore") (syntax "zmk") (back "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000") (backward "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000") (box-number "1") (created "00010101000000") (forward "00001003000000 00001006020400 00001010000000 00001010040100 00001010040200 00001010070200 00001010070300") (modified "20220201171959") (published "20220201171959")) (rights 62)) (zettel (id "00001007030100") ...
+(meta-list (query "") (human "") (zettel (id "00001012921200") (meta (title "API: Encoding of Zettel Access Rights") (role "manual") (tags "#api #manual #reference #zettelstore") (syntax "zmk") (back "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000") (backward "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000") (box-number "1") (created "00010101000000") (forward "00001003000000 00001006020400 00001010000000 00001010040100 00001010040200 00001010070200 00001010070300") (modified "20220201171959") (published "20220201171959")) (rights 62)) (zettel (id "00001007030100") ...
 ```
 
 Pretty-printed, this results in:
 ```
 (meta-list (query "")
            (human "")
-           (list (zettel (id "00001012921200")
-                         (meta (title "API: Encoding of Zettel Access Rights")
-                               (role "manual")
-                               (tags "#api #manual #reference #zettelstore")
-                               (syntax "zmk")
-                               (back "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000")
-                               (backward "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000")
-                               (box-number "1")
-                               (created "00010101000000")
-                               (forward "00001003000000 00001006020400 00001010000000 00001010040100 00001010040200 00001010070200 00001010070300")
-                               (modified "20220201171959")
-                               (published "20220201171959"))
-                         (rights 62))
-                 (zettel (id "00001007030100")
+           (zettel (id "00001012921200")
+                   (meta (title "API: Encoding of Zettel Access Rights")
+                         (role "manual")
+                         (tags "#api #manual #reference #zettelstore")
+                         (syntax "zmk")
+                         (back "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000")
+                         (backward "00001012051200 00001012051400 00001012053300 00001012053400 00001012053900 00001012054000")
+                         (box-number "1")
+                         (created "00010101000000")
+                         (forward "00001003000000 00001006020400 00001010000000 00001010040100 00001010040200 00001010070200 00001010070300")
+                         (modified "20220201171959")
+                         (published "20220201171959"))
+                   (rights 62))
+           (zettel (id "00001007030100")
+                   ...
 ```
 
 * The result is a list, starting with the symbol ''meta-list''.
 * Then, some key/value pairs are following, also nested.
 * Keys ''query'' and ''human'' will be explained [[later in this manual|00001012051400]].
-* ''list'' starts a list of zettel.
+* Then comes the list of zettel.
 * ''zettel'' itself start, well, a zettel.
 * ''id'' denotes the zettel identifier, encoded as a string.
 * Nested in ''meta'' are the metadata, each as a key/value pair.
