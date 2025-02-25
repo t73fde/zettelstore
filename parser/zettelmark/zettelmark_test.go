@@ -480,7 +480,7 @@ func TestPara(t *testing.T) {
 	t.Parallel()
 	checkTcs(t, TestCases{
 		{"a\n\nb", "(PARA a)(PARA b)"},
-		{"a\n \nb", "(PARA a SB HB b)" /*"(PARA a)(PARA b)"*/},
+		{"a\n \nb", "(PARA a)(PARA b)"},
 	})
 }
 

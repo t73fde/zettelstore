@@ -40,28 +40,19 @@ type Transformer struct {
 func (t *Transformer) GetSz(node ast.Node) *sx.Pair {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
-		return t.getBlockList(n).Cons(sz.SymBlock)
+		return sz.MakeBlockList(t.getBlockList(n))
 	case *ast.InlineSlice:
-		return t.getInlineList(*n).Cons(sz.SymInline)
+		return sz.MakeInlineList(t.getInlineList(*n))
 	case *ast.ParaNode:
-		return t.getInlineList(n.Inlines).Cons(sz.SymPara)
+		return sz.MakePara(t.getInlineList(n.Inlines))
 	case *ast.VerbatimNode:
-		return sx.MakeList(
-			mapGetS(mapVerbatimKindS, n.Kind),
-			getAttributes(n.Attrs),
-			sx.MakeString(string(n.Content)),
-		)
+		return sz.MakeVerbatim(mapGetS(mapVerbatimKindS, n.Kind), getAttributes(n.Attrs), string(n.Content))
 	case *ast.RegionNode:
 		return t.getRegion(n)
 	case *ast.HeadingNode:
-		return t.getInlineList(n.Inlines).
-			Cons(sx.MakeString(n.Fragment)).
-			Cons(sx.MakeString(n.Slug)).
-			Cons(getAttributes(n.Attrs)).
-			Cons(sx.Int64(int64(n.Level))).
-			Cons(sz.SymHeading)
+		return sz.MakeHeading(n.Level, getAttributes(n.Attrs), t.getInlineList(n.Inlines), n.Slug, n.Fragment)
 	case *ast.HRuleNode:
-		return sx.MakeList(sz.SymThematic, getAttributes(n.Attrs))
+		return sz.MakeThematic(getAttributes(n.Attrs))
 	case *ast.NestedListNode:
 		return t.getNestedList(n)
 	case *ast.DescriptionListNode:
@@ -69,50 +60,32 @@ func (t *Transformer) GetSz(node ast.Node) *sx.Pair {
 	case *ast.TableNode:
 		return t.getTable(n)
 	case *ast.TranscludeNode:
-		return sx.MakeList(sz.SymTransclude, getAttributes(n.Attrs), getReference(n.Ref))
+		return sz.MakeTransclusion(getAttributes(n.Attrs), getReference(n.Ref))
 	case *ast.BLOBNode:
 		return t.getBLOB(n)
 	case *ast.TextNode:
-		return sx.MakeList(sz.SymText, sx.MakeString(n.Text))
+		return sz.MakeText(n.Text)
 	case *ast.BreakNode:
 		if n.Hard {
-			return sx.MakeList(sz.SymHard)
+			return sz.MakeHard()
 		}
-		return sx.MakeList(sz.SymSoft)
+		return sz.MakeSoft()
 	case *ast.LinkNode:
 		return t.getLink(n)
 	case *ast.EmbedRefNode:
-		return t.getInlineList(n.Inlines).
-			Cons(sx.MakeString(n.Syntax)).
-			Cons(getReference(n.Ref)).
-			Cons(getAttributes(n.Attrs)).
-			Cons(sz.SymEmbed)
+		return sz.MakeEmbed(getAttributes(n.Attrs), getReference(n.Ref), n.Syntax, t.getInlineList(n.Inlines))
 	case *ast.EmbedBLOBNode:
 		return t.getEmbedBLOB(n)
 	case *ast.CiteNode:
-		return t.getInlineList(n.Inlines).
-			Cons(sx.MakeString(n.Key)).
-			Cons(getAttributes(n.Attrs)).
-			Cons(sz.SymCite)
+		return sz.MakeCite(getAttributes(n.Attrs), n.Key, t.getInlineList(n.Inlines))
 	case *ast.FootnoteNode:
-		// (ENDNODE attrs InlineElement ...)
-		return t.getInlineList(n.Inlines).Cons(getAttributes(n.Attrs)).Cons(sz.SymEndnote)
+		return sz.MakeEndnote(getAttributes(n.Attrs), t.getInlineList(n.Inlines))
 	case *ast.MarkNode:
-		return t.getInlineList(n.Inlines).
-			Cons(sx.MakeString(n.Fragment)).
-			Cons(sx.MakeString(n.Slug)).
-			Cons(sx.MakeString(n.Mark)).
-			Cons(sz.SymMark)
+		return sz.MakeMark(n.Mark, n.Slug, n.Fragment, t.getInlineList(n.Inlines))
 	case *ast.FormatNode:
-		return t.getInlineList(n.Inlines).
-			Cons(getAttributes(n.Attrs)).
-			Cons(mapGetS(mapFormatKindS, n.Kind))
+		return sz.MakeFormat(mapGetS(mapFormatKindS, n.Kind), getAttributes(n.Attrs), t.getInlineList(n.Inlines))
 	case *ast.LiteralNode:
-		return sx.MakeList(
-			mapGetS(mapLiteralKindS, n.Kind),
-			getAttributes(n.Attrs),
-			sx.MakeString(string(n.Content)),
-		)
+		return sz.MakeLiteral(mapGetS(mapLiteralKindS, n.Kind), getAttributes(n.Attrs), string(n.Content))
 	}
 	return sx.MakeList(sz.SymUnknown, sx.MakeString(fmt.Sprintf("%T %v", node, node)))
 }
@@ -159,10 +132,11 @@ func (t *Transformer) getRegion(rn *ast.RegionNode) *sx.Pair {
 	}
 	symBlocks := t.getBlockList(&rn.Blocks)
 	t.inVerse = saveInVerse
-	return t.getInlineList(rn.Inlines).
-		Cons(symBlocks).
-		Cons(getAttributes(rn.Attrs)).
-		Cons(mapGetS(mapRegionKindS, rn.Kind))
+	return sz.MakeRegion(
+		mapGetS(mapRegionKindS, rn.Kind),
+		getAttributes(rn.Attrs), symBlocks,
+		t.getInlineList(rn.Inlines),
+	)
 }
 
 var mapNestedListKindS = map[ast.NestedListKind]*sx.Symbol{
@@ -172,26 +146,26 @@ var mapNestedListKindS = map[ast.NestedListKind]*sx.Symbol{
 }
 
 func (t *Transformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
-	nlistObjs := make(sx.Vector, len(ln.Items)+1)
-	nlistObjs[0] = mapGetS(mapNestedListKindS, ln.Kind)
+	var nlistObjs sx.ListBuilder
+	nlistObjs.Add(mapGetS(mapNestedListKindS, ln.Kind))
 	isCompact := isCompactList(ln.Items)
-	for i, item := range ln.Items {
+	for _, item := range ln.Items {
 		if isCompact && len(item) > 0 {
 			paragraph := t.GetSz(item[0])
-			nlistObjs[i+1] = paragraph.Tail().Cons(sz.SymInline)
+			nlistObjs.Add(sz.MakeInlineList(paragraph.Tail()))
 			continue
 		}
-		itemObjs := make(sx.Vector, len(item))
-		for j, in := range item {
-			itemObjs[j] = t.GetSz(in)
+		var itemObjs sx.ListBuilder
+		for _, in := range item {
+			itemObjs.Add(t.GetSz(in))
 		}
 		if isCompact {
-			nlistObjs[i+1] = sx.MakeList(itemObjs...).Cons(sz.SymInline)
+			nlistObjs.Add(sz.MakeInlineList(itemObjs.List()))
 		} else {
-			nlistObjs[i+1] = sx.MakeList(itemObjs...).Cons(sz.SymBlock)
+			nlistObjs.Add(sz.MakeBlockList(itemObjs.List()))
 		}
 	}
-	return sx.MakeList(nlistObjs...)
+	return nlistObjs.List()
 }
 func isCompactList(itemSlice []ast.ItemSlice) bool {
 	for _, items := range itemSlice {
@@ -208,30 +182,29 @@ func isCompactList(itemSlice []ast.ItemSlice) bool {
 }
 
 func (t *Transformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair {
-	dlObjs := make(sx.Vector, 2*len(dn.Descriptions))
-	for i, def := range dn.Descriptions {
-		dlObjs[2*i] = t.getInlineList(def.Term)
-		descObjs := make(sx.Vector, len(def.Descriptions))
-		for j, b := range def.Descriptions {
-			dVal := make(sx.Vector, len(b))
-			for k, dn := range b {
-				dVal[k] = t.GetSz(dn)
+	var dlObjs sx.ListBuilder
+	for _, def := range dn.Descriptions {
+		dlObjs.Add(t.getInlineList(def.Term))
+		var descObjs sx.ListBuilder
+		for _, b := range def.Descriptions {
+			var dVal sx.ListBuilder
+			for _, dn := range b {
+				dVal.Add(t.GetSz(dn))
 			}
-			descObjs[j] = sx.MakeList(dVal...).Cons(sz.SymBlock)
+			descObjs.Add(sz.MakeBlockList(dVal.List()))
 		}
-		dlObjs[2*i+1] = sx.MakeList(descObjs...).Cons(sz.SymBlock)
+		dlObjs.Add(sz.MakeBlockList(descObjs.List()))
 	}
-	return sx.MakeList(dlObjs...).Cons(sz.SymDescription)
+	return dlObjs.List().Cons(sz.SymDescription)
 }
 
 func (t *Transformer) getTable(tn *ast.TableNode) *sx.Pair {
-	tObjs := make(sx.Vector, len(tn.Rows)+2)
-	tObjs[0] = sz.SymTable
-	tObjs[1] = t.getHeader(tn.Header)
-	for i, row := range tn.Rows {
-		tObjs[i+2] = t.getRow(row)
+	var lb sx.ListBuilder
+	lb.AddN(sz.SymTable, t.getHeader(tn.Header))
+	for _, row := range tn.Rows {
+		lb.Add(t.getRow(row))
 	}
-	return sx.MakeList(tObjs...)
+	return lb.List()
 }
 func (t *Transformer) getHeader(header ast.TableRow) *sx.Pair {
 	if len(header) == 0 {
@@ -240,11 +213,11 @@ func (t *Transformer) getHeader(header ast.TableRow) *sx.Pair {
 	return t.getRow(header)
 }
 func (t *Transformer) getRow(row ast.TableRow) *sx.Pair {
-	rObjs := make(sx.Vector, len(row))
-	for i, cell := range row {
-		rObjs[i] = t.getCell(cell)
+	var lb sx.ListBuilder
+	for _, cell := range row {
+		lb.Add(t.getCell(cell))
 	}
-	return sx.MakeList(rObjs...)
+	return lb.List()
 }
 
 var alignmentSymbolS = map[ast.Alignment]*sx.Symbol{
@@ -255,22 +228,17 @@ var alignmentSymbolS = map[ast.Alignment]*sx.Symbol{
 }
 
 func (t *Transformer) getCell(cell *ast.TableCell) *sx.Pair {
-	return t.getInlineList(cell.Inlines).Cons(mapGetS(alignmentSymbolS, cell.Align))
+	return sz.MakeCell(mapGetS(alignmentSymbolS, cell.Align), t.getInlineList(cell.Inlines))
 }
 
 func (t *Transformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
-	var lastObj sx.Object
+	var content string
 	if bn.Syntax == meta.ValueSyntaxSVG {
-		lastObj = sx.MakeString(string(bn.Blob))
+		content = string(bn.Blob)
 	} else {
-		lastObj = getBase64String(bn.Blob)
+		content = getBase64String(bn.Blob)
 	}
-	return sx.MakeList(
-		sz.SymBLOB,
-		t.getInlineList(bn.Description),
-		sx.MakeString(bn.Syntax),
-		lastObj,
-	)
+	return sz.MakeBLOB(t.getInlineList(bn.Description), bn.Syntax, content)
 }
 
 var mapRefStateLink = map[ast.RefState]*sx.Symbol{
@@ -286,47 +254,49 @@ var mapRefStateLink = map[ast.RefState]*sx.Symbol{
 }
 
 func (t *Transformer) getLink(ln *ast.LinkNode) *sx.Pair {
-	return t.getInlineList(ln.Inlines).
-		Cons(sx.MakeString(ln.Ref.Value)).
-		Cons(getAttributes(ln.Attrs)).
-		Cons(mapGetS(mapRefStateLink, ln.Ref.State))
+	return sz.MakeLink(
+		mapGetS(mapRefStateLink, ln.Ref.State),
+		getAttributes(ln.Attrs),
+		ln.Ref.Value,
+		t.getInlineList(ln.Inlines),
+	)
 }
 
 func (t *Transformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
-	tail := t.getInlineList(en.Inlines)
+	var content string
 	if en.Syntax == meta.ValueSyntaxSVG {
-		tail = tail.Cons(sx.MakeString(string(en.Blob)))
+		content = string(en.Blob)
 	} else {
-		tail = tail.Cons(getBase64String(en.Blob))
+		content = getBase64String(en.Blob)
 	}
-	return tail.Cons(sx.MakeString(en.Syntax)).Cons(getAttributes(en.Attrs)).Cons(sz.SymEmbedBLOB)
+	return sz.MakeEmbedBLOB(getAttributes(en.Attrs), en.Syntax, content, t.getInlineList(en.Inlines))
 }
 
 func (t *Transformer) getBlockList(bs *ast.BlockSlice) *sx.Pair {
-	objs := make(sx.Vector, len(*bs))
-	for i, n := range *bs {
-		objs[i] = t.GetSz(n)
+	var lb sx.ListBuilder
+	for _, n := range *bs {
+		lb.Add(t.GetSz(n))
 	}
-	return sx.MakeList(objs...)
+	return lb.List()
 }
 func (t *Transformer) getInlineList(is ast.InlineSlice) *sx.Pair {
-	objs := make(sx.Vector, len(is))
-	for i, n := range is {
-		objs[i] = t.GetSz(n)
+	var lb sx.ListBuilder
+	for _, n := range is {
+		lb.Add(t.GetSz(n))
 	}
-	return sx.MakeList(objs...)
+	return lb.List()
 }
 
-func getAttributes(a attrs.Attributes) sx.Object {
+func getAttributes(a attrs.Attributes) *sx.Pair {
 	if a.IsEmpty() {
 		return sx.Nil()
 	}
 	keys := a.Keys()
-	objs := make(sx.Vector, 0, len(keys))
+	var lb sx.ListBuilder
 	for _, k := range keys {
-		objs = append(objs, sx.Cons(sx.MakeString(k), sx.MakeString(a[k])))
+		lb.Add(sx.Cons(sx.MakeString(k), sx.MakeString(a[k])))
 	}
-	return sx.MakeList(objs...)
+	return lb.List()
 }
 
 var mapRefStateS = map[ast.RefState]*sx.Symbol{
@@ -360,24 +330,24 @@ var mapMetaTypeS = map[*meta.DescriptionType]*sx.Symbol{
 
 // GetMeta transforms the given metadata into a sx list.
 func (t *Transformer) GetMeta(m *meta.Meta) *sx.Pair {
-	objs := sx.Vector{}
+	var lb sx.ListBuilder
+	lb.Add(sz.SymMeta)
 	for key, val := range m.Computed() {
 		ty := m.Type(key)
 		symType := mapGetS(mapMetaTypeS, ty)
 		var obj sx.Object
 		if ty.IsSet {
-			setList := val.AsSlice()
-			setObjs := make(sx.Vector, len(setList))
-			for i, val := range setList {
-				setObjs[i] = sx.MakeString(val)
+			var setObjs sx.ListBuilder
+			for _, val := range val.AsSlice() {
+				setObjs.Add(sx.MakeString(val))
 			}
-			obj = sx.MakeList(setObjs...)
+			obj = setObjs.List()
 		} else {
 			obj = sx.MakeString(string(val))
 		}
-		objs = append(objs, sx.Nil().Cons(obj).Cons(sx.MakeSymbol(key)).Cons(symType))
+		lb.Add(sx.Nil().Cons(obj).Cons(sx.MakeSymbol(key)).Cons(symType))
 	}
-	return sx.MakeList(objs...).Cons(sz.SymMeta)
+	return lb.List()
 }
 
 func mapGetS[T comparable](m map[T]*sx.Symbol, k T) *sx.Symbol {
@@ -387,7 +357,7 @@ func mapGetS[T comparable](m map[T]*sx.Symbol, k T) *sx.Symbol {
 	return sx.MakeSymbol(fmt.Sprintf("**%v:NOT-FOUND**", k))
 }
 
-func getBase64String(data []byte) sx.String {
+func getBase64String(data []byte) string {
 	var sb strings.Builder
 	encoder := base64.NewEncoder(base64.StdEncoding, &sb)
 	_, err := encoder.Write(data)
@@ -395,7 +365,7 @@ func getBase64String(data []byte) sx.String {
 		err = encoder.Close()
 	}
 	if err == nil {
-		return sx.MakeString(sb.String())
+		return sb.String()
 	}
-	return sx.MakeString("")
+	return ""
 }
