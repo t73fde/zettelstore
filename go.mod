@@ -8,10 +8,10 @@ require (
 	golang.org/x/crypto v0.33.0
 	golang.org/x/term v0.29.0
 	golang.org/x/text v0.22.0
-	t73f.de/r/sx v0.0.0-20250218105028-dfce75101c7d
+	t73f.de/r/sx v0.0.0-20250225112807-3ae4b5ef3ec1
 	t73f.de/r/sxwebs v0.0.0-20250218110800-faf5c8883894
 	t73f.de/r/zero v0.0.0-20250213131408-74aa11527e0b
-	t73f.de/r/zsc v0.0.0-20250224184003-fa40a48cc051
+	t73f.de/r/zsc v0.0.0-20250225120310-75031f89e1fd
 )
 
 require (
