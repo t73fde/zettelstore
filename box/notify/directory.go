@@ -20,6 +20,8 @@ import (
 	"regexp"
 	"sync"
 
+	"slices"
+
 	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/domain/id"
 	"zettelstore.de/z/box"
@@ -503,10 +505,8 @@ func updateEntryContent(entry *DirEntry, name, ext string) (string, string) {
 	return addUselessFile(entry, name), ""
 }
 func addUselessFile(entry *DirEntry, name string) string {
-	for _, dupName := range entry.UselessFiles {
-		if name == dupName {
-			return ""
-		}
+	if slices.Contains(entry.UselessFiles, name) {
+		return ""
 	}
 	entry.UselessFiles = append(entry.UselessFiles, name)
 	return name

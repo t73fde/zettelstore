@@ -63,8 +63,8 @@ func BenchmarkWalk(b *testing.B) {
 		),
 	}
 	v := benchVisitor{}
-	b.ResetTimer()
-	for range b.N {
+
+	for b.Loop() {
 		ast.Walk(&v, &root)
 	}
 }

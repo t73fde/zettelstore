@@ -48,7 +48,7 @@ func recycleMessage(m *Message) {
 }
 
 var messagePool = &sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return &Message{
 			buf: make([]byte, 0, 500),
 		}

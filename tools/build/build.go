@@ -23,6 +23,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -254,7 +255,7 @@ func cmdRelease() error {
 		{"arm64", "android", nil, "zettelstore"},
 	}
 	for _, rel := range releases {
-		env := append([]string{}, rel.env...)
+		env := slices.Clone(rel.env)
 		env = append(env, "GOARCH="+rel.arch, "GOOS="+rel.os)
 		env = append(env, tools.EnvDirectProxy...)
 		env = append(env, tools.EnvGoVCS...)

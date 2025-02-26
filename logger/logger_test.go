@@ -45,7 +45,7 @@ func TestParseLevel(t *testing.T) {
 
 func BenchmarkDisabled(b *testing.B) {
 	log := logger.New(&stderrLogWriter{}, "").SetLevel(logger.NeverLevel)
-	for range b.N {
+	for b.Loop() {
 		log.Info().Str("key", "val").Msg("Benchmark")
 	}
 }
@@ -65,21 +65,21 @@ func (*testLogWriter) WriteMessage(logger.Level, time.Time, string, string, []by
 
 func BenchmarkStrMessage(b *testing.B) {
 	log := logger.New(&testLogWriter{}, "")
-	for range b.N {
+	for b.Loop() {
 		log.Info().Str("key", "val").Msg("Benchmark")
 	}
 }
 
 func BenchmarkMessage(b *testing.B) {
 	log := logger.New(&testLogWriter{}, "")
-	for range b.N {
+	for b.Loop() {
 		log.Info().Msg("Benchmark")
 	}
 }
 
 func BenchmarkCloneStrMessage(b *testing.B) {
 	log := logger.New(&testLogWriter{}, "").Clone().Str("sss", "ttt").Child()
-	for range b.N {
+	for b.Loop() {
 		log.Info().Msg("123456789")
 	}
 }

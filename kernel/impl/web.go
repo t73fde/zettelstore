@@ -146,10 +146,7 @@ func (ws *webService) Start(kern *myKernel) error {
 	persistentCookie := ws.GetNextConfig(kernel.WebPersistentCookie).(bool)
 	secureCookie := ws.GetNextConfig(kernel.WebSecureCookie).(bool)
 	profile := ws.GetNextConfig(kernel.WebProfiling).(bool)
-	maxRequestSize := ws.GetNextConfig(kernel.WebMaxRequestSize).(int64)
-	if maxRequestSize < 1024 {
-		maxRequestSize = 1024
-	}
+	maxRequestSize := max(ws.GetNextConfig(kernel.WebMaxRequestSize).(int64), 1024)
 
 	if !strings.HasSuffix(baseURL, urlPrefix) {
 		ws.logger.Error().Str("base-url", baseURL).Str("url-prefix", urlPrefix).Msg(

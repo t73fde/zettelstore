@@ -51,7 +51,7 @@ type Kernel interface {
 	SetLogLevel(string)
 
 	// LogRecover outputs some information about the previous panic.
-	LogRecover(name string, recoverInfo interface{}) bool
+	LogRecover(name string, recoverInfo any) bool
 
 	// StartProfiling starts profiling the software according to a profile.
 	// It is an error to start more than one profile.
@@ -70,7 +70,7 @@ type Kernel interface {
 	SetConfig(srv Service, key, value string) error
 
 	// GetConfig returns a configuration value.
-	GetConfig(srv Service, key string) interface{}
+	GetConfig(srv Service, key string) any
 
 	// GetConfigList returns a sorted list of configuration data.
 	GetConfigList(Service) []KeyDescrValue

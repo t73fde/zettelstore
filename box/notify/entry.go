@@ -16,6 +16,8 @@ package notify
 import (
 	"path/filepath"
 
+	"slices"
+
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/parser"
@@ -104,10 +106,8 @@ func calcContentExt(syntax meta.Value, yamlSep bool, getZettelFileSyntax func() 
 	case meta.ValueSyntaxNone, meta.ValueSyntaxZmk:
 		return extZettel
 	}
-	for _, s := range getZettelFileSyntax() {
-		if s == syntax {
-			return extZettel
-		}
+	if slices.Contains(getZettelFileSyntax(), syntax) {
+		return extZettel
 	}
 	return string(syntax)
 

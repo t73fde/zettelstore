@@ -15,6 +15,7 @@ package impl
 
 import (
 	"os"
+	"slices"
 	"sync"
 	"time"
 
@@ -54,7 +55,7 @@ func (klw *kernelLogWriter) WriteMessage(level logger.Level, ts time.Time, prefi
 			ts:      ts,
 			prefix:  prefix,
 			msg:     msg,
-			details: append([]byte(nil), details...),
+			details: slices.Clone(details),
 		}
 		klw.writePos++
 		if klw.writePos >= cap(klw.data) {

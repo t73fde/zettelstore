@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"path"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -611,7 +612,7 @@ func (fs *fragmentSearcher) visitInlineSlice(is *ast.InlineSlice) {
 		if mn, ok := in.(*ast.MarkNode); ok && mn.Fragment == fs.fragment {
 			ris := skipBreakeNodes((*is)[i+1:])
 			if len(mn.Inlines) > 0 {
-				fs.result = append(ast.InlineSlice{}, mn.Inlines...)
+				fs.result = slices.Clone(mn.Inlines)
 				fs.result = append(fs.result, &ast.TextNode{Text: " "})
 				fs.result = append(fs.result, ris...)
 			} else {

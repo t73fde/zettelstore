@@ -59,13 +59,11 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			wui.reportError(ctx, w, err)
 			return
 		}
-		if len(actions) > 0 && len(metaSeq) > 0 {
-			for _, act := range actions {
-				if act == api.RedirectAction {
-					ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid)
-					wui.redirectFound(w, r, ub)
-					return
-				}
+		if len(metaSeq) > 0 {
+			if slices.Contains(actions, api.RedirectAction) {
+				ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid)
+				wui.redirectFound(w, r, ub)
+				return
 			}
 		}
 

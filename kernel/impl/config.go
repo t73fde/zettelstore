@@ -34,18 +34,9 @@ type configDescription struct {
 	canList bool
 }
 type descriptionMap map[string]configDescription
-type interfaceMap map[string]interface{}
+type interfaceMap map[string]any
 
-func (m interfaceMap) Clone() interfaceMap {
-	if m == nil {
-		return nil
-	}
-	result := make(interfaceMap, len(m))
-	for k, v := range m {
-		result[k] = v
-	}
-	return result
-}
+func (m interfaceMap) Clone() interfaceMap { return maps.Clone(m) }
 
 type srvConfig struct {
 	logger   *logger.Logger
@@ -138,7 +129,7 @@ func (cfg *srvConfig) getListDescription(key string) (configDescription, string,
 	return configDescription{}, "", -1
 }
 
-func (cfg *srvConfig) GetCurConfig(key string) interface{} {
+func (cfg *srvConfig) GetCurConfig(key string) any {
 	cfg.mxConfig.RLock()
 	defer cfg.mxConfig.RUnlock()
 	if cfg.cur == nil {
@@ -147,7 +138,7 @@ func (cfg *srvConfig) GetCurConfig(key string) interface{} {
 	return cfg.cur[key]
 }
 
-func (cfg *srvConfig) GetNextConfig(key string) interface{} {
+func (cfg *srvConfig) GetNextConfig(key string) any {
 	cfg.mxConfig.RLock()
 	defer cfg.mxConfig.RUnlock()
 	return cfg.next[key]
@@ -159,7 +150,7 @@ func (cfg *srvConfig) GetCurConfigList(all bool) []kernel.KeyDescrValue {
 func (cfg *srvConfig) GetNextConfigList() []kernel.KeyDescrValue {
 	return cfg.getOneConfigList(true, cfg.GetNextConfig)
 }
-func (cfg *srvConfig) getOneConfigList(all bool, getConfig func(string) interface{}) []kernel.KeyDescrValue {
+func (cfg *srvConfig) getOneConfigList(all bool, getConfig func(string) any) []kernel.KeyDescrValue {
 	if len(cfg.descr) == 0 {
 		return nil
 	}
@@ -183,7 +174,7 @@ func (cfg *srvConfig) getOneConfigList(all bool, getConfig func(string) interfac
 	return result
 }
 
-func (cfg *srvConfig) getSortedConfigKeys(all bool, getConfig func(string) interface{}) []string {
+func (cfg *srvConfig) getSortedConfigKeys(all bool, getConfig func(string) any) []string {
 	keys := make([]string, 0, len(cfg.descr))
 	for k, descr := range cfg.descr {
 		if all || descr.canList {

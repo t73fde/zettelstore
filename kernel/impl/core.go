@@ -39,7 +39,7 @@ type coreService struct {
 type recoverInfo struct {
 	count uint64
 	ts    time.Time
-	info  interface{}
+	info  any
 	stack []byte
 }
 
@@ -147,7 +147,7 @@ func (cs *coreService) RecoverLines(name string) []string {
 	)
 }
 
-func (cs *coreService) updateRecoverInfo(name string, recoverInfo interface{}, stack []byte) {
+func (cs *coreService) updateRecoverInfo(name string, recoverInfo any, stack []byte) {
 	cs.mxRecover.Lock()
 	ri := cs.mapRecover[name]
 	ri.count++

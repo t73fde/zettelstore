@@ -103,11 +103,7 @@ func (sess *cmdSession) calcMaxLen(table [][]string) []int {
 			if colLen <= maxLen[colno] {
 				continue
 			}
-			if colLen < sess.colwidth {
-				maxLen[colno] = colLen
-			} else {
-				maxLen[colno] = sess.colwidth
-			}
+			maxLen[colno] = min(colLen, sess.colwidth)
 		}
 	}
 	return maxLen
@@ -225,16 +221,16 @@ func cmdConfig(sess *cmdSession, cmd string, args []string) bool {
 }
 func cmdGetConfig(sess *cmdSession, _ string, args []string) bool {
 	showConfig(sess, args,
-		listCurConfig, func(srv service, key string) interface{} { return srv.GetCurConfig(key) })
+		listCurConfig, func(srv service, key string) any { return srv.GetCurConfig(key) })
 	return true
 }
 func cmdNextConfig(sess *cmdSession, _ string, args []string) bool {
 	showConfig(sess, args,
-		listNextConfig, func(srv service, key string) interface{} { return srv.GetNextConfig(key) })
+		listNextConfig, func(srv service, key string) any { return srv.GetNextConfig(key) })
 	return true
 }
 func showConfig(sess *cmdSession, args []string,
-	listConfig func(*cmdSession, service), getConfig func(service, string) interface{}) {
+	listConfig func(*cmdSession, service), getConfig func(service, string) any) {
 
 	if len(args) == 0 {
 		keys := make([]int, 0, len(sess.kern.srvs))

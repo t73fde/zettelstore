@@ -14,6 +14,8 @@
 package store
 
 import (
+	"maps"
+
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
@@ -77,14 +79,7 @@ func (zi *ZettelIndex) GetBackRefs() *idset.Set { return zi.backrefs }
 
 // GetInverseRefs returns all inverse meta references as a map of strings to a sorted list of references
 func (zi *ZettelIndex) GetInverseRefs() map[string]*idset.Set {
-	if len(zi.inverseRefs) == 0 {
-		return nil
-	}
-	result := make(map[string]*idset.Set, len(zi.inverseRefs))
-	for key, refs := range zi.inverseRefs {
-		result[key] = refs
-	}
-	return result
+	return maps.Clone(zi.inverseRefs)
 }
 
 // GetWords returns a reference to the set of words. It must not be modified.

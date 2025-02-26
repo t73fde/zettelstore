@@ -45,20 +45,11 @@ func computeCreated(zid id.Zid) meta.Value {
 		// In the month 000101, the day must be > 0.
 		return "00010101000000"
 	}
-	seconds := zid % 100
-	if seconds > 59 {
-		seconds = 59
-	}
+	seconds := min(zid%100, 59)
 	zid /= 100
-	minutes := zid % 100
-	if minutes > 59 {
-		minutes = 59
-	}
+	minutes := min(zid%100, 59)
 	zid /= 100
-	hours := zid % 100
-	if hours > 23 {
-		hours = 23
-	}
+	hours := min(zid%100, 23)
 	zid /= 100
 	day := zid % 100
 	zid /= 100

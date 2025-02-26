@@ -16,6 +16,7 @@ package query
 
 import (
 	"context"
+	"maps"
 	"math/rand/v2"
 	"slices"
 
@@ -147,27 +148,13 @@ func (q *Query) Clone() *Query {
 	c.preMatch = q.preMatch
 	c.terms = make([]conjTerms, len(q.terms))
 	for i, term := range q.terms {
-		if len(term.keys) > 0 {
-			c.terms[i].keys = make(keyExistMap, len(term.keys))
-			for k, v := range term.keys {
-				c.terms[i].keys[k] = v
-			}
-		}
-		// if len(c.mvals) > 0 {
-		c.terms[i].mvals = make(expMetaValues, len(term.mvals))
-		for k, v := range term.mvals {
-			c.terms[i].mvals[k] = v
-		}
-		// }
-		if len(term.search) > 0 {
-			c.terms[i].search = append([]expValue{}, term.search...)
-		}
+		c.terms[i].keys = maps.Clone(term.keys)
+		c.terms[i].mvals = maps.Clone(term.mvals)
+		c.terms[i].search = slices.Clone(term.search)
 	}
 	c.seed = q.seed
 	c.pick = q.pick
-	if len(q.order) > 0 {
-		c.order = append([]sortOrder{}, q.order...)
-	}
+	c.order = slices.Clone(q.order)
 	c.offset = q.offset
 	c.limit = q.limit
 	c.actions = q.actions

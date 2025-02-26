@@ -22,6 +22,8 @@ import (
 	"strconv"
 	"strings"
 
+	"slices"
+
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
@@ -61,13 +63,11 @@ func (a *API) MakeQueryHandler(
 		}
 		if len(actions) > 0 {
 			if len(metaSeq) > 0 {
-				for _, act := range actions {
-					if act == api.RedirectAction {
-						zid := metaSeq[0].Zid
-						ub := a.NewURLBuilder('z').SetZid(zid)
-						a.redirectFound(w, r, ub, zid)
-						return
-					}
+				if slices.Contains(actions, api.RedirectAction) {
+					zid := metaSeq[0].Zid
+					ub := a.NewURLBuilder('z').SetZid(zid)
+					a.redirectFound(w, r, ub, zid)
+					return
 				}
 			}
 		}

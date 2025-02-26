@@ -236,7 +236,7 @@ func (kern *myKernel) SetLogLevel(logLevel string) {
 func (kern *myKernel) parseLogLevel(logLevel string) (logger.Level, map[kernel.Service]logger.Level) {
 	defaultLevel := logger.NoLevel
 	srvLevel := map[kernel.Service]logger.Level{}
-	for _, spec := range strings.Split(logLevel, ";") {
+	for spec := range strings.SplitSeq(logLevel, ";") {
 		vals := cleanLogSpec(strings.Split(spec, ":"))
 		switch len(vals) {
 		case 0:
@@ -276,10 +276,10 @@ func (kern *myKernel) GetLastLogTime() time.Time {
 }
 
 // LogRecover outputs some information about the previous panic.
-func (kern *myKernel) LogRecover(name string, recoverInfo interface{}) bool {
+func (kern *myKernel) LogRecover(name string, recoverInfo any) bool {
 	return kern.doLogRecover(name, recoverInfo)
 }
-func (kern *myKernel) doLogRecover(name string, recoverInfo interface{}) bool {
+func (kern *myKernel) doLogRecover(name string, recoverInfo any) bool {
 	stack := debug.Stack()
 	kern.logger.Error().Str("recovered_from", fmt.Sprint(recoverInfo)).Bytes("stack", stack).Msg(name)
 	kern.core.updateRecoverInfo(name, recoverInfo, stack)
@@ -365,7 +365,7 @@ func (kern *myKernel) SetConfig(srvnum kernel.Service, key, value string) error 
 	return errUnknownService
 }
 
-func (kern *myKernel) GetConfig(srvnum kernel.Service, key string) interface{} {
+func (kern *myKernel) GetConfig(srvnum kernel.Service, key string) any {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -503,10 +503,10 @@ type service interface {
 	SetConfig(key, value string) error
 
 	// GetCurConfig returns the current configuration value.
-	GetCurConfig(key string) interface{}
+	GetCurConfig(key string) any
 
 	// GetNextConfig returns the next configuration value.
-	GetNextConfig(key string) interface{}
+	GetNextConfig(key string) any
 
 	// GetCurConfigList returns a sorted list of current configuration data.
 	GetCurConfigList(all bool) []kernel.KeyDescrValue
@@ -555,8 +555,8 @@ func (*kernelService) Initialize(*logger.Logger)                      {}
 func (ks *kernelService) GetLogger() *logger.Logger                   { return ks.kernel.logger }
 func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return nil }
 func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
-func (*kernelService) GetCurConfig(string) interface{}                { return nil }
-func (*kernelService) GetNextConfig(string) interface{}               { return nil }
+func (*kernelService) GetCurConfig(string) any                        { return nil }
+func (*kernelService) GetNextConfig(string) any                       { return nil }
 func (*kernelService) GetCurConfigList(bool) []kernel.KeyDescrValue   { return nil }
 func (*kernelService) GetNextConfigList() []kernel.KeyDescrValue      { return nil }
 func (*kernelService) GetStatistics() []kernel.KeyValue               { return nil }
