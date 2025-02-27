@@ -175,9 +175,6 @@ func (ws *webService) Start(kern *myKernel) error {
 		ws.logger.Error().Err(err).Msg("Unable to create")
 		return err
 	}
-	if kern.core.GetNextConfig(kernel.CoreDebug).(bool) {
-		srvw.SetDebug()
-	}
 	if err = srvw.Run(); err != nil {
 		ws.logger.Error().Err(err).Msg("Unable to start")
 		return err

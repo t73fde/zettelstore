@@ -4,7 +4,7 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20211125191727
-modified: 20250102190221
+modified: 20250227220050
 
 You have already tried the Zettelstore software and now you want to use it permanently.
 Zettelstore should start automatically when you log into your computer.
@@ -25,3 +25,9 @@ Zettelstore should start automatically when you log into your computer.
 ** [[Windows|00001003305000]]
 ** [[macOS|00001003310000]]
 ** [[Linux|00001003315000]]
+
+A word of caution: Never expose Zettelstore directly to the Internet.
+As a personal service, Zettelstore is not designed to handle all aspects of the open web.
+For instance, it lacks support for certificate handling, which is necessary for encrypted HTTP connections.
+To ensure security, [[install Zettelstore on a server|00001003600000]] and place it behind a proxy server designed for Internet exposure.
+For more details, see: [[External server to encrypt message transport|00001010090100]].

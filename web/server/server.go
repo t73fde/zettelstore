@@ -112,7 +112,6 @@ type Server interface {
 	Auth
 	Builder
 
-	SetDebug()
 	Run() error
 	Stop()
 }
