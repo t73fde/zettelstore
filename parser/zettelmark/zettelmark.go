@@ -32,12 +32,12 @@ func init() {
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseZmkBlocks,
+		Parse:         parseZmk,
 	})
 }
 
-func parseZmkBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
-	if obj := zmk.ParseBlocks(inp); obj != nil {
+func parseZmk(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
+	if obj := zmk.Parse(inp); obj != nil {
 		bs, err := sztrans.GetBlockSlice(obj)
 		if err == nil {
 			return bs
