@@ -88,18 +88,6 @@ func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
 // EvaluateBlock evaluates the given block list in the given context, with
 // the given ports, and the given environment.
 func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, bns *ast.BlockSlice) {
-	evaluateNode(ctx, port, rtConfig, bns)
-	cleaner.CleanBlockSlice(bns, true)
-}
-
-// EvaluateInline evaluates the given inline list in the given context, with
-// the given ports, and the given environment.
-func EvaluateInline(ctx context.Context, port Port, rtConfig config.Config, is *ast.InlineSlice) {
-	evaluateNode(ctx, port, rtConfig, is)
-	cleaner.CleanInlineSlice(is)
-}
-
-func evaluateNode(ctx context.Context, port Port, rtConfig config.Config, n ast.Node) {
 	e := evaluator{
 		ctx:             ctx,
 		port:            port,
@@ -110,7 +98,8 @@ func evaluateNode(ctx context.Context, port Port, rtConfig config.Config, n ast.
 		embedMap:        map[string]ast.InlineSlice{},
 		marker:          &ast.ZettelNode{},
 	}
-	ast.Walk(&e, n)
+	ast.Walk(&e, bns)
+	cleaner.CleanBlockSlice(bns, true)
 }
 
 type evaluator struct {

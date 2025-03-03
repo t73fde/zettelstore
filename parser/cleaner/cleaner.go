@@ -24,22 +24,17 @@ import (
 )
 
 // CleanBlockSlice cleans the given block list.
-func CleanBlockSlice(bs *ast.BlockSlice, allowHTML bool) { cleanNode(bs, allowHTML) }
-
-// CleanInlineSlice cleans the given inline list.
-func CleanInlineSlice(is *ast.InlineSlice) { cleanNode(is, false) }
-
-func cleanNode(n ast.Node, allowHTML bool) {
+func CleanBlockSlice(bs *ast.BlockSlice, allowHTML bool) {
 	cv := cleanVisitor{
 		textEnc:   textenc.Create(),
 		allowHTML: allowHTML,
 		hasMark:   false,
 		doMark:    false,
 	}
-	ast.Walk(&cv, n)
+	ast.Walk(&cv, bs)
 	if cv.hasMark {
 		cv.doMark = true
-		ast.Walk(&cv, n)
+		ast.Walk(&cv, bs)
 	}
 }
 
