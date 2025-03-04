@@ -131,7 +131,9 @@ func (v *visitor) Visit(node ast.Node) ast.Visitor {
 	case *ast.TableNode:
 		v.visitTable(n)
 		return nil
-	case *ast.TranscludeNode, *ast.BLOBNode:
+	case *ast.TranscludeNode:
+		ast.Walk(v, &n.Inlines)
+	case *ast.BLOBNode:
 		return nil
 	case *ast.TextNode:
 		v.visitText(n.Text)

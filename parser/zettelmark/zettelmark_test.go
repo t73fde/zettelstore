@@ -874,7 +874,7 @@ func (tv *TestVisitor) Visit(node ast.Node) ast.Visitor {
 		}
 		tv.sb.WriteString(")")
 	case *ast.TranscludeNode:
-		fmt.Fprintf(&tv.sb, "(TRANSCLUDE %v)", n.Ref)
+		fmt.Fprintf(&tv.sb, "(TRANSCLUDE %v)", n.Ref) // FIXME n.Inlines
 		tv.visitAttributes(n.Attrs)
 	case *ast.BLOBNode:
 		tv.sb.WriteString("(BLOB ")

@@ -275,14 +275,15 @@ func (cell *TableCell) WalkChildren(v Visitor) {
 // TranscludeNode specifies block content from other zettel to embedded in
 // current zettel
 type TranscludeNode struct {
-	Attrs attrs.Attributes
-	Ref   *Reference
+	Attrs   attrs.Attributes
+	Ref     *Reference
+	Inlines InlineSlice // Optional text.
 }
 
 func (*TranscludeNode) blockNode() { /* Just a marker */ }
 
-// WalkChildren does nothing.
-func (*TranscludeNode) WalkChildren(Visitor) { /* No children*/ }
+// WalkChildren walks the associated text.
+func (tn *TranscludeNode) WalkChildren(v Visitor) { Walk(v, &tn.Inlines) }
 
 //--------------------------------------------------------------------------
 

@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20241216104739
+modified: 20250304220504
 
 === ''PARA''
 :::syntax
@@ -178,7 +178,7 @@ Otherwise the (binary) image data is encoded with base64.
 
 === ''TRANSCLUDE''
 :::syntax
-__Transclude__ **=** ''(TRANSCLUDE'' [[__Attributes__|00001012931000#attribute]] [[__Reference__|00001012931900]] '')''.
+__Transclude__ **=** ''(TRANSCLUDE'' [[__Attributes__|00001012931000#attribute]] [[__Reference__|00001012931900]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 A transclude list only occurs for a parsed zettel, but not for a evaluated zettel.
 Evaluating a zettel also means that all transclusions are resolved.

@@ -128,7 +128,7 @@ func (v *visitor) Visit(node ast.Node) ast.Visitor {
 	case *ast.TableNode:
 		v.visitTable(n)
 	case *ast.TranscludeNode:
-		v.b.WriteStrings("{{{", n.Ref.String(), "}}}")
+		v.b.WriteStrings("{{{", n.Ref.String(), "}}}") // FIXME n.Inlines
 		v.visitAttributes(n.Attrs)
 	case *ast.BLOBNode:
 		v.visitBLOB(n)

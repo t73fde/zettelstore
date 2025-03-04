@@ -81,8 +81,6 @@ func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 			return handleVerbatim(ast.VerbatimCode, pair.Tail())
 		case sz.SymVerbatimZettel:
 			return handleVerbatim(ast.VerbatimZettel, pair.Tail())
-		case sz.SymTransclude:
-			return handleTransclude(pair.Tail())
 		}
 	}
 	return sx.Nil(), false
@@ -114,20 +112,6 @@ func handleVerbatim(kind ast.VerbatimKind, rest *sx.Pair) (sx.Object, bool) {
 					Content: []byte(s.GetValue()),
 				}}, true
 			}
-		}
-	}
-	return nil, false
-}
-
-func handleTransclude(rest *sx.Pair) (sx.Object, bool) {
-	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			ref := collectReference(curr.Head())
-			return sxNode{&ast.TranscludeNode{
-				Attrs: attrs,
-				Ref:   ref,
-			}}, true
 		}
 	}
 	return nil, false
@@ -176,6 +160,8 @@ func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
 			return handleRegion(ast.RegionQuote, pair.Tail())
 		case sz.SymRegionVerse:
 			return handleRegion(ast.RegionVerse, pair.Tail())
+		case sz.SymTransclude:
+			return handleTransclude(pair.Tail())
 
 		case sz.SymLinkHosted:
 			return handleLink(ast.RefStateHosted, pair.Tail())
@@ -419,6 +405,22 @@ func handleRegion(kind ast.RegionKind, rest *sx.Pair) sx.Object {
 		}
 	}
 	log.Println("REGI", rest)
+	return rest
+}
+
+func handleTransclude(rest *sx.Pair) sx.Object {
+	if rest != nil {
+		attrs := sz.GetAttributes(rest.Head())
+		if curr := rest.Tail(); curr != nil {
+			ref := collectReference(curr.Head())
+			return sxNode{&ast.TranscludeNode{
+				Attrs:   attrs,
+				Ref:     ref,
+				Inlines: collectInlines(curr.Tail()),
+			}}
+		}
+	}
+	log.Println("TRAN", rest)
 	return rest
 }
 

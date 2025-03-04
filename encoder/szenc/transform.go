@@ -60,7 +60,7 @@ func (t *Transformer) GetSz(node ast.Node) *sx.Pair {
 	case *ast.TableNode:
 		return t.getTable(n)
 	case *ast.TranscludeNode:
-		return sz.MakeTransclusion(getAttributes(n.Attrs), getReference(n.Ref))
+		return sz.MakeTransclusion(getAttributes(n.Attrs), getReference(n.Ref), t.getInlineList(n.Inlines))
 	case *ast.BLOBNode:
 		return t.getBLOB(n)
 	case *ast.TextNode:
