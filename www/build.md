@@ -75,9 +75,9 @@ prefer Git and popular platforms that just support Git.
 
 Some dependencies of Zettelstore, namely [Zettelstore
 client](https://t73f.de/r/zsc), [webs](https://t73f.de/r/webs),
-[sx](https://t73f.de/r/sx), and [sxwebs](https://t73f.de/r/sxwebs) are also
-managed by Fossil. Depending on your development setup, some error messages
-might occur.
+[sx](https://t73f.de/r/sx), [sxwebs](https://t73f.de/r/sxwebs), and
+[zero](https://t73f.de/r/zero) are also managed by Fossil. Depending on your
+development setup, some error messages might occur.
 
 If the error message mentions an environment variable called `GOVCS` you should
 set it to the value `GOVCS=zettelstore.de:fossil` (alternatively more generous
