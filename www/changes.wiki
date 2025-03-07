@@ -1,7 +1,10 @@
 <title>Change Log</title>
 
+<a id="0_21"></a>
+<h2>Changes for Version 0.21.0 (pending)</h2>
+
 <a id="0_20"></a>
-<h2>Changes for Version 0.20.0 (pending)</h2>
+<h2>Changes for Version 0.20.0 (2025-03-07)</h2>
   *  Metadata with keys that have the suffix <code>-title</code> are no longer
      interpreted as Zettelmarkup. This was a leftover from [#0_11|v0.11], when
      type of metadata <code>title</code> was changed from Zettelmarkup to a
