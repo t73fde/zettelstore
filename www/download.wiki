@@ -11,6 +11,7 @@
 <h2>ZIP-ped Executables</h2>
 Build: <code>v0.20.0</code> (2025-03-07).
 
+  *  [/uv/zettelstore-0.20.0-android-arm64.zip|Android] (arm64)
   *  [/uv/zettelstore-0.20.0-linux-amd64.zip|Linux] (amd64)
   *  [/uv/zettelstore-0.20.0-linux-arm.zip|Linux] (arm6, e.g. Raspberry Pi)
   *  [/uv/zettelstore-0.20.0-darwin-arm64.zip|macOS] (arm64)

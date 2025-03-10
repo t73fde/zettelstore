@@ -20,8 +20,8 @@
      support the cancelled migration process into a four letter zettel
      identifier format.
      (breaking)
-  *  Remove support for inline zettel snippets. Mostyl used for some HTML
-     trinks, which hinders portability and encoding in other formats.
+  *  Remove support for inline zettel snippets. Mostly used for some HTML
+     elements, which hinders portability and encoding in other formats.
      (breaking: zettelmarkup)
   *  Remove support for inline HTML text within Markdown text. Such HTML code
      (did I ever say that Markdown is just a super-set of HTML?) is now
@@ -29,7 +29,7 @@
      (breaking: markdown/CommonMark)
   *  Query aggregates <code>ATOM</code> and <code>RSS</code> are removed, as
      well as the accompanying <code>TITLE</code> query action (parameter).
-     Were announced as deprecated in version 0.19.
+     Was announced as deprecated in version 0.19.
      (breaking)
   *  Query data encoding and aggregate data encoding were changed to remove the
      superfluous <code>(list ...)</code>. Instead, the result list is now
