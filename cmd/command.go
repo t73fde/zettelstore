@@ -18,7 +18,7 @@ import (
 	"maps"
 	"slices"
 
-	"zettelstore.de/z/logger"
+	"zettelstore.de/z/internal/logger"
 )
 
 // Command stores information about commands / sub-commands.

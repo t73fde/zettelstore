@@ -11,6 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
+// Package cmd provides the commands to call Zettelstore from the command line.
 package cmd
 
 import (
@@ -29,15 +30,16 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
-	"zettelstore.de/z/auth"
-	"zettelstore.de/z/auth/impl"
-	"zettelstore.de/z/box"
-	"zettelstore.de/z/box/compbox"
-	"zettelstore.de/z/box/manager"
-	"zettelstore.de/z/config"
-	"zettelstore.de/z/kernel"
-	"zettelstore.de/z/logger"
-	"zettelstore.de/z/web/server"
+
+	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/auth/impl"
+	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/box/compbox"
+	"zettelstore.de/z/internal/box/manager"
+	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/kernel"
+	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/web/server"
 )
 
 const strRunSimple = "run-simple"

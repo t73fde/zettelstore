@@ -11,27 +11,26 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package cmd provides command generic functions.
 package cmd
 
-// Mention all needed encoders, parsers and stores to have them registered.
+// Mention all needed boxes, encoders, and parsers to have them registered.
 import (
-	_ "zettelstore.de/z/box/compbox"       // Allow to use computed box.
-	_ "zettelstore.de/z/box/constbox"      // Allow to use global internal box.
-	_ "zettelstore.de/z/box/dirbox"        // Allow to use directory box.
-	_ "zettelstore.de/z/box/filebox"       // Allow to use file box.
-	_ "zettelstore.de/z/box/membox"        // Allow to use in-memory box.
-	_ "zettelstore.de/z/encoder/htmlenc"   // Allow to use HTML encoder.
-	_ "zettelstore.de/z/encoder/mdenc"     // Allow to use markdown encoder.
-	_ "zettelstore.de/z/encoder/shtmlenc"  // Allow to use SHTML encoder.
-	_ "zettelstore.de/z/encoder/szenc"     // Allow to use Sz encoder.
-	_ "zettelstore.de/z/encoder/textenc"   // Allow to use text encoder.
-	_ "zettelstore.de/z/encoder/zmkenc"    // Allow to use zmk encoder.
-	_ "zettelstore.de/z/kernel/impl"       // Allow kernel implementation to create itself
-	_ "zettelstore.de/z/parser/blob"       // Allow to use BLOB parser.
-	_ "zettelstore.de/z/parser/draw"       // Allow to use draw parser.
-	_ "zettelstore.de/z/parser/markdown"   // Allow to use markdown parser.
-	_ "zettelstore.de/z/parser/none"       // Allow to use none parser.
-	_ "zettelstore.de/z/parser/plain"      // Allow to use plain parser.
-	_ "zettelstore.de/z/parser/zettelmark" // Allow to use zettelmark parser.
+	_ "zettelstore.de/z/internal/box/compbox"       // Allow to use computed box.
+	_ "zettelstore.de/z/internal/box/constbox"      // Allow to use global internal box.
+	_ "zettelstore.de/z/internal/box/dirbox"        // Allow to use directory box.
+	_ "zettelstore.de/z/internal/box/filebox"       // Allow to use file box.
+	_ "zettelstore.de/z/internal/box/membox"        // Allow to use in-memory box.
+	_ "zettelstore.de/z/internal/encoder/htmlenc"   // Allow to use HTML encoder.
+	_ "zettelstore.de/z/internal/encoder/mdenc"     // Allow to use markdown encoder.
+	_ "zettelstore.de/z/internal/encoder/shtmlenc"  // Allow to use SHTML encoder.
+	_ "zettelstore.de/z/internal/encoder/szenc"     // Allow to use Sz encoder.
+	_ "zettelstore.de/z/internal/encoder/textenc"   // Allow to use text encoder.
+	_ "zettelstore.de/z/internal/encoder/zmkenc"    // Allow to use zmk encoder.
+	_ "zettelstore.de/z/internal/kernel/impl"       // Allow kernel implementation to create itself
+	_ "zettelstore.de/z/internal/parser/blob"       // Allow to use BLOB parser.
+	_ "zettelstore.de/z/internal/parser/draw"       // Allow to use draw parser.
+	_ "zettelstore.de/z/internal/parser/markdown"   // Allow to use markdown parser.
+	_ "zettelstore.de/z/internal/parser/none"       // Allow to use none parser.
+	_ "zettelstore.de/z/internal/parser/plain"      // Allow to use plain parser.
+	_ "zettelstore.de/z/internal/parser/zettelmark" // Allow to use zettelmark parser.
 )

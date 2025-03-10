@@ -19,14 +19,15 @@ import (
 	"net/http"
 
 	"t73f.de/r/zsc/domain/meta"
-	"zettelstore.de/z/auth"
-	"zettelstore.de/z/box"
-	"zettelstore.de/z/config"
-	"zettelstore.de/z/kernel"
-	"zettelstore.de/z/usecase"
-	"zettelstore.de/z/web/adapter/api"
-	"zettelstore.de/z/web/adapter/webui"
-	"zettelstore.de/z/web/server"
+
+	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/kernel"
+	"zettelstore.de/z/internal/usecase"
+	"zettelstore.de/z/internal/web/adapter/api"
+	"zettelstore.de/z/internal/web/adapter/webui"
+	"zettelstore.de/z/internal/web/server"
 )
 
 // ---------- Subcommand: run ------------------------------------------------

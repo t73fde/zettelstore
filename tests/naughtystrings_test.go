@@ -22,9 +22,11 @@ import (
 
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
+
+	"zettelstore.de/z/internal/encoder"
+	"zettelstore.de/z/internal/parser"
+
 	_ "zettelstore.de/z/cmd"
-	"zettelstore.de/z/encoder"
-	"zettelstore.de/z/parser"
 )
 
 // Test all parser / encoder with a list of "naughty strings", i.e. unusual strings

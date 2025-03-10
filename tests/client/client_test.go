@@ -29,7 +29,7 @@ import (
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-	"zettelstore.de/z/kernel"
+	"zettelstore.de/z/internal/kernel"
 )
 
 func nextZid(zid id.Zid) id.Zid { return zid + 1 }

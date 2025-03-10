@@ -26,16 +26,17 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
-	"zettelstore.de/z/ast"
-	"zettelstore.de/z/box"
-	"zettelstore.de/z/box/manager"
-	"zettelstore.de/z/config"
-	"zettelstore.de/z/encoder"
-	"zettelstore.de/z/kernel"
-	"zettelstore.de/z/parser"
-	"zettelstore.de/z/query"
 
-	_ "zettelstore.de/z/box/dirbox"
+	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/box/manager"
+	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/encoder"
+	"zettelstore.de/z/internal/kernel"
+	"zettelstore.de/z/internal/parser"
+	"zettelstore.de/z/internal/query"
+
+	_ "zettelstore.de/z/internal/box/dirbox"
 )
 
 var encodings = []api.EncodingEnum{

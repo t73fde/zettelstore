@@ -24,18 +24,20 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
-	"zettelstore.de/z/ast"
-	"zettelstore.de/z/config"
-	"zettelstore.de/z/encoder"
-	_ "zettelstore.de/z/encoder/htmlenc"
-	_ "zettelstore.de/z/encoder/mdenc"
-	_ "zettelstore.de/z/encoder/shtmlenc"
-	_ "zettelstore.de/z/encoder/szenc"
-	_ "zettelstore.de/z/encoder/textenc"
-	_ "zettelstore.de/z/encoder/zmkenc"
-	"zettelstore.de/z/parser"
-	_ "zettelstore.de/z/parser/markdown"
-	_ "zettelstore.de/z/parser/zettelmark"
+
+	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/encoder"
+	"zettelstore.de/z/internal/parser"
+
+	_ "zettelstore.de/z/internal/encoder/htmlenc"
+	_ "zettelstore.de/z/internal/encoder/mdenc"
+	_ "zettelstore.de/z/internal/encoder/shtmlenc"
+	_ "zettelstore.de/z/internal/encoder/szenc"
+	_ "zettelstore.de/z/internal/encoder/textenc"
+	_ "zettelstore.de/z/internal/encoder/zmkenc"
+	_ "zettelstore.de/z/internal/parser/markdown"
+	_ "zettelstore.de/z/internal/parser/zettelmark"
 )
 
 type markdownTestCase struct {
