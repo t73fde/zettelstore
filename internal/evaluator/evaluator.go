@@ -34,8 +34,6 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
-	"zettelstore.de/z/internal/parser/cleaner"
-	"zettelstore.de/z/internal/parser/draw"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -100,7 +98,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, bns *
 		marker:          &ast.ZettelNode{},
 	}
 	ast.Walk(&e, bns)
-	cleaner.CleanBlockSlice(bns, true)
+	parser.Clean(bns, true)
 }
 
 type evaluator struct {
@@ -181,7 +179,7 @@ func (e *evaluator) evalVerbatimNode(vn *ast.VerbatimNode) ast.BlockNode {
 		return e.evalVerbatimZettel(vn)
 	case ast.VerbatimEval:
 		if syntax, found := vn.Attrs.Get(""); found && syntax == meta.ValueSyntaxDraw {
-			return draw.ParseDrawBlock(vn)
+			return parser.ParseDrawBlock(vn)
 		}
 	}
 	return vn

@@ -11,58 +11,58 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package blob provides a parser of binary data.
-package blob
+package parser
+
+// blob provides a parser of binary data.
 
 import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/parser"
 )
 
 func init() {
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxGif,
 		AltNames:      nil,
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		Parse:         parseBlocks,
+		Parse:         parseBlob,
 	})
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxJPEG,
 		AltNames:      []string{meta.ValueSyntaxJPG},
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		Parse:         parseBlocks,
+		Parse:         parseBlob,
 	})
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxPNG,
 		AltNames:      nil,
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		Parse:         parseBlocks,
+		Parse:         parseBlob,
 	})
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxWebp,
 		AltNames:      nil,
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: true,
-		Parse:         parseBlocks,
+		Parse:         parseBlob,
 	})
 }
 
-func parseBlocks(inp *input.Input, m *meta.Meta, syntax string) ast.BlockSlice {
-	if p := parser.Get(syntax); p != nil {
+func parseBlob(inp *input.Input, m *meta.Meta, syntax string) ast.BlockSlice {
+	if p := Get(syntax); p != nil {
 		syntax = p.Name
 	}
 	return ast.BlockSlice{&ast.BLOBNode{
-		Description: parser.ParseDescription(m),
+		Description: ParseDescription(m),
 		Syntax:      syntax,
 		Blob:        []byte(inp.Src),
 	}}

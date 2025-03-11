@@ -27,8 +27,6 @@ import (
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
-
-	_ "zettelstore.de/z/internal/parser/zettelmark" // Allow to use zettelmark parser.
 )
 
 type zmkTestCase struct {
@@ -60,7 +58,7 @@ func TestEncoder(t *testing.T) {
 func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 	for testNum, tc := range testCases {
 		inp := input.NewInput([]byte(tc.zmk))
-		bs := parser.ParseBlocks(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
+		bs := parser.Parse(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
 		checkEncodings(t, testNum, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, bs, tc.inline, tc.descr)
 	}

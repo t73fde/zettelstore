@@ -11,8 +11,9 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package plain provides a parser for plain text data.
-package plain
+package parser
+
+// plain provides a parser for plain text data.
 
 import (
 	"bytes"
@@ -23,59 +24,58 @@ import (
 	"t73f.de/r/zsc/input"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/parser"
 )
 
 func init() {
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxTxt,
 		AltNames:      []string{meta.ValueSyntaxPlain, meta.ValueSyntaxText},
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseBlocks,
+		Parse:         parsePlain,
 	})
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxHTML,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseBlocksHTML,
+		Parse:         parsePlainHTML,
 	})
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxCSS,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseBlocks,
+		Parse:         parsePlain,
 	})
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxSVG,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: true,
-		Parse:         parseSVGBlocks,
+		Parse:         parsePlainSVG,
 	})
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxSxn,
 		AltNames:      []string{},
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseSxnBlocks,
+		Parse:         parsePlainSxn,
 	})
 }
 
-func parseBlocks(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
-	return doParseBlocks(inp, syntax, ast.VerbatimCode)
+func parsePlain(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
+	return doParsePlain(inp, syntax, ast.VerbatimCode)
 }
-func parseBlocksHTML(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
-	return doParseBlocks(inp, syntax, ast.VerbatimHTML)
+func parsePlainHTML(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
+	return doParsePlain(inp, syntax, ast.VerbatimHTML)
 }
-func doParseBlocks(inp *input.Input, syntax string, kind ast.VerbatimKind) ast.BlockSlice {
+func doParsePlain(inp *input.Input, syntax string, kind ast.VerbatimKind) ast.BlockSlice {
 	return ast.BlockSlice{
 		&ast.VerbatimNode{
 			Kind:    kind,
@@ -85,7 +85,7 @@ func doParseBlocks(inp *input.Input, syntax string, kind ast.VerbatimKind) ast.B
 	}
 }
 
-func parseSVGBlocks(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
+func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
 	is := parseSVGInlines(inp, syntax)
 	if len(is) == 0 {
 		return nil
@@ -118,7 +118,7 @@ func scanSVG(inp *input.Input) string {
 	return ""
 }
 
-func parseSxnBlocks(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
+func parsePlainSxn(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
 	rd := sxreader.MakeReader(bytes.NewReader(inp.Src))
 	_, err := rd.ReadAll()
 	result := ast.BlockSlice{

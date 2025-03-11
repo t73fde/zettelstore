@@ -23,15 +23,13 @@ import (
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/parser/cleaner"
 	"zettelstore.de/z/internal/zettel"
 )
 
 // Info describes a single parser.
 //
-// Before ParseBlocks() or ParseInlines() is called, ensure the input stream to
-// be valid. This can ce achieved on calling inp.Next() after the input stream
-// was created.
+// Before Parse() is called, ensure the input stream to be valid. This can be
+// achieved on calling inp.Next() after the input stream was created.
 type Info struct {
 	Name          string
 	AltNames      []string
@@ -43,8 +41,8 @@ type Info struct {
 
 var registry = map[string]*Info{}
 
-// Register the parser (info) for later retrieval.
-func Register(pi *Info) {
+// register the parser (info) for later retrieval.
+func register(pi *Info) {
 	if _, ok := registry[pi.Name]; ok {
 		panic(fmt.Sprintf("Parser %q already registered", pi.Name))
 	}
@@ -95,10 +93,10 @@ func IsImageFormat(syntax string) bool {
 	return pi.IsImageFormat
 }
 
-// ParseBlocks parses some input and returns a slice of block nodes.
-func ParseBlocks(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) ast.BlockSlice {
+// Parse parses some input and returns a slice of block nodes.
+func Parse(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) ast.BlockSlice {
 	bs := Get(syntax).Parse(inp, m, syntax)
-	cleaner.CleanBlockSlice(&bs, hi.AllowHTML(syntax))
+	Clean(&bs, hi.AllowHTML(syntax))
 	return bs
 }
 
@@ -136,7 +134,7 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 	if rtConfig != nil {
 		hi = rtConfig.GetHTMLInsecurity()
 	}
-	bs := ParseBlocks(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
+	bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
 	return &ast.ZettelNode{
 		Meta:      m,
 		Content:   zettel.Content,

@@ -18,13 +18,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-
-	_ "zettelstore.de/z/internal/parser/blob"       // Allow to use BLOB parser.
-	_ "zettelstore.de/z/internal/parser/draw"       // Allow to use draw parser.
-	_ "zettelstore.de/z/internal/parser/markdown"   // Allow to use markdown parser.
-	_ "zettelstore.de/z/internal/parser/none"       // Allow to use none parser.
-	_ "zettelstore.de/z/internal/parser/plain"      // Allow to use plain parser.
-	_ "zettelstore.de/z/internal/parser/zettelmark" // Allow to use zettelmark parser.
 )
 
 func TestSeekZid(t *testing.T) {

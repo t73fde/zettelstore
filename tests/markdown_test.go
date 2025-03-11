@@ -29,9 +29,6 @@ import (
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
-
-	_ "zettelstore.de/z/internal/parser/markdown"
-	_ "zettelstore.de/z/internal/parser/zettelmark"
 )
 
 type markdownTestCase struct {
@@ -77,7 +74,7 @@ func TestMarkdownSpec(t *testing.T) {
 }
 
 func createMDBlockSlice(markdown string, hi config.HTMLInsecurity) ast.BlockSlice {
-	return parser.ParseBlocks(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, hi)
+	return parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, hi)
 }
 
 func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
@@ -101,7 +98,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// gotFirst := buf.String()
 
 		testID = tc.Example*100 + 2
-		secondAst := parser.ParseBlocks(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		secondAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		zmkEncoder.WriteBlocks(&buf, &secondAst)
 		gotSecond := buf.String()
@@ -111,7 +108,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// }
 
 		testID = tc.Example*100 + 3
-		thirdAst := parser.ParseBlocks(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		thirdAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		zmkEncoder.WriteBlocks(&buf, &thirdAst)
 		gotThird := buf.String()

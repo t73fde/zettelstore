@@ -11,8 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package zettelmark_test provides some tests for the zettelmarkup parser.
-package zettelmark_test
+package parser_test
 
 import (
 	"fmt"
@@ -49,7 +48,7 @@ func checkTcs(t *testing.T, tcs TestCases) {
 		t.Run(fmt.Sprintf("TC=%02d,src=%q", tcn, tc.source), func(st *testing.T) {
 			st.Helper()
 			inp := input.NewInput([]byte(tc.source))
-			bns := parser.ParseBlocks(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
+			bns := parser.Parse(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
 			var tv TestVisitor
 			ast.Walk(&tv, &bns)
 			got := tv.String()

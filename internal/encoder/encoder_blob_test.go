@@ -22,8 +22,6 @@ import (
 
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
-
-	_ "zettelstore.de/z/internal/parser/blob" // Allow to use BLOB parser.
 )
 
 type blobTestCase struct {
@@ -57,7 +55,7 @@ func TestBlob(t *testing.T) {
 	m.Set(meta.KeyTitle, "PNG")
 	for testNum, tc := range pngTestCases {
 		inp := input.NewInput(tc.blob)
-		bs := parser.ParseBlocks(inp, m, "png", config.NoHTML)
+		bs := parser.Parse(inp, m, "png", config.NoHTML)
 		checkEncodings(t, testNum, bs, false, tc.descr, tc.expect, "???")
 	}
 }

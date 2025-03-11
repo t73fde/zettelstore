@@ -11,8 +11,9 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package cleaner provides functions to clean up the parsed AST.
-package cleaner
+package parser
+
+// cleaner provides functions to clean up the parsed AST.
 
 import (
 	"strconv"
@@ -24,8 +25,8 @@ import (
 	"zettelstore.de/z/strfun"
 )
 
-// CleanBlockSlice cleans the given block list.
-func CleanBlockSlice(bs *ast.BlockSlice, allowHTML bool) {
+// Clean cleans the given block list.
+func Clean(bs *ast.BlockSlice, allowHTML bool) {
 	cv := cleanVisitor{
 		textEnc:   encoder.Create(api.EncoderText, nil),
 		allowHTML: allowHTML,

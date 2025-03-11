@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2024-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package plain_test
+package parser_test
 
 import (
 	"testing"
@@ -40,7 +40,7 @@ func TestParseSVG(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			inp := input.NewInput([]byte(tc.src))
-			bs := parser.ParseBlocks(inp, nil, meta.ValueSyntaxSVG, config.NoHTML)
+			bs := parser.Parse(inp, nil, meta.ValueSyntaxSVG, config.NoHTML)
 			trans := encoder.NewSzTransformer()
 			lst := trans.GetSz(&bs)
 			if got := lst.String(); tc.exp != got {

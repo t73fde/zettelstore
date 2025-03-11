@@ -11,11 +11,9 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package draw provides a parser to create SVG from ASCII drawing.
-//
-// It is not a parser registered by the general parser framework (directed by
-// metadata "syntax" of a zettel). It will be used when a zettel is evaluated.
-package draw
+package parser
+
+// draw provides a parser to create SVG from ASCII drawing.
 
 import (
 	"strconv"
@@ -25,17 +23,16 @@ import (
 	"t73f.de/r/zsc/input"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/parser"
 )
 
 func init() {
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxDraw,
 		AltNames:      []string{},
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseBlocks,
+		Parse:         parseDraw,
 	})
 }
 
@@ -45,7 +42,7 @@ const (
 	defaultScaleY = 20
 )
 
-func parseBlocks(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
+func parseDraw(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
 	font := m.GetDefault("font", defaultFont)
 	scaleX := m.GetNumber("x-scale", defaultScaleX)
 	scaleY := m.GetNumber("y-scale", defaultScaleY)
@@ -65,7 +62,7 @@ func parseBlocks(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
 		return ast.BlockSlice{ast.CreateParaNode(noSVGErrMsg()...)}
 	}
 	return ast.BlockSlice{&ast.BLOBNode{
-		Description: parser.ParseDescription(m),
+		Description: ParseDescription(m),
 		Syntax:      meta.ValueSyntaxSVG,
 		Blob:        svg,
 	}}

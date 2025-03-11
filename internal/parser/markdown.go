@@ -11,8 +11,9 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package markdown provides a parser for markdown.
-package markdown
+package parser
+
+// markdown provides a parser for markdown.
 
 import (
 	"bytes"
@@ -31,31 +32,26 @@ import (
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/encoder"
-	"zettelstore.de/z/internal/parser"
 )
 
 func init() {
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxMarkdown,
 		AltNames:      []string{meta.ValueSyntaxMD},
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseBlocks,
+		Parse:         parseMarkdown,
 	})
 }
 
-func parseBlocks(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
-	p := parseMarkdown(inp)
-	return p.acceptBlockChildren(p.docNode)
-}
-
-func parseMarkdown(inp *input.Input) *mdP {
+func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	source := []byte(inp.Src[inp.Pos:])
 	parser := gm.DefaultParser()
 	node := parser.Parse(gmText.NewReader(source))
 	textEnc := encoder.Create(api.EncoderText, nil)
-	return &mdP{source: source, docNode: node, textEnc: textEnc}
+	p := mdP{source: source, docNode: node, textEnc: textEnc}
+	return p.acceptBlockChildren(p.docNode)
 }
 
 type mdP struct {

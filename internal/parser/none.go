@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2022-present Detlef Stern
+// Copyright (c) 2020-present Detlef Stern
 //
 // This file is part of Zettelstore.
 //
@@ -8,27 +8,26 @@
 // under this license.
 //
 // SPDX-License-Identifier: EUPL-1.2
-// SPDX-FileCopyrightText: 2022-present Detlef Stern
+// SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package draw_test
+package parser
 
 import (
-	"testing"
-
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
-
-	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/parser"
-
-	_ "zettelstore.de/z/internal/parser/draw"
+	"zettelstore.de/z/internal/ast"
 )
 
-func FuzzParseBlocks(f *testing.F) {
-	f.Fuzz(func(t *testing.T, src []byte) {
-		t.Parallel()
-		inp := input.NewInput(src)
-		parser.ParseBlocks(inp, nil, meta.ValueSyntaxDraw, config.NoHTML)
+// none provides a none-parser, e.g. for zettel with just metadata.
+
+func init() {
+	register(&Info{
+		Name:          meta.ValueSyntaxNone,
+		AltNames:      []string{},
+		IsASTParser:   false,
+		IsTextFormat:  false,
+		IsImageFormat: false,
+		Parse:         func(*input.Input, *meta.Meta, string) ast.BlockSlice { return nil },
 	})
 }

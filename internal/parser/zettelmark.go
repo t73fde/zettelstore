@@ -11,8 +11,9 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package zettelmark provides a parser for zettelmarkup.
-package zettelmark
+package parser
+
+// zettelmark provides a parser for zettelmarkup.
 
 import (
 	"log"
@@ -23,27 +24,24 @@ import (
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/ast/sztrans"
-	"zettelstore.de/z/internal/parser"
 )
 
 func init() {
-	parser.Register(&parser.Info{
+	register(&Info{
 		Name:          meta.ValueSyntaxZmk,
 		AltNames:      nil,
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parseZmk,
+		Parse: func(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
+			if obj := zmk.Parse(inp); obj != nil {
+				bs, err := sztrans.GetBlockSlice(obj)
+				if err == nil {
+					return bs
+				}
+				log.Printf("sztrans error: %v, for %v\n", err, obj)
+			}
+			return nil
+		},
 	})
-}
-
-func parseZmk(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
-	if obj := zmk.Parse(inp); obj != nil {
-		bs, err := sztrans.GetBlockSlice(obj)
-		if err == nil {
-			return bs
-		}
-		log.Printf("sztrans error: %v, for %v\n", err, obj)
-	}
-	return nil
 }

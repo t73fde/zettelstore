@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package zettelmark_test
+package parser_test
 
 import (
 	"testing"
@@ -23,10 +23,10 @@ import (
 	"zettelstore.de/z/internal/parser"
 )
 
-func FuzzParseBlocks(f *testing.F) {
+func FuzzParseZmk(f *testing.F) {
 	f.Fuzz(func(t *testing.T, src []byte) {
 		t.Parallel()
 		inp := input.NewInput(src)
-		parser.ParseBlocks(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
+		parser.Parse(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
 	})
 }

@@ -20,7 +20,7 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package draw
+package parser
 
 import (
 	"bytes"
