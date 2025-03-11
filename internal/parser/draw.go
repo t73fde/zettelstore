@@ -18,6 +18,7 @@ package parser
 import (
 	"strconv"
 
+	"t73f.de/r/webs/aasvg"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
@@ -53,11 +54,11 @@ func parseDraw(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
 		scaleY = defaultScaleY
 	}
 
-	canvas, err := newCanvas(inp.Src[inp.Pos:])
+	canvas, err := aasvg.NewCanvas(inp.Src[inp.Pos:])
 	if err != nil {
 		return ast.BlockSlice{ast.CreateParaNode(canvasErrMsg(err)...)}
 	}
-	svg := canvasToSVG(canvas, string(font), int(scaleX), int(scaleY))
+	svg := aasvg.CanvasToSVG(canvas, string(font), int(scaleX), int(scaleY))
 	if len(svg) == 0 {
 		return ast.BlockSlice{ast.CreateParaNode(noSVGErrMsg()...)}
 	}
@@ -77,7 +78,7 @@ func ParseDrawBlock(vn *ast.VerbatimNode) ast.BlockNode {
 	scaleX := getScale(vn.Attrs, "x-scale", defaultScaleX)
 	scaleY := getScale(vn.Attrs, "y-scale", defaultScaleY)
 
-	canvas, err := newCanvas(vn.Content)
+	canvas, err := aasvg.NewCanvas(vn.Content)
 	if err != nil {
 		return ast.CreateParaNode(canvasErrMsg(err)...)
 	}
@@ -87,7 +88,7 @@ func ParseDrawBlock(vn *ast.VerbatimNode) ast.BlockNode {
 	if scaleY < 1 || 1000000 < scaleY {
 		scaleY = defaultScaleY
 	}
-	svg := canvasToSVG(canvas, font, scaleX, scaleY)
+	svg := aasvg.CanvasToSVG(canvas, font, scaleX, scaleY)
 	if len(svg) == 0 {
 		return ast.CreateParaNode(noSVGErrMsg()...)
 	}
