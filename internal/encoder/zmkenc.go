@@ -31,8 +31,6 @@ import (
 // zmkEncoder contains all data needed for encoding.
 type zmkEncoder struct{}
 
-var theOnlyZmkEncoder zmkEncoder
-
 // WriteZettel writes the encoded zettel to the writer.
 func (*zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	v := newZmkVisitor(w)

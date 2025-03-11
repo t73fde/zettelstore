@@ -28,8 +28,6 @@ import (
 // textEncoder contains all data needed for encoding.
 type textEncoder struct{}
 
-var theOnlyTextEncoder textEncoder // Only a singleton is required.
-
 // WriteZettel writes metadata and content.
 func (te *textEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	v := newTextVisitor(w)

@@ -71,9 +71,9 @@ func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
 		// If we can refactor it out, the transformer can be created only once.
 		return &szEncoder{trans: NewSzTransformer()}
 	case api.EncoderText:
-		return &theOnlyTextEncoder
+		return (*textEncoder)(nil)
 	case api.EncoderZmk:
-		return &theOnlyZmkEncoder
+		return (*zmkEncoder)(nil)
 	}
 	return nil
 }
