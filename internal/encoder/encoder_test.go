@@ -28,12 +28,6 @@ import (
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
 
-	_ "zettelstore.de/z/internal/encoder/htmlenc"   // Allow to use HTML encoder.
-	_ "zettelstore.de/z/internal/encoder/mdenc"     // Allow to use markdown encoder.
-	_ "zettelstore.de/z/internal/encoder/shtmlenc"  // Allow to use SHTML encoder.
-	_ "zettelstore.de/z/internal/encoder/szenc"     // Allow to use sz encoder.
-	_ "zettelstore.de/z/internal/encoder/textenc"   // Allow to use text encoder.
-	_ "zettelstore.de/z/internal/encoder/zmkenc"    // Allow to use zmk encoder.
 	_ "zettelstore.de/z/internal/parser/zettelmark" // Allow to use zettelmark parser.
 )
 

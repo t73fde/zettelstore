@@ -11,46 +11,29 @@
 // SPDX-FileCopyrightText: 2023-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package shtmlenc encodes the abstract syntax tree into a s-expr which represents HTML.
-package shtmlenc
+package encoder
+
+// shtmlenc encodes the abstract syntax tree into a s-expr which represents HTML.
 
 import (
 	"io"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder"
-	"zettelstore.de/z/internal/encoder/szenc"
 )
 
-func init() {
-	encoder.Register(api.EncoderSHTML, func(params *encoder.CreateParameter) encoder.Encoder { return Create(params) })
-}
-
-// Create a SHTML encoder
-func Create(params *encoder.CreateParameter) *Encoder {
-	// We need a new transformer every time, because tx.inVerse must be unique.
-	// If we can refactor it out, the transformer can be created only once.
-	return &Encoder{
-		tx:   szenc.NewTransformer(),
-		th:   shtml.NewEvaluator(1),
-		lang: params.Lang,
-	}
-}
-
-// Encoder contains all data needed for encoding.
-type Encoder struct {
-	tx   *szenc.Transformer
+// shtmlEncoder contains all data needed for encoding.
+type shtmlEncoder struct {
+	tx   SzTransformer
 	th   *shtml.Evaluator
 	lang string
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	env := shtml.MakeEnvironment(enc.lang)
 	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(zn.InhMeta), &env)
 	if err != nil {
@@ -65,7 +48,7 @@ func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 }
 
 // WriteMeta encodes meta data as s-expression.
-func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (enc *shtmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	env := shtml.MakeEnvironment(enc.lang)
 	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(m), &env)
 	if err != nil {
@@ -75,12 +58,12 @@ func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 }
 
 // WriteContent encodes the zettel content.
-func (enc *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (enc *shtmlEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return enc.WriteBlocks(w, &zn.BlocksAST)
 }
 
 // WriteBlocks writes a block slice to the writer
-func (enc *Encoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (enc *shtmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	env := shtml.MakeEnvironment(enc.lang)
 	hval, err := enc.th.Evaluate(enc.tx.GetSz(bs), &env)
 	if err != nil {
@@ -90,7 +73,7 @@ func (enc *Encoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 }
 
 // WriteInlines writes an inline slice to the writer
-func (enc *Encoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
+func (enc *shtmlEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
 	env := shtml.MakeEnvironment(enc.lang)
 	hval, err := enc.th.Evaluate(enc.tx.GetSz(is), &env)
 	if err != nil {

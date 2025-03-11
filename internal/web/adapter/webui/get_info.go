@@ -29,7 +29,6 @@ import (
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/evaluator"
-	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/server"
@@ -71,7 +70,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		summary := collect.References(zn)
 		locLinks, queryLinks, extLinks := wui.splitLocSeaExtLinks(append(summary.Links, summary.Embeds...))
 
-		title := parser.NormalizedSpacedText(zn.InhMeta.GetTitle())
+		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())
 		phrase := q.Get(api.QueryKeyPhrase)
 		if phrase == "" {
 			phrase = title

@@ -20,7 +20,7 @@ import (
 	"t73f.de/r/zsc/input"
 
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/encoder/szenc"
+	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
 )
 
@@ -41,7 +41,7 @@ func TestParseSVG(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			inp := input.NewInput([]byte(tc.src))
 			bs := parser.ParseBlocks(inp, nil, meta.ValueSyntaxSVG, config.NoHTML)
-			trans := szenc.NewTransformer()
+			trans := encoder.NewSzTransformer()
 			lst := trans.GetSz(&bs)
 			if got := lst.String(); tc.exp != got {
 				t.Errorf("\nexp: %q\ngot: %q", tc.exp, got)

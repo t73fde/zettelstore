@@ -17,7 +17,6 @@ package parser
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
@@ -103,16 +102,6 @@ func ParseBlocks(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLIn
 	return bs
 }
 
-// ParseSpacedText returns an inline slice that consists just of test and space node.
-// No Zettelmarkup parsing is done. It is typically used to transform the zettel
-// description into an inline slice.
-func ParseSpacedText(s string) ast.InlineSlice {
-	return ast.InlineSlice{&ast.TextNode{Text: NormalizedSpacedText(s)}}
-}
-
-// NormalizedSpacedText returns the given string, but normalize multiple spaces to one space.
-func NormalizedSpacedText(s string) string { return strings.Join(strings.Fields(s), " ") }
-
 // ParseDescription returns a suitable description stored in the metadata as an inline slice.
 // This is done for an image in most cases.
 func ParseDescription(m *meta.Meta) ast.InlineSlice {
@@ -120,10 +109,10 @@ func ParseDescription(m *meta.Meta) ast.InlineSlice {
 		return nil
 	}
 	if summary, found := m.Get(meta.KeySummary); found {
-		return ParseSpacedText(string(summary))
+		return ast.ParseSpacedText(string(summary))
 	}
 	if title, found := m.Get(meta.KeyTitle); found {
-		return ParseSpacedText(string(title))
+		return ast.ParseSpacedText(string(title))
 	}
 	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title/summary: " + m.Zid.String()}}
 }

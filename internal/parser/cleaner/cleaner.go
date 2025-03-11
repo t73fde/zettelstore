@@ -18,15 +18,16 @@ import (
 	"strconv"
 	"strings"
 
+	"t73f.de/r/zsc/api"
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder/textenc"
+	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/strfun"
 )
 
 // CleanBlockSlice cleans the given block list.
 func CleanBlockSlice(bs *ast.BlockSlice, allowHTML bool) {
 	cv := cleanVisitor{
-		textEnc:   textenc.Create(),
+		textEnc:   encoder.Create(api.EncoderText, nil),
 		allowHTML: allowHTML,
 		hasMark:   false,
 		doMark:    false,
@@ -39,7 +40,7 @@ func CleanBlockSlice(bs *ast.BlockSlice, allowHTML bool) {
 }
 
 type cleanVisitor struct {
-	textEnc   *textenc.Encoder
+	textEnc   encoder.Encoder
 	ids       map[string]ast.Node
 	allowHTML bool
 	hasMark   bool

@@ -11,8 +11,9 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package zmkenc encodes the abstract syntax tree back into Zettelmarkup.
-package zmkenc
+package encoder
+
+// zmkenc encodes the abstract syntax tree back into Zettelmarkup.
 
 import (
 	"fmt"
@@ -25,85 +26,76 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder"
-	"zettelstore.de/z/internal/encoder/textenc"
 )
 
-func init() {
-	encoder.Register(api.EncoderZmk, func(*encoder.CreateParameter) encoder.Encoder { return Create() })
-}
+// zmkEncoder contains all data needed for encoding.
+type zmkEncoder struct{}
 
-// Create an encoder.
-func Create() *Encoder { return &myZE }
-
-// Encoder contains all data needed for encoding.
-type Encoder struct{}
-
-var myZE Encoder
+var theOnlyZmkEncoder zmkEncoder
 
 // WriteZettel writes the encoded zettel to the writer.
-func (*Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	v := newVisitor(w)
+func (*zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+	v := newZmkVisitor(w)
 	v.acceptMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {
 		v.b.WriteString("---\n")
 	} else {
 		v.b.WriteByte('\n')
 	}
-	ast.Walk(v, &zn.BlocksAST)
+	ast.Walk(&v, &zn.BlocksAST)
 	length, err := v.b.Flush()
 	return length, err
 }
 
 // WriteMeta encodes meta data as zmk.
-func (*Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
-	v := newVisitor(w)
+func (*zmkEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+	v := newZmkVisitor(w)
 	v.acceptMeta(m)
 	length, err := v.b.Flush()
 	return length, err
 }
 
-func (v *visitor) acceptMeta(m *meta.Meta) {
+func (v *zmkVisitor) acceptMeta(m *meta.Meta) {
 	for key, val := range m.Computed() {
 		v.b.WriteStrings(key, ": ", string(val), "\n")
 	}
 }
 
 // WriteContent encodes the zettel content.
-func (ze *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (ze *zmkEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return ze.WriteBlocks(w, &zn.BlocksAST)
 }
 
 // WriteBlocks writes the content of a block slice to the writer.
-func (*Encoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
-	v := newVisitor(w)
-	ast.Walk(v, bs)
+func (*zmkEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+	v := newZmkVisitor(w)
+	ast.Walk(&v, bs)
 	length, err := v.b.Flush()
 	return length, err
 }
 
 // WriteInlines writes an inline slice to the writer
-func (*Encoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
-	v := newVisitor(w)
-	ast.Walk(v, is)
+func (*zmkEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
+	v := newZmkVisitor(w)
+	ast.Walk(&v, is)
 	length, err := v.b.Flush()
 	return length, err
 }
 
-// visitor writes the abstract syntax tree to an io.Writer.
-type visitor struct {
-	b         encoder.EncWriter
-	textEnc   encoder.Encoder
+// zmkVisitor writes the abstract syntax tree to an io.Writer.
+type zmkVisitor struct {
+	b         encWriter
+	textEnc   Encoder
 	prefix    []byte
 	inVerse   bool
 	inlinePos int
 }
 
-func newVisitor(w io.Writer) *visitor {
-	return &visitor{b: encoder.NewEncWriter(w), textEnc: textenc.Create()}
+func newZmkVisitor(w io.Writer) zmkVisitor {
+	return zmkVisitor{b: newEncWriter(w), textEnc: Create(api.EncoderText, nil)}
 }
 
-func (v *visitor) Visit(node ast.Node) ast.Visitor {
+func (v *zmkVisitor) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
 		v.visitBlockSlice(n)
@@ -162,7 +154,7 @@ func (v *visitor) Visit(node ast.Node) ast.Visitor {
 	return nil
 }
 
-func (v *visitor) visitBlockSlice(bs *ast.BlockSlice) {
+func (v *zmkVisitor) visitBlockSlice(bs *ast.BlockSlice) {
 	var lastWasParagraph bool
 	for i, bn := range *bs {
 		if i > 0 {
@@ -187,7 +179,7 @@ var mapVerbatimKind = map[ast.VerbatimKind]string{
 	ast.VerbatimMath:    "$$$",
 }
 
-func (v *visitor) visitVerbatim(vn *ast.VerbatimNode) {
+func (v *zmkVisitor) visitVerbatim(vn *ast.VerbatimNode) {
 	kind, ok := mapVerbatimKind[vn.Kind]
 	if !ok {
 		panic(fmt.Sprintf("Unknown verbatim kind %d", vn.Kind))
@@ -212,7 +204,7 @@ var mapRegionKind = map[ast.RegionKind]string{
 	ast.RegionVerse: "\"\"\"",
 }
 
-func (v *visitor) visitRegion(rn *ast.RegionNode) {
+func (v *zmkVisitor) visitRegion(rn *ast.RegionNode) {
 	// Scan rn.Blocks for embedded regions to adjust length of regionCode
 	kind, ok := mapRegionKind[rn.Kind]
 	if !ok {
@@ -233,7 +225,7 @@ func (v *visitor) visitRegion(rn *ast.RegionNode) {
 	}
 }
 
-func (v *visitor) visitHeading(hn *ast.HeadingNode) {
+func (v *zmkVisitor) visitHeading(hn *ast.HeadingNode) {
 	const headingSigns = "========= "
 	v.b.WriteString(headingSigns[len(headingSigns)-hn.Level-3:])
 	ast.Walk(v, &hn.Inlines)
@@ -246,7 +238,7 @@ var mapNestedListKind = map[ast.NestedListKind]byte{
 	ast.NestedListQuote:     '>',
 }
 
-func (v *visitor) visitNestedList(ln *ast.NestedListNode) {
+func (v *zmkVisitor) visitNestedList(ln *ast.NestedListNode) {
 	v.prefix = append(v.prefix, mapNestedListKind[ln.Kind])
 	for i, item := range ln.Items {
 		if i > 0 {
@@ -267,7 +259,7 @@ func (v *visitor) visitNestedList(ln *ast.NestedListNode) {
 	v.prefix = v.prefix[:len(v.prefix)-1]
 }
 
-func (v *visitor) writePrefixSpaces() {
+func (v *zmkVisitor) writePrefixSpaces() {
 	if prefixLen := len(v.prefix); prefixLen > 0 {
 		for i := 0; i <= prefixLen; i++ {
 			v.b.WriteByte(' ')
@@ -275,7 +267,7 @@ func (v *visitor) writePrefixSpaces() {
 	}
 }
 
-func (v *visitor) visitDescriptionList(dn *ast.DescriptionListNode) {
+func (v *zmkVisitor) visitDescriptionList(dn *ast.DescriptionListNode) {
 	for i, descr := range dn.Descriptions {
 		if i > 0 {
 			v.b.WriteByte('\n')
@@ -302,7 +294,7 @@ var alignCode = map[ast.Alignment]string{
 	ast.AlignRight:   ">",
 }
 
-func (v *visitor) visitTable(tn *ast.TableNode) {
+func (v *zmkVisitor) visitTable(tn *ast.TableNode) {
 	if header := tn.Header; len(header) > 0 {
 		v.writeTableHeader(header, tn.Align)
 		v.b.WriteByte('\n')
@@ -315,7 +307,7 @@ func (v *visitor) visitTable(tn *ast.TableNode) {
 	}
 }
 
-func (v *visitor) writeTableHeader(header ast.TableRow, align []ast.Alignment) {
+func (v *zmkVisitor) writeTableHeader(header ast.TableRow, align []ast.Alignment) {
 	for pos, cell := range header {
 		v.b.WriteString("|=")
 		colAlign := align[pos]
@@ -329,7 +321,7 @@ func (v *visitor) writeTableHeader(header ast.TableRow, align []ast.Alignment) {
 	}
 }
 
-func (v *visitor) writeTableRow(row ast.TableRow, align []ast.Alignment) {
+func (v *zmkVisitor) writeTableRow(row ast.TableRow, align []ast.Alignment) {
 	for pos, cell := range row {
 		v.b.WriteByte('|')
 		if cell.Align != align[pos] {
@@ -339,7 +331,7 @@ func (v *visitor) writeTableRow(row ast.TableRow, align []ast.Alignment) {
 	}
 }
 
-func (v *visitor) visitBLOB(bn *ast.BLOBNode) {
+func (v *zmkVisitor) visitBLOB(bn *ast.BLOBNode) {
 	if bn.Syntax == meta.ValueSyntaxSVG {
 		v.b.WriteStrings("@@@", bn.Syntax, "\n")
 		v.b.Write(bn.Blob)
@@ -355,7 +347,7 @@ var escapeSeqs = set.New(
 	"\\", "__", "**", "~~", "^^", ",,", ">>", `""`, "::", "''", "``", "++", "==", "##",
 )
 
-func (v *visitor) visitText(tn *ast.TextNode) {
+func (v *zmkVisitor) visitText(tn *ast.TextNode) {
 	last := 0
 	for i := 0; i < len(tn.Text); i++ {
 		if b := tn.Text[i]; b == '\\' {
@@ -380,7 +372,7 @@ func (v *visitor) visitText(tn *ast.TextNode) {
 	v.b.WriteString(tn.Text[last:])
 }
 
-func (v *visitor) visitBreak(bn *ast.BreakNode) {
+func (v *zmkVisitor) visitBreak(bn *ast.BreakNode) {
 	if bn.Hard {
 		v.b.WriteString("\\\n")
 	} else {
@@ -389,7 +381,7 @@ func (v *visitor) visitBreak(bn *ast.BreakNode) {
 	v.writePrefixSpaces()
 }
 
-func (v *visitor) visitLink(ln *ast.LinkNode) {
+func (v *zmkVisitor) visitLink(ln *ast.LinkNode) {
 	v.b.WriteString("[[")
 	if len(ln.Inlines) > 0 {
 		ast.Walk(v, &ln.Inlines)
@@ -401,7 +393,7 @@ func (v *visitor) visitLink(ln *ast.LinkNode) {
 	v.b.WriteStrings(ln.Ref.String(), "]]")
 }
 
-func (v *visitor) visitEmbedRef(en *ast.EmbedRefNode) {
+func (v *zmkVisitor) visitEmbedRef(en *ast.EmbedRefNode) {
 	v.b.WriteString("{{")
 	if len(en.Inlines) > 0 {
 		ast.Walk(v, &en.Inlines)
@@ -410,7 +402,7 @@ func (v *visitor) visitEmbedRef(en *ast.EmbedRefNode) {
 	v.b.WriteStrings(en.Ref.String(), "}}")
 }
 
-func (v *visitor) visitEmbedBLOB(en *ast.EmbedBLOBNode) {
+func (v *zmkVisitor) visitEmbedBLOB(en *ast.EmbedBLOBNode) {
 	if en.Syntax == meta.ValueSyntaxSVG {
 		v.b.WriteString("@@")
 		v.b.Write(en.Blob)
@@ -420,7 +412,7 @@ func (v *visitor) visitEmbedBLOB(en *ast.EmbedBLOBNode) {
 	v.b.WriteString("{{TODO: display inline BLOB}}")
 }
 
-func (v *visitor) visitCite(cn *ast.CiteNode) {
+func (v *zmkVisitor) visitCite(cn *ast.CiteNode) {
 	v.b.WriteStrings("[@", cn.Key)
 	if len(cn.Inlines) > 0 {
 		v.b.WriteByte(' ')
@@ -430,7 +422,7 @@ func (v *visitor) visitCite(cn *ast.CiteNode) {
 	v.visitAttributes(cn.Attrs)
 }
 
-func (v *visitor) visitMark(mn *ast.MarkNode) {
+func (v *zmkVisitor) visitMark(mn *ast.MarkNode) {
 	v.b.WriteStrings("[!", mn.Mark)
 	if len(mn.Inlines) > 0 {
 		v.b.WriteByte('|')
@@ -452,7 +444,7 @@ var mapFormatKind = map[ast.FormatKind][]byte{
 	ast.FormatSpan:   []byte("::"),
 }
 
-func (v *visitor) visitFormat(fn *ast.FormatNode) {
+func (v *zmkVisitor) visitFormat(fn *ast.FormatNode) {
 	kind, ok := mapFormatKind[fn.Kind]
 	if !ok {
 		panic(fmt.Sprintf("Unknown format kind %d", fn.Kind))
@@ -463,7 +455,7 @@ func (v *visitor) visitFormat(fn *ast.FormatNode) {
 	v.visitAttributes(fn.Attrs)
 }
 
-func (v *visitor) visitLiteral(ln *ast.LiteralNode) {
+func (v *zmkVisitor) visitLiteral(ln *ast.LiteralNode) {
 	switch ln.Kind {
 	case ast.LiteralCode:
 		v.writeLiteral('`', ln.Attrs, ln.Content)
@@ -484,7 +476,7 @@ func (v *visitor) visitLiteral(ln *ast.LiteralNode) {
 	}
 }
 
-func (v *visitor) writeLiteral(code byte, a attrs.Attributes, content []byte) {
+func (v *zmkVisitor) writeLiteral(code byte, a attrs.Attributes, content []byte) {
 	v.b.WriteBytes(code, code)
 	v.writeEscaped(string(content), code)
 	v.b.WriteBytes(code, code)
@@ -492,7 +484,7 @@ func (v *visitor) writeLiteral(code byte, a attrs.Attributes, content []byte) {
 }
 
 // visitAttributes write HTML attributes
-func (v *visitor) visitAttributes(a attrs.Attributes) {
+func (v *zmkVisitor) visitAttributes(a attrs.Attributes) {
 	if a.IsEmpty() {
 		return
 	}
@@ -514,7 +506,7 @@ func (v *visitor) visitAttributes(a attrs.Attributes) {
 	v.b.WriteByte('}')
 }
 
-func (v *visitor) writeEscaped(s string, toEscape byte) {
+func (v *zmkVisitor) writeEscaped(s string, toEscape byte) {
 	last := 0
 	for i := range len(s) {
 		if b := s[i]; b == toEscape || b == '\\' {

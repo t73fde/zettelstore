@@ -16,6 +16,7 @@ package ast
 
 import (
 	"net/url"
+	"strings"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -90,3 +91,13 @@ const (
 	RefStateQuery                    // Reference to a zettel query
 	RefStateExternal                 // Reference to external material
 )
+
+// ParseSpacedText returns an inline slice that consists just of test and space node.
+// No Zettelmarkup parsing is done. It is typically used to transform the zettel
+// description into an inline slice.
+func ParseSpacedText(s string) InlineSlice {
+	return InlineSlice{&TextNode{Text: NormalizedSpacedText(s)}}
+}
+
+// NormalizedSpacedText returns the given string, but normalize multiple spaces to one space.
+func NormalizedSpacedText(s string) string { return strings.Join(strings.Fields(s), " ") }

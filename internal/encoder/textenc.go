@@ -11,36 +11,28 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package textenc encodes the abstract syntax tree into its text.
-package textenc
+package encoder
+
+// textenc encodes the abstract syntax tree into its text.
 
 import (
 	"io"
 	"iter"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder"
 )
 
-func init() {
-	encoder.Register(api.EncoderText, func(*encoder.CreateParameter) encoder.Encoder { return Create() })
-}
+// textEncoder contains all data needed for encoding.
+type textEncoder struct{}
 
-// Create an encoder.
-func Create() *Encoder { return &myTE }
-
-// Encoder contains all data needed for encoding.
-type Encoder struct{}
-
-var myTE Encoder // Only a singleton is required.
+var theOnlyTextEncoder textEncoder // Only a singleton is required.
 
 // WriteZettel writes metadata and content.
-func (te *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	v := newVisitor(w)
+func (te *textEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+	v := newTextVisitor(w)
 	te.WriteMeta(&v.b, zn.InhMeta)
 	v.visitBlockSlice(&zn.BlocksAST)
 	length, err := v.b.Flush()
@@ -48,8 +40,8 @@ func (te *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 }
 
 // WriteMeta encodes metadata as text.
-func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
-	buf := encoder.NewEncWriter(w)
+func (te *textEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+	buf := newEncWriter(w)
 	for key, val := range m.Computed() {
 		if meta.Type(key) == meta.TypeTagSet {
 			writeTagSet(&buf, val.Elems())
@@ -62,7 +54,7 @@ func (te *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	return length, err
 }
 
-func writeTagSet(buf *encoder.EncWriter, tags iter.Seq[meta.Value]) {
+func writeTagSet(buf *encWriter, tags iter.Seq[meta.Value]) {
 	first := true
 	for tag := range tags {
 		if !first {
@@ -75,37 +67,37 @@ func writeTagSet(buf *encoder.EncWriter, tags iter.Seq[meta.Value]) {
 }
 
 // WriteContent encodes the zettel content.
-func (te *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (te *textEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return te.WriteBlocks(w, &zn.BlocksAST)
 }
 
 // WriteBlocks writes the content of a block slice to the writer.
-func (*Encoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
-	v := newVisitor(w)
+func (*textEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+	v := newTextVisitor(w)
 	v.visitBlockSlice(bs)
 	length, err := v.b.Flush()
 	return length, err
 }
 
 // WriteInlines writes an inline slice to the writer
-func (*Encoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
-	v := newVisitor(w)
-	ast.Walk(v, is)
+func (*textEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
+	v := newTextVisitor(w)
+	ast.Walk(&v, is)
 	length, err := v.b.Flush()
 	return length, err
 }
 
-// visitor writes the abstract syntax tree to an io.Writer.
-type visitor struct {
-	b         encoder.EncWriter
+// textVisitor writes the abstract syntax tree to an io.Writer.
+type textVisitor struct {
+	b         encWriter
 	inlinePos int
 }
 
-func newVisitor(w io.Writer) *visitor {
-	return &visitor{b: encoder.NewEncWriter(w)}
+func newTextVisitor(w io.Writer) textVisitor {
+	return textVisitor{b: newEncWriter(w)}
 }
 
-func (v *visitor) Visit(node ast.Node) ast.Visitor {
+func (v *textVisitor) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
 		v.visitBlockSlice(n)
@@ -169,14 +161,14 @@ func (v *visitor) Visit(node ast.Node) ast.Visitor {
 	return v
 }
 
-func (v *visitor) visitVerbatim(vn *ast.VerbatimNode) {
+func (v *textVisitor) visitVerbatim(vn *ast.VerbatimNode) {
 	if vn.Kind == ast.VerbatimComment {
 		return
 	}
 	v.b.Write(vn.Content)
 }
 
-func (v *visitor) visitNestedList(ln *ast.NestedListNode) {
+func (v *textVisitor) visitNestedList(ln *ast.NestedListNode) {
 	for i, item := range ln.Items {
 		v.writePosChar(i, '\n')
 		for j, it := range item {
@@ -186,7 +178,7 @@ func (v *visitor) visitNestedList(ln *ast.NestedListNode) {
 	}
 }
 
-func (v *visitor) visitDescriptionList(dl *ast.DescriptionListNode) {
+func (v *textVisitor) visitDescriptionList(dl *ast.DescriptionListNode) {
 	for i, descr := range dl.Descriptions {
 		v.writePosChar(i, '\n')
 		ast.Walk(v, &descr.Term)
@@ -200,7 +192,7 @@ func (v *visitor) visitDescriptionList(dl *ast.DescriptionListNode) {
 	}
 }
 
-func (v *visitor) visitTable(tn *ast.TableNode) {
+func (v *textVisitor) visitTable(tn *ast.TableNode) {
 	if len(tn.Header) > 0 {
 		v.writeRow(tn.Header)
 		v.b.WriteByte('\n')
@@ -211,21 +203,21 @@ func (v *visitor) visitTable(tn *ast.TableNode) {
 	}
 }
 
-func (v *visitor) writeRow(row ast.TableRow) {
+func (v *textVisitor) writeRow(row ast.TableRow) {
 	for i, cell := range row {
 		v.writePosChar(i, ' ')
 		ast.Walk(v, &cell.Inlines)
 	}
 }
 
-func (v *visitor) visitBlockSlice(bs *ast.BlockSlice) {
+func (v *textVisitor) visitBlockSlice(bs *ast.BlockSlice) {
 	for i, bn := range *bs {
 		v.writePosChar(i, '\n')
 		ast.Walk(v, bn)
 	}
 }
 
-func (v *visitor) visitInlineSlice(is *ast.InlineSlice) {
+func (v *textVisitor) visitInlineSlice(is *ast.InlineSlice) {
 	for i, in := range *is {
 		v.inlinePos = i
 		ast.Walk(v, in)
@@ -233,7 +225,7 @@ func (v *visitor) visitInlineSlice(is *ast.InlineSlice) {
 	v.inlinePos = 0
 }
 
-func (v *visitor) visitText(s string) {
+func (v *textVisitor) visitText(s string) {
 	spaceFound := false
 	for _, ch := range s {
 		if input.IsSpace(ch) {
@@ -248,7 +240,7 @@ func (v *visitor) visitText(s string) {
 	}
 }
 
-func (v *visitor) writePosChar(pos int, ch byte) {
+func (v *textVisitor) writePosChar(pos int, ch byte) {
 	if pos > 0 {
 		v.b.WriteByte(ch)
 	}

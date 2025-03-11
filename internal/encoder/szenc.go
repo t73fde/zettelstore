@@ -11,59 +11,47 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package szenc encodes the abstract syntax tree into a s-expr for zettel.
-package szenc
+package encoder
+
+// szenc encodes the abstract syntax tree into a s-expr for zettel.
 
 import (
 	"io"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder"
 )
 
-func init() {
-	encoder.Register(api.EncoderSz, func(*encoder.CreateParameter) encoder.Encoder { return Create() })
-}
-
-// Create a S-expr encoder
-func Create() *Encoder {
-	// We need a new transformer every time, because trans.inVerse must be unique.
-	// If we can refactor it out, the transformer can be created only once.
-	return &Encoder{trans: NewTransformer()}
-}
-
-// Encoder contains all data needed for encoding.
-type Encoder struct {
-	trans *Transformer
+// szEncoder contains all data needed for encoding.
+type szEncoder struct {
+	trans SzTransformer
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *Encoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (enc *szEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	content := enc.trans.GetSz(&zn.BlocksAST)
 	meta := enc.trans.GetMeta(zn.InhMeta)
 	return sx.MakeList(meta, content).Print(w)
 }
 
 // WriteMeta encodes meta data as s-expression.
-func (enc *Encoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (enc *szEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	return enc.trans.GetMeta(m).Print(w)
 }
 
 // WriteContent encodes the zettel content.
-func (enc *Encoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (enc *szEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	return enc.WriteBlocks(w, &zn.BlocksAST)
 }
 
 // WriteBlocks writes a block slice to the writer
-func (enc *Encoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (enc *szEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	return enc.trans.GetSz(bs).Print(w)
 }
 
 // WriteInlines writes an inline slice to the writer
-func (enc *Encoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
+func (enc *szEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
 	return enc.trans.GetSz(is).Print(w)
 }

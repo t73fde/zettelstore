@@ -334,7 +334,7 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) *sx
 		if !wui.policy.CanRead(user, z.Meta) {
 			continue
 		}
-		text := sx.MakeString(parser.NormalizedSpacedText(z.Meta.GetTitle()))
+		text := sx.MakeString(ast.NormalizedSpacedText(z.Meta.GetTitle()))
 		link := sx.MakeString(wui.NewURLBuilder('c').SetZid(zid).
 			AppendKVQuery(queryKeyAction, valueActionNew).String())
 

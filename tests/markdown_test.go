@@ -30,12 +30,6 @@ import (
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
 
-	_ "zettelstore.de/z/internal/encoder/htmlenc"
-	_ "zettelstore.de/z/internal/encoder/mdenc"
-	_ "zettelstore.de/z/internal/encoder/shtmlenc"
-	_ "zettelstore.de/z/internal/encoder/szenc"
-	_ "zettelstore.de/z/internal/encoder/textenc"
-	_ "zettelstore.de/z/internal/encoder/zmkenc"
 	_ "zettelstore.de/z/internal/parser/markdown"
 	_ "zettelstore.de/z/internal/parser/zettelmark"
 )

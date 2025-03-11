@@ -20,13 +20,14 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
+	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/encoder/zmkenc"
+	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/evaluator"
-	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
 	"zettelstore.de/z/internal/web/server"
@@ -64,8 +65,8 @@ func (wui *WebUI) MakeGetCreateZettelHandler(
 		case actionFolge:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareFolge(origZettel), "Folge Zettel", "", roleData, syntaxData)
 		case actionNew:
-			title := parser.NormalizedSpacedText(origZettel.Meta.GetTitle())
-			newTitle := parser.NormalizedSpacedText(q.Get(meta.KeyTitle))
+			title := ast.NormalizedSpacedText(origZettel.Meta.GetTitle())
+			newTitle := ast.NormalizedSpacedText(q.Get(meta.KeyTitle))
 			wui.renderZettelForm(ctx, w, createZettel.PrepareNew(origZettel, newTitle), title, "", roleData, syntaxData)
 		case actionSequel:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareSequel(origZettel), "Sequel Zettel", "", roleData, syntaxData)
@@ -175,7 +176,7 @@ func (wui *WebUI) MakeGetZettelFromListHandler(
 		}
 		entries, _ := evaluator.QueryAction(ctx, q, metaSeq)
 		bns := evaluate.RunBlockNode(ctx, entries)
-		enc := zmkenc.Create()
+		enc := encoder.Create(api.EncoderZmk, nil)
 		var zmkContent bytes.Buffer
 		_, err = enc.WriteBlocks(&zmkContent, &bns)
 		if err != nil {

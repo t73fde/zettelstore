@@ -30,7 +30,7 @@ import (
 	"t73f.de/r/zsc/sz"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder/szenc"
+	"zettelstore.de/z/internal/encoder"
 )
 
 // Builder allows to build new URLs for the web service.
@@ -40,7 +40,7 @@ type urlBuilder interface {
 }
 
 type htmlGenerator struct {
-	tx    *szenc.Transformer
+	tx    encoder.SzTransformer
 	th    *shtml.Evaluator
 	lang  string
 	symAt *sx.Symbol
@@ -176,7 +176,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 	})
 
 	return &htmlGenerator{
-		tx:   szenc.NewTransformer(),
+		tx:   encoder.NewSzTransformer(),
 		th:   th,
 		lang: lang,
 	}

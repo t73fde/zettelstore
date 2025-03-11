@@ -25,8 +25,8 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 
+	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/usecase"
 )
 
@@ -162,6 +162,6 @@ func (wui *WebUI) makeGetTextTitle(ctx context.Context, getZettel usecase.GetZet
 			}
 			return "", 0
 		}
-		return parser.NormalizedSpacedText(z.Meta.GetTitle()), 1
+		return ast.NormalizedSpacedText(z.Meta.GetTitle()), 1
 	}
 }

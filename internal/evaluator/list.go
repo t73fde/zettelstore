@@ -26,7 +26,6 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
 )
 
@@ -245,7 +244,7 @@ func (ap *actionPara) createBlockNodeMeta(key string) (ast.BlockNode, int) {
 		items = append(items, ast.ItemSlice{ast.CreateParaNode(&ast.LinkNode{
 			Attrs:   nil,
 			Ref:     ast.ParseReference(m.Zid.String()),
-			Inlines: parser.ParseSpacedText(m.GetTitle()),
+			Inlines: ast.ParseSpacedText(m.GetTitle()),
 		})})
 	}
 	return &ast.NestedListNode{

@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package szenc
+package encoder
 
 import (
 	"encoding/base64"
@@ -26,19 +26,18 @@ import (
 	"zettelstore.de/z/internal/ast"
 )
 
-// NewTransformer returns a new transformer to create s-expressions from AST nodes.
-func NewTransformer() *Transformer {
-	t := Transformer{}
-	return &t
+// NewSzTransformer returns a new transformer to create s-expressions from AST nodes.
+func NewSzTransformer() SzTransformer {
+	return SzTransformer{}
 }
 
-// Transformer contains all data needed to transform into a s-expression.
-type Transformer struct {
+// SzTransformer contains all data needed to transform into a s-expression.
+type SzTransformer struct {
 	inVerse bool
 }
 
 // GetSz transforms the given node into a sx list.
-func (t *Transformer) GetSz(node ast.Node) *sx.Pair {
+func (t *SzTransformer) GetSz(node ast.Node) *sx.Pair {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
 		return sz.MakeBlockList(t.getBlockList(n))
@@ -126,7 +125,7 @@ var mapRegionKindS = map[ast.RegionKind]*sx.Symbol{
 	ast.RegionVerse: sz.SymRegionVerse,
 }
 
-func (t *Transformer) getRegion(rn *ast.RegionNode) *sx.Pair {
+func (t *SzTransformer) getRegion(rn *ast.RegionNode) *sx.Pair {
 	saveInVerse := t.inVerse
 	if rn.Kind == ast.RegionVerse {
 		t.inVerse = true
@@ -146,7 +145,7 @@ var mapNestedListKindS = map[ast.NestedListKind]*sx.Symbol{
 	ast.NestedListQuote:     sz.SymListQuote,
 }
 
-func (t *Transformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
+func (t *SzTransformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
 	var nlistObjs sx.ListBuilder
 	nlistObjs.Add(mapGetS(mapNestedListKindS, ln.Kind))
 	isCompact := isCompactList(ln.Items)
@@ -182,7 +181,7 @@ func isCompactList(itemSlice []ast.ItemSlice) bool {
 	return true
 }
 
-func (t *Transformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair {
+func (t *SzTransformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair {
 	var dlObjs sx.ListBuilder
 	for _, def := range dn.Descriptions {
 		dlObjs.Add(t.getInlineList(def.Term))
@@ -199,7 +198,7 @@ func (t *Transformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair {
 	return dlObjs.List().Cons(sz.SymDescription)
 }
 
-func (t *Transformer) getTable(tn *ast.TableNode) *sx.Pair {
+func (t *SzTransformer) getTable(tn *ast.TableNode) *sx.Pair {
 	var lb sx.ListBuilder
 	lb.AddN(sz.SymTable, t.getHeader(tn.Header))
 	for _, row := range tn.Rows {
@@ -207,13 +206,13 @@ func (t *Transformer) getTable(tn *ast.TableNode) *sx.Pair {
 	}
 	return lb.List()
 }
-func (t *Transformer) getHeader(header ast.TableRow) *sx.Pair {
+func (t *SzTransformer) getHeader(header ast.TableRow) *sx.Pair {
 	if len(header) == 0 {
 		return nil
 	}
 	return t.getRow(header)
 }
-func (t *Transformer) getRow(row ast.TableRow) *sx.Pair {
+func (t *SzTransformer) getRow(row ast.TableRow) *sx.Pair {
 	var lb sx.ListBuilder
 	for _, cell := range row {
 		lb.Add(t.getCell(cell))
@@ -228,11 +227,11 @@ var alignmentSymbolS = map[ast.Alignment]*sx.Symbol{
 	ast.AlignRight:   sz.SymCellRight,
 }
 
-func (t *Transformer) getCell(cell *ast.TableCell) *sx.Pair {
+func (t *SzTransformer) getCell(cell *ast.TableCell) *sx.Pair {
 	return sz.MakeCell(mapGetS(alignmentSymbolS, cell.Align), t.getInlineList(cell.Inlines))
 }
 
-func (t *Transformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
+func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
 	var content string
 	if bn.Syntax == meta.ValueSyntaxSVG {
 		content = string(bn.Blob)
@@ -254,7 +253,7 @@ var mapRefStateLink = map[ast.RefState]*sx.Symbol{
 	ast.RefStateExternal: sz.SymLinkExternal,
 }
 
-func (t *Transformer) getLink(ln *ast.LinkNode) *sx.Pair {
+func (t *SzTransformer) getLink(ln *ast.LinkNode) *sx.Pair {
 	return sz.MakeLink(
 		mapGetS(mapRefStateLink, ln.Ref.State),
 		getAttributes(ln.Attrs),
@@ -263,7 +262,7 @@ func (t *Transformer) getLink(ln *ast.LinkNode) *sx.Pair {
 	)
 }
 
-func (t *Transformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
+func (t *SzTransformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
 	var content string
 	if en.Syntax == meta.ValueSyntaxSVG {
 		content = string(en.Blob)
@@ -273,14 +272,14 @@ func (t *Transformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
 	return sz.MakeEmbedBLOB(getAttributes(en.Attrs), en.Syntax, content, t.getInlineList(en.Inlines))
 }
 
-func (t *Transformer) getBlockList(bs *ast.BlockSlice) *sx.Pair {
+func (t *SzTransformer) getBlockList(bs *ast.BlockSlice) *sx.Pair {
 	var lb sx.ListBuilder
 	for _, n := range *bs {
 		lb.Add(t.GetSz(n))
 	}
 	return lb.List()
 }
-func (t *Transformer) getInlineList(is ast.InlineSlice) *sx.Pair {
+func (t *SzTransformer) getInlineList(is ast.InlineSlice) *sx.Pair {
 	var lb sx.ListBuilder
 	for _, n := range is {
 		lb.Add(t.GetSz(n))
@@ -330,7 +329,7 @@ var mapMetaTypeS = map[*meta.DescriptionType]*sx.Symbol{
 }
 
 // GetMeta transforms the given metadata into a sx list.
-func (t *Transformer) GetMeta(m *meta.Meta) *sx.Pair {
+func (t *SzTransformer) GetMeta(m *meta.Meta) *sx.Pair {
 	var lb sx.ListBuilder
 	lb.Add(sz.SymMeta)
 	for key, val := range m.Computed() {

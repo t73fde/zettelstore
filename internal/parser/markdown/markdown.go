@@ -24,12 +24,13 @@ import (
 	gmAst "github.com/yuin/goldmark/ast"
 	gmText "github.com/yuin/goldmark/text"
 
+	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder/textenc"
+	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
 )
 
@@ -53,14 +54,14 @@ func parseMarkdown(inp *input.Input) *mdP {
 	source := []byte(inp.Src[inp.Pos:])
 	parser := gm.DefaultParser()
 	node := parser.Parse(gmText.NewReader(source))
-	textEnc := textenc.Create()
+	textEnc := encoder.Create(api.EncoderText, nil)
 	return &mdP{source: source, docNode: node, textEnc: textEnc}
 }
 
 type mdP struct {
 	source  []byte
 	docNode gmAst.Node
-	textEnc *textenc.Encoder
+	textEnc encoder.Encoder
 }
 
 func (p *mdP) acceptBlockChildren(docNode gmAst.Node) ast.BlockSlice {

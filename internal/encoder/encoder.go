@@ -17,11 +17,11 @@ package encoder
 
 import (
 	"errors"
-	"fmt"
 	"io"
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -46,35 +46,44 @@ var (
 
 // Create builds a new encoder with the given options.
 func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
-	if create, ok := registry[enc]; ok {
-		return create(params)
+	switch enc {
+	case api.EncoderHTML:
+		// We need a new transformer every time, because tx.inVerse must be unique.
+		// If we can refactor it out, the transformer can be created only once.
+		return &htmlEncoder{
+			tx:      NewSzTransformer(),
+			th:      shtml.NewEvaluator(1),
+			lang:    params.Lang,
+			textEnc: Create(api.EncoderText, nil),
+		}
+	case api.EncoderMD:
+		return &mdEncoder{lang: params.Lang}
+	case api.EncoderSHTML:
+		// We need a new transformer every time, because tx.inVerse must be unique.
+		// If we can refactor it out, the transformer can be created only once.
+		return &shtmlEncoder{
+			tx:   NewSzTransformer(),
+			th:   shtml.NewEvaluator(1),
+			lang: params.Lang,
+		}
+	case api.EncoderSz:
+		// We need a new transformer every time, because trans.inVerse must be unique.
+		// If we can refactor it out, the transformer can be created only once.
+		return &szEncoder{trans: NewSzTransformer()}
+	case api.EncoderText:
+		return &theOnlyTextEncoder
+	case api.EncoderZmk:
+		return &theOnlyZmkEncoder
 	}
 	return nil
 }
 
-// CreateFunc produces a new encoder.
-type CreateFunc func(*CreateParameter) Encoder
-
-// CreateParameter contains values that are needed to create an encoder.
+// CreateParameter contains values that are needed to create some encoder.
 type CreateParameter struct {
 	Lang string // default language
 }
 
-var registry = map[api.EncodingEnum]CreateFunc{}
-
-// Register the encoder for later retrieval.
-func Register(enc api.EncodingEnum, create CreateFunc) {
-	if _, ok := registry[enc]; ok {
-		panic(fmt.Sprintf("Encoder %q already registered", enc))
-	}
-	registry[enc] = create
-}
-
 // GetEncodings returns all registered encodings, ordered by encoding value.
 func GetEncodings() []api.EncodingEnum {
-	result := make([]api.EncodingEnum, 0, len(registry))
-	for enc := range registry {
-		result = append(result, enc)
-	}
-	return result
+	return []api.EncodingEnum{api.EncoderHTML, api.EncoderMD, api.EncoderSHTML, api.EncoderSz, api.EncoderText, api.EncoderZmk}
 }
