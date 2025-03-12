@@ -34,7 +34,9 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		Parse: func(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
-			if obj := zmk.Parse(inp); obj != nil {
+			var parser zmk.Parser
+			parser.Initialize(inp)
+			if obj := parser.Parse(); obj != nil {
 				bs, err := sztrans.GetBlockSlice(obj)
 				if err == nil {
 					return bs
