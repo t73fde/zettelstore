@@ -18,6 +18,7 @@ package parser
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 
@@ -25,12 +26,14 @@ import (
 	gmAst "github.com/yuin/goldmark/ast"
 	gmText "github.com/yuin/goldmark/text"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsc/sz"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/encoder"
 )
 
@@ -51,7 +54,14 @@ func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
 	node := parser.Parse(gmText.NewReader(source))
 	textEnc := encoder.Create(api.EncoderText, nil)
 	p := mdP{source: source, docNode: node, textEnc: textEnc}
-	return p.acceptBlockChildren(p.docNode)
+	if obj := p.acceptBlockChildren(p.docNode); obj != nil {
+		bs, err := sztrans.GetBlockSlice(obj)
+		if err == nil {
+			return bs
+		}
+		log.Printf("sztrans error: %v, for %v\n", err, obj)
+	}
+	return nil
 }
 
 type mdP struct {
@@ -60,20 +70,21 @@ type mdP struct {
 	textEnc encoder.Encoder
 }
 
-func (p *mdP) acceptBlockChildren(docNode gmAst.Node) ast.BlockSlice {
+func (p *mdP) acceptBlockChildren(docNode gmAst.Node) *sx.Pair {
 	if docNode.Type() != gmAst.TypeDocument {
 		panic(fmt.Sprintf("Expected document, but got node type %v", docNode.Type()))
 	}
-	result := make(ast.BlockSlice, 0, docNode.ChildCount())
+	var result sx.ListBuilder
+	result.Add(sz.SymBlock)
 	for child := docNode.FirstChild(); child != nil; child = child.NextSibling() {
 		if block := p.acceptBlock(child); block != nil {
-			result = append(result, block)
+			result.Add(block)
 		}
 	}
-	return result
+	return result.List()
 }
 
-func (p *mdP) acceptBlock(node gmAst.Node) ast.ItemNode {
+func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 	if node.Type() != gmAst.TypeBlock {
 		panic(fmt.Sprintf("Expected block node, but got node type %v", node.Type()))
 	}
@@ -100,45 +111,31 @@ func (p *mdP) acceptBlock(node gmAst.Node) ast.ItemNode {
 	panic(fmt.Sprintf("Unhandled block node of kind %v", node.Kind()))
 }
 
-func (p *mdP) acceptParagraph(node *gmAst.Paragraph) ast.ItemNode {
-	if is := p.acceptInlineChildren(node); len(is) > 0 {
-		return &ast.ParaNode{Inlines: is}
+func (p *mdP) acceptParagraph(node *gmAst.Paragraph) *sx.Pair {
+	if is := p.acceptInlineChildren(node); is != nil {
+		return sz.MakePara(is)
 	}
 	return nil
 }
 
-func (p *mdP) acceptHeading(node *gmAst.Heading) *ast.HeadingNode {
-	return &ast.HeadingNode{
-		Level:   node.Level,
-		Inlines: p.acceptInlineChildren(node),
-		Attrs:   nil,
-	}
+func (p *mdP) acceptHeading(node *gmAst.Heading) *sx.Pair {
+	return sz.MakeHeading(node.Level, nil, p.acceptInlineChildren(node), "", "")
 }
 
-func (*mdP) acceptThematicBreak() *ast.HRuleNode {
-	return &ast.HRuleNode{
-		Attrs: nil, //TODO
-	}
+func (*mdP) acceptThematicBreak() *sx.Pair {
+	return sz.MakeThematic(nil /*TODO*/)
 }
 
-func (p *mdP) acceptCodeBlock(node *gmAst.CodeBlock) *ast.VerbatimNode {
-	return &ast.VerbatimNode{
-		Kind:    ast.VerbatimCode,
-		Attrs:   nil, //TODO
-		Content: p.acceptRawText(node),
-	}
+func (p *mdP) acceptCodeBlock(node *gmAst.CodeBlock) *sx.Pair {
+	return sz.MakeVerbatim(sz.SymVerbatimCode, nil /*TODO*/, string(p.acceptRawText(node)))
 }
 
-func (p *mdP) acceptFencedCodeBlock(node *gmAst.FencedCodeBlock) *ast.VerbatimNode {
-	var a attrs.Attributes
+func (p *mdP) acceptFencedCodeBlock(node *gmAst.FencedCodeBlock) *sx.Pair {
+	var a sx.ListBuilder
 	if language := node.Language(p.source); len(language) > 0 {
-		a = a.Set("class", "language-"+cleanText(language, true))
+		a.Add(sx.Cons(sx.MakeString("class"), sx.MakeString("language-"+cleanText(language, true))))
 	}
-	return &ast.VerbatimNode{
-		Kind:    ast.VerbatimCode,
-		Attrs:   a,
-		Content: p.acceptRawText(node),
-	}
+	return sz.MakeVerbatim(sz.SymVerbatimCode, a.List(), string(p.acceptRawText(node)))
 }
 
 func (p *mdP) acceptRawText(node gmAst.Node) []byte {
@@ -162,57 +159,49 @@ func (p *mdP) acceptRawText(node gmAst.Node) []byte {
 	return result
 }
 
-func (p *mdP) acceptBlockquote(node *gmAst.Blockquote) *ast.NestedListNode {
-	return &ast.NestedListNode{
-		Kind: ast.NestedListQuote,
-		Items: []ast.ItemSlice{
-			p.acceptItemSlice(node),
-		},
-	}
+func (p *mdP) acceptBlockquote(node *gmAst.Blockquote) *sx.Pair {
+	return p.acceptItemSlice(node).Cons(sz.SymListQuote)
 }
 
-func (p *mdP) acceptList(node *gmAst.List) ast.ItemNode {
-	kind := ast.NestedListUnordered
-	var a attrs.Attributes
+func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
+	kind := sz.SymListUnordered
+	var a sx.ListBuilder
 	if node.IsOrdered() {
-		kind = ast.NestedListOrdered
+		kind = sz.SymListOrdered
 		if node.Start != 1 {
-			a = a.Set("start", strconv.Itoa(node.Start))
+			a.Add(sx.Cons(sx.MakeString("start"), sx.MakeString(strconv.Itoa(node.Start))))
 		}
 	}
-	items := make([]ast.ItemSlice, 0, node.ChildCount())
+	var result sx.ListBuilder
+	result.Add(kind)
 	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
 		item, ok := child.(*gmAst.ListItem)
 		if !ok {
 			panic(fmt.Sprintf("Expected list item node, but got %v", child.Kind()))
 		}
-		items = append(items, p.acceptItemSlice(item))
+		result.Add(p.acceptItemSlice(item))
 	}
-	return &ast.NestedListNode{
-		Kind:  kind,
-		Items: items,
-		Attrs: a,
-	}
+	return result.List()
 }
 
-func (p *mdP) acceptItemSlice(node gmAst.Node) ast.ItemSlice {
-	result := make(ast.ItemSlice, 0, node.ChildCount())
+func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
+	var result sx.ListBuilder
 	for elem := node.FirstChild(); elem != nil; elem = elem.NextSibling() {
 		if item := p.acceptBlock(elem); item != nil {
-			result = append(result, item)
+			result.Add(item)
 		}
 	}
-	return result
+	return result.List()
 }
 
-func (p *mdP) acceptTextBlock(node *gmAst.TextBlock) ast.ItemNode {
-	if is := p.acceptInlineChildren(node); len(is) > 0 {
-		return &ast.ParaNode{Inlines: is}
+func (p *mdP) acceptTextBlock(node *gmAst.TextBlock) *sx.Pair {
+	if is := p.acceptInlineChildren(node); is != nil {
+		return sz.MakePara(is)
 	}
 	return nil
 }
 
-func (p *mdP) acceptHTMLBlock(node *gmAst.HTMLBlock) *ast.VerbatimNode {
+func (p *mdP) acceptHTMLBlock(node *gmAst.HTMLBlock) *sx.Pair {
 	content := p.acceptRawText(node)
 	if node.HasClosure() {
 		closure := node.ClosureLine.Value(p.source)
@@ -224,23 +213,24 @@ func (p *mdP) acceptHTMLBlock(node *gmAst.HTMLBlock) *ast.VerbatimNode {
 		}
 		content = append(content, closure...)
 	}
-	return &ast.VerbatimNode{
-		Kind:    ast.VerbatimHTML,
-		Content: content,
-	}
+	return sz.MakeVerbatim(sz.SymVerbatimHTML, nil, string(content))
 }
 
-func (p *mdP) acceptInlineChildren(node gmAst.Node) ast.InlineSlice {
-	result := make(ast.InlineSlice, 0, node.ChildCount())
+func (p *mdP) acceptInlineChildren(node gmAst.Node) *sx.Pair {
+	var result sx.ListBuilder
 	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
-		if inlines := p.acceptInline(child); inlines != nil {
-			result = append(result, inlines...)
+		n1, n2 := p.acceptInline(child)
+		if n1 != nil {
+			result.Add(n1)
+		}
+		if n2 != nil {
+			result.Add(n2)
 		}
 	}
-	return result
+	return result.List()
 }
 
-func (p *mdP) acceptInline(node gmAst.Node) ast.InlineSlice {
+func (p *mdP) acceptInline(node gmAst.Node) (*sx.Pair, *sx.Pair) {
 	if node.Type() != gmAst.TypeInline {
 		panic(fmt.Sprintf("Expected inline node, but got %v", node.Type()))
 	}
@@ -263,24 +253,23 @@ func (p *mdP) acceptInline(node gmAst.Node) ast.InlineSlice {
 	panic(fmt.Sprintf("Unhandled inline node %v", node.Kind()))
 }
 
-func (p *mdP) acceptText(node *gmAst.Text) ast.InlineSlice {
+func (p *mdP) acceptText(node *gmAst.Text) (*sx.Pair, *sx.Pair) {
 	segment := node.Segment
 	text := segment.Value(p.source)
 	if text == nil {
-		return nil
+		return nil, nil
 	}
 	if node.IsRaw() {
-		return ast.InlineSlice{&ast.TextNode{Text: string(text)}}
+		return sz.MakeText(string(text)), nil
 	}
-	result := make(ast.InlineSlice, 0, 2)
-	in := &ast.TextNode{Text: cleanText(text, true)}
-	result = append(result, in)
+	in := sz.MakeText(cleanText(text, true))
 	if node.HardLineBreak() {
-		result = append(result, &ast.BreakNode{Hard: true})
-	} else if node.SoftLineBreak() {
-		result = append(result, &ast.BreakNode{Hard: false})
+		return in, sz.MakeHard()
 	}
-	return result
+	if node.SoftLineBreak() {
+		return in, sz.MakeSoft()
+	}
+	return in, nil
 }
 
 var ignoreAfterBS = map[byte]struct{}{
@@ -321,125 +310,77 @@ func cleanText(text []byte, cleanBS bool) string {
 	return sb.String()
 }
 
-func (p *mdP) acceptCodeSpan(node *gmAst.CodeSpan) ast.InlineSlice {
-	var segBuf bytes.Buffer
+func (p *mdP) acceptCodeSpan(node *gmAst.CodeSpan) (*sx.Pair, *sx.Pair) {
+	var segBuf strings.Builder
 	for c := node.FirstChild(); c != nil; c = c.NextSibling() {
 		segment := c.(*gmAst.Text).Segment
 		segBuf.Write(segment.Value(p.source))
 	}
-	content := segBuf.Bytes()
+	content := segBuf.String()
 
 	// Clean code span
-	if len(content) == 0 {
-		content = nil
-	} else {
+	if len(content) > 0 {
 		lastPos := 0
-		var buf bytes.Buffer
+		var buf strings.Builder
 		for pos, ch := range content {
 			if ch == '\n' {
-				buf.Write(content[lastPos:pos])
+				buf.WriteString(content[lastPos:pos])
 				if pos < len(content)-1 {
 					buf.WriteByte(' ')
 				}
 				lastPos = pos + 1
 			}
 		}
-		buf.Write(content[lastPos:])
-		content = buf.Bytes()
+		buf.WriteString(content[lastPos:])
+		content = buf.String()
 	}
-
-	return ast.InlineSlice{
-		&ast.LiteralNode{
-			Kind:    ast.LiteralCode,
-			Attrs:   nil, //TODO
-			Content: content,
-		},
-	}
+	return sz.MakeLiteral(sz.SymLiteralCode, nil /* TODO */, content), nil
 }
 
-func (p *mdP) acceptEmphasis(node *gmAst.Emphasis) ast.InlineSlice {
-	kind := ast.FormatEmph
+func (p *mdP) acceptEmphasis(node *gmAst.Emphasis) (*sx.Pair, *sx.Pair) {
+	sym := sz.SymFormatEmph
 	if node.Level == 2 {
-		kind = ast.FormatStrong
+		sym = sz.SymFormatStrong
 	}
-	return ast.InlineSlice{
-		&ast.FormatNode{
-			Kind:    kind,
-			Attrs:   nil, //TODO
-			Inlines: p.acceptInlineChildren(node),
-		},
-	}
+	return sz.MakeFormat(sym, nil /* TODO */, p.acceptInlineChildren(node)), nil
 }
 
-func (p *mdP) acceptLink(node *gmAst.Link) ast.InlineSlice {
-	ref := ast.ParseReference(cleanText(node.Destination, true))
-	var a attrs.Attributes
+func (p *mdP) acceptLink(node *gmAst.Link) (*sx.Pair, *sx.Pair) {
+	ref := sz.ScanReference(cleanText(node.Destination, true))
+	var a sx.ListBuilder
 	if title := node.Title; len(title) > 0 {
-		a = a.Set("title", cleanText(title, true))
+		a.Add(sx.Cons(sx.MakeString("title"), sx.MakeString(cleanText(title, true))))
 	}
-	return ast.InlineSlice{
-		&ast.LinkNode{
-			Ref:     ref,
-			Inlines: p.acceptInlineChildren(node),
-			Attrs:   a,
-		},
-	}
+	return sz.MakeLink(a.List(), ref, p.acceptInlineChildren(node)), nil
 }
 
-func (p *mdP) acceptImage(node *gmAst.Image) ast.InlineSlice {
-	ref := ast.ParseReference(cleanText(node.Destination, true))
-	var a attrs.Attributes
+func (p *mdP) acceptImage(node *gmAst.Image) (*sx.Pair, *sx.Pair) {
+	ref := sz.ScanReference(cleanText(node.Destination, true))
+	var a sx.ListBuilder
 	if title := node.Title; len(title) > 0 {
-		a = a.Set("title", cleanText(title, true))
+		a.Add(sx.Cons(sx.MakeString("title"), sx.MakeString(cleanText(title, true))))
 	}
-	return ast.InlineSlice{
-		&ast.EmbedRefNode{
-			Ref:     ref,
-			Inlines: p.flattenInlineSlice(node),
-			Attrs:   a,
-		},
-	}
+	return sz.MakeEmbed(a.List(), ref, "", p.acceptInlineChildren(node)), nil
 }
 
-func (p *mdP) flattenInlineSlice(node gmAst.Node) ast.InlineSlice {
-	is := p.acceptInlineChildren(node)
-	var sb strings.Builder
-	_, err := p.textEnc.WriteInlines(&sb, &is)
-	if err != nil {
-		panic(err)
-	}
-	if sb.Len() == 0 {
-		return nil
-	}
-	return ast.InlineSlice{&ast.TextNode{Text: sb.String()}}
-}
-
-func (p *mdP) acceptAutoLink(node *gmAst.AutoLink) ast.InlineSlice {
+func (p *mdP) acceptAutoLink(node *gmAst.AutoLink) (*sx.Pair, *sx.Pair) {
 	u := node.URL(p.source)
 	if node.AutoLinkType == gmAst.AutoLinkEmail &&
 		!bytes.HasPrefix(bytes.ToLower(u), []byte("mailto:")) {
 		u = append([]byte("mailto:"), u...)
 	}
-	return ast.InlineSlice{
-		&ast.LinkNode{
-			Ref:     ast.ParseReference(cleanText(u, false)),
-			Inlines: nil,
-			Attrs:   nil, // TODO
-		},
-	}
+	return sz.MakeLink(nil /* TODO */, sz.ScanReference(cleanText(u, false)), nil), nil
 }
 
-func (p *mdP) acceptRawHTML(node *gmAst.RawHTML) ast.InlineSlice {
+func (p *mdP) acceptRawHTML(node *gmAst.RawHTML) (*sx.Pair, *sx.Pair) {
 	segs := make([][]byte, 0, node.Segments.Len())
 	for i := range node.Segments.Len() {
 		segment := node.Segments.At(i)
 		segs = append(segs, segment.Value(p.source))
 	}
-	return ast.InlineSlice{
-		&ast.LiteralNode{
-			Kind:    ast.LiteralCode,
-			Attrs:   attrs.Attributes{"": "html"},
-			Content: bytes.Join(segs, nil),
-		},
-	}
+	return sz.MakeLiteral(
+		sz.SymLiteralCode,
+		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString("html")), sx.Nil()),
+		string(bytes.Join(segs, nil)),
+	), nil
 }
