@@ -16,14 +16,10 @@ package parser
 // zettelmark provides a parser for zettelmarkup.
 
 import (
-	"log"
-
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/sz/zmk"
-
-	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/ast/sztrans"
 )
 
 func init() {
@@ -33,17 +29,10 @@ func init() {
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse: func(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
+		Parse: func(inp *input.Input, _ *meta.Meta, _ string) *sx.Pair {
 			var parser zmk.Parser
 			parser.Initialize(inp)
-			if obj := parser.Parse(); obj != nil {
-				bs, err := sztrans.GetBlockSlice(obj)
-				if err == nil {
-					return bs
-				}
-				log.Printf("sztrans error: %v, for %v\n", err, obj)
-			}
-			return nil
+			return parser.Parse()
 		},
 	})
 }

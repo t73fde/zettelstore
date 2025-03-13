@@ -18,10 +18,12 @@ package parser
 import (
 	"strconv"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/webs/aasvg"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsc/sz"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -43,7 +45,7 @@ const (
 	defaultScaleY = 20
 )
 
-func parseDraw(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
+func parseDraw(inp *input.Input, m *meta.Meta, _ string) *sx.Pair {
 	font := m.GetDefault("font", defaultFont)
 	scaleX := m.GetNumber("x-scale", defaultScaleX)
 	scaleY := m.GetNumber("y-scale", defaultScaleY)
@@ -56,17 +58,13 @@ func parseDraw(inp *input.Input, m *meta.Meta, _ string) ast.BlockSlice {
 
 	canvas, err := aasvg.NewCanvas(inp.Src[inp.Pos:])
 	if err != nil {
-		return ast.BlockSlice{ast.CreateParaNode(canvasErrMsg(err)...)}
+		return sz.MakeBlock(sz.MakePara(canvasErrMsg(err)))
 	}
 	svg := aasvg.CanvasToSVG(canvas, string(font), int(scaleX), int(scaleY))
 	if len(svg) == 0 {
-		return ast.BlockSlice{ast.CreateParaNode(noSVGErrMsg()...)}
+		return sz.MakeBlock(sz.MakePara(noSVGErrMsg()))
 	}
-	return ast.BlockSlice{&ast.BLOBNode{
-		Description: ParseDescription(m),
-		Syntax:      meta.ValueSyntaxSVG,
-		Blob:        svg,
-	}}
+	return sz.MakeBlock(sz.MakeBLOB(ParseDescription(m), meta.ValueSyntaxSVG, string(svg)))
 }
 
 // ParseDrawBlock parses the content of an eval verbatim node into an SVG image BLOB.
@@ -80,7 +78,7 @@ func ParseDrawBlock(vn *ast.VerbatimNode) ast.BlockNode {
 
 	canvas, err := aasvg.NewCanvas(vn.Content)
 	if err != nil {
-		return ast.CreateParaNode(canvasErrMsg(err)...)
+		return ast.CreateParaNode(ast.InlineSlice{&ast.TextNode{Text: "Error: " + err.Error()}}...)
 	}
 	if scaleX < 1 || 1000000 < scaleX {
 		scaleX = defaultScaleX
@@ -90,7 +88,7 @@ func ParseDrawBlock(vn *ast.VerbatimNode) ast.BlockNode {
 	}
 	svg := aasvg.CanvasToSVG(canvas, font, scaleX, scaleY)
 	if len(svg) == 0 {
-		return ast.CreateParaNode(noSVGErrMsg()...)
+		return ast.CreateParaNode(ast.InlineSlice{&ast.TextNode{Text: "NO IMAGE"}}...)
 	}
 	return &ast.BLOBNode{
 		Description: nil, // TODO: look for attribute "summary" / "title"
@@ -108,10 +106,10 @@ func getScale(a attrs.Attributes, key string, defVal int) int {
 	return defVal
 }
 
-func canvasErrMsg(err error) ast.InlineSlice {
-	return ast.InlineSlice{&ast.TextNode{Text: "Error: " + err.Error()}}
+func canvasErrMsg(err error) *sx.Pair {
+	return sx.Cons(sz.MakeText("Error: "+err.Error()), sx.Nil())
 }
 
-func noSVGErrMsg() ast.InlineSlice {
-	return ast.InlineSlice{&ast.TextNode{Text: "NO IMAGE"}}
+func noSVGErrMsg() *sx.Pair {
+	return sx.Cons(sz.MakeText("NO IMAGE"), sx.Nil())
 }

@@ -18,12 +18,11 @@ package parser
 import (
 	"bytes"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxreader"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
-
-	"zettelstore.de/z/internal/ast"
+	"t73f.de/r/zsc/sz"
 )
 
 func init() {
@@ -69,39 +68,34 @@ func init() {
 	})
 }
 
-func parsePlain(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
-	return doParsePlain(inp, syntax, ast.VerbatimCode)
+func parsePlain(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
+	return doParsePlain(inp, syntax, sz.SymVerbatimCode)
 }
-func parsePlainHTML(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
-	return doParsePlain(inp, syntax, ast.VerbatimHTML)
+func parsePlainHTML(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
+	return doParsePlain(inp, syntax, sz.SymVerbatimHTML)
 }
-func doParsePlain(inp *input.Input, syntax string, kind ast.VerbatimKind) ast.BlockSlice {
-	return ast.BlockSlice{
-		&ast.VerbatimNode{
-			Kind:    kind,
-			Attrs:   attrs.Attributes{"": syntax},
-			Content: inp.ScanLineContent(),
-		},
-	}
+func doParsePlain(inp *input.Input, syntax string, kind *sx.Symbol) *sx.Pair {
+	return sz.MakeBlock(sz.MakeVerbatim(
+		kind,
+		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString(syntax)), sx.Nil()),
+		string(inp.ScanLineContent()),
+	))
 }
 
-func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
+func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
 	is := parseSVGInlines(inp, syntax)
-	if len(is) == 0 {
+	if is == nil {
 		return nil
 	}
-	return ast.BlockSlice{ast.CreateParaNode(is...)}
+	return sz.MakeBlock(sz.MakePara(is))
 }
 
-func parseSVGInlines(inp *input.Input, syntax string) ast.InlineSlice {
+func parseSVGInlines(inp *input.Input, syntax string) *sx.Pair {
 	svgSrc := scanSVG(inp)
 	if svgSrc == "" {
 		return nil
 	}
-	return ast.InlineSlice{&ast.EmbedBLOBNode{
-		Blob:   []byte(svgSrc),
-		Syntax: syntax,
-	}}
+	return sx.Cons(sz.MakeEmbedBLOB(nil, syntax, svgSrc, nil), sx.Nil())
 }
 
 func scanSVG(inp *input.Input) string {
@@ -118,20 +112,18 @@ func scanSVG(inp *input.Input) string {
 	return ""
 }
 
-func parsePlainSxn(inp *input.Input, _ *meta.Meta, syntax string) ast.BlockSlice {
+func parsePlainSxn(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
 	rd := sxreader.MakeReader(bytes.NewReader(inp.Src))
 	_, err := rd.ReadAll()
-	result := ast.BlockSlice{
-		&ast.VerbatimNode{
-			Kind:    ast.VerbatimCode,
-			Attrs:   attrs.Attributes{"": syntax},
-			Content: inp.ScanLineContent(),
-		},
-	}
+
+	var blocks sx.ListBuilder
+	blocks.Add(sz.MakeVerbatim(
+		sz.SymVerbatimCode,
+		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString(syntax)), sx.Nil()),
+		string(inp.ScanLineContent()),
+	))
 	if err != nil {
-		result = append(result, ast.CreateParaNode(&ast.TextNode{
-			Text: err.Error(),
-		}))
+		blocks.Add(sz.MakePara(sx.Cons(sz.MakeText(err.Error()), sx.Nil())))
 	}
-	return result
+	return sz.MakeBlockList(blocks.List())
 }

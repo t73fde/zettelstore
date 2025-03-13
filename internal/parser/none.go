@@ -14,9 +14,9 @@
 package parser
 
 import (
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
-	"zettelstore.de/z/internal/ast"
 )
 
 // none provides a none-parser, e.g. for zettel with just metadata.
@@ -28,6 +28,6 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: false,
-		Parse:         func(*input.Input, *meta.Meta, string) ast.BlockSlice { return nil },
+		Parse:         func(*input.Input, *meta.Meta, string) *sx.Pair { return nil },
 	})
 }

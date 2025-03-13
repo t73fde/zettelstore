@@ -163,11 +163,15 @@ func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
 			return handleRegion(ast.RegionVerse, pair.Tail())
 		case sz.SymTransclude:
 			return handleTransclude(pair.Tail())
+		case sz.SymBLOB:
+			return handleBLOB(pair.Tail())
 
 		case sz.SymLink:
 			return handleLink(pair.Tail())
 		case sz.SymEmbed:
 			return handleEmbed(pair.Tail())
+		case sz.SymEmbedBLOB:
+			return handleEmbedBLOB(pair.Tail())
 		case sz.SymCite:
 			return handleCite(pair.Tail())
 		case sz.SymMark:
@@ -407,6 +411,28 @@ func handleTransclude(rest *sx.Pair) sx.Object {
 	return rest
 }
 
+func handleBLOB(rest *sx.Pair) sx.Object {
+	if rest != nil {
+		ins := collectInlines(rest.Head())
+		if curr := rest.Tail(); curr != nil {
+			if syntax, isString := sx.GetString(curr.Car()); isString {
+				if curr = curr.Tail(); curr != nil {
+					if blob, isBlob := sx.GetString(curr.Car()); isBlob {
+						return sxNode{&ast.BLOBNode{
+							Description: ins,
+							Syntax:      syntax.GetValue(),
+							Blob:        []byte(blob.GetValue()),
+						}}
+
+					}
+				}
+			}
+		}
+	}
+	log.Println("BLOB", rest)
+	return rest
+}
+
 var mapRefState = map[*sx.Symbol]ast.RefState{
 	sz.SymRefStateInvalid:  ast.RefStateInvalid,
 	sz.SymRefStateZettel:   ast.RefStateZettel,
@@ -466,6 +492,28 @@ func handleEmbed(rest *sx.Pair) sx.Object {
 		}
 	}
 	log.Println("EMBE", rest)
+	return rest
+}
+
+func handleEmbedBLOB(rest *sx.Pair) sx.Object {
+	if rest != nil {
+		attrs := sz.GetAttributes(rest.Head())
+		if curr := rest.Tail(); curr != nil {
+			if syntax, isSyntax := sx.GetString(curr.Car()); isSyntax {
+				if curr = curr.Tail(); curr != nil {
+					if content, isContent := sx.GetString(curr.Car()); isContent {
+						return sxNode{&ast.EmbedBLOBNode{
+							Attrs:   attrs,
+							Syntax:  syntax.GetValue(),
+							Blob:    []byte(content.GetValue()),
+							Inlines: collectInlines(curr.Tail()),
+						}}
+					}
+				}
+			}
+		}
+	}
+	log.Println("EMBL", rest)
 	return rest
 }
 

@@ -18,7 +18,6 @@ package parser
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -32,8 +31,6 @@ import (
 	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/sz"
 
-	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/encoder"
 )
 
@@ -48,20 +45,13 @@ func init() {
 	})
 }
 
-func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string) ast.BlockSlice {
+func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string) *sx.Pair {
 	source := []byte(inp.Src[inp.Pos:])
 	parser := gm.DefaultParser()
 	node := parser.Parse(gmText.NewReader(source))
 	textEnc := encoder.Create(api.EncoderText, nil)
 	p := mdP{source: source, docNode: node, textEnc: textEnc}
-	if obj := p.acceptBlockChildren(p.docNode); obj != nil {
-		bs, err := sztrans.GetBlockSlice(obj)
-		if err == nil {
-			return bs
-		}
-		log.Printf("sztrans error: %v, for %v\n", err, obj)
-	}
-	return nil
+	return p.acceptBlockChildren(p.docNode)
 }
 
 type mdP struct {

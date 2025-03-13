@@ -16,10 +16,10 @@ package parser
 // blob provides a parser of binary data.
 
 import (
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
-
-	"zettelstore.de/z/internal/ast"
+	"t73f.de/r/zsc/sz"
 )
 
 func init() {
@@ -57,13 +57,9 @@ func init() {
 	})
 }
 
-func parseBlob(inp *input.Input, m *meta.Meta, syntax string) ast.BlockSlice {
+func parseBlob(inp *input.Input, m *meta.Meta, syntax string) *sx.Pair {
 	if p := Get(syntax); p != nil {
 		syntax = p.Name
 	}
-	return ast.BlockSlice{&ast.BLOBNode{
-		Description: ParseDescription(m),
-		Syntax:      syntax,
-		Blob:        []byte(inp.Src),
-	}}
+	return sz.MakeBlock(sz.MakeBLOB(ParseDescription(m), syntax, string(inp.Src)))
 }

@@ -482,7 +482,7 @@ func mustParseZid(ref *ast.Reference) id.Zid {
 func (e *evaluator) updateImageRefNode(en *ast.EmbedRefNode, m *meta.Meta, syntax string) {
 	en.Syntax = syntax
 	if len(en.Inlines) == 0 {
-		is := parser.ParseDescription(m)
+		is := parser.ParseDescriptionAST(m)
 		if len(is) > 0 {
 			ast.Walk(e, &is)
 			if len(is) > 0 {
