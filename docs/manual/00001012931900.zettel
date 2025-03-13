@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230405123046
-modified: 20250102172048
+modified: 20250313130616
 
 A reference is encoded as the actual reference value, and a symbol describing the state of that actual reference value.
 
@@ -16,8 +16,6 @@ The string contains the actual reference value.
 :::syntax
 __ReferenceState__ **=** ''INVALID'' **|** ''ZETTEL'' **|** ''SELF'' **|** ''FOUND'' **|** ''BROKEN'' **|** ''HOSTED'' **|** ''BASED'' **|** ''QUERY'' **|** ''EXTERNAL''.
 :::
-
-The meaning of the state symbols corresponds to that of the symbols used for the description of [[link references|00001012931600#link]].
 
 ; ''INVALID''
 : The reference value is invalid.

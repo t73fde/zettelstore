@@ -164,26 +164,8 @@ func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
 		case sz.SymTransclude:
 			return handleTransclude(pair.Tail())
 
-		case sz.SymLinkHosted:
-			return handleLink(ast.RefStateHosted, pair.Tail())
-		case sz.SymLinkInvalid:
-			return handleLink(ast.RefStateInvalid, pair.Tail())
-		case sz.SymLinkZettel:
-			return handleLink(ast.RefStateZettel, pair.Tail())
-		case sz.SymLinkSelf:
-			return handleLink(ast.RefStateSelf, pair.Tail())
-		case sz.SymLinkFound:
-			return handleLink(ast.RefStateFound, pair.Tail())
-		case sz.SymLinkBroken:
-			return handleLink(ast.RefStateBroken, pair.Tail())
-		case sz.SymLinkHosted:
-			return handleLink(ast.RefStateHosted, pair.Tail())
-		case sz.SymLinkBased:
-			return handleLink(ast.RefStateBased, pair.Tail())
-		case sz.SymLinkQuery:
-			return handleLink(ast.RefStateQuery, pair.Tail())
-		case sz.SymLinkExternal:
-			return handleLink(ast.RefStateExternal, pair.Tail())
+		case sz.SymLink:
+			return handleLink(pair.Tail())
 		case sz.SymEmbed:
 			return handleEmbed(pair.Tail())
 		case sz.SymCite:
@@ -425,23 +407,43 @@ func handleTransclude(rest *sx.Pair) sx.Object {
 	return rest
 }
 
-func handleLink(state ast.RefState, rest *sx.Pair) sx.Object {
+var mapRefState = map[*sx.Symbol]ast.RefState{
+	sz.SymRefStateInvalid:  ast.RefStateInvalid,
+	sz.SymRefStateZettel:   ast.RefStateZettel,
+	sz.SymRefStateSelf:     ast.RefStateSelf,
+	sz.SymRefStateFound:    ast.RefStateFound,
+	sz.SymRefStateBroken:   ast.RefStateBroken,
+	sz.SymRefStateHosted:   ast.RefStateHosted,
+	sz.SymRefStateBased:    ast.RefStateBased,
+	sz.SymRefStateQuery:    ast.RefStateQuery,
+	sz.SymRefStateExternal: ast.RefStateExternal,
+}
+
+func handleLink(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		attrs := sz.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
-			if sref, isString := sx.GetString(curr.Car()); isString {
-				ref := ast.ParseReference(sref.GetValue())
-				ref.State = state
-				ins := collectInlines(curr.Tail())
-				return sxNode{&ast.LinkNode{
-					Attrs:   attrs,
-					Ref:     ref,
-					Inlines: ins,
-				}}
+			if szref := curr.Head(); szref != nil {
+				if stateSym, isSym := sx.GetSymbol(szref.Car()); isSym {
+					refval, isString := sx.GetString(szref.Cdr())
+					if !isString {
+						refval, isString = sx.GetString(szref.Tail().Car())
+					}
+					if isString {
+						ref := ast.ParseReference(refval.GetValue())
+						ref.State = mapRefState[stateSym]
+						ins := collectInlines(curr.Tail())
+						return sxNode{&ast.LinkNode{
+							Attrs:   attrs,
+							Ref:     ref,
+							Inlines: ins,
+						}}
+					}
+				}
 			}
 		}
 	}
-	log.Println("LINK", state, rest)
+	log.Println("LINK", rest)
 	return rest
 }
 

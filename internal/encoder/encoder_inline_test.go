@@ -451,7 +451,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<span>link</span>`,
 			encoderMD:    "[link](00000000000000)",
-			encoderSz:    `(INLINE (LINK-INVALID () "00000000000000" (TEXT "link")))`,
+			encoderSz:    `(INLINE (LINK () (INVALID "00000000000000") (TEXT "link")))`,
 			encoderSHTML: `((span "link"))`,
 			encoderText:  `link`,
 			encoderZmk:   useZmk,
@@ -463,7 +463,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<span>00000000000000</span>`,
 			encoderMD:    "[00000000000000](00000000000000)",
-			encoderSz:    `(INLINE (LINK-INVALID () "00000000000000"))`,
+			encoderSz:    `(INLINE (LINK () (INVALID "00000000000000")))`,
 			encoderSHTML: `((span "00000000000000"))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
@@ -475,7 +475,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="abc" rel="external">abc</a>`,
 			encoderMD:    "[abc](abc)",
-			encoderSz:    `(INLINE (LINK-EXTERNAL () "abc"))`,
+			encoderSz:    `(INLINE (LINK () (EXTERNAL "abc")))`,
 			encoderSHTML: `((a (@ (href . "abc") (rel . "external")) "abc"))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
@@ -487,7 +487,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="https://zettelstore.de" rel="external">https://zettelstore.de</a>`,
 			encoderMD:    "<https://zettelstore.de>",
-			encoderSz:    `(INLINE (LINK-EXTERNAL () "https://zettelstore.de"))`,
+			encoderSz:    `(INLINE (LINK () (EXTERNAL "https://zettelstore.de")))`,
 			encoderSHTML: `((a (@ (href . "https://zettelstore.de") (rel . "external")) "https://zettelstore.de"))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
@@ -499,7 +499,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="https://zettelstore.de" rel="external">Home</a>`,
 			encoderMD:    "[Home](https://zettelstore.de)",
-			encoderSz:    `(INLINE (LINK-EXTERNAL () "https://zettelstore.de" (TEXT "Home")))`,
+			encoderSz:    `(INLINE (LINK () (EXTERNAL "https://zettelstore.de") (TEXT "Home")))`,
 			encoderSHTML: `((a (@ (href . "https://zettelstore.de") (rel . "external")) "Home"))`,
 			encoderText:  `Home`,
 			encoderZmk:   useZmk,
@@ -511,7 +511,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="00000000000100">00000000000100</a>`,
 			encoderMD:    "[00000000000100](00000000000100)",
-			encoderSz:    `(INLINE (LINK-ZETTEL () "00000000000100"))`,
+			encoderSz:    `(INLINE (LINK () (ZETTEL "00000000000100")))`,
 			encoderSHTML: `((a (@ (href . "00000000000100")) "00000000000100"))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
@@ -523,7 +523,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="00000000000100">Config</a>`,
 			encoderMD:    "[Config](00000000000100)",
-			encoderSz:    `(INLINE (LINK-ZETTEL () "00000000000100" (TEXT "Config")))`,
+			encoderSz:    `(INLINE (LINK () (ZETTEL "00000000000100") (TEXT "Config")))`,
 			encoderSHTML: `((a (@ (href . "00000000000100")) "Config"))`,
 			encoderText:  `Config`,
 			encoderZmk:   useZmk,
@@ -535,7 +535,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="00000000000100#frag">00000000000100#frag</a>`,
 			encoderMD:    "[00000000000100#frag](00000000000100#frag)",
-			encoderSz:    `(INLINE (LINK-ZETTEL () "00000000000100#frag"))`,
+			encoderSz:    `(INLINE (LINK () (ZETTEL "00000000000100#frag")))`,
 			encoderSHTML: `((a (@ (href . "00000000000100#frag")) "00000000000100#frag"))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
@@ -547,7 +547,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="00000000000100#frag">Config</a>`,
 			encoderMD:    "[Config](00000000000100#frag)",
-			encoderSz:    `(INLINE (LINK-ZETTEL () "00000000000100#frag" (TEXT "Config")))`,
+			encoderSz:    `(INLINE (LINK () (ZETTEL "00000000000100#frag") (TEXT "Config")))`,
 			encoderSHTML: `((a (@ (href . "00000000000100#frag")) "Config"))`,
 			encoderText:  `Config`,
 			encoderZmk:   useZmk,
@@ -559,7 +559,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="#frag">#frag</a>`,
 			encoderMD:    "[#frag](#frag)",
-			encoderSz:    `(INLINE (LINK-SELF () "#frag"))`,
+			encoderSz:    `(INLINE (LINK () (SELF "#frag")))`,
 			encoderSHTML: `((a (@ (href . "#frag")) "#frag"))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
@@ -571,7 +571,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="/hosted">H</a>`,
 			encoderMD:    "[H](/hosted)",
-			encoderSz:    `(INLINE (LINK-HOSTED () "/hosted" (TEXT "H")))`,
+			encoderSz:    `(INLINE (LINK () (HOSTED "/hosted") (TEXT "H")))`,
 			encoderSHTML: `((a (@ (href . "/hosted")) "H"))`,
 			encoderText:  `H`,
 			encoderZmk:   useZmk,
@@ -583,7 +583,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="/based">B</a>`,
 			encoderMD:    "[B](/based)",
-			encoderSz:    `(INLINE (LINK-BASED () "/based" (TEXT "B")))`,
+			encoderSz:    `(INLINE (LINK () (BASED "/based") (TEXT "B")))`,
 			encoderText:  `B`,
 			encoderSHTML: `((a (@ (href . "/based")) "B"))`,
 			encoderZmk:   useZmk,
@@ -595,7 +595,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="../relative">R</a>`,
 			encoderMD:    "[R](../relative)",
-			encoderSz:    `(INLINE (LINK-HOSTED () "../relative" (TEXT "R")))`,
+			encoderSz:    `(INLINE (LINK () (HOSTED "../relative") (TEXT "R")))`,
 			encoderSHTML: `((a (@ (href . "../relative")) "R"))`,
 			encoderText:  `R`,
 			encoderZmk:   useZmk,
@@ -607,7 +607,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="?q=title%3Asyntax">title:syntax</a>`,
 			encoderMD:    "",
-			encoderSz:    `(INLINE (LINK-QUERY () "title:syntax"))`,
+			encoderSz:    `(INLINE (LINK () (QUERY "title:syntax")))`,
 			encoderSHTML: `((a (@ (href . "?q=title%3Asyntax")) "title:syntax"))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
@@ -619,7 +619,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<a href="?q=title%3Asyntax">Q</a>`,
 			encoderMD:    "Q",
-			encoderSz:    `(INLINE (LINK-QUERY () "title:syntax" (TEXT "Q")))`,
+			encoderSz:    `(INLINE (LINK () (QUERY "title:syntax") (TEXT "Q")))`,
 			encoderSHTML: `((a (@ (href . "?q=title%3Asyntax")) "Q"))`,
 			encoderText:  `Q`,
 			encoderZmk:   useZmk,

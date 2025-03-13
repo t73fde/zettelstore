@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161845
-modified: 20250102221540
+modified: 20250313130428
 
 === ''TEXT''
 :::syntax
@@ -25,55 +25,13 @@ __Hard__ **=** ''(HARD)''.
 :::
 Specifies a hard line break, i.e. the user wants to have a line break here.
 
-=== ''LINK-*''
-The following lists specify various links, based on the full reference.
-They all have the same structure, with a trailing sequence of __InlineElements__ that contain the linked text.
-
+=== ''LINK''
 :::syntax
-__InvalidLink__ **=** ''(LINK-INVALID'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
+__Link__ **=** ''(LINK'' [[__Attributes__|00001012931000#attribute]] [[__Reference__|00001012931900]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
-The string contains the invalid link specification.
-
-:::syntax
-__ZettelLink__ **=** ''(LINK-ZETTEL'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains the zettel identifier, a zettel reference.
-
-:::syntax
-__SelfLink__ **=** ''(LINK-SELF'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains the number sign character and the name of a zettel mark.
-It reference the same zettel where it occurs.
-
-:::syntax
-__FoundLink__ **=** ''(LINK-FOUND'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains a zettel identifier, a zettel reference, of a zettel known to be included in the Zettelstore.
-
-:::syntax
-__BrokenLink__ **=** ''(LINK-BROKEN'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains a zettel identifier, a zettel reference, of a zettel known to be __not__ included in the Zettelstore.
-
-:::syntax
-__HostedLink__ **=** ''(LINK-HOSTED'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains a link starting with one slash character, denoting an absolute local reference.
-
-:::syntax
-__BasedLink__ **=** ''(LINK-BASED'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains a link starting with two slash characters, denoting a local reference interpreted relative to the Zettelstore base URL.
-
-:::syntax
-__QueryLink__ **=** ''(LINK-BASED'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains a [[query expression|00001007700000]].
-
-:::syntax
-__ExternalLink__ **=** ''(LINK-EXTERNAL'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The string contains a full URL, referencing a resource outside of the Zettelstore server.
+Specifies a link to some other material.
+The link type is based on the full reference.
+The trailing sequence of __InlineElements__ contains the linked text.
 
 === ''EMBED''
 :::syntax

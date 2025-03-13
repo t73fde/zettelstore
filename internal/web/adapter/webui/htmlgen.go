@@ -65,12 +65,20 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 		}
 		return attr, attr.Tail(), rest.Tail()
 	}
-	linkZettel := func(obj sx.Object) sx.Object {
-		attr, assoc, rest := findA(obj)
-		if attr == nil {
-			return obj
-		}
 
+	rebindWrap(th, sz.SymLink, func(args sx.Vector, env *shtml.Environment, prevFn shtml.EvalFn) sx.Object {
+		refSym, _ := shtml.GetReference(args[1], env)
+		obj := prevFn(args, env)
+		attr, assoc, rest := findA(obj)
+		if attr == nil {
+			return obj
+		}
+		if sz.SymRefStateExternal.IsEqual(refSym) {
+			a := sz.GetAttributes(attr)
+			a = a.Set("target", "_blank")
+			a = a.Add("rel", "external").Add("rel", "noreferrer")
+			return rest.Cons(shtml.EvaluateAttrbute(a)).Cons(shtml.SymA)
+		}
 		hrefP := assoc.Assoc(shtml.SymAttrHref)
 		if hrefP == nil {
 			return obj
@@ -79,76 +87,44 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 		if !ok {
 			return obj
 		}
-		strZid, fragment, hasFragment := strings.Cut(href.GetValue(), "#")
-		zid, err := id.Parse(strZid)
-		u := builder.NewURLBuilder('h')
-		if err == nil {
-			u = u.SetZid(zid)
-		}
-		if hasFragment {
-			u = u.SetFragment(fragment)
-		}
-		assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
-		return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
-	}
+		switch refSym {
+		case sz.SymRefStateZettel, sz.SymRefStateFound:
+			strZid, fragment, hasFragment := strings.Cut(href.GetValue(), "#")
+			zid, err := id.Parse(strZid)
+			u := builder.NewURLBuilder('h')
+			if err == nil {
+				u = u.SetZid(zid)
+			}
+			if hasFragment {
+				u = u.SetFragment(fragment)
+			}
+			assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
+			return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
 
-	rebind(th, sz.SymLinkZettel, linkZettel)
-	rebind(th, sz.SymLinkFound, linkZettel)
-	rebind(th, sz.SymLinkBased, func(obj sx.Object) sx.Object {
-		attr, assoc, rest := findA(obj)
-		if attr == nil {
-			return obj
+		case sz.SymRefStateQuery:
+			ur, err := url.Parse(href.GetValue())
+			if err != nil {
+				return obj
+			}
+			urlQuery := ur.Query()
+			if !urlQuery.Has(api.QueryKeyQuery) {
+				return obj
+			}
+			u := builder.NewURLBuilder('h')
+			if q := urlQuery.Get(api.QueryKeyQuery); q != "" {
+				u = u.AppendQuery(q)
+			}
+			assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
+			return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
+
+		case sz.SymRefStateBased:
+			u := builder.NewURLBuilder('/')
+			assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String()+href.GetValue()[1:])))
+			return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
 		}
-		hrefP := assoc.Assoc(shtml.SymAttrHref)
-		if hrefP == nil {
-			return obj
-		}
-		href, ok := sx.GetString(hrefP.Cdr())
-		if !ok {
-			return obj
-		}
-		u := builder.NewURLBuilder('/')
-		assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String()+href.GetValue()[1:])))
-		return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
+		return obj
 	})
-	rebind(th, sz.SymLinkQuery, func(obj sx.Object) sx.Object {
-		attr, assoc, rest := findA(obj)
-		if attr == nil {
-			return obj
-		}
-		hrefP := assoc.Assoc(shtml.SymAttrHref)
-		if hrefP == nil {
-			return obj
-		}
-		href, ok := sx.GetString(hrefP.Cdr())
-		if !ok {
-			return obj
-		}
-		ur, err := url.Parse(href.GetValue())
-		if err != nil {
-			return obj
-		}
-		urlQuery := ur.Query()
-		if !urlQuery.Has(api.QueryKeyQuery) {
-			return obj
-		}
-		u := builder.NewURLBuilder('h')
-		if q := urlQuery.Get(api.QueryKeyQuery); q != "" {
-			u = u.AppendQuery(q)
-		}
-		assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
-		return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
-	})
-	rebind(th, sz.SymLinkExternal, func(obj sx.Object) sx.Object {
-		attr, _, rest := findA(obj)
-		if attr == nil {
-			return obj
-		}
-		a := sz.GetAttributes(attr)
-		a = a.Set("target", "_blank")
-		a = a.Add("rel", "external").Add("rel", "noreferrer")
-		return rest.Cons(shtml.EvaluateAttrbute(a)).Cons(shtml.SymA)
-	})
+
 	rebind(th, sz.SymEmbed, func(obj sx.Object) sx.Object {
 		pair, isPair := sx.GetPair(obj)
 		if !isPair || !shtml.SymIMG.IsEqual(pair.Car()) {
@@ -188,6 +164,17 @@ func rebind(ev *shtml.Evaluator, sym *sx.Symbol, fn func(sx.Object) sx.Object) {
 		obj := prevFn(args, env)
 		if env.GetError() == nil {
 			return fn(obj)
+		}
+		return sx.Nil()
+	})
+}
+
+func rebindWrap(ev *shtml.Evaluator, sym *sx.Symbol, fn func(sx.Vector, *shtml.Environment, shtml.EvalFn) sx.Object) {
+	prevFn := ev.ResolveBinding(sym)
+	ev.Rebind(sym, func(args sx.Vector, env *shtml.Environment) sx.Object {
+		obj := fn(args, env, prevFn)
+		if env.GetError() == nil {
+			return obj
 		}
 		return sx.Nil()
 	})

@@ -241,23 +241,10 @@ func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
 	return sz.MakeBLOB(t.getInlineList(bn.Description), bn.Syntax, content)
 }
 
-var mapRefStateLink = map[ast.RefState]*sx.Symbol{
-	ast.RefStateInvalid:  sz.SymLinkInvalid,
-	ast.RefStateZettel:   sz.SymLinkZettel,
-	ast.RefStateSelf:     sz.SymLinkSelf,
-	ast.RefStateFound:    sz.SymLinkFound,
-	ast.RefStateBroken:   sz.SymLinkBroken,
-	ast.RefStateHosted:   sz.SymLinkHosted,
-	ast.RefStateBased:    sz.SymLinkBased,
-	ast.RefStateQuery:    sz.SymLinkQuery,
-	ast.RefStateExternal: sz.SymLinkExternal,
-}
-
 func (t *SzTransformer) getLink(ln *ast.LinkNode) *sx.Pair {
 	return sz.MakeLink(
-		mapGetS(mapRefStateLink, ln.Ref.State),
 		getAttributes(ln.Attrs),
-		ln.Ref.Value,
+		getReference(ln.Ref),
 		t.getInlineList(ln.Inlines),
 	)
 }
