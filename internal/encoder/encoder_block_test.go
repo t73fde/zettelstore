@@ -80,7 +80,7 @@ var tcsBlock = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  "<ul><li>A</li><li>B</li><li>C</li></ul>",
 			encoderMD:    "* A\n* B\n* C",
-			encoderSz:    `(BLOCK (UNORDERED (INLINE (TEXT "A")) (INLINE (TEXT "B")) (INLINE (TEXT "C"))))`,
+			encoderSz:    `(BLOCK (UNORDERED () (INLINE (TEXT "A")) (INLINE (TEXT "B")) (INLINE (TEXT "C"))))`,
 			encoderSHTML: `((ul (li "A") (li "B") (li "C")))`,
 			encoderText:  "A\nB\nC",
 			encoderZmk:   useZmk,
@@ -88,12 +88,12 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Nested List",
-		zmk:   "* T1\n** T2\n* T3\n** T4\n** T5\n* T6",
+		zmk:   "* T1\n*# T2\n* T3\n** T4\n** T5\n* T6",
 		expect: expectMap{
-			encoderHTML:  `<ul><li><p>T1</p><ul><li>T2</li></ul></li><li><p>T3</p><ul><li>T4</li><li>T5</li></ul></li><li><p>T6</p></li></ul>`,
-			encoderMD:    "* T1\n    * T2\n* T3\n    * T4\n    * T5\n* T6",
-			encoderSz:    `(BLOCK (UNORDERED (BLOCK (PARA (TEXT "T1")) (UNORDERED (INLINE (TEXT "T2")))) (BLOCK (PARA (TEXT "T3")) (UNORDERED (INLINE (TEXT "T4")) (INLINE (TEXT "T5")))) (BLOCK (PARA (TEXT "T6")))))`,
-			encoderSHTML: `((ul (li (p "T1") (ul (li "T2"))) (li (p "T3") (ul (li "T4") (li "T5"))) (li (p "T6"))))`,
+			encoderHTML:  `<ul><li><p>T1</p><ol><li>T2</li></ol></li><li><p>T3</p><ul><li>T4</li><li>T5</li></ul></li><li><p>T6</p></li></ul>`,
+			encoderMD:    "* T1\n    1. T2\n* T3\n    * T4\n    * T5\n* T6",
+			encoderSz:    `(BLOCK (UNORDERED () (BLOCK (PARA (TEXT "T1")) (ORDERED () (INLINE (TEXT "T2")))) (BLOCK (PARA (TEXT "T3")) (UNORDERED () (INLINE (TEXT "T4")) (INLINE (TEXT "T5")))) (BLOCK (PARA (TEXT "T6")))))`,
+			encoderSHTML: `((ul (li (p "T1") (ol (li "T2"))) (li (p "T3") (ul (li "T4") (li "T5"))) (li (p "T6"))))`,
 			encoderText:  "T1\nT2\nT3\nT4\nT5\nT6",
 			encoderZmk:   useZmk,
 		},
@@ -104,7 +104,7 @@ var tcsBlock = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  "<ul><li>Item1.1</li><li>Item1.2</li><li>Item1.3</li><li>Item2.1</li><li>Item2.2</li></ul>",
 			encoderMD:    "* Item1.1\n* Item1.2\n* Item1.3\n* Item2.1\n* Item2.2",
-			encoderSz:    `(BLOCK (UNORDERED (INLINE (TEXT "Item1.1")) (INLINE (TEXT "Item1.2")) (INLINE (TEXT "Item1.3")) (INLINE (TEXT "Item2.1")) (INLINE (TEXT "Item2.2"))))`,
+			encoderSz:    `(BLOCK (UNORDERED () (INLINE (TEXT "Item1.1")) (INLINE (TEXT "Item1.2")) (INLINE (TEXT "Item1.3")) (INLINE (TEXT "Item2.1")) (INLINE (TEXT "Item2.2"))))`,
 			encoderSHTML: `((ul (li "Item1.1") (li "Item1.2") (li "Item1.3") (li "Item2.1") (li "Item2.2")))`,
 			encoderText:  "Item1.1\nItem1.2\nItem1.3\nItem2.1\nItem2.2",
 			encoderZmk:   "* Item1.1\n* Item1.2\n* Item1.3\n* Item2.1\n* Item2.2",
@@ -152,7 +152,7 @@ var tcsBlock = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  "<p>Text</p><ol><li>abc</li></ol>",
 			encoderMD:    "Text\n\n1. abc",
-			encoderSz:    `(BLOCK (PARA (TEXT "Text")) (ORDERED (INLINE (TEXT "abc"))))`,
+			encoderSz:    `(BLOCK (PARA (TEXT "Text")) (ORDERED () (INLINE (TEXT "abc"))))`,
 			encoderSHTML: `((p "Text") (ol (li "abc")))`,
 			encoderText:  "Text\nabc",
 			encoderZmk:   useZmk,
@@ -164,7 +164,7 @@ var tcsBlock = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  "<blockquote>ToBeOrNotToBe</blockquote>",
 			encoderMD:    "> ToBeOrNotToBe",
-			encoderSz:    `(BLOCK (QUOTATION (INLINE (TEXT "ToBeOrNotToBe"))))`,
+			encoderSz:    `(BLOCK (QUOTATION () (INLINE (TEXT "ToBeOrNotToBe"))))`,
 			encoderSHTML: `((blockquote (@L "ToBeOrNotToBe")))`,
 			encoderText:  "ToBeOrNotToBe",
 			encoderZmk:   useZmk,
@@ -284,7 +284,7 @@ and much more
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>Zettel</dt><dd><p>Paper</p></dd><dd><p>Note</p></dd><dt>Zettelkasten</dt><dd><p>Slip box</p></dd></dl>",
 			encoderMD:    "",
-			encoderSz:    `(BLOCK (DESCRIPTION ((TEXT "Zettel")) (BLOCK (BLOCK (PARA (TEXT "Paper"))) (BLOCK (PARA (TEXT "Note")))) ((TEXT "Zettelkasten")) (BLOCK (BLOCK (PARA (TEXT "Slip box"))))))`,
+			encoderSz:    `(BLOCK (DESCRIPTION () ((TEXT "Zettel")) (BLOCK (BLOCK (PARA (TEXT "Paper"))) (BLOCK (PARA (TEXT "Note")))) ((TEXT "Zettelkasten")) (BLOCK (BLOCK (PARA (TEXT "Slip box"))))))`,
 			encoderSHTML: `((dl (dt "Zettel") (dd (p "Paper")) (dd (p "Note")) (dt "Zettelkasten") (dd (p "Slip box"))))`,
 			encoderText:  "Zettel\nPaper\nNote\nZettelkasten\nSlip box",
 			encoderZmk:   useZmk,
@@ -296,7 +296,7 @@ and much more
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>Zettel</dt><dd><p>Paper</p><p>Note</p></dd><dt>Zettelkasten</dt><dd><p>Slip box</p></dd></dl>",
 			encoderMD:    "",
-			encoderSz:    `(BLOCK (DESCRIPTION ((TEXT "Zettel")) (BLOCK (BLOCK (PARA (TEXT "Paper")) (PARA (TEXT "Note")))) ((TEXT "Zettelkasten")) (BLOCK (BLOCK (PARA (TEXT "Slip box"))))))`,
+			encoderSz:    `(BLOCK (DESCRIPTION () ((TEXT "Zettel")) (BLOCK (BLOCK (PARA (TEXT "Paper")) (PARA (TEXT "Note")))) ((TEXT "Zettelkasten")) (BLOCK (BLOCK (PARA (TEXT "Slip box"))))))`,
 			encoderSHTML: `((dl (dt "Zettel") (dd (p "Paper") (p "Note")) (dt "Zettelkasten") (dd (p "Slip box"))))`,
 			encoderText:  "Zettel\nPaper\nNote\nZettelkasten\nSlip box",
 			encoderZmk:   useZmk,
@@ -308,7 +308,7 @@ and much more
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>K1</dt><dd><p>D11</p></dd><dd><p>D12</p></dd><dt>K2</dt><dt>K3</dt><dd><p>D31</p></dd></dl>",
 			encoderMD:    "",
-			encoderSz:    `(BLOCK (DESCRIPTION ((TEXT "K1")) (BLOCK (BLOCK (PARA (TEXT "D11"))) (BLOCK (PARA (TEXT "D12")))) ((TEXT "K2")) (BLOCK) ((TEXT "K3")) (BLOCK (BLOCK (PARA (TEXT "D31"))))))`,
+			encoderSz:    `(BLOCK (DESCRIPTION () ((TEXT "K1")) (BLOCK (BLOCK (PARA (TEXT "D11"))) (BLOCK (PARA (TEXT "D12")))) ((TEXT "K2")) (BLOCK) ((TEXT "K3")) (BLOCK (BLOCK (PARA (TEXT "D31"))))))`,
 			encoderSHTML: `((dl (dt "K1") (dd (p "D11")) (dd (p "D12")) (dt "K2") (dt "K3") (dd (p "D31"))))`,
 			encoderText:  "K1\nD11\nD12\nK2\nK3\nD31",
 			encoderZmk:   useZmk,

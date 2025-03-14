@@ -77,7 +77,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 			a := sz.GetAttributes(attr)
 			a = a.Set("target", "_blank")
 			a = a.Add("rel", "external").Add("rel", "noreferrer")
-			return rest.Cons(shtml.EvaluateAttrbute(a)).Cons(shtml.SymA)
+			return rest.Cons(shtml.EvaluateAttributes(a)).Cons(shtml.SymA)
 		}
 		hrefP := assoc.Assoc(shtml.SymAttrHref)
 		if hrefP == nil {

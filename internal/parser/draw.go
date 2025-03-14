@@ -58,11 +58,11 @@ func parseDraw(inp *input.Input, m *meta.Meta, _ string) *sx.Pair {
 
 	canvas, err := aasvg.NewCanvas(inp.Src[inp.Pos:])
 	if err != nil {
-		return sz.MakeBlock(sz.MakePara(canvasErrMsg(err)))
+		return sz.MakeBlock(sz.MakeParaList(canvasErrMsg(err)))
 	}
 	svg := aasvg.CanvasToSVG(canvas, string(font), int(scaleX), int(scaleY))
 	if len(svg) == 0 {
-		return sz.MakeBlock(sz.MakePara(noSVGErrMsg()))
+		return sz.MakeBlock(sz.MakeParaList(noSVGErrMsg()))
 	}
 	return sz.MakeBlock(sz.MakeBLOB(ParseDescription(m), meta.ValueSyntaxSVG, string(svg)))
 }

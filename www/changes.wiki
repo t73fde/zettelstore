@@ -2,6 +2,12 @@
 
 <a id="0_21"></a>
 <h2>Changes for Version 0.21.0 (pending)</h2>
+  *  Sz encodings of links were simplified into one <code>LINK</code> symbol.
+     Different link types are now specified by reference node.
+     (breaking: api)
+  *  Sz encodings of lists and descriptions have now an additional attributes
+     entry, directly after the initial symbol.
+     (breaking: api)
 
 <a id="0_20"></a>
 <h2>Changes for Version 0.20.0 (2025-03-07)</h2>

@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20250304220504
+modified: 20250314140036
 
 === ''PARA''
 :::syntax
@@ -31,11 +31,11 @@ These three symbols are specifying different kinds of lists / enumerations: an o
 Their structure is the same.
 
 :::syntax
-__OrderedList__ **=** ''(ORDERED'' __ListElement__ &hellip; '')''.
+__OrderedList__ **=** ''(ORDERED'' [[__Attributes__|00001012931000#attribute]] __ListElement__ &hellip; '')''.
 
-__UnorderedList__ **=** ''(UNORDERED'' __ListElement__ &hellip; '')''.
+__UnorderedList__ **=** ''(UNORDERED'' [[__Attributes__|00001012931000#attribute]] __ListElement__ &hellip; '')''.
 
-__QuotationList__ **=** ''(QUOTATION'' __ListElement__ &hellip; '')''.
+__QuotationList__ **=** ''(QUOTATION'' [[__Attributes__|00001012931000#attribute]] __ListElement__ &hellip; '')''.
 :::
 
 :::syntax
@@ -45,7 +45,7 @@ A list element is either a block or an inline.
 If it is a block, it may contain a nested list.
 === ''DESCRIPTION''
 :::syntax
-__Description__ **=** ''(DESCRIPTION'' __DescriptionTerm__ __DescriptionValues__ __DescriptionTerm__ __DescriptionValues__ &hellip; '')''.
+__Description__ **=** ''(DESCRIPTION'' [[__Attributes__|00001012931000#attribute]] __DescriptionTerm__ __DescriptionValues__ __DescriptionTerm__ __DescriptionValues__ &hellip; '')''.
 :::
 A description is a sequence of one or more terms and values.
 

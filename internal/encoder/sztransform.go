@@ -44,7 +44,7 @@ func (t *SzTransformer) GetSz(node ast.Node) *sx.Pair {
 	case *ast.InlineSlice:
 		return sz.MakeInlineList(t.getInlineList(*n))
 	case *ast.ParaNode:
-		return sz.MakePara(t.getInlineList(n.Inlines))
+		return sz.MakeParaList(t.getInlineList(n.Inlines))
 	case *ast.VerbatimNode:
 		return sz.MakeVerbatim(mapGetS(mapVerbatimKindS, n.Kind), getAttributes(n.Attrs), string(n.Content))
 	case *ast.RegionNode:
@@ -146,13 +146,12 @@ var mapNestedListKindS = map[ast.NestedListKind]*sx.Symbol{
 }
 
 func (t *SzTransformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
-	var nlistObjs sx.ListBuilder
-	nlistObjs.Add(mapGetS(mapNestedListKindS, ln.Kind))
+	var items sx.ListBuilder
 	isCompact := isCompactList(ln.Items)
 	for _, item := range ln.Items {
 		if isCompact && len(item) > 0 {
 			paragraph := t.GetSz(item[0])
-			nlistObjs.Add(sz.MakeInlineList(paragraph.Tail()))
+			items.Add(sz.MakeInlineList(paragraph.Tail()))
 			continue
 		}
 		var itemObjs sx.ListBuilder
@@ -160,12 +159,12 @@ func (t *SzTransformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
 			itemObjs.Add(t.GetSz(in))
 		}
 		if isCompact {
-			nlistObjs.Add(sz.MakeInlineList(itemObjs.List()))
+			items.Add(sz.MakeInlineList(itemObjs.List()))
 		} else {
-			nlistObjs.Add(sz.MakeBlockList(itemObjs.List()))
+			items.Add(sz.MakeBlockList(itemObjs.List()))
 		}
 	}
-	return nlistObjs.List()
+	return sz.MakeList(mapGetS(mapNestedListKindS, ln.Kind), getAttributes(ln.Attrs), items.List())
 }
 func isCompactList(itemSlice []ast.ItemSlice) bool {
 	for _, items := range itemSlice {
@@ -195,7 +194,7 @@ func (t *SzTransformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair
 		}
 		dlObjs.Add(sz.MakeBlockList(descObjs.List()))
 	}
-	return dlObjs.List().Cons(sz.SymDescription)
+	return dlObjs.List().Cons(getAttributes(dn.Attrs)).Cons(sz.SymDescription)
 }
 
 func (t *SzTransformer) getTable(tn *ast.TableNode) *sx.Pair {

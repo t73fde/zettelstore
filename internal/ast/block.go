@@ -158,8 +158,8 @@ func (*HRuleNode) WalkChildren(Visitor) { /* No children*/ }
 // NestedListNode specifies a nestable list, either ordered or unordered.
 type NestedListNode struct {
 	Kind  NestedListKind
-	Items []ItemSlice
 	Attrs attrs.Attributes
+	Items []ItemSlice
 }
 
 // NestedListKind specifies the actual list type.
@@ -189,6 +189,7 @@ func (ln *NestedListNode) WalkChildren(v Visitor) {
 
 // DescriptionListNode specifies a description list.
 type DescriptionListNode struct {
+	Attrs        attrs.Attributes
 	Descriptions []Description
 }
 

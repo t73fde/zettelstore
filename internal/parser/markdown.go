@@ -103,7 +103,7 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 
 func (p *mdP) acceptParagraph(node *gmAst.Paragraph) *sx.Pair {
 	if is := p.acceptInlineChildren(node); is != nil {
-		return sz.MakePara(is)
+		return sz.MakeParaList(is)
 	}
 	return nil
 }
@@ -150,7 +150,7 @@ func (p *mdP) acceptRawText(node gmAst.Node) []byte {
 }
 
 func (p *mdP) acceptBlockquote(node *gmAst.Blockquote) *sx.Pair {
-	return p.acceptItemSlice(node).Cons(sz.SymListQuote)
+	return sz.MakeList(sz.SymListQuote, nil, p.acceptItemSlice(node))
 }
 
 func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
@@ -162,16 +162,15 @@ func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
 			a.Add(sx.Cons(sx.MakeString("start"), sx.MakeString(strconv.Itoa(node.Start))))
 		}
 	}
-	var result sx.ListBuilder
-	result.Add(kind)
+	var items sx.ListBuilder
 	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
 		item, ok := child.(*gmAst.ListItem)
 		if !ok {
 			panic(fmt.Sprintf("Expected list item node, but got %v", child.Kind()))
 		}
-		result.Add(p.acceptItemSlice(item))
+		items.Add(p.acceptItemSlice(item))
 	}
-	return result.List()
+	return sz.MakeList(kind, a.List(), items.List())
 }
 
 func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
@@ -186,7 +185,7 @@ func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
 
 func (p *mdP) acceptTextBlock(node *gmAst.TextBlock) *sx.Pair {
 	if is := p.acceptInlineChildren(node); is != nil {
-		return sz.MakePara(is)
+		return sz.MakeParaList(is)
 	}
 	return nil
 }

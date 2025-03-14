@@ -87,7 +87,7 @@ func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
 	if is == nil {
 		return nil
 	}
-	return sz.MakeBlock(sz.MakePara(is))
+	return sz.MakeBlock(sz.MakeParaList(is))
 }
 
 func parseSVGInlines(inp *input.Input, syntax string) *sx.Pair {
@@ -123,7 +123,7 @@ func parsePlainSxn(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
 		string(inp.ScanLineContent()),
 	))
 	if err != nil {
-		blocks.Add(sz.MakePara(sx.Cons(sz.MakeText(err.Error()), sx.Nil())))
+		blocks.Add(sz.MakeParaList(sx.Cons(sz.MakeText(err.Error()), sx.Nil())))
 	}
 	return sz.MakeBlockList(blocks.List())
 }

@@ -129,20 +129,11 @@ func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
 		case sz.SymHeading:
 			return handleHeading(pair.Tail())
 		case sz.SymListOrdered:
-			return sxNode{&ast.NestedListNode{
-				Kind:  ast.NestedListOrdered,
-				Items: collectItemSlices(pair.Tail()),
-				Attrs: nil}}
+			return handleList(ast.NestedListOrdered, pair.Tail())
 		case sz.SymListUnordered:
-			return sxNode{&ast.NestedListNode{
-				Kind:  ast.NestedListUnordered,
-				Items: collectItemSlices(pair.Tail()),
-				Attrs: nil}}
+			return handleList(ast.NestedListUnordered, pair.Tail())
 		case sz.SymListQuote:
-			return sxNode{&ast.NestedListNode{
-				Kind:  ast.NestedListQuote,
-				Items: collectItemSlices(pair.Tail()),
-				Attrs: nil}}
+			return handleList(ast.NestedListQuote, pair.Tail())
 		case sz.SymDescription:
 			return handleDescription(pair.Tail())
 		case sz.SymTable:
@@ -251,6 +242,18 @@ func handleHeading(rest *sx.Pair) sx.Object {
 	return rest
 }
 
+func handleList(kind ast.NestedListKind, rest *sx.Pair) sx.Object {
+	if rest != nil {
+		attrs := sz.GetAttributes(rest.Head())
+		return sxNode{&ast.NestedListNode{
+			Kind:  kind,
+			Items: collectItemSlices(rest.Tail()),
+			Attrs: attrs}}
+	}
+	log.Println("LIST", kind, rest)
+	return rest
+}
+
 func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
 	for val := range lst.Values() {
 		if sxn, isNode := val.(sxNode); isNode {
@@ -278,56 +281,62 @@ func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
 }
 
 func handleDescription(rest *sx.Pair) sx.Object {
-	var descs []ast.Description
-	for curr := rest; curr != nil; {
-		term := collectInlines(curr.Head())
-		curr = curr.Tail()
-		if curr == nil {
-			descr := ast.Description{Term: term, Descriptions: nil}
-			descs = append(descs, descr)
-			break
-		}
-
-		car := curr.Car()
-		if sx.IsNil(car) {
-			descs = append(descs, ast.Description{Term: term, Descriptions: nil})
+	if rest != nil {
+		attrs := sz.GetAttributes(rest.Head())
+		var descs []ast.Description
+		for curr := rest.Tail(); curr != nil; {
+			term := collectInlines(curr.Head())
 			curr = curr.Tail()
-			continue
-		}
+			if curr == nil {
+				descr := ast.Description{Term: term, Descriptions: nil}
+				descs = append(descs, descr)
+				break
+			}
 
-		sxn, isNode := car.(sxNode)
-		if !isNode {
-			descs = nil
-			break
-		}
-		blocks, isBlocks := sxn.node.(*ast.BlockSlice)
-		if !isBlocks {
-			descs = nil
-			break
-		}
-
-		descSlice := make([]ast.DescriptionSlice, 0, len(*blocks))
-		for _, bn := range *blocks {
-			bns, isBns := bn.(*ast.BlockSlice)
-			if !isBns {
+			car := curr.Car()
+			if sx.IsNil(car) {
+				descs = append(descs, ast.Description{Term: term, Descriptions: nil})
+				curr = curr.Tail()
 				continue
 			}
-			ds := make(ast.DescriptionSlice, 0, len(*bns))
-			for _, b := range *bns {
-				if defNode, isDef := b.(ast.DescriptionNode); isDef {
-					ds = append(ds, defNode)
-				}
+
+			sxn, isNode := car.(sxNode)
+			if !isNode {
+				descs = nil
+				break
 			}
-			descSlice = append(descSlice, ds)
+			blocks, isBlocks := sxn.node.(*ast.BlockSlice)
+			if !isBlocks {
+				descs = nil
+				break
+			}
+
+			descSlice := make([]ast.DescriptionSlice, 0, len(*blocks))
+			for _, bn := range *blocks {
+				bns, isBns := bn.(*ast.BlockSlice)
+				if !isBns {
+					continue
+				}
+				ds := make(ast.DescriptionSlice, 0, len(*bns))
+				for _, b := range *bns {
+					if defNode, isDef := b.(ast.DescriptionNode); isDef {
+						ds = append(ds, defNode)
+					}
+				}
+				descSlice = append(descSlice, ds)
+			}
+
+			descr := ast.Description{Term: term, Descriptions: descSlice}
+			descs = append(descs, descr)
+
+			curr = curr.Tail()
 		}
-
-		descr := ast.Description{Term: term, Descriptions: descSlice}
-		descs = append(descs, descr)
-
-		curr = curr.Tail()
-	}
-	if len(descs) > 0 {
-		return sxNode{&ast.DescriptionListNode{Descriptions: descs}}
+		if len(descs) > 0 {
+			return sxNode{&ast.DescriptionListNode{
+				Attrs:        attrs,
+				Descriptions: descs,
+			}}
+		}
 	}
 	log.Println("DESC", rest)
 	return rest
