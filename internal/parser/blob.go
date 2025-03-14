@@ -61,5 +61,5 @@ func parseBlob(inp *input.Input, m *meta.Meta, syntax string) *sx.Pair {
 	if p := Get(syntax); p != nil {
 		syntax = p.Name
 	}
-	return sz.MakeBlock(sz.MakeBLOB(ParseDescription(m), syntax, string(inp.Src)))
+	return sz.MakeBlock(sz.MakeBLOB(nil, ParseDescription(m), syntax, string(inp.Src)))
 }

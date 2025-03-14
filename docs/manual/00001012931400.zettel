@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20250314140036
+modified: 20250314153427
 
 === ''PARA''
 :::syntax
@@ -167,7 +167,7 @@ The string contains text that should be treated as (nested) zettel content.
 
 === ''BLOB''
 :::syntax
-__BLOB__ **=** ''(BLOB'' ''('' [[__InlineElement__|00001012931600]] &hellip; '')'' String,,1,, String,,2,, '')''.
+__BLOB__ **=** ''(BLOB'' [[__Attributes__|00001012931000#attribute]] ''('' [[__InlineElement__|00001012931600]] &hellip; '')'' String,,1,, String,,2,, '')''.
 :::
 A BLOB contains an image in block mode.
 The inline elements states some description.

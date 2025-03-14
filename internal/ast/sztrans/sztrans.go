@@ -422,17 +422,21 @@ func handleTransclude(rest *sx.Pair) sx.Object {
 
 func handleBLOB(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		ins := collectInlines(rest.Head())
+		attrs := sz.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
-			if syntax, isString := sx.GetString(curr.Car()); isString {
-				if curr = curr.Tail(); curr != nil {
-					if blob, isBlob := sx.GetString(curr.Car()); isBlob {
-						return sxNode{&ast.BLOBNode{
-							Description: ins,
-							Syntax:      syntax.GetValue(),
-							Blob:        []byte(blob.GetValue()),
-						}}
+			ins := collectInlines(curr.Head())
+			if curr = curr.Tail(); curr != nil {
+				if syntax, isString := sx.GetString(curr.Car()); isString {
+					if curr = curr.Tail(); curr != nil {
+						if blob, isBlob := sx.GetString(curr.Car()); isBlob {
+							return sxNode{&ast.BLOBNode{
+								Attrs:       attrs,
+								Description: ins,
+								Syntax:      syntax.GetValue(),
+								Blob:        []byte(blob.GetValue()),
+							}}
 
+						}
 					}
 				}
 			}

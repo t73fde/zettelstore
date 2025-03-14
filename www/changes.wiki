@@ -5,8 +5,8 @@
   *  Sz encodings of links were simplified into one <code>LINK</code> symbol.
      Different link types are now specified by reference node.
      (breaking: api)
-  *  Sz encodings of lists and descriptions have now an additional attributes
-     entry, directly after the initial symbol.
+  *  Sz encodings of lists, descriptions, and block BLOBs have now an
+     additional attributes entry, directly after the initial symbol.
      (breaking: api)
 
 <a id="0_20"></a>

@@ -237,7 +237,7 @@ func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
 	} else {
 		content = getBase64String(bn.Blob)
 	}
-	return sz.MakeBLOB(t.getInlineList(bn.Description), bn.Syntax, content)
+	return sz.MakeBLOB(getAttributes(bn.Attrs), t.getInlineList(bn.Description), bn.Syntax, content)
 }
 
 func (t *SzTransformer) getLink(ln *ast.LinkNode) *sx.Pair {

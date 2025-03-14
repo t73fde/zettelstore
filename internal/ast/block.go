@@ -291,6 +291,7 @@ func (tn *TranscludeNode) WalkChildren(v Visitor) { Walk(v, &tn.Inlines) }
 // BLOBNode contains just binary data that must be interpreted according to
 // a syntax.
 type BLOBNode struct {
+	Attrs       attrs.Attributes
 	Description InlineSlice
 	Syntax      string
 	Blob        []byte
