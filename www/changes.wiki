@@ -5,8 +5,14 @@
   *  Sz encodings of links were simplified into one <code>LINK</code> symbol.
      Different link types are now specified by reference node.
      (breaking: api)
-  *  Sz encodings of lists, descriptions, and block BLOBs have now an
-     additional attributes entry, directly after the initial symbol.
+  *  Sz encodings of lists, descriptions, tables, table cells, and block BLOBs
+     have now an additional attributes entry, directly after the initial
+     symbol.
+     (breaking: api)
+  *  Sz encoding for table cell alignment (<code>CELL-*</code>) is now done via
+     table cell attribute <code>(align . *)</code>, where <code>*</code> is the
+     alignment value (<code>"center"</code>, <code>"left"</code>, or
+     <code>"right"</code>).
      (breaking: api)
 
 <a id="0_20"></a>

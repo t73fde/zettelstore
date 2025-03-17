@@ -219,15 +219,17 @@ func (t *SzTransformer) getRow(row ast.TableRow) *sx.Pair {
 	return lb.List()
 }
 
-var alignmentSymbolS = map[ast.Alignment]*sx.Symbol{
-	ast.AlignDefault: sz.SymCell,
-	ast.AlignLeft:    sz.SymCellLeft,
-	ast.AlignCenter:  sz.SymCellCenter,
-	ast.AlignRight:   sz.SymCellRight,
-}
-
 func (t *SzTransformer) getCell(cell *ast.TableCell) *sx.Pair {
-	return sz.MakeCell(mapGetS(alignmentSymbolS, cell.Align), nil, t.getInlineList(cell.Inlines))
+	var attrs *sx.Pair
+	switch cell.Align {
+	case ast.AlignCenter:
+		attrs = sx.Cons(sx.Cons(sz.SymAttrAlign, sz.AttrAlignCenter), nil)
+	case ast.AlignLeft:
+		attrs = sx.Cons(sx.Cons(sz.SymAttrAlign, sz.AttrAlignLeft), nil)
+	case ast.AlignRight:
+		attrs = sx.Cons(sx.Cons(sz.SymAttrAlign, sz.AttrAlignRight), nil)
+	}
+	return sz.MakeCell(attrs, t.getInlineList(cell.Inlines))
 }
 
 func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {

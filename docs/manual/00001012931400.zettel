@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20250317124820
+modified: 20250317143910
 
 === ''PARA''
 :::syntax
@@ -61,7 +61,7 @@ Description values are sequences of blocks.
 
 === ''TABLE''
 :::syntax
-__Table__ **=** ''(TABLE'' __TableHeader__ __TableRow__ &hellip; '')''.
+__Table__ **=** ''(TABLE'' [[__Attributes__|00001012931000#attribute]] __TableHeader__ __TableRow__ &hellip; '')''.
 :::
 A table is a table header and a sequence of table rows.
 
@@ -75,33 +75,17 @@ __TableRow__ **=** ''('' __TableCell__ &hellip; '')''.
 :::
 A table row is a list of table cells.
 
-=== ''CELL'', ''CELL-*''
-There are four kinds of table cells, one for each possible cell alignment.
-The structure is the same for all kind.
-
+=== ''CELL''
 :::syntax
-__TableCell__ **=** __DefaultCell__ **|** __CenterCell__ **|** __LeftCell__ **|** __RightCell__.
+__TableCell__ **=** ''(CELL'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
+A table cell contains some attributes and cell content, which is a sequence of inline elements.
 
-:::syntax
-__DefaultCell__ **=** ''(CELL'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The cell content, specified by the sequence of inline elements, used the default alignment.
-
-:::syntax
-__CenterCell__ **=** ''(CELL-CENTER'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The cell content, specified by the sequence of inline elements, is centered aligned.
-
-:::syntax
-__LeftCell__ **=** ''(CELL-LEFT'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The cell content, specified by the sequence of inline elements, is left aligned.
-
-:::syntax
-__RightCell__ **=** ''(CELL-RIGHT'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
-:::
-The cell content, specified by the sequence of inline elements, is right aligned.
+The attribute ''align'' specifies the cell alignment.
+An attribute value ''"center"'' specifies centered aligned cell content.
+The attribute value ''"left"'' specifies left aligned cell content.
+The attribute value ''"right"'' specifies right aligned cell content.
+In all other cases, a default alignment is assumed.
 
 === ''REGION-*''
 The following lists specifies different kinds of regions.

@@ -139,13 +139,7 @@ func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
 		case sz.SymTable:
 			return handleTable(pair.Tail())
 		case sz.SymCell:
-			return handleCell(ast.AlignDefault, pair.Tail())
-		case sz.SymCellCenter:
-			return handleCell(ast.AlignCenter, pair.Tail())
-		case sz.SymCellLeft:
-			return handleCell(ast.AlignLeft, pair.Tail())
-		case sz.SymCellRight:
-			return handleCell(ast.AlignRight, pair.Tail())
+			return handleCell(pair.Tail())
 		case sz.SymRegionBlock:
 			return handleRegion(ast.RegionSpan, pair.Tail())
 		case sz.SymRegionQuote:
@@ -379,15 +373,24 @@ func collectRow(lst *sx.Pair) (row ast.TableRow) {
 	return row
 }
 
-func handleCell(align ast.Alignment, rest *sx.Pair) sx.Object {
+func handleCell(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		// attrs := sz.GetAttributes(rest.Head())
+		align := ast.AlignDefault
+		if alignPair := rest.Head().Assoc(sz.SymAttrAlign); alignPair != nil {
+			if alignValue := alignPair.Cdr(); sz.AttrAlignCenter.IsEqual(alignValue) {
+				align = ast.AlignCenter
+			} else if sz.AttrAlignLeft.IsEqual(alignValue) {
+				align = ast.AlignLeft
+			} else if sz.AttrAlignRight.IsEqual(alignValue) {
+				align = ast.AlignRight
+			}
+		}
 		return sxNode{&ast.TableCell{
 			Align:   align,
 			Inlines: collectInlines(rest.Tail()),
 		}}
 	}
-	log.Println("CELL", align, rest)
+	log.Println("CELL", rest)
 	return rest
 }
 
