@@ -380,10 +380,15 @@ func collectRow(lst *sx.Pair) (row ast.TableRow) {
 }
 
 func handleCell(align ast.Alignment, rest *sx.Pair) sx.Object {
-	return sxNode{&ast.TableCell{
-		Align:   align,
-		Inlines: collectInlines(rest),
-	}}
+	if rest != nil {
+		// attrs := sz.GetAttributes(rest.Head())
+		return sxNode{&ast.TableCell{
+			Align:   align,
+			Inlines: collectInlines(rest.Tail()),
+		}}
+	}
+	log.Println("CELL", align, rest)
+	return rest
 }
 
 func handleRegion(kind ast.RegionKind, rest *sx.Pair) sx.Object {

@@ -227,7 +227,7 @@ var alignmentSymbolS = map[ast.Alignment]*sx.Symbol{
 }
 
 func (t *SzTransformer) getCell(cell *ast.TableCell) *sx.Pair {
-	return sz.MakeCell(mapGetS(alignmentSymbolS, cell.Align), t.getInlineList(cell.Inlines))
+	return sz.MakeCell(mapGetS(alignmentSymbolS, cell.Align), nil, t.getInlineList(cell.Inlines))
 }
 
 func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {

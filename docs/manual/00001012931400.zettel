@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20250314153427
+modified: 20250317124820
 
 === ''PARA''
 :::syntax
@@ -84,22 +84,22 @@ __TableCell__ **=** __DefaultCell__ **|** __CenterCell__ **|** __LeftCell__ **|*
 :::
 
 :::syntax
-__DefaultCell__ **=** ''(CELL'' [[__InlineElement__|00001012931600]] &hellip; '')''.
+__DefaultCell__ **=** ''(CELL'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 The cell content, specified by the sequence of inline elements, used the default alignment.
 
 :::syntax
-__CenterCell__ **=** ''(CELL-CENTER'' [[__InlineElement__|00001012931600]] &hellip; '')''.
+__CenterCell__ **=** ''(CELL-CENTER'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 The cell content, specified by the sequence of inline elements, is centered aligned.
 
 :::syntax
-__LeftCell__ **=** ''(CELL-LEFT'' [[__InlineElement__|00001012931600]] &hellip; '')''.
+__LeftCell__ **=** ''(CELL-LEFT'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 The cell content, specified by the sequence of inline elements, is left aligned.
 
 :::syntax
-__RightCell__ **=** ''(CELL-RIGHT'' [[__InlineElement__|00001012931600]] &hellip; '')''.
+__RightCell__ **=** ''(CELL-RIGHT'' [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 The cell content, specified by the sequence of inline elements, is right aligned.
 
