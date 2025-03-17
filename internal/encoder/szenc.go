@@ -41,17 +41,7 @@ func (enc *szEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	return enc.trans.GetMeta(m).Print(w)
 }
 
-// WriteContent encodes the zettel content.
-func (enc *szEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return enc.WriteBlocks(w, &zn.BlocksAST)
-}
-
 // WriteBlocks writes a block slice to the writer
 func (enc *szEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	return enc.trans.GetSz(bs).Print(w)
-}
-
-// WriteInlines writes an inline slice to the writer
-func (enc *szEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
-	return enc.trans.GetSz(is).Print(w)
 }

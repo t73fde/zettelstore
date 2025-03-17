@@ -32,7 +32,7 @@ type htmlEncoder struct {
 	tx      SzTransformer
 	th      *shtml.Evaluator
 	lang    string
-	textEnc Encoder
+	textEnc TextEncoder
 }
 
 // WriteZettel encodes a full zettel as HTML5.
@@ -106,11 +106,6 @@ func (he *htmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	return gen.WriteListHTML(w, hm)
 }
 
-// WriteContent encodes the zettel content.
-func (he *htmlEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return he.WriteBlocks(w, &zn.BlocksAST)
-}
-
 // WriteBlocks encodes a block slice.
 func (he *htmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	env := shtml.MakeEnvironment(he.lang)
@@ -125,21 +120,6 @@ func (he *htmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error)
 		l, err2 := gen.WriteHTML(w, shtml.Endnotes(&env))
 		length += l
 		return length, err2
-	}
-	return 0, err
-}
-
-// WriteInlines writes an inline slice to the writer
-func (he *htmlEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
-	env := shtml.MakeEnvironment(he.lang)
-	hobj, err := he.th.Evaluate(he.tx.GetSz(is), &env)
-	if err == nil {
-		gen := sxhtml.NewGenerator()
-		length, err2 := gen.WriteListHTML(w, hobj)
-		if err2 != nil {
-			return length, err2
-		}
-		return length, nil
 	}
 	return 0, err
 }

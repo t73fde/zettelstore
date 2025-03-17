@@ -57,25 +57,10 @@ func (enc *shtmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	return sx.Print(w, metaSHTML)
 }
 
-// WriteContent encodes the zettel content.
-func (enc *shtmlEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return enc.WriteBlocks(w, &zn.BlocksAST)
-}
-
 // WriteBlocks writes a block slice to the writer
 func (enc *shtmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	env := shtml.MakeEnvironment(enc.lang)
 	hval, err := enc.th.Evaluate(enc.tx.GetSz(bs), &env)
-	if err != nil {
-		return 0, err
-	}
-	return sx.Print(w, hval)
-}
-
-// WriteInlines writes an inline slice to the writer
-func (enc *shtmlEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
-	env := shtml.MakeEnvironment(enc.lang)
-	hval, err := enc.th.Evaluate(enc.tx.GetSz(is), &env)
 	if err != nil {
 		return 0, err
 	}

@@ -25,11 +25,11 @@ import (
 	"zettelstore.de/z/internal/ast"
 )
 
-// textEncoder contains all data needed for encoding.
-type textEncoder struct{}
+// TextEncoder encodes just the text and ignores any formatting.
+type TextEncoder struct{}
 
 // WriteZettel writes metadata and content.
-func (te *textEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	v := newTextVisitor(w)
 	te.WriteMeta(&v.b, zn.InhMeta)
 	v.visitBlockSlice(&zn.BlocksAST)
@@ -38,7 +38,7 @@ func (te *textEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error)
 }
 
 // WriteMeta encodes metadata as text.
-func (te *textEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (te *TextEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 	buf := newEncWriter(w)
 	for key, val := range m.Computed() {
 		if meta.Type(key) == meta.TypeTagSet {
@@ -64,13 +64,8 @@ func writeTagSet(buf *encWriter, tags iter.Seq[meta.Value]) {
 
 }
 
-// WriteContent encodes the zettel content.
-func (te *textEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return te.WriteBlocks(w, &zn.BlocksAST)
-}
-
 // WriteBlocks writes the content of a block slice to the writer.
-func (*textEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (*TextEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	v := newTextVisitor(w)
 	v.visitBlockSlice(bs)
 	length, err := v.b.Flush()
@@ -78,7 +73,7 @@ func (*textEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 }
 
 // WriteInlines writes an inline slice to the writer
-func (*textEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
+func (*TextEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
 	v := newTextVisitor(w)
 	ast.Walk(&v, is)
 	length, err := v.b.Flush()

@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"t73f.de/r/zero/set"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -59,11 +58,6 @@ func (v *zmkVisitor) acceptMeta(m *meta.Meta) {
 	}
 }
 
-// WriteContent encodes the zettel content.
-func (ze *zmkEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return ze.WriteBlocks(w, &zn.BlocksAST)
-}
-
 // WriteBlocks writes the content of a block slice to the writer.
 func (*zmkEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	v := newZmkVisitor(w)
@@ -72,26 +66,16 @@ func (*zmkEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	return length, err
 }
 
-// WriteInlines writes an inline slice to the writer
-func (*zmkEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
-	v := newZmkVisitor(w)
-	ast.Walk(&v, is)
-	length, err := v.b.Flush()
-	return length, err
-}
-
 // zmkVisitor writes the abstract syntax tree to an io.Writer.
 type zmkVisitor struct {
 	b         encWriter
-	textEnc   Encoder
+	textEnc   TextEncoder
 	prefix    []byte
 	inVerse   bool
 	inlinePos int
 }
 
-func newZmkVisitor(w io.Writer) zmkVisitor {
-	return zmkVisitor{b: newEncWriter(w), textEnc: Create(api.EncoderText, nil)}
-}
+func newZmkVisitor(w io.Writer) zmkVisitor { return zmkVisitor{b: newEncWriter(w)} }
 
 func (v *zmkVisitor) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {

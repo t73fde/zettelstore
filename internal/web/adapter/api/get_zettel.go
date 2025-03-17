@@ -162,7 +162,7 @@ func (a *API) writeEncodedZettelPart(
 	case partMeta:
 		_, err = encdr.WriteMeta(&buf, zn.InhMeta)
 	case partContent:
-		_, err = encdr.WriteContent(&buf, zn)
+		_, err = encdr.WriteBlocks(&buf, &zn.BlocksAST)
 	}
 	if err != nil {
 		a.log.Error().Err(err).Zid(zn.Zid).Msg("Unable to store data in buffer")

@@ -58,23 +58,10 @@ func (v *mdVisitor) acceptMeta(m *meta.Meta) {
 	}
 }
 
-// WriteContent encodes the zettel content.
-func (me *mdEncoder) WriteContent(w io.Writer, zn *ast.ZettelNode) (int, error) {
-	return me.WriteBlocks(w, &zn.BlocksAST)
-}
-
 // WriteBlocks writes the content of a block slice to the writer.
 func (me *mdEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
 	v := newMDVisitor(w, me.lang)
 	ast.Walk(&v, bs)
-	length, err := v.b.Flush()
-	return length, err
-}
-
-// WriteInlines writes an inline slice to the writer
-func (me *mdEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
-	v := newMDVisitor(w, me.lang)
-	ast.Walk(&v, is)
 	length, err := v.b.Flush()
 	return length, err
 }

@@ -16,7 +16,6 @@
 package encoder
 
 import (
-	"errors"
 	"io"
 
 	"t73f.de/r/zsc/api"
@@ -28,21 +27,15 @@ import (
 
 // Encoder is an interface that allows to encode different parts of a zettel.
 type Encoder interface {
+	// WriteZettel encodes a whole zettel and writes it to the Writer.
 	WriteZettel(io.Writer, *ast.ZettelNode) (int, error)
-	WriteMeta(io.Writer, *meta.Meta) (int, error)
-	WriteContent(io.Writer, *ast.ZettelNode) (int, error)
-	WriteBlocks(io.Writer, *ast.BlockSlice) (int, error)
-	WriteInlines(io.Writer, *ast.InlineSlice) (int, error)
-}
 
-// Some errors to signal when encoder methods are not implemented.
-var (
-	ErrNoWriteZettel  = errors.New("method WriteZettel is not implemented")
-	ErrNoWriteMeta    = errors.New("method WriteMeta is not implemented")
-	ErrNoWriteContent = errors.New("method WriteContent is not implemented")
-	ErrNoWriteBlocks  = errors.New("method WriteBlocks is not implemented")
-	ErrNoWriteInlines = errors.New("method WriteInlines is not implemented")
-)
+	// WriteMeta encodes just the metadata.
+	WriteMeta(io.Writer, *meta.Meta) (int, error)
+
+	// WiteBlocks encodes a block slice, i.e. the zettel content.
+	WriteBlocks(io.Writer, *ast.BlockSlice) (int, error)
+}
 
 // Create builds a new encoder with the given options.
 func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
@@ -51,10 +44,9 @@ func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
 		// We need a new transformer every time, because tx.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &htmlEncoder{
-			tx:      NewSzTransformer(),
-			th:      shtml.NewEvaluator(1),
-			lang:    params.Lang,
-			textEnc: Create(api.EncoderText, nil),
+			tx:   NewSzTransformer(),
+			th:   shtml.NewEvaluator(1),
+			lang: params.Lang,
 		}
 	case api.EncoderMD:
 		return &mdEncoder{lang: params.Lang}
@@ -71,7 +63,7 @@ func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
 		// If we can refactor it out, the transformer can be created only once.
 		return &szEncoder{trans: NewSzTransformer()}
 	case api.EncoderText:
-		return (*textEncoder)(nil)
+		return (*TextEncoder)(nil)
 	case api.EncoderZmk:
 		return (*zmkEncoder)(nil)
 	}

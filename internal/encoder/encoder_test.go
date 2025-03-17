@@ -67,7 +67,7 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 func checkEncodings(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string, expected expectMap, zmkDefault string) {
 	for enc, exp := range expected {
 		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
-		got, err := encode(encdr, bs, isInline)
+		got, err := encode(encdr, bs)
 		if err != nil {
 			prefix := fmt.Sprintf("Test #%d", testNum)
 			if d := descr; d != "" {
@@ -94,7 +94,7 @@ func checkEncodings(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool,
 func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string) {
 	t.Helper()
 	encdr := encoder.Create(encoderSz, nil)
-	exp, err := encode(encdr, bs, isInline)
+	exp, err := encode(encdr, bs)
 	if err != nil {
 		t.Error(err)
 		return
@@ -115,19 +115,9 @@ func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr 
 	}
 }
 
-func encode(e encoder.Encoder, bs ast.BlockSlice, isInline bool) (string, error) {
+func encode(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
 	var sb strings.Builder
-	if !isInline {
-		_, err := e.WriteBlocks(&sb, &bs)
-		return sb.String(), err
-	}
-	var is ast.InlineSlice
-	if len(bs) > 0 {
-		if pn, ok := bs[0].(*ast.ParaNode); ok {
-			is = pn.Inlines
-		}
-	}
-	_, err := e.WriteInlines(&sb, &is)
+	_, err := e.WriteBlocks(&sb, &bs)
 	return sb.String(), err
 }
 
