@@ -18,9 +18,9 @@ import (
 	"strings"
 	"testing"
 
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/config"
@@ -1007,7 +1007,7 @@ func (tv *TestVisitor) visitInlineSlice(is *ast.InlineSlice) {
 	}
 }
 
-func (tv *TestVisitor) visitAttributes(a attrs.Attributes) {
+func (tv *TestVisitor) visitAttributes(a zsx.Attributes) {
 	if a.IsEmpty() {
 		return
 	}

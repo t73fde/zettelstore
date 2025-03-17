@@ -20,10 +20,10 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/webs/aasvg"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -97,7 +97,7 @@ func ParseDrawBlock(vn *ast.VerbatimNode) ast.BlockNode {
 	}
 }
 
-func getScale(a attrs.Attributes, key string, defVal int) int {
+func getScale(a zsx.Attributes, key string, defVal int) int {
 	if val, found := a.Get(key); found {
 		if n, err := strconv.Atoi(val); err == nil && 0 < n && n < 100000 {
 			return n

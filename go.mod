@@ -10,9 +10,10 @@ require (
 	golang.org/x/text v0.23.0
 	t73f.de/r/sx v0.0.0-20250226205800-c12af029b6d3
 	t73f.de/r/sxwebs v0.0.0-20250226210617-7bc3145c269b
-	t73f.de/r/webs v0.0.0-20250311182007-ddeb0e136028
+	t73f.de/r/webs v0.0.0-20250311182734-f263a38b32d5
 	t73f.de/r/zero v0.0.0-20250226205915-c4194684acb7
-	t73f.de/r/zsc v0.0.0-20250317134200-fb01063d355b
+	t73f.de/r/zsc v0.0.0-20250317180135-d5fd7ae0e06d
+	t73f.de/r/zsx v0.0.0-20250317174636-5665bf1b3c6d
 )
 
 require golang.org/x/sys v0.31.0 // indirect

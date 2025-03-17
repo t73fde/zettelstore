@@ -21,6 +21,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -69,7 +70,7 @@ func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 		case sz.SymLiteralOutput:
 			return handleLiteral(ast.LiteralOutput, pair.Tail())
 		case sz.SymThematic:
-			return sxNode{&ast.HRuleNode{Attrs: sz.GetAttributes(pair.Tail().Head())}}, true
+			return sxNode{&ast.HRuleNode{Attrs: zsx.GetAttributes(pair.Tail().Head())}}, true
 		case sz.SymVerbatimComment:
 			return handleVerbatim(ast.VerbatimComment, pair.Tail())
 		case sz.SymVerbatimEval:
@@ -89,7 +90,7 @@ func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 
 func handleLiteral(kind ast.LiteralKind, rest *sx.Pair) (sx.Object, bool) {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if s, isString := sx.GetString(curr.Car()); isString {
 				return sxNode{&ast.LiteralNode{
@@ -104,7 +105,7 @@ func handleLiteral(kind ast.LiteralKind, rest *sx.Pair) (sx.Object, bool) {
 
 func handleVerbatim(kind ast.VerbatimKind, rest *sx.Pair) (sx.Object, bool) {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if s, isString := sx.GetString(curr.Car()); isString {
 				return sxNode{&ast.VerbatimNode{
@@ -213,7 +214,7 @@ func handleHeading(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		if num, isNumber := rest.Car().(sx.Int64); isNumber && num > 0 && num < 6 {
 			if curr := rest.Tail(); curr != nil {
-				attrs := sz.GetAttributes(curr.Head())
+				attrs := zsx.GetAttributes(curr.Head())
 				if curr = curr.Tail(); curr != nil {
 					if sSlug, isSlug := sx.GetString(curr.Car()); isSlug {
 						if curr = curr.Tail(); curr != nil {
@@ -238,7 +239,7 @@ func handleHeading(rest *sx.Pair) sx.Object {
 
 func handleList(kind ast.NestedListKind, rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		return sxNode{&ast.NestedListNode{
 			Kind:  kind,
 			Items: collectItemSlices(rest.Tail()),
@@ -276,7 +277,7 @@ func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
 
 func handleDescription(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		var descs []ast.Description
 		for curr := rest.Tail(); curr != nil; {
 			term := collectInlines(curr.Head())
@@ -396,7 +397,7 @@ func handleCell(rest *sx.Pair) sx.Object {
 
 func handleRegion(kind ast.RegionKind, rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if blockList := curr.Head(); blockList != nil {
 				return sxNode{&ast.RegionNode{
@@ -414,7 +415,7 @@ func handleRegion(kind ast.RegionKind, rest *sx.Pair) sx.Object {
 
 func handleTransclude(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			ref := collectReference(curr.Head())
 			return sxNode{&ast.TranscludeNode{
@@ -430,7 +431,7 @@ func handleTransclude(rest *sx.Pair) sx.Object {
 
 func handleBLOB(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			ins := collectInlines(curr.Head())
 			if curr = curr.Tail(); curr != nil {
@@ -468,7 +469,7 @@ var mapRefState = map[*sx.Symbol]ast.RefState{
 
 func handleLink(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if szref := curr.Head(); szref != nil {
 				if stateSym, isSym := sx.GetSymbol(szref.Car()); isSym {
@@ -496,7 +497,7 @@ func handleLink(rest *sx.Pair) sx.Object {
 
 func handleEmbed(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if ref := collectReference(curr.Head()); ref != nil {
 				if curr = curr.Tail(); curr != nil {
@@ -518,7 +519,7 @@ func handleEmbed(rest *sx.Pair) sx.Object {
 
 func handleEmbedBLOB(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if syntax, isSyntax := sx.GetString(curr.Car()); isSyntax {
 				if curr = curr.Tail(); curr != nil {
@@ -574,7 +575,7 @@ func collectReference(pair *sx.Pair) *ast.Reference {
 
 func handleCite(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		if curr := rest.Tail(); curr != nil {
 			if sKey, isString := sx.GetString(curr.Car()); isString {
 				return sxNode{&ast.CiteNode{
@@ -614,7 +615,7 @@ func handleMark(rest *sx.Pair) sx.Object {
 
 func handleEndnote(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		return sxNode{&ast.FootnoteNode{
 			Attrs:   attrs,
 			Inlines: collectInlines(rest.Tail()),
@@ -626,7 +627,7 @@ func handleEndnote(rest *sx.Pair) sx.Object {
 
 func handleFormat(kind ast.FormatKind, rest *sx.Pair) sx.Object {
 	if rest != nil {
-		attrs := sz.GetAttributes(rest.Head())
+		attrs := zsx.GetAttributes(rest.Head())
 		return sxNode{&ast.FormatNode{
 			Kind:    kind,
 			Attrs:   attrs,

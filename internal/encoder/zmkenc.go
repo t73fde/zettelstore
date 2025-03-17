@@ -21,8 +21,8 @@ import (
 	"strings"
 
 	"t73f.de/r/zero/set"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -458,7 +458,7 @@ func (v *zmkVisitor) visitLiteral(ln *ast.LiteralNode) {
 	}
 }
 
-func (v *zmkVisitor) writeLiteral(code byte, a attrs.Attributes, content []byte) {
+func (v *zmkVisitor) writeLiteral(code byte, a zsx.Attributes, content []byte) {
 	v.b.WriteBytes(code, code)
 	v.writeEscaped(string(content), code)
 	v.b.WriteBytes(code, code)
@@ -466,7 +466,7 @@ func (v *zmkVisitor) writeLiteral(code byte, a attrs.Attributes, content []byte)
 }
 
 // visitAttributes write HTML attributes
-func (v *zmkVisitor) visitAttributes(a attrs.Attributes) {
+func (v *zmkVisitor) visitAttributes(a zsx.Attributes) {
 	if a.IsEmpty() {
 		return
 	}
@@ -500,6 +500,6 @@ func (v *zmkVisitor) writeEscaped(s string, toEscape byte) {
 	v.b.WriteString(s[last:])
 }
 
-func syntaxToHTML(a attrs.Attributes) attrs.Attributes {
+func syntaxToHTML(a zsx.Attributes) zsx.Attributes {
 	return a.Clone().Set("", meta.ValueSyntaxHTML).Remove(meta.KeySyntax)
 }

@@ -18,9 +18,9 @@ package encoder
 import (
 	"io"
 
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -80,7 +80,7 @@ func newMDVisitor(w io.Writer, lang string) mdVisitor {
 }
 
 // pushAttribute adds the current attributes to the visitor.
-func (v *mdVisitor) pushAttributes(a attrs.Attributes) {
+func (v *mdVisitor) pushAttributes(a zsx.Attributes) {
 	if value, ok := a.Get("lang"); ok {
 		v.langStack.Push(value)
 	} else {

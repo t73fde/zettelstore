@@ -23,11 +23,11 @@ import (
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/api"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/encoder"
@@ -74,7 +74,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 			return obj
 		}
 		if sz.SymRefStateExternal.IsEqual(refSym) {
-			a := sz.GetAttributes(attr)
+			a := zsx.GetAttributes(attr)
 			a = a.Set("target", "_blank")
 			a = a.Add("rel", "external").Add("rel", "noreferrer")
 			return rest.Cons(shtml.EvaluateAttributes(a)).Cons(shtml.SymA)
@@ -215,7 +215,7 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 		if !att.Car().IsEqual(g.symAt) {
 			continue
 		}
-		a := make(attrs.Attributes, 32)
+		a := make(zsx.Attributes, 32)
 		for aelem := range att.Tail().Values() {
 			if p, ok := sx.GetPair(aelem); ok {
 				key := p.Car()
@@ -223,7 +223,7 @@ func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
 				if tail, isTail := sx.GetPair(val); isTail {
 					val = tail.Car()
 				}
-				a = a.Set(sz.GoValue(key), sz.GoValue(val))
+				a = a.Set(zsx.GoValue(key), zsx.GoValue(val))
 			}
 		}
 		name, found := a.Get("name")
@@ -259,7 +259,7 @@ func (g *htmlGenerator) transformMetaTags(tags meta.Value) *sx.Pair {
 	if len(metaTags) == 0 {
 		return nil
 	}
-	return g.th.EvaluateMeta(attrs.Attributes{"name": "keywords", "content": metaTags})
+	return g.th.EvaluateMeta(zsx.Attributes{"name": "keywords", "content": metaTags})
 }
 
 func (g *htmlGenerator) BlocksSxn(bs *ast.BlockSlice) (content, endnotes *sx.Pair, _ error) {

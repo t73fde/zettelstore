@@ -13,9 +13,7 @@
 
 package ast
 
-import (
-	"t73f.de/r/zsc/attrs"
-)
+import "t73f.de/r/zsx"
 
 // Definitions of inline nodes.
 
@@ -61,7 +59,7 @@ func (*BreakNode) WalkChildren(Visitor) { /* No children*/ }
 
 // LinkNode contains the specified link.
 type LinkNode struct {
-	Attrs   attrs.Attributes // Optional attributes
+	Attrs   zsx.Attributes // Optional attributes
 	Ref     *Reference
 	Inlines InlineSlice // The text associated with the link.
 }
@@ -79,10 +77,10 @@ func (ln *LinkNode) WalkChildren(v Visitor) {
 
 // EmbedRefNode contains the specified embedded reference material.
 type EmbedRefNode struct {
-	Attrs   attrs.Attributes // Optional attributes
-	Ref     *Reference       // The reference to be embedded.
-	Syntax  string           // Syntax of referenced material, if known
-	Inlines InlineSlice      // Optional text associated with the image.
+	Attrs   zsx.Attributes // Optional attributes
+	Ref     *Reference     // The reference to be embedded.
+	Syntax  string         // Syntax of referenced material, if known
+	Inlines InlineSlice    // Optional text associated with the image.
 }
 
 func (*EmbedRefNode) inlineNode() { /* Just a marker */ }
@@ -94,10 +92,10 @@ func (en *EmbedRefNode) WalkChildren(v Visitor) { Walk(v, &en.Inlines) }
 
 // EmbedBLOBNode contains the specified embedded BLOB material.
 type EmbedBLOBNode struct {
-	Attrs   attrs.Attributes // Optional attributes
-	Syntax  string           // Syntax of Blob
-	Blob    []byte           // BLOB data itself.
-	Inlines InlineSlice      // Optional text associated with the image.
+	Attrs   zsx.Attributes // Optional attributes
+	Syntax  string         // Syntax of Blob
+	Blob    []byte         // BLOB data itself.
+	Inlines InlineSlice    // Optional text associated with the image.
 }
 
 func (*EmbedBLOBNode) inlineNode() { /* Just a marker */ }
@@ -109,9 +107,9 @@ func (en *EmbedBLOBNode) WalkChildren(v Visitor) { Walk(v, &en.Inlines) }
 
 // CiteNode contains the specified citation.
 type CiteNode struct {
-	Attrs   attrs.Attributes // Optional attributes
-	Key     string           // The citation key
-	Inlines InlineSlice      // Optional text associated with the citation.
+	Attrs   zsx.Attributes // Optional attributes
+	Key     string         // The citation key
+	Inlines InlineSlice    // Optional text associated with the citation.
 }
 
 func (*CiteNode) inlineNode() { /* Just a marker */ }
@@ -144,8 +142,8 @@ func (mn *MarkNode) WalkChildren(v Visitor) {
 
 // FootnoteNode contains the specified footnote.
 type FootnoteNode struct {
-	Attrs   attrs.Attributes // Optional attributes
-	Inlines InlineSlice      // The footnote text.
+	Attrs   zsx.Attributes // Optional attributes
+	Inlines InlineSlice    // The footnote text.
 }
 
 func (*FootnoteNode) inlineNode() { /* Just a marker */ }
@@ -158,7 +156,7 @@ func (fn *FootnoteNode) WalkChildren(v Visitor) { Walk(v, &fn.Inlines) }
 // FormatNode specifies some inline formatting.
 type FormatNode struct {
 	Kind    FormatKind
-	Attrs   attrs.Attributes // Optional attributes.
+	Attrs   zsx.Attributes // Optional attributes.
 	Inlines InlineSlice
 }
 
@@ -189,7 +187,7 @@ func (fn *FormatNode) WalkChildren(v Visitor) { Walk(v, &fn.Inlines) }
 // LiteralNode specifies some uninterpreted text.
 type LiteralNode struct {
 	Kind    LiteralKind
-	Attrs   attrs.Attributes // Optional attributes.
+	Attrs   zsx.Attributes // Optional attributes.
 	Content []byte
 }
 

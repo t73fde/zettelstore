@@ -26,9 +26,9 @@ import (
 
 	"t73f.de/r/sx/sxbuiltins"
 	"t73f.de/r/sx/sxreader"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
@@ -72,7 +72,7 @@ func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
 						sxbuiltins.Print(&buf, obj)
 						result[i] = &ast.VerbatimNode{
 							Kind:    ast.VerbatimCode,
-							Attrs:   attrs.Attributes{"": classAttr},
+							Attrs:   zsx.Attributes{"": classAttr},
 							Content: buf.Bytes(),
 						}
 					}
@@ -197,7 +197,7 @@ func (e *evaluator) evalVerbatimZettel(vn *ast.VerbatimNode) ast.BlockNode {
 	return &zn.BlocksAST
 }
 
-func getSyntax(a attrs.Attributes, defSyntax meta.Value) meta.Value {
+func getSyntax(a zsx.Attributes, defSyntax meta.Value) meta.Value {
 	if a != nil {
 		if val, ok := a.Get(meta.KeySyntax); ok {
 			return meta.Value(val)
@@ -302,7 +302,7 @@ func (e *evaluator) checkMaxTransclusions(ref *ast.Reference) ast.InlineNode {
 
 func makeBlockNode(in ast.InlineNode) ast.BlockNode { return ast.CreateParaNode(in) }
 
-func setMetadataFromAttributes(m *meta.Meta, a attrs.Attributes) {
+func setMetadataFromAttributes(m *meta.Meta, a zsx.Attributes) {
 	for aKey, aVal := range a {
 		if meta.KeyIsValid(aKey) {
 			m.Set(aKey, meta.Value(aVal))

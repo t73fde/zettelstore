@@ -16,7 +16,7 @@ package ast_test
 import (
 	"testing"
 
-	"t73f.de/r/zsc/attrs"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -50,7 +50,7 @@ func BenchmarkWalk(b *testing.B) {
 		ast.CreateParaNode(
 			&ast.FormatNode{
 				Kind: ast.FormatEmph,
-				Attrs: attrs.Attributes(map[string]string{
+				Attrs: zsx.Attributes(map[string]string{
 					"":      "class",
 					"color": "green",
 				}),

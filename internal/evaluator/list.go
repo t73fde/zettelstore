@@ -22,8 +22,8 @@ import (
 	"strings"
 
 	"t73f.de/r/zsc/api"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/query"
@@ -285,9 +285,9 @@ func (ap *actionPara) prepareSimpleQuery(buf *bytes.Buffer) int {
 const fontSizes = 6 // Must be the number of CSS classes zs-font-size-* in base.css
 const fontSizes64 = float64(fontSizes)
 
-func (*actionPara) calcFontSizes(ccs meta.CountedCategories) map[int]attrs.Attributes {
-	var fsAttrs [fontSizes]attrs.Attributes
-	var a attrs.Attributes
+func (*actionPara) calcFontSizes(ccs meta.CountedCategories) map[int]zsx.Attributes {
+	var fsAttrs [fontSizes]zsx.Attributes
+	var a zsx.Attributes
 	for i := range fontSizes {
 		fsAttrs[i] = a.AddClass("zs-font-size-" + strconv.Itoa(i))
 	}
@@ -303,7 +303,7 @@ func (*actionPara) calcFontSizes(ccs meta.CountedCategories) map[int]attrs.Attri
 	}
 	slices.Sort(countList)
 
-	result := make(map[int]attrs.Attributes, len(countList))
+	result := make(map[int]zsx.Attributes, len(countList))
 	if len(countList) <= fontSizes {
 		// If we have less different counts, center them inside the fsAttrs vector.
 		curSize := (fontSizes - len(countList)) / 2

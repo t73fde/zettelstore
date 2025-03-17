@@ -19,9 +19,9 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/attrs"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -275,7 +275,7 @@ func (t *SzTransformer) getInlineList(is ast.InlineSlice) *sx.Pair {
 	return lb.List()
 }
 
-func getAttributes(a attrs.Attributes) *sx.Pair {
+func getAttributes(a zsx.Attributes) *sx.Pair {
 	if a.IsEmpty() {
 		return sx.Nil()
 	}

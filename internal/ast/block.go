@@ -13,7 +13,7 @@
 
 package ast
 
-import "t73f.de/r/zsc/attrs"
+import "t73f.de/r/zsx"
 
 // Definition of Block nodes.
 
@@ -69,7 +69,7 @@ func (pn *ParaNode) WalkChildren(v Visitor) { Walk(v, &pn.Inlines) }
 // VerbatimNode contains uninterpreted text
 type VerbatimNode struct {
 	Kind    VerbatimKind
-	Attrs   attrs.Attributes
+	Attrs   zsx.Attributes
 	Content []byte
 }
 
@@ -98,7 +98,7 @@ func (*VerbatimNode) WalkChildren(Visitor) { /* No children*/ }
 // RegionNode encapsulates a region of block nodes.
 type RegionNode struct {
 	Kind    RegionKind
-	Attrs   attrs.Attributes
+	Attrs   zsx.Attributes
 	Blocks  BlockSlice
 	Inlines InlineSlice // Optional text at the end of the region
 }
@@ -128,7 +128,7 @@ func (rn *RegionNode) WalkChildren(v Visitor) {
 // HeadingNode stores the heading text and level.
 type HeadingNode struct {
 	Level    int
-	Attrs    attrs.Attributes
+	Attrs    zsx.Attributes
 	Slug     string      // Heading text, normalized
 	Fragment string      // Heading text, suitable to be used as an unique URL fragment
 	Inlines  InlineSlice // Heading text, possibly formatted
@@ -144,7 +144,7 @@ func (hn *HeadingNode) WalkChildren(v Visitor) { Walk(v, &hn.Inlines) }
 
 // HRuleNode specifies a horizontal rule.
 type HRuleNode struct {
-	Attrs attrs.Attributes
+	Attrs zsx.Attributes
 }
 
 func (*HRuleNode) blockNode() { /* Just a marker */ }
@@ -158,7 +158,7 @@ func (*HRuleNode) WalkChildren(Visitor) { /* No children*/ }
 // NestedListNode specifies a nestable list, either ordered or unordered.
 type NestedListNode struct {
 	Kind  NestedListKind
-	Attrs attrs.Attributes
+	Attrs zsx.Attributes
 	Items []ItemSlice
 }
 
@@ -189,7 +189,7 @@ func (ln *NestedListNode) WalkChildren(v Visitor) {
 
 // DescriptionListNode specifies a description list.
 type DescriptionListNode struct {
-	Attrs        attrs.Attributes
+	Attrs        zsx.Attributes
 	Descriptions []Description
 }
 
@@ -276,7 +276,7 @@ func (cell *TableCell) WalkChildren(v Visitor) {
 // TranscludeNode specifies block content from other zettel to embedded in
 // current zettel
 type TranscludeNode struct {
-	Attrs   attrs.Attributes
+	Attrs   zsx.Attributes
 	Ref     *Reference
 	Inlines InlineSlice // Optional text.
 }
@@ -291,7 +291,7 @@ func (tn *TranscludeNode) WalkChildren(v Visitor) { Walk(v, &tn.Inlines) }
 // BLOBNode contains just binary data that must be interpreted according to
 // a syntax.
 type BLOBNode struct {
-	Attrs       attrs.Attributes
+	Attrs       zsx.Attributes
 	Description InlineSlice
 	Syntax      string
 	Blob        []byte
