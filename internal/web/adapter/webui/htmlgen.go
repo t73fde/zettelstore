@@ -66,14 +66,14 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 		return attr, attr.Tail(), rest.Tail()
 	}
 
-	rebindWrap(th, sz.SymLink, func(args sx.Vector, env *shtml.Environment, prevFn shtml.EvalFn) sx.Object {
+	rebindWrap(th, zsx.SymLink, func(args sx.Vector, env *shtml.Environment, prevFn shtml.EvalFn) sx.Object {
 		refSym, _ := shtml.GetReference(args[1], env)
 		obj := prevFn(args, env)
 		attr, assoc, rest := findA(obj)
 		if attr == nil {
 			return obj
 		}
-		if sz.SymRefStateExternal.IsEqual(refSym) {
+		if zsx.SymRefStateExternal.IsEqual(refSym) {
 			a := zsx.GetAttributes(attr)
 			a = a.Set("target", "_blank")
 			a = a.Add("rel", "external").Add("rel", "noreferrer")
@@ -125,7 +125,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 		return obj
 	})
 
-	rebind(th, sz.SymEmbed, func(obj sx.Object) sx.Object {
+	rebind(th, zsx.SymEmbed, func(obj sx.Object) sx.Object {
 		pair, isPair := sx.GetPair(obj)
 		if !isPair || !shtml.SymIMG.IsEqual(pair.Car()) {
 			return obj

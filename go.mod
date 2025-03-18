@@ -12,8 +12,8 @@ require (
 	t73f.de/r/sxwebs v0.0.0-20250226210617-7bc3145c269b
 	t73f.de/r/webs v0.0.0-20250311182734-f263a38b32d5
 	t73f.de/r/zero v0.0.0-20250226205915-c4194684acb7
-	t73f.de/r/zsc v0.0.0-20250317180135-d5fd7ae0e06d
-	t73f.de/r/zsx v0.0.0-20250317174636-5665bf1b3c6d
+	t73f.de/r/zsc v0.0.0-20250318144842-e7328338dcb3
+	t73f.de/r/zsx v0.0.0-20250318144521-378ade80541e
 )
 
 require golang.org/x/sys v0.31.0 // indirect

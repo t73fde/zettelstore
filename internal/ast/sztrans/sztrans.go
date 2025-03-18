@@ -34,7 +34,7 @@ func GetBlockSlice(pair *sx.Pair) (ast.BlockSlice, error) {
 		return nil, nil
 	}
 	var t transformer
-	if obj := sz.Walk(&t, pair, nil); !obj.IsNil() {
+	if obj := zsx.Walk(&t, pair, nil); !obj.IsNil() {
 		if sxn, isNode := obj.(sxNode); isNode {
 			if bs, ok := sxn.node.(*ast.BlockSlice); ok {
 				return *bs, nil
@@ -49,39 +49,39 @@ func GetBlockSlice(pair *sx.Pair) (ast.BlockSlice, error) {
 func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 	if sym, isSymbol := sx.GetSymbol(pair.Car()); isSymbol {
 		switch sym {
-		case sz.SymText:
+		case zsx.SymText:
 			if p := pair.Tail(); p != nil {
 				if s, isString := sx.GetString(p.Car()); isString {
 					return sxNode{&ast.TextNode{Text: s.GetValue()}}, true
 				}
 			}
-		case sz.SymSoft:
+		case zsx.SymSoft:
 			return sxNode{&ast.BreakNode{Hard: false}}, true
-		case sz.SymHard:
+		case zsx.SymHard:
 			return sxNode{&ast.BreakNode{Hard: true}}, true
-		case sz.SymLiteralCode:
+		case zsx.SymLiteralCode:
 			return handleLiteral(ast.LiteralCode, pair.Tail())
-		case sz.SymLiteralComment:
+		case zsx.SymLiteralComment:
 			return handleLiteral(ast.LiteralComment, pair.Tail())
-		case sz.SymLiteralInput:
+		case zsx.SymLiteralInput:
 			return handleLiteral(ast.LiteralInput, pair.Tail())
-		case sz.SymLiteralMath:
+		case zsx.SymLiteralMath:
 			return handleLiteral(ast.LiteralMath, pair.Tail())
-		case sz.SymLiteralOutput:
+		case zsx.SymLiteralOutput:
 			return handleLiteral(ast.LiteralOutput, pair.Tail())
-		case sz.SymThematic:
+		case zsx.SymThematic:
 			return sxNode{&ast.HRuleNode{Attrs: zsx.GetAttributes(pair.Tail().Head())}}, true
-		case sz.SymVerbatimComment:
+		case zsx.SymVerbatimComment:
 			return handleVerbatim(ast.VerbatimComment, pair.Tail())
-		case sz.SymVerbatimEval:
+		case zsx.SymVerbatimEval:
 			return handleVerbatim(ast.VerbatimEval, pair.Tail())
-		case sz.SymVerbatimHTML:
+		case zsx.SymVerbatimHTML:
 			return handleVerbatim(ast.VerbatimHTML, pair.Tail())
-		case sz.SymVerbatimMath:
+		case zsx.SymVerbatimMath:
 			return handleVerbatim(ast.VerbatimMath, pair.Tail())
-		case sz.SymVerbatimCode:
+		case zsx.SymVerbatimCode:
 			return handleVerbatim(ast.VerbatimCode, pair.Tail())
-		case sz.SymVerbatimZettel:
+		case zsx.SymVerbatimZettel:
 			return handleVerbatim(ast.VerbatimZettel, pair.Tail())
 		}
 	}
@@ -122,65 +122,65 @@ func handleVerbatim(kind ast.VerbatimKind, rest *sx.Pair) (sx.Object, bool) {
 func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
 	if sym, isSymbol := sx.GetSymbol(pair.Car()); isSymbol {
 		switch sym {
-		case sz.SymBlock:
+		case zsx.SymBlock:
 			bns := collectBlocks(pair.Tail())
 			return sxNode{&bns}
-		case sz.SymPara:
+		case zsx.SymPara:
 			return sxNode{&ast.ParaNode{Inlines: collectInlines(pair.Tail())}}
-		case sz.SymHeading:
+		case zsx.SymHeading:
 			return handleHeading(pair.Tail())
-		case sz.SymListOrdered:
+		case zsx.SymListOrdered:
 			return handleList(ast.NestedListOrdered, pair.Tail())
-		case sz.SymListUnordered:
+		case zsx.SymListUnordered:
 			return handleList(ast.NestedListUnordered, pair.Tail())
-		case sz.SymListQuote:
+		case zsx.SymListQuote:
 			return handleList(ast.NestedListQuote, pair.Tail())
-		case sz.SymDescription:
+		case zsx.SymDescription:
 			return handleDescription(pair.Tail())
-		case sz.SymTable:
+		case zsx.SymTable:
 			return handleTable(pair.Tail())
-		case sz.SymCell:
+		case zsx.SymCell:
 			return handleCell(pair.Tail())
-		case sz.SymRegionBlock:
+		case zsx.SymRegionBlock:
 			return handleRegion(ast.RegionSpan, pair.Tail())
-		case sz.SymRegionQuote:
+		case zsx.SymRegionQuote:
 			return handleRegion(ast.RegionQuote, pair.Tail())
-		case sz.SymRegionVerse:
+		case zsx.SymRegionVerse:
 			return handleRegion(ast.RegionVerse, pair.Tail())
-		case sz.SymTransclude:
+		case zsx.SymTransclude:
 			return handleTransclude(pair.Tail())
-		case sz.SymBLOB:
+		case zsx.SymBLOB:
 			return handleBLOB(pair.Tail())
 
-		case sz.SymLink:
+		case zsx.SymLink:
 			return handleLink(pair.Tail())
-		case sz.SymEmbed:
+		case zsx.SymEmbed:
 			return handleEmbed(pair.Tail())
-		case sz.SymEmbedBLOB:
+		case zsx.SymEmbedBLOB:
 			return handleEmbedBLOB(pair.Tail())
-		case sz.SymCite:
+		case zsx.SymCite:
 			return handleCite(pair.Tail())
-		case sz.SymMark:
+		case zsx.SymMark:
 			return handleMark(pair.Tail())
-		case sz.SymEndnote:
+		case zsx.SymEndnote:
 			return handleEndnote(pair.Tail())
-		case sz.SymFormatDelete:
+		case zsx.SymFormatDelete:
 			return handleFormat(ast.FormatDelete, pair.Tail())
-		case sz.SymFormatEmph:
+		case zsx.SymFormatEmph:
 			return handleFormat(ast.FormatEmph, pair.Tail())
-		case sz.SymFormatInsert:
+		case zsx.SymFormatInsert:
 			return handleFormat(ast.FormatInsert, pair.Tail())
-		case sz.SymFormatMark:
+		case zsx.SymFormatMark:
 			return handleFormat(ast.FormatMark, pair.Tail())
-		case sz.SymFormatQuote:
+		case zsx.SymFormatQuote:
 			return handleFormat(ast.FormatQuote, pair.Tail())
-		case sz.SymFormatSpan:
+		case zsx.SymFormatSpan:
 			return handleFormat(ast.FormatSpan, pair.Tail())
-		case sz.SymFormatSub:
+		case zsx.SymFormatSub:
 			return handleFormat(ast.FormatSub, pair.Tail())
-		case sz.SymFormatSuper:
+		case zsx.SymFormatSuper:
 			return handleFormat(ast.FormatSuper, pair.Tail())
-		case sz.SymFormatStrong:
+		case zsx.SymFormatStrong:
 			return handleFormat(ast.FormatStrong, pair.Tail())
 		}
 		log.Println("MISS", pair)
@@ -377,12 +377,12 @@ func collectRow(lst *sx.Pair) (row ast.TableRow) {
 func handleCell(rest *sx.Pair) sx.Object {
 	if rest != nil {
 		align := ast.AlignDefault
-		if alignPair := rest.Head().Assoc(sz.SymAttrAlign); alignPair != nil {
-			if alignValue := alignPair.Cdr(); sz.AttrAlignCenter.IsEqual(alignValue) {
+		if alignPair := rest.Head().Assoc(zsx.SymAttrAlign); alignPair != nil {
+			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
 				align = ast.AlignCenter
-			} else if sz.AttrAlignLeft.IsEqual(alignValue) {
+			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
 				align = ast.AlignLeft
-			} else if sz.AttrAlignRight.IsEqual(alignValue) {
+			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
 				align = ast.AlignRight
 			}
 		}
@@ -456,15 +456,15 @@ func handleBLOB(rest *sx.Pair) sx.Object {
 }
 
 var mapRefState = map[*sx.Symbol]ast.RefState{
-	sz.SymRefStateInvalid:  ast.RefStateInvalid,
-	sz.SymRefStateZettel:   ast.RefStateZettel,
-	sz.SymRefStateSelf:     ast.RefStateSelf,
-	sz.SymRefStateFound:    ast.RefStateFound,
-	sz.SymRefStateBroken:   ast.RefStateBroken,
-	sz.SymRefStateHosted:   ast.RefStateHosted,
-	sz.SymRefStateBased:    ast.RefStateBased,
-	sz.SymRefStateQuery:    ast.RefStateQuery,
-	sz.SymRefStateExternal: ast.RefStateExternal,
+	zsx.SymRefStateInvalid:  ast.RefStateInvalid,
+	sz.SymRefStateZettel:    ast.RefStateZettel,
+	zsx.SymRefStateSelf:     ast.RefStateSelf,
+	sz.SymRefStateFound:     ast.RefStateFound,
+	sz.SymRefStateBroken:    ast.RefStateBroken,
+	zsx.SymRefStateHosted:   ast.RefStateHosted,
+	sz.SymRefStateBased:     ast.RefStateBased,
+	sz.SymRefStateQuery:     ast.RefStateQuery,
+	zsx.SymRefStateExternal: ast.RefStateExternal,
 }
 
 func handleLink(rest *sx.Pair) sx.Object {
@@ -546,23 +546,23 @@ func collectReference(pair *sx.Pair) *ast.Reference {
 				if sRef, isString := sx.GetString(next.Car()); isString {
 					ref := ast.ParseReference(sRef.GetValue())
 					switch sym {
-					case sz.SymRefStateInvalid:
+					case zsx.SymRefStateInvalid:
 						ref.State = ast.RefStateInvalid
 					case sz.SymRefStateZettel:
 						ref.State = ast.RefStateZettel
-					case sz.SymRefStateSelf:
+					case zsx.SymRefStateSelf:
 						ref.State = ast.RefStateSelf
 					case sz.SymRefStateFound:
 						ref.State = ast.RefStateFound
 					case sz.SymRefStateBroken:
 						ref.State = ast.RefStateBroken
-					case sz.SymRefStateHosted:
+					case zsx.SymRefStateHosted:
 						ref.State = ast.RefStateHosted
 					case sz.SymRefStateBased:
 						ref.State = ast.RefStateBased
 					case sz.SymRefStateQuery:
 						ref.State = ast.RefStateQuery
-					case sz.SymRefStateExternal:
+					case zsx.SymRefStateExternal:
 						ref.State = ast.RefStateExternal
 					}
 					return ref

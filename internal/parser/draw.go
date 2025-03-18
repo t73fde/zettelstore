@@ -21,9 +21,8 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/webs/aasvg"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/input"
-	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
+	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -58,13 +57,13 @@ func parseDraw(inp *input.Input, m *meta.Meta, _ string) *sx.Pair {
 
 	canvas, err := aasvg.NewCanvas(inp.Src[inp.Pos:])
 	if err != nil {
-		return sz.MakeBlock(sz.MakeParaList(canvasErrMsg(err)))
+		return zsx.MakeBlock(zsx.MakeParaList(canvasErrMsg(err)))
 	}
 	svg := aasvg.CanvasToSVG(canvas, string(font), int(scaleX), int(scaleY))
 	if len(svg) == 0 {
-		return sz.MakeBlock(sz.MakeParaList(noSVGErrMsg()))
+		return zsx.MakeBlock(zsx.MakeParaList(noSVGErrMsg()))
 	}
-	return sz.MakeBlock(sz.MakeBLOB(nil, ParseDescription(m), meta.ValueSyntaxSVG, string(svg)))
+	return zsx.MakeBlock(zsx.MakeBLOB(nil, ParseDescription(m), meta.ValueSyntaxSVG, string(svg)))
 }
 
 // ParseDrawBlock parses the content of an eval verbatim node into an SVG image BLOB.
@@ -107,9 +106,9 @@ func getScale(a zsx.Attributes, key string, defVal int) int {
 }
 
 func canvasErrMsg(err error) *sx.Pair {
-	return sx.Cons(sz.MakeText("Error: "+err.Error()), sx.Nil())
+	return sx.Cons(zsx.MakeText("Error: "+err.Error()), sx.Nil())
 }
 
 func noSVGErrMsg() *sx.Pair {
-	return sx.Cons(sz.MakeText("NO IMAGE"), sx.Nil())
+	return sx.Cons(zsx.MakeText("NO IMAGE"), sx.Nil())
 }

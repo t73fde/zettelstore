@@ -21,8 +21,8 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/input"
-	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
+	"t73f.de/r/zsx/input"
 )
 
 func init() {
@@ -69,13 +69,13 @@ func init() {
 }
 
 func parsePlain(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
-	return doParsePlain(inp, syntax, sz.SymVerbatimCode)
+	return doParsePlain(inp, syntax, zsx.SymVerbatimCode)
 }
 func parsePlainHTML(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
-	return doParsePlain(inp, syntax, sz.SymVerbatimHTML)
+	return doParsePlain(inp, syntax, zsx.SymVerbatimHTML)
 }
 func doParsePlain(inp *input.Input, syntax string, kind *sx.Symbol) *sx.Pair {
-	return sz.MakeBlock(sz.MakeVerbatim(
+	return zsx.MakeBlock(zsx.MakeVerbatim(
 		kind,
 		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString(syntax)), sx.Nil()),
 		string(inp.ScanLineContent()),
@@ -87,7 +87,7 @@ func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
 	if is == nil {
 		return nil
 	}
-	return sz.MakeBlock(sz.MakeParaList(is))
+	return zsx.MakeBlock(zsx.MakeParaList(is))
 }
 
 func parseSVGInlines(inp *input.Input, syntax string) *sx.Pair {
@@ -95,7 +95,7 @@ func parseSVGInlines(inp *input.Input, syntax string) *sx.Pair {
 	if svgSrc == "" {
 		return nil
 	}
-	return sx.Cons(sz.MakeEmbedBLOB(nil, syntax, svgSrc, nil), sx.Nil())
+	return sx.Cons(zsx.MakeEmbedBLOB(nil, syntax, svgSrc, nil), sx.Nil())
 }
 
 func scanSVG(inp *input.Input) string {
@@ -117,13 +117,13 @@ func parsePlainSxn(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
 	_, err := rd.ReadAll()
 
 	var blocks sx.ListBuilder
-	blocks.Add(sz.MakeVerbatim(
-		sz.SymVerbatimCode,
+	blocks.Add(zsx.MakeVerbatim(
+		zsx.SymVerbatimCode,
 		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString(syntax)), sx.Nil()),
 		string(inp.ScanLineContent()),
 	))
 	if err != nil {
-		blocks.Add(sz.MakeParaList(sx.Cons(sz.MakeText(err.Error()), sx.Nil())))
+		blocks.Add(zsx.MakeParaList(sx.Cons(zsx.MakeText(err.Error()), sx.Nil())))
 	}
-	return sz.MakeBlockList(blocks.List())
+	return zsx.MakeBlockList(blocks.List())
 }

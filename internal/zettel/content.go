@@ -21,7 +21,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsx/input"
 )
 
 // Content is just the content of a zettel.

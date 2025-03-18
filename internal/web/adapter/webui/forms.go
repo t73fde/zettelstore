@@ -24,7 +24,7 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsx/input"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/web/content"

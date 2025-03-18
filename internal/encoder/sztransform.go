@@ -40,19 +40,19 @@ type SzTransformer struct {
 func (t *SzTransformer) GetSz(node ast.Node) *sx.Pair {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
-		return sz.MakeBlockList(t.getBlockList(n))
+		return zsx.MakeBlockList(t.getBlockList(n))
 	case *ast.InlineSlice:
-		return sz.MakeInlineList(t.getInlineList(*n))
+		return zsx.MakeInlineList(t.getInlineList(*n))
 	case *ast.ParaNode:
-		return sz.MakeParaList(t.getInlineList(n.Inlines))
+		return zsx.MakeParaList(t.getInlineList(n.Inlines))
 	case *ast.VerbatimNode:
-		return sz.MakeVerbatim(mapGetS(mapVerbatimKindS, n.Kind), getAttributes(n.Attrs), string(n.Content))
+		return zsx.MakeVerbatim(mapGetS(mapVerbatimKindS, n.Kind), getAttributes(n.Attrs), string(n.Content))
 	case *ast.RegionNode:
 		return t.getRegion(n)
 	case *ast.HeadingNode:
-		return sz.MakeHeading(n.Level, getAttributes(n.Attrs), t.getInlineList(n.Inlines), n.Slug, n.Fragment)
+		return zsx.MakeHeading(n.Level, getAttributes(n.Attrs), t.getInlineList(n.Inlines), n.Slug, n.Fragment)
 	case *ast.HRuleNode:
-		return sz.MakeThematic(getAttributes(n.Attrs))
+		return zsx.MakeThematic(getAttributes(n.Attrs))
 	case *ast.NestedListNode:
 		return t.getNestedList(n)
 	case *ast.DescriptionListNode:
@@ -60,69 +60,69 @@ func (t *SzTransformer) GetSz(node ast.Node) *sx.Pair {
 	case *ast.TableNode:
 		return t.getTable(n)
 	case *ast.TranscludeNode:
-		return sz.MakeTransclusion(getAttributes(n.Attrs), getReference(n.Ref), t.getInlineList(n.Inlines))
+		return zsx.MakeTransclusion(getAttributes(n.Attrs), getReference(n.Ref), t.getInlineList(n.Inlines))
 	case *ast.BLOBNode:
 		return t.getBLOB(n)
 	case *ast.TextNode:
-		return sz.MakeText(n.Text)
+		return zsx.MakeText(n.Text)
 	case *ast.BreakNode:
 		if n.Hard {
-			return sz.MakeHard()
+			return zsx.MakeHard()
 		}
-		return sz.MakeSoft()
+		return zsx.MakeSoft()
 	case *ast.LinkNode:
 		return t.getLink(n)
 	case *ast.EmbedRefNode:
-		return sz.MakeEmbed(getAttributes(n.Attrs), getReference(n.Ref), n.Syntax, t.getInlineList(n.Inlines))
+		return zsx.MakeEmbed(getAttributes(n.Attrs), getReference(n.Ref), n.Syntax, t.getInlineList(n.Inlines))
 	case *ast.EmbedBLOBNode:
 		return t.getEmbedBLOB(n)
 	case *ast.CiteNode:
-		return sz.MakeCite(getAttributes(n.Attrs), n.Key, t.getInlineList(n.Inlines))
+		return zsx.MakeCite(getAttributes(n.Attrs), n.Key, t.getInlineList(n.Inlines))
 	case *ast.FootnoteNode:
-		return sz.MakeEndnote(getAttributes(n.Attrs), t.getInlineList(n.Inlines))
+		return zsx.MakeEndnote(getAttributes(n.Attrs), t.getInlineList(n.Inlines))
 	case *ast.MarkNode:
-		return sz.MakeMark(n.Mark, n.Slug, n.Fragment, t.getInlineList(n.Inlines))
+		return zsx.MakeMark(n.Mark, n.Slug, n.Fragment, t.getInlineList(n.Inlines))
 	case *ast.FormatNode:
-		return sz.MakeFormat(mapGetS(mapFormatKindS, n.Kind), getAttributes(n.Attrs), t.getInlineList(n.Inlines))
+		return zsx.MakeFormat(mapGetS(mapFormatKindS, n.Kind), getAttributes(n.Attrs), t.getInlineList(n.Inlines))
 	case *ast.LiteralNode:
-		return sz.MakeLiteral(mapGetS(mapLiteralKindS, n.Kind), getAttributes(n.Attrs), string(n.Content))
+		return zsx.MakeLiteral(mapGetS(mapLiteralKindS, n.Kind), getAttributes(n.Attrs), string(n.Content))
 	}
-	return sx.MakeList(sz.SymUnknown, sx.MakeString(fmt.Sprintf("%T %v", node, node)))
+	return sx.MakeList(zsx.SymUnknown, sx.MakeString(fmt.Sprintf("%T %v", node, node)))
 }
 
 var mapVerbatimKindS = map[ast.VerbatimKind]*sx.Symbol{
-	ast.VerbatimZettel:  sz.SymVerbatimZettel,
-	ast.VerbatimCode:    sz.SymVerbatimCode,
-	ast.VerbatimEval:    sz.SymVerbatimEval,
-	ast.VerbatimMath:    sz.SymVerbatimMath,
-	ast.VerbatimComment: sz.SymVerbatimComment,
-	ast.VerbatimHTML:    sz.SymVerbatimHTML,
+	ast.VerbatimZettel:  zsx.SymVerbatimZettel,
+	ast.VerbatimCode:    zsx.SymVerbatimCode,
+	ast.VerbatimEval:    zsx.SymVerbatimEval,
+	ast.VerbatimMath:    zsx.SymVerbatimMath,
+	ast.VerbatimComment: zsx.SymVerbatimComment,
+	ast.VerbatimHTML:    zsx.SymVerbatimHTML,
 }
 
 var mapFormatKindS = map[ast.FormatKind]*sx.Symbol{
-	ast.FormatEmph:   sz.SymFormatEmph,
-	ast.FormatStrong: sz.SymFormatStrong,
-	ast.FormatDelete: sz.SymFormatDelete,
-	ast.FormatInsert: sz.SymFormatInsert,
-	ast.FormatSuper:  sz.SymFormatSuper,
-	ast.FormatSub:    sz.SymFormatSub,
-	ast.FormatQuote:  sz.SymFormatQuote,
-	ast.FormatMark:   sz.SymFormatMark,
-	ast.FormatSpan:   sz.SymFormatSpan,
+	ast.FormatEmph:   zsx.SymFormatEmph,
+	ast.FormatStrong: zsx.SymFormatStrong,
+	ast.FormatDelete: zsx.SymFormatDelete,
+	ast.FormatInsert: zsx.SymFormatInsert,
+	ast.FormatSuper:  zsx.SymFormatSuper,
+	ast.FormatSub:    zsx.SymFormatSub,
+	ast.FormatQuote:  zsx.SymFormatQuote,
+	ast.FormatMark:   zsx.SymFormatMark,
+	ast.FormatSpan:   zsx.SymFormatSpan,
 }
 
 var mapLiteralKindS = map[ast.LiteralKind]*sx.Symbol{
-	ast.LiteralCode:    sz.SymLiteralCode,
-	ast.LiteralInput:   sz.SymLiteralInput,
-	ast.LiteralOutput:  sz.SymLiteralOutput,
-	ast.LiteralComment: sz.SymLiteralComment,
-	ast.LiteralMath:    sz.SymLiteralMath,
+	ast.LiteralCode:    zsx.SymLiteralCode,
+	ast.LiteralInput:   zsx.SymLiteralInput,
+	ast.LiteralOutput:  zsx.SymLiteralOutput,
+	ast.LiteralComment: zsx.SymLiteralComment,
+	ast.LiteralMath:    zsx.SymLiteralMath,
 }
 
 var mapRegionKindS = map[ast.RegionKind]*sx.Symbol{
-	ast.RegionSpan:  sz.SymRegionBlock,
-	ast.RegionQuote: sz.SymRegionQuote,
-	ast.RegionVerse: sz.SymRegionVerse,
+	ast.RegionSpan:  zsx.SymRegionBlock,
+	ast.RegionQuote: zsx.SymRegionQuote,
+	ast.RegionVerse: zsx.SymRegionVerse,
 }
 
 func (t *SzTransformer) getRegion(rn *ast.RegionNode) *sx.Pair {
@@ -132,7 +132,7 @@ func (t *SzTransformer) getRegion(rn *ast.RegionNode) *sx.Pair {
 	}
 	symBlocks := t.getBlockList(&rn.Blocks)
 	t.inVerse = saveInVerse
-	return sz.MakeRegion(
+	return zsx.MakeRegion(
 		mapGetS(mapRegionKindS, rn.Kind),
 		getAttributes(rn.Attrs), symBlocks,
 		t.getInlineList(rn.Inlines),
@@ -140,9 +140,9 @@ func (t *SzTransformer) getRegion(rn *ast.RegionNode) *sx.Pair {
 }
 
 var mapNestedListKindS = map[ast.NestedListKind]*sx.Symbol{
-	ast.NestedListOrdered:   sz.SymListOrdered,
-	ast.NestedListUnordered: sz.SymListUnordered,
-	ast.NestedListQuote:     sz.SymListQuote,
+	ast.NestedListOrdered:   zsx.SymListOrdered,
+	ast.NestedListUnordered: zsx.SymListUnordered,
+	ast.NestedListQuote:     zsx.SymListQuote,
 }
 
 func (t *SzTransformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
@@ -151,7 +151,7 @@ func (t *SzTransformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
 	for _, item := range ln.Items {
 		if isCompact && len(item) > 0 {
 			paragraph := t.GetSz(item[0])
-			items.Add(sz.MakeInlineList(paragraph.Tail()))
+			items.Add(zsx.MakeInlineList(paragraph.Tail()))
 			continue
 		}
 		var itemObjs sx.ListBuilder
@@ -159,12 +159,12 @@ func (t *SzTransformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
 			itemObjs.Add(t.GetSz(in))
 		}
 		if isCompact {
-			items.Add(sz.MakeInlineList(itemObjs.List()))
+			items.Add(zsx.MakeInlineList(itemObjs.List()))
 		} else {
-			items.Add(sz.MakeBlockList(itemObjs.List()))
+			items.Add(zsx.MakeBlockList(itemObjs.List()))
 		}
 	}
-	return sz.MakeList(mapGetS(mapNestedListKindS, ln.Kind), getAttributes(ln.Attrs), items.List())
+	return zsx.MakeList(mapGetS(mapNestedListKindS, ln.Kind), getAttributes(ln.Attrs), items.List())
 }
 func isCompactList(itemSlice []ast.ItemSlice) bool {
 	for _, items := range itemSlice {
@@ -190,16 +190,16 @@ func (t *SzTransformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair
 			for _, dn := range b {
 				dVal.Add(t.GetSz(dn))
 			}
-			descObjs.Add(sz.MakeBlockList(dVal.List()))
+			descObjs.Add(zsx.MakeBlockList(dVal.List()))
 		}
-		dlObjs.Add(sz.MakeBlockList(descObjs.List()))
+		dlObjs.Add(zsx.MakeBlockList(descObjs.List()))
 	}
-	return dlObjs.List().Cons(getAttributes(dn.Attrs)).Cons(sz.SymDescription)
+	return dlObjs.List().Cons(getAttributes(dn.Attrs)).Cons(zsx.SymDescription)
 }
 
 func (t *SzTransformer) getTable(tn *ast.TableNode) *sx.Pair {
 	var lb sx.ListBuilder
-	lb.AddN(sz.SymTable, t.getHeader(tn.Header))
+	lb.AddN(zsx.SymTable, t.getHeader(tn.Header))
 	for _, row := range tn.Rows {
 		lb.Add(t.getRow(row))
 	}
@@ -223,13 +223,13 @@ func (t *SzTransformer) getCell(cell *ast.TableCell) *sx.Pair {
 	var attrs *sx.Pair
 	switch cell.Align {
 	case ast.AlignCenter:
-		attrs = sx.Cons(sx.Cons(sz.SymAttrAlign, sz.AttrAlignCenter), nil)
+		attrs = sx.Cons(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignCenter), nil)
 	case ast.AlignLeft:
-		attrs = sx.Cons(sx.Cons(sz.SymAttrAlign, sz.AttrAlignLeft), nil)
+		attrs = sx.Cons(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignLeft), nil)
 	case ast.AlignRight:
-		attrs = sx.Cons(sx.Cons(sz.SymAttrAlign, sz.AttrAlignRight), nil)
+		attrs = sx.Cons(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignRight), nil)
 	}
-	return sz.MakeCell(attrs, t.getInlineList(cell.Inlines))
+	return zsx.MakeCell(attrs, t.getInlineList(cell.Inlines))
 }
 
 func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
@@ -239,11 +239,11 @@ func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
 	} else {
 		content = getBase64String(bn.Blob)
 	}
-	return sz.MakeBLOB(getAttributes(bn.Attrs), t.getInlineList(bn.Description), bn.Syntax, content)
+	return zsx.MakeBLOB(getAttributes(bn.Attrs), t.getInlineList(bn.Description), bn.Syntax, content)
 }
 
 func (t *SzTransformer) getLink(ln *ast.LinkNode) *sx.Pair {
-	return sz.MakeLink(
+	return zsx.MakeLink(
 		getAttributes(ln.Attrs),
 		getReference(ln.Ref),
 		t.getInlineList(ln.Inlines),
@@ -257,7 +257,7 @@ func (t *SzTransformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
 	} else {
 		content = getBase64String(en.Blob)
 	}
-	return sz.MakeEmbedBLOB(getAttributes(en.Attrs), en.Syntax, content, t.getInlineList(en.Inlines))
+	return zsx.MakeEmbedBLOB(getAttributes(en.Attrs), en.Syntax, content, t.getInlineList(en.Inlines))
 }
 
 func (t *SzTransformer) getBlockList(bs *ast.BlockSlice) *sx.Pair {
@@ -288,15 +288,15 @@ func getAttributes(a zsx.Attributes) *sx.Pair {
 }
 
 var mapRefStateS = map[ast.RefState]*sx.Symbol{
-	ast.RefStateInvalid:  sz.SymRefStateInvalid,
+	ast.RefStateInvalid:  zsx.SymRefStateInvalid,
 	ast.RefStateZettel:   sz.SymRefStateZettel,
-	ast.RefStateSelf:     sz.SymRefStateSelf,
+	ast.RefStateSelf:     zsx.SymRefStateSelf,
 	ast.RefStateFound:    sz.SymRefStateFound,
 	ast.RefStateBroken:   sz.SymRefStateBroken,
-	ast.RefStateHosted:   sz.SymRefStateHosted,
+	ast.RefStateHosted:   zsx.SymRefStateHosted,
 	ast.RefStateBased:    sz.SymRefStateBased,
 	ast.RefStateQuery:    sz.SymRefStateQuery,
-	ast.RefStateExternal: sz.SymRefStateExternal,
+	ast.RefStateExternal: zsx.SymRefStateExternal,
 }
 
 func getReference(ref *ast.Reference) *sx.Pair {

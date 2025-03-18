@@ -20,7 +20,7 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/input"
+	"t73f.de/r/zsx/input"
 )
 
 // Parse the query specification and return a Query object.

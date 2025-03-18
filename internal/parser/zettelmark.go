@@ -18,8 +18,8 @@ package parser
 import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/sz/zmk"
+	"t73f.de/r/zsx/input"
 )
 
 func init() {

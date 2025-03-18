@@ -28,8 +28,9 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsc/input"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
+	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/encoder"
 )
@@ -65,7 +66,7 @@ func (p *mdP) acceptBlockChildren(docNode gmAst.Node) *sx.Pair {
 		panic(fmt.Sprintf("Expected document, but got node type %v", docNode.Type()))
 	}
 	var result sx.ListBuilder
-	result.Add(sz.SymBlock)
+	result.Add(zsx.SymBlock)
 	for child := docNode.FirstChild(); child != nil; child = child.NextSibling() {
 		if block := p.acceptBlock(child); block != nil {
 			result.Add(block)
@@ -103,21 +104,21 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 
 func (p *mdP) acceptParagraph(node *gmAst.Paragraph) *sx.Pair {
 	if is := p.acceptInlineChildren(node); is != nil {
-		return sz.MakeParaList(is)
+		return zsx.MakeParaList(is)
 	}
 	return nil
 }
 
 func (p *mdP) acceptHeading(node *gmAst.Heading) *sx.Pair {
-	return sz.MakeHeading(node.Level, nil, p.acceptInlineChildren(node), "", "")
+	return zsx.MakeHeading(node.Level, nil, p.acceptInlineChildren(node), "", "")
 }
 
 func (*mdP) acceptThematicBreak() *sx.Pair {
-	return sz.MakeThematic(nil /*TODO*/)
+	return zsx.MakeThematic(nil /*TODO*/)
 }
 
 func (p *mdP) acceptCodeBlock(node *gmAst.CodeBlock) *sx.Pair {
-	return sz.MakeVerbatim(sz.SymVerbatimCode, nil /*TODO*/, string(p.acceptRawText(node)))
+	return zsx.MakeVerbatim(zsx.SymVerbatimCode, nil /*TODO*/, string(p.acceptRawText(node)))
 }
 
 func (p *mdP) acceptFencedCodeBlock(node *gmAst.FencedCodeBlock) *sx.Pair {
@@ -125,7 +126,7 @@ func (p *mdP) acceptFencedCodeBlock(node *gmAst.FencedCodeBlock) *sx.Pair {
 	if language := node.Language(p.source); len(language) > 0 {
 		a.Add(sx.Cons(sx.MakeString("class"), sx.MakeString("language-"+cleanText(language, true))))
 	}
-	return sz.MakeVerbatim(sz.SymVerbatimCode, a.List(), string(p.acceptRawText(node)))
+	return zsx.MakeVerbatim(zsx.SymVerbatimCode, a.List(), string(p.acceptRawText(node)))
 }
 
 func (p *mdP) acceptRawText(node gmAst.Node) []byte {
@@ -150,14 +151,14 @@ func (p *mdP) acceptRawText(node gmAst.Node) []byte {
 }
 
 func (p *mdP) acceptBlockquote(node *gmAst.Blockquote) *sx.Pair {
-	return sz.MakeList(sz.SymListQuote, nil, p.acceptItemSlice(node))
+	return zsx.MakeList(zsx.SymListQuote, nil, p.acceptItemSlice(node))
 }
 
 func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
-	kind := sz.SymListUnordered
+	kind := zsx.SymListUnordered
 	var a sx.ListBuilder
 	if node.IsOrdered() {
-		kind = sz.SymListOrdered
+		kind = zsx.SymListOrdered
 		if node.Start != 1 {
 			a.Add(sx.Cons(sx.MakeString("start"), sx.MakeString(strconv.Itoa(node.Start))))
 		}
@@ -170,7 +171,7 @@ func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
 		}
 		items.Add(p.acceptItemSlice(item))
 	}
-	return sz.MakeList(kind, a.List(), items.List())
+	return zsx.MakeList(kind, a.List(), items.List())
 }
 
 func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
@@ -185,7 +186,7 @@ func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
 
 func (p *mdP) acceptTextBlock(node *gmAst.TextBlock) *sx.Pair {
 	if is := p.acceptInlineChildren(node); is != nil {
-		return sz.MakeParaList(is)
+		return zsx.MakeParaList(is)
 	}
 	return nil
 }
@@ -202,7 +203,7 @@ func (p *mdP) acceptHTMLBlock(node *gmAst.HTMLBlock) *sx.Pair {
 		}
 		content = append(content, closure...)
 	}
-	return sz.MakeVerbatim(sz.SymVerbatimHTML, nil, string(content))
+	return zsx.MakeVerbatim(zsx.SymVerbatimHTML, nil, string(content))
 }
 
 func (p *mdP) acceptInlineChildren(node gmAst.Node) *sx.Pair {
@@ -249,14 +250,14 @@ func (p *mdP) acceptText(node *gmAst.Text) (*sx.Pair, *sx.Pair) {
 		return nil, nil
 	}
 	if node.IsRaw() {
-		return sz.MakeText(string(text)), nil
+		return zsx.MakeText(string(text)), nil
 	}
-	in := sz.MakeText(cleanText(text, true))
+	in := zsx.MakeText(cleanText(text, true))
 	if node.HardLineBreak() {
-		return in, sz.MakeHard()
+		return in, zsx.MakeHard()
 	}
 	if node.SoftLineBreak() {
-		return in, sz.MakeSoft()
+		return in, zsx.MakeSoft()
 	}
 	return in, nil
 }
@@ -323,15 +324,15 @@ func (p *mdP) acceptCodeSpan(node *gmAst.CodeSpan) (*sx.Pair, *sx.Pair) {
 		buf.WriteString(content[lastPos:])
 		content = buf.String()
 	}
-	return sz.MakeLiteral(sz.SymLiteralCode, nil /* TODO */, content), nil
+	return zsx.MakeLiteral(zsx.SymLiteralCode, nil /* TODO */, content), nil
 }
 
 func (p *mdP) acceptEmphasis(node *gmAst.Emphasis) (*sx.Pair, *sx.Pair) {
-	sym := sz.SymFormatEmph
+	sym := zsx.SymFormatEmph
 	if node.Level == 2 {
-		sym = sz.SymFormatStrong
+		sym = zsx.SymFormatStrong
 	}
-	return sz.MakeFormat(sym, nil /* TODO */, p.acceptInlineChildren(node)), nil
+	return zsx.MakeFormat(sym, nil /* TODO */, p.acceptInlineChildren(node)), nil
 }
 
 func (p *mdP) acceptLink(node *gmAst.Link) (*sx.Pair, *sx.Pair) {
@@ -340,7 +341,7 @@ func (p *mdP) acceptLink(node *gmAst.Link) (*sx.Pair, *sx.Pair) {
 	if title := node.Title; len(title) > 0 {
 		a.Add(sx.Cons(sx.MakeString("title"), sx.MakeString(cleanText(title, true))))
 	}
-	return sz.MakeLink(a.List(), ref, p.acceptInlineChildren(node)), nil
+	return zsx.MakeLink(a.List(), ref, p.acceptInlineChildren(node)), nil
 }
 
 func (p *mdP) acceptImage(node *gmAst.Image) (*sx.Pair, *sx.Pair) {
@@ -349,7 +350,7 @@ func (p *mdP) acceptImage(node *gmAst.Image) (*sx.Pair, *sx.Pair) {
 	if title := node.Title; len(title) > 0 {
 		a.Add(sx.Cons(sx.MakeString("title"), sx.MakeString(cleanText(title, true))))
 	}
-	return sz.MakeEmbed(a.List(), ref, "", p.acceptInlineChildren(node)), nil
+	return zsx.MakeEmbed(a.List(), ref, "", p.acceptInlineChildren(node)), nil
 }
 
 func (p *mdP) acceptAutoLink(node *gmAst.AutoLink) (*sx.Pair, *sx.Pair) {
@@ -358,7 +359,7 @@ func (p *mdP) acceptAutoLink(node *gmAst.AutoLink) (*sx.Pair, *sx.Pair) {
 		!bytes.HasPrefix(bytes.ToLower(u), []byte("mailto:")) {
 		u = append([]byte("mailto:"), u...)
 	}
-	return sz.MakeLink(nil /* TODO */, sz.ScanReference(cleanText(u, false)), nil), nil
+	return zsx.MakeLink(nil /* TODO */, sz.ScanReference(cleanText(u, false)), nil), nil
 }
 
 func (p *mdP) acceptRawHTML(node *gmAst.RawHTML) (*sx.Pair, *sx.Pair) {
@@ -367,8 +368,8 @@ func (p *mdP) acceptRawHTML(node *gmAst.RawHTML) (*sx.Pair, *sx.Pair) {
 		segment := node.Segments.At(i)
 		segs = append(segs, segment.Value(p.source))
 	}
-	return sz.MakeLiteral(
-		sz.SymLiteralCode,
+	return zsx.MakeLiteral(
+		zsx.SymLiteralCode,
 		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString("html")), sx.Nil()),
 		string(bytes.Join(segs, nil)),
 	), nil
