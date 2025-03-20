@@ -18,7 +18,7 @@ t73f.de/r/webs v0.0.0-20250311182734-f263a38b32d5 h1:nnKfs/2i9n3S5VjbSj98odcwZKG
 t73f.de/r/webs v0.0.0-20250311182734-f263a38b32d5/go.mod h1:zk92hSKB4iWyT290+163seNzu350TA9XLATC9kOldqo=
 t73f.de/r/zero v0.0.0-20250320133226-a6d535b4985a h1:Fph+eBW2QhZ4GX5Pml8zx4vRPy56rOGrBC6GH61UwrQ=
 t73f.de/r/zero v0.0.0-20250320133226-a6d535b4985a/go.mod h1:T1vFcHoymUQcr7+vENBkS1yryZRZ3YB8uRtnMy8yRBA=
-t73f.de/r/zsc v0.0.0-20250320151331-95f53cd9aa08 h1:crIjCXGFq50D8/C/Q/htt19T9lR+O9+EEibfyOKGARo=
-t73f.de/r/zsc v0.0.0-20250320151331-95f53cd9aa08/go.mod h1:MYdNXL0bbcjwt8xKJPwTbvvrbr1g8zu3SObk9qDADAg=
-t73f.de/r/zsx v0.0.0-20250320151151-18b5b7ef4a72 h1:zgjZEP2en1DiEcAA8VT5GPKyNdVbiwwCRJTqdf6yC/c=
-t73f.de/r/zsx v0.0.0-20250320151151-18b5b7ef4a72/go.mod h1:hZlFM0YBLIMgh2iEdS0rnuxLfO7inpWmc+wyDeRptT8=
+t73f.de/r/zsc v0.0.0-20250320152210-07bbd8cce609 h1:HkaxKmVXZLchNCoNyg2Ka/pUWeBDEQSnWSyvegondqc=
+t73f.de/r/zsc v0.0.0-20250320152210-07bbd8cce609/go.mod h1:ZvrqlLeTKgqg6gttC53hcsE/iAPCDM5+/FXXlRLt+vQ=
+t73f.de/r/zsx v0.0.0-20250320152042-d72698d2606a h1:+HLfeVMoYfTzeVYnOJYywKmgahE/pqiZrPuNZn53M2k=
+t73f.de/r/zsx v0.0.0-20250320152042-d72698d2606a/go.mod h1:hZlFM0YBLIMgh2iEdS0rnuxLfO7inpWmc+wyDeRptT8=
