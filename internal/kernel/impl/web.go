@@ -28,7 +28,6 @@ import (
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/web/server"
-	"zettelstore.de/z/internal/web/server/impl"
 )
 
 type webService struct {
@@ -158,7 +157,7 @@ func (ws *webService) Start(kern *myKernel) error {
 		ws.logger.Info().Str("listen", listenAddr).Msg("service may be reached from outside, but authentication is not enabled")
 	}
 
-	sd := impl.ServerData{
+	sd := server.ConfigData{
 		Log:              ws.logger,
 		ListenAddr:       listenAddr,
 		BaseURL:          baseURL,
@@ -169,7 +168,7 @@ func (ws *webService) Start(kern *myKernel) error {
 		SecureCookie:     secureCookie,
 		Profiling:        profile,
 	}
-	srvw := impl.New(sd)
+	srvw := server.New(sd)
 	err := kern.web.setupServer(srvw, kern.box.manager, kern.auth.manager, &kern.cfg)
 	if err != nil {
 		ws.logger.Error().Err(err).Msg("Unable to create")

@@ -1,5 +1,5 @@
 //-----------------------------------------------------------------------------
-// Copyright (c) 2021-present Detlef Stern
+// Copyright (c) 2020-present Detlef Stern
 //
 // This file is part of Zettelstore.
 //
@@ -8,36 +8,34 @@
 // under this license.
 //
 // SPDX-License-Identifier: EUPL-1.2
-// SPDX-FileCopyrightText: 2021-present Detlef Stern
+// SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package impl provides the Zettelstore web service.
-package impl
+package server
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"time"
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
-
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/logger"
-	"zettelstore.de/z/internal/web/server"
 )
 
-type myServer struct {
+type webServer struct {
 	log              *logger.Logger
 	baseURL          string
-	server           httpServer
+	httpServer       httpServer
 	router           httpRouter
 	persistentCookie bool
 	secureCookie     bool
 }
 
-// ServerData contains the data needed to configure a server.
-type ServerData struct {
+// ConfigData contains the data needed to configure a server.
+type ConfigData struct {
 	Log              *logger.Logger
 	ListenAddr       string
 	BaseURL          string
@@ -50,8 +48,8 @@ type ServerData struct {
 }
 
 // New creates a new web server.
-func New(sd ServerData) server.Server {
-	srv := myServer{
+func New(sd ConfigData) Server {
+	srv := webServer{
 		log:              sd.Log,
 		baseURL:          sd.BaseURL,
 		persistentCookie: sd.PersistentCookie,
@@ -66,36 +64,36 @@ func New(sd ServerData) server.Server {
 		profiling:      sd.Profiling,
 	}
 	srv.router.initializeRouter(rd)
-	srv.server.initializeHTTPServer(sd.ListenAddr, &srv.router)
+	srv.httpServer.initializeHTTPServer(sd.ListenAddr, &srv.router)
 	return &srv
 }
 
-func (srv *myServer) Handle(pattern string, handler http.Handler) {
+func (srv *webServer) Handle(pattern string, handler http.Handler) {
 	srv.router.Handle(pattern, handler)
 }
-func (srv *myServer) AddListRoute(key byte, method server.Method, handler http.Handler) {
+func (srv *webServer) AddListRoute(key byte, method Method, handler http.Handler) {
 	srv.router.addListRoute(key, method, handler)
 }
-func (srv *myServer) AddZettelRoute(key byte, method server.Method, handler http.Handler) {
+func (srv *webServer) AddZettelRoute(key byte, method Method, handler http.Handler) {
 	srv.router.addZettelRoute(key, method, handler)
 }
-func (srv *myServer) SetUserRetriever(ur server.UserRetriever) {
+func (srv *webServer) SetUserRetriever(ur UserRetriever) {
 	srv.router.ur = ur
 }
 
-func (srv *myServer) GetURLPrefix() string {
+func (srv *webServer) GetURLPrefix() string {
 	return srv.router.urlPrefix
 }
-func (srv *myServer) NewURLBuilder(key byte) *api.URLBuilder {
+func (srv *webServer) NewURLBuilder(key byte) *api.URLBuilder {
 	return api.NewURLBuilder(srv.GetURLPrefix(), key)
 }
-func (srv *myServer) NewURLBuilderAbs(key byte) *api.URLBuilder {
+func (srv *webServer) NewURLBuilderAbs(key byte) *api.URLBuilder {
 	return api.NewURLBuilder(srv.baseURL, key)
 }
 
 const sessionName = "zsession"
 
-func (srv *myServer) SetToken(w http.ResponseWriter, token []byte, d time.Duration) {
+func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Duration) {
 	cookie := http.Cookie{
 		Name:     sessionName,
 		Value:    string(token),
@@ -116,8 +114,8 @@ func (srv *myServer) SetToken(w http.ResponseWriter, token []byte, d time.Durati
 }
 
 // ClearToken invalidates the session cookie by sending an empty one.
-func (srv *myServer) ClearToken(ctx context.Context, w http.ResponseWriter) context.Context {
-	if authData := server.GetAuthData(ctx); authData == nil {
+func (srv *webServer) ClearToken(ctx context.Context, w http.ResponseWriter) context.Context {
+	if authData := GetAuthData(ctx); authData == nil {
 		// No authentication data stored in session, nothing to do.
 		return ctx
 	}
@@ -129,12 +127,12 @@ func (srv *myServer) ClearToken(ctx context.Context, w http.ResponseWriter) cont
 
 func updateContext(ctx context.Context, user *meta.Meta, data *auth.TokenData) context.Context {
 	if data == nil {
-		return context.WithValue(ctx, server.CtxKeySession, &server.AuthData{User: user})
+		return context.WithValue(ctx, ctxKeySession, &AuthData{User: user})
 	}
 	return context.WithValue(
 		ctx,
-		server.CtxKeySession,
-		&server.AuthData{
+		ctxKeySession,
+		&AuthData{
 			User:    user,
 			Token:   data.Token,
 			Now:     data.Now,
@@ -143,5 +141,43 @@ func updateContext(ctx context.Context, user *meta.Meta, data *auth.TokenData) c
 		})
 }
 
-func (srv *myServer) Run() error { return srv.server.Run() }
-func (srv *myServer) Stop()      { srv.server.Stop() }
+func (srv *webServer) Run() error { return srv.httpServer.start() }
+func (srv *webServer) Stop()      { srv.httpServer.stop() }
+
+// Server timeout values
+const shutdownTimeout = 5 * time.Second
+
+// httpServer is a HTTP server.
+type httpServer struct {
+	http.Server
+}
+
+// initializeHTTPServer creates a new HTTP server object.
+func (srv *httpServer) initializeHTTPServer(addr string, handler http.Handler) {
+	if addr == "" {
+		addr = ":http"
+	}
+	srv.Server = http.Server{
+		Addr:    addr,
+		Handler: handler,
+	}
+}
+
+// start the web server, but does not wait for its completion.
+func (srv *httpServer) start() error {
+	ln, err := net.Listen("tcp", srv.Addr)
+	if err != nil {
+		return err
+	}
+
+	go func() { srv.Serve(ln) }()
+	return nil
+}
+
+// stop the web server.
+func (srv *httpServer) stop() {
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+
+	srv.Shutdown(ctx)
+}

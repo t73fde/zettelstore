@@ -39,7 +39,7 @@ const (
 	MethodPost
 	MethodPut
 	MethodDelete
-	MethodLAST // must always be the last one
+	methodLAST // must always be the last one
 )
 
 // Router allows to state routes for various URL paths.
@@ -78,7 +78,7 @@ type AuthData struct {
 // GetAuthData returns the full authentication data from the context.
 func GetAuthData(ctx context.Context) *AuthData {
 	if ctx != nil {
-		data, ok := ctx.Value(CtxKeySession).(*AuthData)
+		data, ok := ctx.Value(ctxKeySession).(*AuthData)
 		if ok {
 			return data
 		}
@@ -94,11 +94,11 @@ func GetUser(ctx context.Context) *meta.Meta {
 	return nil
 }
 
-// CtxKeyTypeSession is just an additional type to make context value retrieval unambiguous.
-type CtxKeyTypeSession struct{}
+// ctxKeyTypeSession is just an additional type to make context value retrieval unambiguous.
+type ctxKeyTypeSession struct{}
 
-// CtxKeySession is the key value to retrieve Authdata
-var CtxKeySession CtxKeyTypeSession
+// ctxKeySession is the key value to retrieve Authdata
+var ctxKeySession ctxKeyTypeSession
 
 // AuthBuilder is a Builder that also allows to execute authentication functions.
 type AuthBuilder interface {

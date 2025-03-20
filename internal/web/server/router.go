@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package server
 
 import (
 	"io"
@@ -22,22 +22,20 @@ import (
 	"strings"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
-	"zettelstore.de/z/internal/web/server"
 )
 
 type (
-	methodHandler [server.MethodLAST]http.Handler
+	methodHandler [methodLAST]http.Handler
 	routingTable  [256]*methodHandler
 )
 
-var mapMethod = map[string]server.Method{
-	http.MethodHead:   server.MethodHead,
-	http.MethodGet:    server.MethodGet,
-	http.MethodPost:   server.MethodPost,
-	http.MethodPut:    server.MethodPut,
-	http.MethodDelete: server.MethodDelete,
+var mapMethod = map[string]Method{
+	http.MethodHead:   MethodHead,
+	http.MethodGet:    MethodGet,
+	http.MethodPost:   MethodPost,
+	http.MethodPut:    MethodPut,
+	http.MethodDelete: MethodDelete,
 }
 
 // httpRouter handles all routing for zettelstore.
@@ -50,7 +48,7 @@ type httpRouter struct {
 	reURL       *regexp.Regexp
 	listTable   routingTable
 	zettelTable routingTable
-	ur          server.UserRetriever
+	ur          UserRetriever
 	mux         *http.ServeMux
 	maxReqSize  int64
 }
@@ -91,7 +89,7 @@ func (rt *httpRouter) setRuntimeProfiling() {
 	rt.mux.HandleFunc("GET /rtp/trace", pprof.Trace)
 }
 
-func (rt *httpRouter) addRoute(key byte, method server.Method, handler http.Handler, table *routingTable) {
+func (rt *httpRouter) addRoute(key byte, method Method, handler http.Handler, table *routingTable) {
 	// Set minKey and maxKey; re-calculate regexp.
 	if key < rt.minKey || rt.maxKey < key {
 		if key < rt.minKey {
@@ -110,20 +108,20 @@ func (rt *httpRouter) addRoute(key byte, method server.Method, handler http.Hand
 		table[key] = mh
 	}
 	mh[method] = handler
-	if method == server.MethodGet {
-		if prevHandler := mh[server.MethodHead]; prevHandler == nil {
-			mh[server.MethodHead] = handler
+	if method == MethodGet {
+		if prevHandler := mh[MethodHead]; prevHandler == nil {
+			mh[MethodHead] = handler
 		}
 	}
 }
 
 // addListRoute adds a route for the given key and HTTP method to work with a list.
-func (rt *httpRouter) addListRoute(key byte, method server.Method, handler http.Handler) {
+func (rt *httpRouter) addListRoute(key byte, method Method, handler http.Handler) {
 	rt.addRoute(key, method, handler, &rt.listTable)
 }
 
 // addZettelRoute adds a route for the given key and HTTP method to work with a zettel.
-func (rt *httpRouter) addZettelRoute(key byte, method server.Method, handler http.Handler) {
+func (rt *httpRouter) addZettelRoute(key byte, method Method, handler http.Handler) {
 	rt.addRoute(key, method, handler, &rt.zettelTable)
 }
 
@@ -133,14 +131,6 @@ func (rt *httpRouter) Handle(pattern string, handler http.Handler) {
 }
 
 func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// Something may panic. Ensure a kernel log.
-	defer func() {
-		if ri := recover(); ri != nil {
-			rt.log.Error().Str("Method", r.Method).Str("URL", r.URL.String()).HTTPIP(r).Msg("Recover context")
-			kernel.Main.LogRecover("Web", ri)
-		}
-	}()
-
 	var withDebug bool
 	if msg := rt.log.Debug(); msg.Enabled() {
 		withDebug = true
