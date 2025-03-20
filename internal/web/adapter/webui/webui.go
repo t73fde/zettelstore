@@ -23,9 +23,9 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxeval"
 	"t73f.de/r/sxwebs/sxhtml"
+	"t73f.de/r/zero/graph"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idgraph"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
@@ -69,7 +69,7 @@ type WebUI struct {
 	rootBinding     *sxeval.Binding
 	mxZettelBinding sync.Mutex
 	zettelBinding   *sxeval.Binding
-	dag             idgraph.Digraph
+	dag             graph.Digraph[id.Zid]
 	genHTML         *sxhtml.Generator
 }
 

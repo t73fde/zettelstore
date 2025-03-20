@@ -19,13 +19,13 @@ import (
 	"io"
 
 	"t73f.de/r/sx/sxeval"
+	"t73f.de/r/zero/graph"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idgraph"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
 )
 
-func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (idgraph.Digraph, *sxeval.Binding, error) {
+func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (graph.Digraph[id.Zid], *sxeval.Binding, error) {
 	// getMeta MUST currently use GetZettel, because GetMeta just uses the
 	// Index, which might not be current.
 	getMeta := func(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
@@ -57,14 +57,14 @@ func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (idgraph.Digraph, *s
 
 type getMetaFunc func(context.Context, id.Zid) (*meta.Meta, error)
 
-func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFunc) idgraph.Digraph {
+func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFunc) graph.Digraph[id.Zid] {
 	m, err := getMeta(ctx, startZid)
 	if err != nil {
 		return nil
 	}
 	var marked *idset.Set
 	stack := []*meta.Meta{m}
-	dg := idgraph.Digraph(nil).AddVertex(startZid)
+	dg := graph.Digraph[id.Zid](nil).AddVertex(startZid)
 	for pos := len(stack) - 1; pos >= 0; pos = len(stack) - 1 {
 		curr := stack[pos]
 		stack = stack[:pos]
