@@ -279,7 +279,7 @@ func cleanText(text []byte, cleanBS bool) string {
 		}
 		if ch == '&' {
 			inp := input.NewInput([]byte(text[pos:]))
-			if s, ok := inp.ScanEntity(); ok {
+			if s, ok := sz.ScanEntity(inp); ok {
 				sb.Write(text[lastPos:pos])
 				sb.WriteString(s)
 				lastPos = pos + inp.Pos
