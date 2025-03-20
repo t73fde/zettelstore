@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"os"
@@ -19,7 +19,6 @@ import (
 	"sync"
 	"time"
 
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 )
 
@@ -118,7 +117,7 @@ type logEntry struct {
 	details []byte
 }
 
-func (klw *kernelLogWriter) retrieveLogEntries() []kernel.LogEntry {
+func (klw *kernelLogWriter) retrieveLogEntries() []LogEntry {
 	klw.mx.RLock()
 	defer klw.mx.RUnlock()
 
@@ -126,13 +125,13 @@ func (klw *kernelLogWriter) retrieveLogEntries() []kernel.LogEntry {
 		if klw.writePos == 0 {
 			return nil
 		}
-		result := make([]kernel.LogEntry, klw.writePos)
+		result := make([]LogEntry, klw.writePos)
 		for i := range klw.writePos {
 			copyE2E(&result[i], &klw.data[i])
 		}
 		return result
 	}
-	result := make([]kernel.LogEntry, cap(klw.data))
+	result := make([]LogEntry, cap(klw.data))
 	pos := 0
 	for j := klw.writePos; j < cap(klw.data); j++ {
 		copyE2E(&result[pos], &klw.data[j])
@@ -151,7 +150,7 @@ func (klw *kernelLogWriter) getLastLogTime() time.Time {
 	return klw.lastLog
 }
 
-func copyE2E(result *kernel.LogEntry, origin *logEntry) {
+func copyE2E(result *LogEntry, origin *logEntry) {
 	result.Level = origin.level
 	result.TS = origin.ts
 	result.Prefix = origin.prefix

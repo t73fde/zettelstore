@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"bufio"

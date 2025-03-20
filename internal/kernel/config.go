@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"errors"
@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 )
 
@@ -144,18 +143,18 @@ func (cfg *srvConfig) GetNextConfig(key string) any {
 	return cfg.next[key]
 }
 
-func (cfg *srvConfig) GetCurConfigList(all bool) []kernel.KeyDescrValue {
+func (cfg *srvConfig) GetCurConfigList(all bool) []KeyDescrValue {
 	return cfg.getOneConfigList(all, cfg.GetCurConfig)
 }
-func (cfg *srvConfig) GetNextConfigList() []kernel.KeyDescrValue {
+func (cfg *srvConfig) GetNextConfigList() []KeyDescrValue {
 	return cfg.getOneConfigList(true, cfg.GetNextConfig)
 }
-func (cfg *srvConfig) getOneConfigList(all bool, getConfig func(string) any) []kernel.KeyDescrValue {
+func (cfg *srvConfig) getOneConfigList(all bool, getConfig func(string) any) []KeyDescrValue {
 	if len(cfg.descr) == 0 {
 		return nil
 	}
 	keys := cfg.getSortedConfigKeys(all, getConfig)
-	result := make([]kernel.KeyDescrValue, 0, len(keys))
+	result := make([]KeyDescrValue, 0, len(keys))
 	for _, k := range keys {
 		val := getConfig(k)
 		if val == nil {
@@ -165,7 +164,7 @@ func (cfg *srvConfig) getOneConfigList(all bool, getConfig func(string) any) []k
 		if !ok {
 			descr, _, _ = cfg.getListDescription(k)
 		}
-		result = append(result, kernel.KeyDescrValue{
+		result = append(result, KeyDescrValue{
 			Key:   k,
 			Descr: descr.text,
 			Value: fmt.Sprintf("%v", val),

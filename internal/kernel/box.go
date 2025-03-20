@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"context"
@@ -23,7 +23,6 @@ import (
 	"sync"
 
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 )
 
@@ -31,7 +30,7 @@ type boxService struct {
 	srvConfig
 	mxService     sync.RWMutex
 	manager       box.Manager
-	createManager kernel.CreateBoxManagerFunc
+	createManager CreateBoxManagerFunc
 }
 
 var errInvalidDirType = errors.New("invalid directory type")
@@ -39,18 +38,18 @@ var errInvalidDirType = errors.New("invalid directory type")
 func (ps *boxService) Initialize(logger *logger.Logger) {
 	ps.logger = logger
 	ps.descr = descriptionMap{
-		kernel.BoxDefaultDirType: {
+		BoxDefaultDirType: {
 			"Default directory box type",
 			ps.noFrozen(func(val string) (any, error) {
 				switch val {
-				case kernel.BoxDirTypeNotify, kernel.BoxDirTypeSimple:
+				case BoxDirTypeNotify, BoxDirTypeSimple:
 					return val, nil
 				}
 				return nil, errInvalidDirType
 			}),
 			true,
 		},
-		kernel.BoxURIs: {
+		BoxURIs: {
 			"Box URI",
 			func(val string) (any, error) {
 				uVal, err := url.Parse(val)
@@ -66,7 +65,7 @@ func (ps *boxService) Initialize(logger *logger.Logger) {
 		},
 	}
 	ps.next = interfaceMap{
-		kernel.BoxDefaultDirType: kernel.BoxDirTypeNotify,
+		BoxDefaultDirType: BoxDirTypeNotify,
 	}
 }
 
@@ -75,7 +74,7 @@ func (ps *boxService) GetLogger() *logger.Logger { return ps.logger }
 func (ps *boxService) Start(kern *myKernel) error {
 	boxURIs := make([]*url.URL, 0, 4)
 	for i := 1; ; i++ {
-		u := ps.GetNextConfig(kernel.BoxURIs + strconv.Itoa(i))
+		u := ps.GetNextConfig(BoxURIs + strconv.Itoa(i))
 		if u == nil {
 			break
 		}
@@ -115,12 +114,12 @@ func (ps *boxService) Stop(*myKernel) {
 	ps.mxService.Unlock()
 }
 
-func (ps *boxService) GetStatistics() []kernel.KeyValue {
+func (ps *boxService) GetStatistics() []KeyValue {
 	var st box.Stats
 	ps.mxService.RLock()
 	ps.manager.ReadStats(&st)
 	ps.mxService.RUnlock()
-	return []kernel.KeyValue{
+	return []KeyValue{
 		{Key: "Read-only", Value: strconv.FormatBool(st.ReadOnly)},
 		{Key: "Managed boxes", Value: strconv.Itoa(st.NumManagedBoxes)},
 		{Key: "Zettel (total)", Value: strconv.Itoa(st.ZettelTotal)},

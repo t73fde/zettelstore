@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"errors"
@@ -25,7 +25,6 @@ import (
 	"sync"
 	"time"
 
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -34,7 +33,7 @@ type webService struct {
 	srvConfig
 	mxService   sync.RWMutex
 	srvw        server.Server
-	setupServer kernel.SetupWebServerFunc
+	setupServer SetupWebServerFunc
 }
 
 var errURLPrefixSyntax = errors.New("must not be empty and must start with '//'")
@@ -42,7 +41,7 @@ var errURLPrefixSyntax = errors.New("must not be empty and must start with '//'"
 func (ws *webService) Initialize(logger *logger.Logger) {
 	ws.logger = logger
 	ws.descr = descriptionMap{
-		kernel.WebAssetDir: {
+		WebAssetDir: {
 			"Asset file  directory",
 			func(val string) (any, error) {
 				val = filepath.Clean(val)
@@ -54,7 +53,7 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 			},
 			true,
 		},
-		kernel.WebBaseURL: {
+		WebBaseURL: {
 			"Base URL",
 			func(val string) (any, error) {
 				if _, err := url.Parse(val); err != nil {
@@ -64,7 +63,7 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 			},
 			true,
 		},
-		kernel.WebListenAddress: {
+		WebListenAddress: {
 			"Listen address",
 			func(val string) (any, error) {
 				// If there is no host, prepend 127.0.0.1 as host.
@@ -79,21 +78,21 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 				return ap.String(), nil
 			},
 			true},
-		kernel.WebMaxRequestSize:   {"Max Request Size", parseInt64, true},
-		kernel.WebPersistentCookie: {"Persistent cookie", parseBool, true},
-		kernel.WebProfiling:        {"Runtime profiling", parseBool, true},
-		kernel.WebSecureCookie:     {"Secure cookie", parseBool, true},
-		kernel.WebTokenLifetimeAPI: {
+		WebMaxRequestSize:   {"Max Request Size", parseInt64, true},
+		WebPersistentCookie: {"Persistent cookie", parseBool, true},
+		WebProfiling:        {"Runtime profiling", parseBool, true},
+		WebSecureCookie:     {"Secure cookie", parseBool, true},
+		WebTokenLifetimeAPI: {
 			"Token lifetime API",
 			makeDurationParser(10*time.Minute, 0, 1*time.Hour),
 			true,
 		},
-		kernel.WebTokenLifetimeHTML: {
+		WebTokenLifetimeHTML: {
 			"Token lifetime HTML",
 			makeDurationParser(1*time.Hour, 1*time.Minute, 30*24*time.Hour),
 			true,
 		},
-		kernel.WebURLPrefix: {
+		WebURLPrefix: {
 			"URL prefix under which the web server runs",
 			func(val string) (any, error) {
 				if val != "" && val[0] == '/' && val[len(val)-1] == '/' {
@@ -105,16 +104,16 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 		},
 	}
 	ws.next = interfaceMap{
-		kernel.WebAssetDir:          "",
-		kernel.WebBaseURL:           "http://127.0.0.1:23123/",
-		kernel.WebListenAddress:     "127.0.0.1:23123",
-		kernel.WebMaxRequestSize:    int64(16 * 1024 * 1024),
-		kernel.WebPersistentCookie:  false,
-		kernel.WebSecureCookie:      true,
-		kernel.WebProfiling:         false,
-		kernel.WebTokenLifetimeAPI:  1 * time.Hour,
-		kernel.WebTokenLifetimeHTML: 10 * time.Minute,
-		kernel.WebURLPrefix:         "/",
+		WebAssetDir:          "",
+		WebBaseURL:           "http://127.0.0.1:23123/",
+		WebListenAddress:     "127.0.0.1:23123",
+		WebMaxRequestSize:    int64(16 * 1024 * 1024),
+		WebPersistentCookie:  false,
+		WebSecureCookie:      true,
+		WebProfiling:         false,
+		WebTokenLifetimeAPI:  1 * time.Hour,
+		WebTokenLifetimeHTML: 10 * time.Minute,
+		WebURLPrefix:         "/",
 	}
 }
 
@@ -134,18 +133,18 @@ func makeDurationParser(defDur, minDur, maxDur time.Duration) parseFunc {
 	}
 }
 
-var errWrongBasePrefix = errors.New(kernel.WebURLPrefix + " does not match " + kernel.WebBaseURL)
+var errWrongBasePrefix = errors.New(WebURLPrefix + " does not match " + WebBaseURL)
 
 func (ws *webService) GetLogger() *logger.Logger { return ws.logger }
 
 func (ws *webService) Start(kern *myKernel) error {
-	baseURL := ws.GetNextConfig(kernel.WebBaseURL).(string)
-	listenAddr := ws.GetNextConfig(kernel.WebListenAddress).(string)
-	urlPrefix := ws.GetNextConfig(kernel.WebURLPrefix).(string)
-	persistentCookie := ws.GetNextConfig(kernel.WebPersistentCookie).(bool)
-	secureCookie := ws.GetNextConfig(kernel.WebSecureCookie).(bool)
-	profile := ws.GetNextConfig(kernel.WebProfiling).(bool)
-	maxRequestSize := max(ws.GetNextConfig(kernel.WebMaxRequestSize).(int64), 1024)
+	baseURL := ws.GetNextConfig(WebBaseURL).(string)
+	listenAddr := ws.GetNextConfig(WebListenAddress).(string)
+	urlPrefix := ws.GetNextConfig(WebURLPrefix).(string)
+	persistentCookie := ws.GetNextConfig(WebPersistentCookie).(bool)
+	secureCookie := ws.GetNextConfig(WebSecureCookie).(bool)
+	profile := ws.GetNextConfig(WebProfiling).(bool)
+	maxRequestSize := max(ws.GetNextConfig(WebMaxRequestSize).(int64), 1024)
 
 	if !strings.HasSuffix(baseURL, urlPrefix) {
 		ws.logger.Error().Str("base-url", baseURL).Str("url-prefix", urlPrefix).Msg(
@@ -183,8 +182,8 @@ func (ws *webService) Start(kern *myKernel) error {
 	ws.srvw = srvw
 	ws.mxService.Unlock()
 
-	if kern.cfg.GetCurConfig(kernel.ConfigSimpleMode).(bool) {
-		listenAddr := ws.GetNextConfig(kernel.WebListenAddress).(string)
+	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
+		listenAddr := ws.GetNextConfig(WebListenAddress).(string)
 		if idx := strings.LastIndexByte(listenAddr, ':'); idx >= 0 {
 			ws.logger.Mandatory().Msg(strings.Repeat("--------------------", 3))
 			ws.logger.Mandatory().Msg("Open your browser and enter the following URL:")
@@ -212,6 +211,6 @@ func (ws *webService) Stop(*myKernel) {
 	ws.mxService.Unlock()
 }
 
-func (*webService) GetStatistics() []kernel.KeyValue {
+func (*webService) GetStatistics() []KeyValue {
 	return nil
 }

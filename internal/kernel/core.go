@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"fmt"
@@ -25,7 +25,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/strfun"
 )
@@ -48,12 +47,12 @@ func (cs *coreService) Initialize(logger *logger.Logger) {
 	cs.logger = logger
 	cs.mapRecover = make(map[string]recoverInfo)
 	cs.descr = descriptionMap{
-		kernel.CoreDebug:     {"Debug mode", parseBool, false},
-		kernel.CoreGoArch:    {"Go processor architecture", nil, false},
-		kernel.CoreGoOS:      {"Go Operating System", nil, false},
-		kernel.CoreGoVersion: {"Go Version", nil, false},
-		kernel.CoreHostname:  {"Host name", nil, false},
-		kernel.CorePort: {
+		CoreDebug:     {"Debug mode", parseBool, false},
+		CoreGoArch:    {"Go processor architecture", nil, false},
+		CoreGoOS:      {"Go Operating System", nil, false},
+		CoreGoVersion: {"Go Version", nil, false},
+		CoreHostname:  {"Host name", nil, false},
+		CorePort: {
 			"Port of command line server",
 			cs.noFrozen(func(val string) (any, error) {
 				port, err := net.LookupPort("tcp", val)
@@ -64,33 +63,33 @@ func (cs *coreService) Initialize(logger *logger.Logger) {
 			}),
 			true,
 		},
-		kernel.CoreProgname: {"Program name", nil, false},
-		kernel.CoreStarted:  {"Start time", nil, false},
-		kernel.CoreVerbose:  {"Verbose output", parseBool, true},
-		kernel.CoreVersion: {
+		CoreProgname: {"Program name", nil, false},
+		CoreStarted:  {"Start time", nil, false},
+		CoreVerbose:  {"Verbose output", parseBool, true},
+		CoreVersion: {
 			"Version",
 			cs.noFrozen(func(val string) (any, error) {
 				if val == "" {
-					return kernel.CoreDefaultVersion, nil
+					return CoreDefaultVersion, nil
 				}
 				return val, nil
 			}),
 			false,
 		},
-		kernel.CoreVTime: {"Version time", nil, false},
+		CoreVTime: {"Version time", nil, false},
 	}
 	cs.next = interfaceMap{
-		kernel.CoreDebug:     false,
-		kernel.CoreGoArch:    runtime.GOARCH,
-		kernel.CoreGoOS:      runtime.GOOS,
-		kernel.CoreGoVersion: runtime.Version(),
-		kernel.CoreHostname:  "*unknown host*",
-		kernel.CorePort:      0,
-		kernel.CoreStarted:   time.Now().Local().Format(id.TimestampLayout),
-		kernel.CoreVerbose:   false,
+		CoreDebug:     false,
+		CoreGoArch:    runtime.GOARCH,
+		CoreGoOS:      runtime.GOOS,
+		CoreGoVersion: runtime.Version(),
+		CoreHostname:  "*unknown host*",
+		CorePort:      0,
+		CoreStarted:   time.Now().Local().Format(id.TimestampLayout),
+		CoreVerbose:   false,
 	}
 	if hn, err := os.Hostname(); err == nil {
-		cs.next[kernel.CoreHostname] = hn
+		cs.next[CoreHostname] = hn
 	}
 }
 
@@ -105,24 +104,24 @@ func (cs *coreService) Stop(*myKernel) {
 	cs.started = false
 }
 
-func (cs *coreService) GetStatistics() []kernel.KeyValue {
+func (cs *coreService) GetStatistics() []KeyValue {
 	cs.mxRecover.RLock()
 	defer cs.mxRecover.RUnlock()
 	names := slices.Sorted(maps.Keys(cs.mapRecover))
-	result := make([]kernel.KeyValue, 0, 3*len(names))
+	result := make([]KeyValue, 0, 3*len(names))
 	for _, n := range names {
 		ri := cs.mapRecover[n]
 		result = append(
 			result,
-			kernel.KeyValue{
+			KeyValue{
 				Key:   fmt.Sprintf("Recover %q / Count", n),
 				Value: fmt.Sprintf("%d", ri.count),
 			},
-			kernel.KeyValue{
+			KeyValue{
 				Key:   fmt.Sprintf("Recover %q / Last ", n),
 				Value: fmt.Sprintf("%v", ri.ts),
 			},
-			kernel.KeyValue{
+			KeyValue{
 				Key:   fmt.Sprintf("Recover %q / Info ", n),
 				Value: fmt.Sprintf("%v", ri.info),
 			},

@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"fmt"
@@ -23,7 +23,6 @@ import (
 	"strconv"
 	"strings"
 
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/strfun"
 )
@@ -242,7 +241,7 @@ func showConfig(sess *cmdSession, args []string,
 			if i > 0 {
 				sess.println()
 			}
-			srvD := sess.kern.srvs[kernel.Service(k)]
+			srvD := sess.kern.srvs[Service(k)]
 			sess.println("%% Service", srvD.name)
 			listConfig(sess, srvD.srv)
 
@@ -265,12 +264,12 @@ func showConfig(sess *cmdSession, args []string,
 	sess.println(fmt.Sprintf("%v", val))
 }
 func listCurConfig(sess *cmdSession, srv service) {
-	listConfig(sess, func() []kernel.KeyDescrValue { return srv.GetCurConfigList(true) })
+	listConfig(sess, func() []KeyDescrValue { return srv.GetCurConfigList(true) })
 }
 func listNextConfig(sess *cmdSession, srv service) {
 	listConfig(sess, srv.GetNextConfigList)
 }
-func listConfig(sess *cmdSession, getConfigList func() []kernel.KeyDescrValue) {
+func listConfig(sess *cmdSession, getConfigList func() []KeyDescrValue) {
 	l := getConfigList()
 	table := [][]string{{"Key", "Value", "Description"}}
 	for _, kdv := range l {
@@ -412,7 +411,7 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 	return true
 }
 
-func lookupService(sess *cmdSession, cmd string, args []string) (kernel.Service, bool) {
+func lookupService(sess *cmdSession, cmd string, args []string) (Service, bool) {
 	if len(args) == 0 {
 		sess.usage(cmd, "SERVICE")
 		return 0, false
@@ -427,7 +426,7 @@ func lookupService(sess *cmdSession, cmd string, args []string) (kernel.Service,
 func cmdProfile(sess *cmdSession, _ string, args []string) bool {
 	var profileName string
 	if len(args) < 1 {
-		profileName = kernel.ProfileCPU
+		profileName = ProfileCPU
 	} else {
 		profileName = args[0]
 	}

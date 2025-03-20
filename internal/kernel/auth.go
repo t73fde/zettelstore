@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"errors"
@@ -20,7 +20,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 )
 
@@ -28,7 +27,7 @@ type authService struct {
 	srvConfig
 	mxService     sync.RWMutex
 	manager       auth.Manager
-	createManager kernel.CreateAuthManagerFunc
+	createManager CreateAuthManagerFunc
 }
 
 var errAlreadySetOwner = errors.New("changing an existing owner not allowed")
@@ -37,10 +36,10 @@ var errAlreadyROMode = errors.New("system in readonly mode cannot change this mo
 func (as *authService) Initialize(logger *logger.Logger) {
 	as.logger = logger
 	as.descr = descriptionMap{
-		kernel.AuthOwner: {
+		AuthOwner: {
 			"Owner's zettel id",
 			func(val string) (any, error) {
-				if owner := as.cur[kernel.AuthOwner]; owner != nil && owner != id.Invalid {
+				if owner := as.cur[AuthOwner]; owner != nil && owner != id.Invalid {
 					return nil, errAlreadySetOwner
 				}
 				if val == "" {
@@ -50,10 +49,10 @@ func (as *authService) Initialize(logger *logger.Logger) {
 			},
 			false,
 		},
-		kernel.AuthReadonly: {
+		AuthReadonly: {
 			"Readonly mode",
 			func(val string) (any, error) {
-				if ro := as.cur[kernel.AuthReadonly]; ro == true {
+				if ro := as.cur[AuthReadonly]; ro == true {
 					return nil, errAlreadyROMode
 				}
 				return parseBool(val)
@@ -62,8 +61,8 @@ func (as *authService) Initialize(logger *logger.Logger) {
 		},
 	}
 	as.next = interfaceMap{
-		kernel.AuthOwner:    id.Invalid,
-		kernel.AuthReadonly: false,
+		AuthOwner:    id.Invalid,
+		AuthReadonly: false,
 	}
 }
 
@@ -72,8 +71,8 @@ func (as *authService) GetLogger() *logger.Logger { return as.logger }
 func (as *authService) Start(*myKernel) error {
 	as.mxService.Lock()
 	defer as.mxService.Unlock()
-	readonlyMode := as.GetNextConfig(kernel.AuthReadonly).(bool)
-	owner := as.GetNextConfig(kernel.AuthOwner).(id.Zid)
+	readonlyMode := as.GetNextConfig(AuthReadonly).(bool)
+	owner := as.GetNextConfig(AuthOwner).(id.Zid)
 	authMgr, err := as.createManager(readonlyMode, owner)
 	if err != nil {
 		as.logger.Error().Err(err).Msg("Unable to create manager")
@@ -97,4 +96,4 @@ func (as *authService) Stop(*myKernel) {
 	as.mxService.Unlock()
 }
 
-func (*authService) GetStatistics() []kernel.KeyValue { return nil }
+func (*authService) GetStatistics() []KeyValue { return nil }

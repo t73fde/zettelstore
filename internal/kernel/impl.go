@@ -11,8 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package impl provides the kernel implementation.
-package impl
+package kernel
 
 import (
 	"errors"
@@ -32,7 +31,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 )
 
@@ -56,7 +54,7 @@ type myKernel struct {
 	box  boxService
 	web  webService
 
-	srvs     map[kernel.Service]serviceDescr
+	srvs     map[Service]serviceDescr
 	srvNames map[string]serviceData
 	depStart serviceDependency
 	depStop  serviceDependency // reverse of depStart
@@ -69,9 +67,9 @@ type serviceDescr struct {
 }
 type serviceData struct {
 	srv    service
-	srvnum kernel.Service
+	srvnum Service
 }
-type serviceDependency map[kernel.Service][]kernel.Service
+type serviceDependency map[Service][]Service
 
 const (
 	defaultNormalLogLevel = logger.InfoLevel
@@ -80,11 +78,11 @@ const (
 
 // create a new kernel.
 func init() {
-	kernel.Main = createKernel()
+	Main = createKernel()
 }
 
-// create a new kernel.
-func createKernel() kernel.Kernel {
+// create a new
+func createKernel() Kernel {
 	lw := newKernelLogWriter(8192)
 	kern := &myKernel{
 		logWriter: lw,
@@ -92,13 +90,13 @@ func createKernel() kernel.Kernel {
 		interrupt: make(chan os.Signal, 5),
 	}
 	kern.self.kernel = kern
-	kern.srvs = map[kernel.Service]serviceDescr{
-		kernel.KernelService: {&kern.self, "kernel", defaultNormalLogLevel},
-		kernel.CoreService:   {&kern.core, "core", defaultNormalLogLevel},
-		kernel.ConfigService: {&kern.cfg, "config", defaultNormalLogLevel},
-		kernel.AuthService:   {&kern.auth, "auth", defaultNormalLogLevel},
-		kernel.BoxService:    {&kern.box, "box", defaultNormalLogLevel},
-		kernel.WebService:    {&kern.web, "web", defaultNormalLogLevel},
+	kern.srvs = map[Service]serviceDescr{
+		KernelService: {&kern.self, "kernel", defaultNormalLogLevel},
+		CoreService:   {&kern.core, "core", defaultNormalLogLevel},
+		ConfigService: {&kern.cfg, "config", defaultNormalLogLevel},
+		AuthService:   {&kern.auth, "auth", defaultNormalLogLevel},
+		BoxService:    {&kern.box, "box", defaultNormalLogLevel},
+		WebService:    {&kern.web, "web", defaultNormalLogLevel},
 	}
 	kern.srvNames = make(map[string]serviceData, len(kern.srvs))
 	for key, srvD := range kern.srvs {
@@ -111,12 +109,12 @@ func createKernel() kernel.Kernel {
 		srvD.srv.Initialize(l)
 	}
 	kern.depStart = serviceDependency{
-		kernel.KernelService: nil,
-		kernel.CoreService:   {kernel.KernelService},
-		kernel.ConfigService: {kernel.CoreService},
-		kernel.AuthService:   {kernel.CoreService},
-		kernel.BoxService:    {kernel.CoreService, kernel.ConfigService, kernel.AuthService},
-		kernel.WebService:    {kernel.ConfigService, kernel.AuthService, kernel.BoxService},
+		KernelService: nil,
+		CoreService:   {KernelService},
+		ConfigService: {CoreService},
+		AuthService:   {CoreService},
+		BoxService:    {CoreService, ConfigService, AuthService},
+		WebService:    {ConfigService, AuthService, BoxService},
 	}
 	kern.depStop = make(serviceDependency, len(kern.depStart))
 	for srv, deps := range kern.depStart {
@@ -128,16 +126,16 @@ func createKernel() kernel.Kernel {
 }
 
 func (kern *myKernel) Setup(progname, version string, versionTime time.Time) {
-	kern.SetConfig(kernel.CoreService, kernel.CoreProgname, progname)
-	kern.SetConfig(kernel.CoreService, kernel.CoreVersion, version)
-	kern.SetConfig(kernel.CoreService, kernel.CoreVTime, versionTime.Local().Format(id.TimestampLayout))
+	kern.SetConfig(CoreService, CoreProgname, progname)
+	kern.SetConfig(CoreService, CoreVersion, version)
+	kern.SetConfig(CoreService, CoreVTime, versionTime.Local().Format(id.TimestampLayout))
 }
 
 func (kern *myKernel) Start(headline, lineServer bool, configFilename string) {
 	for _, srvD := range kern.srvs {
 		srvD.srv.Freeze()
 	}
-	if kern.cfg.GetCurConfig(kernel.ConfigSimpleMode).(bool) {
+	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
 		kern.SetLogLevel(defaultSimpleLogLevel.String())
 	}
 	kern.wg.Add(1)
@@ -152,16 +150,16 @@ func (kern *myKernel) Start(headline, lineServer bool, configFilename string) {
 		kern.wg.Done()
 	}()
 
-	kern.StartService(kernel.KernelService)
+	kern.StartService(KernelService)
 	if headline {
 		logger := kern.logger
 		logger.Mandatory().Msg(fmt.Sprintf(
 			"%v %v (%v@%v/%v)",
-			kern.core.GetCurConfig(kernel.CoreProgname),
-			kern.core.GetCurConfig(kernel.CoreVersion),
-			kern.core.GetCurConfig(kernel.CoreGoVersion),
-			kern.core.GetCurConfig(kernel.CoreGoOS),
-			kern.core.GetCurConfig(kernel.CoreGoArch),
+			kern.core.GetCurConfig(CoreProgname),
+			kern.core.GetCurConfig(CoreVersion),
+			kern.core.GetCurConfig(CoreGoVersion),
+			kern.core.GetCurConfig(CoreGoOS),
+			kern.core.GetCurConfig(CoreGoArch),
 		))
 		logger.Mandatory().Msg("Licensed under the latest version of the EUPL (European Union Public License)")
 		if configFilename != "" {
@@ -169,17 +167,17 @@ func (kern *myKernel) Start(headline, lineServer bool, configFilename string) {
 		} else {
 			logger.Mandatory().Msg("No configuration file found / used")
 		}
-		if kern.core.GetCurConfig(kernel.CoreDebug).(bool) {
+		if kern.core.GetCurConfig(CoreDebug).(bool) {
 			logger.Info().Msg("----------------------------------------")
 			logger.Info().Msg("DEBUG MODE, DO NO USE THIS IN PRODUCTION")
 			logger.Info().Msg("----------------------------------------")
 		}
-		if kern.auth.GetCurConfig(kernel.AuthReadonly).(bool) {
+		if kern.auth.GetCurConfig(AuthReadonly).(bool) {
 			logger.Info().Msg("Read-only mode")
 		}
 	}
 	if lineServer {
-		port := kern.core.GetNextConfig(kernel.CorePort).(int)
+		port := kern.core.GetNextConfig(CorePort).(int)
 		if port > 0 {
 			listenAddr := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
 			startLineServer(kern, listenAddr)
@@ -188,7 +186,7 @@ func (kern *myKernel) Start(headline, lineServer bool, configFilename string) {
 }
 
 func (kern *myKernel) doShutdown() {
-	kern.StopService(kernel.KernelService) // Will stop all other services.
+	kern.StopService(KernelService) // Will stop all other services.
 }
 
 func (kern *myKernel) WaitForShutdown() {
@@ -234,9 +232,9 @@ func (kern *myKernel) SetLogLevel(logLevel string) {
 	}
 }
 
-func (kern *myKernel) parseLogLevel(logLevel string) (logger.Level, map[kernel.Service]logger.Level) {
+func (kern *myKernel) parseLogLevel(logLevel string) (logger.Level, map[Service]logger.Level) {
 	defaultLevel := logger.NoLevel
-	srvLevel := map[kernel.Service]logger.Level{}
+	srvLevel := map[Service]logger.Level{}
 	for spec := range strings.SplitSeq(logLevel, ";") {
 		vals := cleanLogSpec(strings.Split(spec, ":"))
 		switch len(vals) {
@@ -268,7 +266,7 @@ func cleanLogSpec(rawVals []string) []string {
 	return vals
 }
 
-func (kern *myKernel) RetrieveLogEntries() []kernel.LogEntry {
+func (kern *myKernel) RetrieveLogEntries() []LogEntry {
 	return kern.logWriter.retrieveLogEntries()
 }
 
@@ -301,7 +299,7 @@ func (kern *myKernel) doStartProfiling(profileName, fileName string) error {
 	if kern.profileName != "" {
 		return errProfileInWork
 	}
-	if profileName == kernel.ProfileCPU {
+	if profileName == ProfileCPU {
 		f, err := os.Create(fileName)
 		if err != nil {
 			return err
@@ -342,7 +340,7 @@ func (kern *myKernel) doStopProfiling() error {
 	if kern.profileName == "" {
 		return nil // No profile started
 	}
-	if kern.profileName == kernel.ProfileCPU {
+	if kern.profileName == ProfileCPU {
 		pprof.StopCPUProfile()
 	}
 	err := kern.profileFile.Close()
@@ -357,7 +355,7 @@ func (kern *myKernel) doStopProfiling() error {
 
 var errUnknownService = errors.New("unknown service")
 
-func (kern *myKernel) SetConfig(srvnum kernel.Service, key, value string) error {
+func (kern *myKernel) SetConfig(srvnum Service, key, value string) error {
 	kern.mx.Lock()
 	defer kern.mx.Unlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -366,7 +364,7 @@ func (kern *myKernel) SetConfig(srvnum kernel.Service, key, value string) error 
 	return errUnknownService
 }
 
-func (kern *myKernel) GetConfig(srvnum kernel.Service, key string) any {
+func (kern *myKernel) GetConfig(srvnum Service, key string) any {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -375,7 +373,7 @@ func (kern *myKernel) GetConfig(srvnum kernel.Service, key string) any {
 	return nil
 }
 
-func (kern *myKernel) GetConfigList(srvnum kernel.Service) []kernel.KeyDescrValue {
+func (kern *myKernel) GetConfigList(srvnum Service) []KeyDescrValue {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -384,7 +382,7 @@ func (kern *myKernel) GetConfigList(srvnum kernel.Service) []kernel.KeyDescrValu
 	return nil
 }
 
-func (kern *myKernel) GetServiceStatistics(srvnum kernel.Service) []kernel.KeyValue {
+func (kern *myKernel) GetServiceStatistics(srvnum Service) []KeyValue {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -393,7 +391,7 @@ func (kern *myKernel) GetServiceStatistics(srvnum kernel.Service) []kernel.KeyVa
 	return nil
 }
 
-func (kern *myKernel) GetLogger(srvnum kernel.Service) *logger.Logger {
+func (kern *myKernel) GetLogger(srvnum Service) *logger.Logger {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -402,7 +400,7 @@ func (kern *myKernel) GetLogger(srvnum kernel.Service) *logger.Logger {
 	return kern.GetKernelLogger()
 }
 
-func (kern *myKernel) SetLevel(srvnum kernel.Service, level logger.Level) {
+func (kern *myKernel) SetLevel(srvnum Service, level logger.Level) {
 	if level.IsValid() {
 		kern.mx.RLock()
 		if srvD, ok := kern.srvs[srvnum]; ok {
@@ -412,12 +410,12 @@ func (kern *myKernel) SetLevel(srvnum kernel.Service, level logger.Level) {
 	}
 }
 
-func (kern *myKernel) StartService(srvnum kernel.Service) error {
+func (kern *myKernel) StartService(srvnum Service) error {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	return kern.doStartService(srvnum)
 }
-func (kern *myKernel) doStartService(srvnum kernel.Service) error {
+func (kern *myKernel) doStartService(srvnum Service) error {
 	for _, srv := range kern.sortDependency(srvnum, kern.depStart, true) {
 		if err := srv.Start(kern); err != nil {
 			return err
@@ -427,12 +425,12 @@ func (kern *myKernel) doStartService(srvnum kernel.Service) error {
 	return nil
 }
 
-func (kern *myKernel) RestartService(srvnum kernel.Service) error {
+func (kern *myKernel) RestartService(srvnum Service) error {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	return kern.doRestartService(srvnum)
 }
-func (kern *myKernel) doRestartService(srvnum kernel.Service) error {
+func (kern *myKernel) doRestartService(srvnum Service) error {
 	deps := kern.sortDependency(srvnum, kern.depStop, false)
 	for _, srv := range deps {
 		srv.Stop(kern)
@@ -447,20 +445,20 @@ func (kern *myKernel) doRestartService(srvnum kernel.Service) error {
 	return nil
 }
 
-func (kern *myKernel) StopService(srvnum kernel.Service) {
+func (kern *myKernel) StopService(srvnum Service) {
 	kern.mx.Lock()
 	defer kern.mx.Unlock()
 	kern.doStopService(srvnum)
 }
 
-func (kern *myKernel) doStopService(srvnum kernel.Service) {
+func (kern *myKernel) doStopService(srvnum Service) {
 	for _, srv := range kern.sortDependency(srvnum, kern.depStop, false) {
 		srv.Stop(kern)
 	}
 }
 
 func (kern *myKernel) sortDependency(
-	srvnum kernel.Service,
+	srvnum Service,
 	srvdeps serviceDependency,
 	isStarted bool,
 ) []service {
@@ -510,13 +508,13 @@ type service interface {
 	GetNextConfig(key string) any
 
 	// GetCurConfigList returns a sorted list of current configuration data.
-	GetCurConfigList(all bool) []kernel.KeyDescrValue
+	GetCurConfigList(all bool) []KeyDescrValue
 
 	// GetNextConfigList returns a sorted list of next configuration data.
-	GetNextConfigList() []kernel.KeyDescrValue
+	GetNextConfigList() []KeyDescrValue
 
 	// GetStatistics returns a key/value list of statistical data.
-	GetStatistics() []kernel.KeyValue
+	GetStatistics() []KeyValue
 
 	// Freeze disallows to change some fixed configuration values.
 	Freeze()
@@ -537,9 +535,9 @@ type service interface {
 type serviceConfigDescription struct{ Key, Descr string }
 
 func (kern *myKernel) SetCreators(
-	createAuthManager kernel.CreateAuthManagerFunc,
-	createBoxManager kernel.CreateBoxManagerFunc,
-	setupWebServer kernel.SetupWebServerFunc,
+	createAuthManager CreateAuthManagerFunc,
+	createBoxManager CreateBoxManagerFunc,
+	setupWebServer SetupWebServerFunc,
 ) {
 	kern.auth.createManager = createAuthManager
 	kern.box.createManager = createBoxManager
@@ -558,9 +556,9 @@ func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return n
 func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
 func (*kernelService) GetCurConfig(string) any                        { return nil }
 func (*kernelService) GetNextConfig(string) any                       { return nil }
-func (*kernelService) GetCurConfigList(bool) []kernel.KeyDescrValue   { return nil }
-func (*kernelService) GetNextConfigList() []kernel.KeyDescrValue      { return nil }
-func (*kernelService) GetStatistics() []kernel.KeyValue               { return nil }
+func (*kernelService) GetCurConfigList(bool) []KeyDescrValue          { return nil }
+func (*kernelService) GetNextConfigList() []KeyDescrValue             { return nil }
+func (*kernelService) GetStatistics() []KeyValue                      { return nil }
 func (*kernelService) Freeze()                                        {}
 func (*kernelService) Start(*myKernel) error                          { return nil }
 func (*kernelService) SwitchNextToCur()                               {}

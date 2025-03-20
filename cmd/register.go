@@ -20,5 +20,4 @@ import (
 	_ "zettelstore.de/z/internal/box/dirbox"   // Allow to use directory box.
 	_ "zettelstore.de/z/internal/box/filebox"  // Allow to use file box.
 	_ "zettelstore.de/z/internal/box/membox"   // Allow to use in-memory box.
-	_ "zettelstore.de/z/internal/kernel/impl"  // Allow kernel implementation to create itself.
 )

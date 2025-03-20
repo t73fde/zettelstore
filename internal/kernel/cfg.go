@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package impl
+package kernel
 
 import (
 	"context"
@@ -26,7 +26,6 @@ import (
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -72,15 +71,15 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		keyExpertMode:          {"Expert mode", parseBool, true},
 		config.KeyFooterZettel: {"Footer Zettel", parseInvalidZid, true},
 		config.KeyHomeZettel:   {"Home zettel", parseZid, true},
-		kernel.ConfigInsecureHTML: {
+		ConfigInsecureHTML: {
 			"Insecure HTML",
 			cs.noFrozen(func(val string) (any, error) {
 				switch val {
-				case kernel.ConfigSyntaxHTML:
+				case ConfigSyntaxHTML:
 					return config.SyntaxHTML, nil
-				case kernel.ConfigMarkdownHTML:
+				case ConfigMarkdownHTML:
 					return config.MarkdownHTML, nil
-				case kernel.ConfigZmkHTML:
+				case ConfigZmkHTML:
 					return config.ZettelmarkupHTML, nil
 				}
 				return config.NoHTML, nil
@@ -96,7 +95,7 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 			func(val string) (any, error) { return strings.Fields(val), nil },
 			true,
 		},
-		kernel.ConfigSimpleMode:        {"Simple mode", cs.noFrozen(parseBool), true},
+		ConfigSimpleMode:               {"Simple mode", cs.noFrozen(parseBool), true},
 		config.KeyListsMenuZettel:      {"Lists menu", parseZid, true},
 		config.KeyShowBackLinks:        {"Show back links", parseString, true},
 		config.KeyShowFolgeLinks:       {"Show folge links", parseString, true},
@@ -111,13 +110,13 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		keyExpertMode:                  false,
 		config.KeyFooterZettel:         id.Invalid,
 		config.KeyHomeZettel:           id.ZidDefaultHome,
-		kernel.ConfigInsecureHTML:      config.NoHTML,
+		ConfigInsecureHTML:             config.NoHTML,
 		meta.KeyLang:                   meta.ValueLangEN,
 		keyMaxTransclusions:            int64(1024),
 		keySiteName:                    "Zettelstore",
 		keyYAMLHeader:                  false,
 		keyZettelFileSyntax:            nil,
-		kernel.ConfigSimpleMode:        false,
+		ConfigSimpleMode:               false,
 		config.KeyListsMenuZettel:      id.ZidTOCListsMenu,
 		config.KeyShowBackLinks:        "",
 		config.KeyShowFolgeLinks:       "",
@@ -154,7 +153,7 @@ func (cs *configService) Stop(*myKernel) {
 	cs.mxService.Unlock()
 }
 
-func (*configService) GetStatistics() []kernel.KeyValue {
+func (*configService) GetStatistics() []KeyValue {
 	return nil
 }
 
@@ -274,7 +273,7 @@ func updateMeta(result, m *meta.Meta, key string, val string) *meta.Meta {
 }
 
 func (cs *configService) GetHTMLInsecurity() config.HTMLInsecurity {
-	return cs.GetCurConfig(kernel.ConfigInsecureHTML).(config.HTMLInsecurity)
+	return cs.GetCurConfig(ConfigInsecureHTML).(config.HTMLInsecurity)
 }
 
 // GetSiteName returns the current value of the "site-name" key.
@@ -304,7 +303,7 @@ func (cs *configService) GetZettelFileSyntax() []meta.Value {
 // --- config.AuthConfig
 
 // GetSimpleMode returns true if system tuns in simple-mode.
-func (cs *configService) GetSimpleMode() bool { return cs.GetCurConfig(kernel.ConfigSimpleMode).(bool) }
+func (cs *configService) GetSimpleMode() bool { return cs.GetCurConfig(ConfigSimpleMode).(bool) }
 
 // GetExpertMode returns the current value of the "expert-mode" key.
 func (cs *configService) GetExpertMode() bool { return cs.GetCurConfig(keyExpertMode).(bool) }
