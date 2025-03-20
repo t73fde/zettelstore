@@ -90,7 +90,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 			return
 		}
 		encTexts := encodingTexts()
-		shadowLinks := getShadowLinks(ctx, zid, ucGetAllZettel)
+		shadowLinks := getShadowLinks(ctx, zid, zn.InhMeta.GetDefault(meta.KeyBoxNumber, ""), ucGetAllZettel)
 
 		user := server.GetUser(ctx)
 		env, rb := wui.createRenderEnv(ctx, "info", wui.getUserLang(ctx), title, user)
@@ -212,11 +212,11 @@ func (wui *WebUI) infoAPIMatrixParsed(zid id.Zid, encTexts []string) *sx.Pair {
 	return matrix
 }
 
-func getShadowLinks(ctx context.Context, zid id.Zid, getAllZettel usecase.GetAllZettel) *sx.Pair {
+func getShadowLinks(ctx context.Context, zid id.Zid, boxNumber meta.Value, getAllZettel usecase.GetAllZettel) *sx.Pair {
 	var lb sx.ListBuilder
 	if zl, err := getAllZettel.Run(ctx, zid); err == nil {
 		for _, ztl := range zl {
-			if boxNo, ok := ztl.Meta.Get(meta.KeyBoxNumber); ok {
+			if boxNo, ok := ztl.Meta.Get(meta.KeyBoxNumber); ok && boxNo != boxNumber {
 				lb.Add(sx.MakeString(string(boxNo)))
 			}
 		}
