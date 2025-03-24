@@ -137,7 +137,7 @@ var errWrongBasePrefix = errors.New(WebURLPrefix + " does not match " + WebBaseU
 
 func (ws *webService) GetLogger() *logger.Logger { return ws.logger }
 
-func (ws *webService) Start(kern *myKernel) error {
+func (ws *webService) Start(kern *Kernel) error {
 	baseURL := ws.GetNextConfig(WebBaseURL).(string)
 	listenAddr := ws.GetNextConfig(WebListenAddress).(string)
 	urlPrefix := ws.GetNextConfig(WebURLPrefix).(string)
@@ -203,7 +203,7 @@ func (ws *webService) IsStarted() bool {
 	return ws.srvw != nil
 }
 
-func (ws *webService) Stop(*myKernel) {
+func (ws *webService) Stop(*Kernel) {
 	ws.logger.Info().Msg("Stop Service")
 	ws.srvw.Stop()
 	ws.mxService.Lock()

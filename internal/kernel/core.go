@@ -95,12 +95,12 @@ func (cs *coreService) Initialize(logger *logger.Logger) {
 
 func (cs *coreService) GetLogger() *logger.Logger { return cs.logger }
 
-func (cs *coreService) Start(*myKernel) error {
+func (cs *coreService) Start(*Kernel) error {
 	cs.started = true
 	return nil
 }
 func (cs *coreService) IsStarted() bool { return cs.started }
-func (cs *coreService) Stop(*myKernel) {
+func (cs *coreService) Stop(*Kernel) {
 	cs.started = false
 }
 

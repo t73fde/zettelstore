@@ -68,7 +68,7 @@ func (as *authService) Initialize(logger *logger.Logger) {
 
 func (as *authService) GetLogger() *logger.Logger { return as.logger }
 
-func (as *authService) Start(*myKernel) error {
+func (as *authService) Start(*Kernel) error {
 	as.mxService.Lock()
 	defer as.mxService.Unlock()
 	readonlyMode := as.GetNextConfig(AuthReadonly).(bool)
@@ -89,7 +89,7 @@ func (as *authService) IsStarted() bool {
 	return as.manager != nil
 }
 
-func (as *authService) Stop(*myKernel) {
+func (as *authService) Stop(*Kernel) {
 	as.logger.Info().Msg("Stop Manager")
 	as.mxService.Lock()
 	as.manager = nil

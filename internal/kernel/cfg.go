@@ -127,7 +127,7 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 }
 func (cs *configService) GetLogger() *logger.Logger { return cs.logger }
 
-func (cs *configService) Start(*myKernel) error {
+func (cs *configService) Start(*Kernel) error {
 	cs.logger.Info().Msg("Start Service")
 	data := meta.New(id.ZidConfiguration)
 	for _, kv := range cs.GetNextConfigList() {
@@ -145,7 +145,7 @@ func (cs *configService) IsStarted() bool {
 	return cs.orig != nil
 }
 
-func (cs *configService) Stop(*myKernel) {
+func (cs *configService) Stop(*Kernel) {
 	cs.logger.Info().Msg("Stop Service")
 	cs.mxService.Lock()
 	cs.orig = nil

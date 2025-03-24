@@ -34,8 +34,8 @@ import (
 	"zettelstore.de/z/internal/logger"
 )
 
-// myKernel is the main internal kernel.
-type myKernel struct {
+// Kernel is the main internal kernel.
+type Kernel struct {
 	logWriter *kernelLogWriter
 	logger    *logger.Logger
 	wg        sync.WaitGroup
@@ -82,9 +82,9 @@ func init() {
 }
 
 // create a new
-func createKernel() Kernel {
+func createKernel() *Kernel {
 	lw := newKernelLogWriter(8192)
-	kern := &myKernel{
+	kern := &Kernel{
 		logWriter: lw,
 		logger:    logger.New(lw, "").SetLevel(defaultNormalLogLevel),
 		interrupt: make(chan os.Signal, 5),
@@ -125,13 +125,16 @@ func createKernel() Kernel {
 	return kern
 }
 
-func (kern *myKernel) Setup(progname, version string, versionTime time.Time) {
+// Setup sets the most basic data of a software: its name, its version,
+// and when the version was created.
+func (kern *Kernel) Setup(progname, version string, versionTime time.Time) {
 	kern.SetConfig(CoreService, CoreProgname, progname)
 	kern.SetConfig(CoreService, CoreVersion, version)
 	kern.SetConfig(CoreService, CoreVTime, versionTime.Local().Format(id.TimestampLayout))
 }
 
-func (kern *myKernel) Start(headline, lineServer bool, configFilename string) {
+// Start the service.
+func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 	for _, srvD := range kern.srvs {
 		srvD.srv.Freeze()
 	}
@@ -185,19 +188,20 @@ func (kern *myKernel) Start(headline, lineServer bool, configFilename string) {
 	}
 }
 
-func (kern *myKernel) doShutdown() {
+func (kern *Kernel) doShutdown() {
 	kern.StopService(KernelService) // Will stop all other services.
 }
 
-func (kern *myKernel) WaitForShutdown() {
+// WaitForShutdown blocks the call until Shutdown is called.
+func (kern *Kernel) WaitForShutdown() {
 	kern.wg.Wait()
 	kern.doStopProfiling()
 }
 
 // --- Shutdown operation ----------------------------------------------------
 
-// Shutdown the service. Waits for all concurrent activity to stop.
-func (kern *myKernel) Shutdown(silent bool) {
+// Shutdown the service. Waits for all concurrent activities to stop.
+func (kern *Kernel) Shutdown(silent bool) {
 	kern.logger.Trace().Msg("Shutdown")
 	kern.interrupt <- &shutdownSignal{silent: silent}
 }
@@ -214,11 +218,15 @@ func (*shutdownSignal) Signal() { /* Just a signal */ }
 
 // --- Log operation ---------------------------------------------------------
 
-func (kern *myKernel) GetKernelLogger() *logger.Logger {
+// GetKernelLogger returns the kernel logger.
+func (kern *Kernel) GetKernelLogger() *logger.Logger {
 	return kern.logger
 }
 
-func (kern *myKernel) SetLogLevel(logLevel string) {
+// SetLogLevel sets the logging level for logger maintained by the kernel.
+//
+// Its syntax is: (SERVICE ":")? LEVEL (";" (SERICE ":")? LEVEL)*.
+func (kern *Kernel) SetLogLevel(logLevel string) {
 	defaultLevel, srvLevel := kern.parseLogLevel(logLevel)
 
 	kern.mx.RLock()
@@ -232,7 +240,7 @@ func (kern *myKernel) SetLogLevel(logLevel string) {
 	}
 }
 
-func (kern *myKernel) parseLogLevel(logLevel string) (logger.Level, map[Service]logger.Level) {
+func (kern *Kernel) parseLogLevel(logLevel string) (logger.Level, map[Service]logger.Level) {
 	defaultLevel := logger.NoLevel
 	srvLevel := map[Service]logger.Level{}
 	for spec := range strings.SplitSeq(logLevel, ";") {
@@ -266,23 +274,21 @@ func cleanLogSpec(rawVals []string) []string {
 	return vals
 }
 
-func (kern *myKernel) RetrieveLogEntries() []LogEntry {
+// RetrieveLogEntries returns all buffered log entries.
+func (kern *Kernel) RetrieveLogEntries() []LogEntry {
 	return kern.logWriter.retrieveLogEntries()
 }
 
-func (kern *myKernel) GetLastLogTime() time.Time {
+// GetLastLogTime returns the time when the last logging with level > DEBUG happened.
+func (kern *Kernel) GetLastLogTime() time.Time {
 	return kern.logWriter.getLastLogTime()
 }
 
 // LogRecover outputs some information about the previous panic.
-func (kern *myKernel) LogRecover(name string, recoverInfo any) bool {
-	return kern.doLogRecover(name, recoverInfo)
-}
-func (kern *myKernel) doLogRecover(name string, recoverInfo any) bool {
+func (kern *Kernel) LogRecover(name string, recoverInfo any) {
 	stack := debug.Stack()
 	kern.logger.Error().Str("recovered_from", fmt.Sprint(recoverInfo)).Bytes("stack", stack).Msg(name)
 	kern.core.updateRecoverInfo(name, recoverInfo, stack)
-	return true
 }
 
 // --- Profiling ---------------------------------------------------------
@@ -290,12 +296,18 @@ func (kern *myKernel) doLogRecover(name string, recoverInfo any) bool {
 var errProfileInWork = errors.New("already profiling")
 var errProfileNotFound = errors.New("profile not found")
 
-func (kern *myKernel) StartProfiling(profileName, fileName string) error {
+// StartProfiling starts profiling the software according to a profile.
+// It is an error to start more than one profile.
+//
+// profileName is a valid profile (see runtime/pprof/Lookup()), or the
+// value "cpu" for profiling the CPI.
+// fileName is the name of the file where the results are written to.
+func (kern *Kernel) StartProfiling(profileName, fileName string) error {
 	kern.mx.Lock()
 	defer kern.mx.Unlock()
 	return kern.doStartProfiling(profileName, fileName)
 }
-func (kern *myKernel) doStartProfiling(profileName, fileName string) error {
+func (kern *Kernel) doStartProfiling(profileName, fileName string) error {
 	if kern.profileName != "" {
 		return errProfileInWork
 	}
@@ -331,12 +343,15 @@ func (kern *myKernel) doStartProfiling(profileName, fileName string) error {
 	return nil
 }
 
-func (kern *myKernel) StopProfiling() error {
+// StopProfiling stops the current profiling and writes the result to
+// the file, which was named during StartProfiling().
+// It will always be called before the software stops its operations.
+func (kern *Kernel) StopProfiling() error {
 	kern.mx.Lock()
 	defer kern.mx.Unlock()
 	return kern.doStopProfiling()
 }
-func (kern *myKernel) doStopProfiling() error {
+func (kern *Kernel) doStopProfiling() error {
 	if kern.profileName == "" {
 		return nil // No profile started
 	}
@@ -355,7 +370,8 @@ func (kern *myKernel) doStopProfiling() error {
 
 var errUnknownService = errors.New("unknown service")
 
-func (kern *myKernel) SetConfig(srvnum Service, key, value string) error {
+// SetConfig stores a configuration value.
+func (kern *Kernel) SetConfig(srvnum Service, key, value string) error {
 	kern.mx.Lock()
 	defer kern.mx.Unlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -364,7 +380,8 @@ func (kern *myKernel) SetConfig(srvnum Service, key, value string) error {
 	return errUnknownService
 }
 
-func (kern *myKernel) GetConfig(srvnum Service, key string) any {
+// GetConfig returns a configuration value.
+func (kern *Kernel) GetConfig(srvnum Service, key string) any {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -373,7 +390,8 @@ func (kern *myKernel) GetConfig(srvnum Service, key string) any {
 	return nil
 }
 
-func (kern *myKernel) GetConfigList(srvnum Service) []KeyDescrValue {
+// GetConfigList returns a sorted list of configuration data.
+func (kern *Kernel) GetConfigList(srvnum Service) []KeyDescrValue {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -382,7 +400,8 @@ func (kern *myKernel) GetConfigList(srvnum Service) []KeyDescrValue {
 	return nil
 }
 
-func (kern *myKernel) GetServiceStatistics(srvnum Service) []KeyValue {
+// GetServiceStatistics returns a key/value list with statistical data.
+func (kern *Kernel) GetServiceStatistics(srvnum Service) []KeyValue {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -391,7 +410,8 @@ func (kern *myKernel) GetServiceStatistics(srvnum Service) []KeyValue {
 	return nil
 }
 
-func (kern *myKernel) GetLogger(srvnum Service) *logger.Logger {
+// GetLogger returns a logger for the given service.
+func (kern *Kernel) GetLogger(srvnum Service) *logger.Logger {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -400,7 +420,8 @@ func (kern *myKernel) GetLogger(srvnum Service) *logger.Logger {
 	return kern.GetKernelLogger()
 }
 
-func (kern *myKernel) SetLevel(srvnum Service, level logger.Level) {
+// SetLevel sets the logging level for the given service.
+func (kern *Kernel) SetLevel(srvnum Service, level logger.Level) {
 	if level.IsValid() {
 		kern.mx.RLock()
 		if srvD, ok := kern.srvs[srvnum]; ok {
@@ -410,12 +431,13 @@ func (kern *myKernel) SetLevel(srvnum Service, level logger.Level) {
 	}
 }
 
-func (kern *myKernel) StartService(srvnum Service) error {
+// StartService start the given service.
+func (kern *Kernel) StartService(srvnum Service) error {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	return kern.doStartService(srvnum)
 }
-func (kern *myKernel) doStartService(srvnum Service) error {
+func (kern *Kernel) doStartService(srvnum Service) error {
 	for _, srv := range kern.sortDependency(srvnum, kern.depStart, true) {
 		if err := srv.Start(kern); err != nil {
 			return err
@@ -425,12 +447,13 @@ func (kern *myKernel) doStartService(srvnum Service) error {
 	return nil
 }
 
-func (kern *myKernel) RestartService(srvnum Service) error {
+// RestartService stops and restarts the given service, while maintaining service dependencies.
+func (kern *Kernel) RestartService(srvnum Service) error {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	return kern.doRestartService(srvnum)
 }
-func (kern *myKernel) doRestartService(srvnum Service) error {
+func (kern *Kernel) doRestartService(srvnum Service) error {
 	deps := kern.sortDependency(srvnum, kern.depStop, false)
 	for _, srv := range deps {
 		srv.Stop(kern)
@@ -445,19 +468,20 @@ func (kern *myKernel) doRestartService(srvnum Service) error {
 	return nil
 }
 
-func (kern *myKernel) StopService(srvnum Service) {
+// StopService stop the given service.
+func (kern *Kernel) StopService(srvnum Service) {
 	kern.mx.Lock()
 	defer kern.mx.Unlock()
 	kern.doStopService(srvnum)
 }
 
-func (kern *myKernel) doStopService(srvnum Service) {
+func (kern *Kernel) doStopService(srvnum Service) {
 	for _, srv := range kern.sortDependency(srvnum, kern.depStop, false) {
 		srv.Stop(kern)
 	}
 }
 
-func (kern *myKernel) sortDependency(
+func (kern *Kernel) sortDependency(
 	srvnum Service,
 	srvdeps serviceDependency,
 	isStarted bool,
@@ -484,7 +508,8 @@ func (kern *myKernel) sortDependency(
 	return append(result, srvD.srv)
 }
 
-func (kern *myKernel) DumpIndex(w io.Writer) {
+// DumpIndex writes some data about the internal index into a writer.
+func (kern *Kernel) DumpIndex(w io.Writer) {
 	kern.box.DumpIndex(w)
 }
 
@@ -520,7 +545,7 @@ type service interface {
 	Freeze()
 
 	// Start the service.
-	Start(*myKernel) error
+	Start(*Kernel) error
 
 	// SwitchNextToCur moves next config data to current.
 	SwitchNextToCur()
@@ -529,12 +554,13 @@ type service interface {
 	IsStarted() bool
 
 	// Stop the service.
-	Stop(*myKernel)
+	Stop(*Kernel)
 }
 
 type serviceConfigDescription struct{ Key, Descr string }
 
-func (kern *myKernel) SetCreators(
+// SetCreators store functions to be called when a service has to be created.
+func (kern *Kernel) SetCreators(
 	createAuthManager CreateAuthManagerFunc,
 	createBoxManager CreateBoxManagerFunc,
 	setupWebServer SetupWebServerFunc,
@@ -547,7 +573,7 @@ func (kern *myKernel) SetCreators(
 // --- The kernel as a service -------------------------------------------
 
 type kernelService struct {
-	kernel *myKernel
+	kernel *Kernel
 }
 
 func (*kernelService) Initialize(*logger.Logger)                      {}
@@ -560,7 +586,7 @@ func (*kernelService) GetCurConfigList(bool) []KeyDescrValue          { return n
 func (*kernelService) GetNextConfigList() []KeyDescrValue             { return nil }
 func (*kernelService) GetStatistics() []KeyValue                      { return nil }
 func (*kernelService) Freeze()                                        {}
-func (*kernelService) Start(*myKernel) error                          { return nil }
+func (*kernelService) Start(*Kernel) error                            { return nil }
 func (*kernelService) SwitchNextToCur()                               {}
 func (*kernelService) IsStarted() bool                                { return true }
-func (*kernelService) Stop(*myKernel)                                 {}
+func (*kernelService) Stop(*Kernel)                                   {}

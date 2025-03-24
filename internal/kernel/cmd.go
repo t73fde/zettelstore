@@ -29,14 +29,14 @@ import (
 
 type cmdSession struct {
 	w        io.Writer
-	kern     *myKernel
+	kern     *Kernel
 	echo     bool
 	header   bool
 	colwidth int
 	eol      []byte
 }
 
-func (sess *cmdSession) initialize(w io.Writer, kern *myKernel) {
+func (sess *cmdSession) initialize(w io.Writer, kern *Kernel) {
 	sess.w = w
 	sess.kern = kern
 	sess.header = true

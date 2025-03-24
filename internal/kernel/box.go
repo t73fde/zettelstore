@@ -71,7 +71,7 @@ func (ps *boxService) Initialize(logger *logger.Logger) {
 
 func (ps *boxService) GetLogger() *logger.Logger { return ps.logger }
 
-func (ps *boxService) Start(kern *myKernel) error {
+func (ps *boxService) Start(kern *Kernel) error {
 	boxURIs := make([]*url.URL, 0, 4)
 	for i := 1; ; i++ {
 		u := ps.GetNextConfig(BoxURIs + strconv.Itoa(i))
@@ -103,7 +103,7 @@ func (ps *boxService) IsStarted() bool {
 	return ps.manager != nil
 }
 
-func (ps *boxService) Stop(*myKernel) {
+func (ps *boxService) Stop(*Kernel) {
 	ps.logger.Info().Msg("Stop Manager")
 	ps.mxService.RLock()
 	mgr := ps.manager

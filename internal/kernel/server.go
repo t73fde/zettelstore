@@ -18,7 +18,7 @@ import (
 	"net"
 )
 
-func startLineServer(kern *myKernel, listenAddr string) error {
+func startLineServer(kern *Kernel, listenAddr string) error {
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		kern.logger.Error().Err(err).Msg("Unable to start administration console")
@@ -29,11 +29,11 @@ func startLineServer(kern *myKernel, listenAddr string) error {
 	return nil
 }
 
-func lineServer(ln net.Listener, kern *myKernel) {
+func lineServer(ln net.Listener, kern *Kernel) {
 	// Something may panic. Ensure a running line service.
 	defer func() {
 		if ri := recover(); ri != nil {
-			kern.doLogRecover("Line", ri)
+			kern.LogRecover("Line", ri)
 			go lineServer(ln, kern)
 		}
 	}()
@@ -50,11 +50,11 @@ func lineServer(ln net.Listener, kern *myKernel) {
 	ln.Close()
 }
 
-func handleLineConnection(conn net.Conn, kern *myKernel) {
+func handleLineConnection(conn net.Conn, kern *Kernel) {
 	// Something may panic. Ensure a running connection.
 	defer func() {
 		if ri := recover(); ri != nil {
-			kern.doLogRecover("LineConn", ri)
+			kern.LogRecover("LineConn", ri)
 			go handleLineConnection(conn, kern)
 		}
 	}()
