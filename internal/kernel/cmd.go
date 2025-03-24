@@ -327,7 +327,7 @@ func cmdRestart(sess *cmdSession, cmd string, args []string) bool {
 	if !ok {
 		return true
 	}
-	err := sess.kern.doRestartService(srvnum)
+	err := sess.kern.restartService(srvnum)
 	if err != nil {
 		sess.println(err.Error())
 	}
@@ -497,7 +497,7 @@ func cmdMetrics(sess *cmdSession, _ string, _ []string) bool {
 }
 
 func cmdDumpIndex(sess *cmdSession, _ string, _ []string) bool {
-	sess.kern.DumpIndex(sess.w)
+	sess.kern.dumpIndex(sess.w)
 	return true
 }
 

@@ -133,7 +133,7 @@ func (ps *boxService) GetStatistics() []KeyValue {
 	}
 }
 
-func (ps *boxService) DumpIndex(w io.Writer) {
+func (ps *boxService) dumpIndex(w io.Writer) {
 	ps.manager.Dump(w)
 }
 
