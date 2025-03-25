@@ -473,10 +473,10 @@ var tcsInline = []zmkTestCase{
 		descr: "Dummy Link",
 		zmk:   `[[abc]]`,
 		expect: expectMap{
-			encoderHTML:  `<p><a href="abc" rel="external">abc</a></p>`,
+			encoderHTML:  `<p><a href="abc">abc</a></p>`,
 			encoderMD:    "[abc](abc)",
-			encoderSz:    `(BLOCK (PARA (LINK () (EXTERNAL "abc"))))`,
-			encoderSHTML: `((p (a (@ (href . "abc") (rel . "external")) "abc")))`,
+			encoderSz:    `(BLOCK (PARA (LINK () (HOSTED "abc"))))`,
+			encoderSHTML: `((p (a (@ (href . "abc")) "abc")))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
 		},
@@ -631,7 +631,7 @@ var tcsInline = []zmkTestCase{
 		expect: expectMap{
 			encoderHTML:  `<p><img src="abc"></p>`,
 			encoderMD:    "![abc](abc)",
-			encoderSz:    `(BLOCK (PARA (EMBED () (EXTERNAL "abc") "")))`,
+			encoderSz:    `(BLOCK (PARA (EMBED () (HOSTED "abc") "")))`,
 			encoderSHTML: `((p (img (@ (src . "abc")))))`,
 			encoderText:  ``,
 			encoderZmk:   useZmk,
