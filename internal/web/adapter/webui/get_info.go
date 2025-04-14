@@ -26,7 +26,6 @@ import (
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/query"
@@ -38,6 +37,7 @@ import (
 // MakeGetInfoHandler creates a new HTTP handler for the use case "get zettel".
 func (wui *WebUI) MakeGetInfoHandler(
 	ucParseZettel usecase.ParseZettel,
+	ucGetReferences usecase.GetReferences,
 	ucEvaluate *usecase.Evaluate,
 	ucGetZettel usecase.GetZettel,
 	ucGetAllZettel usecase.GetAllZettel,
@@ -67,8 +67,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 			lbMetadata.Add(sx.Cons(sx.MakeString(key), sxval))
 		}
 
-		summary := collect.References(zn)
-		locLinks, queryLinks, extLinks := wui.splitLocSeaExtLinks(append(summary.Links, summary.Embeds...))
+		locLinks, extLinks, queryLinks := wui.getLocalExtQueryLinks(ucGetReferences, zn)
 
 		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())
 		phrase := q.Get(api.QueryKeyPhrase)
@@ -116,24 +115,22 @@ func (wui *WebUI) MakeGetInfoHandler(
 	})
 }
 
-func (wui *WebUI) splitLocSeaExtLinks(links []*ast.Reference) (locLinks, queries, extLinks *sx.Pair) {
+func (wui *WebUI) getLocalExtQueryLinks(ucGetReferences usecase.GetReferences, zn *ast.ZettelNode) (locLinks, extLinks, queries *sx.Pair) {
+	locRefs, extRefs, queryRefs := ucGetReferences.RunByState(zn)
 	var lbLoc, lbQueries, lbExt sx.ListBuilder
-	for _, ref := range links {
-		switch ref.State {
-		case ast.RefStateHosted, ast.RefStateBased: // Local
-			lbLoc.Add(sx.MakeString(ref.String()))
-
-		case ast.RefStateQuery:
-			lbQueries.Add(
-				sx.Cons(
-					sx.MakeString(ref.Value),
-					sx.MakeString(wui.NewURLBuilder('h').AppendQuery(ref.Value).String())))
-
-		case ast.RefStateExternal:
-			lbExt.Add(sx.MakeString(ref.String()))
-		}
+	for _, ref := range locRefs {
+		lbLoc.Add(sx.MakeString(ref.String()))
 	}
-	return lbLoc.List(), lbQueries.List(), lbExt.List()
+	for _, ref := range extRefs {
+		lbExt.Add(sx.MakeString(ref.String()))
+	}
+	for _, ref := range queryRefs {
+		lbQueries.Add(
+			sx.Cons(
+				sx.MakeString(ref.Value),
+				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(ref.Value).String())))
+	}
+	return lbLoc.List(), lbExt.List(), lbQueries.List()
 }
 
 func createUnlinkedQuery(zid id.Zid, phrase string) *query.Query {
