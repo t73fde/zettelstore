@@ -20,7 +20,6 @@ import "zettelstore.de/z/internal/ast"
 type Summary struct {
 	Links  []*ast.Reference // list of all linked material
 	Embeds []*ast.Reference // list of all embedded material
-	Cites  []*ast.CiteNode  // list of all referenced citations
 }
 
 // References returns all references mentioned in the given zettel. This also
@@ -39,8 +38,6 @@ func (s *Summary) Visit(node ast.Node) ast.Visitor {
 		s.Links = append(s.Links, n.Ref)
 	case *ast.EmbedRefNode:
 		s.Embeds = append(s.Embeds, n.Ref)
-	case *ast.CiteNode:
-		s.Cites = append(s.Cites, n)
 	}
 	return s
 }

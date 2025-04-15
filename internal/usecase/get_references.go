@@ -30,9 +30,9 @@ func NewGetReferences() GetReferences { return GetReferences{} }
 
 // RunByAST returns all references of a zettel, separating them according to
 // there occurence in the abstract syntax tree: link, embed, cite.
-func (uc GetReferences) RunByAST(zn *ast.ZettelNode) (links, embeds []*ast.Reference, cites []*ast.CiteNode) {
+func (uc GetReferences) RunByAST(zn *ast.ZettelNode) (links, embeds []*ast.Reference) {
 	s := collect.References(zn)
-	return s.Links, s.Embeds, s.Cites
+	return s.Links, s.Embeds
 }
 
 // RunByState returns all references of a zettel, sparated by their state:
