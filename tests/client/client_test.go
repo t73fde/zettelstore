@@ -282,20 +282,24 @@ func TestGetUnlinkedReferences(t *testing.T) {
 	}
 }
 
-func failNoErrorOrNoCode(t *testing.T, err error, goodCode int) bool {
+func TestGetReferences(t *testing.T) {
+	t.Parallel()
+	c := getClient()
+	c.SetAuth("owner", "owner")
+	urls, err := c.GetReferences(context.Background(), id.ZidDefaultHome, "zettel")
 	if err != nil {
-		if cErr, ok := err.(*client.Error); ok {
-			if cErr.StatusCode == goodCode {
-				return false
-			}
-			t.Errorf("Expect status code %d, but got client error %v", goodCode, cErr)
-		} else {
-			t.Errorf("Expect status code %d, but got non-client error %v", goodCode, err)
-		}
-	} else {
-		t.Errorf("No error returned, but status code %d expected", goodCode)
+		t.Error(err)
+		return
 	}
-	return true
+	exp := []string{
+		"https://zettelstore.de/",
+		"https://zettelstore.de/home/doc/trunk/www/download.wiki",
+		"https://zettelstore.de/home/doc/trunk/www/changes.wiki",
+		"mailto:ds@zettelstore.de",
+	}
+	if !slices.Equal(urls, exp) {
+		t.Errorf("wrong references of home zettel: expected\n%v, but got\n%v", exp, urls)
+	}
 }
 
 func TestExecuteCommand(t *testing.T) {
@@ -316,6 +320,21 @@ func TestExecuteCommand(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+}
+func failNoErrorOrNoCode(t *testing.T, err error, goodCode int) bool {
+	if err != nil {
+		if cErr, ok := err.(*client.Error); ok {
+			if cErr.StatusCode == goodCode {
+				return false
+			}
+			t.Errorf("Expect status code %d, but got client error %v", goodCode, cErr)
+		} else {
+			t.Errorf("Expect status code %d, but got non-client error %v", goodCode, err)
+		}
+	} else {
+		t.Errorf("No error returned, but status code %d expected", goodCode)
+	}
+	return true
 }
 
 func TestListTags(t *testing.T) {
