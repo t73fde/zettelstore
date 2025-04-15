@@ -14,30 +14,43 @@
 // Package collect provides functions to collect items from a syntax tree.
 package collect
 
-import "zettelstore.de/z/internal/ast"
+import (
+	"iter"
 
-// Summary stores the relevant parts of the syntax tree
-type Summary struct {
-	Links  []*ast.Reference // list of all linked material
-	Embeds []*ast.Reference // list of all embedded material
+	"zettelstore.de/z/internal/ast"
+)
+
+type refYielder struct {
+	yield func(*ast.Reference) bool
+	stop  bool
 }
 
-// References returns all references mentioned in the given zettel. This also
-// includes references to images.
-func References(zn *ast.ZettelNode) (s Summary) {
-	ast.Walk(&s, &zn.BlocksAST)
-	return s
+// ReferenceSeq returns an iterator of all references mentioned in the given
+// zettel. This also includes references to images.
+func ReferenceSeq(zn *ast.ZettelNode) iter.Seq[*ast.Reference] {
+	return func(yield func(*ast.Reference) bool) {
+		yielder := refYielder{yield, false}
+		ast.Walk(&yielder, &zn.BlocksAST)
+	}
 }
 
 // Visit all node to collect data for the summary.
-func (s *Summary) Visit(node ast.Node) ast.Visitor {
+func (y *refYielder) Visit(node ast.Node) ast.Visitor {
+	if y.stop {
+		return nil
+	}
+	var stop bool
 	switch n := node.(type) {
 	case *ast.TranscludeNode:
-		s.Embeds = append(s.Embeds, n.Ref)
+		stop = !y.yield(n.Ref)
 	case *ast.LinkNode:
-		s.Links = append(s.Links, n.Ref)
+		stop = !y.yield(n.Ref)
 	case *ast.EmbedRefNode:
-		s.Embeds = append(s.Embeds, n.Ref)
+		stop = !y.yield(n.Ref)
 	}
-	return s
+	if stop {
+		y.stop = true
+		return nil
+	}
+	return y
 }

@@ -14,7 +14,7 @@
 package usecase
 
 import (
-	"slices"
+	"iter"
 
 	zeroiter "t73f.de/r/zero/iter"
 	"t73f.de/r/zsc/domain/meta"
@@ -28,18 +28,10 @@ type GetReferences struct{}
 // NewGetReferences creates a new usecase object.
 func NewGetReferences() GetReferences { return GetReferences{} }
 
-// RunByAST returns all references of a zettel, separating them according to
-// there occurence in the abstract syntax tree: link, embed, cite.
-func (uc GetReferences) RunByAST(zn *ast.ZettelNode) (links, embeds []*ast.Reference) {
-	s := collect.References(zn)
-	return s.Links, s.Embeds
-}
-
 // RunByState returns all references of a zettel, sparated by their state:
 // local, external, query. No zettel references are returned.
 func (uc GetReferences) RunByState(zn *ast.ZettelNode) (local, ext, query []*ast.Reference) {
-	s := collect.References(zn)
-	for ref := range zeroiter.CatSeq(slices.Values(s.Links), slices.Values(s.Embeds)) {
+	for ref := range collect.ReferenceSeq(zn) {
 		switch ref.State {
 		case ast.RefStateHosted, ast.RefStateBased: // Local
 			local = append(local, ref)
@@ -52,12 +44,20 @@ func (uc GetReferences) RunByState(zn *ast.ZettelNode) (local, ext, query []*ast
 	return local, ext, query
 }
 
+// RunByExternal returns an iterator of all external references of a zettel.
+func RunByExternal(zn *ast.ZettelNode) iter.Seq[*ast.Reference] {
+	return zeroiter.FilterSeq(
+		collect.ReferenceSeq(zn),
+		func(ref *ast.Reference) bool { return ref.State == ast.RefStateExternal })
+}
+
 // RunByMeta returns all URLs that are stored in the metadata.
-func (uc GetReferences) RunByMeta(m *meta.Meta) (urls []string) {
-	for key, val := range m.All() {
-		if meta.Type(key) == meta.TypeURL {
-			urls = append(urls, string(val))
+func (uc GetReferences) RunByMeta(m *meta.Meta) iter.Seq[string] {
+	return func(yield func(string) bool) {
+		for key, val := range m.All() {
+			if meta.Type(key) == meta.TypeURL && !yield(string(val)) {
+				return
+			}
 		}
 	}
-	return urls
 }
