@@ -1,0 +1,72 @@
+id: 00001012053800
+title: API: Retrieve references of an existing zettel
+role: manual
+tags: #api #manual #zettelstore
+syntax: zmk
+created: 20250415154139
+modified: 20250415164614
+
+The [[endpoint|00001012920000]] to retrieve references of a specific zettel is ''/r/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
+
+A zettel may contain references to external material, in the form of an URI.
+External material may be referenced via Zettelmarkup [[links|00001007040310]], [[inline embedding|00001007040320]], or a [[block transclusion|00001007031100]].
+It may also be referenced within the [[metadata|00001006000000]] of a zettel, when a key of [[type|00001006030000]] [[URL|00001006035000]] is given.
+
+For example, to retrieve references of the zettel about [[CommonMark|00001008010500]], just send a HTTP GET request to the endpoint ''/r/00001008010500''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header]:
+```sh
+# curl 'http://127.0.0.1:23123/r/00001008010500'
+https://commonmark.org/
+https://commonmark.org/
+https://xkcd.com/927/
+https://github.github.com/gfm/
+https://spec.commonmark.org/0.31.2/
+https://github.com/yuin/goldmark
+```
+
+If you just want metadata external references, add a query parameter ''part=meta'':
+```sh
+# curl 'http://127.0.0.1:23123/r/00001008010500?part=meta'
+https://commonmark.org/
+```
+
+Similarly, to retrieve only references of the zettel content, use the query parameter ''part=content'':
+```sh
+# curl 'http://127.0.0.1:23123/r/00001008010500?part=content'
+https://commonmark.org/
+https://xkcd.com/927/
+https://github.github.com/gfm/
+https://spec.commonmark.org/0.31.2/
+https://github.com/yuin/goldmark
+```
+
+These examples should make clean, that no duplicates are removed and no sorting takes place.
+The client must handle this, e.g.:
+```sh
+# curl 'http://127.0.0.1:23123/r/00001008010500' | sort -u
+https://commonmark.org/
+https://github.com/yuin/goldmark
+https://github.github.com/gfm/
+https://spec.commonmark.org/0.31.2/
+https://xkcd.com/927/
+```
+
+If you add the query parameter ''enc=data'', the result will be encoded as a [[symbolic expression|00001012930500]]:
+```sh
+# curl 'http://127.0.0.1:23123/r/00001008010500?enc=data'
+("https://commonmark.org/" "https://commonmark.org/" "https://xkcd.com/927/" "https://github.github.com/gfm/" "https://spec.commonmark.org/0.31.2/" "https://github.com/yuin/goldmark")
+```
+
+Of course, you can combine the different query parameters, e.g. to retrieve an Sx list of all metadata URIs.
+
+=== HTTP Status codes
+; ''200''
+: Retrieval was successful, the body contains an appropriate data value.
+; ''400''
+: Request was not valid. 
+  There are several reasons for this.
+  Maybe the zettel identifier did not consist of exactly 14 digits or ''enc'' / ''part'' contained illegal values.
+; ''403''
+: You are not allowed to retrieve data of the given zettel.
+; ''404''
+: Zettel not found.
+  You probably used a zettel identifier that is not used in the Zettelstore.

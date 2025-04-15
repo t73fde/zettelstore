@@ -45,7 +45,7 @@ func (uc GetReferences) RunByState(zn *ast.ZettelNode) (local, ext, query []*ast
 }
 
 // RunByExternal returns an iterator of all external references of a zettel.
-func RunByExternal(zn *ast.ZettelNode) iter.Seq[*ast.Reference] {
+func (uc GetReferences) RunByExternal(zn *ast.ZettelNode) iter.Seq[*ast.Reference] {
 	return zeroiter.FilterSeq(
 		collect.ReferenceSeq(zn),
 		func(ref *ast.Reference) bool { return ref.State == ast.RefStateExternal })
