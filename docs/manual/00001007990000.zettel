@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelmarkup
 syntax: zmk
 created: 20221209191905
-modified: 20231201140000
+modified: 20250415165510
 
 === Overview
 This Zettelmarkup cheat sheet provides a quick overview of many Zettelmarkup elements.
@@ -17,7 +17,7 @@ If you need more information about any of these elements, please refer to the de
 |[[Text literal formatting|00001007040200]]|''\'\'entered text\'\''' &rarr; ''entered text'', ''``source code``'' &rarr; ``source code``, ''==text output=='' &rarr; ==text output==
 |[[Superscript, subscript|00001007040100]]|''m^^2^^'' &rarr; m^^2^^, ''H,,2,,O'' &rarr; H,,2,,O
 |[[Links to other zettel|00001007040310]]|''[[Link text|00001007990000]]'' &rarr; [[Link text|00001007990000]]
-|[[Links to external resources|00001007040310]]|''[[Zettelstore|https://zettelstore.de]]'' &rarr; [[Zettelstore|https://zettelstore.de]]
+|[[Links to external resources|00001007040310]]|''[[Zettelstore|https://zettelstore.de/]]'' &rarr; [[Zettelstore|https://zettelstore.de/]]
 |[[Embed an image|00001007040322]]|''{{Image text|00000000040001}}'' &rarr; {{Image text|00000000040001}}
 |[[Embed content of first paragraph|00001007040324]]|''{{00001007990000}}'' &rarr; {{00001007990000}}
 |[[Footnote|00001007040330]]|''text[^footnote]'' &rarr; text[^footnote]

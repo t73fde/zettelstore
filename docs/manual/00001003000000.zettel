@@ -4,7 +4,7 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102185359
+modified: 20250415170240
 
 === The curious user
 You just want to check out the Zettelstore software
@@ -14,7 +14,7 @@ You just want to check out the Zettelstore software
   If you encounter a problem, please refer to the [[Troubleshooting|00001018000000]] page.]
 * A sub-directory ""zettel"" will be created in the directory where you put the executable.
   It will contain your future zettel.
-* Open the URI [[http://localhost:23123]] with your web browser.
+* Open the URI [[http://localhost:23123/]] with your web browser.
   A mostly empty Zettelstore is presented.
   There will be a zettel titled ""[[Home|00010000000000]]"" that contains some helpful information.
 * Please read the instructions for the [[web-based user interface|00001014000000]] and learn about the various ways to write zettel.

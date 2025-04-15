@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20250106180049
+modified: 20250415170405
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -20,7 +20,7 @@ This page lists some problems and their solutions that may occur when using your
 === Authentication
 * **Problem:** [[Authentication is enabled|00001010040100]] for a local running Zettelstore and there is a valid [[user zettel|00001010040200]] for the owner.
   But entering user name and password at the [[web user interface|00001014000000]] seems to be ignored, while entering a wrong password will result in an error message.
-** **Explanation:** A local running Zettelstore typically means, that you are accessing the Zettelstore using an URL with schema ''http://'', and not ''https://'', for example ''http://localhost:23123''.
+** **Explanation:** A local running Zettelstore typically means, that you are accessing the Zettelstore using an URL with schema ''http://'', and not ''https://'', for example ''http://localhost:23123/''.
    The difference between these two is the missing encryption of user name / password and for the answer of the Zettelstore if you use the ''http://'' schema.
    To be secure by default, the Zettelstore will not work in an insecure environment.
 ** **Solution 1:** If you are sure that your communication medium is safe, even if you use the ''http:/\/'' schema (for example, you are running the Zettelstore on the same computer you are working on, or if the Zettelstore is running on a computer in your protected local network), then you could add the entry ''insecure-cookie: true'' in your [[startup configuration|00001004010000#insecure-cookie]] file.
