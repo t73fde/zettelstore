@@ -321,11 +321,11 @@ func TestExecuteCommand(t *testing.T) {
 		t.Error(err)
 	}
 }
-func failNoErrorOrNoCode(t *testing.T, err error, goodCode int) bool {
+func failNoErrorOrNoCode(t *testing.T, err error, goodCode int) {
 	if err != nil {
 		if cErr, ok := err.(*client.Error); ok {
 			if cErr.StatusCode == goodCode {
-				return false
+				return
 			}
 			t.Errorf("Expect status code %d, but got client error %v", goodCode, cErr)
 		} else {
@@ -334,7 +334,6 @@ func failNoErrorOrNoCode(t *testing.T, err error, goodCode int) bool {
 	} else {
 		t.Errorf("No error returned, but status code %d expected", goodCode)
 	}
-	return true
 }
 
 func TestListTags(t *testing.T) {
