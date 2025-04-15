@@ -110,7 +110,8 @@ func (p *mdP) acceptParagraph(node *gmAst.Paragraph) *sx.Pair {
 }
 
 func (p *mdP) acceptHeading(node *gmAst.Heading) *sx.Pair {
-	return zsx.MakeHeading(node.Level, nil, p.acceptInlineChildren(node), "", "")
+	level := min(node.Level, 5)
+	return zsx.MakeHeading(level, nil, p.acceptInlineChildren(node), "", "")
 }
 
 func (*mdP) acceptThematicBreak() *sx.Pair {
