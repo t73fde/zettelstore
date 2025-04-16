@@ -9,6 +9,5 @@ The source code contains some simple [[fuzzing tests|https://go.dev/security/fuz
 You should call them regularly to make sure that the software will cope with unusual input.
 
 ```sh
-go test -fuzz=FuzzParseBlocks zettelstore.de/z/parser/draw
-go test -fuzz=FuzzParseBlocks zettelstore.de/z/parser/zettelmark
+go test -fuzz=FuzzParseZmk zettelstore.de/z/internal/parser/
 ```
