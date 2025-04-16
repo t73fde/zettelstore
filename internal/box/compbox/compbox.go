@@ -51,6 +51,7 @@ var myZettel = map[id.Zid]struct {
 	id.ZidVersion:         {genVersionBuildM, genVersionBuildC},
 	id.ZidHost:            {genVersionHostM, genVersionHostC},
 	id.ZidOperatingSystem: {genVersionOSM, genVersionOSC},
+	id.ZidModules:         {genModulesM, genModulesC},
 	id.ZidLog:             {genLogM, genLogC},
 	id.ZidMemory:          {genMemoryM, genMemoryC},
 	id.ZidSx:              {genSxM, genSxC},

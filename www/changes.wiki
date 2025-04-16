@@ -2,6 +2,9 @@
 
 <a id="0_21"></a>
 <h2>Changes for Version 0.21.0 (pending)</h2>
+  *  Zettel identifier of Zettelstore Log, Zettelstore Memory, and Zettelstore
+     Sx Engine changed. See manual for new identifier.
+     (breaking)
   *  Sz encodings of links were simplified into one <code>LINK</code> symbol.
      Different link types are now specified by reference node.
      (breaking: api)
@@ -14,6 +17,9 @@
      alignment value (<code>"center"</code>, <code>"left"</code>, or
      <code>"right"</code>).
      (breaking: api)
+  *  New computed zettel Zettelstore Modules, which shows all Go modules
+     Zettelstore is dependent to.
+     (minor)
 
 <a id="0_20"></a>
 <h2>Changes for Version 0.20.0 (2025-03-07)</h2>
