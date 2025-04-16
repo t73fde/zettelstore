@@ -4,13 +4,15 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20250415154139
-modified: 20250415164614
+modified: 20250416181257
 
 The [[endpoint|00001012920000]] to retrieve references of a specific zettel is ''/r/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
 A zettel may contain references to external material, in the form of an URI.
 External material may be referenced via Zettelmarkup [[links|00001007040310]], [[inline embedding|00001007040320]], or a [[block transclusion|00001007031100]].
 It may also be referenced within the [[metadata|00001006000000]] of a zettel, when a key of [[type|00001006030000]] [[URL|00001006035000]] is given.
+
+To calculate the references of a zettel, its [[parsed|00001006000000]] form is used.
 
 For example, to retrieve references of the zettel about [[CommonMark|00001008010500]], just send a HTTP GET request to the endpoint ''/r/00001008010500''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header]:
 ```sh

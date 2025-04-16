@@ -17,6 +17,8 @@
      alignment value (<code>"center"</code>, <code>"left"</code>, or
      <code>"right"</code>).
      (breaking: api)
+  *  New API endpoint <code>/r/{ZID}</code> retrieves references of a zettel.
+     (major: api)
   *  New computed zettel Zettelstore Modules, which shows all Go modules
      Zettelstore is dependent to.
      (minor)
