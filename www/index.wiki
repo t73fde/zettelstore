@@ -26,13 +26,13 @@ The software, including the manual, is licensed under the
 
 [https://mastodon.social/tags/Zettelstore|Stay tuned]&nbsp;&hellip;
 <hr>
-<h3>Latest Release: 0.20.0 (2025-03-07)</h3>
+<h3>Latest Release: 0.21.0 (2025-03-07)</h3>
   *  [./download.wiki|Download]
-  *  [./changes.wiki#0_20|Change summary]
-  *  [/timeline?p=v0.20.0&bt=v0.19.0&y=ci|Check-ins for version 0.20],
-     [/vdiff?to=v0.20.0&from=v0.19.0|content diff]
-  *  [/timeline?df=v0.20.0&y=ci|Check-ins derived from the 0.20 release],
-     [/vdiff?from=v0.20.0&to=trunk|content diff]
+  *  [./changes.wiki#0_21|Change summary]
+  *  [/timeline?p=v0.21.0&bt=v0.20.0&y=ci|Check-ins for version 0.21],
+     [/vdiff?to=v0.21.0&from=v0.20.0|content diff]
+  *  [/timeline?df=v0.21.0&y=ci|Check-ins derived from the 0.21 release],
+     [/vdiff?from=v0.21.0&to=trunk|content diff]
   *  [./plan.wiki|Limitations and planned improvements]
   *  [/timeline?t=release|Timeline of all past releases]
 

@@ -7,7 +7,8 @@ They are planned to be solved.
      Otherwise not all zettel may be returned.
   *  Quoted attribute values are not yet supported in Zettelmarkup:
      <code>{key="value with space"}</code>.
-  *  The horizontal tab character (<tt>U+0009</tt>) is not supported.
+  *  The horizontal tab character (<tt>U+0009</tt>) is not fully supported by
+     the parser.
   *  Missing support for citation keys.
   *  Changing the content syntax is not reflected in file extension.
   *  File names with additional text besides the zettel identifier are not

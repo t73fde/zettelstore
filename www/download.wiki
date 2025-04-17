@@ -1,27 +1,38 @@
 <title>Download</title>
 <h1>Download of Zettelstore Software</h1>
 <h2>Foreword</h2>
-  *  Zettelstore is free/libre open source software, licensed under EUPL-1.2-or-later.
-  *  The software is provided as-is.
-  *  There is no guarantee that it will not damage your system.
-  *  However, it is in use by the main developer since March 2020 without any damage.
-  *  It may be useful for you. It is useful for me.
-  *  Take a look at the [https://zettelstore.de/manual/|manual] to know how to start and use it.
+
+<b>Zettelstore</b> is free/libre open source software, licensed under the
+[https://zettelstore.de/home/file?name=LICENSE.txt&ci=trunk|EUPL-1.2 or later].
+
+The software is provided <em>as is</em>, without any warranty. While there's no
+guarantee it won't cause issues, it has been in daily use by the main developer
+since March 2020, without any damage or data loss.
+Since 2021, others have also been using Zettelstore reliably, and my students
+have used it since 2023, all without encountering any problems.
+
+It’s useful for me and many others. It might be useful for you too.
+
+Check out the [https://zettelstore.de/manual/|manual] to get started and learn
+how to make the most of it.
+
 
 <h2>ZIP-ped Executables</h2>
-Build: <code>v0.20.0</code> (2025-03-07).
+Build: <code>v0.21.0</code> (2025-03-07).
 
-  *  [/uv/zettelstore-0.20.0-android-arm64.zip|Android] (arm64)
-  *  [/uv/zettelstore-0.20.0-linux-amd64.zip|Linux] (amd64)
-  *  [/uv/zettelstore-0.20.0-linux-arm.zip|Linux] (arm6, e.g. Raspberry Pi)
-  *  [/uv/zettelstore-0.20.0-darwin-arm64.zip|macOS] (arm64)
-  *  [/uv/zettelstore-0.20.0-darwin-amd64.zip|macOS] (amd64)
-  *  [/uv/zettelstore-0.20.0-windows-amd64.zip|Windows] (amd64)
+  *  [/uv/zettelstore-0.21.0-android-arm64.zip|Android] (arm64)
+  *  [/uv/zettelstore-0.21.0-linux-amd64.zip|Linux] (amd64)
+  *  [/uv/zettelstore-0.21.0-linux-arm.zip|Linux] (arm6, e.g. Raspberry Pi)
+  *  [/uv/zettelstore-0.21.0-darwin-arm64.zip|macOS] (arm64)
+  *  [/uv/zettelstore-0.21.0-darwin-amd64.zip|macOS] (amd64)
+  *  [/uv/zettelstore-0.21.0-windows-amd64.zip|Windows] (amd64)
 
-Unzip the appropriate file, install and execute Zettelstore according to the manual.
+Unzip the appropriate file, install and execute Zettelstore according to the
+manual.
 
 <h2>Zettel for the manual</h2>
 As a starter, you can download the zettel for the manual
-[/uv/manual-0.20.0.zip|here].
+[/uv/manual-0.21.0.zip|here].
+
 Just unzip the contained files and put them into your zettel folder or
 configure a file box to read the zettel directly from the ZIP file.

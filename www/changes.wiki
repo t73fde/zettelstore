@@ -1,7 +1,10 @@
 <title>Change Log</title>
 
+<a id="0_22"></a>
+<h2>Changes for Version 0.22.0 (pending)</h2>
+
 <a id="0_21"></a>
-<h2>Changes for Version 0.21.0 (pending)</h2>
+<h2>Changes for Version 0.21.0 (2025-04-17)</h2>
   *  Zettel identifier of Zettelstore Log, Zettelstore Memory, and Zettelstore
      Sx Engine changed. See manual for new identifier.
      (breaking)
@@ -22,6 +25,11 @@
   *  New computed zettel Zettelstore Modules, which shows all Go modules
      Zettelstore is dependent to.
      (minor)
+  *  Move most of the code to new internal package <code>internal</code>, to
+     make reuse by other software a little bit harder.
+  *  Move some code to external packages, esp. to Zettelstore Client, webs.
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
 
 <a id="0_20"></a>
 <h2>Changes for Version 0.20.0 (2025-03-07)</h2>
