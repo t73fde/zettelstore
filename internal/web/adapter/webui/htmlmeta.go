@@ -114,9 +114,10 @@ func (wui *WebUI) transformIdentifierSet(vals iter.Seq[string], getTextTitle get
 
 func (wui *WebUI) transformTagSet(key string, tags []string) *sx.Pair {
 	var lb sx.ListBuilder
-	lb.Add(shtml.SymSPAN)
 	for i, tag := range tags {
-		if i > 0 {
+		if i == 0 {
+			lb.Add(shtml.SymSPAN)
+		} else if i > 0 {
 			lb.Add(space)
 		}
 		lb.Add(wui.transformKeyValueText(key, meta.Value(tag), tag))
