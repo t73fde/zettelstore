@@ -15,9 +15,8 @@
   (header (h1 "Information for Zettel " ,zid)
     (p
       (a (@ (href ,web-url)) "Web")
-      (@H " &#183; ") (a (@ (href ,context-url)) "Context")
-      (@H " / ") (a (@ (href ,context-full-url)) "Full")
       ,@(if (bound? 'edit-url) `((@H " &#183; ") (a (@ (href ,edit-url)) "Edit")))
+      (@H " &#183; ") (a (@ (href ,context-full-url)) "Full Context")
       ,@(ROLE-DEFAULT-actions (current-binding))
       ,@(if (bound? 'reindex-url) `((@H " &#183; ") (a (@ (href ,reindex-url)) "Reindex")))
       ,@(if (bound? 'delete-url) `((@H " &#183; ") (a (@ (href ,delete-url)) "Delete")))

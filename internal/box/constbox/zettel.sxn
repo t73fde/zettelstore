@@ -23,6 +23,7 @@
                 `((@H " &rarr; ") (a (@ (href ,folge-role-url)) ,meta-folge-role)))
       ")"
       ,@(if tag-refs `((@H " &#183; ") ,@tag-refs))
+      (@H " &#183; ") (a (@ (href ,context-url)) "Context")
       ,@(ROLE-DEFAULT-actions (current-binding))
       ,@(if superior-refs `((br) "Superior: " ,superior-refs))
       ,@(if predecessor-refs `((br) "Predecessor: " ,predecessor-refs))

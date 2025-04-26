@@ -2,6 +2,8 @@
 
 <a id="0_22"></a>
 <h2>Changes for Version 0.22.0 (pending)</h2>
+  *  Move context link to zettel page.
+     (minor: webui)
 
 <a id="0_21"></a>
 <h2>Changes for Version 0.21.0 (2025-04-17)</h2>
