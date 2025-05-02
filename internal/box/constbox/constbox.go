@@ -260,20 +260,8 @@ var constZettelMap = map[id.Zid]constZettel{
 			meta.KeyModified:   "20241118173500",
 			meta.KeyReadOnly:   meta.ValueTrue,
 			meta.KeyVisibility: meta.ValueVisibilityExpert,
-			meta.KeyPrecursor:  id.ZidSxnPrelude.String(),
 		},
 		zettel.NewContent(contentBaseCodeSxn)},
-	id.ZidSxnPrelude: {
-		constHeader{
-			meta.KeyTitle:      "Zettelstore Sxn Prelude",
-			meta.KeyRole:       meta.ValueRoleConfiguration,
-			meta.KeySyntax:     meta.ValueSyntaxSxn,
-			meta.KeyCreated:    "20231006181700",
-			meta.KeyModified:   "20240222121200",
-			meta.KeyReadOnly:   meta.ValueTrue,
-			meta.KeyVisibility: meta.ValueVisibilityExpert,
-		},
-		zettel.NewContent(contentPreludeSxn)},
 	id.ZidBaseCSS: {
 		constHeader{
 			meta.KeyTitle:      "Zettelstore Base CSS",
@@ -469,9 +457,6 @@ var contentStartCodeSxn []byte
 
 //go:embed wuicode.sxn
 var contentBaseCodeSxn []byte
-
-//go:embed prelude.sxn
-var contentPreludeSxn []byte
 
 //go:embed base.css
 var contentBaseCSS []byte

@@ -40,7 +40,6 @@ func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (graph.Digraph[id.Zi
 		return nil, wui.rootBinding, nil
 	}
 	dg = dg.AddVertex(id.ZidSxnBase).AddEdge(id.ZidSxnStart, id.ZidSxnBase)
-	dg = dg.AddVertex(id.ZidSxnPrelude).AddEdge(id.ZidSxnBase, id.ZidSxnPrelude)
 	dg = dg.TransitiveClosure(id.ZidSxnStart)
 
 	if zid, isDAG := dg.IsDAG(); !isDAG {

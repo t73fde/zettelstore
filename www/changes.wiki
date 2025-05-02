@@ -2,6 +2,9 @@
 
 <a id="0_22"></a>
 <h2>Changes for Version 0.22.0 (pending)</h2>
+  *  Remove zettel for Sx prelude. Luckily, it was never documented. So nobody
+     used this zettel. Now the prelude is a constant string in Sx.
+     (breaking)
   *  Move context link to zettel page.
      (minor: webui)
 

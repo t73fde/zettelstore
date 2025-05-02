@@ -41,11 +41,10 @@ import (
 )
 
 func (wui *WebUI) createRenderBinding() *sxeval.Binding {
-	root := sxeval.MakeRootBinding(len(specials) + len(builtins) + 3)
+	root := sxeval.MakeRootBinding(len(specials) + len(builtins) + 32)
+	_ = sxbuiltins.LoadPrelude(root)
 	_ = sxeval.BindSpecials(root, specials...)
 	_ = sxeval.BindBuiltins(root, builtins...)
-	_ = root.Bind(sx.MakeSymbol("NIL"), sx.Nil())
-	_ = root.Bind(sx.MakeSymbol("T"), sx.MakeSymbol("T"))
 	_ = sxeval.BindBuiltins(root,
 		&sxeval.Builtin{
 			Name:     "url-to-html",
@@ -102,11 +101,12 @@ var (
 		&sxbuiltins.UnquoteS, &sxbuiltins.UnquoteSplicingS, // unquote, unquote-splicing
 		&sxbuiltins.DefVarS,                     // defvar
 		&sxbuiltins.DefunS, &sxbuiltins.LambdaS, // defun, lambda
-		&sxbuiltins.SetXS,     // set!
-		&sxbuiltins.IfS,       // if
-		&sxbuiltins.BeginS,    // begin
-		&sxbuiltins.DefMacroS, // defmacro
-		&sxbuiltins.LetS,      // let
+		&sxbuiltins.SetXS,                      // set!
+		&sxbuiltins.IfS,                        // if
+		&sxbuiltins.BeginS,                     // begin
+		&sxbuiltins.DefMacroS,                  // defmacro
+		&sxbuiltins.LetS, &sxbuiltins.LetStarS, // let, let*
+		&sxbuiltins.AndS, &sxbuiltins.OrS, // and, or
 	}
 	builtins = []*sxeval.Builtin{
 		&sxbuiltins.Equal,                // =
