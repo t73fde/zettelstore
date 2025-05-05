@@ -19,6 +19,7 @@ import (
 	"strconv"
 	"sync"
 
+	"t73f.de/r/webs/ip"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 )
@@ -129,13 +130,11 @@ func (m *Message) User(ctx context.Context) *Message {
 
 // HTTPIP adds the IP address of a HTTP request to the message.
 func (m *Message) HTTPIP(r *http.Request) *Message {
-	if r == nil {
+	addr := ip.GetRemoteAddr(r)
+	if addr == "" {
 		return m
 	}
-	if from := r.Header.Get("X-Forwarded-For"); from != "" {
-		return m.Str("ip", from)
-	}
-	return m.Str("IP", r.RemoteAddr)
+	return m.Str("remote", addr)
 }
 
 // Zid adds a zettel identifier to the full message
