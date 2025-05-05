@@ -52,7 +52,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	defer addDelay(time.Now(), 500*time.Millisecond, 100*time.Millisecond)
 
 	if identMeta == nil || err != nil {
-		uc.log.Info().Str("ident", ident).Err(err).HTTPIP(r).Msg("No user with given ident found")
+		uc.log.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("No user with given ident found")
 		compensateCompare()
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	if hashCred, ok := identMeta.Get(meta.KeyCredential); ok {
 		ok, err = cred.CompareHashAndCredential(string(hashCred), identMeta.Zid, ident, credential)
 		if err != nil {
-			uc.log.Info().Str("ident", ident).Err(err).HTTPIP(r).Msg("Error while comparing credentials")
+			uc.log.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("Error while comparing credentials")
 			return nil, err
 		}
 		if ok {
@@ -72,7 +72,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 			uc.log.Info().Str("user", ident).Msg("Successful")
 			return token, nil
 		}
-		uc.log.Info().Str("ident", ident).HTTPIP(r).Msg("Credentials don't match")
+		uc.log.Info().Str("ident", ident).RemoteAddr(r).Msg("Credentials don't match")
 		return nil, nil
 	}
 	uc.log.Info().Str("ident", ident).Msg("No credential stored")

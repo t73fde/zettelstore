@@ -128,8 +128,8 @@ func (m *Message) User(ctx context.Context) *Message {
 	return m
 }
 
-// HTTPIP adds the IP address of a HTTP request to the message.
-func (m *Message) HTTPIP(r *http.Request) *Message {
+// RemoteAddr adds the remote address of an HTTP request to the message.
+func (m *Message) RemoteAddr(r *http.Request) *Message {
 	addr := ip.GetRemoteAddr(r)
 	if addr == "" {
 		return m

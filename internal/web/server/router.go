@@ -135,7 +135,7 @@ func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if msg := rt.log.Debug(); msg.Enabled() {
 		withDebug = true
 		w = &traceResponseWriter{original: w}
-		msg.Str("method", r.Method).Str("uri", r.RequestURI).HTTPIP(r).Msg("ServeHTTP")
+		msg.Str("method", r.Method).Str("uri", r.RequestURI).RemoteAddr(r).Msg("ServeHTTP")
 	}
 
 	if prefixLen := len(rt.urlPrefix); prefixLen > 1 {
@@ -203,13 +203,13 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 	}
 	tokenData, err := rt.auth.CheckToken(t, k)
 	if err != nil {
-		rt.log.Info().Err(err).HTTPIP(r).Msg("invalid auth token")
+		rt.log.Info().Err(err).RemoteAddr(r).Msg("invalid auth token")
 		return r
 	}
 	ctx := r.Context()
 	user, err := rt.ur.GetUser(ctx, tokenData.Zid, tokenData.Ident)
 	if err != nil {
-		rt.log.Info().Zid(tokenData.Zid).Str("ident", tokenData.Ident).Err(err).HTTPIP(r).Msg("auth user not found")
+		rt.log.Info().Zid(tokenData.Zid).Str("ident", tokenData.Ident).Err(err).RemoteAddr(r).Msg("auth user not found")
 		return r
 	}
 	return r.WithContext(updateContext(ctx, user, &tokenData))
