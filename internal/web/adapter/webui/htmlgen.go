@@ -275,14 +275,6 @@ func (g *htmlGenerator) BlocksSxn(bs *ast.BlockSlice) (content, endnotes *sx.Pai
 	return sh, shtml.Endnotes(&env), nil
 }
 
-// InlinesSxHTML returns an inline slice, encoded as a SxHTML object.
-func (g *htmlGenerator) InlinesSxHTML(is *ast.InlineSlice) *sx.Pair {
-	if is == nil || len(*is) == 0 {
-		return nil
-	}
-	return g.nodeSxHTML(is)
-}
-
 func (g *htmlGenerator) nodeSxHTML(node ast.Node) *sx.Pair {
 	sz := g.tx.GetSz(node)
 	env := shtml.MakeEnvironment(g.lang)

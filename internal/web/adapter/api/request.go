@@ -85,25 +85,6 @@ func getPart(q url.Values, defPart partType) partType {
 	return defPart
 }
 
-func (p partType) String() string {
-	switch p {
-	case partMeta:
-		return "meta"
-	case partContent:
-		return "content"
-	case partZettel:
-		return "zettel"
-	}
-	return ""
-}
-
-func (p partType) DefString(defPart partType) string {
-	if p == defPart {
-		return ""
-	}
-	return p.String()
-}
-
 func buildZettelFromPlainData(r *http.Request, zid id.Zid) (zettel.Zettel, error) {
 	defer r.Body.Close()
 	b, err := io.ReadAll(r.Body)
