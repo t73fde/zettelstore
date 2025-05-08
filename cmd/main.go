@@ -297,7 +297,10 @@ func executeCommand(name string, args ...string) int {
 	)
 
 	if command.Simple {
-		kern.SetConfig(kernel.ConfigService, kernel.ConfigSimpleMode, "true")
+		if err := kern.SetConfig(kernel.ConfigService, kernel.ConfigSimpleMode, "true"); err != nil {
+			kern.GetKernelLogger().Error().Err(err).Msg("unable to set simple-mode")
+			return 1
+		}
 	}
 	kern.Start(command.Header, command.LineServer, filename)
 	exitCode, err := command.Func(fs)
@@ -335,12 +338,22 @@ func Main(progName, buildVersion string) int {
 	kernel.Main.Setup(progName, fullVersion, info.time)
 	flag.Parse()
 	if *cpuprofile != "" || *memprofile != "" {
+		var err error
 		if *cpuprofile != "" {
-			kernel.Main.StartProfiling(kernel.ProfileCPU, *cpuprofile)
+			err = kernel.Main.StartProfiling(kernel.ProfileCPU, *cpuprofile)
 		} else {
-			kernel.Main.StartProfiling(kernel.ProfileHead, *memprofile)
+			err = kernel.Main.StartProfiling(kernel.ProfileHead, *memprofile)
 		}
-		defer kernel.Main.StopProfiling()
+		if err != nil {
+			kernel.Main.GetKernelLogger().Error().Err(err).Msg("start profiling")
+			return 1
+		}
+		defer func() {
+			err := kernel.Main.StopProfiling()
+			if err != nil {
+				kernel.Main.GetKernelLogger().Error().Err(err).Msg("stop profiling")
+			}
+		}()
 	}
 	args := flag.Args()
 	if len(args) == 0 {
