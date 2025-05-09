@@ -98,6 +98,9 @@ func Check(forRelease bool) error {
 	if err := checkRevive(); err != nil {
 		return err
 	}
+	if err := checkErrCheck(); err != nil {
+		return err
+	}
 	if forRelease {
 		if err := checkGoVulncheck(); err != nil {
 			return err
@@ -165,6 +168,17 @@ func checkRevive() error {
 	out, err := ExecuteCommand(EnvGoVCS, "revive", "./...")
 	if err != nil || out != "" {
 		fmt.Fprintln(os.Stderr, "Some revive problems found")
+		if len(out) > 0 {
+			fmt.Fprintln(os.Stderr, out)
+		}
+	}
+	return err
+}
+
+func checkErrCheck() error {
+	out, err := ExecuteCommand(EnvGoVCS, "errcheck", "./...")
+	if err != nil || out != "" {
+		fmt.Fprintln(os.Stderr, "Some errcheck problems found")
 		if len(out) > 0 {
 			fmt.Fprintln(os.Stderr, out)
 		}
