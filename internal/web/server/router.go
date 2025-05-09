@@ -21,6 +21,9 @@ import (
 	rtprf "runtime/pprof"
 	"strings"
 
+	"t73f.de/r/webs/ip"
+	"t73f.de/r/zsc/domain/id"
+
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/logger"
 )
@@ -40,17 +43,19 @@ var mapMethod = map[string]Method{
 
 // httpRouter handles all routing for zettelstore.
 type httpRouter struct {
-	log         *logger.Logger
-	urlPrefix   string
-	auth        auth.TokenManager
-	minKey      byte
-	maxKey      byte
-	reURL       *regexp.Regexp
-	listTable   routingTable
-	zettelTable routingTable
-	ur          UserRetriever
-	mux         *http.ServeMux
-	maxReqSize  int64
+	log           *logger.Logger
+	urlPrefix     string
+	auth          auth.TokenManager
+	loopbackIdent string
+	loopbackZid   id.Zid
+	minKey        byte
+	maxKey        byte
+	reURL         *regexp.Regexp
+	listTable     routingTable
+	zettelTable   routingTable
+	ur            UserRetriever
+	mux           *http.ServeMux
+	maxReqSize    int64
 }
 
 type routerData struct {
@@ -58,6 +63,8 @@ type routerData struct {
 	urlPrefix      string
 	maxRequestSize int64
 	auth           auth.TokenManager
+	loopbackIdent  string
+	loopbackZid    id.Zid
 	profiling      bool
 }
 
@@ -66,6 +73,8 @@ func (rt *httpRouter) initializeRouter(rd routerData) {
 	rt.log = rd.log
 	rt.urlPrefix = rd.urlPrefix
 	rt.auth = rd.auth
+	rt.loopbackIdent = rd.loopbackIdent
+	rt.loopbackZid = rd.loopbackZid
 	rt.minKey = 255
 	rt.maxKey = 0
 	rt.reURL = regexp.MustCompile("^$")
@@ -190,6 +199,19 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 		// No auth needed
 		return r
 	}
+	ctx := r.Context()
+
+	if rt.loopbackZid.IsValid() {
+		if remoteAddr := ip.GetRemoteAddr(r); ip.IsLoopbackAddr(remoteAddr) {
+			if user, err := rt.ur.GetUser(ctx, rt.loopbackZid, rt.loopbackIdent); err == nil {
+				if user != nil {
+					return r.WithContext(updateContext(ctx, user, nil))
+				}
+				rt.log.Error().Str("loopback-ident", rt.loopbackIdent).Msg("No match to loopback-zid")
+			}
+		}
+	}
+
 	k := auth.KindAPI
 	t := getHeaderToken(r)
 	if len(t) == 0 {
@@ -206,7 +228,6 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 		rt.log.Info().Err(err).RemoteAddr(r).Msg("invalid auth token")
 		return r
 	}
-	ctx := r.Context()
 	user, err := rt.ur.GetUser(ctx, tokenData.Zid, tokenData.Ident)
 	if err != nil {
 		rt.log.Info().Zid(tokenData.Zid).Str("ident", tokenData.Ident).Err(err).RemoteAddr(r).Msg("auth user not found")

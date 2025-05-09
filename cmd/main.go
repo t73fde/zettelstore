@@ -171,6 +171,8 @@ const (
 	keyInsecureHTML      = "insecure-html"
 	keyListenAddr        = "listen-addr"
 	keyLogLevel          = "log-level"
+	keyLoopbackIdent     = "loopback-ident"
+	keyLoopbackZid       = "loopback-zid"
 	keyMaxRequestSize    = "max-request-size"
 	keyOwner             = "owner"
 	keyPersistentCookie  = "persistent-cookie"
@@ -217,6 +219,8 @@ func setServiceConfig(cfg *meta.Meta) bool {
 
 	err = setConfigValue(
 		err, kernel.WebService, kernel.WebListenAddress, cfg.GetDefault(keyListenAddr, "127.0.0.1:23123"))
+	err = setConfigValue(err, kernel.WebService, kernel.WebLoopbackIdent, cfg.GetDefault(keyLoopbackIdent, ""))
+	err = setConfigValue(err, kernel.WebService, kernel.WebLoopbackZid, cfg.GetDefault(keyLoopbackZid, ""))
 	if val, found := cfg.Get(keyBaseURL); found {
 		err = setConfigValue(err, kernel.WebService, kernel.WebBaseURL, val)
 	}

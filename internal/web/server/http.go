@@ -20,7 +20,9 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/logger"
 )
@@ -42,6 +44,8 @@ type ConfigData struct {
 	URLPrefix        string
 	MaxRequestSize   int64
 	Auth             auth.TokenManager
+	LoopbackIdent    string
+	LoopbackZid      id.Zid
 	PersistentCookie bool
 	SecureCookie     bool
 	Profiling        bool
@@ -61,6 +65,8 @@ func New(sd ConfigData) Server {
 		urlPrefix:      sd.URLPrefix,
 		maxRequestSize: sd.MaxRequestSize,
 		auth:           sd.Auth,
+		loopbackIdent:  sd.LoopbackIdent,
+		loopbackZid:    sd.LoopbackZid,
 		profiling:      sd.Profiling,
 	}
 	srv.router.initializeRouter(rd)

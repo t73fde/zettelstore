@@ -25,6 +25,8 @@ import (
 	"sync"
 	"time"
 
+	"t73f.de/r/zsc/domain/id"
+
 	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -78,6 +80,8 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 				return ap.String(), nil
 			},
 			true},
+		WebLoopbackIdent:    {"Loopback user ident", ws.noFrozen(parseString), true},
+		WebLoopbackZid:      {"Loopback user zettel identifier", ws.noFrozen(parseInvalidZid), true},
 		WebMaxRequestSize:   {"Max Request Size", parseInt64, true},
 		WebPersistentCookie: {"Persistent cookie", parseBool, true},
 		WebProfiling:        {"Runtime profiling", parseBool, true},
@@ -107,6 +111,8 @@ func (ws *webService) Initialize(logger *logger.Logger) {
 		WebAssetDir:          "",
 		WebBaseURL:           "http://127.0.0.1:23123/",
 		WebListenAddress:     "127.0.0.1:23123",
+		WebLoopbackIdent:     "",
+		WebLoopbackZid:       id.Invalid,
 		WebMaxRequestSize:    int64(16 * 1024 * 1024),
 		WebPersistentCookie:  false,
 		WebSecureCookie:      true,
@@ -140,6 +146,8 @@ func (ws *webService) GetLogger() *logger.Logger { return ws.logger }
 func (ws *webService) Start(kern *Kernel) error {
 	baseURL := ws.GetNextConfig(WebBaseURL).(string)
 	listenAddr := ws.GetNextConfig(WebListenAddress).(string)
+	loopbackIdent := ws.GetNextConfig(WebLoopbackIdent).(string)
+	loopbackZid := ws.GetNextConfig(WebLoopbackZid).(id.Zid)
 	urlPrefix := ws.GetNextConfig(WebURLPrefix).(string)
 	persistentCookie := ws.GetNextConfig(WebPersistentCookie).(bool)
 	secureCookie := ws.GetNextConfig(WebSecureCookie).(bool)
@@ -163,6 +171,8 @@ func (ws *webService) Start(kern *Kernel) error {
 		URLPrefix:        urlPrefix,
 		MaxRequestSize:   maxRequestSize,
 		Auth:             kern.auth.manager,
+		LoopbackIdent:    loopbackIdent,
+		LoopbackZid:      loopbackZid,
 		PersistentCookie: persistentCookie,
 		SecureCookie:     secureCookie,
 		Profiling:        profile,

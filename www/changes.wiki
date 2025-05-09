@@ -5,6 +5,9 @@
   *  Remove zettel for Sx prelude. Luckily, it was never documented. So nobody
      used this zettel. Now the prelude is a constant string in Sx.
      (breaking)
+  *  If authentication is enabled, allow to access Zettelstore from loopback
+     device without logging in / get an access token.
+     (major: api, webui)
   *  Move context link to zettel page.
      (minor: webui)
 

@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102180346
+modified: 20250509182657
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -95,6 +95,18 @@ The following keys are supported:
   ""error;web:debug"" will emit debugging messages for the web component of Zettelstore while still producing error messages for all other components.
 
   When you are familiar with operating the Zettelstore, you might set the level to ""error"" to receive fewer noisy messages from it.
+; [!loopback-ident|''loopback-ident''], [!loopback-zid|''loopback-zid'']
+: These keys are effective only if [[authentication is enabled|00001010000000]].
+  They must specify the user ID and zettel ID of a [[user zettel|00001010040200]].
+  When these keys are set and an HTTP request originates from the loopback device, no further authentication is required.
+
+  The loopback device typically uses the IP address ''127.0.0.1'' (IPv4) or ''::1'' (IPv6).
+
+  This configuration allows client software running on the same computer as the Zettelstore to access it through its API or web user interface.
+
+  However, this setup is not recommended if the Zettelstore is running on a computer shared with untrusted or unknown users.
+
+  Default: (empty string)/00000000000000
 ; [!max-request-size|''max-request-size'']
 : It limits the maximum byte size of a web request body to prevent clients from accidentally or maliciously sending a large request and wasting server resources.
   The minimum value is 1024.

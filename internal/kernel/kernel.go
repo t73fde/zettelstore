@@ -206,6 +206,8 @@ const (
 	WebAssetDir          = "asset-dir"
 	WebBaseURL           = "base-url"
 	WebListenAddress     = "listen"
+	WebLoopbackIdent     = "loopback-ident"
+	WebLoopbackZid       = "loopback-zid"
 	WebPersistentCookie  = "persistent"
 	WebProfiling         = "profiling"
 	WebMaxRequestSize    = "max-request-size"
