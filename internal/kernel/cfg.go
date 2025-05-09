@@ -174,13 +174,14 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 	m := z.Meta
 	cs.mxService.Lock()
 	for key := range cs.orig.All() {
+		var setErr error
 		if val, ok := m.Get(key); ok {
-			err = cs.SetConfig(key, string(val))
+			setErr = cs.SetConfig(key, string(val))
 		} else if defVal, defFound := cs.orig.Get(key); defFound {
-			err = cs.SetConfig(key, string(defVal))
+			setErr = cs.SetConfig(key, string(defVal))
 		}
-		if err != nil {
-			break
+		if err == nil && setErr != nil && setErr != errAlreadyFrozen {
+			err = fmt.Errorf("%w (key=%q)", setErr, key)
 		}
 	}
 	cs.mxService.Unlock()

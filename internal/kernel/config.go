@@ -61,7 +61,7 @@ func (cfg *srvConfig) ConfigDescriptions() []serviceConfigDescription {
 	return result
 }
 
-var errAlreadyFrozen = errors.New("value not allowed to be set")
+var errAlreadyFrozen = errors.New("value frozen")
 
 func (cfg *srvConfig) noFrozen(parse parseFunc) parseFunc {
 	return func(val string) (any, error) {
