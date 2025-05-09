@@ -170,9 +170,9 @@ func createManualZip(path, base string) error {
 	if err != nil {
 		return err
 	}
-	defer zipFile.Close()
+	defer func() { _ = zipFile.Close() }()
 	zipWriter := zip.NewWriter(zipFile)
-	defer zipWriter.Close()
+	defer func() { _ = zipWriter.Close() }()
 
 	for _, entry := range entries {
 		if err = createManualZipEntry(manualPath, entry, zipWriter); err != nil {
@@ -204,7 +204,7 @@ func createManualZipEntry(path string, entry fs.DirEntry, zipWriter *zip.Writer)
 	if err != nil {
 		return err
 	}
-	defer manualFile.Close()
+	defer func() { _ = manualFile.Close() }()
 
 	if name != versionZid+".zettel" {
 		_, err = io.Copy(w, manualFile)
@@ -226,8 +226,7 @@ func createManualZipEntry(path string, entry fs.DirEntry, zipWriter *zip.Writer)
 	if _, err = m.WriteComputed(&buf); err != nil {
 		return err
 	}
-	version := getVersion()
-	if _, err = fmt.Fprintf(&buf, "\n%s", version); err != nil {
+	if _, err = fmt.Fprintf(&buf, "\n%s", getVersion()); err != nil {
 		return err
 	}
 	_, err = io.Copy(w, &buf)
@@ -290,19 +289,16 @@ func createReleaseZip(zsName, zipName, fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer zipFile.Close()
+	defer func() { _ = zipFile.Close() }()
 	zw := zip.NewWriter(zipFile)
-	defer zw.Close()
-	err = addFileToZip(zw, zsName, fileName)
-	if err != nil {
+	defer func() { _ = zw.Close() }()
+	if err = addFileToZip(zw, zsName, fileName); err != nil {
 		return err
 	}
-	err = addFileToZip(zw, "LICENSE.txt", "LICENSE.txt")
-	if err != nil {
+	if err = addFileToZip(zw, "LICENSE.txt", "LICENSE.txt"); err != nil {
 		return err
 	}
-	err = addFileToZip(zw, "docs/readmezip.txt", "README.txt")
-	return err
+	return addFileToZip(zw, "docs/readmezip.txt", "README.txt")
 }
 
 func addFileToZip(zipFile *zip.Writer, filepath, filename string) error {
@@ -310,7 +306,7 @@ func addFileToZip(zipFile *zip.Writer, filepath, filename string) error {
 	if err != nil {
 		return err
 	}
-	defer zsFile.Close()
+	defer func() { _ = zsFile.Close() }()
 	stat, err := zsFile.Stat()
 	if err != nil {
 		return err

@@ -255,9 +255,9 @@ const (
 // Setup sets the most basic data of a software: its name, its version,
 // and when the version was created.
 func (kern *Kernel) Setup(progname, version string, versionTime time.Time) {
-	kern.SetConfig(CoreService, CoreProgname, progname)
-	kern.SetConfig(CoreService, CoreVersion, version)
-	kern.SetConfig(CoreService, CoreVTime, versionTime.Local().Format(id.TimestampLayout))
+	_ = kern.SetConfig(CoreService, CoreProgname, progname)
+	_ = kern.SetConfig(CoreService, CoreVersion, version)
+	_ = kern.SetConfig(CoreService, CoreVTime, versionTime.Local().Format(id.TimestampLayout))
 }
 
 // Start the service.
@@ -280,7 +280,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		kern.wg.Done()
 	}()
 
-	kern.StartService(KernelService)
+	_ = kern.StartService(KernelService)
 	if headline {
 		logger := kern.logger
 		logger.Mandatory().Msg(fmt.Sprintf(
@@ -310,7 +310,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		port := kern.core.GetNextConfig(CorePort).(int)
 		if port > 0 {
 			listenAddr := net.JoinHostPort("127.0.0.1", strconv.Itoa(port))
-			startLineServer(kern, listenAddr)
+			_ = startLineServer(kern, listenAddr)
 		}
 	}
 }
@@ -322,7 +322,7 @@ func (kern *Kernel) doShutdown() {
 // WaitForShutdown blocks the call until Shutdown is called.
 func (kern *Kernel) WaitForShutdown() {
 	kern.wg.Wait()
-	kern.doStopProfiling()
+	_ = kern.doStopProfiling()
 }
 
 // --- Shutdown operation ----------------------------------------------------
@@ -441,9 +441,8 @@ func (kern *Kernel) doStartProfiling(profileName, fileName string) error {
 		if err != nil {
 			return err
 		}
-		err = pprof.StartCPUProfile(f)
-		if err != nil {
-			f.Close()
+		if err = pprof.StartCPUProfile(f); err != nil {
+			_ = f.Close()
 			return err
 		}
 		kern.profileName = profileName
@@ -464,8 +463,7 @@ func (kern *Kernel) doStartProfiling(profileName, fileName string) error {
 	kern.profile = profile
 	kern.profileFile = f
 	runtime.GC() // get up-to-date statistics
-	profile.WriteTo(f, 0)
-	return nil
+	return profile.WriteTo(f, 0)
 }
 
 // StopProfiling stops the current profiling and writes the result to

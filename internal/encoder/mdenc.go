@@ -37,7 +37,7 @@ func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	if zn.InhMeta.YamlSep {
 		v.b.WriteString("---\n")
 	} else {
-		v.b.WriteByte('\n')
+		v.b.WriteLn()
 	}
 	ast.Walk(&v, &zn.BlocksAST)
 	length, err := v.b.Flush()
@@ -157,7 +157,7 @@ func (v *mdVisitor) visitVerbatim(vn *ast.VerbatimNode) {
 	for i := 0; i < lc; i++ {
 		b := vn.Content[i]
 		if b != '\n' && b != '\r' {
-			v.b.WriteByte(b)
+			_ = v.b.WriteByte(b)
 			continue
 		}
 		j := i + 1
@@ -170,7 +170,7 @@ func (v *mdVisitor) visitVerbatim(vn *ast.VerbatimNode) {
 		if j >= lcm1 {
 			break
 		}
-		v.b.WriteByte('\n')
+		v.b.WriteLn()
 		v.writeSpaces(4)
 		i = j - 1
 	}
@@ -225,13 +225,13 @@ func (v *mdVisitor) writeNestedList(ln *ast.NestedListNode, enum string) {
 	paraIndent := regIndent + len(enum)
 	for i, item := range ln.Items {
 		if i > 0 {
-			v.b.WriteByte('\n')
+			v.b.WriteLn()
 		}
 		v.writeSpaces(regIndent)
 		v.b.WriteString(enum)
 		for j, in := range item {
 			if j > 0 {
-				v.b.WriteByte('\n')
+				v.b.WriteLn()
 				if _, ok := in.(*ast.ParaNode); ok {
 					v.writeSpaces(paraIndent)
 				}
@@ -252,12 +252,12 @@ func (v *mdVisitor) writeListQuote(ln *ast.NestedListNode) {
 
 	for i, item := range ln.Items {
 		if i > 0 {
-			v.b.WriteByte('\n')
+			v.b.WriteLn()
 		}
 		v.b.WriteString(v.listPrefix)
 		for j, in := range item {
 			if j > 0 {
-				v.b.WriteByte('\n')
+				v.b.WriteLn()
 				if _, ok := in.(*ast.ParaNode); ok {
 					v.b.WriteString(v.listPrefix)
 				}
@@ -273,7 +273,7 @@ func (v *mdVisitor) visitBreak(bn *ast.BreakNode) {
 	if bn.Hard {
 		v.b.WriteString("\\\n")
 	} else {
-		v.b.WriteByte('\n')
+		v.b.WriteLn()
 	}
 	if l := len(v.listInfo); l > 0 {
 		if v.listPrefix == "" {
@@ -296,7 +296,7 @@ func (v *mdVisitor) visitEmbedRef(en *ast.EmbedRefNode) {
 	v.pushAttributes(en.Attrs)
 	defer v.popAttributes()
 
-	v.b.WriteByte('!')
+	_ = v.b.WriteByte('!')
 	v.writeReference(en.Ref, en.Inlines)
 }
 
@@ -304,14 +304,14 @@ func (v *mdVisitor) writeReference(ref *ast.Reference, is ast.InlineSlice) {
 	if ref.State == ast.RefStateQuery {
 		ast.Walk(v, &is)
 	} else if len(is) > 0 {
-		v.b.WriteByte('[')
+		_ = v.b.WriteByte('[')
 		ast.Walk(v, &is)
 		v.b.WriteStrings("](", ref.String())
-		v.b.WriteByte(')')
+		_ = v.b.WriteByte(')')
 	} else if isAutoLinkable(ref) {
-		v.b.WriteByte('<')
+		_ = v.b.WriteByte('<')
 		v.b.WriteString(ref.String())
-		v.b.WriteByte('>')
+		_ = v.b.WriteByte('>')
 	} else {
 		s := ref.String()
 		v.b.WriteStrings("[", s, "](", s, ")")
@@ -331,9 +331,9 @@ func (v *mdVisitor) visitFormat(fn *ast.FormatNode) {
 
 	switch fn.Kind {
 	case ast.FormatEmph:
-		v.b.WriteByte('*')
+		_ = v.b.WriteByte('*')
 		ast.Walk(v, &fn.Inlines)
-		v.b.WriteByte('*')
+		_ = v.b.WriteByte('*')
 	case ast.FormatStrong:
 		v.b.WriteString("__")
 		ast.Walk(v, &fn.Inlines)
@@ -367,17 +367,17 @@ func (v *mdVisitor) writeQuote(fn *ast.FormatNode) {
 func (v *mdVisitor) visitLiteral(ln *ast.LiteralNode) {
 	switch ln.Kind {
 	case ast.LiteralCode, ast.LiteralInput, ast.LiteralOutput:
-		v.b.WriteByte('`')
-		v.b.Write(ln.Content)
-		v.b.WriteByte('`')
+		_ = v.b.WriteByte('`')
+		_, _ = v.b.Write(ln.Content)
+		_ = v.b.WriteByte('`')
 	case ast.LiteralComment: // ignore everything
 	default:
-		v.b.Write(ln.Content)
+		_, _ = v.b.Write(ln.Content)
 	}
 }
 
 func (v *mdVisitor) writeSpaces(n int) {
 	for range n {
-		v.b.WriteByte(' ')
+		v.b.WriteSpace()
 	}
 }

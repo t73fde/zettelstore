@@ -31,7 +31,7 @@ type TextEncoder struct{}
 // WriteZettel writes metadata and content.
 func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 	v := newTextVisitor(w)
-	te.WriteMeta(&v.b, zn.InhMeta)
+	_, _ = te.WriteMeta(&v.b, zn.InhMeta)
 	v.visitBlockSlice(&zn.BlocksAST)
 	length, err := v.b.Flush()
 	return length, err
@@ -46,7 +46,7 @@ func (te *TextEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 		} else {
 			buf.WriteString(string(val))
 		}
-		buf.WriteByte('\n')
+		buf.WriteLn()
 	}
 	length, err := buf.Flush()
 	return length, err
@@ -56,7 +56,7 @@ func writeTagSet(buf *encWriter, tags iter.Seq[meta.Value]) {
 	first := true
 	for tag := range tags {
 		if !first {
-			buf.WriteByte(' ')
+			buf.WriteSpace()
 		}
 		first = false
 		buf.WriteString(string(tag.CleanTag()))
@@ -104,7 +104,7 @@ func (v *textVisitor) Visit(node ast.Node) ast.Visitor {
 	case *ast.RegionNode:
 		v.visitBlockSlice(&n.Blocks)
 		if len(n.Inlines) > 0 {
-			v.b.WriteByte('\n')
+			v.b.WriteLn()
 			ast.Walk(v, &n.Inlines)
 		}
 		return nil
@@ -126,9 +126,9 @@ func (v *textVisitor) Visit(node ast.Node) ast.Visitor {
 		return nil
 	case *ast.BreakNode:
 		if n.Hard {
-			v.b.WriteByte('\n')
+			v.b.WriteLn()
 		} else {
-			v.b.WriteByte(' ')
+			v.b.WriteSpace()
 		}
 		return nil
 	case *ast.LinkNode:
@@ -143,22 +143,21 @@ func (v *textVisitor) Visit(node ast.Node) ast.Visitor {
 		return nil
 	case *ast.FootnoteNode:
 		if v.inlinePos > 0 {
-			v.b.WriteByte(' ')
+			v.b.WriteSpace()
 		}
 		// No 'return nil' to write text
 	case *ast.LiteralNode:
 		if n.Kind != ast.LiteralComment {
-			v.b.Write(n.Content)
+			_, _ = v.b.Write(n.Content)
 		}
 	}
 	return v
 }
 
 func (v *textVisitor) visitVerbatim(vn *ast.VerbatimNode) {
-	if vn.Kind == ast.VerbatimComment {
-		return
+	if vn.Kind != ast.VerbatimComment {
+		_, _ = v.b.Write(vn.Content)
 	}
-	v.b.Write(vn.Content)
 }
 
 func (v *textVisitor) visitNestedList(ln *ast.NestedListNode) {
@@ -176,7 +175,7 @@ func (v *textVisitor) visitDescriptionList(dl *ast.DescriptionListNode) {
 		v.writePosChar(i, '\n')
 		ast.Walk(v, &descr.Term)
 		for _, b := range descr.Descriptions {
-			v.b.WriteByte('\n')
+			v.b.WriteLn()
 			for k, d := range b {
 				v.writePosChar(k, '\n')
 				ast.Walk(v, d)
@@ -188,7 +187,7 @@ func (v *textVisitor) visitDescriptionList(dl *ast.DescriptionListNode) {
 func (v *textVisitor) visitTable(tn *ast.TableNode) {
 	if len(tn.Header) > 0 {
 		v.writeRow(tn.Header)
-		v.b.WriteByte('\n')
+		v.b.WriteLn()
 	}
 	for i, row := range tn.Rows {
 		v.writePosChar(i, '\n')
@@ -223,7 +222,7 @@ func (v *textVisitor) visitText(s string) {
 	for _, ch := range s {
 		if input.IsSpace(ch) {
 			if !spaceFound {
-				v.b.WriteByte(' ')
+				v.b.WriteSpace()
 				spaceFound = true
 			}
 			continue
@@ -235,6 +234,6 @@ func (v *textVisitor) visitText(s string) {
 
 func (v *textVisitor) writePosChar(pos int, ch byte) {
 	if pos > 0 {
-		v.b.WriteByte(ch)
+		_ = v.b.WriteByte(ch)
 	}
 }

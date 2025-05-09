@@ -70,7 +70,9 @@ func (zb *zipBox) Start(context.Context) error {
 	if err != nil {
 		return err
 	}
-	reader.Close()
+	if err = reader.Close(); err != nil {
+		return err
+	}
 	zipNotifier := notify.NewSimpleZipNotifier(zb.log, zb.name)
 	zb.dirSrv = notify.NewDirService(zb, zb.log, zipNotifier, zb.notify)
 	zb.dirSrv.Start()
@@ -96,7 +98,7 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error
 	if err != nil {
 		return zettel.Zettel{}, err
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 
 	var m *meta.Meta
 	var src []byte
@@ -156,7 +158,6 @@ func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 	if err != nil {
 		return err
 	}
-	defer reader.Close()
 	entries := zb.dirSrv.GetDirEntries(constraint)
 	zb.log.Trace().Int("entries", int64(len(entries))).Msg("ApplyMeta")
 	for _, entry := range entries {
@@ -170,7 +171,7 @@ func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 		zb.enricher.Enrich(ctx, m, zb.number)
 		handle(m)
 	}
-	return nil
+	return reader.Close()
 }
 
 func (*zipBox) CanDeleteZettel(context.Context, id.Zid) bool { return false }
@@ -226,6 +227,10 @@ func readZipFileContent(reader *zip.ReadCloser, name string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
-	return io.ReadAll(f)
+	data, err := io.ReadAll(f)
+	err2 := f.Close()
+	if err == nil {
+		err = err2
+	}
+	return data, err
 }

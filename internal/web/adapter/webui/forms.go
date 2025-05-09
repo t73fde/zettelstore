@@ -107,7 +107,7 @@ func textContent(r *http.Request) []byte {
 func uploadedContent(r *http.Request, m *meta.Meta) ([]byte, *meta.Meta) {
 	file, fh, err := r.FormFile("file")
 	if file != nil {
-		defer file.Close()
+		defer func() { _ = file.Close() }()
 		if err == nil {
 			data, err2 := io.ReadAll(file)
 			if err2 != nil {

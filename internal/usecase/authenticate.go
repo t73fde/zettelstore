@@ -82,7 +82,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 
 // compensateCompare if normal comapare is not possible, to avoid timing hints.
 func compensateCompare() {
-	cred.CompareHashAndCredential(
+	_, _ = cred.CompareHashAndCredential(
 		"$2a$10$WHcSO3G9afJ3zlOYQR1suuf83bCXED2jmzjti/MH4YH4l2mivDuze", id.Invalid, "", "")
 }
 

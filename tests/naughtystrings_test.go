@@ -39,7 +39,7 @@ func getNaughtyStrings() (result []string, err error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		if text := scanner.Text(); text != "" && text[0] != '#' {

@@ -170,7 +170,7 @@ func (srv *httpServer) start() error {
 		return err
 	}
 
-	go func() { srv.Serve(ln) }()
+	go func() { _ = srv.Serve(ln) }()
 	return nil
 }
 
@@ -179,5 +179,5 @@ func (srv *httpServer) stop() {
 	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer cancel()
 
-	srv.Shutdown(ctx)
+	_ = srv.Shutdown(ctx)
 }

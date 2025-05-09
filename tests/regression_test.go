@@ -95,8 +95,11 @@ func resultFile(file string) (data string, err error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
 	src, err := io.ReadAll(f)
+	err2 := f.Close()
+	if err == nil {
+		err = err2
+	}
 	return string(src), err
 }
 
@@ -127,7 +130,7 @@ func checkMetaFile(t *testing.T, resultName string, zn *ast.ZettelNode, enc api.
 
 	if enc := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN}); enc != nil {
 		var sf strings.Builder
-		enc.WriteMeta(&sf, zn.Meta)
+		_, _ = enc.WriteMeta(&sf, zn.Meta)
 		checkFileContent(t, resultName, sf.String())
 		return
 	}

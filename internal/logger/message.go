@@ -145,7 +145,7 @@ func (m *Message) Zid(zid id.Zid) *Message {
 // Msg add the given text to the message and writes it to the log.
 func (m *Message) Msg(text string) {
 	if m.Enabled() {
-		m.logger.writeMessage(m.level, text, m.buf)
+		_ = m.logger.writeMessage(m.level, text, m.buf)
 		recycleMessage(m)
 	}
 }

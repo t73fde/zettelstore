@@ -69,7 +69,7 @@ func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
 					result := make(ast.BlockSlice, len(objs))
 					for i, obj := range objs {
 						var buf bytes.Buffer
-						sxbuiltins.Print(&buf, obj)
+						_, _ = sxbuiltins.Print(&buf, obj)
 						result[i] = &ast.VerbatimNode{
 							Kind:    ast.VerbatimCode,
 							Attrs:   zsx.Attributes{"": classAttr},

@@ -409,7 +409,9 @@ func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWr
 	if err != nil {
 		return err
 	}
-	bind.Bind(symDetail, detailObj)
+	if err = bind.Bind(symDetail, detailObj); err != nil {
+		return err
+	}
 
 	pageObj, err := wui.evalSxnTemplate(ctx, id.ZidBaseTemplate, bind)
 	if err != nil {
@@ -456,7 +458,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 
 	// if errBind != nil, the HTTP header was not written
 	wui.prepareAndWriteHeader(w, http.StatusInternalServerError)
-	fmt.Fprintf(
+	_, _ = fmt.Fprintf(
 		w,
 		`<!DOCTYPE html>
 <html>

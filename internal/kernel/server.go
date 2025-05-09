@@ -47,7 +47,7 @@ func lineServer(ln net.Listener, kern *Kernel) {
 		}
 		go handleLineConnection(conn, kern)
 	}
-	ln.Close()
+	_ = ln.Close()
 }
 
 func handleLineConnection(conn net.Conn, kern *Kernel) {
@@ -69,5 +69,5 @@ func handleLineConnection(conn net.Conn, kern *Kernel) {
 			break
 		}
 	}
-	conn.Close()
+	_ = conn.Close()
 }

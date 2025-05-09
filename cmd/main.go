@@ -349,8 +349,7 @@ func Main(progName, buildVersion string) int {
 			return 1
 		}
 		defer func() {
-			err := kernel.Main.StopProfiling()
-			if err != nil {
+			if err = kernel.Main.StopProfiling(); err != nil {
 				kernel.Main.GetKernelLogger().Error().Err(err).Msg("stop profiling")
 			}
 		}()

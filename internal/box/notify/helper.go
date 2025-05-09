@@ -57,12 +57,12 @@ func (zpf *zipPathFetcher) Fetch() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer reader.Close()
 	result := make([]string, 0, len(reader.File))
 	for _, f := range reader.File {
 		result = append(result, f.Name)
 	}
-	return result, nil
+	err = reader.Close()
+	return result, err
 }
 
 // listDirElements write all files within the directory path as events.

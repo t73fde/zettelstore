@@ -96,16 +96,16 @@ var bsSpace = []byte{' '}
 
 func (pe *PrintEnv) printSpace() {
 	if pe.space {
-		pe.w.Write(bsSpace)
+		_, _ = pe.w.Write(bsSpace)
 		return
 	}
 	pe.space = true
 }
-func (pe *PrintEnv) write(ch byte)        { pe.w.Write([]byte{ch}) }
-func (pe *PrintEnv) writeString(s string) { io.WriteString(pe.w, s) }
+func (pe *PrintEnv) write(ch byte)        { _, _ = pe.w.Write([]byte{ch}) }
+func (pe *PrintEnv) writeString(s string) { _, _ = io.WriteString(pe.w, s) }
 func (pe *PrintEnv) writeStrings(sSeq ...string) {
 	for _, s := range sSeq {
-		io.WriteString(pe.w, s)
+		_, _ = io.WriteString(pe.w, s)
 	}
 }
 

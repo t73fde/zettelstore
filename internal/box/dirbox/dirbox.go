@@ -314,8 +314,11 @@ func (dp *dirBox) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error 
 		entry = &notify.DirEntry{Zid: zid}
 	}
 	dp.updateEntryFromMetaContent(entry, meta, zettel.Content)
-	dp.dirSrv.UpdateDirEntry(entry)
-	err := dp.srvSetZettel(ctx, entry, zettel)
+	err := dp.dirSrv.UpdateDirEntry(entry)
+	if err != nil {
+		return err
+	}
+	err = dp.srvSetZettel(ctx, entry, zettel)
 	if err == nil {
 		dp.notifyChanged(zid, box.OnZettel)
 	}

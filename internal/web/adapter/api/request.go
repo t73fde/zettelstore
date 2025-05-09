@@ -86,7 +86,7 @@ func getPart(q url.Values, defPart partType) partType {
 }
 
 func buildZettelFromPlainData(r *http.Request, zid id.Zid) (zettel.Zettel, error) {
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		return zettel.Zettel{}, err
@@ -100,7 +100,7 @@ func buildZettelFromPlainData(r *http.Request, zid id.Zid) (zettel.Zettel, error
 }
 
 func buildZettelFromData(r *http.Request, zid id.Zid) (zettel.Zettel, error) {
-	defer r.Body.Close()
+	defer func() { _ = r.Body.Close() }()
 	rdr := sxreader.MakeReader(r.Body)
 	obj, err := rdr.Read()
 	if err != nil {

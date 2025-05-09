@@ -82,7 +82,7 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 	testID := tc.Example*100 + 1
 	for _, enc := range encodings {
 		t.Run(fmt.Sprintf("Encode %v %v", enc, testID), func(*testing.T) {
-			encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN}).WriteBlocks(&sb, ast)
+			_, _ = encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN}).WriteBlocks(&sb, ast)
 			sb.Reset()
 		})
 	}
@@ -94,13 +94,13 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 	testID := tc.Example*100 + 1
 	t.Run(fmt.Sprintf("Encode zmk %14d", testID), func(st *testing.T) {
 		buf.Reset()
-		zmkEncoder.WriteBlocks(&buf, ast)
+		_, _ = zmkEncoder.WriteBlocks(&buf, ast)
 		// gotFirst := buf.String()
 
 		testID = tc.Example*100 + 2
 		secondAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
-		zmkEncoder.WriteBlocks(&buf, &secondAst)
+		_, _ = zmkEncoder.WriteBlocks(&buf, &secondAst)
 		gotSecond := buf.String()
 
 		// if gotFirst != gotSecond {
@@ -110,7 +110,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		testID = tc.Example*100 + 3
 		thirdAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
-		zmkEncoder.WriteBlocks(&buf, &thirdAst)
+		_, _ = zmkEncoder.WriteBlocks(&buf, &thirdAst)
 		gotThird := buf.String()
 
 		if gotSecond != gotThird {
@@ -131,7 +131,7 @@ func TestAdditionalMarkdown(t *testing.T) {
 	for i, tc := range testcases {
 		ast := createMDBlockSlice(tc.md, config.MarkdownHTML)
 		sb.Reset()
-		zmkEncoder.WriteBlocks(&sb, &ast)
+		_, _ = zmkEncoder.WriteBlocks(&sb, &ast)
 		got := sb.String()
 		if got != tc.exp {
 			t.Errorf("%d: %q -> %q, but got %q", i, tc.md, tc.exp, got)

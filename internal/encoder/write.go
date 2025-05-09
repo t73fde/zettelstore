@@ -26,9 +26,7 @@ type encWriter struct {
 }
 
 // newEncWriter creates a new encWriter
-func newEncWriter(w io.Writer) encWriter {
-	return encWriter{w: w}
-}
+func newEncWriter(w io.Writer) encWriter { return encWriter{w: w} }
 
 // Write writes the content of p.
 func (w *encWriter) Write(p []byte) (l int, err error) {
@@ -66,9 +64,7 @@ func (w *encWriter) WriteByte(b byte) error {
 }
 
 // WriteBytes writes the content of bs.
-func (w *encWriter) WriteBytes(bs ...byte) {
-	w.Write(bs)
-}
+func (w *encWriter) WriteBytes(bs ...byte) { _, _ = w.Write(bs) }
 
 // WriteBase64 writes the content of p, encoded with base64.
 func (w *encWriter) WriteBase64(p []byte) {
@@ -81,6 +77,20 @@ func (w *encWriter) WriteBase64(p []byte) {
 		if w.err == nil {
 			w.err = err1
 		}
+	}
+}
+
+// WriteLn writes a new line character.
+func (w *encWriter) WriteLn() {
+	if w.err == nil {
+		w.err = w.WriteByte('\n')
+	}
+}
+
+// WriteLn writes a space character.
+func (w *encWriter) WriteSpace() {
+	if w.err == nil {
+		w.err = w.WriteByte(' ')
 	}
 }
 

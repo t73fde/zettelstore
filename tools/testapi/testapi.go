@@ -92,9 +92,11 @@ func stopZettelstore(i *zsInfo) error {
 		fmt.Println("Unable to stop Zettelstore")
 		return err
 	}
-	io.WriteString(conn, "shutdown\n")
-	conn.Close()
-	err = i.cmd.Wait()
+	_, err = io.WriteString(conn, "shutdown\n")
+	_ = conn.Close()
+	if err == nil {
+		err = i.cmd.Wait()
+	}
 	return err
 }
 
@@ -103,6 +105,6 @@ func addressInUse(address string) bool {
 	if err != nil {
 		return false
 	}
-	conn.Close()
+	_ = conn.Close()
 	return true
 }

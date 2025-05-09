@@ -442,7 +442,7 @@ func TestRedirect(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer respRedirect.Body.Close()
+	defer func() { _ = respRedirect.Body.Close() }()
 	bodyRedirect, err := io.ReadAll(respRedirect.Body)
 	if err != nil {
 		t.Error(err)
@@ -454,7 +454,7 @@ func TestRedirect(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer respEmoji.Body.Close()
+	defer func() { _ = respEmoji.Body.Close() }()
 	bodyEmoji, err := io.ReadAll(respEmoji.Body)
 	if err != nil {
 		t.Error(err)

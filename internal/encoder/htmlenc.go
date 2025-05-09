@@ -70,7 +70,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error)
 	head.ExtendBang(hm)
 	var sb strings.Builder
 	if hasTitle {
-		he.textEnc.WriteInlines(&sb, &isTitle)
+		_, _ = he.textEnc.WriteInlines(&sb, &isTitle)
 	} else {
 		sb.Write(zn.Meta.Zid.Bytes())
 	}

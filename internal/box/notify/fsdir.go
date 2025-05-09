@@ -55,7 +55,7 @@ func NewFSDirNotifier(log *logger.Logger, path string) (Notifier, error) {
 				Str("parentDir", absParentDir).Err(errParent).
 				Str("path", absPath).Err(err).
 				Msg("Unable to access Zettel directory and its parent directory")
-			watcher.Close()
+			_ = watcher.Close()
 			return nil, err
 		}
 		log.Info().Str("parentDir", absParentDir).Err(errParent).
@@ -90,7 +90,7 @@ func (fsdn *fsdirNotifier) Refresh() {
 }
 
 func (fsdn *fsdirNotifier) eventLoop() {
-	defer fsdn.base.Close()
+	defer func() { _ = fsdn.base.Close() }()
 	defer close(fsdn.events)
 	defer close(fsdn.refresh)
 	if !listDirElements(fsdn.log, fsdn.fetcher, fsdn.events, fsdn.done) {
@@ -156,7 +156,7 @@ func (fsdn *fsdirNotifier) processEvent(ev *fsnotify.Event) bool {
 func (fsdn *fsdirNotifier) processDirEvent(ev *fsnotify.Event) bool {
 	if ev.Has(fsnotify.Remove) || ev.Has(fsnotify.Rename) {
 		fsdn.log.Debug().Str("name", fsdn.path).Msg("Directory removed")
-		fsdn.base.Remove(fsdn.path)
+		_ = fsdn.base.Remove(fsdn.path)
 		select {
 		case fsdn.events <- Event{Op: Destroy}:
 		case <-fsdn.done:

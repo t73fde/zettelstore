@@ -62,13 +62,13 @@ func (sess *cmdSession) executeLine(line string) bool {
 
 func (sess *cmdSession) println(args ...string) {
 	if len(args) > 0 {
-		io.WriteString(sess.w, args[0])
+		_, _ = io.WriteString(sess.w, args[0])
 		for _, arg := range args[1:] {
-			io.WriteString(sess.w, " ")
-			io.WriteString(sess.w, arg)
+			_, _ = io.WriteString(sess.w, " ")
+			_, _ = io.WriteString(sess.w, arg)
 		}
 	}
-	sess.w.Write(sess.eol)
+	_, _ = sess.w.Write(sess.eol)
 }
 
 func (sess *cmdSession) usage(cmd, val string) {
@@ -110,11 +110,11 @@ func (sess *cmdSession) calcMaxLen(table [][]string) []int {
 
 func (sess *cmdSession) printRow(row []string, maxLen []int, prefix, delim string, pad rune) {
 	for colno, column := range row {
-		io.WriteString(sess.w, prefix)
+		_, _ = io.WriteString(sess.w, prefix)
 		prefix = delim
-		io.WriteString(sess.w, strfun.JustifyLeft(column, maxLen[colno], pad))
+		_, _ = io.WriteString(sess.w, strfun.JustifyLeft(column, maxLen[colno], pad))
 	}
-	sess.w.Write(sess.eol)
+	_, _ = sess.w.Write(sess.eol)
 }
 
 func splitLine(line string) (string, []string) {
@@ -504,7 +504,9 @@ func cmdDumpIndex(sess *cmdSession, _ string, _ []string) bool {
 func cmdRefresh(sess *cmdSession, _ string, _ []string) bool {
 	kern := sess.kern
 	kern.logger.Mandatory().Msg("Refresh")
-	kern.box.Refresh()
+	if err := kern.box.Refresh(); err != nil {
+		kern.logger.Error().Err(err).Msg("refresh")
+	}
 	return true
 }
 

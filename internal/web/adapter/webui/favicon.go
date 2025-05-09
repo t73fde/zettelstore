@@ -32,7 +32,7 @@ func (wui *WebUI) MakeFaviconHandler(baseDir string) http.Handler {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 
 		data, err := io.ReadAll(f)
 		if err != nil {

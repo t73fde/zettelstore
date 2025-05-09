@@ -175,14 +175,17 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 	cs.mxService.Lock()
 	for key := range cs.orig.All() {
 		if val, ok := m.Get(key); ok {
-			cs.SetConfig(key, string(val))
+			err = cs.SetConfig(key, string(val))
 		} else if defVal, defFound := cs.orig.Get(key); defFound {
-			cs.SetConfig(key, string(defVal))
+			err = cs.SetConfig(key, string(defVal))
+		}
+		if err != nil {
+			break
 		}
 	}
 	cs.mxService.Unlock()
 	cs.SwitchNextToCur() // Poor man's restart
-	return nil
+	return err
 }
 
 func (cs *configService) observe(ci box.UpdateInfo) {
@@ -192,10 +195,14 @@ func (cs *configService) observe(ci box.UpdateInfo) {
 			cs.mxService.RLock()
 			mgr := cs.manager
 			cs.mxService.RUnlock()
+			var err error
 			if mgr != nil {
-				cs.doUpdate(mgr)
+				err = cs.doUpdate(mgr)
 			} else {
-				cs.doUpdate(ci.Box)
+				err = cs.doUpdate(ci.Box)
+			}
+			if err != nil {
+				cs.logger.Error().Err(err).Msg("update config")
 			}
 		}()
 	}

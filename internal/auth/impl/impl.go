@@ -59,10 +59,10 @@ var configKeys = []string{
 func calcSecret(extSecret string) []byte {
 	h := fnv.New128()
 	if extSecret != "" {
-		io.WriteString(h, extSecret)
+		_, _ = io.WriteString(h, extSecret)
 	}
 	for _, key := range configKeys {
-		io.WriteString(h, kernel.Main.GetConfig(kernel.CoreService, key).(string))
+		_, _ = io.WriteString(h, kernel.Main.GetConfig(kernel.CoreService, key).(string))
 	}
 	return h.Sum(nil)
 }
