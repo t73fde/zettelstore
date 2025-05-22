@@ -78,8 +78,7 @@ type AuthData struct {
 // GetAuthData returns the full authentication data from the context.
 func GetAuthData(ctx context.Context) *AuthData {
 	if ctx != nil {
-		data, ok := ctx.Value(ctxKeySession).(*AuthData)
-		if ok {
+		if data, ok := ctx.Value(ctxKeyTypeSession{}).(*AuthData); ok {
 			return data
 		}
 	}
@@ -96,9 +95,6 @@ func GetUser(ctx context.Context) *meta.Meta {
 
 // ctxKeyTypeSession is just an additional type to make context value retrieval unambiguous.
 type ctxKeyTypeSession struct{}
-
-// ctxKeySession is the key value to retrieve Authdata
-var ctxKeySession ctxKeyTypeSession
 
 // AuthBuilder is a Builder that also allows to execute authentication functions.
 type AuthBuilder interface {

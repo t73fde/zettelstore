@@ -133,11 +133,11 @@ func (srv *webServer) ClearToken(ctx context.Context, w http.ResponseWriter) con
 
 func updateContext(ctx context.Context, user *meta.Meta, data *auth.TokenData) context.Context {
 	if data == nil {
-		return context.WithValue(ctx, ctxKeySession, &AuthData{User: user})
+		return context.WithValue(ctx, ctxKeyTypeSession{}, &AuthData{User: user})
 	}
 	return context.WithValue(
 		ctx,
-		ctxKeySession,
+		ctxKeyTypeSession{},
 		&AuthData{
 			User:    user,
 			Token:   data.Token,

@@ -241,16 +241,14 @@ type Enricher interface {
 // This is useful for an Indexer, but also for some box.Box calls, when
 // just the plain metadata is needed.
 func NoEnrichContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, ctxNoEnrichKey, &ctxNoEnrichKey)
+	return context.WithValue(ctx, ctxNoEnrichType{}, ctx)
 }
 
 type ctxNoEnrichType struct{}
 
-var ctxNoEnrichKey ctxNoEnrichType
-
 // DoEnrich determines if the context is not marked to not enrich metadata.
 func DoEnrich(ctx context.Context) bool {
-	_, ok := ctx.Value(ctxNoEnrichKey).(*ctxNoEnrichType)
+	_, ok := ctx.Value(ctxNoEnrichType{}).(*ctxNoEnrichType)
 	return !ok
 }
 
