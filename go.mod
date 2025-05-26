@@ -8,12 +8,12 @@ require (
 	golang.org/x/crypto v0.38.0
 	golang.org/x/term v0.32.0
 	golang.org/x/text v0.25.0
-	t73f.de/r/sx v0.0.0-20250506141526-34e7a17d22f1
-	t73f.de/r/sxwebs v0.0.0-20250505103220-54507dc1509d
-	t73f.de/r/webs v0.0.0-20250505155652-db844dadbf0a
-	t73f.de/r/zero v0.0.0-20250421161051-9472f592aeea
-	t73f.de/r/zsc v0.0.0-20250502143402-b5c74e61e1a7
-	t73f.de/r/zsx v0.0.0-20250415162540-fc13b286b6ce
+	t73f.de/r/sx v0.0.0-20250526093546-50d78edc2593
+	t73f.de/r/sxwebs v0.0.0-20250526094632-c7f8ff8e06f9
+	t73f.de/r/webs v0.0.0-20250526090915-201b7072f617
+	t73f.de/r/zero v0.0.0-20250512130128-009067784541
+	t73f.de/r/zsc v0.0.0-20250526094847-9d5734d0c6ee
+	t73f.de/r/zsx v0.0.0-20250526093914-c34f0bae8fd2
 )
 
 require golang.org/x/sys v0.33.0 // indirect
