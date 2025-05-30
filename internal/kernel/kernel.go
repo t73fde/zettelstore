@@ -46,7 +46,7 @@ var Main *Kernel
 // Kernel is the main internal kernel.
 type Kernel struct {
 	logWriter *kernelLogWriter
-	logger    *logger.Logger
+	logger    *logger.DLogger
 	wg        sync.WaitGroup
 	mx        sync.RWMutex
 	interrupt chan os.Signal
@@ -72,7 +72,7 @@ type Kernel struct {
 type serviceDescr struct {
 	srv      service
 	name     string
-	logLevel logger.Level
+	logLevel logger.DLevel
 }
 type serviceData struct {
 	srv    service
@@ -90,7 +90,7 @@ func createKernel() *Kernel {
 	lw := newKernelLogWriter(8192)
 	kern := &Kernel{
 		logWriter: lw,
-		logger:    logger.New(lw, "").SetLevel(defaultNormalLogLevel),
+		logger:    logger.DNew(lw, "").SetLevel(defaultNormalLogLevel),
 		interrupt: make(chan os.Signal, 5),
 	}
 	kern.self.kernel = kern
@@ -108,7 +108,7 @@ func createKernel() *Kernel {
 			kern.logger.Error().Str("service", srvD.name).Msg("Service data already set, ignore")
 		}
 		kern.srvNames[srvD.name] = serviceData{srvD.srv, key}
-		l := logger.New(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.logLevel)
+		l := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.logLevel)
 		kern.logger.Debug().Str("service", srvD.name).Msg("Initialize")
 		srvD.srv.Initialize(l)
 	}
@@ -225,7 +225,7 @@ type KeyValue struct{ Key, Value string }
 
 // LogEntry stores values of one log line written by a logger.Logger
 type LogEntry struct {
-	Level   logger.Level
+	Level   logger.DLevel
 	TS      time.Time
 	Prefix  string
 	Message string
@@ -250,8 +250,8 @@ type SetupWebServerFunc func(
 ) error
 
 const (
-	defaultNormalLogLevel = logger.InfoLevel
-	defaultSimpleLogLevel = logger.ErrorLevel
+	defaultNormalLogLevel = logger.DInfoLevel
+	defaultSimpleLogLevel = logger.DErrorLevel
 )
 
 // Setup sets the most basic data of a software: its name, its version,
@@ -348,7 +348,7 @@ func (*shutdownSignal) Signal() { /* Just a signal */ }
 // --- Log operation ---------------------------------------------------------
 
 // GetKernelLogger returns the kernel logger.
-func (kern *Kernel) GetKernelLogger() *logger.Logger {
+func (kern *Kernel) GetKernelLogger() *logger.DLogger {
 	return kern.logger
 }
 
@@ -363,27 +363,27 @@ func (kern *Kernel) SetLogLevel(logLevel string) {
 	for srvN, srvD := range kern.srvs {
 		if lvl, found := srvLevel[srvN]; found {
 			srvD.srv.GetLogger().SetLevel(lvl)
-		} else if defaultLevel != logger.NoLevel {
+		} else if defaultLevel != logger.DNoLevel {
 			srvD.srv.GetLogger().SetLevel(defaultLevel)
 		}
 	}
 }
 
-func (kern *Kernel) parseLogLevel(logLevel string) (logger.Level, map[Service]logger.Level) {
-	defaultLevel := logger.NoLevel
-	srvLevel := map[Service]logger.Level{}
+func (kern *Kernel) parseLogLevel(logLevel string) (logger.DLevel, map[Service]logger.DLevel) {
+	defaultLevel := logger.DNoLevel
+	srvLevel := map[Service]logger.DLevel{}
 	for spec := range strings.SplitSeq(logLevel, ";") {
 		vals := cleanLogSpec(strings.Split(spec, ":"))
 		switch len(vals) {
 		case 0:
 		case 1:
-			if lvl := logger.ParseLevel(vals[0]); lvl.IsValid() {
+			if lvl := logger.DParseLevel(vals[0]); lvl.IsValid() {
 				defaultLevel = lvl
 			}
 		default:
 			serviceText, levelText := vals[0], vals[1]
 			if srv, found := kern.srvNames[serviceText]; found {
-				if lvl := logger.ParseLevel(levelText); lvl.IsValid() {
+				if lvl := logger.DParseLevel(levelText); lvl.IsValid() {
 					srvLevel[srv.srvnum] = lvl
 				}
 			}
@@ -526,7 +526,7 @@ func (kern *Kernel) GetServiceStatistics(srvnum Service) []KeyValue {
 }
 
 // GetLogger returns a logger for the given service.
-func (kern *Kernel) GetLogger(srvnum Service) *logger.Logger {
+func (kern *Kernel) GetLogger(srvnum Service) *logger.DLogger {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -612,10 +612,10 @@ func (kern *Kernel) dumpIndex(w io.Writer) { kern.box.dumpIndex(w) }
 
 type service interface {
 	// Initialize the data for the service.
-	Initialize(*logger.Logger)
+	Initialize(*logger.DLogger)
 
 	// Get service logger.
-	GetLogger() *logger.Logger
+	GetLogger() *logger.DLogger
 
 	// ConfigDescriptions returns a sorted list of configuration descriptions.
 	ConfigDescriptions() []serviceConfigDescription
@@ -673,8 +673,8 @@ type kernelService struct {
 	kernel *Kernel
 }
 
-func (*kernelService) Initialize(*logger.Logger)                      {}
-func (ks *kernelService) GetLogger() *logger.Logger                   { return ks.kernel.logger }
+func (*kernelService) Initialize(*logger.DLogger)                     {}
+func (ks *kernelService) GetLogger() *logger.DLogger                  { return ks.kernel.logger }
 func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return nil }
 func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
 func (*kernelService) GetCurConfig(string) any                        { return nil }

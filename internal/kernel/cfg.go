@@ -52,7 +52,7 @@ const (
 
 var errUnknownVisibility = errors.New("unknown visibility")
 
-func (cs *configService) Initialize(logger *logger.Logger) {
+func (cs *configService) Initialize(logger *logger.DLogger) {
 	cs.logger = logger
 	cs.descr = descriptionMap{
 		keyDefaultCopyright: {"Default copyright", parseString, true},
@@ -125,7 +125,7 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		config.KeyShowSuccessorLinks:   "",
 	}
 }
-func (cs *configService) GetLogger() *logger.Logger { return cs.logger }
+func (cs *configService) GetLogger() *logger.DLogger { return cs.logger }
 
 func (cs *configService) Start(*Kernel) error {
 	cs.logger.Info().Msg("Start Service")

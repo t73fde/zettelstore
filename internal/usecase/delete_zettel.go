@@ -29,12 +29,12 @@ type DeleteZettelPort interface {
 
 // DeleteZettel is the data for this use case.
 type DeleteZettel struct {
-	log  *logger.Logger
+	log  *logger.DLogger
 	port DeleteZettelPort
 }
 
 // NewDeleteZettel creates a new use case.
-func NewDeleteZettel(log *logger.Logger, port DeleteZettelPort) DeleteZettel {
+func NewDeleteZettel(log *logger.DLogger, port DeleteZettelPort) DeleteZettel {
 	return DeleteZettel{log: log, port: port}
 }
 

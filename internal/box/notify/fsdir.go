@@ -23,7 +23,7 @@ import (
 )
 
 type fsdirNotifier struct {
-	log     *logger.Logger
+	log     *logger.DLogger
 	events  chan Event
 	done    chan struct{}
 	refresh chan struct{}
@@ -35,7 +35,7 @@ type fsdirNotifier struct {
 
 // NewFSDirNotifier creates a directory based notifier that receives notifications
 // from the file system.
-func NewFSDirNotifier(log *logger.Logger, path string) (Notifier, error) {
+func NewFSDirNotifier(log *logger.DLogger, path string) (Notifier, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		log.Debug().Err(err).Str("path", path).Msg("Unable to create absolute path")

@@ -24,17 +24,17 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 )
 
-// Message presents a message to log.
-type Message struct {
-	logger *Logger
-	level  Level
+// DMessage presents a message to log.
+type DMessage struct {
+	logger *DLogger
+	level  DLevel
 	buf    []byte
 }
 
-func newMessage(logger *Logger, level Level) *Message {
+func dnewDMessage(logger *DLogger, level DLevel) *DMessage {
 	if logger != nil {
 		if logger.topParent.Level() <= level {
-			m := messagePool.Get().(*Message)
+			m := messagePool.Get().(*DMessage)
 			m.logger = logger
 			m.level = level
 			m.buf = append(m.buf[:0], logger.context...)
@@ -44,25 +44,25 @@ func newMessage(logger *Logger, level Level) *Message {
 	return nil
 }
 
-func recycleMessage(m *Message) {
+func drecycleDMessage(m *DMessage) {
 	messagePool.Put(m)
 }
 
 var messagePool = &sync.Pool{
 	New: func() any {
-		return &Message{
+		return &DMessage{
 			buf: make([]byte, 0, 500),
 		}
 	},
 }
 
 // Enabled returns whether the message will log or not.
-func (m *Message) Enabled() bool {
-	return m != nil && m.level != NeverLevel
+func (m *DMessage) Enabled() bool {
+	return m != nil && m.level != DNeverLevel
 }
 
 // Str adds a string value to the full message
-func (m *Message) Str(text, val string) *Message {
+func (m *DMessage) Str(text, val string) *DMessage {
 	if m.Enabled() {
 		buf := append(m.buf, ',', ' ')
 		buf = append(buf, text...)
@@ -73,7 +73,7 @@ func (m *Message) Str(text, val string) *Message {
 }
 
 // Bool adds a boolean value to the full message
-func (m *Message) Bool(text string, val bool) *Message {
+func (m *DMessage) Bool(text string, val bool) *DMessage {
 	if val {
 		m.Str(text, "true")
 	} else {
@@ -83,7 +83,7 @@ func (m *Message) Bool(text string, val bool) *Message {
 }
 
 // Bytes adds a byte slice value to the full message
-func (m *Message) Bytes(text string, val []byte) *Message {
+func (m *DMessage) Bytes(text string, val []byte) *DMessage {
 	if m.Enabled() {
 		buf := append(m.buf, ',', ' ')
 		buf = append(buf, text...)
@@ -94,7 +94,7 @@ func (m *Message) Bytes(text string, val []byte) *Message {
 }
 
 // Err adds an error value to the full message
-func (m *Message) Err(err error) *Message {
+func (m *DMessage) Err(err error) *DMessage {
 	if err != nil {
 		return m.Str("error", err.Error())
 	}
@@ -102,17 +102,17 @@ func (m *Message) Err(err error) *Message {
 }
 
 // Int adds an integer to the full message
-func (m *Message) Int(text string, i int64) *Message {
+func (m *DMessage) Int(text string, i int64) *DMessage {
 	return m.Str(text, strconv.FormatInt(i, 10))
 }
 
 // Uint adds an unsigned integer to the full message
-func (m *Message) Uint(text string, u uint64) *Message {
+func (m *DMessage) Uint(text string, u uint64) *DMessage {
 	return m.Str(text, strconv.FormatUint(u, 10))
 }
 
 // User adds the user-id field of the given user to the message.
-func (m *Message) User(ctx context.Context) *Message {
+func (m *DMessage) User(ctx context.Context) *DMessage {
 	if m.Enabled() {
 		if up := m.logger.uProvider; up != nil {
 			if user := up.GetUser(ctx); user != nil {
@@ -129,7 +129,7 @@ func (m *Message) User(ctx context.Context) *Message {
 }
 
 // RemoteAddr adds the remote address of an HTTP request to the message.
-func (m *Message) RemoteAddr(r *http.Request) *Message {
+func (m *DMessage) RemoteAddr(r *http.Request) *DMessage {
 	addr := ip.GetRemoteAddr(r)
 	if addr == "" {
 		return m
@@ -138,19 +138,19 @@ func (m *Message) RemoteAddr(r *http.Request) *Message {
 }
 
 // Zid adds a zettel identifier to the full message
-func (m *Message) Zid(zid id.Zid) *Message {
+func (m *DMessage) Zid(zid id.Zid) *DMessage {
 	return m.Bytes("zid", zid.Bytes())
 }
 
 // Msg add the given text to the message and writes it to the log.
-func (m *Message) Msg(text string) {
+func (m *DMessage) Msg(text string) {
 	if m.Enabled() {
-		_ = m.logger.writeMessage(m.level, text, m.buf)
-		recycleMessage(m)
+		_ = m.logger.dwriteDMessage(m.level, text, m.buf)
+		drecycleDMessage(m)
 	}
 }
 
 // Child creates a child logger with context of this message.
-func (m *Message) Child() *Logger {
-	return newFromMessage(m)
+func (m *DMessage) Child() *DLogger {
+	return dnewFromDMessage(m)
 }

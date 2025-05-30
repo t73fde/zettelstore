@@ -33,7 +33,7 @@ type authService struct {
 var errAlreadySetOwner = errors.New("changing an existing owner not allowed")
 var errAlreadyROMode = errors.New("system in readonly mode cannot change this mode")
 
-func (as *authService) Initialize(logger *logger.Logger) {
+func (as *authService) Initialize(logger *logger.DLogger) {
 	as.logger = logger
 	as.descr = descriptionMap{
 		AuthOwner: {
@@ -66,7 +66,7 @@ func (as *authService) Initialize(logger *logger.Logger) {
 	}
 }
 
-func (as *authService) GetLogger() *logger.Logger { return as.logger }
+func (as *authService) GetLogger() *logger.DLogger { return as.logger }
 
 func (as *authService) Start(*Kernel) error {
 	as.mxService.Lock()

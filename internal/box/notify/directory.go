@@ -56,7 +56,7 @@ const (
 // DirService specifies a directory service for file based zettel.
 type DirService struct {
 	box      box.ManagedBox
-	log      *logger.Logger
+	log      *logger.DLogger
 	dirPath  string
 	notifier Notifier
 	infos    box.UpdateNotifier
@@ -69,7 +69,7 @@ type DirService struct {
 var ErrNoDirectory = errors.New("unable to retrieve zettel directory information")
 
 // NewDirService creates a new directory service.
-func NewDirService(box box.ManagedBox, log *logger.Logger, notifier Notifier, notify box.UpdateNotifier) *DirService {
+func NewDirService(box box.ManagedBox, log *logger.DLogger, notifier Notifier, notify box.UpdateNotifier) *DirService {
 	return &DirService{
 		box:      box,
 		log:      log,

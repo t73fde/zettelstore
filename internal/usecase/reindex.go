@@ -28,12 +28,12 @@ type ReIndexPort interface {
 
 // ReIndex is the data for this use case.
 type ReIndex struct {
-	log  *logger.Logger
+	log  *logger.DLogger
 	port ReIndexPort
 }
 
 // NewReIndex creates a new use case.
-func NewReIndex(log *logger.Logger, port ReIndexPort) ReIndex {
+func NewReIndex(log *logger.DLogger, port ReIndexPort) ReIndex {
 	return ReIndex{log: log, port: port}
 }
 

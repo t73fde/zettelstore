@@ -43,7 +43,7 @@ var mapMethod = map[string]Method{
 
 // httpRouter handles all routing for zettelstore.
 type httpRouter struct {
-	log           *logger.Logger
+	log           *logger.DLogger
 	urlPrefix     string
 	auth          auth.TokenManager
 	loopbackIdent string
@@ -59,7 +59,7 @@ type httpRouter struct {
 }
 
 type routerData struct {
-	log            *logger.Logger
+	log            *logger.DLogger
 	urlPrefix      string
 	maxRequestSize int64
 	auth           auth.TokenManager

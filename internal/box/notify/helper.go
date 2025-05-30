@@ -66,7 +66,7 @@ func (zpf *zipPathFetcher) Fetch() ([]string, error) {
 }
 
 // listDirElements write all files within the directory path as events.
-func listDirElements(log *logger.Logger, fetcher EntryFetcher, events chan<- Event, done <-chan struct{}) bool {
+func listDirElements(log *logger.DLogger, fetcher EntryFetcher, events chan<- Event, done <-chan struct{}) bool {
 	select {
 	case events <- Event{Op: Make}:
 	case <-done:

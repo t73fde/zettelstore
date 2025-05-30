@@ -378,7 +378,7 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 		sess.printTable(table)
 		return true
 	}
-	var l *logger.Logger
+	var l *logger.DLogger
 	name := args[0]
 	if name == "kernel" {
 		l = kern.logger
@@ -398,9 +398,9 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 
 	level := args[1]
 	uval, err := strconv.ParseUint(level, 10, 8)
-	lv := logger.Level(uval)
+	lv := logger.DLevel(uval)
 	if err != nil || !lv.IsValid() {
-		lv = logger.ParseLevel(level)
+		lv = logger.DParseLevel(level)
 	}
 	if !lv.IsValid() {
 		sess.println("Invalid level:", level)

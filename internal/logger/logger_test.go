@@ -22,29 +22,29 @@ import (
 	"zettelstore.de/z/internal/logger"
 )
 
-func TestParseLevel(t *testing.T) {
+func TestDParseLevel(t *testing.T) {
 	testcases := []struct {
 		text string
-		exp  logger.Level
+		exp  logger.DLevel
 	}{
-		{"tra", logger.TraceLevel},
-		{"deb", logger.DebugLevel},
-		{"info", logger.InfoLevel},
-		{"err", logger.ErrorLevel},
-		{"manda", logger.MandatoryLevel},
-		{"dis", logger.NeverLevel},
-		{"d", logger.Level(0)},
+		{"tra", logger.DTraceLevel},
+		{"deb", logger.DDebugLevel},
+		{"info", logger.DInfoLevel},
+		{"err", logger.DErrorLevel},
+		{"manda", logger.DMandatoryLevel},
+		{"dis", logger.DNeverLevel},
+		{"d", logger.DLevel(0)},
 	}
 	for i, tc := range testcases {
-		got := logger.ParseLevel(tc.text)
+		got := logger.DParseLevel(tc.text)
 		if got != tc.exp {
 			t.Errorf("%d: ParseLevel(%q) == %q, but got %q", i, tc.text, tc.exp, got)
 		}
 	}
 }
 
-func BenchmarkDisabled(b *testing.B) {
-	log := logger.New(&stderrLogWriter{}, "").SetLevel(logger.NeverLevel)
+func BenchmarkDDisabled(b *testing.B) {
+	log := logger.DNew(&stderrLogWriter{}, "").SetLevel(logger.DNeverLevel)
 	for b.Loop() {
 		log.Info().Str("key", "val").Msg("Benchmark")
 	}
@@ -52,33 +52,33 @@ func BenchmarkDisabled(b *testing.B) {
 
 type stderrLogWriter struct{}
 
-func (*stderrLogWriter) WriteMessage(level logger.Level, ts time.Time, prefix, msg string, details []byte) error {
+func (*stderrLogWriter) DWriteMessage(level logger.DLevel, ts time.Time, prefix, msg string, details []byte) error {
 	fmt.Fprintf(os.Stderr, "%v %v %v %v %v\n", level.Format(), ts, prefix, msg, string(details))
 	return nil
 }
 
 type testLogWriter struct{}
 
-func (*testLogWriter) WriteMessage(logger.Level, time.Time, string, string, []byte) error {
+func (*testLogWriter) DWriteMessage(logger.DLevel, time.Time, string, string, []byte) error {
 	return nil
 }
 
-func BenchmarkStrMessage(b *testing.B) {
-	log := logger.New(&testLogWriter{}, "")
+func BenchmarkDStrMessage(b *testing.B) {
+	log := logger.DNew(&testLogWriter{}, "")
 	for b.Loop() {
 		log.Info().Str("key", "val").Msg("Benchmark")
 	}
 }
 
-func BenchmarkMessage(b *testing.B) {
-	log := logger.New(&testLogWriter{}, "")
+func BenchmarkDMessage(b *testing.B) {
+	log := logger.DNew(&testLogWriter{}, "")
 	for b.Loop() {
 		log.Info().Msg("Benchmark")
 	}
 }
 
-func BenchmarkCloneStrMessage(b *testing.B) {
-	log := logger.New(&testLogWriter{}, "").Clone().Str("sss", "ttt").Child()
+func BenchmarkDCloneStrMessage(b *testing.B) {
+	log := logger.DNew(&testLogWriter{}, "").Clone().Str("sss", "ttt").Child()
 	for b.Loop() {
 		log.Info().Msg("123456789")
 	}

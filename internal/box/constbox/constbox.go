@@ -52,7 +52,7 @@ type constZettel struct {
 }
 
 type constBox struct {
-	log      *logger.Logger
+	log      *logger.DLogger
 	number   int
 	zettel   map[id.Zid]constZettel
 	enricher box.Enricher

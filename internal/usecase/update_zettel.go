@@ -35,12 +35,12 @@ type UpdateZettelPort interface {
 
 // UpdateZettel is the data for this use case.
 type UpdateZettel struct {
-	log  *logger.Logger
+	log  *logger.DLogger
 	port UpdateZettelPort
 }
 
 // NewUpdateZettel creates a new use case.
-func NewUpdateZettel(log *logger.Logger, port UpdateZettelPort) UpdateZettel {
+func NewUpdateZettel(log *logger.DLogger, port UpdateZettelPort) UpdateZettel {
 	return UpdateZettel{log: log, port: port}
 }
 

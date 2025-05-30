@@ -186,8 +186,8 @@ const (
 
 func setServiceConfig(cfg *meta.Meta) bool {
 	debugMode := cfg.GetBool(keyDebug)
-	if debugMode && kernel.Main.GetKernelLogger().Level() > logger.DebugLevel {
-		kernel.Main.SetLogLevel(logger.DebugLevel.String())
+	if debugMode && kernel.Main.GetKernelLogger().Level() > logger.DDebugLevel {
+		kernel.Main.SetLogLevel(logger.DDebugLevel.String())
 	}
 	if logLevel, found := cfg.Get(keyLogLevel); found {
 		kernel.Main.SetLogLevel(string(logLevel))

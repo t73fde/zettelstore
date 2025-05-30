@@ -38,7 +38,7 @@ func init() {
 }
 
 type compBox struct {
-	log      *logger.Logger
+	log      *logger.DLogger
 	number   int
 	enricher box.Enricher
 }

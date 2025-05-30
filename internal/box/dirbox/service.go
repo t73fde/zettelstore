@@ -32,7 +32,7 @@ import (
 	"zettelstore.de/z/internal/zettel"
 )
 
-func fileService(i uint32, log *logger.Logger, dirPath string, cmds <-chan fileCmd) {
+func fileService(i uint32, log *logger.DLogger, dirPath string, cmds <-chan fileCmd) {
 	// Something may panic. Ensure a running service.
 	defer func() {
 		if ri := recover(); ri != nil {

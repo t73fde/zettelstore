@@ -28,7 +28,7 @@ import (
 )
 
 type webServer struct {
-	log              *logger.Logger
+	log              *logger.DLogger
 	baseURL          string
 	httpServer       httpServer
 	router           httpRouter
@@ -38,7 +38,7 @@ type webServer struct {
 
 // ConfigData contains the data needed to configure a server.
 type ConfigData struct {
-	Log              *logger.Logger
+	Log              *logger.DLogger
 	ListenAddr       string
 	BaseURL          string
 	URLPrefix        string

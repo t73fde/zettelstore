@@ -36,7 +36,7 @@ import (
 
 func init() {
 	manager.Register("dir", func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
-		var log *logger.Logger
+		var log *logger.DLogger
 		if krnl := kernel.Main; krnl != nil {
 			log = krnl.GetLogger(kernel.BoxService).Clone().Str("box", "dir").Int("boxnum", int64(cdata.Number)).Child()
 		}
@@ -92,7 +92,7 @@ const (
 	dirNotifyFS
 )
 
-func getDirSrvInfo(log *logger.Logger, notifyType string) notifyTypeSpec {
+func getDirSrvInfo(log *logger.DLogger, notifyType string) notifyTypeSpec {
 	for range 2 {
 		switch notifyType {
 		case kernel.BoxDirTypeNotify:
@@ -116,7 +116,7 @@ func getDirPath(u *url.URL) string {
 
 // dirBox uses a directory to store zettel as files.
 type dirBox struct {
-	log        *logger.Logger
+	log        *logger.DLogger
 	number     int
 	location   string
 	readonly   bool

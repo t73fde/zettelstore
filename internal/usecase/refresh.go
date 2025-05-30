@@ -26,12 +26,12 @@ type RefreshPort interface {
 
 // Refresh is the data for this use case.
 type Refresh struct {
-	log  *logger.Logger
+	log  *logger.DLogger
 	port RefreshPort
 }
 
 // NewRefresh creates a new use case.
-func NewRefresh(log *logger.Logger, port RefreshPort) Refresh {
+func NewRefresh(log *logger.DLogger, port RefreshPort) Refresh {
 	return Refresh{log: log, port: port}
 }
 

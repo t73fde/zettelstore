@@ -45,7 +45,7 @@ func init() {
 }
 
 type memBox struct {
-	log       *logger.Logger
+	log       *logger.DLogger
 	u         *url.URL
 	cdata     manager.ConnectData
 	maxZettel int

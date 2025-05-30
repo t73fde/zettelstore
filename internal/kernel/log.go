@@ -44,10 +44,10 @@ func newKernelLogWriter(capacity int) *kernelLogWriter {
 	}
 }
 
-func (klw *kernelLogWriter) WriteMessage(level logger.Level, ts time.Time, prefix, msg string, details []byte) error {
+func (klw *kernelLogWriter) DWriteMessage(level logger.DLevel, ts time.Time, prefix, msg string, details []byte) error {
 	klw.mx.Lock()
 
-	if level > logger.DebugLevel {
+	if level > logger.DDebugLevel {
 		klw.lastLog = ts
 		klw.data[klw.writePos] = logEntry{
 			level:   level,
@@ -110,7 +110,7 @@ func itoa(buf *[]byte, i, wid int) {
 }
 
 type logEntry struct {
-	level   logger.Level
+	level   logger.DLevel
 	ts      time.Time
 	prefix  string
 	msg     string

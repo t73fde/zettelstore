@@ -84,7 +84,7 @@ func Register(scheme string, create createFunc) {
 
 // Manager is a coordinating box.
 type Manager struct {
-	mgrLog       *logger.Logger
+	mgrLog       *logger.DLogger
 	stateMx      sync.RWMutex
 	state        box.StartState
 	mgrMx        sync.RWMutex
@@ -97,7 +97,7 @@ type Manager struct {
 	propertyKeys *set.Set[string] // Set of property key names
 
 	// Indexer data
-	idxLog   *logger.Logger
+	idxLog   *logger.DLogger
 	idxStore store.Store
 	idxAr    *anteroomQueue
 	idxReady chan struct{} // Signal a non-empty anteroom to background task

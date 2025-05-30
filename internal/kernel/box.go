@@ -35,7 +35,7 @@ type boxService struct {
 
 var errInvalidDirType = errors.New("invalid directory type")
 
-func (ps *boxService) Initialize(logger *logger.Logger) {
+func (ps *boxService) Initialize(logger *logger.DLogger) {
 	ps.logger = logger
 	ps.descr = descriptionMap{
 		BoxDefaultDirType: {
@@ -69,7 +69,7 @@ func (ps *boxService) Initialize(logger *logger.Logger) {
 	}
 }
 
-func (ps *boxService) GetLogger() *logger.Logger { return ps.logger }
+func (ps *boxService) GetLogger() *logger.DLogger { return ps.logger }
 
 func (ps *boxService) Start(kern *Kernel) error {
 	boxURIs := make([]*url.URL, 0, 4)

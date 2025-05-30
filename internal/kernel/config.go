@@ -38,7 +38,7 @@ type interfaceMap map[string]any
 func (m interfaceMap) Clone() interfaceMap { return maps.Clone(m) }
 
 type srvConfig struct {
-	logger   *logger.Logger
+	logger   *logger.DLogger
 	mxConfig sync.RWMutex
 	frozen   bool
 	descr    descriptionMap

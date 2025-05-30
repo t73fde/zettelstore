@@ -32,7 +32,7 @@ import (
 )
 
 type zipBox struct {
-	log      *logger.Logger
+	log      *logger.DLogger
 	number   int
 	name     string
 	enricher box.Enricher

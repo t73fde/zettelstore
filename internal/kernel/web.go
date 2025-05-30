@@ -40,7 +40,7 @@ type webService struct {
 
 var errURLPrefixSyntax = errors.New("must not be empty and must start with '//'")
 
-func (ws *webService) Initialize(logger *logger.Logger) {
+func (ws *webService) Initialize(logger *logger.DLogger) {
 	ws.logger = logger
 	ws.descr = descriptionMap{
 		WebAssetDir: {
@@ -141,7 +141,7 @@ func makeDurationParser(defDur, minDur, maxDur time.Duration) parseFunc {
 
 var errWrongBasePrefix = errors.New(WebURLPrefix + " does not match " + WebBaseURL)
 
-func (ws *webService) GetLogger() *logger.Logger { return ws.logger }
+func (ws *webService) GetLogger() *logger.DLogger { return ws.logger }
 
 func (ws *webService) Start(kern *Kernel) error {
 	baseURL := ws.GetNextConfig(WebBaseURL).(string)

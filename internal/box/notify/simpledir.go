@@ -20,7 +20,7 @@ import (
 )
 
 type simpleDirNotifier struct {
-	log     *logger.Logger
+	log     *logger.DLogger
 	events  chan Event
 	done    chan struct{}
 	refresh chan struct{}
@@ -29,7 +29,7 @@ type simpleDirNotifier struct {
 
 // NewSimpleDirNotifier creates a directory based notifier that will not receive
 // any notifications from the operating system.
-func NewSimpleDirNotifier(log *logger.Logger, path string) (Notifier, error) {
+func NewSimpleDirNotifier(log *logger.DLogger, path string) (Notifier, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func NewSimpleDirNotifier(log *logger.Logger, path string) (Notifier, error) {
 
 // NewSimpleZipNotifier creates a zip-file based notifier that will not receive
 // any notifications from the operating system.
-func NewSimpleZipNotifier(log *logger.Logger, zipPath string) Notifier {
+func NewSimpleZipNotifier(log *logger.DLogger, zipPath string) Notifier {
 	sdn := &simpleDirNotifier{
 		log:     log,
 		events:  make(chan Event),

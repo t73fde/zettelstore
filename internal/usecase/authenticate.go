@@ -29,13 +29,13 @@ import (
 
 // Authenticate is the data for this use case.
 type Authenticate struct {
-	log       *logger.Logger
+	log       *logger.DLogger
 	token     auth.TokenManager
 	ucGetUser *GetUser
 }
 
 // NewAuthenticate creates a new use case.
-func NewAuthenticate(log *logger.Logger, token auth.TokenManager, ucGetUser *GetUser) Authenticate {
+func NewAuthenticate(log *logger.DLogger, token auth.TokenManager, ucGetUser *GetUser) Authenticate {
 	return Authenticate{
 		log:       log,
 		token:     token,
@@ -105,13 +105,13 @@ type IsAuthenticatedPort interface {
 
 // IsAuthenticated cheks if the caller is alrwady authenticated.
 type IsAuthenticated struct {
-	log   *logger.Logger
+	log   *logger.DLogger
 	port  IsAuthenticatedPort
 	authz auth.AuthzManager
 }
 
 // NewIsAuthenticated creates a new use case object.
-func NewIsAuthenticated(log *logger.Logger, port IsAuthenticatedPort, authz auth.AuthzManager) IsAuthenticated {
+func NewIsAuthenticated(log *logger.DLogger, port IsAuthenticatedPort, authz auth.AuthzManager) IsAuthenticated {
 	return IsAuthenticated{
 		log:   log,
 		port:  port,

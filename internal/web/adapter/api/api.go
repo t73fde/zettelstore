@@ -33,7 +33,7 @@ import (
 
 // API holds all data and methods for delivering API call results.
 type API struct {
-	log      *logger.Logger
+	log      *logger.DLogger
 	b        server.Builder
 	authz    auth.AuthzManager
 	token    auth.TokenManager
@@ -44,7 +44,7 @@ type API struct {
 }
 
 // New creates a new API object.
-func New(log *logger.Logger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
+func New(log *logger.DLogger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
 	rtConfig config.Config, pol auth.Policy) *API {
 	a := &API{
 		log:      log,

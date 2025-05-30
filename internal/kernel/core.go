@@ -43,7 +43,7 @@ type recoverInfo struct {
 	stack []byte
 }
 
-func (cs *coreService) Initialize(logger *logger.Logger) {
+func (cs *coreService) Initialize(logger *logger.DLogger) {
 	cs.logger = logger
 	cs.mapRecover = make(map[string]recoverInfo)
 	cs.descr = descriptionMap{
@@ -93,7 +93,7 @@ func (cs *coreService) Initialize(logger *logger.Logger) {
 	}
 }
 
-func (cs *coreService) GetLogger() *logger.Logger { return cs.logger }
+func (cs *coreService) GetLogger() *logger.DLogger { return cs.logger }
 
 func (cs *coreService) Start(*Kernel) error {
 	cs.started = true
