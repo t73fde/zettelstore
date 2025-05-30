@@ -168,7 +168,7 @@ func (ws *webService) Start(kern *Kernel) error {
 	}
 
 	sd := server.ConfigData{
-		DLog:             ws.dlogger,
+		Log:              ws.logger,
 		ListenAddr:       listenAddr,
 		BaseURL:          baseURL,
 		URLPrefix:        urlPrefix,

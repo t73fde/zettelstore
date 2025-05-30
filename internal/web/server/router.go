@@ -15,6 +15,7 @@ package server
 
 import (
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/pprof"
 	"regexp"
@@ -25,7 +26,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/logger"
 )
 
 type (
@@ -43,7 +43,7 @@ var mapMethod = map[string]Method{
 
 // httpRouter handles all routing for zettelstore.
 type httpRouter struct {
-	dlog          *logger.DLogger
+	log           *slog.Logger
 	urlPrefix     string
 	auth          auth.TokenManager
 	loopbackIdent string
@@ -59,7 +59,7 @@ type httpRouter struct {
 }
 
 type routerData struct {
-	dlog           *logger.DLogger
+	log            *slog.Logger
 	urlPrefix      string
 	maxRequestSize int64
 	auth           auth.TokenManager
@@ -70,7 +70,7 @@ type routerData struct {
 
 // initializeRouter creates a new, empty router with the given root handler.
 func (rt *httpRouter) initializeRouter(rd routerData) {
-	rt.dlog = rd.dlog
+	rt.log = rd.log
 	rt.urlPrefix = rd.urlPrefix
 	rt.auth = rd.auth
 	rt.loopbackIdent = rd.loopbackIdent
@@ -141,17 +141,17 @@ func (rt *httpRouter) Handle(pattern string, handler http.Handler) {
 
 func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var withDebug bool
-	if msg := rt.dlog.Debug(); msg.Enabled() {
+	if rt.log.Enabled(r.Context(), slog.LevelDebug) {
 		withDebug = true
 		w = &traceResponseWriter{original: w}
-		msg.Str("method", r.Method).Str("uri", r.RequestURI).RemoteAddr(r).Msg("ServeHTTP")
+		rt.log.Debug("ServeHTTP", "method", r.Method, "uri", r.RequestURI, "remote", ip.GetRemoteAddr(r))
 	}
 
 	if prefixLen := len(rt.urlPrefix); prefixLen > 1 {
 		if len(r.URL.Path) < prefixLen || r.URL.Path[:prefixLen] != rt.urlPrefix {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			if withDebug {
-				rt.dlog.Debug().Int("sc", int64(w.(*traceResponseWriter).statusCode)).Msg("/ServeHTTP/prefix")
+				rt.log.Debug("/ServeHTTP/prefix", "sc", w.(*traceResponseWriter).statusCode)
 			}
 			return
 		}
@@ -162,12 +162,12 @@ func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(match) != 3 {
 		rt.mux.ServeHTTP(w, rt.addUserContext(r))
 		if withDebug {
-			rt.dlog.Debug().Int("sc", int64(w.(*traceResponseWriter).statusCode)).Msg("match other")
+			rt.log.Debug("match other", "sc", w.(*traceResponseWriter).statusCode)
 		}
 		return
 	}
 	if withDebug {
-		rt.dlog.Debug().Str("key", match[1]).Str("zid", match[2]).Msg("path match")
+		rt.log.Debug("path match", "key", match[1], "zid", match[2])
 	}
 
 	key := match[1][0]
@@ -183,14 +183,14 @@ func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			r.URL.Path = "/" + match[2]
 			handler.ServeHTTP(w, rt.addUserContext(r))
 			if withDebug {
-				rt.dlog.Debug().Int("sc", int64(w.(*traceResponseWriter).statusCode)).Msg("/ServeHTTP")
+				rt.log.Debug("/ServeHTTP", "sc", w.(*traceResponseWriter).statusCode)
 			}
 			return
 		}
 	}
 	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	if withDebug {
-		rt.dlog.Debug().Int("sc", int64(w.(*traceResponseWriter).statusCode)).Msg("no match")
+		rt.log.Debug("no match", "sc", w.(*traceResponseWriter).statusCode)
 	}
 }
 
@@ -207,7 +207,7 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 				if user != nil {
 					return r.WithContext(updateContext(ctx, user, nil))
 				}
-				rt.dlog.Error().Str("loopback-ident", rt.loopbackIdent).Msg("No match to loopback-zid")
+				rt.log.Error("No match to loopback-zid", "loopback-ident", rt.loopbackIdent)
 			}
 		}
 	}
@@ -215,22 +215,26 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 	k := auth.KindAPI
 	t := getHeaderToken(r)
 	if len(t) == 0 {
-		rt.dlog.Debug().Msg("no jwt token found") // IP already logged: ServeHTTP
+		rt.log.Debug("no jwt token found") // IP already logged: ServeHTTP
 		k = auth.KindwebUI
 		t = getSessionToken(r)
 	}
 	if len(t) == 0 {
-		rt.dlog.Debug().Msg("no auth token found in request") // IP already logged: ServeHTTP
+		rt.log.Debug("no auth token found in request") // IP already logged: ServeHTTP
 		return r
 	}
 	tokenData, err := rt.auth.CheckToken(t, k)
 	if err != nil {
-		rt.dlog.Info().Err(err).RemoteAddr(r).Msg("invalid auth token")
+		rt.log.Info("invalid auth token", "err", err, "remote", ip.GetRemoteAddr(r))
 		return r
 	}
 	user, err := rt.ur.GetUser(ctx, tokenData.Zid, tokenData.Ident)
 	if err != nil {
-		rt.dlog.Info().Zid(tokenData.Zid).Str("ident", tokenData.Ident).Err(err).RemoteAddr(r).Msg("auth user not found")
+		rt.log.Info("auth user not found",
+			"zid", tokenData.Zid,
+			"ident", tokenData.Ident,
+			"err", err,
+			"remote", ip.GetRemoteAddr(r))
 		return r
 	}
 	return r.WithContext(updateContext(ctx, user, &tokenData))

@@ -15,6 +15,7 @@ package server
 
 import (
 	"context"
+	"log/slog"
 	"net"
 	"net/http"
 	"time"
@@ -24,11 +25,10 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/logger"
 )
 
 type webServer struct {
-	dlog             *logger.DLogger
+	log              *slog.Logger
 	baseURL          string
 	httpServer       httpServer
 	router           httpRouter
@@ -38,7 +38,7 @@ type webServer struct {
 
 // ConfigData contains the data needed to configure a server.
 type ConfigData struct {
-	DLog             *logger.DLogger
+	Log              *slog.Logger
 	ListenAddr       string
 	BaseURL          string
 	URLPrefix        string
@@ -54,14 +54,14 @@ type ConfigData struct {
 // New creates a new web server.
 func New(sd ConfigData) Server {
 	srv := webServer{
-		dlog:             sd.DLog,
+		log:              sd.Log,
 		baseURL:          sd.BaseURL,
 		persistentCookie: sd.PersistentCookie,
 		secureCookie:     sd.SecureCookie,
 	}
 
 	rd := routerData{
-		dlog:           sd.DLog,
+		log:            sd.Log,
 		urlPrefix:      sd.URLPrefix,
 		maxRequestSize: sd.MaxRequestSize,
 		auth:           sd.Auth,
@@ -111,7 +111,7 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 	if srv.persistentCookie && d > 0 {
 		cookie.Expires = time.Now().Add(d).Add(30 * time.Second).UTC()
 	}
-	srv.dlog.Debug().Bytes("token", token).Msg("SetToken")
+	srv.log.Debug("SetToken", "token", token)
 	if v := cookie.String(); v != "" {
 		w.Header().Add("Set-Cookie", v)
 		w.Header().Add("Cache-Control", `no-cache="Set-Cookie"`)
