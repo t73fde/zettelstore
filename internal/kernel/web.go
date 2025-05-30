@@ -15,6 +15,7 @@ package kernel
 
 import (
 	"errors"
+	"log/slog"
 	"net"
 	"net/netip"
 	"net/url"
@@ -28,6 +29,7 @@ import (
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
 
@@ -40,8 +42,9 @@ type webService struct {
 
 var errURLPrefixSyntax = errors.New("must not be empty and must start with '//'")
 
-func (ws *webService) Initialize(logger *logger.DLogger) {
-	ws.dlogger = logger
+func (ws *webService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+	ws.logger = logger
+	ws.dlogger = dlogger
 	ws.descr = descriptionMap{
 		WebAssetDir: {
 			"Asset file  directory",
@@ -141,7 +144,8 @@ func makeDurationParser(defDur, minDur, maxDur time.Duration) parseFunc {
 
 var errWrongBasePrefix = errors.New(WebURLPrefix + " does not match " + WebBaseURL)
 
-func (ws *webService) GetLogger() *logger.DLogger { return ws.dlogger }
+func (ws *webService) GetLogger() *slog.Logger     { return ws.logger }
+func (ws *webService) GetDLogger() *logger.DLogger { return ws.dlogger }
 
 func (ws *webService) Start(kern *Kernel) error {
 	baseURL := ws.GetNextConfig(WebBaseURL).(string)
@@ -155,13 +159,12 @@ func (ws *webService) Start(kern *Kernel) error {
 	maxRequestSize := max(ws.GetNextConfig(WebMaxRequestSize).(int64), 1024)
 
 	if !strings.HasSuffix(baseURL, urlPrefix) {
-		ws.dlogger.Error().Str("base-url", baseURL).Str("url-prefix", urlPrefix).Msg(
-			"url-prefix is not a suffix of base-url")
+		ws.logger.Error("url-prefix is not a suffix of base-url", "base-url", baseURL, "url-prefix", urlPrefix)
 		return errWrongBasePrefix
 	}
 
 	if lap := netip.MustParseAddrPort(listenAddr); !kern.auth.manager.WithAuth() && !lap.Addr().IsLoopback() {
-		ws.dlogger.Info().Str("listen", listenAddr).Msg("service may be reached from outside, but authentication is not enabled")
+		ws.logger.Info("service may be reached from outside, but authentication is not enabled", "listen", listenAddr)
 	}
 
 	sd := server.ConfigData{
@@ -180,14 +183,14 @@ func (ws *webService) Start(kern *Kernel) error {
 	srvw := server.New(sd)
 	err := kern.web.setupServer(srvw, kern.box.manager, kern.auth.manager, &kern.cfg)
 	if err != nil {
-		ws.dlogger.Error().Err(err).Msg("Unable to create")
+		ws.logger.Error("Unable to create", "err", err)
 		return err
 	}
 	if err = srvw.Run(); err != nil {
-		ws.dlogger.Error().Err(err).Msg("Unable to start")
+		ws.logger.Error("Unable to start", "err", err)
 		return err
 	}
-	ws.dlogger.Info().Str("listen", listenAddr).Str("base-url", baseURL).Msg("Start Service")
+	ws.logger.Info("Start Service", "listen", listenAddr, "base-url", baseURL)
 	ws.mxService.Lock()
 	ws.srvw = srvw
 	ws.mxService.Unlock()
@@ -195,12 +198,12 @@ func (ws *webService) Start(kern *Kernel) error {
 	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
 		listenAddr := ws.GetNextConfig(WebListenAddress).(string)
 		if idx := strings.LastIndexByte(listenAddr, ':'); idx >= 0 {
-			ws.dlogger.Mandatory().Msg(strings.Repeat("--------------------", 3))
-			ws.dlogger.Mandatory().Msg("Open your browser and enter the following URL:")
-			ws.dlogger.Mandatory().Msg("    http://localhost" + listenAddr[idx:])
-			ws.dlogger.Mandatory().Msg("")
-			ws.dlogger.Mandatory().Msg("If this does not work, try:")
-			ws.dlogger.Mandatory().Msg("    http://127.0.0.1" + listenAddr[idx:])
+			logging.LogMandatory(ws.logger, strings.Repeat("--------------------", 3))
+			logging.LogMandatory(ws.logger, "Open your browser and enter the following URL:")
+			logging.LogMandatory(ws.logger, "    http://localhost"+listenAddr[idx:])
+			logging.LogMandatory(ws.logger, "")
+			logging.LogMandatory(ws.logger, "If this does not work, try:")
+			logging.LogMandatory(ws.logger, "    http://127.0.0.1"+listenAddr[idx:])
 		}
 	}
 
@@ -214,7 +217,7 @@ func (ws *webService) IsStarted() bool {
 }
 
 func (ws *webService) Stop(*Kernel) {
-	ws.dlogger.Info().Msg("Stop Service")
+	ws.logger.Info("Stop Service")
 	ws.srvw.Stop()
 	ws.mxService.Lock()
 	ws.srvw = nil

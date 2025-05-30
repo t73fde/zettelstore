@@ -16,6 +16,7 @@ package kernel
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"maps"
 	"slices"
 	"strconv"
@@ -38,6 +39,7 @@ type interfaceMap map[string]any
 func (m interfaceMap) Clone() interfaceMap { return maps.Clone(m) }
 
 type srvConfig struct {
+	logger   *slog.Logger
 	dlogger  *logger.DLogger
 	mxConfig sync.RWMutex
 	frozen   bool

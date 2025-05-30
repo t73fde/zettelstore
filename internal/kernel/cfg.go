@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,6 +28,7 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
 
@@ -52,8 +54,9 @@ const (
 
 var errUnknownVisibility = errors.New("unknown visibility")
 
-func (cs *configService) Initialize(logger *logger.DLogger) {
-	cs.dlogger = logger
+func (cs *configService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+	cs.logger = logger
+	cs.dlogger = dlogger
 	cs.descr = descriptionMap{
 		keyDefaultCopyright: {"Default copyright", parseString, true},
 		keyDefaultLicense:   {"Default license", parseString, true},
@@ -125,10 +128,12 @@ func (cs *configService) Initialize(logger *logger.DLogger) {
 		config.KeyShowSuccessorLinks:   "",
 	}
 }
-func (cs *configService) GetLogger() *logger.DLogger { return cs.dlogger }
+
+func (cs *configService) GetLogger() *slog.Logger     { return cs.logger }
+func (cs *configService) GetDLogger() *logger.DLogger { return cs.dlogger }
 
 func (cs *configService) Start(*Kernel) error {
-	cs.dlogger.Info().Msg("Start Service")
+	cs.logger.Info("Start Service")
 	data := meta.New(id.ZidConfiguration)
 	for _, kv := range cs.GetNextConfigList() {
 		data.Set(kv.Key, meta.Value(kv.Value))
@@ -146,7 +151,7 @@ func (cs *configService) IsStarted() bool {
 }
 
 func (cs *configService) Stop(*Kernel) {
-	cs.dlogger.Info().Msg("Stop Service")
+	cs.logger.Info("Stop Service")
 	cs.mxService.Lock()
 	cs.orig = nil
 	cs.manager = nil
@@ -167,7 +172,7 @@ func (cs *configService) setBox(mgr box.Manager) {
 
 func (cs *configService) doUpdate(p box.BaseBox) error {
 	z, err := p.GetZettel(context.Background(), id.ZidConfiguration)
-	cs.dlogger.Trace().Err(err).Msg("got config meta")
+	logging.LogTrace(cs.logger, "got config meta", "err", err)
 	if err != nil {
 		return err
 	}
@@ -191,7 +196,7 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 
 func (cs *configService) observe(ci box.UpdateInfo) {
 	if (ci.Reason != box.OnZettel && ci.Reason != box.OnDelete) || ci.Zid == id.ZidConfiguration {
-		cs.dlogger.Debug().Uint("reason", uint64(ci.Reason)).Zid(ci.Zid).Msg("observe")
+		cs.logger.Debug("observe", "reason", ci.Reason, "zid", ci.Zid)
 		go func() {
 			cs.mxService.RLock()
 			mgr := cs.manager
@@ -203,7 +208,7 @@ func (cs *configService) observe(ci box.UpdateInfo) {
 				err = cs.doUpdate(ci.Box)
 			}
 			if err != nil {
-				cs.dlogger.Error().Err(err).Msg("update config")
+				cs.logger.Error("update config", "err", err)
 			}
 		}()
 	}

@@ -372,7 +372,7 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 			{"kernel", strconv.Itoa(int(level)), level.String()},
 		}
 		for _, name := range sortedServiceNames(sess) {
-			level = kern.srvNames[name].srv.GetLogger().Level()
+			level = kern.srvNames[name].srv.GetDLogger().Level()
 			table = append(table, []string{name, strconv.Itoa(int(level)), level.String()})
 		}
 		sess.printTable(table)
@@ -387,7 +387,7 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 		if !ok {
 			return true
 		}
-		l = srvD.srv.GetLogger()
+		l = srvD.srv.GetDLogger()
 	}
 
 	if len(args) == 1 {

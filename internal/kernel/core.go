@@ -15,6 +15,7 @@ package kernel
 
 import (
 	"fmt"
+	"log/slog"
 	"maps"
 	"net"
 	"os"
@@ -43,8 +44,9 @@ type recoverInfo struct {
 	stack []byte
 }
 
-func (cs *coreService) Initialize(logger *logger.DLogger) {
-	cs.dlogger = logger
+func (cs *coreService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+	cs.logger = logger
+	cs.dlogger = dlogger
 	cs.mapRecover = make(map[string]recoverInfo)
 	cs.descr = descriptionMap{
 		CoreDebug:     {"Debug mode", parseBool, false},
@@ -93,7 +95,8 @@ func (cs *coreService) Initialize(logger *logger.DLogger) {
 	}
 }
 
-func (cs *coreService) GetLogger() *logger.DLogger { return cs.dlogger }
+func (cs *coreService) GetLogger() *slog.Logger     { return cs.logger }
+func (cs *coreService) GetDLogger() *logger.DLogger { return cs.dlogger }
 
 func (cs *coreService) Start(*Kernel) error {
 	cs.started = true

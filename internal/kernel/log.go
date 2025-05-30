@@ -14,6 +14,8 @@
 package kernel
 
 import (
+	"context"
+	"log/slog"
 	"os"
 	"slices"
 	"sync"
@@ -21,6 +23,32 @@ import (
 
 	"zettelstore.de/z/internal/logger"
 )
+
+type kernelLogHandler struct {
+	extHandler slog.Handler
+}
+
+func newKernelLogHandler(extHandler slog.Handler) *kernelLogHandler {
+	return &kernelLogHandler{
+		extHandler: extHandler,
+	}
+}
+
+func (klh *kernelLogHandler) Enabled(ctx context.Context, level slog.Level) bool {
+	return klh.extHandler.Enabled(ctx, level)
+}
+
+func (klh *kernelLogHandler) Handle(ctx context.Context, rec slog.Record) error {
+	return klh.extHandler.Handle(ctx, rec)
+}
+
+func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	return newKernelLogHandler(klh.extHandler.WithAttrs(attrs))
+}
+
+func (klh *kernelLogHandler) WithGroup(name string) slog.Handler {
+	return newKernelLogHandler(klh.extHandler.WithGroup(name))
+}
 
 // kernelDLogWriter adapts an io.Writer to a LogWriter
 type kernelDLogWriter struct {

@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -37,6 +38,7 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
 
@@ -45,11 +47,13 @@ var Main *Kernel
 
 // Kernel is the main internal kernel.
 type Kernel struct {
-	dlogWriter *kernelDLogWriter
-	dlogger    *logger.DLogger
-	wg         sync.WaitGroup
-	mx         sync.RWMutex
-	interrupt  chan os.Signal
+	logLevelVar slog.LevelVar
+	logger      *slog.Logger
+	dlogWriter  *kernelDLogWriter
+	dlogger     *logger.DLogger
+	wg          sync.WaitGroup
+	mx          sync.RWMutex
+	interrupt   chan os.Signal
 
 	profileName string
 	fileName    string
@@ -63,16 +67,18 @@ type Kernel struct {
 	box  boxService
 	web  webService
 
-	srvs     map[Service]serviceDescr
+	srvs     map[Service]*serviceDescr
 	srvNames map[string]serviceData
 	depStart serviceDependency
 	depStop  serviceDependency // reverse of depStart
 }
 
 type serviceDescr struct {
-	srv       service
-	name      string
-	dlogLevel logger.DLevel
+	srv         service
+	name        string
+	logLevel    slog.Level
+	logLevelVar slog.LevelVar
+	dlogLevel   logger.DLevel
 }
 type serviceData struct {
 	srv    service
@@ -90,27 +96,37 @@ func createKernel() *Kernel {
 	lw := newKernelLogWriter(8192)
 	kern := &Kernel{
 		dlogWriter: lw,
-		dlogger:    logger.DNew(lw, "").SetLevel(defaultNormalLogLevel),
+		dlogger:    logger.DNew(lw, "").SetLevel(defaultNormalDLogLevel),
 		interrupt:  make(chan os.Signal, 5),
 	}
+	kern.logLevelVar.Set(defaultNormalLogLevel)
+	kern.logger = slog.New(newKernelLogHandler(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: &kern.logLevelVar,
+	})))
 	kern.self.kernel = kern
-	kern.srvs = map[Service]serviceDescr{
-		KernelService: {&kern.self, "kernel", defaultNormalLogLevel},
-		CoreService:   {&kern.core, "core", defaultNormalLogLevel},
-		ConfigService: {&kern.cfg, "config", defaultNormalLogLevel},
-		AuthService:   {&kern.auth, "auth", defaultNormalLogLevel},
-		BoxService:    {&kern.box, "box", defaultNormalLogLevel},
-		WebService:    {&kern.web, "web", defaultNormalLogLevel},
+	kern.srvs = map[Service]*serviceDescr{
+		KernelService: {srv: &kern.self, name: "kernel", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
+		CoreService:   {srv: &kern.core, name: "core", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
+		ConfigService: {srv: &kern.cfg, name: "config", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
+		AuthService:   {srv: &kern.auth, name: "auth", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
+		BoxService:    {srv: &kern.box, name: "box", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
+		WebService:    {srv: &kern.web, name: "web", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
 	}
 	kern.srvNames = make(map[string]serviceData, len(kern.srvs))
 	for key, srvD := range kern.srvs {
 		if _, ok := kern.srvNames[srvD.name]; ok {
-			kern.dlogger.Error().Str("service", srvD.name).Msg("Service data already set, ignore")
+			kern.logger.Error("Service data already set, ignored", "service", srvD.name)
 		}
 		kern.srvNames[srvD.name] = serviceData{srvD.srv, key}
-		l := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.dlogLevel)
-		kern.dlogger.Debug().Str("service", srvD.name).Msg("Initialize")
-		srvD.srv.Initialize(l)
+
+		srvD.logLevelVar.Set(srvD.logLevel)
+		srvLogger := slog.New(newKernelLogHandler(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+			Level: &srvD.logLevelVar,
+		})))
+		srvLogger = srvLogger.With("system", strings.ToUpper(srvD.name))
+		dlog := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.dlogLevel)
+		kern.logger.Debug("Initialize", "service", srvD.name)
+		srvD.srv.Initialize(srvLogger, dlog)
 	}
 	kern.depStart = serviceDependency{
 		KernelService: nil,
@@ -250,8 +266,10 @@ type SetupWebServerFunc func(
 ) error
 
 const (
-	defaultNormalLogLevel = logger.DInfoLevel
-	defaultSimpleLogLevel = logger.DErrorLevel
+	defaultNormalLogLevel  = slog.LevelInfo
+	defaultSimpleLogLevel  = slog.LevelError
+	defaultNormalDLogLevel = logger.DInfoLevel
+	defaultSimpleDLogLevel = logger.DErrorLevel
 )
 
 // Setup sets the most basic data of a software: its name, its version,
@@ -268,7 +286,8 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		srvD.srv.Freeze()
 	}
 	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
-		kern.SetLogLevel(defaultSimpleLogLevel.String())
+		kern.SetLogLevel(defaultSimpleDLogLevel.String())
+		kern.logLevelVar.Set(defaultSimpleLogLevel)
 	}
 	kern.wg.Add(1)
 	signal.Notify(kern.interrupt, os.Interrupt, syscall.SIGTERM)
@@ -276,7 +295,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		// Wait for interrupt.
 		sig := <-kern.interrupt
 		if strSig := sig.String(); strSig != "" {
-			kern.dlogger.Info().Str("signal", strSig).Msg("Shut down Zettelstore")
+			kern.logger.Info("Shut down Zettelstore", "signal", strSig)
 		}
 		kern.doShutdown()
 		kern.wg.Done()
@@ -284,8 +303,8 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 
 	_ = kern.StartService(KernelService)
 	if headline {
-		logger := kern.dlogger
-		logger.Mandatory().Msg(fmt.Sprintf(
+		logger := kern.logger
+		logging.LogMandatory(logger, fmt.Sprintf(
 			"%v %v (%v@%v/%v)",
 			kern.core.GetCurConfig(CoreProgname),
 			kern.core.GetCurConfig(CoreVersion),
@@ -293,19 +312,19 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 			kern.core.GetCurConfig(CoreGoOS),
 			kern.core.GetCurConfig(CoreGoArch),
 		))
-		logger.Mandatory().Msg("Licensed under the latest version of the EUPL (European Union Public License)")
+		logging.LogMandatory(logger, "Licensed under the latest version of the EUPL (European Union Public License)")
 		if configFilename != "" {
-			logger.Mandatory().Str("filename", configFilename).Msg("Configuration file found")
+			logging.LogMandatory(logger, "Configuration file found", "filename", configFilename)
 		} else {
-			logger.Mandatory().Msg("No configuration file found / used")
+			logging.LogMandatory(logger, "No configuration file found / used")
 		}
 		if kern.core.GetCurConfig(CoreDebug).(bool) {
-			logger.Info().Msg("----------------------------------------")
-			logger.Info().Msg("DEBUG MODE, DO NO USE THIS IN PRODUCTION")
-			logger.Info().Msg("----------------------------------------")
+			logger.Info("----------------------------------------")
+			logger.Info("DEBUG MODE, DO NO USE THIS IN PRODUCTION")
+			logger.Info("----------------------------------------")
 		}
 		if kern.auth.GetCurConfig(AuthReadonly).(bool) {
-			logger.Info().Msg("Read-only mode")
+			logger.Info("Read-only mode")
 		}
 	}
 	if lineServer {
@@ -354,22 +373,54 @@ func (kern *Kernel) GetKernelLogger() *logger.DLogger {
 
 // SetLogLevel sets the logging level for logger maintained by the kernel.
 //
-// Its syntax is: (SERVICE ":")? LEVEL (";" (SERICE ":")? LEVEL)*.
+// Its syntax is: (SERVICE ":")? LEVEL (";" (SERVICE ":")? LEVEL)*.
 func (kern *Kernel) SetLogLevel(logLevel string) {
 	defaultLevel, srvLevel := kern.parseLogLevel(logLevel)
 
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
+
 	for srvN, srvD := range kern.srvs {
 		if lvl, found := srvLevel[srvN]; found {
-			srvD.srv.GetLogger().SetLevel(lvl)
-		} else if defaultLevel != logger.DNoLevel {
-			srvD.srv.GetLogger().SetLevel(defaultLevel)
+			srvD.logLevelVar.Set(lvl)
+		} else if defaultLevel != logging.LevelMissing {
+			srvD.logLevelVar.Set(defaultLevel)
+		}
+	}
+
+	defaultDLevel, srvDLevel := kern.parseDLogLevel(logLevel)
+	for srvN, srvD := range kern.srvs {
+		if lvl, found := srvDLevel[srvN]; found {
+			srvD.srv.GetDLogger().SetLevel(lvl)
+		} else if defaultDLevel != logger.DNoLevel {
+			srvD.srv.GetDLogger().SetLevel(defaultDLevel)
 		}
 	}
 }
 
-func (kern *Kernel) parseLogLevel(logLevel string) (logger.DLevel, map[Service]logger.DLevel) {
+func (kern *Kernel) parseLogLevel(logLevel string) (slog.Level, map[Service]slog.Level) {
+	defaultLevel := logging.LevelMissing
+	srvLevel := map[Service]slog.Level{}
+	for spec := range strings.SplitSeq(logLevel, ";") {
+		vals := cleanLogSpec(strings.Split(spec, ":"))
+		switch len(vals) {
+		case 0:
+		case 1:
+			if lvl := logging.ParseLevel(vals[0]); lvl != logging.LevelMissing {
+				defaultLevel = lvl
+			}
+		default:
+			serviceText, levelText := vals[0], vals[1]
+			if srv, found := kern.srvNames[serviceText]; found {
+				if lvl := logging.ParseLevel(levelText); lvl != logging.LevelMissing {
+					srvLevel[srv.srvnum] = lvl
+				}
+			}
+		}
+	}
+	return defaultLevel, srvLevel
+}
+func (kern *Kernel) parseDLogLevel(logLevel string) (logger.DLevel, map[Service]logger.DLevel) {
 	defaultLevel := logger.DNoLevel
 	srvLevel := map[Service]logger.DLevel{}
 	for spec := range strings.SplitSeq(logLevel, ";") {
@@ -530,7 +581,7 @@ func (kern *Kernel) GetLogger(srvnum Service) *logger.DLogger {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
-		return srvD.srv.GetLogger()
+		return srvD.srv.GetDLogger()
 	}
 	return kern.GetKernelLogger()
 }
@@ -612,10 +663,13 @@ func (kern *Kernel) dumpIndex(w io.Writer) { kern.box.dumpIndex(w) }
 
 type service interface {
 	// Initialize the data for the service.
-	Initialize(*logger.DLogger)
+	Initialize(*slog.Logger, *logger.DLogger)
 
 	// Get service logger.
-	GetLogger() *logger.DLogger
+	GetLogger() *slog.Logger
+
+	// Get service logger.
+	GetDLogger() *logger.DLogger
 
 	// ConfigDescriptions returns a sorted list of configuration descriptions.
 	ConfigDescriptions() []serviceConfigDescription
@@ -673,8 +727,9 @@ type kernelService struct {
 	kernel *Kernel
 }
 
-func (*kernelService) Initialize(*logger.DLogger)                     {}
-func (ks *kernelService) GetLogger() *logger.DLogger                  { return ks.kernel.dlogger }
+func (*kernelService) Initialize(*slog.Logger, *logger.DLogger)       {}
+func (ks *kernelService) GetLogger() *slog.Logger                     { return ks.kernel.logger }
+func (ks *kernelService) GetDLogger() *logger.DLogger                 { return ks.kernel.dlogger }
 func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return nil }
 func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
 func (*kernelService) GetCurConfig(string) any                        { return nil }
