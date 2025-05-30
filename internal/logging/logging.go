@@ -26,6 +26,24 @@ const (
 	LevelMandatory slog.Level = 9999
 )
 
+func LevelString(level slog.Level) string {
+	switch level {
+	case LevelTrace:
+		return "TRACE"
+	case LevelMandatory:
+		return ">>>>>"
+	// case slog.LevelInfo:
+	// 	return "INFO "
+	default:
+		s := level.String()
+		if len(s) < 5 {
+			s = s + "     "[0:5-len(s)]
+		}
+		return s
+	}
+
+}
+
 func LogTrace(logger *slog.Logger, msg string, args ...any) {
 	logger.Log(context.Background(), LevelTrace, msg, args...)
 }

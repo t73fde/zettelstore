@@ -100,9 +100,7 @@ func createKernel() *Kernel {
 		interrupt:  make(chan os.Signal, 5),
 	}
 	kern.logLevelVar.Set(defaultNormalLogLevel)
-	kern.logger = slog.New(newKernelLogHandler(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: &kern.logLevelVar,
-	})))
+	kern.logger = slog.New(newKernelLogHandler(lw, &kern.logLevelVar))
 	kern.self.kernel = kern
 	kern.srvs = map[Service]*serviceDescr{
 		KernelService: {srv: &kern.self, name: "kernel", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
@@ -120,9 +118,7 @@ func createKernel() *Kernel {
 		kern.srvNames[srvD.name] = serviceData{srvD.srv, key}
 
 		srvD.logLevelVar.Set(srvD.logLevel)
-		srvLogger := slog.New(newKernelLogHandler(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-			Level: &srvD.logLevelVar,
-		})))
+		srvLogger := slog.New(newKernelLogHandler(lw, &srvD.logLevelVar))
 		srvLogger = srvLogger.With("system", strings.ToUpper(srvD.name))
 		dlog := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.dlogLevel)
 		kern.logger.Debug("Initialize", "service", srvD.name)

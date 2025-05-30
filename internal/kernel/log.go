@@ -14,6 +14,7 @@
 package kernel
 
 import (
+	"bytes"
 	"context"
 	"log/slog"
 	"os"
@@ -22,32 +23,81 @@ import (
 	"time"
 
 	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 )
 
 type kernelLogHandler struct {
-	extHandler slog.Handler
+	klw    *kernelDLogWriter
+	level  slog.Leveler
+	system string
+	attrs  string
 }
 
-func newKernelLogHandler(extHandler slog.Handler) *kernelLogHandler {
+func newKernelLogHandler(klw *kernelDLogWriter, level slog.Leveler) *kernelLogHandler {
 	return &kernelLogHandler{
-		extHandler: extHandler,
+		klw:    klw,
+		level:  level,
+		system: "",
+		attrs:  "",
 	}
 }
 
-func (klh *kernelLogHandler) Enabled(ctx context.Context, level slog.Level) bool {
-	return klh.extHandler.Enabled(ctx, level)
+func (klh *kernelLogHandler) Enabled(_ context.Context, level slog.Level) bool {
+	return level >= klh.level.Level()
 }
 
 func (klh *kernelLogHandler) Handle(ctx context.Context, rec slog.Record) error {
-	return klh.extHandler.Handle(ctx, rec)
+	var buf bytes.Buffer
+	// _, _ = buf.WriteString(rec.Time.Format(time.DateTime))
+	// _ = buf.WriteByte(' ')
+	// _, _ = buf.WriteString(logging.LevelString(rec.Level))
+	// if s := klh.system; s != "" {
+	// 	_ = buf.WriteByte(' ')
+	// 	_, _ = buf.WriteString(s)
+	// }
+	// _ = buf.WriteByte(' ')
+	// _, _ = buf.WriteString(rec.Message)
+	_, _ = buf.WriteString(klh.attrs)
+	rec.Attrs(func(attr slog.Attr) bool {
+		_ = buf.WriteByte(' ')
+		_, _ = buf.WriteString(attr.String())
+		return true
+	})
+	// _ = buf.WriteByte('\n')
+	// _, _ = os.Stdout.WriteString(buf.String())
+
+	dlevel := logger.DInfoLevel
+	switch rec.Level {
+	case logging.LevelTrace:
+		dlevel = logger.DTraceLevel
+	case slog.LevelDebug:
+		dlevel = logger.DDebugLevel
+	case slog.LevelWarn, slog.LevelError:
+		dlevel = logger.DErrorLevel
+	case logging.LevelMandatory:
+		dlevel = logger.DMandatoryLevel
+	}
+	return klh.klw.DWriteMessage(dlevel, rec.Time, klh.system, rec.Message, buf.Bytes())
 }
 
 func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
-	return newKernelLogHandler(klh.extHandler.WithAttrs(attrs))
+	h := newKernelLogHandler(klh.klw, klh.level)
+	for _, attr := range attrs {
+		if attr.Key == "system" {
+			system := attr.Value.String()
+			if len(system) < 6 {
+				system += "     "[:6-len(system)]
+			}
+			h.system = system
+			continue
+		}
+		h.attrs += attr.String()
+	}
+	return h
 }
 
 func (klh *kernelLogHandler) WithGroup(name string) slog.Handler {
-	return newKernelLogHandler(klh.extHandler.WithGroup(name))
+	panic("kernelLogHandler.WithGroup not implemented")
 }
 
 // kernelDLogWriter adapts an io.Writer to a LogWriter
