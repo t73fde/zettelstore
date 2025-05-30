@@ -132,7 +132,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 			propertyKeys.Add(kd.Name)
 		}
 	}
-	boxLog := kernel.Main.GetLogger(kernel.BoxService)
+	boxLog := kernel.Main.GetDLogger(kernel.BoxService)
 	mgr := &Manager{
 		mgrLog:       boxLog.Clone().Str("box", "manager").Child(),
 		rtConfig:     rtConfig,

@@ -363,9 +363,10 @@ func (*shutdownSignal) Signal() { /* Just a signal */ }
 // --- Log operation ---------------------------------------------------------
 
 // GetKernelLogger returns the kernel logger.
-func (kern *Kernel) GetKernelLogger() *logger.DLogger {
-	return kern.dlogger
-}
+func (kern *Kernel) GetKernelLogger() *slog.Logger { return kern.logger }
+
+// GetKernelDLogger returns the kernel logger.
+func (kern *Kernel) GetKernelDLogger() *logger.DLogger { return kern.dlogger }
 
 // SetLogLevel sets the logging level for logger maintained by the kernel.
 //
@@ -573,13 +574,23 @@ func (kern *Kernel) GetServiceStatistics(srvnum Service) []KeyValue {
 }
 
 // GetLogger returns a logger for the given service.
-func (kern *Kernel) GetLogger(srvnum Service) *logger.DLogger {
+func (kern *Kernel) GetLogger(srvnum Service) *slog.Logger {
+	kern.mx.RLock()
+	defer kern.mx.RUnlock()
+	if srvD, ok := kern.srvs[srvnum]; ok {
+		return srvD.srv.GetLogger()
+	}
+	return kern.GetKernelLogger()
+}
+
+// GetDLogger returns a logger for the given service.
+func (kern *Kernel) GetDLogger(srvnum Service) *logger.DLogger {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
 		return srvD.srv.GetDLogger()
 	}
-	return kern.GetKernelLogger()
+	return kern.GetKernelDLogger()
 }
 
 // StartService start the given service.

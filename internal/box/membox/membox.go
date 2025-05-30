@@ -34,7 +34,7 @@ func init() {
 		"mem",
 		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return &memBox{
-				dlog: kernel.Main.GetLogger(kernel.BoxService).Clone().
+				dlog: kernel.Main.GetDLogger(kernel.BoxService).Clone().
 					Str("box", "mem").Int("boxnum", int64(cdata.Number)).Child(),
 				u:         u,
 				cdata:     *cdata,

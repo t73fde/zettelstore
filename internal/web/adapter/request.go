@@ -29,7 +29,7 @@ import (
 func GetCredentialsViaForm(r *http.Request) (ident, cred string, ok bool) {
 	err := r.ParseForm()
 	if err != nil {
-		kernel.Main.GetLogger(kernel.WebService).Info().Err(err).Msg("Unable to parse form")
+		kernel.Main.GetDLogger(kernel.WebService).Info().Err(err).Msg("Unable to parse form")
 		return "", "", false
 	}
 

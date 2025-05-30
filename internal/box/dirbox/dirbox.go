@@ -38,7 +38,7 @@ func init() {
 	manager.Register("dir", func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 		var dlog *logger.DLogger
 		if krnl := kernel.Main; krnl != nil {
-			dlog = krnl.GetLogger(kernel.BoxService).Clone().Str("box", "dir").Int("boxnum", int64(cdata.Number)).Child()
+			dlog = krnl.GetDLogger(kernel.BoxService).Clone().Str("box", "dir").Int("boxnum", int64(cdata.Number)).Child()
 		}
 		path := getDirPath(u)
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {

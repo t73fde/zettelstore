@@ -35,7 +35,7 @@ func init() {
 		" const",
 		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return &constBox{
-				dlog: kernel.Main.GetLogger(kernel.BoxService).Clone().
+				dlog: kernel.Main.GetDLogger(kernel.BoxService).Clone().
 					Str("box", "const").Int("boxnum", int64(cdata.Number)).Child(),
 				number:   cdata.Number,
 				zettel:   constZettelMap,

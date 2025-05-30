@@ -186,7 +186,7 @@ const (
 
 func setServiceConfig(cfg *meta.Meta) bool {
 	debugMode := cfg.GetBool(keyDebug)
-	if debugMode && kernel.Main.GetKernelLogger().Level() > logger.DDebugLevel {
+	if debugMode && kernel.Main.GetKernelDLogger().Level() > logger.DDebugLevel {
 		kernel.Main.SetLogLevel(logger.DDebugLevel.String())
 	}
 	if logLevel, found := cfg.Get(keyLogLevel); found {
@@ -247,7 +247,7 @@ func setConfigValue(err error, subsys kernel.Service, key string, val any) error
 	if err == nil {
 		err = kernel.Main.SetConfig(subsys, key, fmt.Sprint(val))
 		if err != nil {
-			kernel.Main.GetKernelLogger().Error().Str("key", key).Str("value", fmt.Sprint(val)).Err(err).Msg("Unable to set configuration")
+			kernel.Main.GetKernelDLogger().Error().Str("key", key).Str("value", fmt.Sprint(val)).Err(err).Msg("Unable to set configuration")
 		}
 	}
 	return err
@@ -302,7 +302,7 @@ func executeCommand(name string, args ...string) int {
 
 	if command.Simple {
 		if err := kern.SetConfig(kernel.ConfigService, kernel.ConfigSimpleMode, "true"); err != nil {
-			kern.GetKernelLogger().Error().Err(err).Msg("unable to set simple-mode")
+			kern.GetKernelDLogger().Error().Err(err).Msg("unable to set simple-mode")
 			return 1
 		}
 	}
@@ -349,12 +349,12 @@ func Main(progName, buildVersion string) int {
 			err = kernel.Main.StartProfiling(kernel.ProfileHead, *memprofile)
 		}
 		if err != nil {
-			kernel.Main.GetKernelLogger().Error().Err(err).Msg("start profiling")
+			kernel.Main.GetKernelDLogger().Error().Err(err).Msg("start profiling")
 			return 1
 		}
 		defer func() {
 			if err = kernel.Main.StopProfiling(); err != nil {
-				kernel.Main.GetKernelLogger().Error().Err(err).Msg("stop profiling")
+				kernel.Main.GetKernelDLogger().Error().Err(err).Msg("stop profiling")
 			}
 		}()
 	}

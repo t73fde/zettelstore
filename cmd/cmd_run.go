@@ -55,11 +55,11 @@ func runFunc(*flag.FlagSet) (int, error) {
 func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth.Manager, rtConfig config.Config) {
 	protectedBoxManager, authPolicy := authManager.BoxWithPolicy(boxManager, rtConfig)
 	kern := kernel.Main
-	webLog := kern.GetLogger(kernel.WebService)
+	webLog := kern.GetDLogger(kernel.WebService)
 
 	var getUser getUserImpl
-	logAuth := kern.GetLogger(kernel.AuthService)
-	logUc := kern.GetLogger(kernel.CoreService).WithUser(&getUser)
+	logAuth := kern.GetDLogger(kernel.AuthService)
+	logUc := kern.GetDLogger(kernel.CoreService).WithUser(&getUser)
 	ucGetUser := usecase.NewGetUser(authManager, boxManager)
 	ucAuthenticate := usecase.NewAuthenticate(logAuth, authManager, &ucGetUser)
 	ucIsAuth := usecase.NewIsAuthenticated(logUc, &getUser, authManager)
