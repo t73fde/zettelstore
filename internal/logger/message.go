@@ -15,11 +15,9 @@ package logger
 
 import (
 	"context"
-	"net/http"
 	"strconv"
 	"sync"
 
-	"t73f.de/r/webs/ip"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 )
@@ -126,15 +124,6 @@ func (m *DMessage) User(ctx context.Context) *DMessage {
 		}
 	}
 	return m
-}
-
-// RemoteAddr adds the remote address of an HTTP request to the message.
-func (m *DMessage) RemoteAddr(r *http.Request) *DMessage {
-	addr := ip.GetRemoteAddr(r)
-	if addr == "" {
-		return m
-	}
-	return m.Str("remote", addr)
 }
 
 // Zid adds a zettel identifier to the full message

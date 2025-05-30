@@ -58,7 +58,7 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	webLog := kern.GetDLogger(kernel.WebService)
 
 	var getUser getUserImpl
-	logAuth := kern.GetDLogger(kernel.AuthService)
+	logAuth := kern.GetLogger(kernel.AuthService)
 	logUc := kern.GetDLogger(kernel.CoreService).WithUser(&getUser)
 	ucGetUser := usecase.NewGetUser(authManager, boxManager)
 	ucAuthenticate := usecase.NewAuthenticate(logAuth, authManager, &ucGetUser)

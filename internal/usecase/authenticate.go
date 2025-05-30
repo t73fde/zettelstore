@@ -15,10 +15,12 @@ package usecase
 
 import (
 	"context"
+	"log/slog"
 	"math/rand/v2"
 	"net/http"
 	"time"
 
+	"t73f.de/r/webs/ip"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -29,15 +31,15 @@ import (
 
 // Authenticate is the data for this use case.
 type Authenticate struct {
-	dlog      *logger.DLogger
+	log       *slog.Logger
 	token     auth.TokenManager
 	ucGetUser *GetUser
 }
 
 // NewAuthenticate creates a new use case.
-func NewAuthenticate(dlog *logger.DLogger, token auth.TokenManager, ucGetUser *GetUser) Authenticate {
+func NewAuthenticate(log *slog.Logger, token auth.TokenManager, ucGetUser *GetUser) Authenticate {
 	return Authenticate{
-		dlog:      dlog,
+		log:       log,
 		token:     token,
 		ucGetUser: ucGetUser,
 	}
@@ -52,7 +54,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	defer addDelay(time.Now(), 500*time.Millisecond, 100*time.Millisecond)
 
 	if identMeta == nil || err != nil {
-		uc.dlog.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("No user with given ident found")
+		uc.log.Info("No user with given ident found", "ident", ident, "err", err, "remote", ip.GetRemoteAddr(r))
 		compensateCompare()
 		return nil, err
 	}
@@ -60,22 +62,22 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	if hashCred, ok := identMeta.Get(meta.KeyCredential); ok {
 		ok, err = cred.CompareHashAndCredential(string(hashCred), identMeta.Zid, ident, credential)
 		if err != nil {
-			uc.dlog.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("Error while comparing credentials")
+			uc.log.Info("Error while comparing credentials", "ident", ident, "err", err, "remote", ip.GetRemoteAddr(r))
 			return nil, err
 		}
 		if ok {
 			token, err2 := uc.token.GetToken(identMeta, d, k)
 			if err2 != nil {
-				uc.dlog.Info().Str("ident", ident).Err(err).Msg("Unable to produce authentication token")
+				uc.log.Info("Unable to produce authentication token", "ident", ident, "err", err)
 				return nil, err2
 			}
-			uc.dlog.Info().Str("user", ident).Msg("Successful")
+			uc.log.Info("Successful", "user", ident)
 			return token, nil
 		}
-		uc.dlog.Info().Str("ident", ident).RemoteAddr(r).Msg("Credentials don't match")
+		uc.log.Info("Credentials don't match", "ident", ident, "remote", ip.GetRemoteAddr(r))
 		return nil, nil
 	}
-	uc.dlog.Info().Str("ident", ident).Msg("No credential stored")
+	uc.log.Info("No credential stored", "ident", ident)
 	compensateCompare()
 	return nil, nil
 }
