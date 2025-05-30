@@ -124,7 +124,7 @@ func dnewFromDMessage(msg *DMessage) *DLogger {
 	if msg == nil {
 		return nil
 	}
-	logger := msg.logger
+	logger := msg.dlogger
 	context := make([]byte, 0, len(msg.buf))
 	context = append(context, msg.buf...)
 	return &DLogger{

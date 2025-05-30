@@ -35,13 +35,13 @@ type UpdateZettelPort interface {
 
 // UpdateZettel is the data for this use case.
 type UpdateZettel struct {
-	log  *logger.DLogger
+	dlog *logger.DLogger
 	port UpdateZettelPort
 }
 
 // NewUpdateZettel creates a new use case.
-func NewUpdateZettel(log *logger.DLogger, port UpdateZettelPort) UpdateZettel {
-	return UpdateZettel{log: log, port: port}
+func NewUpdateZettel(dlog *logger.DLogger, port UpdateZettelPort) UpdateZettel {
+	return UpdateZettel{dlog: dlog, port: port}
 }
 
 // Run executes the use case.
@@ -73,6 +73,6 @@ func (uc *UpdateZettel) Run(ctx context.Context, zettel zettel.Zettel, hasConten
 	}
 	zettel.Content.TrimSpace()
 	err = uc.port.UpdateZettel(ctx, zettel)
-	uc.log.Info().User(ctx).Zid(m.Zid).Err(err).Msg("Update zettel")
+	uc.dlog.Info().User(ctx).Zid(m.Zid).Err(err).Msg("Update zettel")
 	return err
 }

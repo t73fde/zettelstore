@@ -56,7 +56,7 @@ const (
 // DirService specifies a directory service for file based zettel.
 type DirService struct {
 	box      box.ManagedBox
-	log      *logger.DLogger
+	dlog     *logger.DLogger
 	dirPath  string
 	notifier Notifier
 	infos    box.UpdateNotifier
@@ -69,10 +69,10 @@ type DirService struct {
 var ErrNoDirectory = errors.New("unable to retrieve zettel directory information")
 
 // NewDirService creates a new directory service.
-func NewDirService(box box.ManagedBox, log *logger.DLogger, notifier Notifier, notify box.UpdateNotifier) *DirService {
+func NewDirService(box box.ManagedBox, dlog *logger.DLogger, notifier Notifier, notify box.UpdateNotifier) *DirService {
 	return &DirService{
 		box:      box,
-		log:      log,
+		dlog:     dlog,
 		notifier: notifier,
 		infos:    notify,
 		state:    DsCreated,
@@ -111,7 +111,7 @@ func (ds *DirService) Stop() {
 
 func (ds *DirService) logMissingEntry(action string) error {
 	err := ErrNoDirectory
-	ds.log.Info().Err(err).Str("action", action).Msg("Unable to get directory information")
+	ds.dlog.Info().Err(err).Str("action", action).Msg("Unable to get directory information")
 	return err
 }
 
@@ -221,7 +221,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 	state := ds.state
 	ds.mx.RUnlock()
 
-	if msg := ds.log.Trace(); msg.Enabled() {
+	if msg := ds.dlog.Trace(); msg.Enabled() {
 		msg.Uint("state", uint64(state)).Str("op", ev.Op.String()).Str("name", ev.Name).Msg("notifyEvent")
 	}
 	if state == DsStopping {
@@ -232,7 +232,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 	case Error:
 		newEntries = nil
 		if state != DsMissing {
-			ds.log.Error().Err(ev.Err).Msg("Notifier confused")
+			ds.dlog.Error().Err(ev.Err).Msg("Notifier confused")
 		}
 	case Make:
 		newEntries = make(entrySet)
@@ -247,7 +247,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 			ds.mx.Unlock()
 			ds.onCreateDirectory(zids, prevEntries)
 			if fromMissing {
-				ds.log.Info().Str("path", ds.dirPath).Msg("Zettel directory found")
+				ds.dlog.Info().Str("path", ds.dirPath).Msg("Zettel directory found")
 			}
 			return nil, true
 		}
@@ -256,7 +256,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 		}
 	case Destroy:
 		ds.onDestroyDirectory()
-		ds.log.Error().Str("path", ds.dirPath).Msg("Zettel directory missing")
+		ds.dlog.Error().Str("path", ds.dirPath).Msg("Zettel directory missing")
 		return nil, true
 	case Update:
 		ds.mx.Lock()
@@ -273,7 +273,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 			ds.notifyChange(zid, box.OnDelete)
 		}
 	default:
-		ds.log.Error().Str("event", fmt.Sprintf("%v", ev)).Msg("Unknown zettel notification event")
+		ds.dlog.Error().Str("event", fmt.Sprintf("%v", ev)).Msg("Unknown zettel notification event")
 	}
 	return newEntries, true
 }
@@ -348,9 +348,9 @@ func (ds *DirService) onUpdateFileEvent(entries entrySet, name string) id.Zid {
 	entry := fetchdirEntry(entries, zid)
 	dupName1, dupName2 := ds.updateEntry(entry, name)
 	if dupName1 != "" {
-		ds.log.Info().Str("name", dupName1).Msg("Duplicate content (is ignored)")
+		ds.dlog.Info().Str("name", dupName1).Msg("Duplicate content (is ignored)")
 		if dupName2 != "" {
-			ds.log.Info().Str("name", dupName2).Msg("Duplicate content (is ignored)")
+			ds.dlog.Info().Str("name", dupName2).Msg("Duplicate content (is ignored)")
 		}
 		return id.Invalid
 	}
@@ -416,7 +416,7 @@ loop:
 				continue loop
 			}
 		}
-		ds.log.Info().Str("name", prevName).Msg("Previous duplicate file becomes useful")
+		ds.dlog.Info().Str("name", prevName).Msg("Previous duplicate file becomes useful")
 	}
 }
 
@@ -577,7 +577,7 @@ func newExtIsBetter(oldExt, newExt string) bool {
 
 func (ds *DirService) notifyChange(zid id.Zid, reason box.UpdateReason) {
 	if notify := ds.infos; notify != nil {
-		ds.log.Trace().Zid(zid).Uint("reason", uint64(reason)).Msg("notifyChange")
+		ds.dlog.Trace().Zid(zid).Uint("reason", uint64(reason)).Msg("notifyChange")
 		notify(ds.box, zid, reason)
 	}
 }

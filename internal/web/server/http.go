@@ -28,7 +28,7 @@ import (
 )
 
 type webServer struct {
-	log              *logger.DLogger
+	dlog             *logger.DLogger
 	baseURL          string
 	httpServer       httpServer
 	router           httpRouter
@@ -38,7 +38,7 @@ type webServer struct {
 
 // ConfigData contains the data needed to configure a server.
 type ConfigData struct {
-	Log              *logger.DLogger
+	DLog             *logger.DLogger
 	ListenAddr       string
 	BaseURL          string
 	URLPrefix        string
@@ -54,14 +54,14 @@ type ConfigData struct {
 // New creates a new web server.
 func New(sd ConfigData) Server {
 	srv := webServer{
-		log:              sd.Log,
+		dlog:             sd.DLog,
 		baseURL:          sd.BaseURL,
 		persistentCookie: sd.PersistentCookie,
 		secureCookie:     sd.SecureCookie,
 	}
 
 	rd := routerData{
-		log:            sd.Log,
+		dlog:           sd.DLog,
 		urlPrefix:      sd.URLPrefix,
 		maxRequestSize: sd.MaxRequestSize,
 		auth:           sd.Auth,
@@ -111,7 +111,7 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 	if srv.persistentCookie && d > 0 {
 		cookie.Expires = time.Now().Add(d).Add(30 * time.Second).UTC()
 	}
-	srv.log.Debug().Bytes("token", token).Msg("SetToken")
+	srv.dlog.Debug().Bytes("token", token).Msg("SetToken")
 	if v := cookie.String(); v != "" {
 		w.Header().Add("Set-Cookie", v)
 		w.Header().Add("Cache-Control", `no-cache="Set-Cookie"`)

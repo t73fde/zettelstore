@@ -35,7 +35,7 @@ func init() {
 		" const",
 		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return &constBox{
-				log: kernel.Main.GetLogger(kernel.BoxService).Clone().
+				dlog: kernel.Main.GetLogger(kernel.BoxService).Clone().
 					Str("box", "const").Int("boxnum", int64(cdata.Number)).Child(),
 				number:   cdata.Number,
 				zettel:   constZettelMap,
@@ -52,7 +52,7 @@ type constZettel struct {
 }
 
 type constBox struct {
-	log      *logger.DLogger
+	dlog     *logger.DLogger
 	number   int
 	zettel   map[id.Zid]constZettel
 	enricher box.Enricher
@@ -62,11 +62,11 @@ func (*constBox) Location() string { return "const:" }
 
 func (cb *constBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error) {
 	if z, ok := cb.zettel[zid]; ok {
-		cb.log.Trace().Msg("GetZettel")
+		cb.dlog.Trace().Msg("GetZettel")
 		return zettel.Zettel{Meta: meta.NewWithData(zid, z.header), Content: z.content}, nil
 	}
 	err := box.ErrZettelNotFound{Zid: zid}
-	cb.log.Trace().Err(err).Msg("GetZettel/Err")
+	cb.dlog.Trace().Err(err).Msg("GetZettel/Err")
 	return zettel.Zettel{}, err
 }
 
@@ -76,7 +76,7 @@ func (cb *constBox) HasZettel(_ context.Context, zid id.Zid) bool {
 }
 
 func (cb *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
-	cb.log.Trace().Int("entries", int64(len(cb.zettel))).Msg("ApplyZid")
+	cb.dlog.Trace().Int("entries", int64(len(cb.zettel))).Msg("ApplyZid")
 	for zid := range cb.zettel {
 		if constraint(zid) {
 			handle(zid)
@@ -86,7 +86,7 @@ func (cb *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint q
 }
 
 func (cb *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
-	cb.log.Trace().Int("entries", int64(len(cb.zettel))).Msg("ApplyMeta")
+	cb.dlog.Trace().Int("entries", int64(len(cb.zettel))).Msg("ApplyMeta")
 	for zid, zettel := range cb.zettel {
 		if constraint(zid) {
 			m := meta.NewWithData(zid, zettel.header)
@@ -105,14 +105,14 @@ func (cb *constBox) DeleteZettel(_ context.Context, zid id.Zid) (err error) {
 	} else {
 		err = box.ErrZettelNotFound{Zid: zid}
 	}
-	cb.log.Trace().Err(err).Msg("DeleteZettel")
+	cb.dlog.Trace().Err(err).Msg("DeleteZettel")
 	return err
 }
 
 func (cb *constBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
 	st.Zettel = len(cb.zettel)
-	cb.log.Trace().Int("zettel", int64(st.Zettel)).Msg("ReadStats")
+	cb.dlog.Trace().Int("zettel", int64(st.Zettel)).Msg("ReadStats")
 }
 
 var constZettelMap = map[id.Zid]constZettel{

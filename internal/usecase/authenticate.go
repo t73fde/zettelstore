@@ -29,15 +29,15 @@ import (
 
 // Authenticate is the data for this use case.
 type Authenticate struct {
-	log       *logger.DLogger
+	dlog      *logger.DLogger
 	token     auth.TokenManager
 	ucGetUser *GetUser
 }
 
 // NewAuthenticate creates a new use case.
-func NewAuthenticate(log *logger.DLogger, token auth.TokenManager, ucGetUser *GetUser) Authenticate {
+func NewAuthenticate(dlog *logger.DLogger, token auth.TokenManager, ucGetUser *GetUser) Authenticate {
 	return Authenticate{
-		log:       log,
+		dlog:      dlog,
 		token:     token,
 		ucGetUser: ucGetUser,
 	}
@@ -52,7 +52,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	defer addDelay(time.Now(), 500*time.Millisecond, 100*time.Millisecond)
 
 	if identMeta == nil || err != nil {
-		uc.log.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("No user with given ident found")
+		uc.dlog.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("No user with given ident found")
 		compensateCompare()
 		return nil, err
 	}
@@ -60,22 +60,22 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	if hashCred, ok := identMeta.Get(meta.KeyCredential); ok {
 		ok, err = cred.CompareHashAndCredential(string(hashCred), identMeta.Zid, ident, credential)
 		if err != nil {
-			uc.log.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("Error while comparing credentials")
+			uc.dlog.Info().Str("ident", ident).Err(err).RemoteAddr(r).Msg("Error while comparing credentials")
 			return nil, err
 		}
 		if ok {
 			token, err2 := uc.token.GetToken(identMeta, d, k)
 			if err2 != nil {
-				uc.log.Info().Str("ident", ident).Err(err).Msg("Unable to produce authentication token")
+				uc.dlog.Info().Str("ident", ident).Err(err).Msg("Unable to produce authentication token")
 				return nil, err2
 			}
-			uc.log.Info().Str("user", ident).Msg("Successful")
+			uc.dlog.Info().Str("user", ident).Msg("Successful")
 			return token, nil
 		}
-		uc.log.Info().Str("ident", ident).RemoteAddr(r).Msg("Credentials don't match")
+		uc.dlog.Info().Str("ident", ident).RemoteAddr(r).Msg("Credentials don't match")
 		return nil, nil
 	}
-	uc.log.Info().Str("ident", ident).Msg("No credential stored")
+	uc.dlog.Info().Str("ident", ident).Msg("No credential stored")
 	compensateCompare()
 	return nil, nil
 }
@@ -105,15 +105,15 @@ type IsAuthenticatedPort interface {
 
 // IsAuthenticated cheks if the caller is alrwady authenticated.
 type IsAuthenticated struct {
-	log   *logger.DLogger
+	dlog  *logger.DLogger
 	port  IsAuthenticatedPort
 	authz auth.AuthzManager
 }
 
 // NewIsAuthenticated creates a new use case object.
-func NewIsAuthenticated(log *logger.DLogger, port IsAuthenticatedPort, authz auth.AuthzManager) IsAuthenticated {
+func NewIsAuthenticated(dlog *logger.DLogger, port IsAuthenticatedPort, authz auth.AuthzManager) IsAuthenticated {
 	return IsAuthenticated{
-		log:   log,
+		dlog:  dlog,
 		port:  port,
 		authz: authz,
 	}
@@ -133,13 +133,13 @@ const (
 // Run executes the use case.
 func (uc *IsAuthenticated) Run(ctx context.Context) IsAuthenticatedResult {
 	if !uc.authz.WithAuth() {
-		uc.log.Info().Str("auth", "disabled").Msg("IsAuthenticated")
+		uc.dlog.Info().Str("auth", "disabled").Msg("IsAuthenticated")
 		return IsAuthenticatedDisabled
 	}
 	if uc.port.GetUser(ctx) == nil {
-		uc.log.Info().Msg("IsAuthenticated is false")
+		uc.dlog.Info().Msg("IsAuthenticated is false")
 		return IsAuthenticatedAndInvalid
 	}
-	uc.log.Info().Msg("IsAuthenticated is true")
+	uc.dlog.Info().Msg("IsAuthenticated is true")
 	return IsAuthenticatedAndValid
 }

@@ -41,7 +41,7 @@ import (
 
 // WebUI holds all data for delivering the web ui.
 type WebUI struct {
-	log      *logger.DLogger
+	dlog     *logger.DLogger
 	debug    bool
 	ab       server.AuthBuilder
 	authz    auth.AuthzManager
@@ -85,12 +85,12 @@ type webuiBox interface {
 }
 
 // New creates a new WebUI struct.
-func New(log *logger.DLogger, ab server.AuthBuilder, authz auth.AuthzManager, rtConfig config.Config, token auth.TokenManager,
+func New(dlog *logger.DLogger, ab server.AuthBuilder, authz auth.AuthzManager, rtConfig config.Config, token auth.TokenManager,
 	mgr box.Manager, pol auth.Policy, evalZettel *usecase.Evaluate) *WebUI {
 	loginoutBase := ab.NewURLBuilder('i')
 
 	wui := &WebUI{
-		log:      log,
+		dlog:     dlog,
 		debug:    kernel.Main.GetConfig(kernel.CoreService, kernel.CoreDebug).(bool),
 		ab:       ab,
 		rtConfig: rtConfig,

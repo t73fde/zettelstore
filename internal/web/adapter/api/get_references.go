@@ -65,7 +65,7 @@ func (a *API) MakeGetReferencesHandler(
 			var lb sx.ListBuilder
 			lb.Collect(zeroiter.MapSeq(seq, func(s string) sx.Object { return sx.MakeString(s) }))
 			if err = a.writeObject(w, zid, lb.List()); err != nil {
-				a.log.Error().Err(err).Zid(zid).Msg("write sx data")
+				a.dlog.Error().Err(err).Zid(zid).Msg("write sx data")
 			}
 			return
 		}
@@ -76,7 +76,7 @@ func (a *API) MakeGetReferencesHandler(
 			buf.WriteByte('\n')
 		}
 		if err = writeBuffer(w, &buf, content.PlainText); err != nil {
-			a.log.Error().Err(err).Zid(zid).Msg("Write Plain data")
+			a.dlog.Error().Err(err).Zid(zid).Msg("Write Plain data")
 		}
 	})
 }

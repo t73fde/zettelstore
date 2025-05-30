@@ -53,7 +53,7 @@ const (
 var errUnknownVisibility = errors.New("unknown visibility")
 
 func (cs *configService) Initialize(logger *logger.DLogger) {
-	cs.logger = logger
+	cs.dlogger = logger
 	cs.descr = descriptionMap{
 		keyDefaultCopyright: {"Default copyright", parseString, true},
 		keyDefaultLicense:   {"Default license", parseString, true},
@@ -125,10 +125,10 @@ func (cs *configService) Initialize(logger *logger.DLogger) {
 		config.KeyShowSuccessorLinks:   "",
 	}
 }
-func (cs *configService) GetLogger() *logger.DLogger { return cs.logger }
+func (cs *configService) GetLogger() *logger.DLogger { return cs.dlogger }
 
 func (cs *configService) Start(*Kernel) error {
-	cs.logger.Info().Msg("Start Service")
+	cs.dlogger.Info().Msg("Start Service")
 	data := meta.New(id.ZidConfiguration)
 	for _, kv := range cs.GetNextConfigList() {
 		data.Set(kv.Key, meta.Value(kv.Value))
@@ -146,7 +146,7 @@ func (cs *configService) IsStarted() bool {
 }
 
 func (cs *configService) Stop(*Kernel) {
-	cs.logger.Info().Msg("Stop Service")
+	cs.dlogger.Info().Msg("Stop Service")
 	cs.mxService.Lock()
 	cs.orig = nil
 	cs.manager = nil
@@ -167,7 +167,7 @@ func (cs *configService) setBox(mgr box.Manager) {
 
 func (cs *configService) doUpdate(p box.BaseBox) error {
 	z, err := p.GetZettel(context.Background(), id.ZidConfiguration)
-	cs.logger.Trace().Err(err).Msg("got config meta")
+	cs.dlogger.Trace().Err(err).Msg("got config meta")
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 
 func (cs *configService) observe(ci box.UpdateInfo) {
 	if (ci.Reason != box.OnZettel && ci.Reason != box.OnDelete) || ci.Zid == id.ZidConfiguration {
-		cs.logger.Debug().Uint("reason", uint64(ci.Reason)).Zid(ci.Zid).Msg("observe")
+		cs.dlogger.Debug().Uint("reason", uint64(ci.Reason)).Zid(ci.Zid).Msg("observe")
 		go func() {
 			cs.mxService.RLock()
 			mgr := cs.manager
@@ -203,7 +203,7 @@ func (cs *configService) observe(ci box.UpdateInfo) {
 				err = cs.doUpdate(ci.Box)
 			}
 			if err != nil {
-				cs.logger.Error().Err(err).Msg("update config")
+				cs.dlogger.Error().Err(err).Msg("update config")
 			}
 		}()
 	}

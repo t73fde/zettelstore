@@ -22,8 +22,8 @@ import (
 	"zettelstore.de/z/internal/logger"
 )
 
-// kernelLogWriter adapts an io.Writer to a LogWriter
-type kernelLogWriter struct {
+// kernelDLogWriter adapts an io.Writer to a LogWriter
+type kernelDLogWriter struct {
 	mx       sync.RWMutex // protects buf, serializes w.Write and retrieveLogEntries
 	lastLog  time.Time
 	buf      []byte
@@ -33,18 +33,18 @@ type kernelLogWriter struct {
 }
 
 // newKernelLogWriter creates a new LogWriter for kernel logging.
-func newKernelLogWriter(capacity int) *kernelLogWriter {
+func newKernelLogWriter(capacity int) *kernelDLogWriter {
 	if capacity < 1 {
 		capacity = 1
 	}
-	return &kernelLogWriter{
+	return &kernelDLogWriter{
 		lastLog: time.Now(),
 		buf:     make([]byte, 0, 500),
 		data:    make([]logEntry, capacity),
 	}
 }
 
-func (klw *kernelLogWriter) DWriteMessage(level logger.DLevel, ts time.Time, prefix, msg string, details []byte) error {
+func (klw *kernelDLogWriter) DWriteMessage(level logger.DLevel, ts time.Time, prefix, msg string, details []byte) error {
 	klw.mx.Lock()
 
 	if level > logger.DDebugLevel {
@@ -117,7 +117,7 @@ type logEntry struct {
 	details []byte
 }
 
-func (klw *kernelLogWriter) retrieveLogEntries() []LogEntry {
+func (klw *kernelDLogWriter) retrieveLogEntries() []DLogEntry {
 	klw.mx.RLock()
 	defer klw.mx.RUnlock()
 
@@ -125,13 +125,13 @@ func (klw *kernelLogWriter) retrieveLogEntries() []LogEntry {
 		if klw.writePos == 0 {
 			return nil
 		}
-		result := make([]LogEntry, klw.writePos)
+		result := make([]DLogEntry, klw.writePos)
 		for i := range klw.writePos {
 			copyE2E(&result[i], &klw.data[i])
 		}
 		return result
 	}
-	result := make([]LogEntry, cap(klw.data))
+	result := make([]DLogEntry, cap(klw.data))
 	pos := 0
 	for j := klw.writePos; j < cap(klw.data); j++ {
 		copyE2E(&result[pos], &klw.data[j])
@@ -144,13 +144,13 @@ func (klw *kernelLogWriter) retrieveLogEntries() []LogEntry {
 	return result
 }
 
-func (klw *kernelLogWriter) getLastLogTime() time.Time {
+func (klw *kernelDLogWriter) getLastLogTime() time.Time {
 	klw.mx.RLock()
 	defer klw.mx.RUnlock()
 	return klw.lastLog
 }
 
-func copyE2E(result *LogEntry, origin *logEntry) {
+func copyE2E(result *DLogEntry, origin *logEntry) {
 	result.Level = origin.level
 	result.TS = origin.ts
 	result.Prefix = origin.prefix

@@ -32,7 +32,7 @@ import (
 )
 
 type zipBox struct {
-	log      *logger.DLogger
+	dlog     *logger.DLogger
 	number   int
 	name     string
 	enricher box.Enricher
@@ -73,15 +73,15 @@ func (zb *zipBox) Start(context.Context) error {
 	if err = reader.Close(); err != nil {
 		return err
 	}
-	zipNotifier := notify.NewSimpleZipNotifier(zb.log, zb.name)
-	zb.dirSrv = notify.NewDirService(zb, zb.log, zipNotifier, zb.notify)
+	zipNotifier := notify.NewSimpleZipNotifier(zb.dlog, zb.name)
+	zb.dirSrv = notify.NewDirService(zb, zb.dlog, zipNotifier, zb.notify)
 	zb.dirSrv.Start()
 	return nil
 }
 
 func (zb *zipBox) Refresh(_ context.Context) {
 	zb.dirSrv.Refresh()
-	zb.log.Trace().Msg("Refresh")
+	zb.dlog.Trace().Msg("Refresh")
 }
 
 func (zb *zipBox) Stop(context.Context) {
@@ -136,7 +136,7 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error
 	}
 
 	CleanupMeta(m, zid, entry.ContentExt, inMeta, entry.UselessFiles)
-	zb.log.Trace().Zid(zid).Msg("GetZettel")
+	zb.dlog.Trace().Zid(zid).Msg("GetZettel")
 	return zettel.Zettel{Meta: m, Content: zettel.NewContent(src)}, nil
 }
 
@@ -146,7 +146,7 @@ func (zb *zipBox) HasZettel(_ context.Context, zid id.Zid) bool {
 
 func (zb *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
 	entries := zb.dirSrv.GetDirEntries(constraint)
-	zb.log.Trace().Int("entries", int64(len(entries))).Msg("ApplyZid")
+	zb.dlog.Trace().Int("entries", int64(len(entries))).Msg("ApplyZid")
 	for _, entry := range entries {
 		handle(entry.Zid)
 	}
@@ -159,7 +159,7 @@ func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 		return err
 	}
 	entries := zb.dirSrv.GetDirEntries(constraint)
-	zb.log.Trace().Int("entries", int64(len(entries))).Msg("ApplyMeta")
+	zb.dlog.Trace().Int("entries", int64(len(entries))).Msg("ApplyMeta")
 	for _, entry := range entries {
 		if !constraint(entry.Zid) {
 			continue
@@ -182,14 +182,14 @@ func (zb *zipBox) DeleteZettel(_ context.Context, zid id.Zid) error {
 	if !entry.IsValid() {
 		err = box.ErrZettelNotFound{Zid: zid}
 	}
-	zb.log.Trace().Err(err).Msg("DeleteZettel")
+	zb.dlog.Trace().Err(err).Msg("DeleteZettel")
 	return err
 }
 
 func (zb *zipBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
 	st.Zettel = zb.dirSrv.NumDirEntries()
-	zb.log.Trace().Int("zettel", int64(st.Zettel)).Msg("ReadStats")
+	zb.dlog.Trace().Int("zettel", int64(st.Zettel)).Msg("ReadStats")
 }
 
 func (zb *zipBox) readZipMeta(reader *zip.ReadCloser, zid id.Zid, entry *notify.DirEntry) (m *meta.Meta, err error) {

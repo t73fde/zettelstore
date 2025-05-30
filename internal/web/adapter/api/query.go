@@ -95,12 +95,12 @@ func (a *API) MakeQueryHandler(
 		var buf bytes.Buffer
 		err = queryAction(&buf, encoder, metaSeq, actions)
 		if err != nil {
-			a.log.Error().Err(err).Str("query", sq.String()).Msg("execute query action")
+			a.dlog.Error().Err(err).Str("query", sq.String()).Msg("execute query action")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		}
 
 		if err = writeBuffer(w, &buf, contentType); err != nil {
-			a.log.Error().Err(err).Msg("write result buffer")
+			a.dlog.Error().Err(err).Msg("write result buffer")
 		}
 	})
 }
@@ -300,6 +300,6 @@ func (a *API) redirectFound(w http.ResponseWriter, r *http.Request, ub *api.URLB
 	w.Header().Set(api.HeaderContentType, content.PlainText)
 	http.Redirect(w, r, ub.String(), http.StatusFound)
 	if _, err := io.WriteString(w, zid.String()); err != nil {
-		a.log.Error().Err(err).Msg("redirect body")
+		a.dlog.Error().Err(err).Msg("redirect body")
 	}
 }

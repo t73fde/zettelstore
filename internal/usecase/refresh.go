@@ -26,18 +26,18 @@ type RefreshPort interface {
 
 // Refresh is the data for this use case.
 type Refresh struct {
-	log  *logger.DLogger
+	dlog *logger.DLogger
 	port RefreshPort
 }
 
 // NewRefresh creates a new use case.
-func NewRefresh(log *logger.DLogger, port RefreshPort) Refresh {
-	return Refresh{log: log, port: port}
+func NewRefresh(dlog *logger.DLogger, port RefreshPort) Refresh {
+	return Refresh{dlog: dlog, port: port}
 }
 
 // Run executes the use case.
 func (uc *Refresh) Run(ctx context.Context) error {
 	err := uc.port.Refresh(ctx)
-	uc.log.Info().User(ctx).Err(err).Msg("Refresh internal data")
+	uc.dlog.Info().User(ctx).Err(err).Msg("Refresh internal data")
 	return err
 }

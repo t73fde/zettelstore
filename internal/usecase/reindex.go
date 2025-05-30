@@ -28,18 +28,18 @@ type ReIndexPort interface {
 
 // ReIndex is the data for this use case.
 type ReIndex struct {
-	log  *logger.DLogger
+	dlog *logger.DLogger
 	port ReIndexPort
 }
 
 // NewReIndex creates a new use case.
-func NewReIndex(log *logger.DLogger, port ReIndexPort) ReIndex {
-	return ReIndex{log: log, port: port}
+func NewReIndex(dlog *logger.DLogger, port ReIndexPort) ReIndex {
+	return ReIndex{dlog: dlog, port: port}
 }
 
 // Run executes the use case.
 func (uc *ReIndex) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.ReIndex(ctx, zid)
-	uc.log.Info().User(ctx).Err(err).Zid(zid).Msg("ReIndex zettel")
+	uc.dlog.Info().User(ctx).Err(err).Zid(zid).Msg("ReIndex zettel")
 	return err
 }

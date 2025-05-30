@@ -26,16 +26,16 @@ import (
 
 // DMessage presents a message to log.
 type DMessage struct {
-	logger *DLogger
-	level  DLevel
-	buf    []byte
+	dlogger *DLogger
+	level   DLevel
+	buf     []byte
 }
 
 func dnewDMessage(logger *DLogger, level DLevel) *DMessage {
 	if logger != nil {
 		if logger.topParent.Level() <= level {
 			m := messagePool.Get().(*DMessage)
-			m.logger = logger
+			m.dlogger = logger
 			m.level = level
 			m.buf = append(m.buf[:0], logger.context...)
 			return m
@@ -114,7 +114,7 @@ func (m *DMessage) Uint(text string, u uint64) *DMessage {
 // User adds the user-id field of the given user to the message.
 func (m *DMessage) User(ctx context.Context) *DMessage {
 	if m.Enabled() {
-		if up := m.logger.uProvider; up != nil {
+		if up := m.dlogger.uProvider; up != nil {
 			if user := up.GetUser(ctx); user != nil {
 				m.buf = append(m.buf, ", user="...)
 				if userID, found := user.Get(meta.KeyUserID); found {
@@ -145,7 +145,7 @@ func (m *DMessage) Zid(zid id.Zid) *DMessage {
 // Msg add the given text to the message and writes it to the log.
 func (m *DMessage) Msg(text string) {
 	if m.Enabled() {
-		_ = m.logger.dwriteDMessage(m.level, text, m.buf)
+		_ = m.dlogger.dwriteDMessage(m.level, text, m.buf)
 		drecycleDMessage(m)
 	}
 }

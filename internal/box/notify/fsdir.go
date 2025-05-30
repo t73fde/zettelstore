@@ -23,7 +23,7 @@ import (
 )
 
 type fsdirNotifier struct {
-	log     *logger.DLogger
+	dlog    *logger.DLogger
 	events  chan Event
 	done    chan struct{}
 	refresh chan struct{}
@@ -35,15 +35,15 @@ type fsdirNotifier struct {
 
 // NewFSDirNotifier creates a directory based notifier that receives notifications
 // from the file system.
-func NewFSDirNotifier(log *logger.DLogger, path string) (Notifier, error) {
+func NewFSDirNotifier(dlog *logger.DLogger, path string) (Notifier, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
-		log.Debug().Err(err).Str("path", path).Msg("Unable to create absolute path")
+		dlog.Debug().Err(err).Str("path", path).Msg("Unable to create absolute path")
 		return nil, err
 	}
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Debug().Err(err).Str("absPath", absPath).Msg("Unable to create watcher")
+		dlog.Debug().Err(err).Str("absPath", absPath).Msg("Unable to create watcher")
 		return nil, err
 	}
 	absParentDir := filepath.Dir(absPath)
@@ -51,24 +51,24 @@ func NewFSDirNotifier(log *logger.DLogger, path string) (Notifier, error) {
 	err = watcher.Add(absPath)
 	if errParent != nil {
 		if err != nil {
-			log.Error().
+			dlog.Error().
 				Str("parentDir", absParentDir).Err(errParent).
 				Str("path", absPath).Err(err).
 				Msg("Unable to access Zettel directory and its parent directory")
 			_ = watcher.Close()
 			return nil, err
 		}
-		log.Info().Str("parentDir", absParentDir).Err(errParent).
+		dlog.Info().Str("parentDir", absParentDir).Err(errParent).
 			Msg("Parent of Zettel directory cannot be supervised")
-		log.Info().Str("path", absPath).
+		dlog.Info().Str("path", absPath).
 			Msg("Zettelstore might not detect a deletion or movement of the Zettel directory")
 	} else if err != nil {
 		// Not a problem, if container is not available. It might become available later.
-		log.Info().Err(err).Str("path", absPath).Msg("Zettel directory currently not available")
+		dlog.Info().Err(err).Str("path", absPath).Msg("Zettel directory currently not available")
 	}
 
 	fsdn := &fsdirNotifier{
-		log:     log,
+		dlog:    dlog,
 		events:  make(chan Event),
 		refresh: make(chan struct{}),
 		done:    make(chan struct{}),
@@ -93,7 +93,7 @@ func (fsdn *fsdirNotifier) eventLoop() {
 	defer func() { _ = fsdn.base.Close() }()
 	defer close(fsdn.events)
 	defer close(fsdn.refresh)
-	if !listDirElements(fsdn.log, fsdn.fetcher, fsdn.events, fsdn.done) {
+	if !listDirElements(fsdn.dlog, fsdn.fetcher, fsdn.events, fsdn.done) {
 		return
 	}
 
@@ -113,10 +113,10 @@ func (fsdn *fsdirNotifier) readAndProcessEvent() bool {
 		fsdn.traceDone(2)
 		return false
 	case <-fsdn.refresh:
-		fsdn.log.Trace().Msg("refresh")
-		listDirElements(fsdn.log, fsdn.fetcher, fsdn.events, fsdn.done)
+		fsdn.dlog.Trace().Msg("refresh")
+		listDirElements(fsdn.dlog, fsdn.fetcher, fsdn.events, fsdn.done)
 	case err, ok := <-fsdn.base.Errors:
-		fsdn.log.Trace().Err(err).Bool("ok", ok).Msg("got errors")
+		fsdn.dlog.Trace().Err(err).Bool("ok", ok).Msg("got errors")
 		if !ok {
 			return false
 		}
@@ -127,7 +127,7 @@ func (fsdn *fsdirNotifier) readAndProcessEvent() bool {
 			return false
 		}
 	case ev, ok := <-fsdn.base.Events:
-		fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Bool("ok", ok).Msg("file event")
+		fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Bool("ok", ok).Msg("file event")
 		if !ok {
 			return false
 		}
@@ -139,7 +139,7 @@ func (fsdn *fsdirNotifier) readAndProcessEvent() bool {
 }
 
 func (fsdn *fsdirNotifier) traceDone(pos int64) {
-	fsdn.log.Trace().Int("i", pos).Msg("done with read and process events")
+	fsdn.dlog.Trace().Int("i", pos).Msg("done with read and process events")
 }
 
 func (fsdn *fsdirNotifier) processEvent(ev *fsnotify.Event) bool {
@@ -149,18 +149,18 @@ func (fsdn *fsdirNotifier) processEvent(ev *fsnotify.Event) bool {
 		}
 		return fsdn.processFileEvent(ev)
 	}
-	fsdn.log.Trace().Str("path", fsdn.path).Str("name", ev.Name).Str("op", ev.Op.String()).Msg("event does not match")
+	fsdn.dlog.Trace().Str("path", fsdn.path).Str("name", ev.Name).Str("op", ev.Op.String()).Msg("event does not match")
 	return true
 }
 
 func (fsdn *fsdirNotifier) processDirEvent(ev *fsnotify.Event) bool {
 	if ev.Has(fsnotify.Remove) || ev.Has(fsnotify.Rename) {
-		fsdn.log.Debug().Str("name", fsdn.path).Msg("Directory removed")
+		fsdn.dlog.Debug().Str("name", fsdn.path).Msg("Directory removed")
 		_ = fsdn.base.Remove(fsdn.path)
 		select {
 		case fsdn.events <- Event{Op: Destroy}:
 		case <-fsdn.done:
-			fsdn.log.Trace().Int("i", 1).Msg("done dir event processing")
+			fsdn.dlog.Trace().Int("i", 1).Msg("done dir event processing")
 			return false
 		}
 		return true
@@ -169,19 +169,19 @@ func (fsdn *fsdirNotifier) processDirEvent(ev *fsnotify.Event) bool {
 	if ev.Has(fsnotify.Create) {
 		err := fsdn.base.Add(fsdn.path)
 		if err != nil {
-			fsdn.log.Error().Err(err).Str("name", fsdn.path).Msg("Unable to add directory")
+			fsdn.dlog.Error().Err(err).Str("name", fsdn.path).Msg("Unable to add directory")
 			select {
 			case fsdn.events <- Event{Op: Error, Err: err}:
 			case <-fsdn.done:
-				fsdn.log.Trace().Int("i", 2).Msg("done dir event processing")
+				fsdn.dlog.Trace().Int("i", 2).Msg("done dir event processing")
 				return false
 			}
 		}
-		fsdn.log.Debug().Str("name", fsdn.path).Msg("Directory added")
-		return listDirElements(fsdn.log, fsdn.fetcher, fsdn.events, fsdn.done)
+		fsdn.dlog.Debug().Str("name", fsdn.path).Msg("Directory added")
+		return listDirElements(fsdn.dlog, fsdn.fetcher, fsdn.events, fsdn.done)
 	}
 
-	fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("Directory processed")
+	fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("Directory processed")
 	return true
 }
 
@@ -189,33 +189,33 @@ func (fsdn *fsdirNotifier) processFileEvent(ev *fsnotify.Event) bool {
 	if ev.Has(fsnotify.Create) || ev.Has(fsnotify.Write) {
 		if fi, err := os.Lstat(ev.Name); err != nil || !fi.Mode().IsRegular() {
 			regular := err == nil && fi.Mode().IsRegular()
-			fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Err(err).Bool("regular", regular).Msg("error with file")
+			fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Err(err).Bool("regular", regular).Msg("error with file")
 			return true
 		}
-		fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File updated")
+		fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File updated")
 		return fsdn.sendEvent(Update, filepath.Base(ev.Name))
 	}
 
 	if ev.Has(fsnotify.Rename) {
 		fi, err := os.Lstat(ev.Name)
 		if err != nil {
-			fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File deleted")
+			fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File deleted")
 			return fsdn.sendEvent(Delete, filepath.Base(ev.Name))
 		}
 		if fi.Mode().IsRegular() {
-			fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File updated")
+			fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File updated")
 			return fsdn.sendEvent(Update, filepath.Base(ev.Name))
 		}
-		fsdn.log.Trace().Str("name", ev.Name).Msg("File not regular")
+		fsdn.dlog.Trace().Str("name", ev.Name).Msg("File not regular")
 		return true
 	}
 
 	if ev.Has(fsnotify.Remove) {
-		fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File deleted")
+		fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File deleted")
 		return fsdn.sendEvent(Delete, filepath.Base(ev.Name))
 	}
 
-	fsdn.log.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File processed")
+	fsdn.dlog.Trace().Str("name", ev.Name).Str("op", ev.Op.String()).Msg("File processed")
 	return true
 }
 
@@ -223,7 +223,7 @@ func (fsdn *fsdirNotifier) sendEvent(op EventOp, filename string) bool {
 	select {
 	case fsdn.events <- Event{Op: op, Name: filename}:
 	case <-fsdn.done:
-		fsdn.log.Trace().Msg("done file event processing")
+		fsdn.dlog.Trace().Msg("done file event processing")
 		return false
 	}
 	return true

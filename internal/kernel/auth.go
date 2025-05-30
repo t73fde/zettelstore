@@ -34,7 +34,7 @@ var errAlreadySetOwner = errors.New("changing an existing owner not allowed")
 var errAlreadyROMode = errors.New("system in readonly mode cannot change this mode")
 
 func (as *authService) Initialize(logger *logger.DLogger) {
-	as.logger = logger
+	as.dlogger = logger
 	as.descr = descriptionMap{
 		AuthOwner: {
 			"Owner's zettel id",
@@ -66,7 +66,7 @@ func (as *authService) Initialize(logger *logger.DLogger) {
 	}
 }
 
-func (as *authService) GetLogger() *logger.DLogger { return as.logger }
+func (as *authService) GetLogger() *logger.DLogger { return as.dlogger }
 
 func (as *authService) Start(*Kernel) error {
 	as.mxService.Lock()
@@ -75,10 +75,10 @@ func (as *authService) Start(*Kernel) error {
 	owner := as.GetNextConfig(AuthOwner).(id.Zid)
 	authMgr, err := as.createManager(readonlyMode, owner)
 	if err != nil {
-		as.logger.Error().Err(err).Msg("Unable to create manager")
+		as.dlogger.Error().Err(err).Msg("Unable to create manager")
 		return err
 	}
-	as.logger.Info().Msg("Start Manager")
+	as.dlogger.Info().Msg("Start Manager")
 	as.manager = authMgr
 	return nil
 }
@@ -90,7 +90,7 @@ func (as *authService) IsStarted() bool {
 }
 
 func (as *authService) Stop(*Kernel) {
-	as.logger.Info().Msg("Stop Manager")
+	as.dlogger.Info().Msg("Stop Manager")
 	as.mxService.Lock()
 	as.manager = nil
 	as.mxService.Unlock()

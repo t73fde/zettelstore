@@ -290,7 +290,7 @@ func cmdSetConfig(sess *cmdSession, cmd string, args []string) bool {
 	key := args[1]
 	newValue := strings.Join(args[2:], " ")
 	if err := srvD.srv.SetConfig(key, newValue); err == nil {
-		sess.kern.logger.Mandatory().Str("key", key).Str("value", newValue).Msg("Update system configuration")
+		sess.kern.dlogger.Mandatory().Str("key", key).Str("value", newValue).Msg("Update system configuration")
 	} else {
 		sess.println("Unable to set key", args[1], "to value", newValue, "because:", err.Error())
 	}
@@ -366,7 +366,7 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 	kern := sess.kern
 	if len(args) == 0 {
 		// Write log levels
-		level := kern.logger.Level()
+		level := kern.dlogger.Level()
 		table := [][]string{
 			{"Service", "Level", "Name"},
 			{"kernel", strconv.Itoa(int(level)), level.String()},
@@ -381,7 +381,7 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 	var l *logger.DLogger
 	name := args[0]
 	if name == "kernel" {
-		l = kern.logger
+		l = kern.dlogger
 	} else {
 		srvD, ok := getService(sess, name)
 		if !ok {
@@ -406,7 +406,7 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 		sess.println("Invalid level:", level)
 		return true
 	}
-	kern.logger.Mandatory().Str("name", name).Str("level", lv.String()).Msg("Update log level")
+	kern.dlogger.Mandatory().Str("name", name).Str("level", lv.String()).Msg("Update log level")
 	l.SetLevel(lv)
 	return true
 }
@@ -440,7 +440,7 @@ func cmdProfile(sess *cmdSession, _ string, args []string) bool {
 	if err := kern.doStartProfiling(profileName, fileName); err != nil {
 		sess.println("Error:", err.Error())
 	} else {
-		kern.logger.Mandatory().Str("profile", profileName).Str("file", fileName).Msg("Start profiling")
+		kern.dlogger.Mandatory().Str("profile", profileName).Str("file", fileName).Msg("Start profiling")
 	}
 	return true
 }
@@ -450,7 +450,7 @@ func cmdEndProfile(sess *cmdSession, _ string, _ []string) bool {
 	if err != nil {
 		sess.println("Error:", err.Error())
 	}
-	kern.logger.Mandatory().Err(err).Msg("Stop profiling")
+	kern.dlogger.Mandatory().Err(err).Msg("Stop profiling")
 	return true
 }
 
@@ -503,9 +503,9 @@ func cmdDumpIndex(sess *cmdSession, _ string, _ []string) bool {
 
 func cmdRefresh(sess *cmdSession, _ string, _ []string) bool {
 	kern := sess.kern
-	kern.logger.Mandatory().Msg("Refresh")
+	kern.dlogger.Mandatory().Msg("Refresh")
 	if err := kern.box.Refresh(); err != nil {
-		kern.logger.Error().Err(err).Msg("refresh")
+		kern.dlogger.Error().Err(err).Msg("refresh")
 	}
 	return true
 }

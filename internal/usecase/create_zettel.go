@@ -33,15 +33,15 @@ type CreateZettelPort interface {
 
 // CreateZettel is the data for this use case.
 type CreateZettel struct {
-	log      *logger.DLogger
+	dlog     *logger.DLogger
 	rtConfig config.Config
 	port     CreateZettelPort
 }
 
 // NewCreateZettel creates a new use case.
-func NewCreateZettel(log *logger.DLogger, rtConfig config.Config, port CreateZettelPort) CreateZettel {
+func NewCreateZettel(dlog *logger.DLogger, rtConfig config.Config, port CreateZettelPort) CreateZettel {
 	return CreateZettel{
-		log:      log,
+		dlog:     dlog,
 		rtConfig: rtConfig,
 		port:     port,
 	}
@@ -153,6 +153,6 @@ func (uc *CreateZettel) Run(ctx context.Context, zettel zettel.Zettel) (id.Zid, 
 
 	zettel.Content.TrimSpace()
 	zid, err := uc.port.CreateZettel(ctx, zettel)
-	uc.log.Info().User(ctx).Zid(zid).Err(err).Msg("Create zettel")
+	uc.dlog.Info().User(ctx).Zid(zid).Err(err).Msg("Create zettel")
 	return zid, err
 }

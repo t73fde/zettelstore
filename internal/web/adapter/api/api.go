@@ -33,7 +33,7 @@ import (
 
 // API holds all data and methods for delivering API call results.
 type API struct {
-	log      *logger.DLogger
+	dlog     *logger.DLogger
 	b        server.Builder
 	authz    auth.AuthzManager
 	token    auth.TokenManager
@@ -44,10 +44,10 @@ type API struct {
 }
 
 // New creates a new API object.
-func New(log *logger.DLogger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
+func New(dlog *logger.DLogger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
 	rtConfig config.Config, pol auth.Policy) *API {
 	a := &API{
-		log:      log,
+		dlog:     dlog,
 		b:        b,
 		authz:    authz,
 		token:    token,
@@ -73,7 +73,7 @@ func (a *API) getToken(ident *meta.Meta) ([]byte, error) {
 func (a *API) reportUsecaseError(w http.ResponseWriter, err error) {
 	code, text := adapter.CodeMessageFromError(err)
 	if code == http.StatusInternalServerError {
-		a.log.Error().Err(err).Msg(text)
+		a.dlog.Error().Err(err).Msg(text)
 		http.Error(w, http.StatusText(code), code)
 		return
 	}

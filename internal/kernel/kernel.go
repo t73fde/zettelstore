@@ -45,11 +45,11 @@ var Main *Kernel
 
 // Kernel is the main internal kernel.
 type Kernel struct {
-	logWriter *kernelLogWriter
-	logger    *logger.DLogger
-	wg        sync.WaitGroup
-	mx        sync.RWMutex
-	interrupt chan os.Signal
+	dlogWriter *kernelDLogWriter
+	dlogger    *logger.DLogger
+	wg         sync.WaitGroup
+	mx         sync.RWMutex
+	interrupt  chan os.Signal
 
 	profileName string
 	fileName    string
@@ -70,9 +70,9 @@ type Kernel struct {
 }
 
 type serviceDescr struct {
-	srv      service
-	name     string
-	logLevel logger.DLevel
+	srv       service
+	name      string
+	dlogLevel logger.DLevel
 }
 type serviceData struct {
 	srv    service
@@ -89,9 +89,9 @@ func init() {
 func createKernel() *Kernel {
 	lw := newKernelLogWriter(8192)
 	kern := &Kernel{
-		logWriter: lw,
-		logger:    logger.DNew(lw, "").SetLevel(defaultNormalLogLevel),
-		interrupt: make(chan os.Signal, 5),
+		dlogWriter: lw,
+		dlogger:    logger.DNew(lw, "").SetLevel(defaultNormalLogLevel),
+		interrupt:  make(chan os.Signal, 5),
 	}
 	kern.self.kernel = kern
 	kern.srvs = map[Service]serviceDescr{
@@ -105,11 +105,11 @@ func createKernel() *Kernel {
 	kern.srvNames = make(map[string]serviceData, len(kern.srvs))
 	for key, srvD := range kern.srvs {
 		if _, ok := kern.srvNames[srvD.name]; ok {
-			kern.logger.Error().Str("service", srvD.name).Msg("Service data already set, ignore")
+			kern.dlogger.Error().Str("service", srvD.name).Msg("Service data already set, ignore")
 		}
 		kern.srvNames[srvD.name] = serviceData{srvD.srv, key}
-		l := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.logLevel)
-		kern.logger.Debug().Str("service", srvD.name).Msg("Initialize")
+		l := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.dlogLevel)
+		kern.dlogger.Debug().Str("service", srvD.name).Msg("Initialize")
 		srvD.srv.Initialize(l)
 	}
 	kern.depStart = serviceDependency{
@@ -223,8 +223,8 @@ type KeyDescrValue struct{ Key, Descr, Value string }
 // KeyValue is a pair of key and value.
 type KeyValue struct{ Key, Value string }
 
-// LogEntry stores values of one log line written by a logger.Logger
-type LogEntry struct {
+// DLogEntry stores values of one log line written by a logger.DLogger
+type DLogEntry struct {
 	Level   logger.DLevel
 	TS      time.Time
 	Prefix  string
@@ -276,7 +276,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		// Wait for interrupt.
 		sig := <-kern.interrupt
 		if strSig := sig.String(); strSig != "" {
-			kern.logger.Info().Str("signal", strSig).Msg("Shut down Zettelstore")
+			kern.dlogger.Info().Str("signal", strSig).Msg("Shut down Zettelstore")
 		}
 		kern.doShutdown()
 		kern.wg.Done()
@@ -284,7 +284,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 
 	_ = kern.StartService(KernelService)
 	if headline {
-		logger := kern.logger
+		logger := kern.dlogger
 		logger.Mandatory().Msg(fmt.Sprintf(
 			"%v %v (%v@%v/%v)",
 			kern.core.GetCurConfig(CoreProgname),
@@ -331,7 +331,7 @@ func (kern *Kernel) WaitForShutdown() {
 
 // Shutdown the service. Waits for all concurrent activities to stop.
 func (kern *Kernel) Shutdown(silent bool) {
-	kern.logger.Trace().Msg("Shutdown")
+	kern.dlogger.Trace().Msg("Shutdown")
 	kern.interrupt <- &shutdownSignal{silent: silent}
 }
 
@@ -349,7 +349,7 @@ func (*shutdownSignal) Signal() { /* Just a signal */ }
 
 // GetKernelLogger returns the kernel logger.
 func (kern *Kernel) GetKernelLogger() *logger.DLogger {
-	return kern.logger
+	return kern.dlogger
 }
 
 // SetLogLevel sets the logging level for logger maintained by the kernel.
@@ -404,17 +404,17 @@ func cleanLogSpec(rawVals []string) []string {
 }
 
 // RetrieveLogEntries returns all buffered log entries.
-func (kern *Kernel) RetrieveLogEntries() []LogEntry {
-	return kern.logWriter.retrieveLogEntries()
+func (kern *Kernel) RetrieveLogEntries() []DLogEntry {
+	return kern.dlogWriter.retrieveLogEntries()
 }
 
 // GetLastLogTime returns the time when the last logging with level > DEBUG happened.
-func (kern *Kernel) GetLastLogTime() time.Time { return kern.logWriter.getLastLogTime() }
+func (kern *Kernel) GetLastLogTime() time.Time { return kern.dlogWriter.getLastLogTime() }
 
 // LogRecover outputs some information about the previous panic.
 func (kern *Kernel) LogRecover(name string, recoverInfo any) {
 	stack := debug.Stack()
-	kern.logger.Error().Str("recovered_from", fmt.Sprint(recoverInfo)).Bytes("stack", stack).Msg(name)
+	kern.dlogger.Error().Str("recovered_from", fmt.Sprint(recoverInfo)).Bytes("stack", stack).Msg(name)
 	kern.core.updateRecoverInfo(name, recoverInfo, stack)
 }
 
@@ -674,7 +674,7 @@ type kernelService struct {
 }
 
 func (*kernelService) Initialize(*logger.DLogger)                     {}
-func (ks *kernelService) GetLogger() *logger.DLogger                  { return ks.kernel.logger }
+func (ks *kernelService) GetLogger() *logger.DLogger                  { return ks.kernel.dlogger }
 func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return nil }
 func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
 func (*kernelService) GetCurConfig(string) any                        { return nil }

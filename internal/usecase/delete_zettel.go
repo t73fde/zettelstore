@@ -29,18 +29,18 @@ type DeleteZettelPort interface {
 
 // DeleteZettel is the data for this use case.
 type DeleteZettel struct {
-	log  *logger.DLogger
+	dlog *logger.DLogger
 	port DeleteZettelPort
 }
 
 // NewDeleteZettel creates a new use case.
-func NewDeleteZettel(log *logger.DLogger, port DeleteZettelPort) DeleteZettel {
-	return DeleteZettel{log: log, port: port}
+func NewDeleteZettel(dlog *logger.DLogger, port DeleteZettelPort) DeleteZettel {
+	return DeleteZettel{dlog: dlog, port: port}
 }
 
 // Run executes the use case.
 func (uc *DeleteZettel) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.DeleteZettel(ctx, zid)
-	uc.log.Info().User(ctx).Zid(zid).Err(err).Msg("Delete zettel")
+	uc.dlog.Info().User(ctx).Zid(zid).Err(err).Msg("Delete zettel")
 	return err
 }

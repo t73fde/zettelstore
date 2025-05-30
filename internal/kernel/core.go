@@ -44,7 +44,7 @@ type recoverInfo struct {
 }
 
 func (cs *coreService) Initialize(logger *logger.DLogger) {
-	cs.logger = logger
+	cs.dlogger = logger
 	cs.mapRecover = make(map[string]recoverInfo)
 	cs.descr = descriptionMap{
 		CoreDebug:     {"Debug mode", parseBool, false},
@@ -93,7 +93,7 @@ func (cs *coreService) Initialize(logger *logger.DLogger) {
 	}
 }
 
-func (cs *coreService) GetLogger() *logger.DLogger { return cs.logger }
+func (cs *coreService) GetLogger() *logger.DLogger { return cs.dlogger }
 
 func (cs *coreService) Start(*Kernel) error {
 	cs.started = true
