@@ -26,7 +26,6 @@ import (
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/auth/cred"
-	"zettelstore.de/z/internal/logger"
 )
 
 // Authenticate is the data for this use case.
@@ -105,19 +104,19 @@ type IsAuthenticatedPort interface {
 	GetUser(context.Context) *meta.Meta
 }
 
-// IsAuthenticated cheks if the caller is alrwady authenticated.
+// IsAuthenticated cheks if the caller is already authenticated.
 type IsAuthenticated struct {
-	dlog  *logger.DLogger
-	port  IsAuthenticatedPort
-	authz auth.AuthzManager
+	logger *slog.Logger
+	port   IsAuthenticatedPort
+	authz  auth.AuthzManager
 }
 
 // NewIsAuthenticated creates a new use case object.
-func NewIsAuthenticated(dlog *logger.DLogger, port IsAuthenticatedPort, authz auth.AuthzManager) IsAuthenticated {
+func NewIsAuthenticated(logger *slog.Logger, port IsAuthenticatedPort, authz auth.AuthzManager) IsAuthenticated {
 	return IsAuthenticated{
-		dlog:  dlog,
-		port:  port,
-		authz: authz,
+		logger: logger,
+		port:   port,
+		authz:  authz,
 	}
 }
 
@@ -135,13 +134,13 @@ const (
 // Run executes the use case.
 func (uc *IsAuthenticated) Run(ctx context.Context) IsAuthenticatedResult {
 	if !uc.authz.WithAuth() {
-		uc.dlog.Info().Str("auth", "disabled").Msg("IsAuthenticated")
+		uc.logger.Info("IsAuthenticated", "auth", "disabled")
 		return IsAuthenticatedDisabled
 	}
 	if uc.port.GetUser(ctx) == nil {
-		uc.dlog.Info().Msg("IsAuthenticated is false")
+		uc.logger.Info("IsAuthenticated is false")
 		return IsAuthenticatedAndInvalid
 	}
-	uc.dlog.Info().Msg("IsAuthenticated is true")
+	uc.logger.Info("IsAuthenticated is true")
 	return IsAuthenticatedAndValid
 }

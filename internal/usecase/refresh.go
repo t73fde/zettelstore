@@ -15,8 +15,7 @@ package usecase
 
 import (
 	"context"
-
-	"zettelstore.de/z/internal/logger"
+	"log/slog"
 )
 
 // RefreshPort is the interface used by this use case.
@@ -26,18 +25,18 @@ type RefreshPort interface {
 
 // Refresh is the data for this use case.
 type Refresh struct {
-	dlog *logger.DLogger
-	port RefreshPort
+	logger *slog.Logger
+	port   RefreshPort
 }
 
 // NewRefresh creates a new use case.
-func NewRefresh(dlog *logger.DLogger, port RefreshPort) Refresh {
-	return Refresh{dlog: dlog, port: port}
+func NewRefresh(logger *slog.Logger, port RefreshPort) Refresh {
+	return Refresh{logger: logger, port: port}
 }
 
 // Run executes the use case.
 func (uc *Refresh) Run(ctx context.Context) error {
 	err := uc.port.Refresh(ctx)
-	uc.dlog.Info().User(ctx).Err(err).Msg("Refresh internal data")
+	uc.logger.Info("Refresh internal data", "err", err) // TODO: add user=
 	return err
 }

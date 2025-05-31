@@ -15,12 +15,12 @@ package usecase
 
 import (
 	"context"
+	"log/slog"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -35,13 +35,13 @@ type UpdateZettelPort interface {
 
 // UpdateZettel is the data for this use case.
 type UpdateZettel struct {
-	dlog *logger.DLogger
-	port UpdateZettelPort
+	logger *slog.Logger
+	port   UpdateZettelPort
 }
 
 // NewUpdateZettel creates a new use case.
-func NewUpdateZettel(dlog *logger.DLogger, port UpdateZettelPort) UpdateZettel {
-	return UpdateZettel{dlog: dlog, port: port}
+func NewUpdateZettel(logger *slog.Logger, port UpdateZettelPort) UpdateZettel {
+	return UpdateZettel{logger: logger, port: port}
 }
 
 // Run executes the use case.
@@ -73,6 +73,6 @@ func (uc *UpdateZettel) Run(ctx context.Context, zettel zettel.Zettel, hasConten
 	}
 	zettel.Content.TrimSpace()
 	err = uc.port.UpdateZettel(ctx, zettel)
-	uc.dlog.Info().User(ctx).Zid(m.Zid).Err(err).Msg("Update zettel")
+	uc.logger.Info("Update zettel", "zid", m.Zid, "err", err) // TODO: add user=
 	return err
 }

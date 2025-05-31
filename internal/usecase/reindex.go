@@ -15,10 +15,9 @@ package usecase
 
 import (
 	"context"
+	"log/slog"
 
 	"t73f.de/r/zsc/domain/id"
-
-	"zettelstore.de/z/internal/logger"
 )
 
 // ReIndexPort is the interface used by this use case.
@@ -28,18 +27,18 @@ type ReIndexPort interface {
 
 // ReIndex is the data for this use case.
 type ReIndex struct {
-	dlog *logger.DLogger
-	port ReIndexPort
+	logger *slog.Logger
+	port   ReIndexPort
 }
 
 // NewReIndex creates a new use case.
-func NewReIndex(dlog *logger.DLogger, port ReIndexPort) ReIndex {
-	return ReIndex{dlog: dlog, port: port}
+func NewReIndex(logger *slog.Logger, port ReIndexPort) ReIndex {
+	return ReIndex{logger: logger, port: port}
 }
 
 // Run executes the use case.
 func (uc *ReIndex) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.ReIndex(ctx, zid)
-	uc.dlog.Info().User(ctx).Err(err).Zid(zid).Msg("ReIndex zettel")
+	uc.logger.Info("ReIndex zettel", "zid", zid, "err", err) // TODO: add user=
 	return err
 }

@@ -58,12 +58,12 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	webLogger := kern.GetLogger(kernel.WebService)
 
 	var getUser getUserImpl
-	logAuth := kern.GetLogger(kernel.AuthService)
-	logUc := kern.GetDLogger(kernel.CoreService).WithUser(&getUser)
+	authLogger := kern.GetLogger(kernel.AuthService)
+	ucLogger := kern.GetLogger(kernel.CoreService)
 	ucGetUser := usecase.NewGetUser(authManager, boxManager)
-	ucAuthenticate := usecase.NewAuthenticate(logAuth, authManager, &ucGetUser)
-	ucIsAuth := usecase.NewIsAuthenticated(logUc, &getUser, authManager)
-	ucCreateZettel := usecase.NewCreateZettel(logUc, rtConfig, protectedBoxManager)
+	ucAuthenticate := usecase.NewAuthenticate(authLogger, authManager, &ucGetUser)
+	ucIsAuth := usecase.NewIsAuthenticated(ucLogger, &getUser, authManager)
+	ucCreateZettel := usecase.NewCreateZettel(ucLogger, rtConfig, protectedBoxManager)
 	ucGetAllZettel := usecase.NewGetAllZettel(protectedBoxManager)
 	ucGetZettel := usecase.NewGetZettel(protectedBoxManager)
 	ucParseZettel := usecase.NewParseZettel(rtConfig, ucGetZettel)
@@ -75,10 +75,10 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	ucRoleZettel := usecase.NewRoleZettel(protectedBoxManager, &ucQuery)
 	ucListSyntax := usecase.NewListSyntax(protectedBoxManager)
 	ucListRoles := usecase.NewListRoles(protectedBoxManager)
-	ucDelete := usecase.NewDeleteZettel(logUc, protectedBoxManager)
-	ucUpdate := usecase.NewUpdateZettel(logUc, protectedBoxManager)
-	ucRefresh := usecase.NewRefresh(logUc, protectedBoxManager)
-	ucReIndex := usecase.NewReIndex(logUc, protectedBoxManager)
+	ucDelete := usecase.NewDeleteZettel(ucLogger, protectedBoxManager)
+	ucUpdate := usecase.NewUpdateZettel(ucLogger, protectedBoxManager)
+	ucRefresh := usecase.NewRefresh(ucLogger, protectedBoxManager)
+	ucReIndex := usecase.NewReIndex(ucLogger, protectedBoxManager)
 	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(string))
 
 	a := api.New(
