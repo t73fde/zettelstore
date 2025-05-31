@@ -46,7 +46,7 @@ func (klh *kernelLogHandler) Enabled(_ context.Context, level slog.Level) bool {
 	return level >= klh.level.Level()
 }
 
-func (klh *kernelLogHandler) Handle(ctx context.Context, rec slog.Record) error {
+func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
 	var buf bytes.Buffer
 	// _, _ = buf.WriteString(rec.Time.Format(time.DateTime))
 	// _ = buf.WriteByte(' ')
@@ -97,7 +97,10 @@ func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 }
 
 func (klh *kernelLogHandler) WithGroup(name string) slog.Handler {
-	panic("kernelLogHandler.WithGroup not implemented")
+	if name == "" {
+		return klh
+	}
+	panic("kernelLogHandler.WithGroup(name) not implemented")
 }
 
 // kernelDLogWriter adapts an io.Writer to a LogWriter

@@ -20,12 +20,14 @@ import (
 	"strings"
 )
 
+// Some additional log levels.
 const (
 	LevelMissing   slog.Level = -9999
 	LevelTrace     slog.Level = -8
 	LevelMandatory slog.Level = 9999
 )
 
+// LevelString returns a string naming the level. The string is a least 5 bytes long.
 func LevelString(level slog.Level) string {
 	switch level {
 	case LevelTrace:
@@ -44,10 +46,12 @@ func LevelString(level slog.Level) string {
 
 }
 
+// LogTrace writes a trace log message.
 func LogTrace(logger *slog.Logger, msg string, args ...any) {
 	logger.Log(context.Background(), LevelTrace, msg, args...)
 }
 
+// LogMandatory writes a mandatory log message.
 func LogMandatory(logger *slog.Logger, msg string, args ...any) {
 	logger.Log(context.Background(), LevelMandatory, msg, args...)
 }
