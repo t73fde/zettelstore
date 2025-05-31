@@ -17,6 +17,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
@@ -28,24 +29,23 @@ import (
 	"zettelstore.de/z/internal/box/filebox"
 	"zettelstore.de/z/internal/box/notify"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/zettel"
 )
 
-func fileService(i uint32, log *logger.DLogger, dirPath string, cmds <-chan fileCmd) {
+func fileService(i uint32, logger *slog.Logger, dirPath string, cmds <-chan fileCmd) {
 	// Something may panic. Ensure a running service.
 	defer func() {
 		if ri := recover(); ri != nil {
 			kernel.Main.LogRecover("FileService", ri)
-			go fileService(i, log, dirPath, cmds)
+			go fileService(i, logger, dirPath, cmds)
 		}
 	}()
 
-	log.Debug().Uint("i", uint64(i)).Str("dirpath", dirPath).Msg("File service started")
+	logger.Debug("File service started", "i", i, "dirpath", dirPath)
 	for cmd := range cmds {
 		cmd.run(dirPath)
 	}
-	log.Debug().Uint("i", uint64(i)).Str("dirpath", dirPath).Msg("File service stopped")
+	logger.Debug("File service stopped", "i", i, "dirpath", dirPath)
 }
 
 type fileCmd interface {

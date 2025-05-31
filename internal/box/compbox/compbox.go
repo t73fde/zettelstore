@@ -16,6 +16,7 @@ package compbox
 
 import (
 	"context"
+	"log/slog"
 	"net/url"
 
 	"t73f.de/r/zsc/domain/id"
@@ -24,7 +25,7 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -38,7 +39,7 @@ func init() {
 }
 
 type compBox struct {
-	dlog     *logger.DLogger
+	logger   *slog.Logger
 	number   int
 	enricher box.Enricher
 }
@@ -70,8 +71,7 @@ var myZettel = map[id.Zid]struct {
 // Get returns the one program box.
 func getCompBox(boxNumber int, mf box.Enricher) *compBox {
 	return &compBox{
-		dlog: kernel.Main.GetDLogger(kernel.BoxService).Clone().
-			Str("box", "comp").Int("boxnum", int64(boxNumber)).Child(),
+		logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "comp", "boxnum", boxNumber),
 		number:   boxNumber,
 		enricher: mf,
 	}
@@ -87,18 +87,18 @@ func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, er
 		if m := gen.meta(zid); m != nil {
 			updateMeta(m)
 			if genContent := gen.content; genContent != nil {
-				cb.dlog.Trace().Msg("GetZettel/Content")
+				logging.LogTrace(cb.logger, "GetZettel/Content")
 				return zettel.Zettel{
 					Meta:    m,
 					Content: zettel.NewContent(genContent(ctx, cb)),
 				}, nil
 			}
-			cb.dlog.Trace().Msg("GetZettel/NoContent")
+			logging.LogTrace(cb.logger, "GetZettel/NoContent")
 			return zettel.Zettel{Meta: m}, nil
 		}
 	}
 	err := box.ErrZettelNotFound{Zid: zid}
-	cb.dlog.Trace().Err(err).Msg("GetZettel/Err")
+	logging.LogTrace(cb.logger, "GetZettel/Err", "err", err)
 	return zettel.Zettel{}, err
 }
 
@@ -108,7 +108,7 @@ func (*compBox) HasZettel(_ context.Context, zid id.Zid) bool {
 }
 
 func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
-	cb.dlog.Trace().Int("entries", int64(len(myZettel))).Msg("ApplyZid")
+	logging.LogTrace(cb.logger, "ApplyZid", "entries", len(myZettel))
 	for zid, gen := range myZettel {
 		if !constraint(zid) {
 			continue
@@ -123,7 +123,7 @@ func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint qu
 }
 
 func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
-	cb.dlog.Trace().Int("entries", int64(len(myZettel))).Msg("ApplyMeta")
+	logging.LogTrace(cb.logger, "ApplyMeta", "entries", len(myZettel))
 	for zid, gen := range myZettel {
 		if !constraint(zid) {
 			continue
@@ -147,14 +147,14 @@ func (cb *compBox) DeleteZettel(_ context.Context, zid id.Zid) (err error) {
 	} else {
 		err = box.ErrZettelNotFound{Zid: zid}
 	}
-	cb.dlog.Trace().Err(err).Msg("DeleteZettel")
+	logging.LogTrace(cb.logger, "DeleteZettel", "err", err)
 	return err
 }
 
 func (cb *compBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
 	st.Zettel = len(myZettel)
-	cb.dlog.Trace().Int("zettel", int64(st.Zettel)).Msg("ReadStats")
+	logging.LogTrace(cb.logger, "ReadStats", "zettel", st.Zettel)
 }
 
 func getTitledMeta(zid id.Zid, title string) *meta.Meta {

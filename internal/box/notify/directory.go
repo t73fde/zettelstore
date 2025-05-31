@@ -15,7 +15,7 @@ package notify
 
 import (
 	"errors"
-	"fmt"
+	"log/slog"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -26,7 +26,7 @@ import (
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
 )
@@ -56,7 +56,7 @@ const (
 // DirService specifies a directory service for file based zettel.
 type DirService struct {
 	box      box.ManagedBox
-	dlog     *logger.DLogger
+	logger   *slog.Logger
 	dirPath  string
 	notifier Notifier
 	infos    box.UpdateNotifier
@@ -69,10 +69,10 @@ type DirService struct {
 var ErrNoDirectory = errors.New("unable to retrieve zettel directory information")
 
 // NewDirService creates a new directory service.
-func NewDirService(box box.ManagedBox, dlog *logger.DLogger, notifier Notifier, notify box.UpdateNotifier) *DirService {
+func NewDirService(box box.ManagedBox, logger *slog.Logger, notifier Notifier, notify box.UpdateNotifier) *DirService {
 	return &DirService{
 		box:      box,
-		dlog:     dlog,
+		logger:   logger,
 		notifier: notifier,
 		infos:    notify,
 		state:    DsCreated,
@@ -111,7 +111,7 @@ func (ds *DirService) Stop() {
 
 func (ds *DirService) logMissingEntry(action string) error {
 	err := ErrNoDirectory
-	ds.dlog.Info().Err(err).Str("action", action).Msg("Unable to get directory information")
+	ds.logger.Info("Unable to get directory information", "err", err, "action", action)
 	return err
 }
 
@@ -221,9 +221,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 	state := ds.state
 	ds.mx.RUnlock()
 
-	if msg := ds.dlog.Trace(); msg.Enabled() {
-		msg.Uint("state", uint64(state)).Str("op", ev.Op.String()).Str("name", ev.Name).Msg("notifyEvent")
-	}
+	logging.LogTrace(ds.logger, "notifyEvent", "state", state, "op", ev.Op, "name", ev.Name)
 	if state == DsStopping {
 		return nil, false
 	}
@@ -232,7 +230,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 	case Error:
 		newEntries = nil
 		if state != DsMissing {
-			ds.dlog.Error().Err(ev.Err).Msg("Notifier confused")
+			ds.logger.Error("Notifier confused", "err", ev.Err)
 		}
 	case Make:
 		newEntries = make(entrySet)
@@ -247,7 +245,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 			ds.mx.Unlock()
 			ds.onCreateDirectory(zids, prevEntries)
 			if fromMissing {
-				ds.dlog.Info().Str("path", ds.dirPath).Msg("Zettel directory found")
+				ds.logger.Info("Zettel directory found", "path", ds.dirPath)
 			}
 			return nil, true
 		}
@@ -256,7 +254,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 		}
 	case Destroy:
 		ds.onDestroyDirectory()
-		ds.dlog.Error().Str("path", ds.dirPath).Msg("Zettel directory missing")
+		ds.logger.Error("Zettel directory missing", "path", ds.dirPath)
 		return nil, true
 	case Update:
 		ds.mx.Lock()
@@ -273,7 +271,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 			ds.notifyChange(zid, box.OnDelete)
 		}
 	default:
-		ds.dlog.Error().Str("event", fmt.Sprintf("%v", ev)).Msg("Unknown zettel notification event")
+		ds.logger.Error("Unknown zettel notification", "event", ev)
 	}
 	return newEntries, true
 }
@@ -348,9 +346,9 @@ func (ds *DirService) onUpdateFileEvent(entries entrySet, name string) id.Zid {
 	entry := fetchdirEntry(entries, zid)
 	dupName1, dupName2 := ds.updateEntry(entry, name)
 	if dupName1 != "" {
-		ds.dlog.Info().Str("name", dupName1).Msg("Duplicate content (is ignored)")
+		ds.logger.Info("Duplicate content (is ignored)", "name", dupName1)
 		if dupName2 != "" {
-			ds.dlog.Info().Str("name", dupName2).Msg("Duplicate content (is ignored)")
+			ds.logger.Info("Duplicate content (is ignored)", "name", dupName2)
 		}
 		return id.Invalid
 	}
@@ -416,7 +414,7 @@ loop:
 				continue loop
 			}
 		}
-		ds.dlog.Info().Str("name", prevName).Msg("Previous duplicate file becomes useful")
+		ds.logger.Info("Previous duplicate file becomes useful", "name", prevName)
 	}
 }
 
@@ -577,7 +575,7 @@ func newExtIsBetter(oldExt, newExt string) bool {
 
 func (ds *DirService) notifyChange(zid id.Zid, reason box.UpdateReason) {
 	if notify := ds.infos; notify != nil {
-		ds.dlog.Trace().Zid(zid).Uint("reason", uint64(reason)).Msg("notifyChange")
+		logging.LogTrace(ds.logger, "notifychange", "zid", zid, "reason", reason)
 		notify(ds.box, zid, reason)
 	}
 }
