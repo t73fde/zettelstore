@@ -15,7 +15,6 @@ package manager
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"time"
 
@@ -26,6 +25,7 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/kernel"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/zettel"
 	"zettelstore.de/z/strfun"
@@ -35,10 +35,8 @@ import (
 // The word must be normalized through Unicode NKFD, trimmed and not empty.
 func (mgr *Manager) SearchEqual(word string) *idset.Set {
 	found := mgr.idxStore.SearchEqual(word)
-	mgr.idxLog.Debug().Str("word", word).Int("found", int64(found.Length())).Msg("SearchEqual")
-	if msg := mgr.idxLog.Trace(); msg.Enabled() {
-		msg.Str("ids", fmt.Sprint(found)).Msg("IDs")
-	}
+	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", found.Length())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }
 
@@ -46,10 +44,8 @@ func (mgr *Manager) SearchEqual(word string) *idset.Set {
 // The prefix must be normalized through Unicode NKFD, trimmed and not empty.
 func (mgr *Manager) SearchPrefix(prefix string) *idset.Set {
 	found := mgr.idxStore.SearchPrefix(prefix)
-	mgr.idxLog.Debug().Str("prefix", prefix).Int("found", int64(found.Length())).Msg("SearchPrefix")
-	if msg := mgr.idxLog.Trace(); msg.Enabled() {
-		msg.Str("ids", fmt.Sprint(found)).Msg("IDs")
-	}
+	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", found.Length())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }
 
@@ -57,10 +53,8 @@ func (mgr *Manager) SearchPrefix(prefix string) *idset.Set {
 // The suffix must be normalized through Unicode NKFD, trimmed and not empty.
 func (mgr *Manager) SearchSuffix(suffix string) *idset.Set {
 	found := mgr.idxStore.SearchSuffix(suffix)
-	mgr.idxLog.Debug().Str("suffix", suffix).Int("found", int64(found.Length())).Msg("SearchSuffix")
-	if msg := mgr.idxLog.Trace(); msg.Enabled() {
-		msg.Str("ids", fmt.Sprint(found)).Msg("IDs")
-	}
+	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", found.Length())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }
 
@@ -68,10 +62,8 @@ func (mgr *Manager) SearchSuffix(suffix string) *idset.Set {
 // The string must be normalized through Unicode NKFD, trimmed and not empty.
 func (mgr *Manager) SearchContains(s string) *idset.Set {
 	found := mgr.idxStore.SearchContains(s)
-	mgr.idxLog.Debug().Str("s", s).Int("found", int64(found.Length())).Msg("SearchContains")
-	if msg := mgr.idxLog.Trace(); msg.Enabled() {
-		msg.Str("ids", fmt.Sprint(found)).Msg("IDs")
-	}
+	mgr.idxLogger.Debug("SearchContains", "s", s, "found", found.Length())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }
 
@@ -104,7 +96,7 @@ func (mgr *Manager) idxWorkService(ctx context.Context) {
 		case arNothing:
 			return
 		case arReload:
-			mgr.idxLog.Debug().Msg("reload")
+			mgr.idxLogger.Debug("reload")
 			zids, err := mgr.FetchZids(ctx)
 			if err == nil {
 				start = time.Now()
@@ -115,15 +107,15 @@ func (mgr *Manager) idxWorkService(ctx context.Context) {
 				mgr.idxMx.Unlock()
 			}
 		case arZettel:
-			mgr.idxLog.Debug().Zid(zid).Msg("zettel")
+			mgr.idxLogger.Debug("zettel", "zid", zid)
 			zettel, err := mgr.GetZettel(ctx, zid)
 			if err != nil {
 				// Zettel was deleted or is not accessible b/c of other reasons
-				mgr.idxLog.Trace().Zid(zid).Msg("delete")
+				logging.LogTrace(mgr.idxLogger, "delete", "zid", zid)
 				mgr.idxDeleteZettel(ctx, zid)
 				continue
 			}
-			mgr.idxLog.Trace().Zid(zid).Msg("update")
+			logging.LogTrace(mgr.idxLogger, "update", "zid", zid)
 			mgr.idxUpdateZettel(ctx, zettel)
 			mgr.idxMx.Lock()
 			if lastReload {

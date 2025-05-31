@@ -17,6 +17,7 @@ package manager
 import (
 	"context"
 	"io"
+	"log/slog"
 	"net/url"
 	"sync"
 	"time"
@@ -31,7 +32,7 @@ import (
 	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 )
 
 // ConnectData contains all administration related values.
@@ -84,7 +85,7 @@ func Register(scheme string, create createFunc) {
 
 // Manager is a coordinating box.
 type Manager struct {
-	mgrLog       *logger.DLogger
+	mgrLogger    *slog.Logger
 	stateMx      sync.RWMutex
 	state        box.StartState
 	mgrMx        sync.RWMutex
@@ -97,10 +98,10 @@ type Manager struct {
 	propertyKeys *set.Set[string] // Set of property key names
 
 	// Indexer data
-	idxLog   *logger.DLogger
-	idxStore store.Store
-	idxAr    *anteroomQueue
-	idxReady chan struct{} // Signal a non-empty anteroom to background task
+	idxLogger *slog.Logger
+	idxStore  store.Store
+	idxAr     *anteroomQueue
+	idxReady  chan struct{} // Signal a non-empty anteroom to background task
 
 	// Indexer stats data
 	idxMx          sync.RWMutex
@@ -132,17 +133,17 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 			propertyKeys.Add(kd.Name)
 		}
 	}
-	boxLog := kernel.Main.GetDLogger(kernel.BoxService)
+	boxLogger := kernel.Main.GetLogger(kernel.BoxService)
 	mgr := &Manager{
-		mgrLog:       boxLog.Clone().Str("box", "manager").Child(),
+		mgrLogger:    boxLogger.With("box", "manager"),
 		rtConfig:     rtConfig,
 		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
 		propertyKeys: propertyKeys,
 
-		idxLog:   boxLog.Clone().Str("box", "index").Child(),
-		idxStore: createIdxStore(rtConfig),
-		idxAr:    newAnteroomQueue(1000),
-		idxReady: make(chan struct{}, 1),
+		idxLogger: boxLogger.With("box", "index"),
+		idxStore:  createIdxStore(rtConfig),
+		idxAr:     newAnteroomQueue(1000),
+		idxReady:  make(chan struct{}, 1),
 	}
 
 	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged}
@@ -204,15 +205,15 @@ func (mgr *Manager) notifier() {
 				now := time.Now()
 				if len(cache) > 1 && tsLastEvent.Add(10*time.Second).Before(now) {
 					// Cache contains entries and is definitely outdated
-					mgr.mgrLog.Trace().Msg("clean destutter cache")
+					logging.LogTrace(mgr.mgrLogger, "clean destutter cache")
 					cache = destutterCache{}
 				}
 				tsLastEvent = now
 
 				reason, zid := ci.Reason, ci.Zid
-				mgr.mgrLog.Debug().Uint("reason", uint64(reason)).Zid(zid).Msg("notifier")
+				mgr.mgrLogger.Debug("notifier", "reason", reason, "zid", zid)
 				if ignoreUpdate(cache, now, reason, zid) {
-					mgr.mgrLog.Trace().Uint("reason", uint64(reason)).Zid(zid).Msg("notifier ignored")
+					logging.LogTrace(mgr.mgrLogger, "notifier ignored", "reason", reason, "zid", zid)
 					continue
 				}
 
@@ -261,7 +262,7 @@ func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zid id.Zid) {
 	case box.OnDelete:
 		mgr.idxAr.EnqueueZettel(zid)
 	default:
-		mgr.mgrLog.Error().Uint("reason", uint64(reason)).Zid(zid).Msg("Unknown notification reason")
+		mgr.mgrLogger.Error("Unknown notification reason", "reason", reason, "zid", zid)
 		return
 	}
 	select {
@@ -325,9 +326,9 @@ func (mgr *Manager) waitBoxesAreStarted() {
 	for i := 1; !mgr.allBoxesStarted(); i++ {
 		if i%waitLoop == 0 {
 			if time.Duration(i)*waitTime > time.Minute {
-				mgr.mgrLog.Info().Msg("Waiting for more than one minute to start")
+				mgr.mgrLogger.Info("Waiting for more than one minute to start")
 			} else {
-				mgr.mgrLog.Trace().Msg("Wait for boxes to start")
+				logging.LogTrace(mgr.mgrLogger, "Wait for boxes to start")
 			}
 		}
 		time.Sleep(waitTime)
@@ -362,7 +363,7 @@ func (mgr *Manager) Stop(ctx context.Context) {
 
 // Refresh internal box data.
 func (mgr *Manager) Refresh(ctx context.Context) error {
-	mgr.mgrLog.Debug().Msg("Refresh")
+	mgr.mgrLogger.Debug("Refresh")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return err
 	}
@@ -379,7 +380,7 @@ func (mgr *Manager) Refresh(ctx context.Context) error {
 
 // ReIndex data of the given zettel.
 func (mgr *Manager) ReIndex(ctx context.Context, zid id.Zid) error {
-	mgr.mgrLog.Debug().Msg("ReIndex")
+	mgr.mgrLogger.Debug("ReIndex")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return err
 	}
@@ -389,7 +390,7 @@ func (mgr *Manager) ReIndex(ctx context.Context, zid id.Zid) error {
 
 // ReadStats populates st with box statistics.
 func (mgr *Manager) ReadStats(st *box.Stats) {
-	mgr.mgrLog.Debug().Msg("ReadStats")
+	mgr.mgrLogger.Debug("ReadStats")
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	subStats := make([]box.ManagedBoxStats, len(mgr.boxes))
