@@ -16,6 +16,7 @@ package webui
 
 import (
 	"context"
+	"log/slog"
 	"net/http"
 	"sync"
 	"time"
@@ -32,7 +33,6 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
 	"zettelstore.de/z/internal/web/server"
@@ -41,7 +41,7 @@ import (
 
 // WebUI holds all data for delivering the web ui.
 type WebUI struct {
-	dlog     *logger.DLogger
+	logger   *slog.Logger
 	debug    bool
 	ab       server.AuthBuilder
 	authz    auth.AuthzManager
@@ -85,12 +85,12 @@ type webuiBox interface {
 }
 
 // New creates a new WebUI struct.
-func New(dlog *logger.DLogger, ab server.AuthBuilder, authz auth.AuthzManager, rtConfig config.Config, token auth.TokenManager,
+func New(logger *slog.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rtConfig config.Config, token auth.TokenManager,
 	mgr box.Manager, pol auth.Policy, evalZettel *usecase.Evaluate) *WebUI {
 	loginoutBase := ab.NewURLBuilder('i')
 
 	wui := &WebUI{
-		dlog:     dlog,
+		logger:   logger,
 		debug:    kernel.Main.GetConfig(kernel.CoreService, kernel.CoreDebug).(bool),
 		ab:       ab,
 		rtConfig: rtConfig,

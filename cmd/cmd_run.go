@@ -55,7 +55,8 @@ func runFunc(*flag.FlagSet) (int, error) {
 func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth.Manager, rtConfig config.Config) {
 	protectedBoxManager, authPolicy := authManager.BoxWithPolicy(boxManager, rtConfig)
 	kern := kernel.Main
-	webLog := kern.GetDLogger(kernel.WebService)
+	webLogger := kern.GetLogger(kernel.WebService)
+	webDLog := kern.GetDLogger(kernel.WebService)
 
 	var getUser getUserImpl
 	logAuth := kern.GetLogger(kernel.AuthService)
@@ -82,10 +83,10 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(string))
 
 	a := api.New(
-		webLog.Clone().Str("adapter", "api").Child(),
+		webDLog.Clone().Str("adapter", "api").Child(),
 		webSrv, authManager, authManager, rtConfig, authPolicy)
 	wui := webui.New(
-		webLog.Clone().Str("adapter", "wui").Child(),
+		webLogger.With("system", "WEBUI"),
 		webSrv, authManager, rtConfig, authManager, boxManager, authPolicy, &ucEvaluate)
 
 	webSrv.Handle("/", wui.MakeGetRootHandler(protectedBoxManager))

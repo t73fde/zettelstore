@@ -155,7 +155,7 @@ func (wui *WebUI) getParentEnv(ctx context.Context) (*sxeval.Binding, error) {
 	}
 	dag, zettelEnv, err := wui.loadAllSxnCodeZettel(ctx)
 	if err != nil {
-		wui.dlog.Error().Err(err).Msg("loading zettel sxn")
+		wui.logger.Error("loading zettel sxn", "err", err)
 		return nil, err
 	}
 	wui.dag = dag
@@ -367,7 +367,7 @@ func (wui *WebUI) getSxnTemplate(ctx context.Context, zid id.Zid, bind *sxeval.B
 
 	objs, err := reader.ReadAll()
 	if err != nil {
-		wui.dlog.Error().Err(err).Zid(zid).Msg("reading sxn template")
+		wui.logger.Error("reading sxn template", "err", err, "zid", zid)
 		return nil, err
 	}
 	if len(objs) != 1 {
@@ -417,10 +417,7 @@ func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWr
 	if err != nil {
 		return err
 	}
-	if msg := wui.dlog.Debug(); msg != nil {
-		// pageObj.String() can be expensive to calculate.
-		msg.Str("page", pageObj.String()).Msg("render")
-	}
+	wui.logger.Debug("render", "page", pageObj)
 
 	gen := sxhtml.NewGenerator().SetNewline()
 	var sb bytes.Buffer
@@ -430,7 +427,7 @@ func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWr
 	}
 	wui.prepareAndWriteHeader(w, code)
 	if _, err = w.Write(sb.Bytes()); err != nil {
-		wui.dlog.Error().Err(err).Msg("Unable to write HTML via template")
+		wui.logger.Error("Unable to write HTML via template", "err", err)
 	}
 	return nil // No error reporting, since we do not know what happended during write to client.
 }
@@ -439,9 +436,9 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 	ctx = context.WithoutCancel(ctx) // Ignore any cancel / timeouts to write an error message.
 	code, text := adapter.CodeMessageFromError(err)
 	if code == http.StatusInternalServerError {
-		wui.dlog.Error().Msg(err.Error())
+		wui.logger.Error(err.Error())
 	} else {
-		wui.dlog.Debug().Err(err).Msg("reportError")
+		wui.logger.Debug("reportError", "err", err)
 	}
 	user := server.GetUser(ctx)
 	env, rb := wui.createRenderEnv(ctx, "error", meta.ValueLangEN, "Error", user)
@@ -454,7 +451,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 	if errSx == nil {
 		return
 	}
-	wui.dlog.Error().Err(errSx).Msg("while rendering error message")
+	wui.logger.Error("while rendering error message", "err", errSx)
 
 	// if errBind != nil, the HTTP header was not written
 	wui.prepareAndWriteHeader(w, http.StatusInternalServerError)

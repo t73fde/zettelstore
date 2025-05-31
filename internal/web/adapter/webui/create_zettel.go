@@ -140,7 +140,7 @@ func (wui *WebUI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel
 		}
 		if err != nil {
 			const msg = "Unable to read form data"
-			wui.dlog.Info().Err(err).Msg(msg)
+			wui.logger.Info(msg, "err", err)
 			wui.reportError(ctx, w, adapter.NewErrBadRequest(msg))
 			return
 		}

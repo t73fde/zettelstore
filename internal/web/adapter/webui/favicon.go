@@ -28,7 +28,7 @@ func (wui *WebUI) MakeFaviconHandler(baseDir string) http.Handler {
 		filename := filepath.Join(baseDir, "favicon.ico")
 		f, err := os.Open(filename)
 		if err != nil {
-			wui.dlog.Debug().Err(err).Msg("Favicon not found")
+			wui.logger.Debug("Favicon not found", "err", err)
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
@@ -36,13 +36,13 @@ func (wui *WebUI) MakeFaviconHandler(baseDir string) http.Handler {
 
 		data, err := io.ReadAll(f)
 		if err != nil {
-			wui.dlog.Error().Err(err).Msg("Unable to read favicon data")
+			wui.logger.Error("Unable to read favicon data", "err", err)
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 			return
 		}
 
 		if err = adapter.WriteData(w, data, ""); err != nil {
-			wui.dlog.Error().Err(err).Msg("Write favicon")
+			wui.logger.Error("Write favicon", "err", err)
 		}
 	})
 }
