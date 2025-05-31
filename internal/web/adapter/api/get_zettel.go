@@ -103,12 +103,12 @@ func (a *API) writePlainData(ctx context.Context, w http.ResponseWriter, zid id.
 	}
 
 	if err != nil {
-		a.dlog.Error().Err(err).Zid(zid).Msg("Unable to store plain zettel/part in buffer")
+		a.logger.Error("Unable to store plain zettel/part in buffer", "err", err, "zid", zid)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 	if err = writeBuffer(w, &buf, contentType); err != nil {
-		a.dlog.Error().Err(err).Zid(zid).Msg("Write Plain data")
+		a.logger.Error("write plain data", "err", err, "zid", zid)
 	}
 }
 
@@ -136,7 +136,7 @@ func (a *API) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid
 		})
 	}
 	if err = a.writeObject(w, zid, obj); err != nil {
-		a.dlog.Error().Err(err).Zid(zid).Msg("write sx data")
+		a.logger.Error("write sx data", "err", err, "zid", zid)
 	}
 }
 
@@ -165,7 +165,7 @@ func (a *API) writeEncodedZettelPart(
 		_, err = encdr.WriteBlocks(&buf, &zn.BlocksAST)
 	}
 	if err != nil {
-		a.dlog.Error().Err(err).Zid(zn.Zid).Msg("Unable to store data in buffer")
+		a.logger.Error("Unable to store data in buffer", "err", err, "zid", zn.Zid)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
@@ -175,6 +175,6 @@ func (a *API) writeEncodedZettelPart(
 	}
 
 	if err = writeBuffer(w, &buf, content.MIMEFromEncoding(enc)); err != nil {
-		a.dlog.Error().Err(err).Zid(zn.Zid).Msg("Write Encoded Zettel")
+		a.logger.Error("Write encoded zettel", "err", err, "zid", zn.Zid)
 	}
 }

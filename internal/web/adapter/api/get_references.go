@@ -22,6 +22,7 @@ import (
 	zeroiter "t73f.de/r/zero/iter"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/content"
@@ -65,7 +66,7 @@ func (a *API) MakeGetReferencesHandler(
 			var lb sx.ListBuilder
 			lb.Collect(zeroiter.MapSeq(seq, func(s string) sx.Object { return sx.MakeString(s) }))
 			if err = a.writeObject(w, zid, lb.List()); err != nil {
-				a.dlog.Error().Err(err).Zid(zid).Msg("write sx data")
+				a.logger.Error("write sx data", "err", err, "zid", zid)
 			}
 			return
 		}
@@ -76,7 +77,7 @@ func (a *API) MakeGetReferencesHandler(
 			buf.WriteByte('\n')
 		}
 		if err = writeBuffer(w, &buf, content.PlainText); err != nil {
-			a.dlog.Error().Err(err).Zid(zid).Msg("Write Plain data")
+			a.logger.Error("write plain data", "err", err, "zid", zid)
 		}
 	})
 }

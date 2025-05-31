@@ -56,7 +56,6 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	protectedBoxManager, authPolicy := authManager.BoxWithPolicy(boxManager, rtConfig)
 	kern := kernel.Main
 	webLogger := kern.GetLogger(kernel.WebService)
-	webDLog := kern.GetDLogger(kernel.WebService)
 
 	var getUser getUserImpl
 	logAuth := kern.GetLogger(kernel.AuthService)
@@ -83,7 +82,7 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(string))
 
 	a := api.New(
-		webDLog.Clone().Str("adapter", "api").Child(),
+		webLogger.With("system", "WEBAPI"),
 		webSrv, authManager, authManager, rtConfig, authPolicy)
 	wui := webui.New(
 		webLogger.With("system", "WEBUI"),

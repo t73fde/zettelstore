@@ -17,6 +17,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -26,14 +27,13 @@ import (
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/web/adapter"
 	"zettelstore.de/z/internal/web/server"
 )
 
 // API holds all data and methods for delivering API call results.
 type API struct {
-	dlog     *logger.DLogger
+	logger   *slog.Logger
 	b        server.Builder
 	authz    auth.AuthzManager
 	token    auth.TokenManager
@@ -44,10 +44,10 @@ type API struct {
 }
 
 // New creates a new API object.
-func New(dlog *logger.DLogger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
+func New(logger *slog.Logger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
 	rtConfig config.Config, pol auth.Policy) *API {
 	a := &API{
-		dlog:     dlog,
+		logger:   logger,
 		b:        b,
 		authz:    authz,
 		token:    token,
@@ -73,7 +73,7 @@ func (a *API) getToken(ident *meta.Meta) ([]byte, error) {
 func (a *API) reportUsecaseError(w http.ResponseWriter, err error) {
 	code, text := adapter.CodeMessageFromError(err)
 	if code == http.StatusInternalServerError {
-		a.dlog.Error().Err(err).Msg(text)
+		a.logger.Error(text, "err", err)
 		http.Error(w, http.StatusText(code), code)
 		return
 	}

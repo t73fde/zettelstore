@@ -30,7 +30,7 @@ func (a *API) MakePostLoginHandler(ucAuth *usecase.Authenticate) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !a.withAuth() {
 			if err := a.writeToken(w, "freeaccess", 24*366*10*time.Hour); err != nil {
-				a.dlog.Error().Err(err).Msg("Login/free")
+				a.logger.Error("Login/free", "err", err)
 			}
 			return
 		}
@@ -50,7 +50,7 @@ func (a *API) MakePostLoginHandler(ucAuth *usecase.Authenticate) http.Handler {
 		}
 
 		if err := a.writeToken(w, string(token), a.tokenLifetime); err != nil {
-			a.dlog.Error().Err(err).Msg("Login")
+			a.logger.Error("Login", "err", err)
 		}
 	})
 }
@@ -71,7 +71,7 @@ func (a *API) MakeRenewAuthHandler() http.Handler {
 		ctx := r.Context()
 		if !a.withAuth() {
 			if err := a.writeToken(w, "freeaccess", 24*366*10*time.Hour); err != nil {
-				a.dlog.Error().Err(err).Msg("Refresh/free")
+				a.logger.Error("Refresh/free", "err", err)
 			}
 			return
 		}
@@ -85,7 +85,7 @@ func (a *API) MakeRenewAuthHandler() http.Handler {
 		// If we are in the first quarter of the tokens lifetime, return the token
 		if currentLifetime*4 < totalLifetime {
 			if err := a.writeToken(w, string(authData.Token), totalLifetime-currentLifetime); err != nil {
-				a.dlog.Error().Err(err).Msg("Write old token")
+				a.logger.Error("write old token", "err", err)
 			}
 			return
 		}
@@ -97,7 +97,7 @@ func (a *API) MakeRenewAuthHandler() http.Handler {
 			return
 		}
 		if err = a.writeToken(w, string(token), a.tokenLifetime); err != nil {
-			a.dlog.Error().Err(err).Msg("Write renewed token")
+			a.logger.Error("write renewed token", "err", err)
 		}
 	})
 }

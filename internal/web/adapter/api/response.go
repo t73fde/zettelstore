@@ -26,13 +26,7 @@ import (
 func (a *API) writeObject(w http.ResponseWriter, zid id.Zid, obj sx.Object) error {
 	var buf bytes.Buffer
 	if _, err := sx.Print(&buf, obj); err != nil {
-		msg := a.dlog.Error().Err(err)
-		if msg != nil {
-			if zid.IsValid() {
-				msg = msg.Zid(zid)
-			}
-			msg.Msg("Unable to store object in buffer")
-		}
+		a.logger.Error("Unable to store object in buffer", "err", err, "zid", zid)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return nil
 	}
