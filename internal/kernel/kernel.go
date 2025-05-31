@@ -78,7 +78,6 @@ type serviceDescr struct {
 	name        string
 	logLevel    slog.Level
 	logLevelVar slog.LevelVar
-	dlogLevel   logger.DLevel
 }
 type serviceData struct {
 	srv    service
@@ -103,12 +102,12 @@ func createKernel() *Kernel {
 	kern.logger = slog.New(newKernelLogHandler(lw, &kern.logLevelVar))
 	kern.self.kernel = kern
 	kern.srvs = map[Service]*serviceDescr{
-		KernelService: {srv: &kern.self, name: "kernel", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
-		CoreService:   {srv: &kern.core, name: "core", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
-		ConfigService: {srv: &kern.cfg, name: "config", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
-		AuthService:   {srv: &kern.auth, name: "auth", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
-		BoxService:    {srv: &kern.box, name: "box", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
-		WebService:    {srv: &kern.web, name: "web", logLevel: defaultNormalLogLevel, dlogLevel: defaultNormalDLogLevel},
+		KernelService: {srv: &kern.self, name: "kernel", logLevel: defaultNormalLogLevel},
+		CoreService:   {srv: &kern.core, name: "core", logLevel: defaultNormalLogLevel},
+		ConfigService: {srv: &kern.cfg, name: "config", logLevel: defaultNormalLogLevel},
+		AuthService:   {srv: &kern.auth, name: "auth", logLevel: defaultNormalLogLevel},
+		BoxService:    {srv: &kern.box, name: "box", logLevel: defaultNormalLogLevel},
+		WebService:    {srv: &kern.web, name: "web", logLevel: defaultNormalLogLevel},
 	}
 	kern.srvNames = make(map[string]serviceData, len(kern.srvs))
 	for key, srvD := range kern.srvs {
@@ -120,7 +119,7 @@ func createKernel() *Kernel {
 		srvD.logLevelVar.Set(srvD.logLevel)
 		srvLogger := slog.New(newKernelLogHandler(lw, &srvD.logLevelVar))
 		srvLogger = srvLogger.With("system", strings.ToUpper(srvD.name))
-		dlog := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.dlogLevel)
+		dlog := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(defaultNormalDLogLevel)
 		kern.logger.Debug("Initialize", "service", srvD.name)
 		srvD.srv.Initialize(srvLogger, dlog)
 	}
@@ -346,7 +345,7 @@ func (kern *Kernel) WaitForShutdown() {
 
 // Shutdown the service. Waits for all concurrent activities to stop.
 func (kern *Kernel) Shutdown(silent bool) {
-	kern.dlogger.Trace().Msg("Shutdown")
+	logging.LogTrace(kern.logger, "Shutdown")
 	kern.interrupt <- &shutdownSignal{silent: silent}
 }
 
@@ -462,7 +461,7 @@ func (kern *Kernel) GetLastLogTime() time.Time { return kern.dlogWriter.getLastL
 // LogRecover outputs some information about the previous panic.
 func (kern *Kernel) LogRecover(name string, recoverInfo any) {
 	stack := debug.Stack()
-	kern.dlogger.Error().Str("recovered_from", fmt.Sprint(recoverInfo)).Bytes("stack", stack).Msg(name)
+	kern.logger.Error(name, "recovered_from", recoverInfo, "stack", stack)
 	kern.core.updateRecoverInfo(name, recoverInfo, stack)
 }
 
