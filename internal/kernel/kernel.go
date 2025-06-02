@@ -37,7 +37,6 @@ import (
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -49,7 +48,7 @@ var Main *Kernel
 type Kernel struct {
 	logLevelVar slog.LevelVar
 	logger      *slog.Logger
-	dlogWriter  *kernelDLogWriter
+	dlogWriter  *kernelLogWriter
 	wg          sync.WaitGroup
 	mx          sync.RWMutex
 	interrupt   chan os.Signal
@@ -231,9 +230,9 @@ type KeyDescrValue struct{ Key, Descr, Value string }
 // KeyValue is a pair of key and value.
 type KeyValue struct{ Key, Value string }
 
-// DLogEntry stores values of one log line written by a logger.DLogger
-type DLogEntry struct {
-	Level   logger.DLevel
+// LogEntry stores values of one log line written by a logger.
+type LogEntry struct {
+	Level   slog.Level
 	TS      time.Time
 	Prefix  string
 	Message string
@@ -258,10 +257,8 @@ type SetupWebServerFunc func(
 ) error
 
 const (
-	defaultNormalLogLevel  = slog.LevelInfo
-	defaultSimpleLogLevel  = slog.LevelError
-	defaultNormalDLogLevel = logger.DInfoLevel
-	defaultSimpleDLogLevel = logger.DErrorLevel
+	defaultNormalLogLevel = slog.LevelInfo
+	defaultSimpleLogLevel = slog.LevelError
 )
 
 // Setup sets the most basic data of a software: its name, its version,
@@ -278,7 +275,6 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		srvD.srv.Freeze()
 	}
 	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
-		kern.SetLogLevel(defaultSimpleDLogLevel.String())
 		kern.logLevelVar.Set(defaultSimpleLogLevel)
 	}
 	kern.wg.Add(1)
@@ -417,7 +413,7 @@ func cleanLogSpec(rawVals []string) []string {
 }
 
 // RetrieveLogEntries returns all buffered log entries.
-func (kern *Kernel) RetrieveLogEntries() []DLogEntry {
+func (kern *Kernel) RetrieveLogEntries() []LogEntry {
 	return kern.dlogWriter.retrieveLogEntries()
 }
 

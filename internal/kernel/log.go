@@ -22,18 +22,17 @@ import (
 	"sync"
 	"time"
 
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/logging"
 )
 
 type kernelLogHandler struct {
-	klw    *kernelDLogWriter
+	klw    *kernelLogWriter
 	level  slog.Leveler
 	system string
 	attrs  string
 }
 
-func newKernelLogHandler(klw *kernelDLogWriter, level slog.Leveler) *kernelLogHandler {
+func newKernelLogHandler(klw *kernelLogWriter, level slog.Leveler) *kernelLogHandler {
 	return &kernelLogHandler{
 		klw:    klw,
 		level:  level,
@@ -48,36 +47,13 @@ func (klh *kernelLogHandler) Enabled(_ context.Context, level slog.Level) bool {
 
 func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
 	var buf bytes.Buffer
-	// _, _ = buf.WriteString(rec.Time.Format(time.DateTime))
-	// _ = buf.WriteByte(' ')
-	// _, _ = buf.WriteString(logging.LevelStringPad(rec.Level))
-	// if s := klh.system; s != "" {
-	// 	_ = buf.WriteByte(' ')
-	// 	_, _ = buf.WriteString(s)
-	// }
-	// _ = buf.WriteByte(' ')
-	// _, _ = buf.WriteString(rec.Message)
-	_, _ = buf.WriteString(klh.attrs)
+	buf.WriteString(klh.attrs)
 	rec.Attrs(func(attr slog.Attr) bool {
-		_ = buf.WriteByte(' ')
-		_, _ = buf.WriteString(attr.String())
+		buf.WriteByte(' ')
+		buf.WriteString(attr.String())
 		return true
 	})
-	// _ = buf.WriteByte('\n')
-	// _, _ = os.Stdout.WriteString(buf.String())
-
-	dlevel := logger.DInfoLevel
-	switch rec.Level {
-	case logging.LevelTrace:
-		dlevel = logger.DTraceLevel
-	case slog.LevelDebug:
-		dlevel = logger.DDebugLevel
-	case slog.LevelWarn, slog.LevelError:
-		dlevel = logger.DErrorLevel
-	case logging.LevelMandatory:
-		dlevel = logger.DMandatoryLevel
-	}
-	return klh.klw.DWriteMessage(dlevel, rec.Time, klh.system, rec.Message, buf.Bytes())
+	return klh.klw.writeMessage(rec.Level, rec.Time, klh.system, rec.Message, buf.Bytes())
 }
 
 func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
@@ -103,8 +79,8 @@ func (klh *kernelLogHandler) WithGroup(name string) slog.Handler {
 	panic("kernelLogHandler.WithGroup(name) not implemented")
 }
 
-// kernelDLogWriter adapts an io.Writer to a LogWriter
-type kernelDLogWriter struct {
+// kernelLogWriter adapts an io.Writer to a LogWriter
+type kernelLogWriter struct {
 	mx       sync.RWMutex // protects buf, serializes w.Write and retrieveLogEntries
 	lastLog  time.Time
 	buf      []byte
@@ -114,21 +90,21 @@ type kernelDLogWriter struct {
 }
 
 // newKernelLogWriter creates a new LogWriter for kernel logging.
-func newKernelLogWriter(capacity int) *kernelDLogWriter {
+func newKernelLogWriter(capacity int) *kernelLogWriter {
 	if capacity < 1 {
 		capacity = 1
 	}
-	return &kernelDLogWriter{
+	return &kernelLogWriter{
 		lastLog: time.Now(),
 		buf:     make([]byte, 0, 500),
 		data:    make([]logEntry, capacity),
 	}
 }
 
-func (klw *kernelDLogWriter) DWriteMessage(level logger.DLevel, ts time.Time, prefix, msg string, details []byte) error {
+func (klw *kernelLogWriter) writeMessage(level slog.Level, ts time.Time, prefix, msg string, details []byte) error {
 	klw.mx.Lock()
 
-	if level > logger.DDebugLevel {
+	if level > slog.LevelDebug {
 		klw.lastLog = ts
 		klw.data[klw.writePos] = logEntry{
 			level:   level,
@@ -148,7 +124,7 @@ func (klw *kernelDLogWriter) DWriteMessage(level logger.DLevel, ts time.Time, pr
 	buf := klw.buf
 	addTimestamp(&buf, ts)
 	buf = append(buf, ' ')
-	buf = append(buf, level.Format()...)
+	buf = append(buf, logging.LevelStringPad(level)...)
 	buf = append(buf, ' ')
 	if prefix != "" {
 		buf = append(buf, prefix...)
@@ -191,14 +167,14 @@ func itoa(buf *[]byte, i, wid int) {
 }
 
 type logEntry struct {
-	level   logger.DLevel
+	level   slog.Level
 	ts      time.Time
 	prefix  string
 	msg     string
 	details []byte
 }
 
-func (klw *kernelDLogWriter) retrieveLogEntries() []DLogEntry {
+func (klw *kernelLogWriter) retrieveLogEntries() []LogEntry {
 	klw.mx.RLock()
 	defer klw.mx.RUnlock()
 
@@ -206,13 +182,13 @@ func (klw *kernelDLogWriter) retrieveLogEntries() []DLogEntry {
 		if klw.writePos == 0 {
 			return nil
 		}
-		result := make([]DLogEntry, klw.writePos)
+		result := make([]LogEntry, klw.writePos)
 		for i := range klw.writePos {
 			copyE2E(&result[i], &klw.data[i])
 		}
 		return result
 	}
-	result := make([]DLogEntry, cap(klw.data))
+	result := make([]LogEntry, cap(klw.data))
 	pos := 0
 	for j := klw.writePos; j < cap(klw.data); j++ {
 		copyE2E(&result[pos], &klw.data[j])
@@ -225,13 +201,13 @@ func (klw *kernelDLogWriter) retrieveLogEntries() []DLogEntry {
 	return result
 }
 
-func (klw *kernelDLogWriter) getLastLogTime() time.Time {
+func (klw *kernelLogWriter) getLastLogTime() time.Time {
 	klw.mx.RLock()
 	defer klw.mx.RUnlock()
 	return klw.lastLog
 }
 
-func copyE2E(result *DLogEntry, origin *logEntry) {
+func copyE2E(result *LogEntry, origin *logEntry) {
 	result.Level = origin.level
 	result.TS = origin.ts
 	result.Prefix = origin.prefix
