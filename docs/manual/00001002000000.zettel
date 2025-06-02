@@ -4,13 +4,13 @@ role: manual
 tags: #design #goal #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102191434
+modified: 20250602181324
 
 Zettelstore supports the following design goals:
 
 ; Longevity of stored notes / zettel
 : Every zettel you create should be readable without the help of any tool, even without Zettelstore.
-: It should not hard to write other software that works with your zettel.
+: It should not be hard to write other software that works with your zettel.
 : Normal zettel should be stored in a single file.
   If this is not possible: at most in two files: one for the metadata, one for the content.
   The only exceptions are [[predefined zettel|00001005090000]] stored in the Zettelstore executable.
@@ -39,5 +39,5 @@ Zettelstore supports the following design goals:
 : Without any customization, Zettelstore provides its services in a safe and secure manner and does not expose you (or other users) to security risks.
 : If you know what you are doing, Zettelstore allows you to relax some security-related preferences.
   However, even in this case, the more secure way is chosen.
-: The Zettelstore software uses a minimal design and uses other software dependencies only is essential needed.
+: Zettelstore features a minimal design and relies on external software only when absolutely necessary.
 : There will be no plugin mechanism, which allows external software to control the inner workings of the Zettelstore software.

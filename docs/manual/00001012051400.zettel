@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220912111111
-modified: 20250224120055
+modified: 20250602182055
 precursor: 00001012051200
 
 The [[endpoint|00001012920000]] ''/z'' also allows you to filter the list of all zettel[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header] and optionally specify some actions.
@@ -58,7 +58,7 @@ But the situation is different for a key like [[''url''|00001006020000#url]].
 Both ``curl 'http://localhost:23123/z?q=url%3A'`` and ``curl 'http://localhost:23123/z?q=url%3A!'`` may result in an empty list.
 
 
-As an example for a query action, to list all roles used in the Zettelstore, send a HTTP GET request to the endpoint ''/z?q=|role''.
+As an example for a query action, to list all roles used in the Zettelstore, send an HTTP GET request to the endpoint ''/z?q=|role''.
 
 ```sh
 # curl 'http://127.0.0.1:23123/z?q=|role'
@@ -70,7 +70,7 @@ zettel	00010000000000 00000000090001
 The result is a text file.
 The first word, separated by a horizontal tab (U+0009) contains the role name.
 The rest of the line consists of zettel identifier, where the corresponding zettel have this role.
-Zettel identifier are separated by a space character (U+0020).
+Zettel identifiers are separated by a space character (U+0020).
 
 Please note that the list is **not** sorted by the role name, so the same request might result in a different order.
 If you want a sorted list, you could sort it on the command line (``curl 'http://127.0.0.1:23123/z?q=|role' | sort``) or within the software that made the call to the Zettelstore.
@@ -88,7 +88,7 @@ Then a string follows, which specifies the key on which the aggregate was perfor
 Then comes the result list of aggregates.
 Each aggregate starts with a string of the aggregate value, in this case the role value, followed by a list of zettel identifier, denoting zettel which have the given role value.
 
-Similar, to list all tags used in the Zettelstore, send a HTTP GET request to the endpoint ''/z?q=|tags''.
+Similarly, to list all tags used in the Zettelstore, send an HTTP GET request to the endpoint ''/z?q=|tags''.
 If successful, the output is a data object:
 
 ```sh
@@ -112,7 +112,7 @@ The following actions are supported:
 ; ''KEYS'' (aggregate)
 : Emit a list of all metadata keys, together with the number of zettel having the key.
 ; ''REDIRECT'' (aggregate)
-: Performs a HTTP redirect to the first selected zettel, using HTTP status code 302.
+: Performs an HTTP redirect to the first selected zettel, using HTTP status code 302.
   The zettel identifier is in the body.
 ; ''REINDEX'' (aggregate)
 : Updates the internal search index for the selected zettel, roughly similar to the [[refresh|00001012080500]] API call.
