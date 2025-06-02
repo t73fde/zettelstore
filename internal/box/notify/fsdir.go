@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
+
 	"zettelstore.de/z/internal/logging"
 )
 
@@ -53,12 +54,14 @@ func NewFSDirNotifier(logger *slog.Logger, path string) (Notifier, error) {
 	if errParent != nil {
 		if err != nil {
 			logger.Error("Unable to access Zettel directory and its parent directory",
-				"parentDir", absParentDir, "err", errParent, "path", absPath, "err", err)
+				"parentDir", absParentDir, "errParent", errParent, "path", absPath, "err", err)
 			_ = watcher.Close()
 			return nil, err
 		}
-		logger.Info("Parent of Zettel directory cannot be supervised", "parentDir", absParentDir, "err", errParent)
-		logger.Info("Zettelstore might not detect a deletion or movement of the Zettel directory", "path", absPath)
+		logger.Info("Parent of Zettel directory cannot be supervised",
+			"parentDir", absParentDir, "err", errParent)
+		logger.Info("Zettelstore might not detect a deletion or movement of the Zettel directory",
+			"path", absPath)
 	} else if err != nil {
 		// Not a problem, if container is not available. It might become available later.
 		logger.Info("Zettel directory currently not available", "err", err, "path", absPath)
@@ -187,7 +190,7 @@ func (fsdn *fsdirNotifier) processFileEvent(ev *fsnotify.Event) bool {
 		if fi, err := os.Lstat(ev.Name); err != nil || !fi.Mode().IsRegular() {
 			regular := err == nil && fi.Mode().IsRegular()
 			logging.LogTrace(fsdn.logger, "error with file",
-				"name", ev.Name, "op", ev.Op, "err", err, "regular", regular)
+				"name", ev.Name, "op", ev.Op, logging.Err(err), "regular", regular)
 			return true
 		}
 		logging.LogTrace(fsdn.logger, "File updated", "name", ev.Name, "op", ev.Op)

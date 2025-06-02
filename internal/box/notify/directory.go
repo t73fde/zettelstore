@@ -230,7 +230,7 @@ func (ds *DirService) handleEvent(ev Event, newEntries entrySet) (entrySet, bool
 	case Error:
 		newEntries = nil
 		if state != DsMissing {
-			ds.logger.Error("Notifier confused", "err", ev.Err)
+			ds.logger.Error("Notifier confused", "state", state, logging.Err(ev.Err))
 		}
 	case Make:
 		newEntries = make(entrySet)

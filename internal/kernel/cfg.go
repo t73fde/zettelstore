@@ -172,7 +172,7 @@ func (cs *configService) setBox(mgr box.Manager) {
 
 func (cs *configService) doUpdate(p box.BaseBox) error {
 	z, err := p.GetZettel(context.Background(), id.ZidConfiguration)
-	logging.LogTrace(cs.logger, "got config meta", "err", err)
+	logging.LogTrace(cs.logger, "got config meta", logging.Err(err))
 	if err != nil {
 		return err
 	}

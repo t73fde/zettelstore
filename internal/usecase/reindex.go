@@ -18,6 +18,8 @@ import (
 	"log/slog"
 
 	"t73f.de/r/zsc/domain/id"
+
+	"zettelstore.de/z/internal/logging"
 )
 
 // ReIndexPort is the interface used by this use case.
@@ -39,6 +41,6 @@ func NewReIndex(logger *slog.Logger, port ReIndexPort) ReIndex {
 // Run executes the use case.
 func (uc *ReIndex) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.ReIndex(ctx, zid)
-	uc.logger.Info("ReIndex zettel", "zid", zid, "err", err) // TODO: add user=
+	uc.logger.Info("ReIndex zettel", "zid", zid, logging.Err(err)) // TODO: add user=
 	return err
 }

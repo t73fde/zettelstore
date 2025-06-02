@@ -67,7 +67,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 		if ok {
 			token, err2 := uc.token.GetToken(identMeta, d, k)
 			if err2 != nil {
-				uc.log.Info("Unable to produce authentication token", "ident", ident, "err", err)
+				uc.log.Info("Unable to produce authentication token", "ident", ident, "err", err2)
 				return nil, err2
 			}
 			uc.log.Info("Successful", "user", ident)

@@ -448,7 +448,7 @@ func cmdEndProfile(sess *cmdSession, _ string, _ []string) bool {
 	if err != nil {
 		sess.println("Error:", err.Error())
 	}
-	logging.LogMandatory(sess.kern.logger, "Stop profiling", "err", err)
+	logging.LogMandatory(sess.kern.logger, "Stop profiling", logging.Err(err))
 	return true
 }
 

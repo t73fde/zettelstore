@@ -80,3 +80,11 @@ func ParseLevel(text string) slog.Level {
 	}
 	return LevelMissing
 }
+
+// Err returns a log attribute, if an error occurred.
+func Err(err error) slog.Attr {
+	if err == nil {
+		return slog.Attr{}
+	}
+	return slog.Any("err", err)
+}

@@ -247,7 +247,7 @@ func (dp *dirBox) CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zi
 		err = dp.dirSrv.UpdateDirEntry(&entry)
 	}
 	dp.notifyChanged(meta.Zid, box.OnZettel)
-	logging.LogTrace(dp.logger, "CreateZettel", "err", err, "zid", meta.Zid)
+	logging.LogTrace(dp.logger, "CreateZettel", logging.Err(err), "zid", meta.Zid)
 	return meta.Zid, err
 }
 
@@ -323,7 +323,7 @@ func (dp *dirBox) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error 
 	if err == nil {
 		dp.notifyChanged(zid, box.OnZettel)
 	}
-	logging.LogTrace(dp.logger, "UpdateZettel", "zid", zid, "err", err)
+	logging.LogTrace(dp.logger, "UpdateZettel", "zid", zid, logging.Err(err))
 	return err
 }
 
@@ -356,7 +356,7 @@ func (dp *dirBox) DeleteZettel(ctx context.Context, zid id.Zid) error {
 	if err == nil {
 		dp.notifyChanged(zid, box.OnDelete)
 	}
-	logging.LogTrace(dp.logger, "DeleteZettel", "zid", zid, "err", err)
+	logging.LogTrace(dp.logger, "DeleteZettel", "zid", zid, logging.Err(err))
 	return err
 }
 

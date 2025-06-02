@@ -246,9 +246,9 @@ func setServiceConfig(cfg *meta.Meta) bool {
 
 func setConfigValue(err error, subsys kernel.Service, key string, val any) error {
 	if err == nil {
-		err = kernel.Main.SetConfig(subsys, key, fmt.Sprint(val))
-		if err != nil {
-			kernel.Main.GetKernelLogger().Error("Unable to set configuration", "key", key, "value", val, "err", err)
+		if err = kernel.Main.SetConfig(subsys, key, fmt.Sprint(val)); err != nil {
+			kernel.Main.GetKernelLogger().Error("Unable to set configuration",
+				"key", key, "value", val, "err", err)
 		}
 	}
 	return err

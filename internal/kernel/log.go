@@ -49,8 +49,10 @@ func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
 	var buf bytes.Buffer
 	buf.WriteString(klh.attrs)
 	rec.Attrs(func(attr slog.Attr) bool {
-		buf.WriteByte(' ')
-		buf.WriteString(attr.String())
+		if !attr.Equal(slog.Attr{}) {
+			buf.WriteByte(' ')
+			buf.WriteString(attr.String())
+		}
 		return true
 	})
 	return klh.klw.writeMessage(rec.Level, rec.Time, klh.system, rec.Message, buf.Bytes())
@@ -59,6 +61,9 @@ func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
 func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	h := newKernelLogHandler(klh.klw, klh.level)
 	for _, attr := range attrs {
+		if attr.Equal(slog.Attr{}) {
+			continue
+		}
 		if attr.Key == "system" {
 			system := attr.Value.String()
 			if len(system) < 6 {

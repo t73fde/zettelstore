@@ -105,7 +105,7 @@ func (cb *constBox) DeleteZettel(_ context.Context, zid id.Zid) (err error) {
 	} else {
 		err = box.ErrZettelNotFound{Zid: zid}
 	}
-	logging.LogTrace(cb.logger, "DeleteZettel", "err", err)
+	logging.LogTrace(cb.logger, "DeleteZettel", logging.Err(err))
 	return err
 }
 

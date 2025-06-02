@@ -21,6 +21,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -73,6 +74,6 @@ func (uc *UpdateZettel) Run(ctx context.Context, zettel zettel.Zettel, hasConten
 	}
 	zettel.Content.TrimSpace()
 	err = uc.port.UpdateZettel(ctx, zettel)
-	uc.logger.Info("Update zettel", "zid", m.Zid, "err", err) // TODO: add user=
+	uc.logger.Info("Update zettel", "zid", m.Zid, logging.Err(err)) // TODO: add user=
 	return err
 }

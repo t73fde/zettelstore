@@ -18,6 +18,8 @@ import (
 	"log/slog"
 
 	"t73f.de/r/zsc/domain/id"
+
+	"zettelstore.de/z/internal/logging"
 )
 
 // DeleteZettelPort is the interface used by this use case.
@@ -40,6 +42,6 @@ func NewDeleteZettel(logger *slog.Logger, port DeleteZettelPort) DeleteZettel {
 // Run executes the use case.
 func (uc *DeleteZettel) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.DeleteZettel(ctx, zid)
-	uc.logger.Info("Delete zettel", "zid", zid, "err", err) // TODO: add user=
+	uc.logger.Info("Delete zettel", "zid", zid, logging.Err(err)) // TODO: add user=
 	return err
 }
