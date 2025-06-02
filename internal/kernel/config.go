@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
-	"zettelstore.de/z/internal/logger"
 )
 
 type parseFunc func(string) (any, error)
@@ -39,13 +38,13 @@ type interfaceMap map[string]any
 func (m interfaceMap) Clone() interfaceMap { return maps.Clone(m) }
 
 type srvConfig struct {
-	logger   *slog.Logger
-	dlogger  *logger.DLogger
-	mxConfig sync.RWMutex
-	frozen   bool
-	descr    descriptionMap
-	cur      interfaceMap
-	next     interfaceMap
+	logLevelVar *slog.LevelVar
+	logger      *slog.Logger
+	mxConfig    sync.RWMutex
+	frozen      bool
+	descr       descriptionMap
+	cur         interfaceMap
+	next        interfaceMap
 }
 
 func (cfg *srvConfig) ConfigDescriptions() []serviceConfigDescription {

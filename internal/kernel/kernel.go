@@ -50,7 +50,6 @@ type Kernel struct {
 	logLevelVar slog.LevelVar
 	logger      *slog.Logger
 	dlogWriter  *kernelDLogWriter
-	dlogger     *logger.DLogger
 	wg          sync.WaitGroup
 	mx          sync.RWMutex
 	interrupt   chan os.Signal
@@ -95,7 +94,6 @@ func createKernel() *Kernel {
 	lw := newKernelLogWriter(8192)
 	kern := &Kernel{
 		dlogWriter: lw,
-		dlogger:    logger.DNew(lw, "").SetLevel(defaultNormalDLogLevel),
 		interrupt:  make(chan os.Signal, 5),
 	}
 	kern.logLevelVar.Set(defaultNormalLogLevel)
@@ -117,11 +115,10 @@ func createKernel() *Kernel {
 		kern.srvNames[srvD.name] = serviceData{srvD.srv, key}
 
 		srvD.logLevelVar.Set(srvD.logLevel)
-		srvLogger := slog.New(newKernelLogHandler(lw, &srvD.logLevelVar))
-		srvLogger = srvLogger.With("system", strings.ToUpper(srvD.name))
-		dlog := logger.DNew(lw, strings.ToUpper(srvD.name)).SetLevel(defaultNormalDLogLevel)
+		srvLogger := slog.New(newKernelLogHandler(lw, &srvD.logLevelVar)).With(
+			"system", strings.ToUpper(srvD.name))
 		kern.logger.Debug("Initialize", "service", srvD.name)
-		srvD.srv.Initialize(srvLogger, dlog)
+		srvD.srv.Initialize(&srvD.logLevelVar, srvLogger)
 	}
 	kern.depStart = serviceDependency{
 		KernelService: nil,
@@ -364,8 +361,8 @@ func (*shutdownSignal) Signal() { /* Just a signal */ }
 // GetKernelLogger returns the kernel logger.
 func (kern *Kernel) GetKernelLogger() *slog.Logger { return kern.logger }
 
-// GetKernelDLogger returns the kernel logger.
-func (kern *Kernel) GetKernelDLogger() *logger.DLogger { return kern.dlogger }
+// GetKernelLogLevel return the logging level of the kernel logger.
+func (kern *Kernel) GetKernelLogLevel() slog.Level { return kern.logLevelVar.Level() }
 
 // SetLogLevel sets the logging level for logger maintained by the kernel.
 //
@@ -378,18 +375,9 @@ func (kern *Kernel) SetLogLevel(logLevel string) {
 
 	for srvN, srvD := range kern.srvs {
 		if lvl, found := srvLevel[srvN]; found {
-			srvD.logLevelVar.Set(lvl)
+			srvD.srv.SetLevel(lvl)
 		} else if defaultLevel != logging.LevelMissing {
-			srvD.logLevelVar.Set(defaultLevel)
-		}
-	}
-
-	defaultDLevel, srvDLevel := kern.parseDLogLevel(logLevel)
-	for srvN, srvD := range kern.srvs {
-		if lvl, found := srvDLevel[srvN]; found {
-			srvD.srv.GetDLogger().SetLevel(lvl)
-		} else if defaultDLevel != logger.DNoLevel {
-			srvD.srv.GetDLogger().SetLevel(defaultDLevel)
+			srvD.srv.SetLevel(defaultLevel)
 		}
 	}
 }
@@ -409,28 +397,6 @@ func (kern *Kernel) parseLogLevel(logLevel string) (slog.Level, map[Service]slog
 			serviceText, levelText := vals[0], vals[1]
 			if srv, found := kern.srvNames[serviceText]; found {
 				if lvl := logging.ParseLevel(levelText); lvl != logging.LevelMissing {
-					srvLevel[srv.srvnum] = lvl
-				}
-			}
-		}
-	}
-	return defaultLevel, srvLevel
-}
-func (kern *Kernel) parseDLogLevel(logLevel string) (logger.DLevel, map[Service]logger.DLevel) {
-	defaultLevel := logger.DNoLevel
-	srvLevel := map[Service]logger.DLevel{}
-	for spec := range strings.SplitSeq(logLevel, ";") {
-		vals := cleanLogSpec(strings.Split(spec, ":"))
-		switch len(vals) {
-		case 0:
-		case 1:
-			if lvl := logger.DParseLevel(vals[0]); lvl.IsValid() {
-				defaultLevel = lvl
-			}
-		default:
-			serviceText, levelText := vals[0], vals[1]
-			if srv, found := kern.srvNames[serviceText]; found {
-				if lvl := logger.DParseLevel(levelText); lvl.IsValid() {
 					srvLevel[srv.srvnum] = lvl
 				}
 			}
@@ -582,16 +548,6 @@ func (kern *Kernel) GetLogger(srvnum Service) *slog.Logger {
 	return kern.GetKernelLogger()
 }
 
-// GetDLogger returns a logger for the given service.
-func (kern *Kernel) GetDLogger(srvnum Service) *logger.DLogger {
-	kern.mx.RLock()
-	defer kern.mx.RUnlock()
-	if srvD, ok := kern.srvs[srvnum]; ok {
-		return srvD.srv.GetDLogger()
-	}
-	return kern.GetKernelDLogger()
-}
-
 // StartService start the given service.
 func (kern *Kernel) StartService(srvnum Service) error {
 	kern.mx.RLock()
@@ -669,13 +625,16 @@ func (kern *Kernel) dumpIndex(w io.Writer) { kern.box.dumpIndex(w) }
 
 type service interface {
 	// Initialize the data for the service.
-	Initialize(*slog.Logger, *logger.DLogger)
+	Initialize(*slog.LevelVar, *slog.Logger)
 
 	// Get service logger.
 	GetLogger() *slog.Logger
 
-	// Get service logger.
-	GetDLogger() *logger.DLogger
+	// Get the log level.
+	GetLevel() slog.Level
+
+	// Set the service log level.
+	SetLevel(slog.Level)
 
 	// ConfigDescriptions returns a sorted list of configuration descriptions.
 	ConfigDescriptions() []serviceConfigDescription
@@ -733,18 +692,22 @@ type kernelService struct {
 	kernel *Kernel
 }
 
-func (*kernelService) Initialize(*slog.Logger, *logger.DLogger)       {}
-func (ks *kernelService) GetLogger() *slog.Logger                     { return ks.kernel.logger }
-func (ks *kernelService) GetDLogger() *logger.DLogger                 { return ks.kernel.dlogger }
+func (*kernelService) Initialize(*slog.LevelVar, *slog.Logger) {}
+
+func (ks *kernelService) GetLogger() *slog.Logger { return ks.kernel.logger }
+func (ks *kernelService) GetLevel() slog.Level    { return ks.kernel.logLevelVar.Level() }
+func (ks *kernelService) SetLevel(lvl slog.Level) { ks.kernel.logLevelVar.Set(lvl) }
+
 func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return nil }
 func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
 func (*kernelService) GetCurConfig(string) any                        { return nil }
 func (*kernelService) GetNextConfig(string) any                       { return nil }
 func (*kernelService) GetCurConfigList(bool) []KeyDescrValue          { return nil }
 func (*kernelService) GetNextConfigList() []KeyDescrValue             { return nil }
-func (*kernelService) GetStatistics() []KeyValue                      { return nil }
-func (*kernelService) Freeze()                                        {}
-func (*kernelService) Start(*Kernel) error                            { return nil }
-func (*kernelService) SwitchNextToCur()                               {}
-func (*kernelService) IsStarted() bool                                { return true }
-func (*kernelService) Stop(*Kernel)                                   {}
+
+func (*kernelService) GetStatistics() []KeyValue { return nil }
+func (*kernelService) Freeze()                   {}
+func (*kernelService) Start(*Kernel) error       { return nil }
+func (*kernelService) SwitchNextToCur()          {}
+func (*kernelService) IsStarted() bool           { return true }
+func (*kernelService) Stop(*Kernel)              {}

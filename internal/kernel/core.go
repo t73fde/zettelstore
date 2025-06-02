@@ -26,7 +26,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/strfun"
 )
 
@@ -44,9 +43,9 @@ type recoverInfo struct {
 	stack []byte
 }
 
-func (cs *coreService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+func (cs *coreService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	cs.logLevelVar = levelVar
 	cs.logger = logger
-	cs.dlogger = dlogger
 	cs.mapRecover = make(map[string]recoverInfo)
 	cs.descr = descriptionMap{
 		CoreDebug:     {"Debug mode", parseBool, false},
@@ -95,8 +94,9 @@ func (cs *coreService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) 
 	}
 }
 
-func (cs *coreService) GetLogger() *slog.Logger     { return cs.logger }
-func (cs *coreService) GetDLogger() *logger.DLogger { return cs.dlogger }
+func (cs *coreService) GetLogger() *slog.Logger { return cs.logger }
+func (cs *coreService) GetLevel() slog.Level    { return cs.logLevelVar.Level() }
+func (cs *coreService) SetLevel(l slog.Level)   { cs.logLevelVar.Set(l) }
 
 func (cs *coreService) Start(*Kernel) error {
 	cs.started = true

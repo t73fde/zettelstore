@@ -27,7 +27,6 @@ import (
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -54,9 +53,9 @@ const (
 
 var errUnknownVisibility = errors.New("unknown visibility")
 
-func (cs *configService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	cs.logLevelVar = levelVar
 	cs.logger = logger
-	cs.dlogger = dlogger
 	cs.descr = descriptionMap{
 		keyDefaultCopyright: {"Default copyright", parseString, true},
 		keyDefaultLicense:   {"Default license", parseString, true},
@@ -129,8 +128,9 @@ func (cs *configService) Initialize(logger *slog.Logger, dlogger *logger.DLogger
 	}
 }
 
-func (cs *configService) GetLogger() *slog.Logger     { return cs.logger }
-func (cs *configService) GetDLogger() *logger.DLogger { return cs.dlogger }
+func (cs *configService) GetLogger() *slog.Logger { return cs.logger }
+func (cs *configService) GetLevel() slog.Level    { return cs.logLevelVar.Level() }
+func (cs *configService) SetLevel(l slog.Level)   { cs.logLevelVar.Set(l) }
 
 func (cs *configService) Start(*Kernel) error {
 	cs.logger.Info("Start Service")

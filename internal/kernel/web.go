@@ -28,7 +28,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -42,9 +41,9 @@ type webService struct {
 
 var errURLPrefixSyntax = errors.New("must not be empty and must start with '//'")
 
-func (ws *webService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+func (ws *webService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	ws.logLevelVar = levelVar
 	ws.logger = logger
-	ws.dlogger = dlogger
 	ws.descr = descriptionMap{
 		WebAssetDir: {
 			"Asset file  directory",
@@ -144,8 +143,9 @@ func makeDurationParser(defDur, minDur, maxDur time.Duration) parseFunc {
 
 var errWrongBasePrefix = errors.New(WebURLPrefix + " does not match " + WebBaseURL)
 
-func (ws *webService) GetLogger() *slog.Logger     { return ws.logger }
-func (ws *webService) GetDLogger() *logger.DLogger { return ws.dlogger }
+func (ws *webService) GetLogger() *slog.Logger { return ws.logger }
+func (ws *webService) GetLevel() slog.Level    { return ws.logLevelVar.Level() }
+func (ws *webService) SetLevel(l slog.Level)   { ws.logLevelVar.Set(l) }
 
 func (ws *webService) Start(kern *Kernel) error {
 	baseURL := ws.GetNextConfig(WebBaseURL).(string)

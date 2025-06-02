@@ -50,7 +50,7 @@ func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
 	var buf bytes.Buffer
 	// _, _ = buf.WriteString(rec.Time.Format(time.DateTime))
 	// _ = buf.WriteByte(' ')
-	// _, _ = buf.WriteString(logging.LevelString(rec.Level))
+	// _, _ = buf.WriteString(logging.LevelStringPad(rec.Level))
 	// if s := klh.system; s != "" {
 	// 	_ = buf.WriteByte(' ')
 	// 	_, _ = buf.WriteString(s)

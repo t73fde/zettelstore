@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/logger"
 )
 
 type boxService struct {
@@ -36,9 +35,9 @@ type boxService struct {
 
 var errInvalidDirType = errors.New("invalid directory type")
 
-func (ps *boxService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+func (ps *boxService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	ps.logLevelVar = levelVar
 	ps.logger = logger
-	ps.dlogger = dlogger
 	ps.descr = descriptionMap{
 		BoxDefaultDirType: {
 			"Default directory box type",
@@ -71,8 +70,9 @@ func (ps *boxService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
 	}
 }
 
-func (ps *boxService) GetLogger() *slog.Logger     { return ps.logger }
-func (ps *boxService) GetDLogger() *logger.DLogger { return ps.dlogger }
+func (ps *boxService) GetLogger() *slog.Logger { return ps.logger }
+func (ps *boxService) GetLevel() slog.Level    { return ps.logLevelVar.Level() }
+func (ps *boxService) SetLevel(l slog.Level)   { ps.logLevelVar.Set(l) }
 
 func (ps *boxService) Start(kern *Kernel) error {
 	boxURIs := make([]*url.URL, 0, 4)

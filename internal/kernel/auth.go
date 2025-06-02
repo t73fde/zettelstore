@@ -21,7 +21,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/logger"
 )
 
 type authService struct {
@@ -34,9 +33,9 @@ type authService struct {
 var errAlreadySetOwner = errors.New("changing an existing owner not allowed")
 var errAlreadyROMode = errors.New("system in readonly mode cannot change this mode")
 
-func (as *authService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) {
+func (as *authService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	as.logLevelVar = levelVar
 	as.logger = logger
-	as.dlogger = dlogger
 	as.descr = descriptionMap{
 		AuthOwner: {
 			"Owner's zettel id",
@@ -68,8 +67,9 @@ func (as *authService) Initialize(logger *slog.Logger, dlogger *logger.DLogger) 
 	}
 }
 
-func (as *authService) GetLogger() *slog.Logger     { return as.logger }
-func (as *authService) GetDLogger() *logger.DLogger { return as.dlogger }
+func (as *authService) GetLogger() *slog.Logger { return as.logger }
+func (as *authService) GetLevel() slog.Level    { return as.logLevelVar.Level() }
+func (as *authService) SetLevel(l slog.Level)   { as.logLevelVar.Set(l) }
 
 func (as *authService) Start(*Kernel) error {
 	as.mxService.Lock()

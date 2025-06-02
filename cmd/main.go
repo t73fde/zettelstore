@@ -18,6 +18,7 @@ import (
 	"crypto/sha256"
 	"flag"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -38,7 +39,7 @@ import (
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
 
@@ -186,8 +187,8 @@ const (
 
 func setServiceConfig(cfg *meta.Meta) bool {
 	debugMode := cfg.GetBool(keyDebug)
-	if debugMode && kernel.Main.GetKernelDLogger().Level() > logger.DDebugLevel {
-		kernel.Main.SetLogLevel(logger.DDebugLevel.String())
+	if debugMode && kernel.Main.GetKernelLogLevel() > slog.LevelDebug {
+		kernel.Main.SetLogLevel(logging.LevelString(slog.LevelDebug))
 	}
 	if logLevel, found := cfg.Get(keyLogLevel); found {
 		kernel.Main.SetLogLevel(string(logLevel))

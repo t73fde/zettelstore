@@ -27,23 +27,31 @@ const (
 	LevelMandatory slog.Level = 9999
 )
 
-// LevelString returns a string naming the level. The string is a least 5 bytes long.
+// LevelString returns a string naming the level.
 func LevelString(level slog.Level) string {
 	switch level {
 	case LevelTrace:
 		return "TRACE"
 	case LevelMandatory:
 		return ">>>>>"
-	// case slog.LevelInfo:
-	// 	return "INFO "
+	case slog.LevelDebug:
+		return "DEBUG"
+	case slog.LevelInfo:
+		return "INFO"
+	case slog.LevelError:
+		return "ERROR"
 	default:
-		s := level.String()
-		if len(s) < 5 {
-			s = s + "     "[0:5-len(s)]
-		}
-		return s
+		return level.String()
 	}
+}
 
+// LevelStringPad returns a string naming the level. The string is a least 5 bytes long.
+func LevelStringPad(level slog.Level) string {
+	s := LevelString(level)
+	if len(s) < 5 {
+		s = s + "     "[0:5-len(s)]
+	}
+	return s
 }
 
 // LogTrace writes a trace log message.

@@ -16,6 +16,7 @@ package kernel
 import (
 	"fmt"
 	"io"
+	"log/slog"
 	"maps"
 	"os"
 	"runtime/metrics"
@@ -23,7 +24,7 @@ import (
 	"strconv"
 	"strings"
 
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/strfun"
 )
 
@@ -290,7 +291,7 @@ func cmdSetConfig(sess *cmdSession, cmd string, args []string) bool {
 	key := args[1]
 	newValue := strings.Join(args[2:], " ")
 	if err := srvD.srv.SetConfig(key, newValue); err == nil {
-		sess.kern.dlogger.Mandatory().Str("key", key).Str("value", newValue).Msg("Update system configuration")
+		logging.LogMandatory(sess.kern.logger, "Update system configuration", "key", key, "value", newValue)
 	} else {
 		sess.println("Unable to set key", args[1], "to value", newValue, "because:", err.Error())
 	}
@@ -366,48 +367,45 @@ func cmdLogLevel(sess *cmdSession, _ string, args []string) bool {
 	kern := sess.kern
 	if len(args) == 0 {
 		// Write log levels
-		level := kern.dlogger.Level()
+		level := kern.GetKernelLogLevel()
 		table := [][]string{
 			{"Service", "Level", "Name"},
-			{"kernel", strconv.Itoa(int(level)), level.String()},
+			{"(kernel)", strconv.Itoa(int(level)), logging.LevelString(level)},
 		}
 		for _, name := range sortedServiceNames(sess) {
-			level = kern.srvNames[name].srv.GetDLogger().Level()
-			table = append(table, []string{name, strconv.Itoa(int(level)), level.String()})
+			level = kern.srvNames[name].srv.GetLevel()
+			table = append(table, []string{name, strconv.Itoa(int(level.Level())), logging.LevelString(level)})
 		}
 		sess.printTable(table)
 		return true
 	}
-	var l *logger.DLogger
-	name := args[0]
-	if name == "kernel" {
-		l = kern.dlogger
-	} else {
-		srvD, ok := getService(sess, name)
-		if !ok {
-			return true
-		}
-		l = srvD.srv.GetDLogger()
+
+	srvD, ok := getService(sess, args[0])
+	if !ok {
+		return true
 	}
+	srv := srvD.srv
 
 	if len(args) == 1 {
-		level := l.Level()
-		sess.println(strconv.Itoa(int(level)), level.String())
+		lvl := srv.GetLevel()
+		sess.println(strconv.Itoa(int(lvl)), lvl.String())
 		return true
 	}
 
-	level := args[1]
-	uval, err := strconv.ParseUint(level, 10, 8)
-	lv := logger.DLevel(uval)
-	if err != nil || !lv.IsValid() {
-		lv = logger.DParseLevel(level)
+	levelString := args[1]
+	var lvl slog.Level
+	if val, err := strconv.ParseInt(levelString, 10, 8); err == nil {
+		lvl = slog.Level(val)
+	} else {
+		lvl = logging.ParseLevel(levelString)
 	}
-	if !lv.IsValid() {
-		sess.println("Invalid level:", level)
+	if lvl <= logging.LevelMissing || logging.LevelMandatory < lvl {
+		sess.println("Invalid level: ", levelString)
 		return true
 	}
-	kern.dlogger.Mandatory().Str("name", name).Str("level", lv.String()).Msg("Update log level")
-	l.SetLevel(lv)
+	logging.LogMandatory(kern.logger,
+		"Update log level", "name", args[0], "level", logging.LevelString(lvl))
+	srv.SetLevel(lvl)
 	return true
 }
 
@@ -440,7 +438,7 @@ func cmdProfile(sess *cmdSession, _ string, args []string) bool {
 	if err := kern.doStartProfiling(profileName, fileName); err != nil {
 		sess.println("Error:", err.Error())
 	} else {
-		kern.dlogger.Mandatory().Str("profile", profileName).Str("file", fileName).Msg("Start profiling")
+		logging.LogMandatory(sess.kern.logger, "Start profiling", "profile", profileName, "file", fileName)
 	}
 	return true
 }
@@ -450,7 +448,7 @@ func cmdEndProfile(sess *cmdSession, _ string, _ []string) bool {
 	if err != nil {
 		sess.println("Error:", err.Error())
 	}
-	kern.dlogger.Mandatory().Err(err).Msg("Stop profiling")
+	logging.LogMandatory(sess.kern.logger, "Stop profiling", "err", err)
 	return true
 }
 
@@ -503,9 +501,9 @@ func cmdDumpIndex(sess *cmdSession, _ string, _ []string) bool {
 
 func cmdRefresh(sess *cmdSession, _ string, _ []string) bool {
 	kern := sess.kern
-	kern.dlogger.Mandatory().Msg("Refresh")
+	logging.LogMandatory(sess.kern.logger, "Refresh")
 	if err := kern.box.Refresh(); err != nil {
-		kern.dlogger.Error().Err(err).Msg("refresh")
+		logging.LogMandatory(sess.kern.logger, "refresh", "err", err)
 	}
 	return true
 }
