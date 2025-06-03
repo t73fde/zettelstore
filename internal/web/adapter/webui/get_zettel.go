@@ -26,10 +26,10 @@ import (
 	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/usecase"
-	"zettelstore.de/z/internal/web/server"
 )
 
 // MakeGetHTMLZettelHandler creates a new HTTP handler for the use case "get zettel".
@@ -62,7 +62,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 			return
 		}
 
-		user := server.GetCurrentUser(ctx)
+		user := user.GetCurrentUser(ctx)
 		getTextTitle := wui.makeGetTextTitle(ctx, getZettel)
 
 		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())

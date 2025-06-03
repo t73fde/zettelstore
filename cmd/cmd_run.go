@@ -21,6 +21,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
@@ -136,4 +137,4 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 
 type getUserImpl struct{}
 
-func (*getUserImpl) GetCurrentUser(ctx context.Context) *meta.Meta { return server.GetCurrentUser(ctx) }
+func (*getUserImpl) GetCurrentUser(ctx context.Context) *meta.Meta { return user.GetCurrentUser(ctx) }

@@ -66,36 +66,6 @@ type Auth interface {
 	ClearToken(ctx context.Context, w http.ResponseWriter) context.Context
 }
 
-// AuthData stores all relevant authentication data for a context.
-type AuthData struct {
-	User    *meta.Meta
-	Token   []byte
-	Now     time.Time
-	Issued  time.Time
-	Expires time.Time
-}
-
-// GetAuthData returns the full authentication data from the context.
-func GetAuthData(ctx context.Context) *AuthData {
-	if ctx != nil {
-		if data, ok := ctx.Value(ctxKeyTypeSession{}).(*AuthData); ok {
-			return data
-		}
-	}
-	return nil
-}
-
-// GetCurrentUser returns the metadata of the current user, or nil if there is no one.
-func GetCurrentUser(ctx context.Context) *meta.Meta {
-	if data := GetAuthData(ctx); data != nil {
-		return data.User
-	}
-	return nil
-}
-
-// ctxKeyTypeSession is just an additional type to make context value retrieval unambiguous.
-type ctxKeyTypeSession struct{}
-
 // AuthBuilder is a Builder that also allows to execute authentication functions.
 type AuthBuilder interface {
 	Auth

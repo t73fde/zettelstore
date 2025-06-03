@@ -31,12 +31,12 @@ import (
 	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/web/adapter"
-	"zettelstore.de/z/internal/web/server"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -440,7 +440,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 	} else {
 		wui.logger.Debug("reportError", "err", err)
 	}
-	user := server.GetCurrentUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	env, rb := wui.createRenderEnv(ctx, "error", meta.ValueLangEN, "Error", user)
 	rb.bindString("heading", sx.MakeString(http.StatusText(code)))
 	rb.bindString("message", sx.MakeString(text))

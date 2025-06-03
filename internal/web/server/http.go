@@ -22,9 +22,9 @@ import (
 
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/auth/user"
 )
 
 type webServer struct {
@@ -121,30 +121,14 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 
 // ClearToken invalidates the session cookie by sending an empty one.
 func (srv *webServer) ClearToken(ctx context.Context, w http.ResponseWriter) context.Context {
-	if authData := GetAuthData(ctx); authData == nil {
+	if authData := user.GetAuthData(ctx); authData == nil {
 		// No authentication data stored in session, nothing to do.
 		return ctx
 	}
 	if w != nil {
 		srv.SetToken(w, nil, 0)
 	}
-	return updateContext(ctx, nil, nil)
-}
-
-func updateContext(ctx context.Context, user *meta.Meta, data *auth.TokenData) context.Context {
-	if data == nil {
-		return context.WithValue(ctx, ctxKeyTypeSession{}, &AuthData{User: user})
-	}
-	return context.WithValue(
-		ctx,
-		ctxKeyTypeSession{},
-		&AuthData{
-			User:    user,
-			Token:   data.Token,
-			Now:     data.Now,
-			Issued:  data.Issued,
-			Expires: data.Expires,
-		})
+	return user.UpdateContext(ctx, nil, nil)
 }
 
 func (srv *webServer) Run() error { return srv.httpServer.start() }

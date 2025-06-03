@@ -22,9 +22,9 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/usecase"
-	"zettelstore.de/z/internal/web/server"
 )
 
 // MakeGetDeleteZettelHandler creates a new HTTP handler to display the
@@ -49,7 +49,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		}
 		m := zs[0].Meta
 
-		user := server.GetCurrentUser(ctx)
+		user := user.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnv(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
 		if len(zs) > 1 {

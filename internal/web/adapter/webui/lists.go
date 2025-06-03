@@ -29,10 +29,10 @@ import (
 	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
-	"zettelstore.de/z/internal/web/server"
 )
 
 // MakeListHTMLMetaHandler creates a HTTP handler for rendering the list of zettel as HTML.
@@ -83,7 +83,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		}
 
 		siteName := wui.rtConfig.GetSiteName()
-		user := server.GetCurrentUser(ctx)
+		user := user.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnv(ctx, "list", userLang, siteName, user)
 		if q == nil {
 			rb.bindString("heading", sx.MakeString(siteName))

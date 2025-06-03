@@ -25,12 +25,12 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/usecase"
-	"zettelstore.de/z/internal/web/server"
 	"zettelstore.de/z/strfun"
 )
 
@@ -91,7 +91,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		encTexts := encodingTexts()
 		shadowLinks := getShadowLinks(ctx, zid, zn.InhMeta.GetDefault(meta.KeyBoxNumber, ""), ucGetAllZettel)
 
-		user := server.GetCurrentUser(ctx)
+		user := user.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnv(ctx, "info", wui.getUserLang(ctx), title, user)
 		rb.bindString("metadata", lbMetadata.List())
 		rb.bindString("local-links", locLinks)
