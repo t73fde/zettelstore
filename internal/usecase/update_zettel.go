@@ -74,6 +74,6 @@ func (uc *UpdateZettel) Run(ctx context.Context, zettel zettel.Zettel, hasConten
 	}
 	zettel.Content.TrimSpace()
 	err = uc.port.UpdateZettel(ctx, zettel)
-	uc.logger.Info("Update zettel", "zid", m.Zid, logging.Err(err)) // TODO: add user=
+	uc.logger.Info("Update zettel", "zid", m.Zid, logging.User(ctx), logging.Err(err))
 	return err
 }

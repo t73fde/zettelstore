@@ -41,6 +41,6 @@ func NewReIndex(logger *slog.Logger, port ReIndexPort) ReIndex {
 // Run executes the use case.
 func (uc *ReIndex) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.ReIndex(ctx, zid)
-	uc.logger.Info("ReIndex zettel", "zid", zid, logging.Err(err)) // TODO: add user=
+	uc.logger.Info("ReIndex zettel", "zid", zid, logging.User(ctx), logging.Err(err))
 	return err
 }

@@ -18,6 +18,10 @@ import (
 	"context"
 	"log/slog"
 	"strings"
+
+	"t73f.de/r/zsc/domain/meta"
+
+	"zettelstore.de/z/internal/auth/user"
 )
 
 // Some additional log levels.
@@ -87,4 +91,15 @@ func Err(err error) slog.Attr {
 		return slog.Attr{}
 	}
 	return slog.Any("err", err)
+}
+
+// User returns a log attribute indicating the currently user.
+func User(ctx context.Context) slog.Attr {
+	if um := user.GetCurrentUser(ctx); um != nil {
+		if userID, found := um.Get(meta.KeyUserID); found {
+			return slog.Any("user", userID)
+		}
+		return slog.String("user", um.Zid.String())
+	}
+	return slog.Attr{}
 }

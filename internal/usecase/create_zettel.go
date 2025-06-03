@@ -154,6 +154,6 @@ func (uc *CreateZettel) Run(ctx context.Context, zettel zettel.Zettel) (id.Zid, 
 
 	zettel.Content.TrimSpace()
 	zid, err := uc.port.CreateZettel(ctx, zettel)
-	uc.logger.Info("Create zettel", "zid", zid, logging.Err(err)) // TODO: Add user=
+	uc.logger.Info("Create zettel", "zid", zid, logging.User(ctx), logging.Err(err))
 	return zid, err
 }

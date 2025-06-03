@@ -42,6 +42,6 @@ func NewDeleteZettel(logger *slog.Logger, port DeleteZettelPort) DeleteZettel {
 // Run executes the use case.
 func (uc *DeleteZettel) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.DeleteZettel(ctx, zid)
-	uc.logger.Info("Delete zettel", "zid", zid, logging.Err(err)) // TODO: add user=
+	uc.logger.Info("Delete zettel", "zid", zid, logging.User(ctx), logging.Err(err))
 	return err
 }

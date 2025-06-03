@@ -17,6 +17,7 @@ import (
 	"context"
 
 	"t73f.de/r/zsc/domain/id"
+
 	"zettelstore.de/z/internal/zettel"
 )
 
