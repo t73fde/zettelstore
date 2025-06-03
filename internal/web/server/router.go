@@ -14,7 +14,6 @@
 package server
 
 import (
-	"io"
 	"log/slog"
 	"net/http"
 	"net/http/pprof"
@@ -141,19 +140,9 @@ func (rt *httpRouter) Handle(pattern string, handler http.Handler) {
 }
 
 func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	var withDebug bool
-	if rt.log.Enabled(r.Context(), slog.LevelDebug) {
-		withDebug = true
-		w = &traceResponseWriter{original: w}
-		rt.log.Debug("ServeHTTP", "method", r.Method, "uri", r.RequestURI, "remote", ip.GetRemoteAddr(r))
-	}
-
 	if prefixLen := len(rt.urlPrefix); prefixLen > 1 {
 		if len(r.URL.Path) < prefixLen || r.URL.Path[:prefixLen] != rt.urlPrefix {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-			if withDebug {
-				rt.log.Debug("/ServeHTTP/prefix", "sc", w.(*traceResponseWriter).statusCode)
-			}
 			return
 		}
 		r.URL.Path = r.URL.Path[prefixLen-1:]
@@ -162,13 +151,7 @@ func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	match := rt.reURL.FindStringSubmatch(r.URL.Path)
 	if len(match) != 3 {
 		rt.mux.ServeHTTP(w, rt.addUserContext(r))
-		if withDebug {
-			rt.log.Debug("match other", "sc", w.(*traceResponseWriter).statusCode)
-		}
 		return
-	}
-	if withDebug {
-		rt.log.Debug("path match", "key", match[1], "zid", match[2])
 	}
 
 	key := match[1][0]
@@ -183,16 +166,10 @@ func (rt *httpRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if handler := mh[method]; handler != nil {
 			r.URL.Path = "/" + match[2]
 			handler.ServeHTTP(w, rt.addUserContext(r))
-			if withDebug {
-				rt.log.Debug("/ServeHTTP", "sc", w.(*traceResponseWriter).statusCode)
-			}
 			return
 		}
 	}
 	http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-	if withDebug {
-		rt.log.Debug("no match", "sc", w.(*traceResponseWriter).statusCode)
-	}
 }
 
 func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
@@ -267,19 +244,4 @@ func getHeaderToken(r *http.Request) []byte {
 		return nil
 	}
 	return []byte(auth[len(prefix):])
-}
-
-type traceResponseWriter struct {
-	original   http.ResponseWriter
-	statusCode int
-}
-
-func (w *traceResponseWriter) Header() http.Header         { return w.original.Header() }
-func (w *traceResponseWriter) Write(p []byte) (int, error) { return w.original.Write(p) }
-func (w *traceResponseWriter) WriteHeader(statusCode int) {
-	w.statusCode = statusCode
-	w.original.WriteHeader(statusCode)
-}
-func (w *traceResponseWriter) WriteString(s string) (int, error) {
-	return io.WriteString(w.original, s)
 }
