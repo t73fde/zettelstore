@@ -52,7 +52,7 @@ func (wui *WebUI) MakeGetRootHandler(s getRootPort) http.Handler {
 			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(homeZid))
 			return
 		}
-		if errors.Is(err, &box.ErrNotAllowed{}) && wui.authz.WithAuth() && server.GetUser(ctx) == nil {
+		if errors.Is(err, &box.ErrNotAllowed{}) && wui.authz.WithAuth() && server.GetCurrentUser(ctx) == nil {
 			wui.redirectFound(w, r, wui.NewURLBuilder('i'))
 			return
 		}

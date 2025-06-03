@@ -100,7 +100,7 @@ func (wui *WebUI) renderZettelForm(
 	roleData []string,
 	syntaxData []string,
 ) {
-	user := server.GetUser(ctx)
+	user := server.GetCurrentUser(ctx)
 	m := ztl.Meta
 
 	var sb strings.Builder

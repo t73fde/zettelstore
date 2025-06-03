@@ -136,4 +136,4 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 
 type getUserImpl struct{}
 
-func (*getUserImpl) GetUser(ctx context.Context) *meta.Meta { return server.GetUser(ctx) }
+func (*getUserImpl) GetCurrentUser(ctx context.Context) *meta.Meta { return server.GetCurrentUser(ctx) }

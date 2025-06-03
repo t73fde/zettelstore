@@ -91,7 +91,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		encTexts := encodingTexts()
 		shadowLinks := getShadowLinks(ctx, zid, zn.InhMeta.GetDefault(meta.KeyBoxNumber, ""), ucGetAllZettel)
 
-		user := server.GetUser(ctx)
+		user := server.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnv(ctx, "info", wui.getUserLang(ctx), title, user)
 		rb.bindString("metadata", lbMetadata.List())
 		rb.bindString("local-links", locLinks)

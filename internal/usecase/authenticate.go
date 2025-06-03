@@ -101,7 +101,7 @@ func addDelay(start time.Time, durDelay, minDelay time.Duration) {
 
 // IsAuthenticatedPort contains method for this usecase.
 type IsAuthenticatedPort interface {
-	GetUser(context.Context) *meta.Meta
+	GetCurrentUser(context.Context) *meta.Meta
 }
 
 // IsAuthenticated cheks if the caller is already authenticated.
@@ -137,7 +137,7 @@ func (uc *IsAuthenticated) Run(ctx context.Context) IsAuthenticatedResult {
 		uc.logger.Info("IsAuthenticated", "auth", "disabled")
 		return IsAuthenticatedDisabled
 	}
-	if uc.port.GetUser(ctx) == nil {
+	if uc.port.GetCurrentUser(ctx) == nil {
 		uc.logger.Info("IsAuthenticated is false")
 		return IsAuthenticatedAndInvalid
 	}

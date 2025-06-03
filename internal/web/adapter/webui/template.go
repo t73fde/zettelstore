@@ -440,7 +440,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 	} else {
 		wui.logger.Debug("reportError", "err", err)
 	}
-	user := server.GetUser(ctx)
+	user := server.GetCurrentUser(ctx)
 	env, rb := wui.createRenderEnv(ctx, "error", meta.ValueLangEN, "Error", user)
 	rb.bindString("heading", sx.MakeString(http.StatusText(code)))
 	rb.bindString("message", sx.MakeString(text))

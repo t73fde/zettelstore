@@ -222,7 +222,7 @@ func (cs *configService) Get(ctx context.Context, m *meta.Meta, key string) stri
 			return string(val)
 		}
 	}
-	if user := server.GetUser(ctx); user != nil {
+	if user := server.GetCurrentUser(ctx); user != nil {
 		if val, found := user.Get(key); found {
 			return string(val)
 		}

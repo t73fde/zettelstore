@@ -62,7 +62,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 			return
 		}
 
-		user := server.GetUser(ctx)
+		user := server.GetCurrentUser(ctx)
 		getTextTitle := wui.makeGetTextTitle(ctx, getZettel)
 
 		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())

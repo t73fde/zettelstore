@@ -85,8 +85,8 @@ func GetAuthData(ctx context.Context) *AuthData {
 	return nil
 }
 
-// GetUser returns the metadata of the current user, or nil if there is no one.
-func GetUser(ctx context.Context) *meta.Meta {
+// GetCurrentUser returns the metadata of the current user, or nil if there is no one.
+func GetCurrentUser(ctx context.Context) *meta.Meta {
 	if data := GetAuthData(ctx); data != nil {
 		return data.User
 	}

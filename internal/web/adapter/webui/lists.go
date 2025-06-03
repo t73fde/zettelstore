@@ -83,7 +83,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		}
 
 		siteName := wui.rtConfig.GetSiteName()
-		user := server.GetUser(ctx)
+		user := server.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnv(ctx, "list", userLang, siteName, user)
 		if q == nil {
 			rb.bindString("heading", sx.MakeString(siteName))

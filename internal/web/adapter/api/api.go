@@ -87,7 +87,7 @@ func writeBuffer(w http.ResponseWriter, buf *bytes.Buffer, contentType string) e
 
 func (a *API) getRights(ctx context.Context, m *meta.Meta) (result api.ZettelRights) {
 	pol := a.policy
-	user := server.GetUser(ctx)
+	user := server.GetCurrentUser(ctx)
 	if pol.CanCreate(user, m) {
 		result |= api.ZettelCanCreate
 	}

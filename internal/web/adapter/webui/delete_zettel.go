@@ -49,7 +49,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		}
 		m := zs[0].Meta
 
-		user := server.GetUser(ctx)
+		user := server.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnv(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
 		if len(zs) > 1 {
