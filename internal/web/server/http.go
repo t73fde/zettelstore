@@ -22,6 +22,7 @@ import (
 
 	"t73f.de/r/webs/middleware"
 	"t73f.de/r/webs/middleware/logging"
+	"t73f.de/r/webs/middleware/reqid"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 
@@ -73,11 +74,13 @@ func New(sd ConfigData) Server {
 	}
 	srv.router.initializeRouter(rd)
 
+	mwReqID := reqid.Config{WithContext: true}
 	mwLogReq := logging.ReqConfig{
 		Logger: sd.Log, Level: slog.LevelDebug,
-		Message: "ServeHTTP", WithRemote: true}
-	mwLogResp := logging.RespConfig{Logger: sd.Log, Level: slog.LevelDebug, Message: "/ServeHTTP"}
-	mw := middleware.NewChain(mwLogReq.Build(), mwLogResp.Build())
+		Message: "ServeHTTP", WithRequestID: true, WithRemote: true}
+	mwLogResp := logging.RespConfig{Logger: sd.Log, Level: slog.LevelDebug,
+		Message: "/ServeHTTP", WithRequestID: true}
+	mw := middleware.NewChain(mwReqID.Build(), mwLogReq.Build(), mwLogResp.Build())
 
 	srv.httpServer.initializeHTTPServer(sd.ListenAddr, middleware.Apply(mw, &srv.router))
 	return &srv
