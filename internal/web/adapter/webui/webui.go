@@ -117,7 +117,7 @@ func New(logger *slog.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rt
 		zettelBinding: nil,
 		genHTML:       sxhtml.NewGenerator().SetNewline(),
 	}
-	wui.rootBinding = wui.createRenderBinding()
+	wui.rootBinding = wui.createRootBinding()
 	wui.observe(box.UpdateInfo{Box: mgr, Reason: box.OnReload, Zid: id.Invalid})
 	mgr.RegisterObserver(wui.observe)
 	return wui

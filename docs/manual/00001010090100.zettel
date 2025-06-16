@@ -4,13 +4,13 @@ role: manual
 tags: #configuration #encryption #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250415165219
+modified: 20250602182154
 
 Since Zettelstore does not encrypt the messages it exchanges with its clients, you may need some additional software to enable encryption.
 
 === Public-key encryption
 To enable encryption, you probably use some kind of encryption keys.
-In most cases, you need to deploy a ""public-key encryption"" process, where your side publish a public encryption key that only works with a corresponding private decryption key.
+In most cases, you need to deploy a ""public-key encryption"" process, where your side publishes a public encryption key that only works with a corresponding private decryption key.
 Technically, this is not trivial.
 Any client who wants to communicate with your Zettelstore must trust the public encryption key.
 Otherwise the client cannot be sure that it is communication with your Zettelstore.
@@ -64,7 +64,7 @@ zettelstore.de {
   }
 }
 ```
-This will forwards requests with the prefix ""/manual/"" to the running Zettelstore.
+This will forward requests with the prefix ""/manual/"" to the running Zettelstore.
 All other requests will be handled by Caddy itself.
 
 In this case you must specify the [[startup configuration key ''url-prefix''|00001004010000#url-prefix]] with the value ""/manual/"".

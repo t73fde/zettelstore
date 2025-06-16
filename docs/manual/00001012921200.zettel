@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20220201173115
-modified: 20240711183931
+modified: 20250602181802
 
 Various API calls return a symbolic expression list ''(rights N)'', with ''N'' as a number, that encodes the access rights the user currently has.
 ''N'' is an integer number between 0 and 62.[^Not all values in this range are used.]
@@ -40,7 +40,7 @@ As an example, let's assume a rights value of 42:
 
 In practice, not every rights value will occur.
 A Zettelstore in [[read-only mode|00001010000000#read-only]] will always return the value 4.
-Similar, a Zettelstore that you started with a [[double-click|00001003000000]] will return either the value ""6"" (reading and updating) or the value ""62"" (all operations are allowed).
+Similarly, a Zettelstore that you started with a [[double-click|00001003000000]] will return either the value ""6"" (read and update) or the value ""62"" (all operations are allowed).
 
 If you have added an additional [[user|00001010040200]] to your Zettelstore, this might change.
 The access rights are calculated depending on [[enabled authentication|00001010040100]], on the [[user role|00001010070300]] of the current user, on [[visibility rules|00001010070200]] for a given zettel and on the [[read-only status|00001006020400]] for the zettel.

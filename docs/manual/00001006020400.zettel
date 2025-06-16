@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102205707
+modified: 20250602181627
 
 A zettel can be marked as read-only, if it contains a metadata value for key
 [[''read-only''|00001006020000#read-only]].
@@ -26,7 +26,7 @@ If the metadata value is the same as an explicit [[user role|00001010070300]], u
 : Neither an unauthenticated user nor a user with role ""reader"" is allowed to modify the zettel.
   Users with role ""writer"" or the owner itself still can modify the zettel.
 ; ""writer""
-: Neither an unauthenticated user, nor users with roles ""reader"" or ""writer"" are allowed to modify the zettel.
+: Neither an unauthenticated user nor users with roles ""reader"" or ""writer"" are allowed to modify the zettel.
   Only the owner of the Zettelstore can modify the zettel.
 
 If the metadata value is something else (one of the values ""true"" or ""owner"" is recommended), no user is allowed to modify the zettel through the [[web user interface|00001014000000]].

@@ -21,7 +21,7 @@
   ,@META-HEADER
   (link (@ (rel "stylesheet") (href ,css-base-url)))
   (link (@ (rel "stylesheet") (href ,css-user-url)))
-  ,@(ROLE-DEFAULT-meta (current-binding))
+  ,@(ROLE-DEFAULT-meta (current-frame))
   (title ,title))
 (body
   (nav (@ (class "zs-menu"))
@@ -41,7 +41,7 @@
       (button "Lists")
       (nav (@ (class "zs-dropdown-content"))
         ,@list-urls
-        ,@(if (bound? 'refresh-url) `((a (@ (href ,refresh-url)) "Refresh")))
+        ,@(if (symbol-bound? 'refresh-url) `((a (@ (href ,refresh-url)) "Refresh")))
     ))
     ,@(if new-zettel-links
       `((div (@ (class "zs-dropdown"))
