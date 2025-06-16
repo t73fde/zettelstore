@@ -30,6 +30,6 @@ func genSxM(zid id.Zid) *meta.Meta {
 func genSxC(context.Context, *compBox) []byte {
 	var buf bytes.Buffer
 	buf.WriteString("|=Name|=Value>\n")
-	fmt.Fprintf(&buf, "|Symbols|%d\n", sx.MakeSymbol("NIL").Factory().Size())
+	fmt.Fprintf(&buf, "|Symbols|%d\n", sx.MakeSymbol("NIL").Package().Size())
 	return buf.Bytes()
 }

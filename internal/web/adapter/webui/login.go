@@ -40,10 +40,10 @@ func (wui *WebUI) MakeGetLoginOutHandler() http.Handler {
 }
 
 func (wui *WebUI) renderLoginForm(ctx context.Context, w http.ResponseWriter, retry bool) {
-	env, rb := wui.createRenderEnv(ctx, "login", wui.getUserLang(ctx), "Login", nil)
+	bind, rb := wui.createRenderBinding(ctx, "login", wui.getUserLang(ctx), "Login", nil)
 	rb.bindString("retry", sx.MakeBoolean(retry))
 	if rb.err == nil {
-		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidLoginTemplate, env)
+		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidLoginTemplate, bind)
 	}
 	if err := rb.err; err != nil {
 		wui.reportError(ctx, w, err)
