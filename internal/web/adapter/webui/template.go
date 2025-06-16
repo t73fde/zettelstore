@@ -117,16 +117,16 @@ var (
 		&sxbuiltins.Caar, &sxbuiltins.Cadr, &sxbuiltins.Cdar, &sxbuiltins.Cddr,
 		&sxbuiltins.Caaar, &sxbuiltins.Caadr, &sxbuiltins.Cadar, &sxbuiltins.Caddr,
 		&sxbuiltins.Cdaar, &sxbuiltins.Cdadr, &sxbuiltins.Cddar, &sxbuiltins.Cdddr,
-		&sxbuiltins.List,           // list
-		&sxbuiltins.Append,         // append
-		&sxbuiltins.Assoc,          // assoc
-		&sxbuiltins.Map,            // map
-		&sxbuiltins.Apply,          // apply
-		&sxbuiltins.Concat,         // concat
-		&sxbuiltins.BoundP,         // bound?
-		&sxbuiltins.DefinedP,       // defined?
-		&sxbuiltins.CurrentBinding, // current-binding
-		&sxbuiltins.BindingLookup,  // binding-lookup
+		&sxbuiltins.List,          // list
+		&sxbuiltins.Append,        // append
+		&sxbuiltins.Assoc,         // assoc
+		&sxbuiltins.Map,           // map
+		&sxbuiltins.Apply,         // apply
+		&sxbuiltins.Concat,        // concat
+		&sxbuiltins.SymbolBoundP,  // symbol-bound?
+		&sxbuiltins.DefinedP,      // defined?
+		&sxbuiltins.CurrentFrame,  // current-frame
+		&sxbuiltins.ResolveSymbol, // resolve-symbol
 	}
 )
 

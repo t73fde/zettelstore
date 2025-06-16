@@ -27,7 +27,7 @@
       (ul ,@(map wui-item-link incoming))
     ))
   )
-  ,@(if (and (bound? 'useless) useless)
+  ,@(if (and (symbol-bound? 'useless) useless)
     `((div (@ (class "zs-warning"))
       (h2 "Warning!")
       (p "Deleting this zettel will also delete the following files, so that they will not be interpreted as content for this zettel.")

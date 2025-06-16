@@ -47,7 +47,7 @@
     ))
     ,@(wui-datalist "zs-syntax-data" syntax-data)
   )
-  ,@(if (bound? 'content)
+  ,@(if (symbol-bound? 'content)
     `((div
       (label (@ (for "zs-content")) "Content " (a (@ (title "Content for this zettel, according to above syntax.")) (@H "&#9432;")))
       (textarea (@ (class "zs-input zs-content") (id "zs-content") (name "content") (rows "20")
