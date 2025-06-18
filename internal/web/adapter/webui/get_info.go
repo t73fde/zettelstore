@@ -92,7 +92,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		shadowLinks := getShadowLinks(ctx, zid, zn.InhMeta.GetDefault(meta.KeyBoxNumber, ""), ucGetAllZettel)
 
 		user := user.GetCurrentUser(ctx)
-		bind, rb := wui.createRenderBinding(ctx, "info", wui.getUserLang(ctx), title, user)
+		env, rb := wui.createRenderEnvironment(ctx, "info", wui.getUserLang(ctx), title, user)
 		rb.bindString("metadata", lbMetadata.List())
 		rb.bindString("local-links", locLinks)
 		rb.bindString("query-links", queryLinks)
@@ -105,7 +105,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		rb.bindString("shadow-links", shadowLinks)
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.ZidInfoTemplate, bind)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidInfoTemplate, env)
 		} else {
 			err = rb.err
 		}

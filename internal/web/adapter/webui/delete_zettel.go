@@ -50,7 +50,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		m := zs[0].Meta
 
 		user := user.GetCurrentUser(ctx)
-		bind, rb := wui.createRenderBinding(
+		env, rb := wui.createRenderEnvironment(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
 		if len(zs) > 1 {
 			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxNumber, "???"))))
@@ -62,7 +62,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		wui.bindCommonZettelData(ctx, &rb, user, m, nil)
 
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.ZidDeleteTemplate, bind)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidDeleteTemplate, env)
 		} else {
 			err = rb.err
 		}

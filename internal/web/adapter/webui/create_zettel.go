@@ -110,7 +110,7 @@ func (wui *WebUI) renderZettelForm(
 		sb.WriteString(string(val))
 		sb.WriteByte('\n')
 	}
-	bind, rb := wui.createRenderBinding(ctx, "form", wui.getUserLang(ctx), title, user)
+	env, rb := wui.createRenderEnvironment(ctx, "form", wui.getUserLang(ctx), title, user)
 	rb.bindString("heading", sx.MakeString(title))
 	rb.bindString("form-action-url", sx.MakeString(formActionURL))
 	rb.bindString("role-data", makeStringList(roleData))
@@ -121,7 +121,7 @@ func (wui *WebUI) renderZettelForm(
 	}
 	wui.bindCommonZettelData(ctx, &rb, user, m, &ztl.Content)
 	if rb.err == nil {
-		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidFormTemplate, bind)
+		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidFormTemplate, env)
 	}
 	if err := rb.err; err != nil {
 		wui.reportError(ctx, w, err)

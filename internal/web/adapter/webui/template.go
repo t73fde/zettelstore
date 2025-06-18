@@ -163,9 +163,9 @@ func (wui *WebUI) getParentBinding(ctx context.Context) (*sxeval.Binding, error)
 	return zettelBind, nil
 }
 
-// createRenderBinding creates a new binding and populates it with all
+// createRenderEnvironment creates a new environment and populates it with all
 // relevant data for the base template.
-func (wui *WebUI) createRenderBinding(ctx context.Context, name, lang, title string, user *meta.Meta) (*sxeval.Binding, renderBinder) {
+func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title string, user *meta.Meta) (*sxeval.Environment, renderBinder) {
 	userIsValid, userZettelURL, userIdent := wui.getUserRenderData(user)
 	parentBind, err := wui.getParentBinding(ctx)
 	bind := parentBind.MakeChildBinding(name, 128)
@@ -193,7 +193,8 @@ func (wui *WebUI) createRenderBinding(ctx context.Context, name, lang, title str
 	rb.bindString("debug-mode", sx.MakeBoolean(wui.debug))
 	rb.bindSymbol(symMetaHeader, sx.Nil())
 	rb.bindSymbol(symDetail, sx.Nil())
-	return bind, rb
+	env := sxeval.MakeEnvironment(bind)
+	return env, rb
 }
 
 func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
@@ -360,7 +361,7 @@ func (wui *WebUI) calculateFooterSxn(ctx context.Context) *sx.Pair {
 	return nil
 }
 
-func (wui *WebUI) getSxnTemplate(ctx context.Context, zid id.Zid, bind *sxeval.Binding) (sxeval.Expr, error) {
+func (wui *WebUI) getSxnTemplate(ctx context.Context, zid id.Zid, env *sxeval.Environment) (sxeval.Expr, error) {
 	if t := wui.getSxnCache(zid); t != nil {
 		return t, nil
 	}
@@ -378,7 +379,6 @@ func (wui *WebUI) getSxnTemplate(ctx context.Context, zid id.Zid, bind *sxeval.B
 	if len(objs) != 1 {
 		return nil, fmt.Errorf("expected 1 expression in template, but got %d", len(objs))
 	}
-	env := sxeval.MakeEnvironment(bind)
 	t, err := env.Parse(objs[0], nil)
 	if err != nil {
 		return nil, err
@@ -397,28 +397,27 @@ func (wui *WebUI) makeZettelReader(ctx context.Context, zid id.Zid) (*sxreader.R
 	return reader, nil
 }
 
-func (wui *WebUI) evalSxnTemplate(ctx context.Context, zid id.Zid, bind *sxeval.Binding) (sx.Object, error) {
-	templateExpr, err := wui.getSxnTemplate(ctx, zid, bind)
+func (wui *WebUI) evalSxnTemplate(ctx context.Context, zid id.Zid, env *sxeval.Environment) (sx.Object, error) {
+	templateExpr, err := wui.getSxnTemplate(ctx, zid, env)
 	if err != nil {
 		return nil, err
 	}
-	env := sxeval.MakeEnvironment(bind)
 	return env.Run(templateExpr, nil)
 }
 
-func (wui *WebUI) renderSxnTemplate(ctx context.Context, w http.ResponseWriter, templateID id.Zid, bind *sxeval.Binding) error {
-	return wui.renderSxnTemplateStatus(ctx, w, http.StatusOK, templateID, bind)
+func (wui *WebUI) renderSxnTemplate(ctx context.Context, w http.ResponseWriter, templateID id.Zid, env *sxeval.Environment) error {
+	return wui.renderSxnTemplateStatus(ctx, w, http.StatusOK, templateID, env)
 }
-func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWriter, code int, templateID id.Zid, bind *sxeval.Binding) error {
-	detailObj, err := wui.evalSxnTemplate(ctx, templateID, bind)
+func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWriter, code int, templateID id.Zid, env *sxeval.Environment) error {
+	detailObj, err := wui.evalSxnTemplate(ctx, templateID, env)
 	if err != nil {
 		return err
 	}
-	if err = bind.Bind(symDetail, detailObj); err != nil {
+	if err = env.BindGlobal(symDetail, detailObj); err != nil {
 		return err
 	}
 
-	pageObj, err := wui.evalSxnTemplate(ctx, id.ZidBaseTemplate, bind)
+	pageObj, err := wui.evalSxnTemplate(ctx, id.ZidBaseTemplate, env)
 	if err != nil {
 		return err
 	}
@@ -446,7 +445,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 		wui.logger.Debug("reportError", "err", err)
 	}
 	user := user.GetCurrentUser(ctx)
-	bind, rb := wui.createRenderBinding(ctx, "error", meta.ValueLangEN, "Error", user)
+	bind, rb := wui.createRenderEnvironment(ctx, "error", meta.ValueLangEN, "Error", user)
 	rb.bindString("heading", sx.MakeString(http.StatusText(code)))
 	rb.bindString("message", sx.MakeString(text))
 	if rb.err == nil {

@@ -84,7 +84,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 
 		siteName := wui.rtConfig.GetSiteName()
 		user := user.GetCurrentUser(ctx)
-		bind, rb := wui.createRenderBinding(ctx, "list", userLang, siteName, user)
+		env, rb := wui.createRenderEnvironment(ctx, "list", userLang, siteName, user)
 		if q == nil {
 			rb.bindString("heading", sx.MakeString(siteName))
 		} else {
@@ -131,7 +131,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			}
 		}
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.ZidListTemplate, bind)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidListTemplate, env)
 		} else {
 			err = rb.err
 		}
