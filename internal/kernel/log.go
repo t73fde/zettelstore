@@ -51,7 +51,9 @@ func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
 	rec.Attrs(func(attr slog.Attr) bool {
 		if !attr.Equal(slog.Attr{}) {
 			buf.WriteByte(' ')
-			buf.WriteString(attr.String())
+			buf.WriteString(attr.Key)
+			buf.WriteByte('=')
+			buf.WriteString(attr.Value.Resolve().String())
 		}
 		return true
 	})
