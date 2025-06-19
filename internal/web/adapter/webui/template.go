@@ -20,7 +20,6 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
-	"runtime/debug"
 	"strings"
 
 	"t73f.de/r/sx"
@@ -197,8 +196,10 @@ func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title
 	rb.bindString("debug-mode", sx.MakeBoolean(wui.debug))
 	rb.bindSymbol(symMetaHeader, sx.Nil())
 	rb.bindSymbol(symDetail, sx.Nil())
-	cob := envComputeObserver{logger: wui.logger}
-	env := sxeval.MakeEnvironment(bind).SetComputeObserver(&cob)
+	stepsH := sxeval.MakeStepsLimitHandler(0, sxeval.DefaultComputeHandler{})
+	nestH := sxeval.MakeLimitNestingHandler(32*1024, stepsH)
+	cob := computeLogHandler{logger: wui.logger, next: nestH, steps: stepsH}
+	env := sxeval.MakeEnvironment(bind).SetComputeHandler(&cob)
 	return env, rb
 }
 
@@ -209,35 +210,41 @@ func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
 	return true, wui.NewURLBuilder('h').SetZid(user.Zid).String(), string(user.GetDefault(meta.KeyUserID, ""))
 }
 
-type envComputeObserver struct {
+type computeLogHandler struct {
 	logger *slog.Logger
-	count  int
-	level  int
+	next   *sxeval.LimitNestingHandler
+	steps  *sxeval.StepsLimitHandler
 }
 
-func (cob *envComputeObserver) BeforeCompute(_ *sxeval.Environment, expr sxeval.Expr, _ *sxeval.Frame) (sxeval.Expr, error) {
-	cob.count++
-	logging.LogTrace(cob.logger, "compute", slog.Int("count", cob.count), slog.Int("level", cob.level), "expr", expensiveExpr{expr})
-	if cob.level > 128*1024 {
-		stack := debug.Stack()
-		cob.logger.Error("render call stack", slog.String("stack", string(stack)))
-		return nil, fmt.Errorf("render recursion limit exceeded: %d", cob.level)
+func (clh *computeLogHandler) Compute(env *sxeval.Environment, expr sxeval.Expr, frame *sxeval.Frame) (sx.Object, error) {
+	logger := clh.logger
+	if logger.Handler().Enabled(context.Background(), logging.LevelTrace) {
+		fname := "nil"
+		if frame != nil {
+			fname = frame.Name()
+		}
+		curNesting, _ := clh.next.Nesting()
+		var sb strings.Builder
+		_, _ = expr.Print(&sb)
+		logging.LogTrace(logger, "compute",
+			slog.String("frame", fname),
+			slog.Int("steps", clh.steps.Steps()),
+			slog.Int("level", curNesting),
+			slog.String("expr", sb.String()))
+		obj, err := clh.next.Compute(env, expr, frame)
+		if err == nil {
+			logging.LogTrace(logger, "result ",
+				slog.String("frame", fname),
+				slog.Int("steps", clh.steps.Steps()),
+				slog.Int("level", curNesting),
+				slog.Any("object", obj))
+		}
+		return obj, err
 	}
-	cob.level++
-	return expr, nil
+	return clh.next.Compute(env, expr, frame)
 }
 
-func (cob *envComputeObserver) AfterCompute(*sxeval.Environment, sxeval.Expr, *sxeval.Frame, sx.Object, error) {
-	cob.level--
-}
-
-type expensiveExpr struct{ expr sxeval.Expr }
-
-func (e expensiveExpr) LogValue() slog.Value {
-	var sb strings.Builder
-	_, _ = e.expr.Print(&sb)
-	return slog.StringValue(sb.String())
-}
+func (clh *computeLogHandler) Reset() { clh.next.Reset() }
 
 type renderBinder struct {
 	err     error
