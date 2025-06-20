@@ -8,7 +8,7 @@ require (
 	golang.org/x/crypto v0.39.0
 	golang.org/x/term v0.32.0
 	golang.org/x/text v0.26.0
-	t73f.de/r/sx v0.0.0-20250619165402-4da8104bea68
+	t73f.de/r/sx v0.0.0-20250619182123-53af1d6947a7
 	t73f.de/r/sxwebs v0.0.0-20250526094632-c7f8ff8e06f9
 	t73f.de/r/webs v0.0.0-20250604132257-c12dbd1f7046
 	t73f.de/r/zero v0.0.0-20250604143210-ce1230735c4c
