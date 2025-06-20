@@ -89,7 +89,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			true,
 		},
 		meta.KeyLang:        {"Language", parseString, true},
-		keyMaxTransclusions: {"Maximum transclusions", parseInt64, true},
+		keyMaxTransclusions: {"Maximum transclusions", parseInt, true},
 		keySiteName:         {"Site name", parseString, true},
 		keyYAMLHeader:       {"YAML header", parseBool, true},
 		keyZettelFileSyntax: {
@@ -114,7 +114,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		config.KeyHomeZettel:           id.ZidDefaultHome,
 		ConfigInsecureHTML:             config.NoHTML,
 		meta.KeyLang:                   meta.ValueLangEN,
-		keyMaxTransclusions:            int64(1024),
+		keyMaxTransclusions:            1024,
 		keySiteName:                    "Zettelstore",
 		keyYAMLHeader:                  false,
 		keyZettelFileSyntax:            nil,
@@ -294,7 +294,7 @@ func (cs *configService) GetSiteName() string { return cs.GetCurConfig(keySiteNa
 
 // GetMaxTransclusions return the maximum number of indirect transclusions.
 func (cs *configService) GetMaxTransclusions() int {
-	return int(cs.GetCurConfig(keyMaxTransclusions).(int64))
+	return int(cs.GetCurConfig(keyMaxTransclusions).(int))
 }
 
 // GetYAMLHeader returns the current value of the "yaml-header" key.

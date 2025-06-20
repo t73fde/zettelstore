@@ -208,8 +208,6 @@ func (cfg *srvConfig) SwitchNextToCur() {
 	cfg.cur = cfg.next.Clone()
 }
 
-func parseString(val string) (any, error) { return val, nil }
-
 var errNoBoolean = errors.New("no boolean value")
 
 func parseBool(val string) (any, error) {
@@ -223,22 +221,10 @@ func parseBool(val string) (any, error) {
 	return true, nil
 }
 
-func parseInt64(val string) (any, error) {
-	u64, err := strconv.ParseInt(val, 10, 64)
-	if err == nil {
-		return u64, nil
-	}
-	return nil, err
-}
-
-func parseZid(val string) (any, error) {
-	zid, err := id.Parse(val)
-	if err == nil {
-		return zid, nil
-	}
-	return id.Invalid, err
-}
-
+func parseString(val string) (any, error) { return val, nil }
+func parseInt(val string) (any, error)    { return strconv.Atoi(val) }
+func parseInt64(val string) (any, error)  { return strconv.ParseInt(val, 10, 64) }
+func parseZid(val string) (any, error)    { return id.Parse(val) }
 func parseInvalidZid(val string) (any, error) {
 	zid, _ := id.Parse(val)
 	return zid, nil

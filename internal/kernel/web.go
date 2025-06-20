@@ -88,7 +88,7 @@ func (ws *webService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 		WebPersistentCookie: {"Persistent cookie", parseBool, true},
 		WebProfiling:        {"Runtime profiling", parseBool, true},
 		WebSecureCookie:     {"Secure cookie", parseBool, true},
-		WebSxMaxNesting:     {"Max nesting of Sx calls", ws.noFrozen(parseInt64), true},
+		WebSxMaxNesting:     {"Max nesting of Sx calls", parseInt, true},
 		WebTokenLifetimeAPI: {
 			"Token lifetime API",
 			makeDurationParser(10*time.Minute, 0, 1*time.Hour),

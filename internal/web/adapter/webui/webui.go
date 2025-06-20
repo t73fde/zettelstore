@@ -116,7 +116,7 @@ func New(logger *slog.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rt
 		searchURL:     ab.NewURLBuilder('h').String(),
 		createNewURL:  ab.NewURLBuilder('c').String(),
 
-		sxMaxNesting:  int(min(max(kernel.Main.GetConfig(kernel.WebService, kernel.WebSxMaxNesting).(int64), 0), math.MaxInt)),
+		sxMaxNesting:  min(max(kernel.Main.GetConfig(kernel.WebService, kernel.WebSxMaxNesting).(int), 0), math.MaxInt),
 		zettelBinding: nil,
 		genHTML:       sxhtml.NewGenerator().SetNewline(),
 	}
