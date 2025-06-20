@@ -16,15 +16,17 @@ package kernel
 import (
 	"bufio"
 	"net"
+
+	"zettelstore.de/z/internal/logging"
 )
 
 func startLineServer(kern *Kernel, listenAddr string) error {
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
-		kern.logger.Error().Err(err).Msg("Unable to start administration console")
+		kern.logger.Error("Unable to start administration console", "err", err)
 		return err
 	}
-	kern.logger.Mandatory().Str("listen", listenAddr).Msg("Start administration console")
+	logging.LogMandatory(kern.logger, "Start administration console", "listen", listenAddr)
 	go func() { lineServer(ln, kern) }()
 	return nil
 }
@@ -42,7 +44,7 @@ func lineServer(ln net.Listener, kern *Kernel) {
 		conn, err := ln.Accept()
 		if err != nil {
 			// handle error
-			kern.logger.Error().Err(err).Msg("Unable to accept connection")
+			kern.logger.Error("Unable to accept connection", "err", err)
 			break
 		}
 		go handleLineConnection(conn, kern)
@@ -59,7 +61,7 @@ func handleLineConnection(conn net.Conn, kern *Kernel) {
 		}
 	}()
 
-	kern.logger.Mandatory().Str("from", conn.RemoteAddr().String()).Msg("Start session on administration console")
+	logging.LogMandatory(kern.logger, "Start session on administration console", "from", conn.RemoteAddr().String())
 	cmds := cmdSession{}
 	cmds.initialize(conn, kern)
 	s := bufio.NewScanner(conn)

@@ -15,13 +15,14 @@ package usecase
 
 import (
 	"context"
+	"log/slog"
 	"time"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -33,15 +34,15 @@ type CreateZettelPort interface {
 
 // CreateZettel is the data for this use case.
 type CreateZettel struct {
-	log      *logger.Logger
+	logger   *slog.Logger
 	rtConfig config.Config
 	port     CreateZettelPort
 }
 
 // NewCreateZettel creates a new use case.
-func NewCreateZettel(log *logger.Logger, rtConfig config.Config, port CreateZettelPort) CreateZettel {
+func NewCreateZettel(logger *slog.Logger, rtConfig config.Config, port CreateZettelPort) CreateZettel {
 	return CreateZettel{
-		log:      log,
+		logger:   logger,
 		rtConfig: rtConfig,
 		port:     port,
 	}
@@ -153,6 +154,6 @@ func (uc *CreateZettel) Run(ctx context.Context, zettel zettel.Zettel) (id.Zid, 
 
 	zettel.Content.TrimSpace()
 	zid, err := uc.port.CreateZettel(ctx, zettel)
-	uc.log.Info().User(ctx).Zid(zid).Err(err).Msg("Create zettel")
+	uc.logger.Info("Create zettel", "zid", zid, logging.User(ctx), logging.Err(err))
 	return zid, err
 }

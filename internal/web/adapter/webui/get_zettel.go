@@ -26,10 +26,10 @@ import (
 	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/usecase"
-	"zettelstore.de/z/internal/web/server"
 )
 
 // MakeGetHTMLZettelHandler creates a new HTTP handler for the use case "get zettel".
@@ -62,11 +62,11 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 			return
 		}
 
-		user := server.GetUser(ctx)
+		user := user.GetCurrentUser(ctx)
 		getTextTitle := wui.makeGetTextTitle(ctx, getZettel)
 
 		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())
-		bind, rb := wui.createRenderBinding(ctx, "zettel", zettelLang, title, user)
+		env, rb := wui.createRenderEnvironment(ctx, "zettel", zettelLang, title, user)
 		rb.bindSymbol(symMetaHeader, metaObj)
 		rb.bindString("heading", sx.MakeString(title))
 		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
@@ -101,7 +101,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		}
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.ZidZettelTemplate, bind)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidZettelTemplate, env)
 		} else {
 			err = rb.err
 		}

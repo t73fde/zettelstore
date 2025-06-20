@@ -17,6 +17,7 @@ package api
 import (
 	"bytes"
 	"context"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -24,16 +25,16 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/internal/web/adapter"
 	"zettelstore.de/z/internal/web/server"
 )
 
 // API holds all data and methods for delivering API call results.
 type API struct {
-	log      *logger.Logger
+	logger   *slog.Logger
 	b        server.Builder
 	authz    auth.AuthzManager
 	token    auth.TokenManager
@@ -44,10 +45,10 @@ type API struct {
 }
 
 // New creates a new API object.
-func New(log *logger.Logger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
+func New(logger *slog.Logger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
 	rtConfig config.Config, pol auth.Policy) *API {
 	a := &API{
-		log:      log,
+		logger:   logger,
 		b:        b,
 		authz:    authz,
 		token:    token,
@@ -62,8 +63,8 @@ func New(log *logger.Logger, b server.Builder, authz auth.AuthzManager, token au
 // NewURLBuilder creates a new URL builder object with the given key.
 func (a *API) NewURLBuilder(key byte) *api.URLBuilder { return a.b.NewURLBuilder(key) }
 
-func (a *API) getAuthData(ctx context.Context) *server.AuthData {
-	return server.GetAuthData(ctx)
+func (a *API) getAuthData(ctx context.Context) *user.AuthData {
+	return user.GetAuthData(ctx)
 }
 func (a *API) withAuth() bool { return a.authz.WithAuth() }
 func (a *API) getToken(ident *meta.Meta) ([]byte, error) {
@@ -73,7 +74,7 @@ func (a *API) getToken(ident *meta.Meta) ([]byte, error) {
 func (a *API) reportUsecaseError(w http.ResponseWriter, err error) {
 	code, text := adapter.CodeMessageFromError(err)
 	if code == http.StatusInternalServerError {
-		a.log.Error().Err(err).Msg(text)
+		a.logger.Error(text, "err", err)
 		http.Error(w, http.StatusText(code), code)
 		return
 	}
@@ -87,7 +88,7 @@ func writeBuffer(w http.ResponseWriter, buf *bytes.Buffer, contentType string) e
 
 func (a *API) getRights(ctx context.Context, m *meta.Meta) (result api.ZettelRights) {
 	pol := a.policy
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if pol.CanCreate(user, m) {
 		result |= api.ZettelCanCreate
 	}

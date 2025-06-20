@@ -18,12 +18,12 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
 	"strconv"
 	"sync"
 
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/logger"
 )
 
 type boxService struct {
@@ -35,7 +35,8 @@ type boxService struct {
 
 var errInvalidDirType = errors.New("invalid directory type")
 
-func (ps *boxService) Initialize(logger *logger.Logger) {
+func (ps *boxService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	ps.logLevelVar = levelVar
 	ps.logger = logger
 	ps.descr = descriptionMap{
 		BoxDefaultDirType: {
@@ -69,7 +70,9 @@ func (ps *boxService) Initialize(logger *logger.Logger) {
 	}
 }
 
-func (ps *boxService) GetLogger() *logger.Logger { return ps.logger }
+func (ps *boxService) GetLogger() *slog.Logger { return ps.logger }
+func (ps *boxService) GetLevel() slog.Level    { return ps.logLevelVar.Level() }
+func (ps *boxService) SetLevel(l slog.Level)   { ps.logLevelVar.Set(l) }
 
 func (ps *boxService) Start(kern *Kernel) error {
 	boxURIs := make([]*url.URL, 0, 4)
@@ -84,12 +87,12 @@ func (ps *boxService) Start(kern *Kernel) error {
 	defer ps.mxService.Unlock()
 	mgr, err := ps.createManager(boxURIs, kern.auth.manager, &kern.cfg)
 	if err != nil {
-		ps.logger.Error().Err(err).Msg("Unable to create manager")
+		ps.logger.Error("Unable to create manager", "err", err)
 		return err
 	}
-	ps.logger.Info().Str("location", mgr.Location()).Msg("Start Manager")
+	ps.logger.Info("Start Manager", "location", mgr.Location())
 	if err = mgr.Start(context.Background()); err != nil {
-		ps.logger.Error().Err(err).Msg("Unable to start manager")
+		ps.logger.Error("Unable to start manager", "err", err)
 		return err
 	}
 	kern.cfg.setBox(mgr)
@@ -104,7 +107,7 @@ func (ps *boxService) IsStarted() bool {
 }
 
 func (ps *boxService) Stop(*Kernel) {
-	ps.logger.Info().Msg("Stop Manager")
+	ps.logger.Info("Stop Manager")
 	ps.mxService.RLock()
 	mgr := ps.manager
 	ps.mxService.RUnlock()

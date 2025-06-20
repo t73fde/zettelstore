@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -36,7 +37,7 @@ import (
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
 
@@ -45,11 +46,12 @@ var Main *Kernel
 
 // Kernel is the main internal kernel.
 type Kernel struct {
-	logWriter *kernelLogWriter
-	logger    *logger.Logger
-	wg        sync.WaitGroup
-	mx        sync.RWMutex
-	interrupt chan os.Signal
+	logLevelVar slog.LevelVar
+	logger      *slog.Logger
+	dlogWriter  *kernelLogWriter
+	wg          sync.WaitGroup
+	mx          sync.RWMutex
+	interrupt   chan os.Signal
 
 	profileName string
 	fileName    string
@@ -63,16 +65,17 @@ type Kernel struct {
 	box  boxService
 	web  webService
 
-	srvs     map[Service]serviceDescr
+	srvs     map[Service]*serviceDescr
 	srvNames map[string]serviceData
 	depStart serviceDependency
 	depStop  serviceDependency // reverse of depStart
 }
 
 type serviceDescr struct {
-	srv      service
-	name     string
-	logLevel logger.Level
+	srv         service
+	name        string
+	logLevel    slog.Level
+	logLevelVar slog.LevelVar
 }
 type serviceData struct {
 	srv    service
@@ -87,30 +90,34 @@ func init() {
 
 // create a new
 func createKernel() *Kernel {
-	lw := newKernelLogWriter(8192)
+	lw := newKernelLogWriter(os.Stdout, 8192)
 	kern := &Kernel{
-		logWriter: lw,
-		logger:    logger.New(lw, "").SetLevel(defaultNormalLogLevel),
-		interrupt: make(chan os.Signal, 5),
+		dlogWriter: lw,
+		interrupt:  make(chan os.Signal, 5),
 	}
+	kern.logLevelVar.Set(defaultNormalLogLevel)
+	kern.logger = slog.New(newKernelLogHandler(lw, &kern.logLevelVar))
 	kern.self.kernel = kern
-	kern.srvs = map[Service]serviceDescr{
-		KernelService: {&kern.self, "kernel", defaultNormalLogLevel},
-		CoreService:   {&kern.core, "core", defaultNormalLogLevel},
-		ConfigService: {&kern.cfg, "config", defaultNormalLogLevel},
-		AuthService:   {&kern.auth, "auth", defaultNormalLogLevel},
-		BoxService:    {&kern.box, "box", defaultNormalLogLevel},
-		WebService:    {&kern.web, "web", defaultNormalLogLevel},
+	kern.srvs = map[Service]*serviceDescr{
+		KernelService: {srv: &kern.self, name: "kernel", logLevel: defaultNormalLogLevel},
+		CoreService:   {srv: &kern.core, name: "core", logLevel: defaultNormalLogLevel},
+		ConfigService: {srv: &kern.cfg, name: "config", logLevel: defaultNormalLogLevel},
+		AuthService:   {srv: &kern.auth, name: "auth", logLevel: defaultNormalLogLevel},
+		BoxService:    {srv: &kern.box, name: "box", logLevel: defaultNormalLogLevel},
+		WebService:    {srv: &kern.web, name: "web", logLevel: defaultNormalLogLevel},
 	}
 	kern.srvNames = make(map[string]serviceData, len(kern.srvs))
 	for key, srvD := range kern.srvs {
 		if _, ok := kern.srvNames[srvD.name]; ok {
-			kern.logger.Error().Str("service", srvD.name).Msg("Service data already set, ignore")
+			kern.logger.Error("Service data already set, ignored", "service", srvD.name)
 		}
 		kern.srvNames[srvD.name] = serviceData{srvD.srv, key}
-		l := logger.New(lw, strings.ToUpper(srvD.name)).SetLevel(srvD.logLevel)
-		kern.logger.Debug().Str("service", srvD.name).Msg("Initialize")
-		srvD.srv.Initialize(l)
+
+		srvD.logLevelVar.Set(srvD.logLevel)
+		srvLogger := slog.New(newKernelLogHandler(lw, &srvD.logLevelVar)).With(
+			"system", strings.ToUpper(srvD.name))
+		kern.logger.Debug("Initialize", "service", srvD.name)
+		srvD.srv.Initialize(&srvD.logLevelVar, srvLogger)
 	}
 	kern.depStart = serviceDependency{
 		KernelService: nil,
@@ -223,12 +230,13 @@ type KeyDescrValue struct{ Key, Descr, Value string }
 // KeyValue is a pair of key and value.
 type KeyValue struct{ Key, Value string }
 
-// LogEntry stores values of one log line written by a logger.Logger
+// LogEntry stores values of one log line written by a logger.
 type LogEntry struct {
-	Level   logger.Level
+	Level   slog.Level
 	TS      time.Time
 	Prefix  string
 	Message string
+	Details string
 }
 
 // CreateAuthManagerFunc is called to create a new auth manager.
@@ -250,8 +258,8 @@ type SetupWebServerFunc func(
 ) error
 
 const (
-	defaultNormalLogLevel = logger.InfoLevel
-	defaultSimpleLogLevel = logger.ErrorLevel
+	defaultNormalLogLevel = slog.LevelInfo
+	defaultSimpleLogLevel = slog.LevelError
 )
 
 // Setup sets the most basic data of a software: its name, its version,
@@ -268,7 +276,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		srvD.srv.Freeze()
 	}
 	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
-		kern.SetLogLevel(defaultSimpleLogLevel.String())
+		kern.logLevelVar.Set(defaultSimpleLogLevel)
 	}
 	kern.wg.Add(1)
 	signal.Notify(kern.interrupt, os.Interrupt, syscall.SIGTERM)
@@ -276,7 +284,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 		// Wait for interrupt.
 		sig := <-kern.interrupt
 		if strSig := sig.String(); strSig != "" {
-			kern.logger.Info().Str("signal", strSig).Msg("Shut down Zettelstore")
+			kern.logger.Info("Shut down Zettelstore", "signal", strSig)
 		}
 		kern.doShutdown()
 		kern.wg.Done()
@@ -285,7 +293,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 	_ = kern.StartService(KernelService)
 	if headline {
 		logger := kern.logger
-		logger.Mandatory().Msg(fmt.Sprintf(
+		logging.LogMandatory(logger, fmt.Sprintf(
 			"%v %v (%v@%v/%v)",
 			kern.core.GetCurConfig(CoreProgname),
 			kern.core.GetCurConfig(CoreVersion),
@@ -293,19 +301,19 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 			kern.core.GetCurConfig(CoreGoOS),
 			kern.core.GetCurConfig(CoreGoArch),
 		))
-		logger.Mandatory().Msg("Licensed under the latest version of the EUPL (European Union Public License)")
+		logging.LogMandatory(logger, "Licensed under the latest version of the EUPL (European Union Public License)")
 		if configFilename != "" {
-			logger.Mandatory().Str("filename", configFilename).Msg("Configuration file found")
+			logging.LogMandatory(logger, "Configuration file found", "filename", configFilename)
 		} else {
-			logger.Mandatory().Msg("No configuration file found / used")
+			logging.LogMandatory(logger, "No configuration file found / used")
 		}
 		if kern.core.GetCurConfig(CoreDebug).(bool) {
-			logger.Info().Msg("----------------------------------------")
-			logger.Info().Msg("DEBUG MODE, DO NO USE THIS IN PRODUCTION")
-			logger.Info().Msg("----------------------------------------")
+			logger.Info("----------------------------------------")
+			logger.Info("DEBUG MODE, DO NO USE THIS IN PRODUCTION")
+			logger.Info("----------------------------------------")
 		}
 		if kern.auth.GetCurConfig(AuthReadonly).(bool) {
-			logger.Info().Msg("Read-only mode")
+			logger.Info("Read-only mode")
 		}
 	}
 	if lineServer {
@@ -331,7 +339,7 @@ func (kern *Kernel) WaitForShutdown() {
 
 // Shutdown the service. Waits for all concurrent activities to stop.
 func (kern *Kernel) Shutdown(silent bool) {
-	kern.logger.Trace().Msg("Shutdown")
+	logging.LogTrace(kern.logger, "Shutdown")
 	kern.interrupt <- &shutdownSignal{silent: silent}
 }
 
@@ -348,42 +356,44 @@ func (*shutdownSignal) Signal() { /* Just a signal */ }
 // --- Log operation ---------------------------------------------------------
 
 // GetKernelLogger returns the kernel logger.
-func (kern *Kernel) GetKernelLogger() *logger.Logger {
-	return kern.logger
-}
+func (kern *Kernel) GetKernelLogger() *slog.Logger { return kern.logger }
+
+// GetKernelLogLevel return the logging level of the kernel logger.
+func (kern *Kernel) GetKernelLogLevel() slog.Level { return kern.logLevelVar.Level() }
 
 // SetLogLevel sets the logging level for logger maintained by the kernel.
 //
-// Its syntax is: (SERVICE ":")? LEVEL (";" (SERICE ":")? LEVEL)*.
+// Its syntax is: (SERVICE ":")? LEVEL (";" (SERVICE ":")? LEVEL)*.
 func (kern *Kernel) SetLogLevel(logLevel string) {
 	defaultLevel, srvLevel := kern.parseLogLevel(logLevel)
 
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
+
 	for srvN, srvD := range kern.srvs {
 		if lvl, found := srvLevel[srvN]; found {
-			srvD.srv.GetLogger().SetLevel(lvl)
-		} else if defaultLevel != logger.NoLevel {
-			srvD.srv.GetLogger().SetLevel(defaultLevel)
+			srvD.srv.SetLevel(lvl)
+		} else if defaultLevel != logging.LevelMissing {
+			srvD.srv.SetLevel(defaultLevel)
 		}
 	}
 }
 
-func (kern *Kernel) parseLogLevel(logLevel string) (logger.Level, map[Service]logger.Level) {
-	defaultLevel := logger.NoLevel
-	srvLevel := map[Service]logger.Level{}
+func (kern *Kernel) parseLogLevel(logLevel string) (slog.Level, map[Service]slog.Level) {
+	defaultLevel := logging.LevelMissing
+	srvLevel := map[Service]slog.Level{}
 	for spec := range strings.SplitSeq(logLevel, ";") {
 		vals := cleanLogSpec(strings.Split(spec, ":"))
 		switch len(vals) {
 		case 0:
 		case 1:
-			if lvl := logger.ParseLevel(vals[0]); lvl.IsValid() {
+			if lvl := logging.ParseLevel(vals[0]); lvl != logging.LevelMissing {
 				defaultLevel = lvl
 			}
 		default:
 			serviceText, levelText := vals[0], vals[1]
 			if srv, found := kern.srvNames[serviceText]; found {
-				if lvl := logger.ParseLevel(levelText); lvl.IsValid() {
+				if lvl := logging.ParseLevel(levelText); lvl != logging.LevelMissing {
 					srvLevel[srv.srvnum] = lvl
 				}
 			}
@@ -405,16 +415,16 @@ func cleanLogSpec(rawVals []string) []string {
 
 // RetrieveLogEntries returns all buffered log entries.
 func (kern *Kernel) RetrieveLogEntries() []LogEntry {
-	return kern.logWriter.retrieveLogEntries()
+	return kern.dlogWriter.retrieveLogEntries()
 }
 
 // GetLastLogTime returns the time when the last logging with level > DEBUG happened.
-func (kern *Kernel) GetLastLogTime() time.Time { return kern.logWriter.getLastLogTime() }
+func (kern *Kernel) GetLastLogTime() time.Time { return kern.dlogWriter.getLastLogTime() }
 
 // LogRecover outputs some information about the previous panic.
 func (kern *Kernel) LogRecover(name string, recoverInfo any) {
 	stack := debug.Stack()
-	kern.logger.Error().Str("recovered_from", fmt.Sprint(recoverInfo)).Bytes("stack", stack).Msg(name)
+	kern.logger.Error(name, "recovered_from", recoverInfo, "stack", stack)
 	kern.core.updateRecoverInfo(name, recoverInfo, stack)
 }
 
@@ -526,7 +536,7 @@ func (kern *Kernel) GetServiceStatistics(srvnum Service) []KeyValue {
 }
 
 // GetLogger returns a logger for the given service.
-func (kern *Kernel) GetLogger(srvnum Service) *logger.Logger {
+func (kern *Kernel) GetLogger(srvnum Service) *slog.Logger {
 	kern.mx.RLock()
 	defer kern.mx.RUnlock()
 	if srvD, ok := kern.srvs[srvnum]; ok {
@@ -612,10 +622,16 @@ func (kern *Kernel) dumpIndex(w io.Writer) { kern.box.dumpIndex(w) }
 
 type service interface {
 	// Initialize the data for the service.
-	Initialize(*logger.Logger)
+	Initialize(*slog.LevelVar, *slog.Logger)
 
 	// Get service logger.
-	GetLogger() *logger.Logger
+	GetLogger() *slog.Logger
+
+	// Get the log level.
+	GetLevel() slog.Level
+
+	// Set the service log level.
+	SetLevel(slog.Level)
 
 	// ConfigDescriptions returns a sorted list of configuration descriptions.
 	ConfigDescriptions() []serviceConfigDescription
@@ -673,17 +689,22 @@ type kernelService struct {
 	kernel *Kernel
 }
 
-func (*kernelService) Initialize(*logger.Logger)                      {}
-func (ks *kernelService) GetLogger() *logger.Logger                   { return ks.kernel.logger }
+func (*kernelService) Initialize(*slog.LevelVar, *slog.Logger) {}
+
+func (ks *kernelService) GetLogger() *slog.Logger { return ks.kernel.logger }
+func (ks *kernelService) GetLevel() slog.Level    { return ks.kernel.logLevelVar.Level() }
+func (ks *kernelService) SetLevel(lvl slog.Level) { ks.kernel.logLevelVar.Set(lvl) }
+
 func (*kernelService) ConfigDescriptions() []serviceConfigDescription { return nil }
 func (*kernelService) SetConfig(string, string) error                 { return errAlreadyFrozen }
 func (*kernelService) GetCurConfig(string) any                        { return nil }
 func (*kernelService) GetNextConfig(string) any                       { return nil }
 func (*kernelService) GetCurConfigList(bool) []KeyDescrValue          { return nil }
 func (*kernelService) GetNextConfigList() []KeyDescrValue             { return nil }
-func (*kernelService) GetStatistics() []KeyValue                      { return nil }
-func (*kernelService) Freeze()                                        {}
-func (*kernelService) Start(*Kernel) error                            { return nil }
-func (*kernelService) SwitchNextToCur()                               {}
-func (*kernelService) IsStarted() bool                                { return true }
-func (*kernelService) Stop(*Kernel)                                   {}
+
+func (*kernelService) GetStatistics() []KeyValue { return nil }
+func (*kernelService) Freeze()                   {}
+func (*kernelService) Start(*Kernel) error       { return nil }
+func (*kernelService) SwitchNextToCur()          {}
+func (*kernelService) IsStarted() bool           { return true }
+func (*kernelService) Stop(*Kernel)              {}

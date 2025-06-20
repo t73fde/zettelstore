@@ -15,6 +15,7 @@ package kernel
 
 import (
 	"fmt"
+	"log/slog"
 	"maps"
 	"net"
 	"os"
@@ -25,7 +26,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/logger"
 	"zettelstore.de/z/strfun"
 )
 
@@ -43,7 +43,8 @@ type recoverInfo struct {
 	stack []byte
 }
 
-func (cs *coreService) Initialize(logger *logger.Logger) {
+func (cs *coreService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	cs.logLevelVar = levelVar
 	cs.logger = logger
 	cs.mapRecover = make(map[string]recoverInfo)
 	cs.descr = descriptionMap{
@@ -93,7 +94,9 @@ func (cs *coreService) Initialize(logger *logger.Logger) {
 	}
 }
 
-func (cs *coreService) GetLogger() *logger.Logger { return cs.logger }
+func (cs *coreService) GetLogger() *slog.Logger { return cs.logger }
+func (cs *coreService) GetLevel() slog.Level    { return cs.logLevelVar.Level() }
+func (cs *coreService) SetLevel(l slog.Level)   { cs.logLevelVar.Set(l) }
 
 func (cs *coreService) Start(*Kernel) error {
 	cs.started = true

@@ -18,6 +18,7 @@ import (
 	"crypto/sha256"
 	"flag"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/url"
 	"os"
@@ -38,7 +39,7 @@ import (
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
 
@@ -186,8 +187,8 @@ const (
 
 func setServiceConfig(cfg *meta.Meta) bool {
 	debugMode := cfg.GetBool(keyDebug)
-	if debugMode && kernel.Main.GetKernelLogger().Level() > logger.DebugLevel {
-		kernel.Main.SetLogLevel(logger.DebugLevel.String())
+	if debugMode && kernel.Main.GetKernelLogLevel() > slog.LevelDebug {
+		kernel.Main.SetLogLevel(logging.LevelString(slog.LevelDebug))
 	}
 	if logLevel, found := cfg.Get(keyLogLevel); found {
 		kernel.Main.SetLogLevel(string(logLevel))
@@ -245,9 +246,9 @@ func setServiceConfig(cfg *meta.Meta) bool {
 
 func setConfigValue(err error, subsys kernel.Service, key string, val any) error {
 	if err == nil {
-		err = kernel.Main.SetConfig(subsys, key, fmt.Sprint(val))
-		if err != nil {
-			kernel.Main.GetKernelLogger().Error().Str("key", key).Str("value", fmt.Sprint(val)).Err(err).Msg("Unable to set configuration")
+		if err = kernel.Main.SetConfig(subsys, key, fmt.Sprint(val)); err != nil {
+			kernel.Main.GetKernelLogger().Error("Unable to set configuration",
+				"key", key, "value", val, "err", err)
 		}
 	}
 	return err
@@ -302,7 +303,7 @@ func executeCommand(name string, args ...string) int {
 
 	if command.Simple {
 		if err := kern.SetConfig(kernel.ConfigService, kernel.ConfigSimpleMode, "true"); err != nil {
-			kern.GetKernelLogger().Error().Err(err).Msg("unable to set simple-mode")
+			kern.GetKernelLogger().Error("unable to set simple-mode", "err", err)
 			return 1
 		}
 	}
@@ -349,12 +350,12 @@ func Main(progName, buildVersion string) int {
 			err = kernel.Main.StartProfiling(kernel.ProfileHead, *memprofile)
 		}
 		if err != nil {
-			kernel.Main.GetKernelLogger().Error().Err(err).Msg("start profiling")
+			kernel.Main.GetKernelLogger().Error("start profiling", "err", err)
 			return 1
 		}
 		defer func() {
 			if err = kernel.Main.StopProfiling(); err != nil {
-				kernel.Main.GetKernelLogger().Error().Err(err).Msg("stop profiling")
+				kernel.Main.GetKernelLogger().Error("stop profiling", "err", err)
 			}
 		}()
 	}

@@ -36,8 +36,7 @@ func init() {
 			return nil, errors.New("unknown extension '" + ext + "' in box URL: " + u.String())
 		}
 		return &zipBox{
-			log: kernel.Main.GetLogger(kernel.BoxService).Clone().
-				Str("box", "zip").Int("boxnum", int64(cdata.Number)).Child(),
+			logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "zip", "boxnum", cdata.Number),
 			number:   cdata.Number,
 			name:     path,
 			enricher: cdata.Enricher,

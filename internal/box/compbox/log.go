@@ -20,6 +20,7 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/internal/kernel"
+	"zettelstore.de/z/internal/logging"
 )
 
 func genLogM(zid id.Zid) *meta.Meta {
@@ -40,11 +41,13 @@ func genLogC(context.Context, *compBox) []byte {
 			buf.WriteByte('0')
 		}
 		buf.WriteByte(' ')
-		buf.WriteString(entry.Level.Format())
+		buf.WriteString(logging.LevelStringPad(entry.Level))
 		buf.WriteByte(' ')
 		buf.WriteString(entry.Prefix)
 		buf.WriteByte(' ')
 		buf.WriteString(entry.Message)
+		buf.WriteByte(' ')
+		buf.WriteString(entry.Details)
 		buf.WriteByte('\n')
 	}
 	return buf.Bytes()

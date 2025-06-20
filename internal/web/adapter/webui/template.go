@@ -17,8 +17,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxbuiltins"
@@ -31,12 +33,13 @@ import (
 	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/web/adapter"
-	"zettelstore.de/z/internal/web/server"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -155,7 +158,7 @@ func (wui *WebUI) getParentBinding(ctx context.Context) (*sxeval.Binding, error)
 	}
 	dag, zettelBind, err := wui.loadAllSxnCodeZettel(ctx)
 	if err != nil {
-		wui.log.Error().Err(err).Msg("loading zettel sxn")
+		wui.logger.Error("loading zettel sxn", "err", err)
 		return nil, err
 	}
 	wui.dag = dag
@@ -163,9 +166,9 @@ func (wui *WebUI) getParentBinding(ctx context.Context) (*sxeval.Binding, error)
 	return zettelBind, nil
 }
 
-// createRenderBinding creates a new binding and populates it with all
+// createRenderEnvironment creates a new environment and populates it with all
 // relevant data for the base template.
-func (wui *WebUI) createRenderBinding(ctx context.Context, name, lang, title string, user *meta.Meta) (*sxeval.Binding, renderBinder) {
+func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title string, user *meta.Meta) (*sxeval.Environment, renderBinder) {
 	userIsValid, userZettelURL, userIdent := wui.getUserRenderData(user)
 	parentBind, err := wui.getParentBinding(ctx)
 	bind := parentBind.MakeChildBinding(name, 128)
@@ -193,7 +196,15 @@ func (wui *WebUI) createRenderBinding(ctx context.Context, name, lang, title str
 	rb.bindString("debug-mode", sx.MakeBoolean(wui.debug))
 	rb.bindSymbol(symMetaHeader, sx.Nil())
 	rb.bindSymbol(symDetail, sx.Nil())
-	return bind, rb
+
+	stepsH := sxeval.MakeStepsHandler(sxeval.DefaultHandler{})
+	nestH := sxeval.MakeNestingLimitHandler(32*1024, stepsH)
+	var handler sxeval.ComputeHandler = nestH
+	if logger := wui.logger; logger.Handler().Enabled(context.Background(), logging.LevelTrace) {
+		handler = &computeLogHandler{logger: logger, next: nestH, steps: stepsH}
+	}
+	env := sxeval.MakeEnvironment(bind).SetComputeHandler(handler)
+	return env, rb
 }
 
 func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
@@ -202,6 +213,38 @@ func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
 	}
 	return true, wui.NewURLBuilder('h').SetZid(user.Zid).String(), string(user.GetDefault(meta.KeyUserID, ""))
 }
+
+type computeLogHandler struct {
+	logger *slog.Logger
+	next   *sxeval.NestingLimitHandler
+	steps  *sxeval.StepsHandler
+}
+
+func (clh *computeLogHandler) Compute(env *sxeval.Environment, expr sxeval.Expr, frame *sxeval.Frame) (sx.Object, error) {
+	fname := "nil"
+	if frame != nil {
+		fname = frame.Name()
+	}
+	curNesting, _ := clh.next.Nesting()
+	var sb strings.Builder
+	_, _ = expr.Print(&sb)
+	logging.LogTrace(clh.logger, "compute",
+		slog.String("frame", fname),
+		slog.Int("steps", clh.steps.Steps),
+		slog.Int("level", curNesting),
+		slog.String("expr", sb.String()))
+	obj, err := clh.next.Compute(env, expr, frame)
+	if err == nil {
+		logging.LogTrace(clh.logger, "result ",
+			slog.String("frame", fname),
+			slog.Int("steps", clh.steps.Steps),
+			slog.Int("level", curNesting),
+			slog.Any("object", obj))
+	}
+	return obj, err
+}
+
+func (clh *computeLogHandler) Reset() { clh.next.Reset() }
 
 type renderBinder struct {
 	err     error
@@ -360,7 +403,7 @@ func (wui *WebUI) calculateFooterSxn(ctx context.Context) *sx.Pair {
 	return nil
 }
 
-func (wui *WebUI) getSxnTemplate(ctx context.Context, zid id.Zid, bind *sxeval.Binding) (sxeval.Expr, error) {
+func (wui *WebUI) getSxnTemplate(ctx context.Context, zid id.Zid, env *sxeval.Environment) (sxeval.Expr, error) {
 	if t := wui.getSxnCache(zid); t != nil {
 		return t, nil
 	}
@@ -372,13 +415,12 @@ func (wui *WebUI) getSxnTemplate(ctx context.Context, zid id.Zid, bind *sxeval.B
 
 	objs, err := reader.ReadAll()
 	if err != nil {
-		wui.log.Error().Err(err).Zid(zid).Msg("reading sxn template")
+		wui.logger.Error("reading sxn template", "err", err, "zid", zid)
 		return nil, err
 	}
 	if len(objs) != 1 {
 		return nil, fmt.Errorf("expected 1 expression in template, but got %d", len(objs))
 	}
-	env := sxeval.MakeEnvironment(bind)
 	t, err := env.Parse(objs[0], nil)
 	if err != nil {
 		return nil, err
@@ -397,35 +439,31 @@ func (wui *WebUI) makeZettelReader(ctx context.Context, zid id.Zid) (*sxreader.R
 	return reader, nil
 }
 
-func (wui *WebUI) evalSxnTemplate(ctx context.Context, zid id.Zid, bind *sxeval.Binding) (sx.Object, error) {
-	templateExpr, err := wui.getSxnTemplate(ctx, zid, bind)
+func (wui *WebUI) evalSxnTemplate(ctx context.Context, zid id.Zid, env *sxeval.Environment) (sx.Object, error) {
+	templateExpr, err := wui.getSxnTemplate(ctx, zid, env)
 	if err != nil {
 		return nil, err
 	}
-	env := sxeval.MakeEnvironment(bind)
 	return env.Run(templateExpr, nil)
 }
 
-func (wui *WebUI) renderSxnTemplate(ctx context.Context, w http.ResponseWriter, templateID id.Zid, bind *sxeval.Binding) error {
-	return wui.renderSxnTemplateStatus(ctx, w, http.StatusOK, templateID, bind)
+func (wui *WebUI) renderSxnTemplate(ctx context.Context, w http.ResponseWriter, templateID id.Zid, env *sxeval.Environment) error {
+	return wui.renderSxnTemplateStatus(ctx, w, http.StatusOK, templateID, env)
 }
-func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWriter, code int, templateID id.Zid, bind *sxeval.Binding) error {
-	detailObj, err := wui.evalSxnTemplate(ctx, templateID, bind)
+func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWriter, code int, templateID id.Zid, env *sxeval.Environment) error {
+	detailObj, err := wui.evalSxnTemplate(ctx, templateID, env)
 	if err != nil {
 		return err
 	}
-	if err = bind.Bind(symDetail, detailObj); err != nil {
+	if err = env.BindGlobal(symDetail, detailObj); err != nil {
 		return err
 	}
 
-	pageObj, err := wui.evalSxnTemplate(ctx, id.ZidBaseTemplate, bind)
+	pageObj, err := wui.evalSxnTemplate(ctx, id.ZidBaseTemplate, env)
 	if err != nil {
 		return err
 	}
-	if msg := wui.log.Debug(); msg != nil {
-		// pageObj.String() can be expensive to calculate.
-		msg.Str("page", pageObj.String()).Msg("render")
-	}
+	wui.logger.Debug("render", "page", pageObj)
 
 	gen := sxhtml.NewGenerator().SetNewline()
 	var sb bytes.Buffer
@@ -435,7 +473,7 @@ func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWr
 	}
 	wui.prepareAndWriteHeader(w, code)
 	if _, err = w.Write(sb.Bytes()); err != nil {
-		wui.log.Error().Err(err).Msg("Unable to write HTML via template")
+		wui.logger.Error("Unable to write HTML via template", "err", err)
 	}
 	return nil // No error reporting, since we do not know what happended during write to client.
 }
@@ -444,12 +482,12 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 	ctx = context.WithoutCancel(ctx) // Ignore any cancel / timeouts to write an error message.
 	code, text := adapter.CodeMessageFromError(err)
 	if code == http.StatusInternalServerError {
-		wui.log.Error().Msg(err.Error())
+		wui.logger.Error(err.Error())
 	} else {
-		wui.log.Debug().Err(err).Msg("reportError")
+		wui.logger.Debug("reportError", "err", err)
 	}
-	user := server.GetUser(ctx)
-	bind, rb := wui.createRenderBinding(ctx, "error", meta.ValueLangEN, "Error", user)
+	user := user.GetCurrentUser(ctx)
+	bind, rb := wui.createRenderEnvironment(ctx, "error", meta.ValueLangEN, "Error", user)
 	rb.bindString("heading", sx.MakeString(http.StatusText(code)))
 	rb.bindString("message", sx.MakeString(text))
 	if rb.err == nil {
@@ -459,7 +497,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 	if errSx == nil {
 		return
 	}
-	wui.log.Error().Err(errSx).Msg("while rendering error message")
+	wui.logger.Error("while rendering error message", "err", errSx)
 
 	// if errBind != nil, the HTTP header was not written
 	wui.prepareAndWriteHeader(w, http.StatusInternalServerError)

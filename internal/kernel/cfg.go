@@ -17,6 +17,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"strings"
 	"sync"
@@ -24,10 +25,10 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/logger"
-	"zettelstore.de/z/internal/web/server"
+	"zettelstore.de/z/internal/logging"
 )
 
 type configService struct {
@@ -52,7 +53,8 @@ const (
 
 var errUnknownVisibility = errors.New("unknown visibility")
 
-func (cs *configService) Initialize(logger *logger.Logger) {
+func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	cs.logLevelVar = levelVar
 	cs.logger = logger
 	cs.descr = descriptionMap{
 		keyDefaultCopyright: {"Default copyright", parseString, true},
@@ -125,10 +127,13 @@ func (cs *configService) Initialize(logger *logger.Logger) {
 		config.KeyShowSuccessorLinks:   "",
 	}
 }
-func (cs *configService) GetLogger() *logger.Logger { return cs.logger }
+
+func (cs *configService) GetLogger() *slog.Logger { return cs.logger }
+func (cs *configService) GetLevel() slog.Level    { return cs.logLevelVar.Level() }
+func (cs *configService) SetLevel(l slog.Level)   { cs.logLevelVar.Set(l) }
 
 func (cs *configService) Start(*Kernel) error {
-	cs.logger.Info().Msg("Start Service")
+	cs.logger.Info("Start Service")
 	data := meta.New(id.ZidConfiguration)
 	for _, kv := range cs.GetNextConfigList() {
 		data.Set(kv.Key, meta.Value(kv.Value))
@@ -146,7 +151,7 @@ func (cs *configService) IsStarted() bool {
 }
 
 func (cs *configService) Stop(*Kernel) {
-	cs.logger.Info().Msg("Stop Service")
+	cs.logger.Info("Stop Service")
 	cs.mxService.Lock()
 	cs.orig = nil
 	cs.manager = nil
@@ -167,7 +172,7 @@ func (cs *configService) setBox(mgr box.Manager) {
 
 func (cs *configService) doUpdate(p box.BaseBox) error {
 	z, err := p.GetZettel(context.Background(), id.ZidConfiguration)
-	cs.logger.Trace().Err(err).Msg("got config meta")
+	logging.LogTrace(cs.logger, "got config meta", logging.Err(err))
 	if err != nil {
 		return err
 	}
@@ -191,7 +196,7 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 
 func (cs *configService) observe(ci box.UpdateInfo) {
 	if (ci.Reason != box.OnZettel && ci.Reason != box.OnDelete) || ci.Zid == id.ZidConfiguration {
-		cs.logger.Debug().Uint("reason", uint64(ci.Reason)).Zid(ci.Zid).Msg("observe")
+		cs.logger.Debug("observe", "reason", ci.Reason, "zid", ci.Zid)
 		go func() {
 			cs.mxService.RLock()
 			mgr := cs.manager
@@ -203,7 +208,7 @@ func (cs *configService) observe(ci box.UpdateInfo) {
 				err = cs.doUpdate(ci.Box)
 			}
 			if err != nil {
-				cs.logger.Error().Err(err).Msg("update config")
+				cs.logger.Error("update config", "err", err)
 			}
 		}()
 	}
@@ -217,7 +222,7 @@ func (cs *configService) Get(ctx context.Context, m *meta.Meta, key string) stri
 			return string(val)
 		}
 	}
-	if user := server.GetUser(ctx); user != nil {
+	if user := user.GetCurrentUser(ctx); user != nil {
 		if val, found := user.Get(key); found {
 			return string(val)
 		}

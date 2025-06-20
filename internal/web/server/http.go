@@ -15,20 +15,23 @@ package server
 
 import (
 	"context"
+	"log/slog"
 	"net"
 	"net/http"
 	"time"
 
+	"t73f.de/r/webs/middleware"
+	"t73f.de/r/webs/middleware/logging"
+	"t73f.de/r/webs/middleware/reqid"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/auth/user"
 )
 
 type webServer struct {
-	log              *logger.Logger
+	log              *slog.Logger
 	baseURL          string
 	httpServer       httpServer
 	router           httpRouter
@@ -38,7 +41,7 @@ type webServer struct {
 
 // ConfigData contains the data needed to configure a server.
 type ConfigData struct {
-	Log              *logger.Logger
+	Log              *slog.Logger
 	ListenAddr       string
 	BaseURL          string
 	URLPrefix        string
@@ -70,7 +73,16 @@ func New(sd ConfigData) Server {
 		profiling:      sd.Profiling,
 	}
 	srv.router.initializeRouter(rd)
-	srv.httpServer.initializeHTTPServer(sd.ListenAddr, &srv.router)
+
+	mwReqID := reqid.Config{WithContext: true}
+	mwLogReq := logging.ReqConfig{
+		Logger: sd.Log, Level: slog.LevelDebug,
+		Message: "ServeHTTP", WithRequestID: true, WithRemote: true}
+	mwLogResp := logging.RespConfig{Logger: sd.Log, Level: slog.LevelDebug,
+		Message: "/ServeHTTP", WithRequestID: true}
+	mw := middleware.NewChain(mwReqID.Build(), mwLogReq.Build(), mwLogResp.Build())
+
+	srv.httpServer.initializeHTTPServer(sd.ListenAddr, middleware.Apply(mw, &srv.router))
 	return &srv
 }
 
@@ -111,7 +123,7 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 	if srv.persistentCookie && d > 0 {
 		cookie.Expires = time.Now().Add(d).Add(30 * time.Second).UTC()
 	}
-	srv.log.Debug().Bytes("token", token).Msg("SetToken")
+	srv.log.Debug("SetToken", "token", token)
 	if v := cookie.String(); v != "" {
 		w.Header().Add("Set-Cookie", v)
 		w.Header().Add("Cache-Control", `no-cache="Set-Cookie"`)
@@ -121,30 +133,14 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 
 // ClearToken invalidates the session cookie by sending an empty one.
 func (srv *webServer) ClearToken(ctx context.Context, w http.ResponseWriter) context.Context {
-	if authData := GetAuthData(ctx); authData == nil {
+	if authData := user.GetAuthData(ctx); authData == nil {
 		// No authentication data stored in session, nothing to do.
 		return ctx
 	}
 	if w != nil {
 		srv.SetToken(w, nil, 0)
 	}
-	return updateContext(ctx, nil, nil)
-}
-
-func updateContext(ctx context.Context, user *meta.Meta, data *auth.TokenData) context.Context {
-	if data == nil {
-		return context.WithValue(ctx, ctxKeyTypeSession{}, &AuthData{User: user})
-	}
-	return context.WithValue(
-		ctx,
-		ctxKeyTypeSession{},
-		&AuthData{
-			User:    user,
-			Token:   data.Token,
-			Now:     data.Now,
-			Issued:  data.Issued,
-			Expires: data.Expires,
-		})
+	return user.UpdateContext(ctx, nil, nil)
 }
 
 func (srv *webServer) Run() error { return srv.httpServer.start() }

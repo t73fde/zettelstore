@@ -15,10 +15,11 @@ package usecase
 
 import (
 	"context"
+	"log/slog"
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 )
 
 // DeleteZettelPort is the interface used by this use case.
@@ -29,18 +30,18 @@ type DeleteZettelPort interface {
 
 // DeleteZettel is the data for this use case.
 type DeleteZettel struct {
-	log  *logger.Logger
-	port DeleteZettelPort
+	logger *slog.Logger
+	port   DeleteZettelPort
 }
 
 // NewDeleteZettel creates a new use case.
-func NewDeleteZettel(log *logger.Logger, port DeleteZettelPort) DeleteZettel {
-	return DeleteZettel{log: log, port: port}
+func NewDeleteZettel(logger *slog.Logger, port DeleteZettelPort) DeleteZettel {
+	return DeleteZettel{logger: logger, port: port}
 }
 
 // Run executes the use case.
 func (uc *DeleteZettel) Run(ctx context.Context, zid id.Zid) error {
 	err := uc.port.DeleteZettel(ctx, zid)
-	uc.log.Info().User(ctx).Zid(zid).Err(err).Msg("Delete zettel")
+	uc.logger.Info("Delete zettel", "zid", zid, logging.User(ctx), logging.Err(err))
 	return err
 }

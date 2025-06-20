@@ -17,6 +17,7 @@ package dirbox
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -29,29 +30,29 @@ import (
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/box/notify"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
 
 func init() {
 	manager.Register("dir", func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
-		var log *logger.Logger
+		var logger *slog.Logger
 		if krnl := kernel.Main; krnl != nil {
-			log = krnl.GetLogger(kernel.BoxService).Clone().Str("box", "dir").Int("boxnum", int64(cdata.Number)).Child()
+			logger = krnl.GetLogger(kernel.BoxService).With("box", "dir", "boxnum", cdata.Number)
 		}
 		path := getDirPath(u)
 		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 			return nil, err
 		}
 		dp := dirBox{
-			log:        log,
+			logger:     logger,
 			number:     cdata.Number,
 			location:   u.String(),
 			readonly:   box.GetQueryBool(u, "readonly"),
 			cdata:      *cdata,
 			dir:        path,
-			notifySpec: getDirSrvInfo(log, u.Query().Get("type")),
+			notifySpec: getDirSrvInfo(logger, u.Query().Get("type")),
 			fSrvs:      makePrime(uint32(box.GetQueryInt(u, "worker", 1, 7, 1499))),
 		}
 		return &dp, nil
@@ -92,7 +93,7 @@ const (
 	dirNotifyFS
 )
 
-func getDirSrvInfo(log *logger.Logger, notifyType string) notifyTypeSpec {
+func getDirSrvInfo(logger *slog.Logger, notifyType string) notifyTypeSpec {
 	for range 2 {
 		switch notifyType {
 		case kernel.BoxDirTypeNotify:
@@ -103,7 +104,7 @@ func getDirSrvInfo(log *logger.Logger, notifyType string) notifyTypeSpec {
 			notifyType = kernel.Main.GetConfig(kernel.BoxService, kernel.BoxDefaultDirType).(string)
 		}
 	}
-	log.Error().Str("notifyType", notifyType).Msg("Unable to set notify type, using a default")
+	logger.Error("Unable to set notify type, using a default", "notifyType", notifyType)
 	return dirNotifySimple
 }
 
@@ -116,7 +117,7 @@ func getDirPath(u *url.URL) string {
 
 // dirBox uses a directory to store zettel as files.
 type dirBox struct {
-	log        *logger.Logger
+	logger     *slog.Logger
 	number     int
 	location   string
 	readonly   bool
@@ -157,7 +158,7 @@ func (dp *dirBox) Start(context.Context) error {
 	dp.fCmds = make([]chan fileCmd, 0, dp.fSrvs)
 	for i := range dp.fSrvs {
 		cc := make(chan fileCmd)
-		go fileService(i, dp.log.Clone().Str("sub", "file").Uint("fn", uint64(i)).Child(), dp.dir, cc)
+		go fileService(i, dp.logger.With("sub", "file", "fn", i), dp.dir, cc)
 		dp.fCmds = append(dp.fCmds, cc)
 	}
 
@@ -165,18 +166,18 @@ func (dp *dirBox) Start(context.Context) error {
 	var err error
 	switch dp.notifySpec {
 	case dirNotifySimple:
-		notifier, err = notify.NewSimpleDirNotifier(dp.log.Clone().Str("notify", "simple").Child(), dp.dir)
+		notifier, err = notify.NewSimpleDirNotifier(dp.logger.With("notify", "simple"), dp.dir)
 	default:
-		notifier, err = notify.NewFSDirNotifier(dp.log.Clone().Str("notify", "fs").Child(), dp.dir)
+		notifier, err = notify.NewFSDirNotifier(dp.logger.With("notify", "fs"), dp.dir)
 	}
 	if err != nil {
-		dp.log.Error().Err(err).Msg("Unable to create directory supervisor")
+		dp.logger.Error("Unable to create directory supervisor", "err", err)
 		dp.stopFileServices()
 		return err
 	}
 	dp.dirSrv = notify.NewDirService(
 		dp,
-		dp.log.Clone().Str("sub", "dirsrv").Child(),
+		dp.logger.With("sub", "dirsrv"),
 		notifier,
 		dp.cdata.Notify,
 	)
@@ -186,7 +187,7 @@ func (dp *dirBox) Start(context.Context) error {
 
 func (dp *dirBox) Refresh(_ context.Context) {
 	dp.dirSrv.Refresh()
-	dp.log.Trace().Msg("Refresh")
+	logging.LogTrace(dp.logger, "Refresh")
 }
 
 func (dp *dirBox) Stop(_ context.Context) {
@@ -206,7 +207,7 @@ func (dp *dirBox) stopFileServices() {
 
 func (dp *dirBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
 	if notify := dp.cdata.Notify; notify != nil {
-		dp.log.Trace().Zid(zid).Uint("reason", uint64(reason)).Msg("notifyChanged")
+		logging.LogTrace(dp.logger, "notifyChanged", "zid", zid, "reason", reason)
 		notify(dp, zid, reason)
 	}
 }
@@ -246,7 +247,7 @@ func (dp *dirBox) CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zi
 		err = dp.dirSrv.UpdateDirEntry(&entry)
 	}
 	dp.notifyChanged(meta.Zid, box.OnZettel)
-	dp.log.Trace().Err(err).Zid(meta.Zid).Msg("CreateZettel")
+	logging.LogTrace(dp.logger, "CreateZettel", logging.Err(err), "zid", meta.Zid)
 	return meta.Zid, err
 }
 
@@ -260,7 +261,7 @@ func (dp *dirBox) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, err
 		return zettel.Zettel{}, err
 	}
 	zettel := zettel.Zettel{Meta: m, Content: zettel.NewContent(c)}
-	dp.log.Trace().Zid(zid).Msg("GetZettel")
+	logging.LogTrace(dp.logger, "GetZettel", "zid", zid)
 	return zettel, nil
 }
 
@@ -270,7 +271,7 @@ func (dp *dirBox) HasZettel(_ context.Context, zid id.Zid) bool {
 
 func (dp *dirBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
 	entries := dp.dirSrv.GetDirEntries(constraint)
-	dp.log.Trace().Int("entries", int64(len(entries))).Msg("ApplyZid")
+	logging.LogTrace(dp.logger, "ApplyZid", "entries", len(entries))
 	for _, entry := range entries {
 		handle(entry.Zid)
 	}
@@ -279,13 +280,13 @@ func (dp *dirBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint que
 
 func (dp *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
 	entries := dp.dirSrv.GetDirEntries(constraint)
-	dp.log.Trace().Int("entries", int64(len(entries))).Msg("ApplyMeta")
+	logging.LogTrace(dp.logger, "ApplyMeta", "entries", len(entries))
 
 	// The following loop could be parallelized if needed for performance.
 	for _, entry := range entries {
 		m, err := dp.srvGetMeta(ctx, entry, entry.Zid)
 		if err != nil {
-			dp.log.Trace().Err(err).Msg("ApplyMeta/getMeta")
+			logging.LogTrace(dp.logger, "ApplyMeta/getMeta", "err", err)
 			return err
 		}
 		dp.cdata.Enricher.Enrich(ctx, m, dp.number)
@@ -322,7 +323,7 @@ func (dp *dirBox) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error 
 	if err == nil {
 		dp.notifyChanged(zid, box.OnZettel)
 	}
-	dp.log.Trace().Zid(zid).Err(err).Msg("UpdateZettel")
+	logging.LogTrace(dp.logger, "UpdateZettel", "zid", zid, logging.Err(err))
 	return err
 }
 
@@ -355,12 +356,12 @@ func (dp *dirBox) DeleteZettel(ctx context.Context, zid id.Zid) error {
 	if err == nil {
 		dp.notifyChanged(zid, box.OnDelete)
 	}
-	dp.log.Trace().Zid(zid).Err(err).Msg("DeleteZettel")
+	logging.LogTrace(dp.logger, "DeleteZettel", "zid", zid, logging.Err(err))
 	return err
 }
 
 func (dp *dirBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = dp.readonly
 	st.Zettel = dp.dirSrv.NumDirEntries()
-	dp.log.Trace().Int("zettel", int64(st.Zettel)).Msg("ReadStats")
+	logging.LogTrace(dp.logger, "ReadStats", "zettel", st.Zettel)
 }

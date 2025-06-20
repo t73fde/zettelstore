@@ -21,6 +21,6 @@ import (
 
 func (wui *WebUI) redirectFound(w http.ResponseWriter, r *http.Request, ub *api.URLBuilder) {
 	us := ub.String()
-	wui.log.Debug().Str("uri", us).Msg("redirect")
+	wui.logger.Debug("redirect", "uri", us)
 	http.Redirect(w, r, us, http.StatusFound)
 }

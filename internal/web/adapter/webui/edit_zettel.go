@@ -67,7 +67,7 @@ func (wui *WebUI) MakeEditSetZettelHandler(updateZettel *usecase.UpdateZettel) h
 		if err != nil {
 			if err != errMissingContent {
 				const msg = "Unable to read zettel form"
-				wui.log.Info().Err(err).Msg(msg)
+				wui.logger.Info(msg, "err", err)
 				wui.reportError(ctx, w, adapter.NewErrBadRequest(msg))
 				return
 			}

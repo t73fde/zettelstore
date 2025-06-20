@@ -25,12 +25,12 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
-	"zettelstore.de/z/internal/web/server"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -100,7 +100,7 @@ func (wui *WebUI) renderZettelForm(
 	roleData []string,
 	syntaxData []string,
 ) {
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	m := ztl.Meta
 
 	var sb strings.Builder
@@ -110,7 +110,7 @@ func (wui *WebUI) renderZettelForm(
 		sb.WriteString(string(val))
 		sb.WriteByte('\n')
 	}
-	bind, rb := wui.createRenderBinding(ctx, "form", wui.getUserLang(ctx), title, user)
+	env, rb := wui.createRenderEnvironment(ctx, "form", wui.getUserLang(ctx), title, user)
 	rb.bindString("heading", sx.MakeString(title))
 	rb.bindString("form-action-url", sx.MakeString(formActionURL))
 	rb.bindString("role-data", makeStringList(roleData))
@@ -121,7 +121,7 @@ func (wui *WebUI) renderZettelForm(
 	}
 	wui.bindCommonZettelData(ctx, &rb, user, m, &ztl.Content)
 	if rb.err == nil {
-		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidFormTemplate, bind)
+		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidFormTemplate, env)
 	}
 	if err := rb.err; err != nil {
 		wui.reportError(ctx, w, err)
@@ -140,7 +140,7 @@ func (wui *WebUI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel
 		}
 		if err != nil {
 			const msg = "Unable to read form data"
-			wui.log.Info().Err(err).Msg(msg)
+			wui.logger.Info(msg, "err", err)
 			wui.reportError(ctx, w, adapter.NewErrBadRequest(msg))
 			return
 		}

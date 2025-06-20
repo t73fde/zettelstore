@@ -15,9 +15,10 @@ package notify
 
 import (
 	"archive/zip"
+	"log/slog"
 	"os"
 
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 )
 
 // EntryFetcher return a list of (file) names of an directory.
@@ -66,7 +67,7 @@ func (zpf *zipPathFetcher) Fetch() ([]string, error) {
 }
 
 // listDirElements write all files within the directory path as events.
-func listDirElements(log *logger.Logger, fetcher EntryFetcher, events chan<- Event, done <-chan struct{}) bool {
+func listDirElements(logger *slog.Logger, fetcher EntryFetcher, events chan<- Event, done <-chan struct{}) bool {
 	select {
 	case events <- Event{Op: Make}:
 	case <-done:
@@ -81,7 +82,7 @@ func listDirElements(log *logger.Logger, fetcher EntryFetcher, events chan<- Eve
 		}
 	}
 	for _, name := range entries {
-		log.Trace().Str("name", name).Msg("File listed")
+		logging.LogTrace(logger, "File listed", "name", name)
 		select {
 		case events <- Event{Op: List, Name: name}:
 		case <-done:

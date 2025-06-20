@@ -14,16 +14,82 @@
 package kernel
 
 import (
-	"os"
+	"bytes"
+	"context"
+	"io"
+	"log/slog"
 	"slices"
 	"sync"
 	"time"
 
-	"zettelstore.de/z/internal/logger"
+	"zettelstore.de/z/internal/logging"
 )
+
+type kernelLogHandler struct {
+	klw    *kernelLogWriter
+	level  slog.Leveler
+	system string
+	attrs  string
+}
+
+func newKernelLogHandler(klw *kernelLogWriter, level slog.Leveler) *kernelLogHandler {
+	return &kernelLogHandler{
+		klw:    klw,
+		level:  level,
+		system: "",
+		attrs:  "",
+	}
+}
+
+func (klh *kernelLogHandler) Enabled(_ context.Context, level slog.Level) bool {
+	return level >= klh.level.Level()
+}
+
+func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
+	var buf bytes.Buffer
+	buf.WriteString(klh.attrs)
+	rec.Attrs(func(attr slog.Attr) bool {
+		if !attr.Equal(slog.Attr{}) {
+			buf.WriteByte(' ')
+			buf.WriteString(attr.Key)
+			buf.WriteByte('=')
+			buf.WriteString(attr.Value.Resolve().String())
+		}
+		return true
+	})
+	return klh.klw.writeMessage(rec.Level, rec.Time, klh.system, rec.Message, buf.Bytes())
+}
+
+func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
+	h := newKernelLogHandler(klh.klw, klh.level)
+	for _, attr := range attrs {
+		if attr.Equal(slog.Attr{}) {
+			continue
+		}
+		if attr.Key == "system" {
+			system := attr.Value.String()
+			if len(system) < 6 {
+				system += "     "[:6-len(system)]
+			}
+			h.system = system
+			continue
+		}
+		h.attrs += attr.String()
+	}
+	return h
+}
+
+func (klh *kernelLogHandler) WithGroup(name string) slog.Handler {
+	if name == "" {
+		return klh
+	}
+	return klh
+	// panic("kernelLogHandler.WithGroup(name) not implemented")
+}
 
 // kernelLogWriter adapts an io.Writer to a LogWriter
 type kernelLogWriter struct {
+	w        io.Writer
 	mx       sync.RWMutex // protects buf, serializes w.Write and retrieveLogEntries
 	lastLog  time.Time
 	buf      []byte
@@ -33,22 +99,26 @@ type kernelLogWriter struct {
 }
 
 // newKernelLogWriter creates a new LogWriter for kernel logging.
-func newKernelLogWriter(capacity int) *kernelLogWriter {
+func newKernelLogWriter(w io.Writer, capacity int) *kernelLogWriter {
 	if capacity < 1 {
 		capacity = 1
 	}
 	return &kernelLogWriter{
+		w:       w,
 		lastLog: time.Now(),
 		buf:     make([]byte, 0, 500),
 		data:    make([]logEntry, capacity),
 	}
 }
 
-func (klw *kernelLogWriter) WriteMessage(level logger.Level, ts time.Time, prefix, msg string, details []byte) error {
+func (klw *kernelLogWriter) writeMessage(level slog.Level, ts time.Time, prefix, msg string, details []byte) error {
+	details = bytes.TrimSpace(details)
 	klw.mx.Lock()
 
-	if level > logger.DebugLevel {
-		klw.lastLog = ts
+	if level > slog.LevelDebug {
+		if !ts.IsZero() {
+			klw.lastLog = ts
+		}
 		klw.data[klw.writePos] = logEntry{
 			level:   level,
 			ts:      ts,
@@ -67,16 +137,17 @@ func (klw *kernelLogWriter) WriteMessage(level logger.Level, ts time.Time, prefi
 	buf := klw.buf
 	addTimestamp(&buf, ts)
 	buf = append(buf, ' ')
-	buf = append(buf, level.Format()...)
+	buf = append(buf, logging.LevelStringPad(level)...)
 	buf = append(buf, ' ')
 	if prefix != "" {
 		buf = append(buf, prefix...)
 		buf = append(buf, ' ')
 	}
 	buf = append(buf, msg...)
+	buf = append(buf, ' ')
 	buf = append(buf, details...)
 	buf = append(buf, '\n')
-	_, err := os.Stdout.Write(buf)
+	_, err := klw.w.Write(buf)
 
 	klw.mx.Unlock()
 	return err
@@ -110,7 +181,7 @@ func itoa(buf *[]byte, i, wid int) {
 }
 
 type logEntry struct {
-	level   logger.Level
+	level   slog.Level
 	ts      time.Time
 	prefix  string
 	msg     string
@@ -154,5 +225,6 @@ func copyE2E(result *LogEntry, origin *logEntry) {
 	result.Level = origin.level
 	result.TS = origin.ts
 	result.Prefix = origin.prefix
-	result.Message = origin.msg + string(origin.details)
+	result.Message = origin.msg
+	result.Details = string(origin.details)
 }

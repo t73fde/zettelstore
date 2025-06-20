@@ -22,9 +22,9 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/usecase"
-	"zettelstore.de/z/internal/web/server"
 )
 
 // MakeGetDeleteZettelHandler creates a new HTTP handler to display the
@@ -49,8 +49,8 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		}
 		m := zs[0].Meta
 
-		user := server.GetUser(ctx)
-		bind, rb := wui.createRenderBinding(
+		user := user.GetCurrentUser(ctx)
+		env, rb := wui.createRenderEnvironment(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
 		if len(zs) > 1 {
 			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxNumber, "???"))))
@@ -62,7 +62,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		wui.bindCommonZettelData(ctx, &rb, user, m, nil)
 
 		if rb.err == nil {
-			err = wui.renderSxnTemplate(ctx, w, id.ZidDeleteTemplate, bind)
+			err = wui.renderSxnTemplate(ctx, w, id.ZidDeleteTemplate, env)
 		} else {
 			err = rb.err
 		}

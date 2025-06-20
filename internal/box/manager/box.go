@@ -23,6 +23,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -59,7 +60,7 @@ func (mgr *Manager) CanCreateZettel(ctx context.Context) bool {
 
 // CreateZettel creates a new zettel.
 func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid, error) {
-	mgr.mgrLog.Debug().Msg("CreateZettel")
+	mgr.mgrLogger.Debug("CreateZettel")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return id.Invalid, err
 	}
@@ -78,7 +79,7 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid
 
 // GetZettel retrieves a specific zettel.
 func (mgr *Manager) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
-	mgr.mgrLog.Debug().Zid(zid).Msg("GetZettel")
+	mgr.mgrLogger.Debug("GetZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return zettel.Zettel{}, err
 	}
@@ -101,7 +102,7 @@ func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, e
 
 // GetAllZettel retrieves a specific zettel from all managed boxes.
 func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zettel, error) {
-	mgr.mgrLog.Debug().Zid(zid).Msg("GetAllZettel")
+	mgr.mgrLogger.Debug("GetAllZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
 	}
@@ -119,7 +120,7 @@ func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zett
 
 // FetchZids returns the set of all zettel identifer managed by the box.
 func (mgr *Manager) FetchZids(ctx context.Context) (*idset.Set, error) {
-	mgr.mgrLog.Debug().Msg("FetchZids")
+	mgr.mgrLogger.Debug("FetchZids")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
 	}
@@ -145,7 +146,7 @@ func (mgr *Manager) fetchZids(ctx context.Context) (*idset.Set, error) {
 }
 
 func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {
-	mgr.mgrLog.Debug().Zid(zid).Msg("HasZettel")
+	mgr.mgrLogger.Debug("HasZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return false
 	}
@@ -161,7 +162,7 @@ func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {
 
 // GetMeta returns just the metadata of the zettel with the given identifier.
 func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
-	mgr.mgrLog.Debug().Zid(zid).Msg("GetMeta")
+	mgr.mgrLogger.Debug("GetMeta", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
 	}
@@ -178,9 +179,7 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 // SelectMeta returns all zettel meta data that match the selection
 // criteria. The result is ordered by descending zettel id.
 func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error) {
-	if msg := mgr.mgrLog.Debug(); msg.Enabled() {
-		msg.Str("query", q.String()).Msg("SelectMeta")
-	}
+	mgr.mgrLogger.Debug("SelectMeta", "query", q)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
 	}
@@ -189,7 +188,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *que
 
 	compSearch := q.RetrieveAndCompile(ctx, mgr, metaSeq)
 	if result := compSearch.Result(); result != nil {
-		mgr.mgrLog.Trace().Int("count", int64(len(result))).Msg("found without ApplyMeta")
+		logging.LogTrace(mgr.mgrLogger, "found without ApplyMeta", "count", len(result))
 		return result, nil
 	}
 	selected := map[id.Zid]*meta.Meta{}
@@ -198,19 +197,19 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *que
 		handleMeta := func(m *meta.Meta) {
 			zid := m.Zid
 			if rejected.Contains(zid) {
-				mgr.mgrLog.Trace().Zid(zid).Msg("SelectMeta/alreadyRejected")
+				logging.LogTrace(mgr.mgrLogger, "SelectMeta/alreadyRejected", "zid", zid)
 				return
 			}
 			if _, ok := selected[zid]; ok {
-				mgr.mgrLog.Trace().Zid(zid).Msg("SelectMeta/alreadySelected")
+				logging.LogTrace(mgr.mgrLogger, "SelectMeta/alreadySelected", "zid", zid)
 				return
 			}
 			if compSearch.PreMatch(m) && term.Match(m) {
 				selected[zid] = m
-				mgr.mgrLog.Trace().Zid(zid).Msg("SelectMeta/match")
+				logging.LogTrace(mgr.mgrLogger, "SelectMeta/match", "zid", zid)
 			} else {
 				rejected.Add(zid)
-				mgr.mgrLog.Trace().Zid(zid).Msg("SelectMeta/reject")
+				logging.LogTrace(mgr.mgrLogger, "SelectMeta/reject", "zid", zid)
 			}
 		}
 		for _, p := range mgr.boxes {
@@ -224,7 +223,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *que
 		result = append(result, m)
 	}
 	result = compSearch.AfterSearch(result)
-	mgr.mgrLog.Trace().Int("count", int64(len(result))).Msg("found with ApplyMeta")
+	logging.LogTrace(mgr.mgrLogger, "found with ApplyMeta", "count", len(result))
 	return result, nil
 }
 
@@ -244,7 +243,7 @@ func (mgr *Manager) CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) b
 
 // UpdateZettel updates an existing zettel.
 func (mgr *Manager) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error {
-	mgr.mgrLog.Debug().Zid(zettel.Meta.Zid).Msg("UpdateZettel")
+	mgr.mgrLogger.Debug("UpdateZettel", "zid", zettel.Meta.Zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return err
 	}
@@ -279,7 +278,7 @@ func (mgr *Manager) CanDeleteZettel(ctx context.Context, zid id.Zid) bool {
 
 // DeleteZettel removes the zettel from the box.
 func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
-	mgr.mgrLog.Debug().Zid(zid).Msg("DeleteZettel")
+	mgr.mgrLogger.Debug("DeleteZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return err
 	}

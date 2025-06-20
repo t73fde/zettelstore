@@ -21,10 +21,10 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/query"
-	"zettelstore.de/z/internal/web/server"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -57,7 +57,7 @@ func (pp *polBox) CanCreateZettel(ctx context.Context) bool {
 }
 
 func (pp *polBox) CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zid, error) {
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if pp.policy.CanCreate(user, zettel.Meta) {
 		return pp.box.CreateZettel(ctx, zettel)
 	}
@@ -69,7 +69,7 @@ func (pp *polBox) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, err
 	if err != nil {
 		return zettel.Zettel{}, err
 	}
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if pp.policy.CanRead(user, z.Meta) {
 		return z, nil
 	}
@@ -81,7 +81,7 @@ func (pp *polBox) GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zettel
 }
 
 func (pp *polBox) FetchZids(ctx context.Context) (*idset.Set, error) {
-	return nil, box.NewErrNotAllowed("fetch-zids", server.GetUser(ctx), id.Invalid)
+	return nil, box.NewErrNotAllowed("fetch-zids", user.GetCurrentUser(ctx), id.Invalid)
 }
 
 func (pp *polBox) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
@@ -89,7 +89,7 @@ func (pp *polBox) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
 	if err != nil {
 		return nil, err
 	}
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if pp.policy.CanRead(user, m) {
 		return m, nil
 	}
@@ -97,7 +97,7 @@ func (pp *polBox) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
 }
 
 func (pp *polBox) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error) {
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	canRead := pp.policy.CanRead
 	q = q.SetPreMatch(func(m *meta.Meta) bool { return canRead(user, m) })
 	return pp.box.SelectMeta(ctx, metaSeq, q)
@@ -109,7 +109,7 @@ func (pp *polBox) CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) boo
 
 func (pp *polBox) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error {
 	zid := zettel.Meta.Zid
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if !zid.IsValid() {
 		return box.ErrInvalidZid{Zid: zid.String()}
 	}
@@ -133,7 +133,7 @@ func (pp *polBox) DeleteZettel(ctx context.Context, zid id.Zid) error {
 	if err != nil {
 		return err
 	}
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if pp.policy.CanDelete(user, z.Meta) {
 		return pp.box.DeleteZettel(ctx, zid)
 	}
@@ -141,14 +141,14 @@ func (pp *polBox) DeleteZettel(ctx context.Context, zid id.Zid) error {
 }
 
 func (pp *polBox) Refresh(ctx context.Context) error {
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if pp.policy.CanRefresh(user) {
 		return pp.box.Refresh(ctx)
 	}
 	return box.NewErrNotAllowed("Refresh", user, id.Invalid)
 }
 func (pp *polBox) ReIndex(ctx context.Context, zid id.Zid) error {
-	user := server.GetUser(ctx)
+	user := user.GetCurrentUser(ctx)
 	if pp.policy.CanRefresh(user) {
 		// If a user is allowed to refresh all data, it it also allowed to re-index a zettel.
 		return pp.box.ReIndex(ctx, zid)

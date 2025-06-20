@@ -15,12 +15,12 @@ package kernel
 
 import (
 	"errors"
+	"log/slog"
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/logger"
 )
 
 type authService struct {
@@ -33,7 +33,8 @@ type authService struct {
 var errAlreadySetOwner = errors.New("changing an existing owner not allowed")
 var errAlreadyROMode = errors.New("system in readonly mode cannot change this mode")
 
-func (as *authService) Initialize(logger *logger.Logger) {
+func (as *authService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
+	as.logLevelVar = levelVar
 	as.logger = logger
 	as.descr = descriptionMap{
 		AuthOwner: {
@@ -66,7 +67,9 @@ func (as *authService) Initialize(logger *logger.Logger) {
 	}
 }
 
-func (as *authService) GetLogger() *logger.Logger { return as.logger }
+func (as *authService) GetLogger() *slog.Logger { return as.logger }
+func (as *authService) GetLevel() slog.Level    { return as.logLevelVar.Level() }
+func (as *authService) SetLevel(l slog.Level)   { as.logLevelVar.Set(l) }
 
 func (as *authService) Start(*Kernel) error {
 	as.mxService.Lock()
@@ -75,10 +78,10 @@ func (as *authService) Start(*Kernel) error {
 	owner := as.GetNextConfig(AuthOwner).(id.Zid)
 	authMgr, err := as.createManager(readonlyMode, owner)
 	if err != nil {
-		as.logger.Error().Err(err).Msg("Unable to create manager")
+		as.logger.Error("Unable to create manager", "err", err)
 		return err
 	}
-	as.logger.Info().Msg("Start Manager")
+	as.logger.Info("Start Manager")
 	as.manager = authMgr
 	return nil
 }
@@ -90,7 +93,7 @@ func (as *authService) IsStarted() bool {
 }
 
 func (as *authService) Stop(*Kernel) {
-	as.logger.Info().Msg("Stop Manager")
+	as.logger.Info("Stop Manager")
 	as.mxService.Lock()
 	as.manager = nil
 	as.mxService.Unlock()
