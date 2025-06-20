@@ -219,6 +219,7 @@ const (
 	WebProfiling         = "profiling"
 	WebMaxRequestSize    = "max-request-size"
 	WebSecureCookie      = "secure"
+	WebSxMaxNesting      = "sx-max-nesting"
 	WebTokenLifetimeAPI  = "api-lifetime"
 	WebTokenLifetimeHTML = "html-lifetime"
 	WebURLPrefix         = "prefix"

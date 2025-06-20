@@ -179,6 +179,7 @@ const (
 	keyPersistentCookie  = "persistent-cookie"
 	keyReadOnly          = "read-only-mode"
 	keyRuntimeProfiling  = "runtime-profiling"
+	keySxNesting         = "sx-max-nesting"
 	keyTokenLifetimeHTML = "token-lifetime-html"
 	keyTokenLifetimeAPI  = "token-lifetime-api"
 	keyURLPrefix         = "url-prefix"
@@ -240,6 +241,9 @@ func setServiceConfig(cfg *meta.Meta) bool {
 	err = setConfigValue(err, kernel.WebService, kernel.WebProfiling, debugMode || cfg.GetBool(keyRuntimeProfiling))
 	if val, found := cfg.Get(keyAssetDir); found {
 		err = setConfigValue(err, kernel.WebService, kernel.WebAssetDir, val)
+	}
+	if val, found := cfg.Get(keySxNesting); found {
+		err = setConfigValue(err, kernel.WebService, kernel.WebSxMaxNesting, val)
 	}
 	return err == nil
 }

@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250509182657
+modified: 20250620184414
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -143,6 +143,12 @@ The following keys are supported:
   The string must have a length of at least 16 bytes.
 
   This value is only needed to be set if [[authentication is enabled|00001010040100]] by setting the key [[''owner''|#owner]] to some user identification value.
+; [!sx-max-nesting|''sx-max-nesting'']
+: Limits nesting of template evaluation to the given value.
+
+  This is used to prevent the application from crashing when an error occurs in a template zettel of the Web User Interface.
+
+  Default: ""32768""
 ; [!token-lifetime-api|''token-lifetime-api''], [!token-lifetime-html|''token-lifetime-html'']
 : Define lifetime of access tokens in minutes.
   Values are only valid if authentication is enabled, i.e. key ''owner'' is set.

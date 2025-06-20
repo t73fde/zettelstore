@@ -2,19 +2,37 @@
 
 <a id="0_22"></a>
 <h2>Changes for Version 0.22.0 (pending)</h2>
-  *  Remove zettel for Sx prelude. Luckily, it was never documented. So nobody
-     used this zettel. Now the prelude is a constant string in Sx.
+  *  Sx builtin <code>(bind-lookup ...)</code> is replaced with
+     <code>(resolve-symbol ...)</code>. If you maintain your own Sx code to
+     customize Zettelstore behaviour, you must update your code; otherwise it
+     will break. If your code use <code>(ROLE-DEFAULT-action ...)</code>
+     , infinite recursion might occur. This is now handled with the new startup
+     configuration <code>sx-max-nesting</code>. In such cases, you should omit
+     the call to <code>ROLE-DEFAULT-action</code>. For debugging purposes, use
+     the <code>web:trace</code> logging level, which logs all Sx computations.
      (breaking)
-  *  If authentication is enabled, allow to access Zettelstore from loopback
-     device without logging in / get an access token.
+  *  Remove zettel for the Sx prelude. Fortunately, it was never documented,
+     so it was likely unused. The prelude is now a constant string whithin Sx's
+     code base.
+     (breaking)
+  *  If authentication is enabled, Zettelstore can now be accessed from the
+     loopback device without logging in or obtaining an access token.
      (major: api, webui)
+  *  The new startup configuration key <code>sx-max-nesting</code> allows
+     setting a limit on the nesting depth of Sx computations. This is primarily
+     useful to prevent unbounded recursion due to programming errors.
+     Previously, such issues would crash the Zettelstore.
+     (minor: webui)
+  *  At logging level <code>trace</code>, the web user interface now logs all
+     Sx computations, mainly those used for rendering HTML templates.
+     (minor: webui)
   *  Move context link to zettel page.
      (minor: webui)
 
 <a id="0_21"></a>
 <h2>Changes for Version 0.21.0 (2025-04-17)</h2>
-  *  Zettel identifier of Zettelstore Log, Zettelstore Memory, and Zettelstore
-     Sx Engine changed. See manual for new identifier.
+  *  Change zettel identifier for Zettelstore Log, Zettelstore Memory, and
+     Zettelstore Sx Engine. See manual for updated identifier values.
      (breaking)
   *  Sz encodings of links were simplified into one <code>LINK</code> symbol.
      Different link types are now specified by reference node.

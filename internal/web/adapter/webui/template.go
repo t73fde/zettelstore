@@ -197,11 +197,11 @@ func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title
 	rb.bindSymbol(symMetaHeader, sx.Nil())
 	rb.bindSymbol(symDetail, sx.Nil())
 
-	stepsH := sxeval.MakeStepsHandler(sxeval.DefaultHandler{})
-	nestH := sxeval.MakeNestingLimitHandler(32*1024, stepsH)
+	nestH := sxeval.MakeNestingLimitHandler(wui.sxMaxNesting, sxeval.DefaultHandler{})
 	var handler sxeval.ComputeHandler = nestH
 	if logger := wui.logger; logger.Handler().Enabled(context.Background(), logging.LevelTrace) {
-		handler = &computeLogHandler{logger: logger, next: nestH, steps: stepsH}
+		stepsH := sxeval.MakeStepsHandler(nestH)
+		handler = &computeLogHandler{logger: logger, nest: nestH, next: stepsH}
 	}
 	env := sxeval.MakeEnvironment(bind).SetComputeHandler(handler)
 	return env, rb
@@ -216,8 +216,8 @@ func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
 
 type computeLogHandler struct {
 	logger *slog.Logger
-	next   *sxeval.NestingLimitHandler
-	steps  *sxeval.StepsHandler
+	nest   *sxeval.NestingLimitHandler
+	next   *sxeval.StepsHandler
 }
 
 func (clh *computeLogHandler) Compute(env *sxeval.Environment, expr sxeval.Expr, frame *sxeval.Frame) (sx.Object, error) {
@@ -225,19 +225,19 @@ func (clh *computeLogHandler) Compute(env *sxeval.Environment, expr sxeval.Expr,
 	if frame != nil {
 		fname = frame.Name()
 	}
-	curNesting, _ := clh.next.Nesting()
+	curNesting, _ := clh.nest.Nesting()
 	var sb strings.Builder
 	_, _ = expr.Print(&sb)
 	logging.LogTrace(clh.logger, "compute",
 		slog.String("frame", fname),
-		slog.Int("steps", clh.steps.Steps),
+		slog.Int("steps", clh.next.Steps),
 		slog.Int("level", curNesting),
 		slog.String("expr", sb.String()))
 	obj, err := clh.next.Compute(env, expr, frame)
 	if err == nil {
 		logging.LogTrace(clh.logger, "result ",
 			slog.String("frame", fname),
-			slog.Int("steps", clh.steps.Steps),
+			slog.Int("steps", clh.next.Steps),
 			slog.Int("level", curNesting),
 			slog.Any("object", obj))
 	}

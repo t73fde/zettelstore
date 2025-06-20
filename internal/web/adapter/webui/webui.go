@@ -17,6 +17,7 @@ package webui
 import (
 	"context"
 	"log/slog"
+	"math"
 	"net/http"
 	"sync"
 	"time"
@@ -66,6 +67,7 @@ type WebUI struct {
 	searchURL     string
 	createNewURL  string
 
+	sxMaxNesting    int
 	rootBinding     *sxeval.Binding
 	mxZettelBinding sync.Mutex
 	zettelBinding   *sxeval.Binding
@@ -114,6 +116,7 @@ func New(logger *slog.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rt
 		searchURL:     ab.NewURLBuilder('h').String(),
 		createNewURL:  ab.NewURLBuilder('c').String(),
 
+		sxMaxNesting:  int(min(max(kernel.Main.GetConfig(kernel.WebService, kernel.WebSxMaxNesting).(int64), 0), math.MaxInt)),
 		zettelBinding: nil,
 		genHTML:       sxhtml.NewGenerator().SetNewline(),
 	}
