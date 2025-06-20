@@ -16,8 +16,8 @@ package kernel
 import (
 	"bytes"
 	"context"
+	"io"
 	"log/slog"
-	"os"
 	"slices"
 	"sync"
 	"time"
@@ -83,11 +83,13 @@ func (klh *kernelLogHandler) WithGroup(name string) slog.Handler {
 	if name == "" {
 		return klh
 	}
-	panic("kernelLogHandler.WithGroup(name) not implemented")
+	return klh
+	// panic("kernelLogHandler.WithGroup(name) not implemented")
 }
 
 // kernelLogWriter adapts an io.Writer to a LogWriter
 type kernelLogWriter struct {
+	w        io.Writer
 	mx       sync.RWMutex // protects buf, serializes w.Write and retrieveLogEntries
 	lastLog  time.Time
 	buf      []byte
@@ -97,11 +99,12 @@ type kernelLogWriter struct {
 }
 
 // newKernelLogWriter creates a new LogWriter for kernel logging.
-func newKernelLogWriter(capacity int) *kernelLogWriter {
+func newKernelLogWriter(w io.Writer, capacity int) *kernelLogWriter {
 	if capacity < 1 {
 		capacity = 1
 	}
 	return &kernelLogWriter{
+		w:       w,
 		lastLog: time.Now(),
 		buf:     make([]byte, 0, 500),
 		data:    make([]logEntry, capacity),
@@ -109,10 +112,13 @@ func newKernelLogWriter(capacity int) *kernelLogWriter {
 }
 
 func (klw *kernelLogWriter) writeMessage(level slog.Level, ts time.Time, prefix, msg string, details []byte) error {
+	details = bytes.TrimSpace(details)
 	klw.mx.Lock()
 
 	if level > slog.LevelDebug {
-		klw.lastLog = ts
+		if !ts.IsZero() {
+			klw.lastLog = ts
+		}
 		klw.data[klw.writePos] = logEntry{
 			level:   level,
 			ts:      ts,
@@ -138,9 +144,10 @@ func (klw *kernelLogWriter) writeMessage(level slog.Level, ts time.Time, prefix,
 		buf = append(buf, ' ')
 	}
 	buf = append(buf, msg...)
+	buf = append(buf, ' ')
 	buf = append(buf, details...)
 	buf = append(buf, '\n')
-	_, err := os.Stdout.Write(buf)
+	_, err := klw.w.Write(buf)
 
 	klw.mx.Unlock()
 	return err
@@ -218,5 +225,6 @@ func copyE2E(result *LogEntry, origin *logEntry) {
 	result.Level = origin.level
 	result.TS = origin.ts
 	result.Prefix = origin.prefix
-	result.Message = origin.msg + string(origin.details)
+	result.Message = origin.msg
+	result.Details = string(origin.details)
 }

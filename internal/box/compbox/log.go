@@ -46,6 +46,8 @@ func genLogC(context.Context, *compBox) []byte {
 		buf.WriteString(entry.Prefix)
 		buf.WriteByte(' ')
 		buf.WriteString(entry.Message)
+		buf.WriteByte(' ')
+		buf.WriteString(entry.Details)
 		buf.WriteByte('\n')
 	}
 	return buf.Bytes()

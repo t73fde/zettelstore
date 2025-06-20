@@ -90,7 +90,7 @@ func init() {
 
 // create a new
 func createKernel() *Kernel {
-	lw := newKernelLogWriter(8192)
+	lw := newKernelLogWriter(os.Stdout, 8192)
 	kern := &Kernel{
 		dlogWriter: lw,
 		interrupt:  make(chan os.Signal, 5),
@@ -236,6 +236,7 @@ type LogEntry struct {
 	TS      time.Time
 	Prefix  string
 	Message string
+	Details string
 }
 
 // CreateAuthManagerFunc is called to create a new auth manager.
