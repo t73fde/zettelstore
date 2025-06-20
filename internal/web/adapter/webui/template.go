@@ -196,10 +196,14 @@ func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title
 	rb.bindString("debug-mode", sx.MakeBoolean(wui.debug))
 	rb.bindSymbol(symMetaHeader, sx.Nil())
 	rb.bindSymbol(symDetail, sx.Nil())
-	stepsH := sxeval.MakeStepsLimitHandler(0, sxeval.DefaultComputeHandler{})
-	nestH := sxeval.MakeLimitNestingHandler(32*1024, stepsH)
-	cob := computeLogHandler{logger: wui.logger, next: nestH, steps: stepsH}
-	env := sxeval.MakeEnvironment(bind).SetComputeHandler(&cob)
+
+	stepsH := sxeval.MakeStepsHandler(sxeval.DefaultHandler{})
+	nestH := sxeval.MakeNestingLimitHandler(32*1024, stepsH)
+	var handler sxeval.ComputeHandler = nestH
+	if logger := wui.logger; logger.Handler().Enabled(context.Background(), logging.LevelTrace) {
+		handler = &computeLogHandler{logger: logger, next: nestH, steps: stepsH}
+	}
+	env := sxeval.MakeEnvironment(bind).SetComputeHandler(handler)
 	return env, rb
 }
 
@@ -212,36 +216,32 @@ func (wui *WebUI) getUserRenderData(user *meta.Meta) (bool, string, string) {
 
 type computeLogHandler struct {
 	logger *slog.Logger
-	next   *sxeval.LimitNestingHandler
-	steps  *sxeval.StepsLimitHandler
+	next   *sxeval.NestingLimitHandler
+	steps  *sxeval.StepsHandler
 }
 
 func (clh *computeLogHandler) Compute(env *sxeval.Environment, expr sxeval.Expr, frame *sxeval.Frame) (sx.Object, error) {
-	logger := clh.logger
-	if logger.Handler().Enabled(context.Background(), logging.LevelTrace) {
-		fname := "nil"
-		if frame != nil {
-			fname = frame.Name()
-		}
-		curNesting, _ := clh.next.Nesting()
-		var sb strings.Builder
-		_, _ = expr.Print(&sb)
-		logging.LogTrace(logger, "compute",
-			slog.String("frame", fname),
-			slog.Int("steps", clh.steps.Steps()),
-			slog.Int("level", curNesting),
-			slog.String("expr", sb.String()))
-		obj, err := clh.next.Compute(env, expr, frame)
-		if err == nil {
-			logging.LogTrace(logger, "result ",
-				slog.String("frame", fname),
-				slog.Int("steps", clh.steps.Steps()),
-				slog.Int("level", curNesting),
-				slog.Any("object", obj))
-		}
-		return obj, err
+	fname := "nil"
+	if frame != nil {
+		fname = frame.Name()
 	}
-	return clh.next.Compute(env, expr, frame)
+	curNesting, _ := clh.next.Nesting()
+	var sb strings.Builder
+	_, _ = expr.Print(&sb)
+	logging.LogTrace(clh.logger, "compute",
+		slog.String("frame", fname),
+		slog.Int("steps", clh.steps.Steps),
+		slog.Int("level", curNesting),
+		slog.String("expr", sb.String()))
+	obj, err := clh.next.Compute(env, expr, frame)
+	if err == nil {
+		logging.LogTrace(clh.logger, "result ",
+			slog.String("frame", fname),
+			slog.Int("steps", clh.steps.Steps),
+			slog.Int("level", curNesting),
+			slog.Any("object", obj))
+	}
+	return obj, err
 }
 
 func (clh *computeLogHandler) Reset() { clh.next.Reset() }
