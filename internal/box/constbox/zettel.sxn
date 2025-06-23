@@ -25,11 +25,13 @@
       ,@(if tag-refs `((@H " &#183; ") ,@tag-refs))
       (@H " &#183; ") (a (@ (href ,context-url)) "Context")
       ,@(ROLE-DEFAULT-actions (current-frame))
+      ,@(let* ((frame (current-frame))(rea (resolve-symbol 'ROLE-EXTRA-actions frame))) (if (defined? rea) (rea frame)))
       ,@(if superior-refs `((br) "Superior: " ,superior-refs))
       ,@(if predecessor-refs `((br) "Predecessor: " ,predecessor-refs))
       ,@(if prequel-refs `((br) "Prequel: " ,prequel-refs))
       ,@(if precursor-refs `((br) "Precursor: " ,precursor-refs))
       ,@(ROLE-DEFAULT-heading (current-frame))
+      ,@(let* ((frame (current-frame))(reh (resolve-symbol 'ROLE-EXTRA-heading frame))) (if (defined? reh) (reh frame)))
     )
   )
   ,@content

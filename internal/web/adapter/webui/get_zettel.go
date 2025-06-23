@@ -96,7 +96,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, meta.KeySuccessors, config.KeyShowSuccessorLinks, getTextTitle)
 		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
 			for _, part := range []string{"meta", "actions", "heading"} {
-				rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-DEFAULT-"+part)
+				rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-EXTRA-"+part)
 			}
 		}
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)

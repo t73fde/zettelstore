@@ -22,6 +22,7 @@
   (link (@ (rel "stylesheet") (href ,css-base-url)))
   (link (@ (rel "stylesheet") (href ,css-user-url)))
   ,@(ROLE-DEFAULT-meta (current-frame))
+  ,@(let* ((frame (current-frame))(rem (resolve-symbol 'ROLE-EXTRA-meta frame))) (if (defined? rem) (rem frame)))
   (title ,title))
 (body
   (nav (@ (class "zs-menu"))

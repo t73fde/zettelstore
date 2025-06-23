@@ -99,8 +99,7 @@
 
 ;; ROLE-tag-actions returns an additional action "Zettel" for zettel with role "tag".
 (defun ROLE-tag-actions (frame)
-    `(,@(ROLE-DEFAULT-actions frame)
-      ,@(let ((title (resolve-symbol 'title frame)))
+    `(,@(let ((title (resolve-symbol 'title frame)))
              (if (and (defined? title) title)
                  `(,ACTION-SEPARATOR (a (@ (href ,(query->url (concat "tags:" title)))) "Zettel"))
              )
@@ -110,8 +109,7 @@
 
 ;; ROLE-role-actions returns an additional action "Zettel" for zettel with role "role".
 (defun ROLE-role-actions (frame)
-    `(,@(ROLE-DEFAULT-actions frame)
-      ,@(let ((title (resolve-symbol 'title frame)))
+    `(,@(let ((title (resolve-symbol 'title frame)))
              (if (and (defined? title) title)
                  `(,ACTION-SEPARATOR (a (@ (href ,(query->url (concat "role:" title)))) "Zettel"))
              )

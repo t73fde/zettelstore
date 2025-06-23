@@ -270,12 +270,12 @@ func (rb *renderBinder) bindKeyValue(key string, value meta.Value) {
 		rb.bindString("set-meta-"+key, makeStringList(value.AsSlice()))
 	}
 }
-func (rb *renderBinder) rebindResolved(key, defKey string) {
+func (rb *renderBinder) rebindResolved(key, extraKey string) {
 	if rb.err == nil {
 		sym := sx.MakeSymbol(key)
 		for curr := rb.binding; curr != nil; curr = curr.Parent() {
 			if obj, found := curr.Lookup(sym); found {
-				rb.bindString(defKey, obj)
+				rb.bindString(extraKey, obj)
 				return
 			}
 		}

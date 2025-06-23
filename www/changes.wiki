@@ -10,11 +10,14 @@
      configuration <code>sx-max-nesting</code>. In such cases, you should omit
      the call to <code>ROLE-DEFAULT-action</code>. For debugging purposes, use
      the <code>web:trace</code> logging level, which logs all Sx computations.
-     (breaking)
+     (breaking: webui)
+  *  Sx templates are changed: base.sxn, info.sxn, zettel.sxn. If you are using
+     a (self-) modified version, you should update your modifications.
+     (breaking: webui)
   *  Remove zettel for the Sx prelude. Fortunately, it was never documented,
      so it was likely unused. The prelude is now a constant string whithin Sx's
      code base.
-     (breaking)
+     (breaking: webui)
   *  If authentication is enabled, Zettelstore can now be accessed from the
      loopback device without logging in or obtaining an access token.
      (major: api, webui)
