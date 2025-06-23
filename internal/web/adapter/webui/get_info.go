@@ -104,6 +104,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		rb.bindString("enc-parsed", wui.infoAPIMatrixParsed(zid, encTexts))
 		rb.bindString("shadow-links", shadowLinks)
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
+		rb.bindString("version-url", sx.MakeString(wui.NewURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionVersion).String()))
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidInfoTemplate, env)
 		} else {

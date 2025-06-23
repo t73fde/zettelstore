@@ -297,7 +297,6 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 		if content != nil && !content.IsBinary() {
 			rb.bindString("copy-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionCopy).String()))
 		}
-		rb.bindString("version-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionVersion).String()))
 		rb.bindString("sequel-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionSequel).String()))
 		rb.bindString("folge-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionFolge).String()))
 	}

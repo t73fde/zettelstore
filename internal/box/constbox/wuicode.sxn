@@ -90,8 +90,6 @@
 (defun ROLE-DEFAULT-actions (frame)
     `(,@(let ((copy-url (resolve-symbol 'copy-url frame)))
              (if (defined? copy-url) `((@H " &#183; ") (a (@ (href ,copy-url)) "Copy"))))
-      ,@(let ((version-url (resolve-symbol 'version-url frame)))
-             (if (defined? version-url) `((@H " &#183; ") (a (@ (href ,version-url)) "Version"))))
       ,@(let ((sequel-url (resolve-symbol 'sequel-url frame)))
              (if (defined? sequel-url) `((@H " &#183; ") (a (@ (href ,sequel-url)) "Sequel"))))
       ,@(let ((folge-url (resolve-symbol 'folge-url frame)))
