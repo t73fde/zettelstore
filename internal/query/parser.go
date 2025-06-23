@@ -101,20 +101,34 @@ func (ps *parserState) parse(q *Query) *Query {
 		}
 	}
 
-	hasContext := false
+	hasContext, hasThread := false, false
 	for {
 		inp.SkipSpace()
 		if ps.mustStop() {
 			break
 		}
 		pos := inp.Pos
-		if ps.acceptSingleKw(api.ContextDirective) {
-			if hasContext {
-				inp.SetPos(pos)
-				break
-			}
+		if !hasContext && ps.acceptSingleKw(api.ContextDirective) {
 			q = ps.parseContext(q)
 			hasContext = true
+			continue
+		}
+		inp.SetPos(pos)
+		if !hasThread && ps.acceptSingleKw(api.FolgeDirective) {
+			q = ps.parseThread(q, true, false)
+			hasThread = true
+			continue
+		}
+		inp.SetPos(pos)
+		if !hasThread && ps.acceptSingleKw(api.SequelDirective) {
+			q = ps.parseThread(q, false, true)
+			hasThread = true
+			continue
+		}
+		inp.SetPos(pos)
+		if !hasThread && ps.acceptSingleKw(api.ThreadDirective) {
+			q = ps.parseThread(q, true, true)
+			hasThread = true
 			continue
 		}
 		inp.SetPos(pos)
@@ -233,7 +247,10 @@ func (ps *parserState) parseContext(q *Query) *Query {
 		}
 		inp.SetPos(pos)
 		if ps.acceptKwArgs(api.MaxDirective) {
-			if ps.parseMaxCount(spec) {
+			if num, ok := ps.scanPosInt(); ok {
+				if spec.MaxCount == 0 || spec.MaxCount >= num {
+					spec.MaxCount = num
+				}
 				continue
 			}
 		}
@@ -261,16 +278,7 @@ func (ps *parserState) parseCost(spec *ContextSpec) bool {
 	}
 	return true
 }
-func (ps *parserState) parseMaxCount(spec *ContextSpec) bool {
-	num, ok := ps.scanPosInt()
-	if !ok {
-		return false
-	}
-	if spec.MaxCount == 0 || spec.MaxCount >= num {
-		spec.MaxCount = num
-	}
-	return true
-}
+
 func (ps *parserState) parseMinCount(spec *ContextSpec) bool {
 	num, ok := ps.scanPosInt()
 	if !ok {
@@ -280,6 +288,46 @@ func (ps *parserState) parseMinCount(spec *ContextSpec) bool {
 		spec.MinCount = num
 	}
 	return true
+}
+
+func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) *Query {
+	inp := ps.inp
+	spec := &ThreadSpec{IsFolge: isFolge, IsSequel: isSequel}
+	for {
+		inp.SkipSpace()
+		if ps.mustStop() {
+			break
+		}
+		pos := inp.Pos
+		if ps.acceptSingleKw(api.BackwardDirective) {
+			spec.IsBackward = true
+			continue
+		}
+		inp.SetPos(pos)
+		if ps.acceptSingleKw(api.ForwardDirective) {
+			spec.IsForward = true
+			continue
+		}
+		inp.SetPos(pos)
+		if ps.acceptKwArgs(api.MaxDirective) {
+			if num, ok := ps.scanPosInt(); ok {
+				if spec.MaxCount == 0 || spec.MaxCount >= num {
+					spec.MaxCount = num
+				}
+				continue
+			}
+		}
+		inp.SetPos(pos)
+
+		break
+	}
+	if !spec.IsForward && !spec.IsBackward {
+		spec.IsForward = true
+		spec.IsBackward = true
+	}
+	q = createIfNeeded(q)
+	q.directives = append(q.directives, spec)
+	return q
 }
 
 func (ps *parserState) parseUnlinked(q *Query) *Query {

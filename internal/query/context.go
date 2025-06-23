@@ -82,7 +82,7 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 	if maxCount <= 0 {
 		maxCount = 200
 	}
-	tasks := newQueue(startSeq, maxCost, maxCount, spec.MinCount, port)
+	tasks := newContextQueue(startSeq, maxCost, maxCount, spec.MinCount, port)
 	isBackward := spec.Direction == ContextDirBoth || spec.Direction == ContextDirBackward
 	isForward := spec.Direction == ContextDirBoth || spec.Direction == ContextDirForward
 	result := make([]*meta.Meta, 0, max(spec.MinCount, 16))
@@ -167,7 +167,7 @@ type contextTask struct {
 	metaZid  map[id.Zid]*meta.Meta // maps zid to meta for all meta retrieved with tags
 }
 
-func newQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
+func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
 	result := &contextTask{
 		port:     port,
 		seen:     idset.New(),

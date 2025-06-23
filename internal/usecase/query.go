@@ -99,6 +99,8 @@ func (uc *Query) processDirectives(ctx context.Context, metaSeq []*meta.Meta, di
 		switch ds := dir.(type) {
 		case *query.ContextSpec:
 			metaSeq = uc.processContextDirective(ctx, ds, metaSeq)
+		case *query.ThreadSpec:
+			metaSeq = uc.processThreadDirective(ctx, ds, metaSeq)
 		case *query.IdentSpec:
 			// Nothing to do.
 		case *query.ItemsSpec:
@@ -114,7 +116,12 @@ func (uc *Query) processDirectives(ctx context.Context, metaSeq []*meta.Meta, di
 	}
 	return metaSeq
 }
+
 func (uc *Query) processContextDirective(ctx context.Context, spec *query.ContextSpec, metaSeq []*meta.Meta) []*meta.Meta {
+	return spec.Execute(ctx, metaSeq, uc.port)
+}
+
+func (uc *Query) processThreadDirective(ctx context.Context, spec *query.ThreadSpec, metaSeq []*meta.Meta) []*meta.Meta {
 	return spec.Execute(ctx, metaSeq, uc.port)
 }
 
