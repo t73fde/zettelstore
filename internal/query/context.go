@@ -91,15 +91,17 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		if m == nil {
 			break
 		}
+		if level == 1 {
+			cost = min(cost, 4.0)
+		}
 		result = append(result, m)
 
 		for key, val := range m.ComputedRest() {
 			tasks.addPair(ctx, key, val, cost, level, isBackward, isForward)
 		}
-		if !spec.Full {
-			continue
+		if spec.Full {
+			tasks.addTags(ctx, m.GetFields(meta.KeyTags), cost, level)
 		}
-		tasks.addTags(ctx, m.GetFields(meta.KeyTags), cost, level)
 	}
 	return result
 }
@@ -217,7 +219,7 @@ func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value
 func contextCost(key string) float64 {
 	switch key {
 	case meta.KeyFolge, meta.KeyPrecursor:
-		return 0.1
+		return 0.2
 	case meta.KeySequel, meta.KeyPrequel:
 		return 1.0
 	case meta.KeySuccessors, meta.KeyPredecessor:

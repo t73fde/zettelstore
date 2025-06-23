@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707204706
-modified: 20250202172633
+modified: 20250623144037
 
 A context directive calculates the __context__ of a list of zettel identifier.
 It starts with the keyword ''CONTEXT''.
@@ -22,15 +22,16 @@ These are:
 If no ''BACKWARD'' and ''FORWARD'' is specified, a search for context zettel will be done though backward and forward links.
 
 The cost of a context zettel is calculated iteratively:
-* Each of the specified zettel hast a cost of one.
-* A zettel found as a single folge zettel or single precursor zettel has the cost of the originating zettel, plus 0.1.
-* A zettel found as a single sequel zettel or single prequel zettel has the cost of the originating zettel, plus 1.0.
-* A zettel found as a single successor zettel or single predecessor zettel has the cost of the originating zettel, plus seven.
-* A zettel found via another link without being part of a [[set of zettel identifier|00001006032500]], has the cost of the originating zettel, plus two.
-* A zettel which is part of a set of zettel identifier, has the cost of the originating zettel, plus one of the four choices above and multiplied with roughly a linear-logarithmic value based on the size of the set.
-* A zettel with the same tag, has the cost of the originating zettel, plus a linear-logarithmic number based on the number of zettel with this tag.
-  If a zettel belongs to more than one tag compared with the current zettel, there is a discount of 90% per additional tag.
-  This only applies if the ''FULL'' directive was specified.
+* Each of the specified zettel has a cost of 1.0.
+* Every zettel directly referenced by a specified zettel has a maximum cost of 4.0.
+* A zettel found as a single folge zettel or single precursor zettel inherits the cost of the originating zettel, plus 0.2.
+* A zettel found as a single sequel zettel or single prequel zettel inherits the cost of the originating zettel, plus 1.0.
+* A zettel found as a single successor zettel or single predecessor zettel inherits the cost of the originating zettel, plus 7.0.
+* A zettel discovered via another type of link, without being part of a [[set of zettel identifiers|00001006032500]], inherits the cost of the originating zettel, plus 2.0.
+* A zettel that is part of a set of zettel identifiers, inherits the cost of the originating zettel, plus one of the four costs above, multiplied by a value that grows roughly in a linear-logarithmic fashion based on the size of the set.
+* A zettel sharing the same tag inherits the cost of the originating zettel, plus a linear-logarithmic value based on the number of zettel sharing that tag.
+  If a zettel shares more than one tag with the originating zettel, a 90% discount is applied per additional tag.
+  This rules applies only if the ''FULL'' directive has been specified.
 
 The maximum cost is only checked for all zettel that are not directly reachable from the initial, specified list of zettel.
 This ensures that initial zettel that have only a highly used tag, will also produce some context zettel.
