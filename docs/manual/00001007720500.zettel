@@ -1,0 +1,35 @@
+id: 00001007720500
+title: Query: Thread Directive
+role: manual
+tags: #manual #search #zettelstore
+syntax: zmk
+created: 20250624162823
+modified: 20250624170353
+
+A thread directive is similar to the [[context directive|00001007720300]] by calculating zettel associated with a list of zettel identifier.
+There are three thread directives, beginning with the keywords ''FOLGE'', ''SEQUEL'', and ''THREAD''.
+
+With the help of the ''FOLGE'' directive, you can list all zettel that belong to the same ""train of thought"".
+It is possible to list all folge zettel only or only precursor zettel.
+Additionally, you can specify the maximum number to be listed.
+A ''FOLGE'' directive considers only the metadata keys only metadata keys [[''folge''|00001006020000#folge]] and [[''precursor''|00001006020000#precursor]].
+
+Similarly, the ''SEQUEL'' directive allows you to list all ""branching ideas""
+You can limit the search to only sequel or only prequel zettel, and you can also restrict the result size.
+The ''SEQUEL'' directive works exclusively with the metadata keys [[''sequel''|00001006020000#sequel]] and [[''prequel''|00001006020000#prequel]].
+
+The ''THREAD'' directive combines the functionality of the other two directives.
+It lists all zettel (or a subset) that can be reached via the four metadata keys mentioned.
+
+Optionally yyou may specify additional parameters after the directive keyword, separated by space characters.
+These include:
+* ''BACKWARD'': Search for zettel only via backward links, i.e. [[''precursor''|00001006020000#precursor]] and/or [[''prequel''|00001006020000#prequel]]
+* ''FORWARD'': Search for zettel only via forward links, i.e. [[''folge''|00001006020000#folge]] and/or [[''sequel''|00001006020000#sequel]]
+* ''MAX'': Followed by one or more space characters and a positive integer, sets the maximum number of resulting Zettel (default: 0 = unlimited)
+
+If no ''BACKWARD'' nor ''FORWARD'' is specified, the search includes both backward and forward links.
+
+The resulting list is sorted by the relative distance to the originating zettel.
+
+These directives may be specified only once as a query directive.
+A second occurence of ''FOLGE'', ''SEQUEL'' or ''THREAD'' is interpreted as a [[search expression|00001007701000]].

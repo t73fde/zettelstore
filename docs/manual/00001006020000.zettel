@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250115163835
+modified: 20250624170541
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -52,7 +52,9 @@ Most keys conform to a [[type|00001006030000]].
   You could define a query and execute it regularly, for example [[query:expire? ORDER expire]].
   Alternatively, a Zettelstore client software could define some actions when it detects expired zettel.
 ; [!folge|''folge'']
-: Is a property that contains identifier of all zettel that reference this zettel through the [[''precursor''|#precursor]] value.
+: Is a property that contains identifiers of all zettel that reference this zettel via the [[''precursor''|#precursor]] value.
+
+  It is used to reference __folge zettel__, those that develop the idea of the current zettel a bit further, following a ""train of thought.""
 ; [!folge-role|''folge-role'']
 : Specifies a suggested [[''role''|#role]] the zettel should use in the future, if zettel currently has a preliminary role.
 ; [!forward|''forward'']
@@ -84,8 +86,9 @@ Most keys conform to a [[type|00001006030000]].
   In contrast to [[''precursor''|#precurso]] / [[''folge''|#folge]], this is a reference because of technical reasons, not because of content-related reasons.
   Basically the inverse of key [[''successors''|#successors]].
 ; [!prequel|''prequel'']
-: Specifies a zettel that is conceptually a prequel zettel.
-  This is a zettel that occurred somehow before the current zettel.
+: Specifies one or more zettel that are conceptually a prequel zettel.
+  These are zettel that occurred somehow before the current zettel.
+  Basically the inverse of key [[''sequel''|#sequel]].
 ; [!published|''published'']
 : This property contains the timestamp of the last modification / creation of the zettel.
   If [[''modified''|#modified]] is set with a valid timestamp, it contains the its value.
@@ -110,6 +113,8 @@ Most keys conform to a [[type|00001006030000]].
   If not given, it is ignored.
 ; [!sequel|''sequel'']
 : Is a property that contains identifier of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
+
+  A __sequel zettel__ acts as a branching thought of the current zettel.
 ; [!subordinates|''subordinates'']
 : Is a property that contains identifier of all zettel that reference this zettel through the [[''superior''|#superior]] value.
 ; [!successors|''successors'']

@@ -18,6 +18,12 @@
      so it was likely unused. The prelude is now a constant string whithin Sx's
      code base.
      (breaking: webui)
+  *  New query directives <code>FOLGE</code>, <code>SEQUEL</code>, and
+     <code>THREAD</code> support folge zettel and sequel zettel (and both). See
+     the manual for details. To make working with these directives a little bit
+     more easier, appropriate query links are placed on main zettel web user
+     interface and on info zettel page.
+     (major)
   *  If authentication is enabled, Zettelstore can now be accessed from the
      loopback device without logging in or obtaining an access token.
      (major: api, webui)

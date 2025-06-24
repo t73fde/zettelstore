@@ -4,14 +4,15 @@ role: manual
 tags: #manual #reference #search #zettelstore
 syntax: zmk
 created: 20220810144539
-modified: 20250202164337
+modified: 20250624171420
 
 ```
 QueryExpression   := ZettelList? QueryDirective* SearchExpression ActionExpression?
-ZettelList        := (ZID (SPACE+ ZID)*).
+ZettelList        := (ZID (SPACE+ ZID)*)?.
 ZID               := '0'+ ('1' .. '9'') DIGIT*
                    | ('1' .. '9') DIGIT*.
 QueryDirective    := ContextDirective
+                   | ThreadDirective
                    | IdentDirective
                    | ItemsDirective
                    | UnlinkedDirective.
@@ -22,6 +23,10 @@ ContextDetail     := "FULL"
                    | "COST" SPACE+ PosInt
                    | "MAX" SPACE+ PosInt
                    | "MIN" SPACE+ PosInt.
+ThreadDirective   := ("FOLGE" | "SEQUEL" | "THREAD") (SPACE+ ThreadDetail)*.
+ThreadDetail      := "BACKWARD"
+                   | "FORWARD"
+                   | "MAX" SPACE+ PosInt.
 IdentDirective    := IDENT.
 ItemsDirective    := ITEMS.
 UnlinkedDirective := UNLINKED (SPACE+ PHRASE SPACE+ Word)*.

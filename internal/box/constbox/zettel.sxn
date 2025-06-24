@@ -24,6 +24,7 @@
       ")"
       ,@(if tag-refs `((@H " &#183; ") ,@tag-refs))
       (@H " &#183; ") (a (@ (href ,context-url)) "Context")
+      ,@(if (symbol-bound? 'thread-query-url) `((@H " &#183; ")  (a (@ (href ,thread-query-url)) "Thread")))
       ,@(ROLE-DEFAULT-actions (current-frame))
       ,@(let* ((frame (current-frame))(rea (resolve-symbol 'ROLE-EXTRA-actions frame))) (if (defined? rea) (rea frame)))
       ,@(if superior-refs `((br) "Superior: " ,superior-refs))
@@ -38,8 +39,14 @@
   ,endnotes
   ,@(if (or folge-links sequel-links back-links successor-links subordinate-links)
     `((nav
-      ,@(if folge-links `((details (@ (,folge-open)) (summary "Folgezettel") (ul ,@(map wui-item-link folge-links)))))
-      ,@(if sequel-links `((details (@ (,sequel-open)) (summary "Sequel") (ul ,@(map wui-item-link sequel-links)))))
+      ,@(if folge-links
+            `((details (@ (,folge-open))
+                       (summary ,(if (symbol-bound? 'folge-query-url) `(a (@ (href ,folge-query-url)) "Folgezettel") "Folgezettel"))
+                       (ul ,@(map wui-item-link folge-links)))))
+      ,@(if sequel-links
+            `((details (@ (,sequel-open))
+                       (summary ,(if (symbol-bound? 'sequel-query-url) `(a (@ (href ,sequel-query-url)) "Sequel") "Sequel"))
+                       (ul ,@(map wui-item-link sequel-links)))))
       ,@(if successor-links `((details (@ (,successor-open)) (summary "Successors") (ul ,@(map wui-item-link successor-links)))))
       ,@(if subordinate-links `((details (@ (,subordinate-open)) (summary "Subordinates") (ul ,@(map wui-item-link subordinate-links)))))
       ,@(if back-links `((details (@ (,back-open)) (summary "Incoming") (ul ,@(map wui-item-link back-links)))))

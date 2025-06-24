@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707203135
-modified: 20230731162002
+modified: 20250624163147
 
 A query directive transforms a list of zettel identifier into a list of zettel identifiert.
 It is only valid if a list of zettel identifier is specified at the beginning of the query expression.
@@ -14,6 +14,7 @@ For example, ''CONTEXT'' is interpreted as a full-text search for the word ""con
 Every query directive therefore consumes a list of zettel, and it produces a list of zettel according to the specific directive.
 
 * [[Context directive|00001007720300]]
+* [[Thread Directive|00001007720500]]
 * [[Ident directive|00001007720600]]
 * [[Items directive|00001007720900]]
 * [[Unlinked directive|00001007721200]]

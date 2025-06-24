@@ -299,6 +299,7 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 		}
 		rb.bindString("sequel-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionSequel).String()))
 		rb.bindString("folge-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionFolge).String()))
+		rb.bindString("version-url", sx.MakeString(wui.NewURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionVersion).String()))
 	}
 	if wui.canDelete(ctx, user, m) {
 		rb.bindString("delete-url", sx.MakeString(newURLBuilder('d').SetZid(zid).String()))
@@ -310,6 +311,18 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	rb.bindString("context-url", sx.MakeString(newURLBuilder('h').AppendQuery(queryContext).String()))
 	queryContext += " " + api.FullDirective
 	rb.bindString("context-full-url", sx.MakeString(newURLBuilder('h').AppendQuery(queryContext).String()))
+	canFolgeQuery := m.Has(meta.KeyPrecursor) || m.Has(meta.KeyFolge)
+	canSequelQuery := m.Has(meta.KeyPrequel) || m.Has(meta.KeySequel)
+	if canFolgeQuery || canSequelQuery {
+		rb.bindString("thread-query-url", sx.MakeString(newURLBuilder('h').AppendQuery(strZid+" "+api.ThreadDirective).String()))
+		if canFolgeQuery {
+			rb.bindString("folge-query-url", sx.MakeString(newURLBuilder('h').AppendQuery(strZid+" "+api.FolgeDirective).String()))
+		}
+		if canSequelQuery {
+			rb.bindString("sequel-query-url", sx.MakeString(newURLBuilder('h').AppendQuery(strZid+" "+api.SequelDirective).String()))
+		}
+	}
+
 	if wui.canRefresh(user) {
 		rb.bindString("reindex-url", sx.MakeString(newURLBuilder('h').AppendQuery(
 			strZid+" "+api.IdentDirective+api.ActionSeparator+api.ReIndexAction).String()))
