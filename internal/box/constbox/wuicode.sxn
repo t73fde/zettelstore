@@ -65,6 +65,13 @@
          (lambda (row) `(tr (th ,(car row)) ,@(map wui-tdata-link (cdr row))))
          matrix)))
 
+;; wui-optional-link puts the text into a link, if symbol is defined. Otherwise just return the text
+(defun wui-optional-link (text url-sym)
+    (let ((url (resolve-symbol url-sym)))
+         (if (defined? url)
+             `(a (@ (href ,(resolve-symbol url-sym))) ,text)
+             text)))
+
 ;; CSS-ROLE-map is a mapping (pair list, assoc list) of role names to zettel
 ;; identifier. It is used in the base template to update the metadata of the
 ;; HTML page to include some role specific CSS code.
