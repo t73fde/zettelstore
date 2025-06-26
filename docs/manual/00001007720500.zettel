@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20250624162823
-modified: 20250624170353
+modified: 20250626155946
 
 A thread directive is similar to the [[context directive|00001007720300]] by calculating zettel associated with a list of zettel identifier.
 There are three thread directives, beginning with the keywords ''FOLGE'', ''SEQUEL'', and ''THREAD''.
@@ -23,11 +23,19 @@ It lists all zettel (or a subset) that can be reached via the four metadata keys
 
 Optionally yyou may specify additional parameters after the directive keyword, separated by space characters.
 These include:
-* ''BACKWARD'': Search for zettel only via backward links, i.e. [[''precursor''|00001006020000#precursor]] and/or [[''prequel''|00001006020000#prequel]]
-* ''FORWARD'': Search for zettel only via forward links, i.e. [[''folge''|00001006020000#folge]] and/or [[''sequel''|00001006020000#sequel]]
+* ''BACKWARD'': Search for zettel only via backward links, i.e. ''precursor'' and/or ''prequel''
+* ''FORWARD'': Search for zettel only via forward links, i.e. ''folge'' and/or ''sequel''
+* ''DIRECTED'': Search for zettel only in the same direction as the one that led to the current zettel.
+  If the zettel is one of the initial zettel, search in both directions.
+
+  ''DIRECTED'' is equivalent to ''FORWARD'' if the current zettel is a starting point of a ''folge'' and/or ''sequel'' sequence.
+  It is equivalent to ''BACKWARD'' at the end of such a sequence (or at the beginning of a ''precursor'' and/or ''prequel'' sequence).
 * ''MAX'': Followed by one or more space characters and a positive integer, sets the maximum number of resulting Zettel (default: 0 = unlimited)
 
 If no ''BACKWARD'' nor ''FORWARD'' is specified, the search includes both backward and forward links.
+
+Only the first occurrence of ''DIRECTED'', ''BACKWARD'', or ''FORWARD'' is interpreted as a parameter.
+Any additional use of these words is interpreted as a search term.
 
 The resulting list is sorted by the relative distance to the originating zettel.
 

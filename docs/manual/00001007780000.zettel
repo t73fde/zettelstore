@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #search #zettelstore
 syntax: zmk
 created: 20220810144539
-modified: 20250624171420
+modified: 20250626154510
 
 ```
 QueryExpression   := ZettelList? QueryDirective* SearchExpression ActionExpression?
@@ -26,6 +26,7 @@ ContextDetail     := "FULL"
 ThreadDirective   := ("FOLGE" | "SEQUEL" | "THREAD") (SPACE+ ThreadDetail)*.
 ThreadDetail      := "BACKWARD"
                    | "FORWARD"
+                   | "DIRECTED"
                    | "MAX" SPACE+ PosInt.
 IdentDirective    := IDENT.
 ItemsDirective    := ITEMS.

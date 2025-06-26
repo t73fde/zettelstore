@@ -293,19 +293,25 @@ func (ps *parserState) parseMinCount(spec *ContextSpec) bool {
 func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) *Query {
 	inp := ps.inp
 	spec := &ThreadSpec{IsFolge: isFolge, IsSequel: isSequel}
+	hasDirection := false
 	for {
 		inp.SkipSpace()
 		if ps.mustStop() {
 			break
 		}
 		pos := inp.Pos
-		if ps.acceptSingleKw(api.BackwardDirective) {
-			spec.IsBackward = true
+		if !hasDirection && ps.acceptSingleKw(api.DirectedDirective) {
+			spec.IsDirected, hasDirection = true, true
 			continue
 		}
 		inp.SetPos(pos)
-		if ps.acceptSingleKw(api.ForwardDirective) {
-			spec.IsForward = true
+		if !hasDirection && ps.acceptSingleKw(api.BackwardDirective) {
+			spec.IsBackward, hasDirection = true, true
+			continue
+		}
+		inp.SetPos(pos)
+		if !hasDirection && ps.acceptSingleKw(api.ForwardDirective) {
+			spec.IsForward, hasDirection = true, true
 			continue
 		}
 		inp.SetPos(pos)

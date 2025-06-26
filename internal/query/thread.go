@@ -29,6 +29,7 @@ type ThreadSpec struct {
 	IsSequel   bool
 	IsForward  bool
 	IsBackward bool
+	IsDirected bool
 	MaxCount   int
 }
 
@@ -47,7 +48,10 @@ func (spec *ThreadSpec) Print(pe *PrintEnv) {
 		panic("neither folge nor sequel")
 	}
 
-	if spec.IsForward {
+	if spec.IsDirected {
+		pe.printSpace()
+		pe.writeString(api.DirectedDirective)
+	} else if spec.IsForward {
 		if !spec.IsBackward {
 			pe.printSpace()
 			pe.writeString(api.ForwardDirective)
@@ -56,7 +60,7 @@ func (spec *ThreadSpec) Print(pe *PrintEnv) {
 		pe.printSpace()
 		pe.writeString(api.BackwardDirective)
 	} else {
-		panic("neither forward nor backward")
+		panic("neither forward, backward, nor directed")
 	}
 
 	pe.printPosInt(api.MaxDirective, spec.MaxCount)
@@ -72,14 +76,14 @@ func (spec *ThreadSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port
 	tasks := newThreadQueue(startSeq, spec.MaxCount, port)
 	result := make([]*meta.Meta, 0, 16)
 	for {
-		m, level := tasks.next()
+		m, level, dir := tasks.next()
 		if m == nil {
 			break
 		}
 		result = append(result, m)
 
 		for key, val := range m.ComputedRest() {
-			tasks.addPair(ctx, key, val, level, spec)
+			tasks.addPair(ctx, key, val, level, dir, spec)
 		}
 	}
 	return result
@@ -88,6 +92,7 @@ func (spec *ThreadSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port
 type ztlThreadItem struct {
 	meta  *meta.Meta
 	level uint
+	dir   int8 // <0: backward, >0: forward, =0: not directed
 }
 type ztlThreadQueue []ztlThreadItem
 
@@ -134,7 +139,7 @@ func newThreadQueue(startSeq []*meta.Meta, maxCount int, port ThreadPort) *threa
 	return result
 }
 
-func (ct *threadTask) next() (*meta.Meta, uint) {
+func (ct *threadTask) next() (*meta.Meta, uint, int) {
 	for len(ct.queue) > 0 {
 		item := heap.Pop(&ct.queue).(ztlThreadItem)
 		m := item.meta
@@ -147,9 +152,9 @@ func (ct *threadTask) next() (*meta.Meta, uint) {
 			break
 		}
 		ct.seen.Add(zid)
-		return m, item.level
+		return m, item.level, int(item.dir)
 	}
-	return nil, 0
+	return nil, 0, 0
 }
 
 func (ct *threadTask) hasEnough(level uint) bool {
@@ -161,34 +166,42 @@ func (ct *threadTask) hasEnough(level uint) bool {
 	return maxCount <= ct.seen.Length()
 }
 
-func (ct *threadTask) addPair(ctx context.Context, key string, value meta.Value, level uint, spec *ThreadSpec) {
+func (ct *threadTask) addPair(ctx context.Context, key string, value meta.Value, level uint, dir int, spec *ThreadSpec) {
 	isFolge, isSequel, isBackward, isForward := spec.IsFolge, spec.IsSequel, spec.IsBackward, spec.IsForward
+	nextDir := int8(0)
 	switch key {
 	case meta.KeyPrecursor:
-		if !isFolge || !isBackward {
+		if !isFolge || !isBackward || dir > 0 {
 			return
 		}
+		nextDir = -1
 	case meta.KeyFolge:
-		if !isFolge || !isForward {
+		if !isFolge || !isForward || dir < 0 {
 			return
 		}
+		nextDir = 1
 	case meta.KeyPrequel:
-		if !isSequel || !isBackward {
+		if !isSequel || !isBackward || dir > 0 {
 			return
 		}
+		nextDir = -1
 	case meta.KeySequel:
-		if !isSequel || !isForward {
+		if !isSequel || !isForward || dir < 0 {
 			return
 		}
+		nextDir = 1
 	default:
 		return
+	}
+	if !spec.IsDirected {
+		nextDir = 0
 	}
 	elems := value.AsSlice()
 	for _, val := range elems {
 		if zid, errParse := id.Parse(val); errParse == nil {
 			if m, errGetMeta := ct.port.GetMeta(ctx, zid); errGetMeta == nil {
 				if !ct.seen.Contains(m.Zid) {
-					heap.Push(&ct.queue, ztlThreadItem{meta: m, level: level + 1})
+					heap.Push(&ct.queue, ztlThreadItem{meta: m, level: level + 1, dir: nextDir})
 				}
 			}
 		}
