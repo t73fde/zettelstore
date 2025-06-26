@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250624170541
+modified: 20250626114159
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -81,10 +81,6 @@ Most keys conform to a [[type|00001006030000]].
 ; [!precursor|''precursor'']
 : References zettel for which this zettel is a ""Folgezettel"" / follow-up zettel.
   Basically the inverse of key [[''folge''|#folge]].
-; [!predecessor|''predecessor'']
-: References the zettel that contains a previous version of the content.
-  In contrast to [[''precursor''|#precurso]] / [[''folge''|#folge]], this is a reference because of technical reasons, not because of content-related reasons.
-  Basically the inverse of key [[''successors''|#successors]].
 ; [!prequel|''prequel'']
 : Specifies one or more zettel that are conceptually a prequel zettel.
   These are zettel that occurred somehow before the current zettel.
@@ -117,12 +113,6 @@ Most keys conform to a [[type|00001006030000]].
   A __sequel zettel__ acts as a branching thought of the current zettel.
 ; [!subordinates|''subordinates'']
 : Is a property that contains identifier of all zettel that reference this zettel through the [[''superior''|#superior]] value.
-; [!successors|''successors'']
-: Is a property that contains identifier of all zettel that reference this zettel through the [[''predecessor''|#predecessor]] value.
-  Therefore, it references all zettel that contain a new version of the content and/or metadata.
-  In contrast to [[''folge''|#folge]], these are references because of technical reasons, not because of content-related reasons.
-  In most cases, zettel referencing the current zettel should be updated to reference a successor zettel.
-  The [[query reference|00001007040310]] [[query:backward? successors?]] lists all such zettel.
 ; [!summary|''summary'']
 : Summarizes the content of the zettel using plain text.
 ; [!superior|''superior'']

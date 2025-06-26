@@ -103,7 +103,6 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		config.KeyShowFolgeLinks:       {"Show folge links", parseString, true},
 		config.KeyShowSequelLinks:      {"Show sequel links", parseString, true},
 		config.KeyShowSubordinateLinks: {"Show subordinate links", parseString, true},
-		config.KeyShowSuccessorLinks:   {"Show successor links", parseString, true},
 	}
 	cs.next = interfaceMap{
 		keyDefaultCopyright:            "",
@@ -124,7 +123,6 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		config.KeyShowFolgeLinks:       "",
 		config.KeyShowSequelLinks:      "",
 		config.KeyShowSubordinateLinks: "",
-		config.KeyShowSuccessorLinks:   "",
 	}
 }
 

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707204706
-modified: 20250623144037
+modified: 20250626114017
 
 A context directive calculates the __context__ of a list of zettel identifier.
 It starts with the keyword ''CONTEXT''.
@@ -26,7 +26,6 @@ The cost of a context zettel is calculated iteratively:
 * Every zettel directly referenced by a specified zettel has a maximum cost of 4.0.
 * A zettel found as a single folge zettel or single precursor zettel inherits the cost of the originating zettel, plus 0.2.
 * A zettel found as a single sequel zettel or single prequel zettel inherits the cost of the originating zettel, plus 1.0.
-* A zettel found as a single successor zettel or single predecessor zettel inherits the cost of the originating zettel, plus 7.0.
 * A zettel discovered via another type of link, without being part of a [[set of zettel identifiers|00001006032500]], inherits the cost of the originating zettel, plus 2.0.
 * A zettel that is part of a set of zettel identifiers, inherits the cost of the originating zettel, plus one of the four costs above, multiplied by a value that grows roughly in a linear-logarithmic fashion based on the size of the set.
 * A zettel sharing the same tag inherits the cost of the originating zettel, plus a linear-logarithmic value based on the number of zettel sharing that tag.

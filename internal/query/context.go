@@ -222,8 +222,6 @@ func contextCost(key string) float64 {
 		return 0.2
 	case meta.KeySequel, meta.KeyPrequel:
 		return 1.0
-	case meta.KeySuccessors, meta.KeyPredecessor:
-		return 7
 	}
 	return 2
 }

@@ -18,6 +18,11 @@
      so it was likely unused. The prelude is now a constant string whithin Sx's
      code base.
      (breaking: webui)
+  *  Remove support for metadata keys <code>predecessor</code> and
+     <code>successors</code>. A Zettelstore is not a version control system.
+     Use <code>precursor</code> instead or use your own metadata key (which
+     should end with <code>-zids</code>.
+     (breaking)
   *  New query directives <code>FOLGE</code>, <code>SEQUEL</code>, and
      <code>THREAD</code> support folge zettel and sequel zettel (and both). See
      the manual for details. To make working with these directives a little bit

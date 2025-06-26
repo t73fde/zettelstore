@@ -82,7 +82,6 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 					meta.KeyRole+api.SearchOperatorHas+string(folgeRole)).String()))
 		}
 		rb.bindString("tag-refs", wui.transformTagSet(meta.KeyTags, zn.InhMeta.GetDefault(meta.KeyTags, "").AsSlice()))
-		rb.bindString("predecessor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPredecessor, getTextTitle))
 		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrecursor, getTextTitle))
 		rb.bindString("prequel-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrequel, getTextTitle))
 		rb.bindString("superior-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeySuperior, getTextTitle))
@@ -93,7 +92,6 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinates, config.KeyShowSubordinateLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, meta.KeySuccessors, config.KeyShowSuccessorLinks, getTextTitle)
 		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
 			for _, part := range []string{"meta", "actions", "heading"} {
 				rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-EXTRA-"+part)

@@ -29,7 +29,6 @@ const (
 	KeyShowFolgeLinks       = "show-folge-links"
 	KeyShowSequelLinks      = "show-sequel-links"
 	KeyShowSubordinateLinks = "show-subordinate-links"
-	KeyShowSuccessorLinks   = "show-successor-links"
 	// api.KeyLang
 )
 

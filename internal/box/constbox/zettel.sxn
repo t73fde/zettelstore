@@ -28,7 +28,6 @@
       ,@(ROLE-DEFAULT-actions (current-frame))
       ,@(let* ((frame (current-frame))(rea (resolve-symbol 'ROLE-EXTRA-actions frame))) (if (defined? rea) (rea frame)))
       ,@(if superior-refs `((br) "Superior: " ,superior-refs))
-      ,@(if predecessor-refs `((br) "Predecessor: " ,predecessor-refs))
       ,@(if prequel-refs `((br) ,(wui-optional-link "Prequel" 'sequel-query-url) ": " ,prequel-refs))
       ,@(if precursor-refs `((br) ,(wui-optional-link "Precursor" 'folge-query-url) ": " ,precursor-refs))
       ,@(ROLE-DEFAULT-heading (current-frame))
@@ -37,7 +36,7 @@
   )
   ,@content
   ,endnotes
-  ,@(if (or folge-links sequel-links back-links successor-links subordinate-links)
+  ,@(if (or folge-links sequel-links back-links subordinate-links)
     `((nav
       ,@(if folge-links
             `((details (@ (,folge-open))
@@ -47,7 +46,6 @@
             `((details (@ (,sequel-open))
                        (summary ,(wui-optional-link "Sequel" 'sequel-query-url))
                        (ul ,@(map wui-item-link sequel-links)))))
-      ,@(if successor-links `((details (@ (,successor-open)) (summary "Successors") (ul ,@(map wui-item-link successor-links)))))
       ,@(if subordinate-links `((details (@ (,subordinate-open)) (summary "Subordinates") (ul ,@(map wui-item-link subordinate-links)))))
       ,@(if back-links `((details (@ (,back-open)) (summary "Incoming") (ul ,@(map wui-item-link back-links)))))
      ))
