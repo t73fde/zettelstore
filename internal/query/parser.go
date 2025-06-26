@@ -231,12 +231,12 @@ func (ps *parserState) parseContext(q *Query) *Query {
 		}
 		inp.SetPos(pos)
 		if ps.acceptSingleKw(api.BackwardDirective) {
-			spec.Direction = ContextDirBackward
+			spec.IsBackward = true
 			continue
 		}
 		inp.SetPos(pos)
 		if ps.acceptSingleKw(api.ForwardDirective) {
-			spec.Direction = ContextDirForward
+			spec.IsForward = true
 			continue
 		}
 		inp.SetPos(pos)
@@ -263,6 +263,9 @@ func (ps *parserState) parseContext(q *Query) *Query {
 
 		inp.SetPos(pos)
 		break
+	}
+	if !spec.IsForward && !spec.IsBackward {
+		spec.IsForward, spec.IsBackward = true, true
 	}
 	q = createIfNeeded(q)
 	q.directives = append(q.directives, spec)
@@ -328,8 +331,7 @@ func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) *Query {
 		break
 	}
 	if !spec.IsForward && !spec.IsBackward {
-		spec.IsForward = true
-		spec.IsBackward = true
+		spec.IsForward, spec.IsBackward = true, true
 	}
 	q = createIfNeeded(q)
 	q.directives = append(q.directives, spec)

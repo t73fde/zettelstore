@@ -28,22 +28,13 @@ import (
 
 // ContextSpec contains all specification values for calculating a context.
 type ContextSpec struct {
-	Direction ContextDirection
-	MaxCost   int
-	MaxCount  int
-	MinCount  int
-	Full      bool
+	MaxCost    int
+	MaxCount   int
+	MinCount   int
+	Full       bool
+	IsForward  bool
+	IsBackward bool
 }
-
-// ContextDirection specifies the direction a context should be calculated.
-type ContextDirection uint8
-
-// Constants for ContextDirection.
-const (
-	ContextDirBoth ContextDirection = iota
-	ContextDirForward
-	ContextDirBackward
-)
 
 // ContextPort is the collection of box methods needed by this directive.
 type ContextPort interface {
@@ -59,13 +50,16 @@ func (spec *ContextSpec) Print(pe *PrintEnv) {
 		pe.printSpace()
 		pe.writeString(api.FullDirective)
 	}
-	switch spec.Direction {
-	case ContextDirBackward:
+	if spec.IsForward {
+		if !spec.IsBackward {
+			pe.printSpace()
+			pe.writeString(api.ForwardDirective)
+		}
+	} else if spec.IsBackward {
 		pe.printSpace()
 		pe.writeString(api.BackwardDirective)
-	case ContextDirForward:
-		pe.printSpace()
-		pe.writeString(api.ForwardDirective)
+	} else {
+		panic("neither forward or backward directed")
 	}
 	pe.printPosInt(api.CostDirective, spec.MaxCost)
 	pe.printPosInt(api.MaxDirective, spec.MaxCount)
@@ -83,8 +77,7 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		maxCount = 200
 	}
 	tasks := newContextQueue(startSeq, maxCost, maxCount, spec.MinCount, port)
-	isBackward := spec.Direction == ContextDirBoth || spec.Direction == ContextDirBackward
-	isForward := spec.Direction == ContextDirBoth || spec.Direction == ContextDirForward
+	isBackward, isForward := spec.IsBackward, spec.IsForward
 	result := make([]*meta.Meta, 0, max(spec.MinCount, 16))
 	for {
 		m, cost, level := tasks.next()
