@@ -47,23 +47,25 @@ func (spec *ThreadSpec) Print(pe *PrintEnv) {
 	} else {
 		panic("neither folge nor sequel")
 	}
+	printDirection(pe, spec.IsDirected, spec.IsForward, spec.IsBackward)
+	pe.printPosInt(api.MaxDirective, spec.MaxCount)
+}
 
-	if spec.IsDirected {
+func printDirection(pe *PrintEnv, isDirected, isForward, isBackward bool) {
+	if isDirected {
 		pe.printSpace()
 		pe.writeString(api.DirectedDirective)
-	} else if spec.IsForward {
-		if !spec.IsBackward {
+	} else if isForward {
+		if !isBackward {
 			pe.printSpace()
 			pe.writeString(api.ForwardDirective)
 		}
-	} else if spec.IsBackward {
+	} else if isBackward {
 		pe.printSpace()
 		pe.writeString(api.BackwardDirective)
 	} else {
 		panic("neither forward, backward, nor directed")
 	}
-
-	pe.printPosInt(api.MaxDirective, spec.MaxCount)
 }
 
 // ThreadPort is the collection of box methods needed by this directive.

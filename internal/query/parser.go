@@ -230,6 +230,11 @@ func (ps *parserState) parseContext(q *Query) *Query {
 			continue
 		}
 		inp.SetPos(pos)
+		if ps.acceptSingleKw(api.DirectedDirective) {
+			spec.IsDirected = true
+			continue
+		}
+		inp.SetPos(pos)
 		if ps.acceptSingleKw(api.BackwardDirective) {
 			spec.IsBackward = true
 			continue

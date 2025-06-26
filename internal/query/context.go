@@ -32,6 +32,7 @@ type ContextSpec struct {
 	MaxCount   int
 	MinCount   int
 	Full       bool
+	IsDirected bool
 	IsForward  bool
 	IsBackward bool
 }
@@ -50,17 +51,7 @@ func (spec *ContextSpec) Print(pe *PrintEnv) {
 		pe.printSpace()
 		pe.writeString(api.FullDirective)
 	}
-	if spec.IsForward {
-		if !spec.IsBackward {
-			pe.printSpace()
-			pe.writeString(api.ForwardDirective)
-		}
-	} else if spec.IsBackward {
-		pe.printSpace()
-		pe.writeString(api.BackwardDirective)
-	} else {
-		panic("neither forward or backward directed")
-	}
+	printDirection(pe, spec.IsDirected, spec.IsForward, spec.IsBackward)
 	pe.printPosInt(api.CostDirective, spec.MaxCost)
 	pe.printPosInt(api.MaxDirective, spec.MaxCount)
 	pe.printPosInt(api.MinDirective, spec.MinCount)
@@ -77,10 +68,9 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		maxCount = 200
 	}
 	tasks := newContextQueue(startSeq, maxCost, maxCount, spec.MinCount, port)
-	isBackward, isForward := spec.IsBackward, spec.IsForward
 	result := make([]*meta.Meta, 0, max(spec.MinCount, 16))
 	for {
-		m, cost, level := tasks.next()
+		m, cost, level, dir := tasks.next()
 		if m == nil {
 			break
 		}
@@ -90,10 +80,14 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		result = append(result, m)
 
 		for key, val := range m.ComputedRest() {
-			tasks.addPair(ctx, key, val, cost, level, isBackward, isForward)
+			tasks.addPair(ctx, key, val, cost, level, dir, spec)
 		}
 		if spec.Full {
-			tasks.addTags(ctx, m.GetFields(meta.KeyTags), cost, level)
+			newDir := 0
+			if spec.IsDirected {
+				newDir = 1
+			}
+			tasks.addTags(ctx, m.GetFields(meta.KeyTags), cost, level, newDir)
 		}
 	}
 	return result
@@ -103,6 +97,7 @@ type ztlCtxItem struct {
 	cost  float64
 	meta  *meta.Meta
 	level uint
+	dir   int8 // <0: backward, >0: forward, =0: not directed
 }
 type ztlCtxQueue []ztlCtxItem
 
@@ -181,31 +176,50 @@ func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount 
 	return result
 }
 
-func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value, curCost float64, level uint, isBackward, isForward bool) {
+func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value, curCost float64, level uint, dir int, spec *ContextSpec) {
 	if key == meta.KeyBack {
 		return
 	}
+	newDir := 0
 	newCost := curCost + contextCost(key)
 	if key == meta.KeyBackward {
-		if isBackward {
-			ct.addIDSet(ctx, newCost, level, value)
+		if spec.IsBackward {
+			if spec.IsDirected {
+				newDir = -1
+			}
+			ct.addIDSet(ctx, newCost, level, newDir, value)
 		}
 		return
 	}
 	if key == meta.KeyForward {
-		if isForward {
-			ct.addIDSet(ctx, newCost, level, value)
+		if spec.IsForward {
+			if spec.IsDirected {
+				newDir = -1
+			}
+			ct.addIDSet(ctx, newCost, level, newDir, value)
 		}
 		return
 	}
-	hasInverse := meta.Inverse(key) != ""
-	if (!hasInverse || !isBackward) && (hasInverse || !isForward) {
-		return
+	if meta.Inverse(key) != "" {
+		// Backward reference
+		if !spec.IsBackward || dir > 0 {
+			return
+		}
+		newDir = -1
+	} else {
+		// Forward reference
+		if !spec.IsForward || dir < 0 {
+			return
+		}
+		newDir = 1
+	}
+	if !spec.IsDirected {
+		newDir = 0
 	}
 	if t := meta.Type(key); t == meta.TypeID {
-		ct.addID(ctx, newCost, level, value)
+		ct.addID(ctx, newCost, level, newDir, value)
 	} else if t == meta.TypeIDSet {
-		ct.addIDSet(ctx, newCost, level, value)
+		ct.addIDSet(ctx, newCost, level, newDir, value)
 	}
 }
 
@@ -219,25 +233,25 @@ func contextCost(key string) float64 {
 	return 2
 }
 
-func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, value meta.Value) {
+func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, dir int, value meta.Value) {
 	if zid, errParse := id.Parse(string(value)); errParse == nil {
 		if m, errGetMeta := ct.port.GetMeta(ctx, zid); errGetMeta == nil {
-			ct.addMeta(m, newCost, level)
+			ct.addMeta(m, newCost, level, dir)
 		}
 	}
 }
 
-func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint) {
+func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint, dir int) {
 	if !ct.seen.Contains(m.Zid) {
-		heap.Push(&ct.queue, ztlCtxItem{cost: newCost, meta: m, level: level + 1})
+		heap.Push(&ct.queue, ztlCtxItem{cost: newCost, meta: m, level: level + 1, dir: int8(dir)})
 	}
 }
 
-func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, value meta.Value) {
+func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, dir int, value meta.Value) {
 	elems := value.AsSlice()
 	refCost := referenceCost(newCost, len(elems))
 	for _, val := range elems {
-		ct.addID(ctx, refCost, level, meta.Value(val))
+		ct.addID(ctx, refCost, level, dir, meta.Value(val))
 	}
 }
 
@@ -246,7 +260,7 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 	return nRefs*math.Log2(nRefs+1) + baseCost - 1
 }
 
-func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint) {
+func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint, dir int) {
 	tags := slices.Collect(tagiter)
 	var zidSet *idset.Set
 	for _, tag := range tags {
@@ -266,7 +280,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 				costFactor /= 1.1
 			}
 		}
-		ct.addMeta(ct.metaZid[zid], minCost*costFactor, level)
+		ct.addMeta(ct.metaZid[zid], minCost*costFactor, level, dir)
 	})
 }
 
@@ -297,7 +311,7 @@ func tagCost(baseCost float64, numTags int) float64 {
 	return nTags*math.Log2(nTags+1) + baseCost - 1
 }
 
-func (ct *contextTask) next() (*meta.Meta, float64, uint) {
+func (ct *contextTask) next() (*meta.Meta, float64, uint, int) {
 	for len(ct.queue) > 0 {
 		item := heap.Pop(&ct.queue).(ztlCtxItem)
 		m := item.meta
@@ -310,9 +324,9 @@ func (ct *contextTask) next() (*meta.Meta, float64, uint) {
 			break
 		}
 		ct.seen.Add(zid)
-		return m, cost, item.level
+		return m, cost, item.level, int(item.dir)
 	}
-	return nil, -1, 0
+	return nil, -1, 0, 0
 }
 
 func (ct *contextTask) hasEnough(cost float64, level uint) bool {
