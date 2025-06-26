@@ -32,8 +32,11 @@
   *  If authentication is enabled, Zettelstore can now be accessed from the
      loopback device without logging in or obtaining an access token.
      (major: api, webui)
+  *  Context directive allows <code>DIRECTED</code>.
+     (minor)
   *  Metadata with keys ending with <code>-ref</code> or <code>-refs</code> are
      interpreted as zettel identifier.
+     (minor)
   *  The new startup configuration key <code>sx-max-nesting</code> allows
      setting a limit on the nesting depth of Sx computations. This is primarily
      useful to prevent unbounded recursion due to programming errors.

@@ -28,13 +28,11 @@ import (
 
 // ContextSpec contains all specification values for calculating a context.
 type ContextSpec struct {
-	MaxCost    int
-	MaxCount   int
-	MinCount   int
-	Full       bool
-	IsDirected bool
-	IsForward  bool
-	IsBackward bool
+	directionSpec
+	maxCost  int
+	maxCount int
+	minCount int
+	full     bool
 }
 
 // ContextPort is the collection of box methods needed by this directive.
@@ -47,28 +45,28 @@ type ContextPort interface {
 func (spec *ContextSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
 	pe.writeString(api.ContextDirective)
-	if spec.Full {
+	if spec.full {
 		pe.printSpace()
 		pe.writeString(api.FullDirective)
 	}
-	printDirection(pe, spec.IsDirected, spec.IsForward, spec.IsBackward)
-	pe.printPosInt(api.CostDirective, spec.MaxCost)
-	pe.printPosInt(api.MaxDirective, spec.MaxCount)
-	pe.printPosInt(api.MinDirective, spec.MinCount)
+	spec.directionSpec.print(pe)
+	pe.printPosInt(api.CostDirective, spec.maxCost)
+	pe.printPosInt(api.MaxDirective, spec.maxCount)
+	pe.printPosInt(api.MinDirective, spec.minCount)
 }
 
 // Execute the specification.
 func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port ContextPort) []*meta.Meta {
-	maxCost := float64(spec.MaxCost)
+	maxCost := float64(spec.maxCost)
 	if maxCost <= 0 {
 		maxCost = 17
 	}
-	maxCount := spec.MaxCount
+	maxCount := spec.maxCount
 	if maxCount <= 0 {
 		maxCount = 200
 	}
-	tasks := newContextQueue(startSeq, maxCost, maxCount, spec.MinCount, port)
-	result := make([]*meta.Meta, 0, max(spec.MinCount, 16))
+	tasks := newContextQueue(startSeq, maxCost, maxCount, spec.minCount, port)
+	result := make([]*meta.Meta, 0, max(spec.minCount, 16))
 	for {
 		m, cost, level, dir := tasks.next()
 		if m == nil {
@@ -82,9 +80,9 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		for key, val := range m.ComputedRest() {
 			tasks.addPair(ctx, key, val, cost, level, dir, spec)
 		}
-		if spec.Full {
+		if spec.full {
 			newDir := 0
-			if spec.IsDirected {
+			if spec.isDirected {
 				newDir = 1
 			}
 			tasks.addTags(ctx, m.GetFields(meta.KeyTags), cost, level, newDir)
@@ -183,8 +181,8 @@ func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value
 	newDir := 0
 	newCost := curCost + contextCost(key)
 	if key == meta.KeyBackward {
-		if spec.IsBackward {
-			if spec.IsDirected {
+		if spec.isBackward {
+			if spec.isDirected {
 				newDir = -1
 			}
 			ct.addIDSet(ctx, newCost, level, newDir, value)
@@ -192,8 +190,8 @@ func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value
 		return
 	}
 	if key == meta.KeyForward {
-		if spec.IsForward {
-			if spec.IsDirected {
+		if spec.isForward {
+			if spec.isDirected {
 				newDir = -1
 			}
 			ct.addIDSet(ctx, newCost, level, newDir, value)
@@ -202,18 +200,18 @@ func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value
 	}
 	if meta.Inverse(key) != "" {
 		// Backward reference
-		if !spec.IsBackward || dir > 0 {
+		if !spec.isBackward || dir > 0 {
 			return
 		}
 		newDir = -1
 	} else {
 		// Forward reference
-		if !spec.IsForward || dir < 0 {
+		if !spec.isForward || dir < 0 {
 			return
 		}
 		newDir = 1
 	}
-	if !spec.IsDirected {
+	if !spec.isDirected {
 		newDir = 0
 	}
 	if t := meta.Type(key); t == meta.TypeID {

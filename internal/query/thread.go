@@ -25,47 +25,28 @@ import (
 
 // ThreadSpec contains all information for a thread directive.
 type ThreadSpec struct {
-	IsFolge    bool
-	IsSequel   bool
-	IsForward  bool
-	IsBackward bool
-	IsDirected bool
-	MaxCount   int
+	directionSpec
+	isFolge  bool
+	isSequel bool
+	maxCount int
 }
 
 // Print the spec on the given print environment.
 func (spec *ThreadSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
-	if spec.IsFolge {
-		if spec.IsSequel {
+	if spec.isFolge {
+		if spec.isSequel {
 			pe.writeString(api.ThreadDirective)
 		} else {
 			pe.writeString(api.FolgeDirective)
 		}
-	} else if spec.IsSequel {
+	} else if spec.isSequel {
 		pe.writeString(api.SequelDirective)
 	} else {
 		panic("neither folge nor sequel")
 	}
-	printDirection(pe, spec.IsDirected, spec.IsForward, spec.IsBackward)
-	pe.printPosInt(api.MaxDirective, spec.MaxCount)
-}
-
-func printDirection(pe *PrintEnv, isDirected, isForward, isBackward bool) {
-	if isDirected {
-		pe.printSpace()
-		pe.writeString(api.DirectedDirective)
-	} else if isForward {
-		if !isBackward {
-			pe.printSpace()
-			pe.writeString(api.ForwardDirective)
-		}
-	} else if isBackward {
-		pe.printSpace()
-		pe.writeString(api.BackwardDirective)
-	} else {
-		panic("neither forward, backward, nor directed")
-	}
+	spec.directionSpec.print(pe)
+	pe.printPosInt(api.MaxDirective, spec.maxCount)
 }
 
 // ThreadPort is the collection of box methods needed by this directive.
@@ -75,7 +56,7 @@ type ThreadPort interface {
 
 // Execute the specification.
 func (spec *ThreadSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port ThreadPort) []*meta.Meta {
-	tasks := newThreadQueue(startSeq, spec.MaxCount, port)
+	tasks := newThreadQueue(startSeq, spec.maxCount, port)
 	result := make([]*meta.Meta, 0, 16)
 	for {
 		m, level, dir := tasks.next()
@@ -169,7 +150,7 @@ func (ct *threadTask) hasEnough(level uint) bool {
 }
 
 func (ct *threadTask) addPair(ctx context.Context, key string, value meta.Value, level uint, dir int, spec *ThreadSpec) {
-	isFolge, isSequel, isBackward, isForward := spec.IsFolge, spec.IsSequel, spec.IsBackward, spec.IsForward
+	isFolge, isSequel, isBackward, isForward := spec.isFolge, spec.isSequel, spec.isBackward, spec.isForward
 	nextDir := int8(0)
 	switch key {
 	case meta.KeyPrecursor:
@@ -195,7 +176,7 @@ func (ct *threadTask) addPair(ctx context.Context, key string, value meta.Value,
 	default:
 		return
 	}
-	if !spec.IsDirected {
+	if !spec.isDirected {
 		nextDir = 0
 	}
 	elems := value.AsSlice()

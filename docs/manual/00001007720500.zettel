@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20250624162823
-modified: 20250626155946
+modified: 20250626174233
 
 A thread directive is similar to the [[context directive|00001007720300]] by calculating zettel associated with a list of zettel identifier.
 There are three thread directives, beginning with the keywords ''FOLGE'', ''SEQUEL'', and ''THREAD''.
@@ -32,10 +32,14 @@ These include:
   It is equivalent to ''BACKWARD'' at the end of such a sequence (or at the beginning of a ''precursor'' and/or ''prequel'' sequence).
 * ''MAX'': Followed by one or more space characters and a positive integer, sets the maximum number of resulting Zettel (default: 0 = unlimited)
 
-If no ''BACKWARD'' nor ''FORWARD'' is specified, the search includes both backward and forward links.
 
-Only the first occurrence of ''DIRECTED'', ''BACKWARD'', or ''FORWARD'' is interpreted as a parameter.
-Any additional use of these words is interpreted as a search term.
+If neither BACKWARD nor FORWARD is specified, the search includes both backward and forward links.
+
+If both ''BACKWARD'' and ''FORWARD'' are specified, the search for context zettel will be performed as ''DIRECTED''.
+Internally, ''DIRECTED'' is just a shorthand for specifying both ''BACKWARD'' and ''FORWARD''.
+
+If any of the three direction specifiers ''BACKWARD'', ''FORWARD'', and ''DIRECTED'' is specified more than once, parsing of the thread directive is stopped.
+All following text is then interpreted either as other directives or as a search term.
 
 The resulting list is sorted by the relative distance to the originating zettel.
 
