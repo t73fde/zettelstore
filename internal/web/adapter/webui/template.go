@@ -295,11 +295,11 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	rb.bindString("info-url", sx.MakeString(newURLBuilder('i').SetZid(zid).String()))
 	if wui.canCreate(ctx, user) {
 		if content != nil && !content.IsBinary() {
-			rb.bindString("copy-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionCopy).String()))
+			wui.bindCreateURL(rb, zid, "copy-url", valueActionCopy)
 		}
-		rb.bindString("sequel-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionSequel).String()))
-		rb.bindString("folge-url", sx.MakeString(newURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionFolge).String()))
-		rb.bindString("version-url", sx.MakeString(wui.NewURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, valueActionVersion).String()))
+		wui.bindCreateURL(rb, zid, "sequel-url", valueActionSequel)
+		wui.bindCreateURL(rb, zid, "folge-url", valueActionFolge)
+		wui.bindCreateURL(rb, zid, "version-url", valueActionVersion)
 	}
 	if wui.canDelete(ctx, user, m) {
 		rb.bindString("delete-url", sx.MakeString(newURLBuilder('d').SetZid(zid).String()))
@@ -307,19 +307,17 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	if val, found := m.Get(meta.KeyUselessFiles); found {
 		rb.bindString("useless", sx.Cons(sx.MakeString(string(val)), nil))
 	}
-	queryContext := strZid + " " + api.ContextDirective
-	rb.bindString("context-url", sx.MakeString(newURLBuilder('h').AppendQuery(queryContext).String()))
-	queryContext += " " + api.FullDirective
-	rb.bindString("context-full-url", sx.MakeString(newURLBuilder('h').AppendQuery(queryContext).String()))
+	wui.bindQueryURL(rb, strZid, "context-url", api.ContextDirective)
+	wui.bindQueryURL(rb, strZid, "context-full-url", api.ContextDirective+" "+api.FullDirective)
 	canFolgeQuery := m.Has(meta.KeyPrecursor) || m.Has(meta.KeyFolge)
 	canSequelQuery := m.Has(meta.KeyPrequel) || m.Has(meta.KeySequel)
 	if canFolgeQuery || canSequelQuery {
-		rb.bindString("thread-query-url", sx.MakeString(newURLBuilder('h').AppendQuery(strZid+" "+api.ThreadDirective).String()))
+		wui.bindQueryURL(rb, strZid, "thread-query-url", api.ThreadDirective)
 		if canFolgeQuery {
-			rb.bindString("folge-query-url", sx.MakeString(newURLBuilder('h').AppendQuery(strZid+" "+api.FolgeDirective).String()))
+			wui.bindQueryURL(rb, strZid, "folge-query-url", api.FolgeDirective)
 		}
 		if canSequelQuery {
-			rb.bindString("sequel-query-url", sx.MakeString(newURLBuilder('h').AppendQuery(strZid+" "+api.SequelDirective).String()))
+			wui.bindQueryURL(rb, strZid, "sequel-query-url", api.SequelDirective)
 		}
 	}
 
@@ -339,6 +337,14 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 		rb.bindKeyValue(key, val)
 	}
 	rb.bindString("metapairs", metaPairs.List())
+}
+func (wui *WebUI) bindCreateURL(rb *renderBinder, zid id.Zid, symName, actionName string) {
+	rb.bindString(symName,
+		sx.MakeString(wui.NewURLBuilder('c').SetZid(zid).AppendKVQuery(queryKeyAction, actionName).String()))
+}
+func (wui *WebUI) bindQueryURL(rb *renderBinder, strZid, symName, directive string) {
+	rb.bindString(symName,
+		sx.MakeString(wui.NewURLBuilder('h').AppendQuery(strZid+" "+directive+" "+api.DirectedDirective).String()))
 }
 
 func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {
