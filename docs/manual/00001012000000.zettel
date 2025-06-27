@@ -4,10 +4,10 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250415154039
+modified: 20250627124452
 
 The API (short for ""**A**pplication **P**rogramming **I**nterface"") is the primary way to communicate with a running Zettelstore.
-Most integration with other systems and services is done through the API.
+Most integration with other systems and services is performed via the API.
 The [[web user interface|00001014000000]] is just an alternative, secondary way of interacting with a Zettelstore.
 
 === Background

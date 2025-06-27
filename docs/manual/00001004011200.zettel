@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102185551
+modified: 20250627162212
 
 A Zettelstore must store its zettel somehow and somewhere.
 In most cases you want to store your zettel as files in a directory.
@@ -25,7 +25,7 @@ The following box URIs are supported:
   ''DIR'' is the file path.
   Although it is possible to use relative file paths, such as ''./zettel'' (&rarr; URI is ''dir://.zettel''), it is preferable to use absolute file paths, e.g. ''/home/user/zettel''.
 
-  The directory must exist before starting the Zettelstore[^There is one exception: when Zettelstore is [[started without any parameter|00001004050000]], e.g. via double-clicking its icon, an directory called ''./zettel'' will be created.].
+  The directory must exist before starting the Zettelstore[^There is one exception: when Zettelstore is [[started without any parameter|00001004050000]], e.g. via double-clicking its icon, a directory called ''./zettel'' will be created.].
 
   It is possible to [[configure|00001004011400]] a directory box.
 ; [!file|''file:FILE.zip'' or ''file:///path/to/file.zip'']
@@ -43,6 +43,6 @@ If a zettel should be retrieved, a search starts in the box specified with the '
 If a zettel is created or changed, it is always stored in the box specified with the ''box-uri-1'' key.
 This allows to overwrite zettel from other boxes, e.g. the predefined zettel.
 
-If you use the ''mem:'' box, where zettel are stored in volatile memory, it makes only sense if you configure it as ''box-uri-1''.
-Such a box will be empty when Zettelstore starts and only the first box will receive updates.
-You must make sure that your computer has enough RAM to store all zettel.
+If you use the ''mem:'' box, where zettel are stored in volatile memory, it only makes sense if you configure it as ''box-uri-1''.
+Such a box will be empty when Zettelstore starts, and only the first box will receive updates.
+You must ensure that your computer has enough RAM to store all zettel.

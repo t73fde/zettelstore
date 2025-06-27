@@ -4,7 +4,7 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102174436
+modified: 20250627160307
 
 Zettelstore is not just a service that provides services of a zettelkasten.
 It allows some tasks to be executed at the command line.
@@ -14,7 +14,7 @@ If no parameter is given, the Zettelstore is called as
 ```
 zettelstore
 ```
-This is equivalent to call it this way:
+This is equivalent to calling it this way:
 ```sh
 mkdir -p ./zettel
 zettelstore run -d ./zettel -c ./.zscfg

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241212152823
+modified: 20250627161609
 
 Zettelmarkup is a rich plain-text based markup language for writing zettel content.
 Besides the zettel content, Zettelmarkup is also used for specifying the title of a zettel, regardless of the syntax of a zettel.
@@ -13,7 +13,7 @@ Zettelmarkup supports the longevity of stored notes by providing a syntax that a
 Zettelmarkup can be much easier parsed / consumed by a software compared to other markup languages.
 Writing a parser for [[Markdown|https://daringfireball.net/projects/markdown/syntax]] is quite challenging.
 [[CommonMark|00001008010500]] is an attempt to make it simpler by providing a comprehensive specification, combined with an extra chapter to give hints for the implementation.
-Zettelmarkup follows some simple principles that anybody who knows how ho write software should be able understand to create an implementation.
+Zettelmarkup follows a few simple principles that anyone familiar with software development should be able to understand and implement.
 
 Zettelmarkup is a markup language on its own.
 This is in contrast to Markdown, which is basically a super-set of HTML: every HTML document is a valid Markdown document.[^To be precise: the content of the ``<body>`` of each HTML document is a valid Markdown document.]
@@ -25,7 +25,7 @@ Zettelmarkup is a rich markup language, but it focuses on relatively short zette
 It allows embedding other content, simple tables, quotations, description lists, and images.
 It provides a broad range of inline formatting, including __emphasized__, **strong**, ~~deleted~~{-} and >>inserted>> text.
 Footnotes[^like this] are supported, links to other zettel and to external material, as well as citation keys.
-Zettelmarkup allows to include content from other zettel and to embed the result of a search query.
+Zettelmarkup allows you to include content from other zettel and to embed the results of a search query.
 
 Zettelmarkup might be seen as a proprietary markup language.
 But if you want to use [[Markdown/CommonMark|00001008010000]] and you need support for footnotes or tables, you'll end up with proprietary extensions.

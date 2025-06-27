@@ -4,7 +4,7 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20211122170506
-modified: 20211122174951
+modified: 20250627161347
 
 If you want to measure potential bottlenecks within the software Zettelstore,
 there are two [[command line|00001004050000]] flags for enabling the measurement (also called __profiling__):
@@ -22,4 +22,4 @@ The given ''FILE'' can be used to analyze the data via the tool ``go tool pprof 
 Please notice that ''-cpuprofile'' takes precedence over ''-memprofile''.
 You cannot measure both.
 
-You also can use the [[administrator console|00001004100000]] to begin and end profiling manually for a already running Zettelstore.
+You also can use the [[administrator console|00001004100000]] to start and stop profiling manually for an already running Zettelstore.

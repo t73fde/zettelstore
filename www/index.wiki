@@ -5,9 +5,9 @@
 many tasks of personal knowledge management by explicitly supporting the
 [https://en.wikipedia.org/wiki/Zettelkasten|Zettelkasten method]. The method is
 based on creating many individual notes, each with one idea or information,
-that are related to each other. Since knowledge is typically build up
-gradually, one major focus is a long-term store of these notes, hence the name
-&ldquo;Zettelstore&rdquo;.
+that are related to each other. Since knowledge is typically built up
+gradually, one major focus is a long-term storage of these notes, hence the
+name &ldquo;Zettelstore&rdquo;.
 
 To get an initial impression, take a look at the
 [https://zettelstore.de/manual/|manual]. It is a live example of the

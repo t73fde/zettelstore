@@ -4,7 +4,7 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220724162050
+modified: 20250627160733
 
 === ``zettelstore run``
 This starts the web service.
@@ -18,7 +18,7 @@ zettelstore run [-a PORT] [-c CONFIGFILE] [-d DIR] [-debug] [-p PORT] [-r] [-v]
   See the explanation of [[''admin-port''|00001004010000#admin-port]] for more details.
 ; [!c|''-c CONFIGFILE'']
 : Specifies ''CONFIGFILE'' as a file, where [[startup configuration data|00001004010000]] is read.
-  It is ignored, when the given file is not available, nor readable.
+  It is ignored if the given file is not available or not readable.
 
   Default: tries to read the following files in the ""current directory"": ''zettelstore.cfg'', ''zsconfig.txt'', ''zscfg.txt'', ''_zscfg'', and ''.zscfg''. 
 ; [!d|''-d DIR'']

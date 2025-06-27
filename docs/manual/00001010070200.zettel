@@ -4,7 +4,7 @@ role: manual
 tags: #authorization #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102170611
+modified: 20250627134004
 
 For every zettel you can specify under which condition the zettel is visible to others.
 This is controlled with the metadata key [[''visibility''|00001006020000#visibility]].
@@ -17,7 +17,7 @@ The following values are supported:
 
   This is the default value for [[''default-visibility''|00001004020000#default-visibility]].
 ; [!creator|""creator""]
-: Only an authenticated user that is allowed to create new zettel can access the zettel.
+: Only an authenticated user who is allowed to create new zettel can access the zettel.
 ; [!owner|""owner""]
 : Only the owner of the Zettelstore can access the zettel.
 
@@ -25,8 +25,8 @@ The following values are supported:
 ; [!expert|""expert""]
 : Only the owner of the Zettelstore can access the zettel, if runtime configuration [[''expert-mode''|00001004020000#expert-mode]] is set to a [[boolean true value|00001006030500]].
 
-  This is for zettel with sensitive content that might irritate the owner.
-  Computed zettel with internal runtime information are examples for such a zettel.
+  This applies to zettel with sensitive content that might irritate the owner.
+  Computed zettel containing internal runtime information are examples of such zettel.
 
 When you install a Zettelstore, only [[some zettel|query:visibility:public]] have visibility ""public"".
 One is the zettel that contains [[CSS|00000000020001]] for displaying the [[web user interface|00001014000000]].

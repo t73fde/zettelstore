@@ -4,17 +4,17 @@ role: manual
 tags: #example #manual #search #zettelstore
 syntax: zmk
 created: 20220810144539
-modified: 20250624171607
+modified: 20250627151159
 
 |= Query Expression |= Meaning
-| [[query:role:configuration]] | Zettel that contains some configuration data for the Zettelstore
+| [[query:role:configuration]] | All zettel that contain configuration data for the Zettelstore
 | [[query:ORDER REVERSE created LIMIT 40]] | 40 recently created zettel
 | [[query:ORDER REVERSE published LIMIT 40]] | 40 recently updated zettel
 | [[query:PICK 40]] | 40 random zettel, ordered by zettel identifier
 | [[query:dead?]] | Zettel with invalid / dead links
 | [[query:backward!? precursor!?]] | Zettel that are not referenced by other zettel
 | [[query:tags!?]] | Zettel without tags
-| [[query:expire? ORDER expire]] | Zettel with an expire date, ordered from the nearest to the latest
+| [[query:expire? ORDER expire]] | All zettel with an expiration date, ordered from the nearest to the latest
 | [[query:00001007700000 CONTEXT]] | Zettel within the context of the [[given zettel|00001007700000]]
 | [[query:00001012051200 FOLGE]] | ""Train of thought"" of the [[given zettel|00001012051200]]
 | [[query:PICK 1 | REDIRECT]] | Redirect to a random zettel

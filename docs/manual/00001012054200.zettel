@@ -4,17 +4,17 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210713150005
-modified: 20231116110417
+modified: 20250627125627
 
-Updating metadata and content of a zettel is technically quite similar to [[creating a new zettel|00001012053200]].
-In both cases you must provide the data for the new or updated zettel in the body of the HTTP request.
+Updating metadata and content of a zettel is technically quite similar to [[creating a new one|00001012053200]].
+In both cases, you must provide the data for the new or updated zettel in the body of the HTTP request.
 
 One difference is the endpoint.
 The [[endpoint|00001012920000]] to update a zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
-You must send a HTTP PUT request to that endpoint.
+You must send an HTTP PUT request to that endpoint.
 
 The zettel must be encoded in a [[plain|00001006000000]] format: first comes the [[metadata|00001006010000]] and the following content is separated by an empty line.
-This is the same format as used by storing zettel within a [[directory box|00001006010000]].
+This is the same format used for storing zettel within a directory box. [[directory box|00001006010000]].
 
 ```
 # curl -X PUT --data $'title: Updated Note\n\nUpdated content.' http://127.0.0.1:23123/z/00001012054200
@@ -37,4 +37,4 @@ You may encode computed or property [[metadata keys|00001006020000]], but these 
 : You are not allowed to delete the given zettel.
 ; ''404''
 : Zettel not found.
-  You probably used a zettel identifier that is not used in the Zettelstore.
+  You probably used a zettel identifier that does not exist in the Zettelstore.

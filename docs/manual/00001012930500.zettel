@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20230403151127
-modified: 20250102175559
+modified: 20250627124837
 
 === Syntax of lists
 A list always starts with the left parenthesis (""''(''"", U+0028) and ends with a right parenthesis (""'')''"", U+0029).
@@ -33,7 +33,7 @@ A __proper__ list, which contains __nil__ as the second value of the last elemen
 ~~~
 
 ''V'' is a placeholder for a value, ''N'' is the reference to the next cell (also known as the rest / tail of the list).
-Above list will be represented as an symbolic expression as ''(Elem1 Elem2 ... ElemN)''
+The list above is represented as a symbolic expression in the form ''(Elem1 Elem2 ... ElemN)''
 
 An improper list will have a non-__nil__ reference to an atom as the very last element
 

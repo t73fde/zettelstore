@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20220803170112
-modified: 20250102190553
+modified: 20250627133713
 
 === Welcome Zettel
 * **Problem:** You want to put your Zettelstore into the public and need a starting zettel for your users.
@@ -13,16 +13,16 @@ modified: 20250102190553
 * **Solution 1:**
 *# Create a new zettel with all your references to internal, non-public zettel.
    Let's assume this zettel receives the zettel identifier ''20220803182600''.
-*# Create the zettel that should serve as the starting zettel for your users.
-   It must have syntax [[Zettelmarkup|00001008000000#zmk]], i.e. the syntax metadata must be set to ''zmk''.
-   If needed, set the runtime configuration [[''home-zettel''|00001004020000#home-zettel]] to the value of the identifier of this zettel.
+*# Create the zettel that will serve as the starting zettel for your users.
+   It must use the [[Zettelmarkup|00001008000000#zmk]] syntax, i.e. the syntax metadata must be set to ''zmk''.
+   If needed, set the runtime configuration [[''home-zettel''|00001004020000#home-zettel]] to the identifier of this zettel.
 *# At the beginning of the start zettel, add the following [[Zettelmarkup|00001007000000]] text in a separate paragraph: ``{{{20220803182600}}}`` (you have to adapt to the actual value of the zettel identifier for your non-public home zettel).
 * **Discussion:** As stated in the description for a [[transclusion|00001007031100]], a transclusion will be ignored, if the transcluded zettel is not visible to the current user.
   In effect, the transclusion statement (above paragraph that contained ''{{{...}}}'') is ignored when rendering the zettel.
 * **Solution 2:** Set a user-specific value by adding metadata ''home-zettel'' to the [[user zettel|00001010040200]].
-* **Discussion:** A value for ''home-zettel'' is first searched in the user zettel of the current authenticated user.
-  Only if it is not found, the value is looked up in the runtime configuration zettel.
-  If multiple user should use the same home zettel, its zettel identifier must be set in all relevant user zettel.
+* **Discussion:** A value for ''home-zettel'' is first searched for in the user zettel of the currently authenticated user.
+  Only if it is not found there, the value is looked up in the runtime configuration zettel.
+  If multiple users should share the same home zettel, its zettel identifier must be set in all relevant user zettel.
 
 === Role-specific Layout of Zettel in Web User Interface (WebUI)
 [!role-css]
@@ -42,10 +42,10 @@ modified: 20250102190553
   Since you have enabled ''expert-mode'', you are allowed to modify the zettel ""[[Zettelstore Sxn Start Code|00000000019000]]"".
   Add the following code to the Sxn Start Code zettel: ``(set! CSS-ROLE-map '(("zettel" . "20220825200100")))``.
 
-  In general, the mapping must follow the pattern: ``(ROLE . ID)``, where ''ROLE'' is the placeholder for the role, and ''ID'' for the zettel identifier containing CSS code.
-  For example, if you also want the role ""configuration"" to be rendered using that CSS, the code should be something like ``(set! CSS-ROLE-map '(("zettel" . "20220825200100") ("configuration" . "20220825200100")))``.
-* **Discussion:** you have to ensure that the CSS zettel is allowed to be read by the intended audience of the zettel with that given role.
-  For example, if you made zettel with a specific role public visible, the CSS zettel must also have a [[''visibility: public''|00001010070200]] metadata.
+  In general, the mapping must follow the pattern: ``(ROLE . ID)``, where ''ROLE'' is a placeholder for the role, and ''ID'' is the identifier of the zettel containing CSS code.
+  For example, if you also want the role ""configuration"" to be rendered using that CSS, the code should look like this: ``(set! CSS-ROLE-map '(("zettel" . "20220825200100") ("configuration" . "20220825200100")))``.
+* **Discussion:** you have to ensure that the CSS zettel is accessible to the intended audience of the zettel with the given role.
+  For example, if you made a zettel with a specific role publicly visible, the CSS zettel must also have a [[''visibility: public''|00001010070200]] metadata entry.
 
 === Zettel synchronization with iCloud (Apple)
 * **Problem:** You use Zettelstore on various macOS computers and you want to use the same set of zettel across all computers.

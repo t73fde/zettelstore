@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250416180103
+modified: 20250627163000
 
 The following table lists all predefined zettel with their purpose.
 
@@ -27,7 +27,7 @@ However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find 
 | [[00000000000090]] | Zettelstore Supported Metadata Keys | Contains all supported metadata keys, their [[types|00001006030000]], and more
 | [[00000000000092]] | Zettelstore Supported Parser | Lists all supported values for metadata [[syntax|00001006020000#syntax]] that are recognized by Zettelstore
 | [[00000000000096]] | Zettelstore Startup Configuration | Contains the effective values of the [[startup configuration|00001004010000]]
-| [[00000000000100]] | Zettelstore Runtime Configuration | Allows to [[configure Zettelstore at runtime|00001004020000]]
+| [[00000000000100]] | Zettelstore Runtime Configuration | Allows you to [[configure Zettelstore at runtime|00001004020000]]
 | [[00000000010100]] | Zettelstore Base HTML Template | Contains the general layout of the HTML view
 | [[00000000010200]] | Zettelstore Login Form HTML Template | Layout of the login form, when authentication is [[enabled|00001010040100]]
 | [[00000000010300]] | Zettelstore List Zettel HTML Template | Used when displaying a list of zettel
@@ -42,7 +42,7 @@ However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find 
 | [[00000000025001]] | Zettelstore User CSS | User-defined CSS file that is included by the [[Base HTML Template|00000000010100]]
 | [[00000000040001]] | Generic Emoji | Image that is shown if [[original image reference|00001007040322]] is invalid
 | [[00000000060010]] | zettel | [[Role zettel|00001012051800]] for the role ""[[zettel|00001006020100#zettel]]""
-| [[00000000060020]] | configuration | [[Role zettel|00001012051800]] for the role ""[[confguration|00001006020100#configuration]]""
+| [[00000000060020]] | configuration | [[Role zettel|00001012051800]] for the role ""[[configuration|00001006020100#configuration]]""
 | [[00000000060030]] | role | [[Role zettel|00001012051800]] for the role ""[[role|00001006020100#role]]""
 | [[00000000060040]] | tag | [[Role zettel|00001012051800]] for the role ""[[tag|00001006020100#tag]]""
 | [[00000000080001]] | Lists Menu | Default items of the ""Lists"" menu; see [[lists-menu-zettel|00001004020000#lists-menu-zettel]] for customization options

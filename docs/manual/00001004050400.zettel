@@ -4,10 +4,10 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20211124182041
+modified: 20250627160522
 
-Emits some information about the Zettelstore's version.
-This allows you to check, whether your installed Zettelstore is 
+Emits some information about the Zettelstore version.
+This allows you to check whether your installed Zettelstore is up to date.
 
 The name of the software (""Zettelstore"") and the build version information is given, as well as the compiler version, and an indication about the operating system and the processor architecture of that computer.
 
@@ -15,7 +15,7 @@ The build version information is a string like ''1.0.2+351ae138b4''.
 The part ""1.0.2"" is the release version.
 ""+351ae138b4"" is a code uniquely identifying the version to the developer.
 
-Everything after the release version is optional, eg. ""1.4.3"" is a valid build version information too.
+Everything after the release version is optional, e.g. ""1.4.3"" is a valid build version information also.
 
 Example:
 
@@ -25,7 +25,7 @@ Zettelstore 1.0.2+351ae138b4 (go1.16.5@linux/amd64)
 Licensed under the latest version of the EUPL (European Union Public License)
 ```
 In this example, Zettelstore is running in the released version ""1.0.2"" and was compiled using [[Go, version 1.16.5|https://golang.org/doc/go1.16]].
-The software was build for running under a Linux operating system with an ""amd64"" processor.
+The software was built for running under a Linux operating system with an ""amd64"" processor.
 
 The build version is also stored in the public, [[predefined|00001005090000]] zettel titled ""[[Zettelstore Version|00000000000001]]"".
 However, to access this zettel, you need a [[running zettelstore|00001004051000]].

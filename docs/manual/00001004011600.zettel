@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20220307112918
-modified: 20250102222236
+modified: 20250627155851
 
 Under most circumstances, it is preferable to further configure a memory box.
 This is done by appending query parameters after the base box URI ''mem:''.
@@ -15,12 +15,11 @@ The following parameters are supported:
 |max-bytes|Maximum number of bytes the box will store|65535|1073741824 (1 GiB)
 |max-zettel|Maximum number of zettel|127|65535
 
-The default values are somehow arbitrarily, but applicable for many use cases.
+The default values are somewhat arbitrary but applicable to many use cases.
 
-While the number of zettel should be easily calculable by a user, the number of bytes might be a little more difficult.
+While the number of zettel should be easily calculable by a user, the number of bytes might be a bit more difficult to determine.
 
-Metadata consumes 6 bytes for the zettel identifier and for each metadata value one byte for the separator, plus the length of key and data.
-Then size of the content is its size in bytes.
-For text content, its the number of bytes for its UTF-8 encoding.
+Metadata consumes 6 bytes for the zettel identifier, plus one byte for the separator for each metadata value, in addition to the length of the key and data.
+The size of the content is its size in bytes. For text content, this corresponds to the number of bytes in its UTF-8 encoding.
 
-If one of the limits are exceeded, Zettelstore will give an error indication, based on the HTTP status code 507.
+If one of the limits is exceeded, Zettelstore will return an error indicated by the HTTP status code 507.

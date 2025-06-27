@@ -4,10 +4,10 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20230403145644
-modified: 20230403154010
+modified: 20250627124639
 
 A symbolic expression (also called __s-expression__) is a notation of a list-based tree.
-Inner nodes are lists of arbitrary length, outer nodes are primitive values (also called __atoms__) or the empty list.
+Inner nodes are lists of arbitrary length, while outer nodes are either primitive values (also called __atoms__) or the empty list.
 
 A symbolic expression is either
 * a primitive value (__atom__), or

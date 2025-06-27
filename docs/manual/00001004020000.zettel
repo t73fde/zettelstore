@@ -4,13 +4,13 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250626114315
+modified: 20250627160124
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
 This zettel is called __configuration zettel__.
 The following metadata keys change the appearance / behavior of Zettelstore.
-Some of them can be overwritten in an [[user zettel|00001010040200]], a subset of those may be overwritten in zettel that is currently used.
+Some of them can be overwritten in a [[user zettel|00001010040200]], a subset of those may be overwritten in the zettel that is currently used.
 See the full list of [[metadata that may be overwritten|00001004020200]].
 
 ; [!default-copyright|''default-copyright'']
@@ -79,7 +79,7 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   Default: """".
 
   May be [[overwritten|00001004020200]] in a user zettel, so that setting will only affect the given user.
-  Alternatively, it may be overwritten in a zettel, so that that the setting will affect only the given zettel.
+  Alternatively, it may be overwritten in a zettel, so that the setting will affect only the given zettel.
 
   This zettel is an example of a zettel that sets ''show-back-links'' to ""false"".
 ; [!site-name|''site-name'']

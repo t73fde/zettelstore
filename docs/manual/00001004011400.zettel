@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250602181524
+modified: 20250627155540
 
 Under certain circumstances, it is preferable to further configure a file directory box.
 This is done by appending query parameters after the base box URI ''dir:\//DIR''.
@@ -37,11 +37,11 @@ The following values are supported:
 Internally, Zettelstore parallels concurrent requests for a zettel or its metadata.
 The number of parallel activities is configured by the ''worker'' parameter.
 
-A computer contains a limited number of internal processing units (CPU).
-Its number ranges from 1 to (currently) 128, e.g. in bigger server environments.
-Zettelstore typically runs on a system with 1 to 8 CPUs.
-Access to zettel file is ultimately managed by the underlying operating system.
-Depending on the hardware and on the type of the directory box, only a limited number of parallel accesses are desirable.
+A computer contains a limited number of internal processing units (CPUs).
+Their number ranges from 1 up to (currently) 128, for example in larger server environments.
+Zettelstore typically runs on systems with 1 to 8 CPUs.
+Access to zettel files is ultimately managed by the underlying operating system.
+Depending on the hardware and the type of directory box, only a limited number of parallel accesses is desirable.
 
 On smaller hardware[^In comparison to a normal desktop or laptop computer], such as the [[Raspberry Zero|https://www.raspberrypi.org/products/raspberry-pi-zero/]], a smaller value might be appropriate.
 Every worker needs some amount of main memory (RAM) and some amount of processing power.

@@ -4,11 +4,11 @@ role: manual
 tags: #authentication #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250509181249
+modified: 20250627131456
 show-back-links: close
 
 To enable authentication, you must create a zettel that stores [[authentication data|00001010040200]] for the owner.
 Then you must reference this zettel within the [[startup configuration|00001004010000#owner]] under the key ''owner''.
 Once the startup configuration contains a valid [[zettel identifier|00001006050000]] under that key, authentication is enabled.
 
-Please note that you must also set key ''secret'' of the [[startup configuration|00001004010000#secret]] to some random string data (minimum length is 16 bytes) to secure the data exchanged with a client system.
+Please note that you must also set key ''secret'' of the [[startup configuration|00001004010000#secret]] to a random string (minimum length: 16 bytes) to secure the data exchanged with a client system.

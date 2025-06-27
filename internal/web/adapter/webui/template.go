@@ -526,7 +526,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 <head><title>Internal server error</title></head>
 <body>
 <h1>Internal server error</h1>
-<p>When generating error code %d with message:</p><pre>%v</pre><p>an error occured:</p><pre>%v</pre>
+<p>When generating error code %d with message:</p><pre>%v</pre><p>an error occurred:</p><pre>%v</pre>
 </body>
 </html>`, code, text, errSx)
 }

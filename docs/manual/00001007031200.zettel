@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220201142439
-modified: 20250102183744
+modified: 20250627131204
 
 An inline-zettel block allows to specify some content with another syntax without creating a new zettel.
 This is useful, for example, if you want to embed some [[Markdown|00001008010500]] content, because you are too lazy to translate Markdown into Zettelmarkup.
@@ -20,8 +20,8 @@ If no value is provided, ""[[text|00001008000000#text]]"" is assumed.
 
 Any other character in this first line will be ignored.
 
-Text following the beginning line will not be interpreted, until a line begins with at least the same number of the same at-sign characters given at the beginning line.
-This allows to enter some at-sign characters in the text that should not be interpreted at this level.
+Text following the beginning line will not be interpreted until a line starts with at least the same number of identical at-sign characters as those in the beginning line.
+This allows entering at-sign characters in the text that should not be interpreted at this level.
 
 Some examples:
 ```zmk
@@ -52,8 +52,8 @@ Alea iacta est
 @@@
 :::
 :::note
-Please note: some HTML code will not be fully rendered because of possible security implications.
-This include HTML lines that contain a ''<script>'' tag or an ''<iframe>'' tag.
+Please note: some HTML code will not be fully rendered due to possible security implications.
+This includes HTML lines that contain a ''<script>'' tag or an ''<iframe>'' tag.
 :::
 Of course, you do not need to switch the syntax and you are allowed to nest inline-zettel blocks:
 ```zmk

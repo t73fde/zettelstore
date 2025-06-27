@@ -4,7 +4,7 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102191502
+modified: 20250627161222
 
 Zettelstore is a software that manages your zettel.
 Since every zettel must be readable without any special tool, most zettel have to be stored as ordinary files within specific directories.
@@ -31,7 +31,7 @@ Every file in this directory that should be monitored by Zettelstore must have a
 If you create a new zettel via the [[web user interface|00001014000000]] or via the [[API|00001012053200]], the zettel identifier will be the timestamp of the current date and time (format is ''YYYYMMDDhhmmss'').
 This allows zettel to be sorted naturally by creation time.
 
-Since the only restriction on zettel identifiers are the 14 digits, you are free to use other digit sequences.
+Since the only restriction on zettel identifiers is that they consist of 14 digits, you are free to use other digit sequences.
 The [[configuration zettel|00001004020000]] is one prominent example, as well as these manual zettel.
 You can create these special zettel by manually renaming the underlying zettel files.
 
@@ -51,7 +51,7 @@ The solution is a meta-file with the same zettel identifier, but without a filen
 Zettelstore recognizes this situation and reads in both files for the one zettel containing the figure.
 It maintains this relationship as long as these files exist.
 
-In case of some textual zettel content you do not want to store the metadata and the zettel content in two different files.
+In the case of some textual zettel content, you may not want to store the metadata and the zettel content in two separate files.
 Here the ''.zettel'' extension will signal that the metadata and the zettel content will be stored in the same file, separated by an empty line or a line with three dashes (""''-\-\-''"", also known as ""YAML separator"").
 
 === Predefined zettel
@@ -83,10 +83,7 @@ Now we have two places where zettel are stored: in the specific directory and wi
 As described above, a zettel may be stored either as a file inside a directory or within the Zettelstore software itself.
 Zettelstore allows other ways to store zettel by providing an abstraction called __box__.[^Formerly, zettel were stored physically in boxes, often made of wood.]
 
-A file directory which stores zettel is called a ""directory box"".
-But zettel may be also stored in a ZIP file, which is called ""file box"".
-For testing purposes, zettel may be stored in volatile memory (called __RAM__).
-This way is called ""memory box"".
-
-Other types of boxes could be added to Zettelstore.
-What about a ""remote Zettelstore box""?
+A file directory that stores zettel is called a ""directory box"".
+Alternatively, zettel can also be stored in a ZIP file, known as a ""file box"".
+For testing purposes, zettel can be stored in volatile memory (called __RAM__).
+This method is referred to as a ""memory box"".

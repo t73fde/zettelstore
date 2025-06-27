@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250415154347
+modified: 20250627125818
 
 All API endpoints conform to the pattern ''[PREFIX]LETTER[/ZETTEL-ID]'', where:
 ; ''PREFIX''
@@ -12,7 +12,7 @@ All API endpoints conform to the pattern ''[PREFIX]LETTER[/ZETTEL-ID]'', where:
 ; ''LETTER''
 : is a single letter that specifies the resource type,
 ; ''ZETTEL-ID''
-: is an optional 14 digits string that uniquely [[identify a zettel|00001006050000]].
+: is an optional 14-digit string that uniquely [[identifies a zettel|00001006050000]].
 
 The following letters are currently in use:
 

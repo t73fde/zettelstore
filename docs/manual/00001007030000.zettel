@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241212153023
+modified: 20250627132222
 
 Every markup for blocks-structured elements (""blocks"") begins at the very first position of a line.
 
@@ -22,31 +22,31 @@ Ordered lists, unordered lists, and quotation lists can be combined into [[neste
 
 === One-line blocks
 
-* [[Headings|00001007030300]] allow to structure the content of a zettel.
+* [[Headings|00001007030300]] allow you to structure the content of a zettel.
 * The [[horizontal rule|00001007030400]] signals a thematic break
 * A [[transclusion|00001007031100]] embeds the content of one zettel into another.
 
 === Line-range blocks
 
-This kind of blocks encompass at least two lines.
-To be useful, they encompass more lines.
-They begin with at least three identical characters at the first position of the beginning line.
-They end at the line, that contains at least the same number of these identical characters, beginning at the first position of that line.
+This kind of block encompasses at least two lines.
+To be useful, it encompasses more lines.
+It begins with at least three identical characters at the start of the first line.
+It ends at the line that contains at least the same number of these identical characters, starting at the first position of that line.
 This allows line-range blocks to be nested.
-Additionally, all other blocks elements are allowed in line-range blocks.
+Additionally, all other block elements are allowed within line-range blocks.
 
 * [[Verbatim blocks|00001007030500]] do not interpret their content,
 * [[Quotation blocks|00001007030600]] specify a block-length quotations,
 * [[Verse blocks|00001007030700]] allow to enter poetry, lyrics and similar text, where line endings are important,
 * [[Region blocks|00001007030800]] just mark regions, e.g. for common formatting,
-* [[Comment blocks|00001007030900]] allow to enter text that will be ignored when rendered.
+* [[Comment blocks|00001007030900]] allow you to enter text that will be ignored when rendered.
 * [[Evaluation blocks|00001007031300]] specify some content to be evaluated by either Zettelstore or external software.
 * [[Math-mode blocks|00001007031400]] can be used to enter mathematical formulas / equations.
 * [[Inline-Zettel blocks|00001007031200]] provide a mechanism to specify zettel content with a new syntax without creating a new zettel.
 
 === Tables
 
-Similar to lists are tables not specified explicitly.
+Tables, similar to lists, are not specified explicitly.
 A sequence of table rows is considered a [[table|00001007031000]].
 A table row itself is a sequence of table cells.
 
@@ -63,7 +63,7 @@ will be rendered in HTML as
 = Heading
 Some text follows.
 :::
-This is because headings need at least three equal sign character.
+This is because headings require at least three equal sign characters.
 
 A paragraph is essentially a sequence of [[inline-structured elements|00001007040000]].
 Inline-structured elements can span more than one line.
