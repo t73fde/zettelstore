@@ -24,7 +24,6 @@
               (@H "]")))
       ,@(ROLE-DEFAULT-actions (current-frame))
       ,@(let* ((frame (current-frame))(rea (resolve-symbol 'ROLE-EXTRA-actions frame))) (if (defined? rea) (rea frame)))
-      ,@(if (symbol-bound? 'version-url) `((@H " &#183; ") (a (@ (href ,version-url)) "Version")))
       ,@(if (symbol-bound? 'reindex-url) `((@H " &#183; ") (a (@ (href ,reindex-url)) "Reindex")))
       ,@(if (symbol-bound? 'delete-url) `((@H " &#183; ") (a (@ (href ,delete-url)) "Delete")))
     )

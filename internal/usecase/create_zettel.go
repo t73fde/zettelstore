@@ -61,17 +61,6 @@ func (*CreateZettel) PrepareCopy(origZettel zettel.Zettel) zettel.Zettel {
 	return zettel.Zettel{Meta: m, Content: content}
 }
 
-// PrepareVersion the zettel for further modification.
-func (*CreateZettel) PrepareVersion(origZettel zettel.Zettel) zettel.Zettel {
-	origMeta := origZettel.Meta
-	m := origMeta.Clone()
-	m.Set(meta.KeyPrecursor, meta.Value(origMeta.Zid.String()))
-	setReadonly(m)
-	content := origZettel.Content
-	content.TrimSpace()
-	return zettel.Zettel{Meta: m, Content: content}
-}
-
 // PrepareFolge the zettel for further modification.
 func (*CreateZettel) PrepareFolge(origZettel zettel.Zettel) zettel.Zettel {
 	origMeta := origZettel.Meta

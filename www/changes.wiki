@@ -20,8 +20,9 @@
      (breaking: webui)
   *  Remove support for metadata keys <code>predecessor</code> and
      <code>successors</code>. A Zettelstore is not a version control system.
-     Use <code>precursor</code> instead or use your own metadata key (which
-     should end with <code>-zids</code>.
+     Use <code>precursor</code> instead (if appropriate), use your own metadata
+     key (which should end with <code>-zids</code>, or get rid of manually
+     versioned zettel. In the WebUI, action &ldquo;version&rdquo; is removed.
      (breaking)
   *  New query directives <code>FOLGE</code>, <code>SEQUEL</code>, and
      <code>THREAD</code> support folge zettel and sequel zettel (and both). See

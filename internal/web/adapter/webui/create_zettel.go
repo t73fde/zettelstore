@@ -70,8 +70,6 @@ func (wui *WebUI) MakeGetCreateZettelHandler(
 			wui.renderZettelForm(ctx, w, createZettel.PrepareNew(origZettel, newTitle), title, "", roleData, syntaxData)
 		case actionSequel:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareSequel(origZettel), "Sequel Zettel", "", roleData, syntaxData)
-		case actionVersion:
-			wui.renderZettelForm(ctx, w, createZettel.PrepareVersion(origZettel), "Version Zettel", "", roleData, syntaxData)
 		}
 	})
 }

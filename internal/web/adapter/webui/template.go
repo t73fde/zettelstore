@@ -299,7 +299,6 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 		}
 		wui.bindCreateURL(rb, zid, "sequel-url", valueActionSequel)
 		wui.bindCreateURL(rb, zid, "folge-url", valueActionFolge)
-		wui.bindCreateURL(rb, zid, "version-url", valueActionVersion)
 	}
 	if wui.canDelete(ctx, user, m) {
 		rb.bindString("delete-url", sx.MakeString(newURLBuilder('d').SetZid(zid).String()))

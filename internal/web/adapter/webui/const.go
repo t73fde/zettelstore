@@ -19,11 +19,10 @@ const queryKeyAction = "_action"
 
 // Values for queryKeyAction
 const (
-	valueActionCopy    = "copy"
-	valueActionFolge   = "folge"
-	valueActionNew     = "new"
-	valueActionSequel  = "sequel"
-	valueActionVersion = "version"
+	valueActionCopy   = "copy"
+	valueActionFolge  = "folge"
+	valueActionNew    = "new"
+	valueActionSequel = "sequel"
 )
 
 // Enumeration for queryKeyAction
@@ -34,15 +33,13 @@ const (
 	actionFolge
 	actionNew
 	actionSequel
-	actionVersion
 )
 
 var createActionMap = map[string]createAction{
-	valueActionSequel:  actionSequel,
-	valueActionCopy:    actionCopy,
-	valueActionFolge:   actionFolge,
-	valueActionNew:     actionNew,
-	valueActionVersion: actionVersion,
+	valueActionSequel: actionSequel,
+	valueActionCopy:   actionCopy,
+	valueActionFolge:  actionFolge,
+	valueActionNew:    actionNew,
 }
 
 func getCreateAction(s string) createAction {
