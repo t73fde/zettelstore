@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210810155955
-modified: 20250313140836
+modified: 20250701130556
 
 There are two kinds of links, regardless of links to (internal) other zettel or to (external) material.
 Both kinds begin with two consecutive left square bracket characters (""''[''"", U+005B) and end with two consecutive right square bracket characters (""'']''"", U+005D).
@@ -32,7 +32,7 @@ Such references will be interpreted relative to the web server hosting the Zette
 
 If a link specification begins with two slash characters (called __based reference__), it will be interpreted relative to the value of [[''url-prefix''|00001004010000#url-prefix]].
 
-To specify some material outside the Zettelstore, just use a normal Uniform Resource Identifier (URI) as defined by [[RFC\ 3986|https://tools.ietf.org/html/rfc3986]].
+To specify some material outside the Zettelstore, just use a normal Uniform Resource Identifier (URI) as defined by [[RFC\ 3986|https://datatracker.ietf.org/doc/html/rfc3986]].
 
 === Other topics
 If the link references another zettel, and this zettel is not readable for the current user, e.g. because of missing access rights, then only the associated text is presented.

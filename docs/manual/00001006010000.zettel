@@ -4,10 +4,10 @@ role: manual
 tags: #manual #syntax #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240219193158
+modified: 20250701130629
 
 The metadata of a zettel is a collection of key-value pairs.
-The syntax roughly resembles the internal header of an email ([[RFC5322|https://tools.ietf.org/html/rfc5322]]).
+The syntax roughly resembles the internal header of an email ([[RFC5322|https://datatracker.ietf.org/doc/html/rfc5322]]).
 
 The key is a sequence of alphanumeric characters, a hyphen-minus character (""''-''"", U+002D) is also allowed.
 It begins at the first position of a new line.

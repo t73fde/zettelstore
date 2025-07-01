@@ -4,14 +4,14 @@ role: manual
 tags: #manual #reference #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220827182130
+modified: 20250701130735
 
 With an [[attribute|00001007050000]] it is possible to specify the natural language of a text region.
 This is important, if you want to render your markup into an environment, where this is significant.
 HTML is such an environment.
 
 To specify the language within an attribute, you must use the key ''lang''.
-The language itself is specified according to the language definition of [[RFC-5646|https://tools.ietf.org/html/rfc5646]].
+The language itself is specified according to the language definition of [[RFC-5646|https://datatracker.ietf.org/doc/html/rfc5646]].
 
 Examples:
 * ``{lang=en}`` for the english language

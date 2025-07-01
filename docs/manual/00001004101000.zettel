@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210510141304
-modified: 20250102190201
+modified: 20250701130043
 
 ; [!bye|''bye'']
 : Closes the connection to the administrator console.
@@ -52,7 +52,7 @@ modified: 20250102190201
   ''VALUE'' is either the name of the log level or its numerical value.
 ; [!metrics|''metrics'']
 : Displays some values that reflect the inner workings of Zettelstore.
-  See [[here|https://golang.org/pkg/runtime/metrics/]] for a technical description of these values.
+  See [[here|https://pkg.go.dev/runtime/metrics]] for a technical description of these values.
 ; [!next-config|''next-config'']
 : Displays next configuration data.
   It will be the current configuration, if the corresponding services is restarted.

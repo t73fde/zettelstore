@@ -4,13 +4,13 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20211125191727
-modified: 20250627152603
+modified: 20250701130205
 
 Windows is a complicated beast. There are several ways to automatically start Zettelstore.
 
 === Startup folder
 
-One way is to use the [[autostart folder|https://support.microsoft.com/en-us/windows/add-an-app-to-run-automatically-at-startup-in-windows-10-150da165-dcd9-7230-517b-cf3c295d89dd]].
+One way is to use the [[autostart folder|https://support.microsoft.com/en-us/windows/configure-startup-applications-in-windows-115a420a-0bff-4a6f-90e0-1934c844e473]].
 Open the folder where you have placed in the Explorer.
 Create a shortcut file for the Zettelstore executable.
 There are some ways to do this:

@@ -4,12 +4,12 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220218130020
+modified: 20250701134911
 
 The [[authentication process|00001012050200]] provides you with an [[access token|00001012921000]].
 Most API calls need such an access token, so that they know the identity of the caller.
 
-You send the access token in the ""Authorization"" request header field, as described in [[RFC 6750, section 2.1|https://tools.ietf.org/html/rfc6750#section-2.1]].
+You send the access token in the ""Authorization"" request header field, as described in [[RFC 6750, section 2.1|https://datatracker.ietf.org/doc/html/rfc6750#section-2.1]].
 You need to use the ""Bearer"" authentication scheme to transmit the access token.
 
 For example (in plain text HTTP):
@@ -19,4 +19,4 @@ Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.eyJfdGsiOjEsImV4cCI6MTYwMTczMTI3NSwia
 ```
 Note, that there is exactly one space character (""'' ''{-}"", U+0020) between the string ""Bearer"" and the access token: ``Authorization: Bearer eyJhbGciOiJIUzUxMiJ9.ey...``{-}.
 
-If you use the [[curl|https://curl.haxx.se/]] tool, you can use the ''-H'' command line parameter to set this header field.
+If you use the [[curl|https://curl.se/]] tool, you can use the ''-H'' command line parameter to set this header field.

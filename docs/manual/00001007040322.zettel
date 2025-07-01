@@ -4,13 +4,13 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210811154251
-modified: 20250102222115
+modified: 20250701130320
 
 Image content is assumed, if a URL is used or if the referenced zettel contains an image.
 
 Supported formats are:
 
-* Portable Network Graphics (""PNG""), as defined by [[RFC\ 2083|https://tools.ietf.org/html/rfc2083]].
+* Portable Network Graphics (""PNG""), as defined by [[RFC\ 2083|https://datatracker.ietf.org/doc/html/rfc2083]].
 * Graphics Interchange Format (""GIF"), as defined by [[https://www.w3.org/Graphics/GIF/spec-gif89a.txt]].
 * JPEG / JPG, defined by the __Joint Photographic Experts Group__.
 * Scalable Vector Graphics (SVG), defined by [[https://www.w3.org/Graphics/SVG/]]

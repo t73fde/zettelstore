@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #encryption #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250602182154
+modified: 20250701125905
 
 Since Zettelstore does not encrypt the messages it exchanges with its clients, you may need some additional software to enable encryption.
 
@@ -38,7 +38,7 @@ There exists software dedicated for this task of handling the encryption part.
 Some examples:
 
 * [[stunnel|https://www.stunnel.org/]] (""a proxy designed to add TLS encryption functionality to existing clients and servers without any changes in the programs' code."")
-* [[Traefik|https://traefik.io/]]: set-up a [[router|https://docs.traefik.io/routing/routers/]].
+* [[Traefik|https://traefik.io/]]: set-up a [[router|https://doc.traefik.io/traefik/routing/routers/]].
 
 === Example configuration for Caddy
 For the inexperienced owner of a Zettelstore, [[Caddy|https://caddyserver.com/]] is a good option[^In fact, the [[server-based installation procedure|00001003000000]] of Zettelstore was inspired by Caddy.].

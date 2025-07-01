@@ -4,13 +4,13 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20230807165915
+modified: 20250701134823
 
 If the [[authentication process|00001012050200]] was successful, an access token with some additional data is returned.
 The same is true, if the access token was [[renewed|00001012050400]].
 The response is structured as a [[symbolic expression|00001012930000]] list, with the following elements:
 
-# The type of the token, always set to ''"Bearer"'', as described in [[RFC 6750|https://tools.ietf.org/html/rfc6750]]
+# The type of the token, always set to ''"Bearer"'', as described in [[RFC 6750|https://datatracker.ietf.org/doc/html/rfc6750]]
 # The token itself, which is technically the string representation of a [[symbolic expression|00001012930500]] containing relevant data, plus a check sum.
 #* The symbolic expression has the form ''(KIND USERNAME NOW EXPIRE Z-ID)''
 #* ''KIND'' is ''0'' for an API access, ''1'' if it created for the Web user interface.

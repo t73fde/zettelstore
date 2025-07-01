@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250626114159
+modified: 20250701130724
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -68,7 +68,7 @@ Most keys conform to a [[type|00001006030000]].
 
   If not given, the value ''lang'' from the zettel of the [[current user|00001010040200]] will be used.
   If that value is also not available, it is read from the [[configuration zettel|00001004020000#lang]] will be used.
-  Use values according to the language definition of [[RFC-5646|https://tools.ietf.org/html/rfc5646]].
+  Use values according to the language definition of [[RFC-5646|https://datatracker.ietf.org/doc/html/rfc5646]].
 ; [!license|''license'']
 : Defines a license string that will be rendered.
   If not given, the value ''default-license'' from the [[configuration zettel|00001004020000#default-license]] will be used.

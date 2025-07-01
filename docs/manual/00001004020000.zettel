@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627160124
+modified: 20250701130707
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -53,7 +53,7 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   This value is used as a default value, if it is not set in a user's zettel or in a zettel.
   It is also used to specify the language for all non-zettel content, e.g. lists or search results.
 
-  Use values according to the language definition of [[RFC-5646|https://tools.ietf.org/html/rfc5646]].
+  Use values according to the language definition of [[RFC-5646|https://datatracker.ietf.org/doc/html/rfc5646]].
 ; [!lists-menu-zettel|''lists-menu-zettel'']
 : Identifier of the zettel that specifies entries of the ""Lists"" menu (in the [[Web user interface|00001014000000]]).
   Every list item with a [[link|00001007040310]] is translated into a menu entry.

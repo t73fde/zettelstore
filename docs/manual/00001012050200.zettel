@@ -4,19 +4,19 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102215926
+modified: 20250701134955
 
 Authentication for future API calls is done by sending a [[user identification|00001010040200]] and a password to the Zettelstore to obtain an [[access token|00001010040700]].
 This token has to be used for other API calls.
 It is valid for a relatively short amount of time, as configured with the key ''token-lifetime-api'' of the [[startup configuration|00001004010000#token-lifetime-api]] (typically 10 minutes).
 
-The simplest way is to send user identification (''IDENT'') and password (''PASSWORD'') via [[HTTP Basic Authentication|https://tools.ietf.org/html/rfc7617]] and send them to the [[endpoint|00001012920000]] ''/a'' with a POST request:
+The simplest way is to send user identification (''IDENT'') and password (''PASSWORD'') via [[HTTP Basic Authentication|https://datatracker.ietf.org/doc/html/rfc7617]] and send them to the [[endpoint|00001012920000]] ''/a'' with a POST request:
 ```sh
 # curl -X POST -u IDENT:PASSWORD http://127.0.0.1:23123/a
 ("Bearer" "eyJhbGciOiJIUzUxMiJ9.eyJfdGsiOjEsImV4cCI6MTY4MTMwNDA2MiwiaWF0IjoxNjgxMzA0MDAyLCJzdWIiOiJvd25lciIsInppZCI6IjIwMjEwNjI5MTYzMzAwIn0.kdF8PdiL50gIPkRD3ovgR6nUXR0-80EKAXcY2zVYgYvryF09iXnNR3zrvYnGzdrArMcnvAYqVvuXtqhQj2jG9g" 600)
 ```
 
-Some tools, like [[curl|https://curl.haxx.se/]], also allow to specify user identification and password as part of the URL:
+Some tools, like [[curl|https://curl.se/]], also allow to specify user identification and password as part of the URL:
 ```sh
 # curl -X POST http://IDENT:PASSWORD@127.0.0.1:23123/a
 ("Bearer" "eyJhbGciOiJIUzUxMiJ9.eyJfdGsiOjEsImV4cCI6MTY4MTMwNDA4NiwiaWF0IjoxNjgxMzA0MDI2LCJzdWIiOiJvd25lciIsInppZCI6IjIwMjEwNjI5MTYzMzAwIn0.kZd3prYc79dt9efDsrYVHtKrjWyOWvfByjeeUB3hf_vs43V3SNJqmb8k-zTHVNWOK0-5orVPrg2tIAqbXqmkhg" 600)

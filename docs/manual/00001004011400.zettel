@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627155540
+modified: 20250701135923
 
 Under certain circumstances, it is preferable to further configure a file directory box.
 This is done by appending query parameters after the base box URI ''dir:\//DIR''.
@@ -43,7 +43,7 @@ Zettelstore typically runs on systems with 1 to 8 CPUs.
 Access to zettel files is ultimately managed by the underlying operating system.
 Depending on the hardware and the type of directory box, only a limited number of parallel accesses is desirable.
 
-On smaller hardware[^In comparison to a normal desktop or laptop computer], such as the [[Raspberry Zero|https://www.raspberrypi.org/products/raspberry-pi-zero/]], a smaller value might be appropriate.
+On smaller hardware[^In comparison to a normal desktop or laptop computer], such as the [[Raspberry Pi Zero|https://www.raspberrypi.com/products/raspberry-pi-zero/]], a smaller value might be appropriate.
 Every worker needs some amount of main memory (RAM) and some amount of processing power.
 On bigger hardware, with some fast file services, a bigger value could result in higher performance, if needed.
 
