@@ -48,6 +48,9 @@
      (minor: webui)
   *  Move context link to zettel page.
      (minor: webui)
+  *  Make writing to zettel files more robust. When an error occurs, the state
+     before writing the file is restored.
+     (info)
 
 <a id="0_21"></a>
 <h2>Changes for Version 0.21.0 (2025-04-17)</h2>

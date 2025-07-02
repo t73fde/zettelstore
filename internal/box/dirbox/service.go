@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"t73f.de/r/zero/oso"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
@@ -209,7 +210,7 @@ func (cmd *fileSetZettel) run(dirPath string) {
 				cmd.rc <- err
 				return
 			}
-			err = writeFileContent(contentPath, content)
+			err = writeFileContent(contentPath, makeTempPrefix(zid), content)
 		}
 		cmd.rc <- err
 		return
@@ -217,39 +218,33 @@ func (cmd *fileSetZettel) run(dirPath string) {
 
 	err = writeMetaFile(filepath.Join(dirPath, metaName), m)
 	if err == nil && contentName != "" {
-		err = writeFileContent(filepath.Join(dirPath, contentName), content)
+		err = writeFileContent(filepath.Join(dirPath, contentName), makeTempPrefix(zid), content)
 	}
 	cmd.rc <- err
 }
 
+func makeTempPrefix(zid id.Zid) string { return "tmp-" + zid.String() }
+
 func writeMetaFile(metaPath string, m *meta.Meta) error {
-	metaFile, err := openFileWrite(metaPath)
+	metaFile, err := oso.SafeWriteWith(metaPath, makeTempPrefix(m.Zid))
 	if err != nil {
 		return err
 	}
-	err = writeFileZid(metaFile, m.Zid)
-	if err == nil {
-		_, err = m.WriteComputed(metaFile)
-	}
-	if err1 := metaFile.Close(); err == nil {
-		err = err1
-	}
-	return err
+	defer metaFile.RollbackIfNeeded()
+	writeFileZid(metaFile, m.Zid)
+	_, _ = m.WriteComputed(metaFile)
+	return metaFile.Close()
 }
 
 func writeZettelFile(contentPath string, m *meta.Meta, content []byte) error {
-	zettelFile, err := openFileWrite(contentPath)
+	zettelFile, err := oso.SafeWriteWith(contentPath, makeTempPrefix(m.Zid))
 	if err != nil {
 		return err
 	}
-	err = writeMetaHeader(zettelFile, m)
-	if err == nil {
-		_, err = zettelFile.Write(content)
-	}
-	if err1 := zettelFile.Close(); err == nil {
-		err = err1
-	}
-	return err
+	defer zettelFile.RollbackIfNeeded()
+	writeMetaHeader(zettelFile, m)
+	_, _ = zettelFile.Write(content)
+	return zettelFile.Close()
 }
 
 var (
@@ -257,27 +252,17 @@ var (
 	yamlSep = []byte{'-', '-', '-', '\n'}
 )
 
-func writeMetaHeader(w io.Writer, m *meta.Meta) (err error) {
+func writeMetaHeader(w io.Writer, m *meta.Meta) {
 	if m.YamlSep {
-		_, err = w.Write(yamlSep)
-		if err != nil {
-			return err
-		}
+		_, _ = w.Write(yamlSep)
 	}
-	err = writeFileZid(w, m.Zid)
-	if err != nil {
-		return err
-	}
-	_, err = m.WriteComputed(w)
-	if err != nil {
-		return err
-	}
+	writeFileZid(w, m.Zid)
+	_, _ = m.WriteComputed(w)
 	if m.YamlSep {
-		_, err = w.Write(yamlSep)
+		_, _ = w.Write(yamlSep)
 	} else {
-		_, err = w.Write(newline)
+		_, _ = w.Write(newline)
 	}
-	return err
 }
 
 // COMMAND: srvDeleteZettel ----------------------------------------
@@ -364,34 +349,18 @@ func cmdCleanupMeta(m *meta.Meta, entry *notify.DirEntry) {
 	)
 }
 
-// fileMode to create a new file: user, group, and all are allowed to read and write.
-//
-// If you want to forbid others or the group to read or to write, you must set
-// umask(1) accordingly.
-const fileMode os.FileMode = 0666 //
-
-func openFileWrite(path string) (*os.File, error) {
-	return os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, fileMode)
+func writeFileZid(w io.Writer, zid id.Zid) {
+	_, _ = io.WriteString(w, "id: ")
+	_, _ = w.Write(zid.Bytes())
+	_, _ = io.WriteString(w, "\n")
 }
 
-func writeFileZid(w io.Writer, zid id.Zid) error {
-	_, err := io.WriteString(w, "id: ")
-	if err == nil {
-		_, err = w.Write(zid.Bytes())
-		if err == nil {
-			_, err = io.WriteString(w, "\n")
-		}
+func writeFileContent(path, prefix string, content []byte) error {
+	f, err := oso.SafeWriteWith(path, prefix)
+	if err != nil {
+		return err
 	}
-	return err
-}
-
-func writeFileContent(path string, content []byte) error {
-	f, err := openFileWrite(path)
-	if err == nil {
-		_, err = f.Write(content)
-		if err1 := f.Close(); err == nil {
-			err = err1
-		}
-	}
-	return err
+	defer f.RollbackIfNeeded()
+	_, _ = f.Write(content)
+	return f.Close()
 }
