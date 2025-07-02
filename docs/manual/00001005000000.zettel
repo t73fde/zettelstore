@@ -4,12 +4,12 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627161222
+modified: 20250702180913
 
-Zettelstore is a software that manages your zettel.
-Since every zettel must be readable without any special tool, most zettel have to be stored as ordinary files within specific directories.
-Typically, file names and file content must comply with specific rules so that Zettelstore can manage them.
-If you add, delete, or change zettel files with other tools, e.g. a text editor, Zettelstore will monitor these actions.
+Zettelstore is a software application that manages your zettel.
+Since each zettel must be readable without any special tools, most of them are stored as ordinary files within specific directories.
+Typically, both file names and file content must follow certain rules so that Zettelstore can manage them properly.
+If you add, delete, or modify zettel files with other tools, e.g. a text editor, Zettelstore will monitor these changes.
 
 Zettelstore provides additional services to the user.
 Via the built-in [[web user interface|00001014000000]] you can work with zettel in various ways.
