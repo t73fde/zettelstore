@@ -63,8 +63,6 @@ func countNegatedOps(vals []expValue) int {
 }
 
 func (ct *conjTerms) createSelectSpecs() (posSpecs, negSpecs []matchSpec) {
-	posSpecs = make([]matchSpec, 0, len(ct.mvals))
-	negSpecs = make([]matchSpec, 0, len(ct.mvals))
 	for key, values := range ct.mvals {
 		if !meta.KeyIsValid(key) {
 			continue
@@ -82,11 +80,10 @@ func (ct *conjTerms) createSelectSpecs() (posSpecs, negSpecs []matchSpec) {
 
 type addSearchFunc func(val expValue)
 
-func noAddSearch(expValue) { /* Just does nothing, for negated queries */ }
+func noAddSearch(expValue) { /* Just does nothing, for negated queries, or property keys */ }
 
 func createPosNegMatchFunc(key string, values []expValue, addSearch addSearchFunc) (posMatch, negMatch matchValueFunc) {
-	posValues := make([]expValue, 0, len(values))
-	negValues := make([]expValue, 0, len(values))
+	var posValues, negValues []expValue
 	for _, val := range values {
 		if val.op.isNegated() {
 			negValues = append(negValues, val)
