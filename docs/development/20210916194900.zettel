@@ -3,7 +3,7 @@ title: Checklist for Release
 role: zettel
 syntax: zmk
 created: 20210916194900
-modified: 20241213125640
+modified: 20250702180238
 
 # Sync with the official repository:
 #* ``fossil sync -u``
@@ -11,6 +11,9 @@ modified: 20241213125640
 #* ``ls ..`` must not have a file ''go.work'', in no parent folder.
 # Make sure that all dependencies are up-to-date:
 #* ``cat go.mod``
+# Ensure clean indirect dependencies:
+#* ``go mod graph | modgraphviz | dot -Tpdf -o /tmp/zsgraph.pdf``
+#* Grey boxes signal outdated dependencies
 # Clean up your Go workspace:
 #* ``go run tools/clean/clean.go`` (alternatively: ``make clean``)
 # All internal tests must succeed:
