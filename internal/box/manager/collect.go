@@ -16,12 +16,12 @@ package manager
 import (
 	"strings"
 
+	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box/manager/store"
-	"zettelstore.de/z/strfun"
 )
 
 type collectData struct {
@@ -61,7 +61,7 @@ func (data *collectData) Visit(node ast.Node) ast.Visitor {
 }
 
 func (data *collectData) addText(s string) {
-	for _, word := range strfun.NormalizeWords(s) {
+	for _, word := range zerostrings.NormalizeWords(s) {
 		data.words.Add(word)
 	}
 }

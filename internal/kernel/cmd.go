@@ -24,8 +24,9 @@ import (
 	"strconv"
 	"strings"
 
+	zerostrings "t73f.de/r/zero/strings"
+
 	"zettelstore.de/z/internal/logging"
-	"zettelstore.de/z/strfun"
 )
 
 type cmdSession struct {
@@ -99,7 +100,7 @@ func (sess *cmdSession) calcMaxLen(table [][]string) []int {
 			if colno >= len(maxLen) {
 				maxLen = append(maxLen, 0)
 			}
-			colLen := strfun.Length(column)
+			colLen := zerostrings.Length(column)
 			if colLen <= maxLen[colno] {
 				continue
 			}
@@ -113,7 +114,7 @@ func (sess *cmdSession) printRow(row []string, maxLen []int, prefix, delim strin
 	for colno, column := range row {
 		_, _ = io.WriteString(sess.w, prefix)
 		prefix = delim
-		_, _ = io.WriteString(sess.w, strfun.JustifyLeft(column, maxLen[colno], pad))
+		_, _ = io.WriteString(sess.w, zerostrings.JustifyLeft(column, maxLen[colno], pad))
 	}
 	_, _ = sess.w.Write(sess.eol)
 }

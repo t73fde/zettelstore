@@ -19,9 +19,10 @@ import (
 	"strconv"
 	"strings"
 
+	zerostrings "t73f.de/r/zero/strings"
+
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/encoder"
-	"zettelstore.de/z/strfun"
 )
 
 // Clean cleans the given block list.
@@ -122,7 +123,7 @@ func (cv *cleanVisitor) visitHeading(hn *ast.HeadingNode) {
 		if err != nil {
 			return
 		}
-		hn.Slug = strfun.Slugify(sb.String())
+		hn.Slug = zerostrings.Slugify(sb.String())
 	}
 	if hn.Slug != "" {
 		hn.Fragment = cv.addIdentifier(hn.Slug, hn)
@@ -140,7 +141,7 @@ func (cv *cleanVisitor) visitMark(mn *ast.MarkNode) {
 		return
 	}
 	if mn.Slug == "" {
-		mn.Slug = strfun.Slugify(mn.Mark)
+		mn.Slug = zerostrings.Slugify(mn.Mark)
 	}
 	mn.Fragment = cv.addIdentifier(mn.Slug, mn)
 }

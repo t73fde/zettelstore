@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"time"
 
+	"t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
@@ -28,7 +29,6 @@ import (
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/zettel"
-	"zettelstore.de/z/strfun"
 )
 
 // SearchEqual returns all zettel that contains the given exact word.
@@ -197,7 +197,7 @@ func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *st
 }
 
 func idxCollectMetaValue(stWords store.WordSet, value string) {
-	if words := strfun.NormalizeWords(value); len(words) > 0 {
+	if words := strings.NormalizeWords(value); len(words) > 0 {
 		for _, word := range words {
 			stWords.Add(word)
 		}

@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
+	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -31,7 +32,6 @@ import (
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/usecase"
-	"zettelstore.de/z/strfun"
 )
 
 // MakeGetInfoHandler creates a new HTTP handler for the use case "get zettel".
@@ -138,7 +138,7 @@ func createUnlinkedQuery(zid id.Zid, phrase string) *query.Query {
 	sb.Write(zid.Bytes())
 	sb.WriteByte(' ')
 	sb.WriteString(api.UnlinkedDirective)
-	for _, word := range strfun.MakeWords(phrase) {
+	for _, word := range zerostrings.MakeWords(phrase) {
 		sb.WriteByte(' ')
 		sb.WriteString(api.PhraseDirective)
 		sb.WriteByte(' ')

@@ -23,7 +23,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"zettelstore.de/z/strfun"
+	zerostrings "t73f.de/r/zero/strings"
 )
 
 // Some constants to make Go work with fossil.
@@ -118,7 +118,7 @@ func CheckGoTest(pkg string, testParams ...string) error {
 	args = append(args, testParams...)
 	out, err := ExecuteCommand(env, "go", args...)
 	if err != nil {
-		for _, line := range strfun.SplitLines(out) {
+		for _, line := range zerostrings.SplitLines(out) {
 			if strings.HasPrefix(line, "ok") || strings.HasPrefix(line, "?") {
 				continue
 			}
@@ -242,7 +242,7 @@ func checkFossilExtra() error {
 	}
 	if len(out) > 0 {
 		fmt.Fprint(os.Stderr, "Warning: unversioned file(s):")
-		for i, extra := range strfun.SplitLines(out) {
+		for i, extra := range zerostrings.SplitLines(out) {
 			if i > 0 {
 				fmt.Fprint(os.Stderr, ",")
 			}

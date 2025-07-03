@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strings"
 
+	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
@@ -29,7 +30,6 @@ import (
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
-	"zettelstore.de/z/strfun"
 )
 
 // QueryPort is the interface used by this use case.
@@ -263,7 +263,7 @@ func (v *unlinkedVisitor) splitInlineTextList(is *ast.InlineSlice) []string {
 	for _, in := range *is {
 		switch n := in.(type) {
 		case *ast.TextNode:
-			curList = append(curList, strfun.MakeWords(n.Text)...)
+			curList = append(curList, zerostrings.MakeWords(n.Text)...)
 		default:
 			if curList != nil {
 				result = append(result, v.joinWords(curList))

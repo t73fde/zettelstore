@@ -24,9 +24,8 @@ import (
 	"sync"
 	"time"
 
+	"t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
-
-	"zettelstore.de/z/strfun"
 )
 
 type coreService struct {
@@ -146,7 +145,7 @@ func (cs *coreService) RecoverLines(name string) []string {
 			fmt.Sprintf("Time: %v", ri.ts),
 			fmt.Sprintf("Reason: %v", ri.info),
 		},
-		strfun.SplitLines(string(ri.stack))...,
+		strings.SplitLines(string(ri.stack))...,
 	)
 }
 

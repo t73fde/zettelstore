@@ -27,10 +27,11 @@ import (
 	"strings"
 	"time"
 
+	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
-	"zettelstore.de/z/strfun"
+
 	"zettelstore.de/z/tools"
 )
 
@@ -62,7 +63,7 @@ func readFossilDirty() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	for _, line := range strfun.SplitLines(s) {
+	for _, line := range zerostrings.SplitLines(s) {
 		for _, prefix := range dirtyPrefixes {
 			if strings.HasPrefix(line, prefix) {
 				return dirtySuffix, nil

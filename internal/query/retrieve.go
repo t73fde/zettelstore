@@ -19,8 +19,8 @@ import (
 	"fmt"
 	"strings"
 
+	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id/idset"
-	"zettelstore.de/z/strfun"
 )
 
 type searchOp struct {
@@ -69,7 +69,7 @@ func prepareRetrieveCalls(searcher Searcher, search []expValue) (normCalls, plai
 	normCalls = make(searchCallMap, len(search))
 	negCalls = make(searchCallMap, len(search))
 	for _, val := range search {
-		for _, word := range strfun.NormalizeWords(string(val.value)) {
+		for _, word := range zerostrings.NormalizeWords(string(val.value)) {
 			if cmpOp := val.op; cmpOp.isNegated() {
 				cmpOp = cmpOp.negate()
 				negCalls.addSearch(word, cmpOp, getSearchFunc(searcher, cmpOp))

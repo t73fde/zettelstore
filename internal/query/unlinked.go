@@ -14,9 +14,9 @@
 package query
 
 import (
+	"t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
-	"zettelstore.de/z/strfun"
 )
 
 // UnlinkedSpec contains all specification values to calculate unlinked references.
@@ -46,7 +46,7 @@ func (spec *UnlinkedSpec) GetWords(metaSeq []*meta.Meta) []string {
 		if !hasTitle {
 			continue
 		}
-		result = append(result, strfun.MakeWords(string(title))...)
+		result = append(result, strings.MakeWords(string(title))...)
 	}
 	return result
 }
