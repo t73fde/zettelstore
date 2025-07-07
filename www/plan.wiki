@@ -3,19 +3,19 @@
 Here is a list of some shortcomings of Zettelstore.
 They are planned to be solved.
 
-  *  Zettelstore must have indexed all zettel to make use of queries.
-     Otherwise not all zettel may be returned.
-  *  Quoted attribute values are not yet supported in Zettelmarkup:
-     <code>{key="value with space"}</code>.
+  *  All zettel must be indexed to enable full query functionality; otherwise,
+     some zettel may not be returned.
+  *  Quoted attribute values are not yet supported in Zettelmarkup
+     (e.g. <code>{key="value with space"}</code>).
   *  The horizontal tab character (<tt>U+0009</tt>) is not fully supported by
      the parser.
-  *  Missing support for citation keys.
-  *  Changing the content syntax is not reflected in file extension.
-  *  File names with additional text besides the zettel identifier are not
+  *  Citation keys are not yet supported.
+  *  Changes to the content syntax are not reflected in the file extension.
+  *  File names containing additional text beyond the zettel identifier are not
      always preserved.
-  *  Some file systems differentiate filenames with different cases (e.g. some
-     on Linux, sometimes on macOS), others do not (default on macOS, most on
-     Windows). Zettelstore is not able to detect these differences. Do not put
-     files in your directory boxes and in files boxes that differ only by upper
-     / lower case letters.
+  *  Case sensitivity in file names is not consistently handled. Some file
+     systems distinguish between upper and lower case (e.g., Linux, sometimes
+     macOS), while others do not (e.g., default macOS, most Windows systems).
+     Zettelstore cannot detect these differences. Avoid using files that differ
+     only by case in your directory boxes or file boxes.
   *  &hellip;
