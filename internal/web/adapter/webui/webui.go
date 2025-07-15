@@ -193,9 +193,6 @@ func (wui *WebUI) getSimpleHTMLEncoder(lang string) *htmlGenerator {
 	return wui.createGenerator(wui, lang)
 }
 
-// GetURLPrefix returns the configured URL prefix of the web server.
-func (wui *WebUI) GetURLPrefix() string { return wui.ab.GetURLPrefix() }
-
 // NewURLBuilder creates a new URL builder object with the given key.
 func (wui *WebUI) NewURLBuilder(key byte) *api.URLBuilder { return wui.ab.NewURLBuilder(key) }
 

@@ -99,11 +99,8 @@ func (srv *webServer) SetUserRetriever(ur UserRetriever) {
 	srv.router.ur = ur
 }
 
-func (srv *webServer) GetURLPrefix() string {
-	return srv.router.urlPrefix
-}
 func (srv *webServer) NewURLBuilder(key byte) *api.URLBuilder {
-	return api.NewURLBuilder(srv.GetURLPrefix(), key)
+	return api.NewURLBuilder(srv.router.urlPrefix, key)
 }
 func (srv *webServer) NewURLBuilderAbs(key byte) *api.URLBuilder {
 	return api.NewURLBuilder(srv.baseURL, key)
@@ -115,7 +112,7 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 	cookie := http.Cookie{
 		Name:     sessionName,
 		Value:    string(token),
-		Path:     srv.GetURLPrefix(),
+		Path:     srv.router.urlPrefix,
 		Secure:   srv.secureCookie,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,

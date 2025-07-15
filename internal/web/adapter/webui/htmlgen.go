@@ -35,7 +35,6 @@ import (
 
 // Builder allows to build new URLs for the web service.
 type urlBuilder interface {
-	GetURLPrefix() string
 	NewURLBuilder(key byte) *api.URLBuilder
 }
 

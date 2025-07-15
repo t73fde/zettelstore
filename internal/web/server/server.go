@@ -52,7 +52,6 @@ type Router interface {
 
 // Builder allows to build new URLs for the web service.
 type Builder interface {
-	GetURLPrefix() string
 	NewURLBuilder(key byte) *api.URLBuilder
 	NewURLBuilderAbs(key byte) *api.URLBuilder
 }
