@@ -13,15 +13,15 @@
 
 `(article
   (header (h1 "Login"))
-  ,@(if retry '((div (@ (class "zs-indication zs-error")) "Wrong user name / password. Try again.")))
-  (form (@ (method "POST") (action ""))
+  ,@(if retry '((div ((class "zs-indication zs-error")) "Wrong user name / password. Try again.")))
+  (form ((method "POST") (action ""))
     (div
-      (label (@ (for "username")) "User name:")
-      (input (@ (class "zs-input") (type "text") (id "username") (name "username") (placeholder "Your user name..") (autofocus))))
+      (label ((for "username")) "User name:")
+      (input ((class "zs-input") (type "text") (id "username") (name "username") (placeholder "Your user name..") (autofocus))))
     (div
-      (label (@ (for "password")) "Password:")
-      (input (@ (class "zs-input") (type "password") (id "password") (name "password") (placeholder "Your password.."))))
+      (label ((for "password")) "Password:")
+      (input ((class "zs-input") (type "password") (id "password") (name "password") (placeholder "Your password.."))))
     (div
-      (input (@ (class "zs-primary") (type "submit") (value "Login"))))
+      (input ((class "zs-primary") (type "submit") (value "Login"))))
   )
 )

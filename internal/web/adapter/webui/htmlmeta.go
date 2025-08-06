@@ -54,7 +54,6 @@ func (wui *WebUI) writeHTMLMetaValue(
 			return sx.MakeList(
 				sx.MakeSymbol("time"),
 				sx.MakeList(
-					sxhtml.SymAttr,
 					sx.Cons(sx.MakeSymbol("datetime"), sx.MakeString(ts.Format("2006-01-02T15:04:05"))),
 				),
 				sx.MakeList(sxhtml.SymNoEscape, sx.MakeString(ts.Format("2006-01-02&nbsp;15:04:05"))),
@@ -84,7 +83,7 @@ func (wui *WebUI) transformIdentifier(val meta.Value, getTextTitle getTextTitleF
 		if title != "" {
 			attrs = attrs.Cons(sx.Cons(shtml.SymAttrTitle, sx.MakeString(title)))
 		}
-		attrs = attrs.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(ub.String()))).Cons(sxhtml.SymAttr)
+		attrs = attrs.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(ub.String())))
 		return sx.Nil().Cons(sx.MakeString(zid.String())).Cons(attrs).Cons(shtml.SymA)
 	case found == 0:
 		return sx.MakeList(sx.MakeSymbol("s"), text)
@@ -144,10 +143,7 @@ func (wui *WebUI) transformKeyValuesText(key string, values []string, text strin
 func buildHref(ub *api.URLBuilder, text string) *sx.Pair {
 	return sx.MakeList(
 		shtml.SymA,
-		sx.MakeList(
-			sxhtml.SymAttr,
-			sx.Cons(shtml.SymAttrHref, sx.MakeString(ub.String())),
-		),
+		sx.MakeList(sx.Cons(shtml.SymAttrHref, sx.MakeString(ub.String()))),
 		sx.MakeString(text),
 	)
 }

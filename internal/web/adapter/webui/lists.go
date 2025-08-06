@@ -22,7 +22,6 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -175,10 +174,7 @@ func (wui *WebUI) transformRoleZettelList(ctx context.Context, roleZettel *useca
 func (wui *WebUI) prependZettelLink(sxZtl *sx.Pair, name string, u *api.URLBuilder) *sx.Pair {
 	link := sx.MakeList(
 		shtml.SymA,
-		sx.MakeList(
-			sxhtml.SymAttr,
-			sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())),
-		),
+		sx.MakeList(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String()))),
 		sx.MakeString(name),
 	)
 	if sxZtl != nil {

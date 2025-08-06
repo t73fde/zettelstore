@@ -20,7 +20,6 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
@@ -48,32 +47,32 @@ type htmlGenerator struct {
 func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerator {
 	th := shtml.NewEvaluator(1)
 
-	findA := func(obj sx.Object) (attr, assoc, rest *sx.Pair) {
-		pair, isPair := sx.GetPair(obj)
-		if !isPair || !shtml.SymA.IsEqual(pair.Car()) {
-			return nil, nil, nil
+	findA := func(obj sx.Object) (assoc, rest *sx.Pair) {
+		pair, isTag := sx.GetPair(obj)
+		if !isTag || !shtml.SymA.IsEqual(pair.Car()) {
+			return nil, nil
 		}
 		rest = pair.Tail()
 		if rest == nil {
-			return nil, nil, nil
+			return nil, nil
 		}
-		objA := rest.Car()
-		attr, isPair = sx.GetPair(objA)
-		if !isPair || !sxhtml.SymAttr.IsEqual(attr.Car()) {
-			return nil, nil, nil
+		if attr, isAssoc := sx.GetPair(rest.Car()); isAssoc {
+			if _, isAttr := sx.GetPair(attr.Car()); isAttr {
+				return attr, rest.Tail()
+			}
 		}
-		return attr, attr.Tail(), rest.Tail()
+		return nil, nil
 	}
 
 	rebindWrap(th, zsx.SymLink, func(args sx.Vector, env *shtml.Environment, prevFn shtml.EvalFn) sx.Object {
 		refSym, _ := shtml.GetReference(args[1], env)
 		obj := prevFn(args, env)
-		attr, assoc, rest := findA(obj)
-		if attr == nil {
+		assoc, rest := findA(obj)
+		if assoc == nil {
 			return obj
 		}
 		if zsx.SymRefStateExternal.IsEqual(refSym) {
-			a := zsx.GetAttributes(attr)
+			a := zsx.GetAttributes(assoc)
 			a = a.Set("target", "_blank")
 			a = a.Add("rel", "external").Add("rel", "noreferrer")
 			return rest.Cons(shtml.EvaluateAttributes(a)).Cons(shtml.SymA)
@@ -98,7 +97,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 				u = u.SetFragment(fragment)
 			}
 			assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
-			return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
+			return rest.Cons(assoc).Cons(shtml.SymA)
 
 		case sz.SymRefStateQuery:
 			ur, err := url.Parse(href.GetValue())
@@ -114,12 +113,12 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 				u = u.AppendQuery(q)
 			}
 			assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
-			return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
+			return rest.Cons(assoc).Cons(shtml.SymA)
 
 		case sz.SymRefStateBased:
 			u := builder.NewURLBuilder('/')
 			assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String()+href.GetValue()[1:])))
-			return rest.Cons(assoc.Cons(sxhtml.SymAttr)).Cons(shtml.SymA)
+			return rest.Cons(assoc).Cons(shtml.SymA)
 		}
 		return obj
 	})
@@ -130,10 +129,14 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 			return obj
 		}
 		attr, isPair := sx.GetPair(pair.Tail().Car())
-		if !isPair || !sxhtml.SymAttr.IsEqual(attr.Car()) {
+		if !isPair {
 			return obj
 		}
-		srcP := attr.Tail().Assoc(shtml.SymAttrSrc)
+		_, isAttr := sx.GetPair(attr.Car())
+		if !isAttr {
+			return obj
+		}
+		srcP := attr.Assoc(shtml.SymAttrSrc)
 		if srcP == nil {
 			return obj
 		}
@@ -146,7 +149,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 			return obj
 		}
 		u := builder.NewURLBuilder('z').SetZid(zid)
-		imgAttr := attr.Tail().Cons(sx.Cons(shtml.SymAttrSrc, sx.MakeString(u.String()))).Cons(sxhtml.SymAttr)
+		imgAttr := attr.Tail().Cons(sx.Cons(shtml.SymAttrSrc, sx.MakeString(u.String())))
 		return pair.Tail().Tail().Cons(imgAttr).Cons(shtml.SymIMG)
 	})
 
