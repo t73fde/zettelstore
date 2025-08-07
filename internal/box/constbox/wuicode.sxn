@@ -21,11 +21,14 @@
 (defun wui-info-meta-table-row (p)
     `(tr (td ((class zs-info-meta-key)) ,(car p)) (td ((class zs-info-meta-value)) ,(cdr p))))
 
+;; wui-href builds an HTML link
+(defun wui-href (url text . attrs) `(a ((href ,url) ,@attrs) ,text))
+
 ;; wui-local-link translates a local link into HTML.
-(defun wui-local-link (l) `(li (a ((href ,l )) ,l)))
+(defun wui-local-link (l) `(li ,(wui-href l l)))
 
 ;; wui-link takes a link (title . url) and returns a HTML reference.
-(defun wui-link (q) `(a ((href ,(cdr q))) ,(car q)))
+(defun wui-link (q) (wui-href (cdr q) (car q)))
 
 ;; wui-item-link taks a pair (text . url) and returns a HTML link inside
 ;; a list item.
@@ -38,7 +41,7 @@
 ;; wui-item-popup-link is like 'wui-item-link, but the HTML link will open
 ;; a new tab / window.
 (defun wui-item-popup-link (e)
-    `(li (a ((href ,e) (target "_blank") (rel "external noreferrer")) ,e)))
+    `(li ,(wui-href e e '(target "_blank") '(rel "external noreferrer"))))
 
 ;; wui-option-value returns a value for an HTML option element.
 (defun wui-option-value (v) `(option ((value ,v))))
@@ -69,7 +72,7 @@
 (defun wui-optional-link (text url-sym)
     (let ((url (resolve-symbol url-sym)))
          (if (defined? url)
-             `(a ((href ,(resolve-symbol url-sym))) ,text)
+             (wui-href url text)
              text)))
 
 ;; CSS-ROLE-map is a mapping (pair list, assoc list) of role names to zettel
@@ -96,11 +99,11 @@
 ;; ROLE-DEFAULT-actions returns the default text for actions.
 (defun ROLE-DEFAULT-actions (frame)
     `(,@(let ((copy-url (resolve-symbol 'copy-url frame)))
-             (if (defined? copy-url) `((@H " &#183; ") (a ((href ,copy-url)) "Copy"))))
+             (if (defined? copy-url) `((@H " &#183; ") ,(wui-href copy-url "Copy"))))
       ,@(let ((sequel-url (resolve-symbol 'sequel-url frame)))
-             (if (defined? sequel-url) `((@H " &#183; ") (a ((href ,sequel-url)) "Sequel"))))
+             (if (defined? sequel-url) `((@H " &#183; ") ,(wui-href sequel-url "Sequel"))))
       ,@(let ((folge-url (resolve-symbol 'folge-url frame)))
-             (if (defined? folge-url) `((@H " &#183; ") (a ((href ,folge-url)) "Folge"))))
+             (if (defined? folge-url) `((@H " &#183; ") ,(wui-href folge-url "Folge"))))
     )
 )
 
@@ -108,7 +111,7 @@
 (defun ROLE-tag-actions (frame)
     `(,@(let ((title (resolve-symbol 'title frame)))
              (if (and (defined? title) title)
-                 `(,ACTION-SEPARATOR (a ((href ,(query->url (concat "tags:" title)))) "Zettel"))
+                 `(,ACTION-SEPARATOR ,(wui-href (query->url (concat "tags:" title)) "Zettel"))
              )
         )
     )
@@ -118,7 +121,7 @@
 (defun ROLE-role-actions (frame)
     `(,@(let ((title (resolve-symbol 'title frame)))
              (if (and (defined? title) title)
-                 `(,ACTION-SEPARATOR (a ((href ,(query->url (concat "role:" title)))) "Zettel"))
+                 `(,ACTION-SEPARATOR ,(wui-href (query->url (concat "role:" title)) "Zettel"))
              )
         )
     )

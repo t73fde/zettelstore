@@ -35,9 +35,9 @@
       ,(if (symbol-bound? 'data-url)
           `(@L "Other encodings"
                ,(if (> num-entries 3) `(@L " of these " ,num-entries " entries: ") ": ")
-               (a ((href ,data-url)) "data")
+               ,(wui-href data-url "data")
                ", "
-               (a ((href ,plain-url)) "plain")
+               ,(wui-href plain-url "plain")
            )
       )
       ,@(if (symbol-bound? 'create-url)

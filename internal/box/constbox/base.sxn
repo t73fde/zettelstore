@@ -26,15 +26,15 @@
   (title ,title))
 (body
   (nav ((class "zs-menu"))
-    (a ((href ,home-url)) "Home")
+    ,(wui-href home-url "Home")
     ,@(if with-auth
       `((div ((class "zs-dropdown"))
         (button "User")
         (nav ((class "zs-dropdown-content"))
           ,@(if user-is-valid
-            `((a ((href ,user-zettel-url)) ,user-ident)
-              (a ((href ,logout-url)) "Logout"))
-            `((a ((href ,login-url)) "Login"))
+            `(,(wui-href user-zettel-url user-ident)
+              ,(wui-href logout-url "Logout"))
+            `(,(wui-href login-url "Login"))
           )
       )))
     )
@@ -42,7 +42,7 @@
       (button "Lists")
       (nav ((class "zs-dropdown-content"))
         ,@list-urls
-        ,@(if (symbol-bound? 'refresh-url) `((a ((href ,refresh-url)) "Refresh")))
+        ,(if (symbol-bound? 'refresh-url) (wui-href refresh-url "Refresh"))
     ))
     ,@(if new-zettel-links
       `((div ((class "zs-dropdown"))
@@ -53,8 +53,8 @@
     )
     (search (form ((action ,search-url))
       (input ((type "search") (inputmode "search") (name ,query-key-query)
-                (title "General search field, with same behaviour as search field in search result list")
-                (placeholder "Search..") (dir "auto")))))
+              (title "General search field, with same behaviour as search field in search result list")
+              (placeholder "Search..") (dir "auto")))))
   )
   (main ((class "content")) ,DETAIL)
   ,@(if FOOTER `((footer (hr) ,@FOOTER)))
