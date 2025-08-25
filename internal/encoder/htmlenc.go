@@ -65,7 +65,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error)
 	var head sx.ListBuilder
 	head.AddN(
 		shtml.SymHead,
-		sx.Nil().Cons(sx.Nil().Cons(sx.Cons(sx.MakeSymbol("charset"), sx.MakeString("utf-8")))).Cons(shtml.SymMeta),
+		sx.Nil().Cons(sx.Nil().Cons(sx.Cons(sxhtml.MakeSymbol("charset"), sx.MakeString("utf-8")))).Cons(shtml.SymMeta),
 	)
 	head.ExtendBang(hm)
 	var sb strings.Builder
