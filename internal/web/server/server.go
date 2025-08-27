@@ -45,8 +45,8 @@ const (
 // Router allows to state routes for various URL paths.
 type Router interface {
 	Handle(pattern string, handler http.Handler)
-	AddListRoute(key byte, method Method, handler http.Handler)
-	AddZettelRoute(key byte, method Method, handler http.Handler)
+	AddListRoute(isAPI bool, key byte, method Method, handler http.Handler)
+	AddZettelRoute(isAPI bool, key byte, method Method, handler http.Handler)
 	SetUserRetriever(ur UserRetriever)
 }
 

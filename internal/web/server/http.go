@@ -35,6 +35,7 @@ type webServer struct {
 	baseURL          string
 	httpServer       httpServer
 	router           httpRouter
+	cop              *http.CrossOriginProtection
 	persistentCookie bool
 	secureCookie     bool
 }
@@ -59,6 +60,7 @@ func New(sd ConfigData) Server {
 	srv := webServer{
 		log:              sd.Log,
 		baseURL:          sd.BaseURL,
+		cop:              http.NewCrossOriginProtection(),
 		persistentCookie: sd.PersistentCookie,
 		secureCookie:     sd.SecureCookie,
 	}
@@ -89,10 +91,16 @@ func New(sd ConfigData) Server {
 func (srv *webServer) Handle(pattern string, handler http.Handler) {
 	srv.router.Handle(pattern, handler)
 }
-func (srv *webServer) AddListRoute(key byte, method Method, handler http.Handler) {
+func (srv *webServer) AddListRoute(isAPI bool, key byte, method Method, handler http.Handler) {
+	if !isAPI {
+		handler = srv.cop.Handler(handler)
+	}
 	srv.router.addListRoute(key, method, handler)
 }
-func (srv *webServer) AddZettelRoute(key byte, method Method, handler http.Handler) {
+func (srv *webServer) AddZettelRoute(isAPI bool, key byte, method Method, handler http.Handler) {
+	if !isAPI {
+		handler = srv.cop.Handler(handler)
+	}
 	srv.router.addZettelRoute(key, method, handler)
 }
 func (srv *webServer) SetUserRetriever(ur UserRetriever) {
