@@ -1,10 +1,10 @@
 id: 00001010090100
-title: External server to encrypt message transport
+title: External server, also to encrypt message transport
 role: manual
 tags: #configuration #encryption #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250701125905
+modified: 20250828135632
 
 Since Zettelstore does not encrypt the messages it exchanges with its clients, you may need some additional software to enable encryption.
 
@@ -69,3 +69,16 @@ All other requests will be handled by Caddy itself.
 
 In this case you must specify the [[startup configuration key ''url-prefix''|00001004010000#url-prefix]] with the value ""/manual/"".
 This is to allow Zettelstore to ignore the prefix while reading web requests and to give the correct URLs with the given prefix when sending a web response.
+
+=== Cross-origin protection
+
+Zettelstore protects you against [[Cross-Site Request Forgery (CSRF)|https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF]].
+The protection will work only if the external server forwards certain HTTP request headers to Zettelstore:
+
+* [[''Sec-Fetch-Site''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site]] is read first and should contain the values ""same-origin"" or ""none"".
+* [[''Origin''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin]] is read next, if ''Sec-Fetch-Site'' is either missing or contains other values.
+  In this case ''Origin'' should contain the same host name as read via header [[''Host''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host]].
+
+Otherwise, an cross-origin request will be detected.
+
+To debug the configuration of the external server, Zettelstore will log the received header values, if Zettelstore is run with the [[''-debug''|00001004051000#debug]] parameter.

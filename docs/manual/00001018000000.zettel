@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20250627130445
+modified: 20250828140447
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -25,6 +25,10 @@ This page lists some problems and their solutions that may occur when using your
    To be secure by default, the Zettelstore will not work in an insecure environment.
 ** **Solution 1:** If you are sure that your communication medium is safe, even if you use the ''http:/\/'' schema (for example, you are running the Zettelstore on the same computer you are working on, or if the Zettelstore is running on a computer in your protected local network), then you could add the entry ''insecure-cookie: true'' in your [[startup configuration|00001004010000#insecure-cookie]] file.
 ** **Solution 2:** If you are not sure about the security of your communication medium (for example, if unknown persons might use your local network), then you should run an [[external server|00001010090100]] in front of your Zettelstore to enable the use of the ''https://'' schema.
+* **Problem:** [[Authentication is enabled|00001010040100]] for a Zettelstore running behind an external server (e.g. for encryption)
+  Entering user name and password produces an error message, stating that a ""cross-origin request"" was detected.
+** **Explanation:** The external web server dos not transfer needed HTTP header data to your Zettelstore.
+** **Solution:** Try to run Zettelstore in debug mode, as described in [[Cross-origin protection|00001010090100#cross-origin-protection]].
 
 === Working with Zettel Files
 * **Problem:** When you delete a zettel file by removing it from the ""disk"", e.g. by dropping it into the trash folder, by dragging into another folder, or by removing it from the command line, Zettelstore sometimes does not detect the change.

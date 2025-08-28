@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627155145
+modified: 20250828135622
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -51,7 +51,6 @@ The following keys are supported:
   In this case, even a key ''box-uri-2'' will be ignored.
 ; [!debug-mode|''debug-mode'']
 : If set to [[true|00001006030500]], allows to debug the Zettelstore software (mostly used by Zettelstore developers).
-  Disables any timeout values of the internal web server and does not send some security-related data.
   Sets [[''log-level''|#log-level]] to ""debug"".
   Enables [[''runtime-profiling''|#runtime-profiling]].
 

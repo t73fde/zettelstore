@@ -79,7 +79,7 @@ func New(sd ConfigData) Server {
 	mwReqID := reqid.Config{WithContext: true}
 	mwLogReq := logging.ReqConfig{
 		Logger: sd.Log, Level: slog.LevelDebug,
-		Message: "ServeHTTP", WithRequestID: true, WithRemote: true}
+		Message: "ServeHTTP", WithRequestID: true, WithRemote: true, WithHeaders: true}
 	mwLogResp := logging.RespConfig{Logger: sd.Log, Level: slog.LevelDebug,
 		Message: "/ServeHTTP", WithRequestID: true}
 	mw := middleware.NewChain(mwReqID.Build(), mwLogReq.Build(), mwLogResp.Build())

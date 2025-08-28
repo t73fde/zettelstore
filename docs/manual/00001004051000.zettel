@@ -4,7 +4,7 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627160733
+modified: 20250828135353
 
 === ``zettelstore run``
 This starts the web service.
@@ -26,11 +26,9 @@ zettelstore run [-a PORT] [-c CONFIGFILE] [-d DIR] [-debug] [-p PORT] [-r] [-v]
 
   Default is ''./zettel'' (''.\\zettel'' on Windows), where ''.'' denotes the ""current directory"".
 ; [!debug|''-debug'']
-: Allows better debugging of the internal web server by disabling any timeout values.
-  You should specify this only as a developer.
-  Especially do not enable it for a production server.
+: Allows debugging of the internal web server.
+  Same as setting [[''debug-mode''|00001004010000#debug-mode]] to ""true"".
 
-  [[https://blog.cloudflare.com/exposing-go-on-the-internet/#timeouts]] contains a good explanation for the usefulness of sensitive timeout values.
 ; [!p|''-p PORT'']
 : Specifies the integer value ''PORT'' as the TCP port, where the Zettelstore web server listens for requests.
 

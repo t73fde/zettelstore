@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102212014
+modified: 20250828121450
 
 Your zettel may contain sensitive content.
 You probably want to ensure that only authorized persons can read and/or modify them.
@@ -65,4 +65,4 @@ To enforce encryption, [[authenticated sessions|00001010040700]] are marked as s
 If you still want to access the Zettelstore remotely without encryption, you must change the startup configuration.
 Otherwise, authentication will not work.
 
-* [[Use a server for encryption|00001010090100]]
+* [[Use a server, also for encryption|00001010090100]]

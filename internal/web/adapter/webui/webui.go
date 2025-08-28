@@ -208,7 +208,7 @@ func (wui *WebUI) prepareAndWriteHeader(w http.ResponseWriter, statusCode int) {
 	h := adapter.PrepareHeader(w, "text/html; charset=utf-8")
 	h.Set("Content-Security-Policy", "default-src 'self'; img-src * data:; style-src 'self' 'unsafe-inline'")
 	h.Set("Permissions-Policy", "payment=(), interest-cohort=()")
-	h.Set("Referrer-Policy", "no-referrer")
+	h.Set("Referrer-Policy", "same-origin")
 	h.Set("X-Content-Type-Options", "nosniff")
 	if !wui.debug {
 		h.Set("X-Frame-Options", "sameorigin")
