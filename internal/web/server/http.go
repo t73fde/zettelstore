@@ -128,7 +128,7 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 	if srv.persistentCookie && d > 0 {
 		cookie.Expires = time.Now().Add(d).Add(30 * time.Second).UTC()
 	}
-	srv.log.Debug("SetToken", "token", token)
+	srv.log.Debug("SetToken", "token", cookie.Value)
 	if v := cookie.String(); v != "" {
 		w.Header().Add("Set-Cookie", v)
 		w.Header().Add("Cache-Control", `no-cache="Set-Cookie"`)
