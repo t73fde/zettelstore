@@ -401,7 +401,7 @@ var tcsInline = []zmkTestCase{
 		descr: "Comment after text and with -->",
 		zmk:   `Text%%{-} comment --> end`,
 		expect: expectMap{
-			encoderHTML:  `<p>Text<!-- comment -&#45;> end --></p>`,
+			encoderHTML:  `<p>Text<!-- comment --&gt; end --></p>`,
 			encoderMD:    "Text",
 			encoderSz:    `(BLOCK (PARA (TEXT "Text") (LITERAL-COMMENT (("-" . "")) "comment --> end")))`,
 			encoderSHTML: `((p "Text" (@@ "comment --> end")))`,

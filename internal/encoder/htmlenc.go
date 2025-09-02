@@ -36,11 +36,11 @@ type htmlEncoder struct {
 }
 
 // WriteZettel encodes a full zettel as HTML5.
-func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	env := shtml.MakeEnvironment(he.lang)
 	hm, err := he.th.Evaluate(he.tx.GetMeta(zn.InhMeta), &env)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	var isTitle ast.InlineSlice
@@ -51,14 +51,14 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error)
 		xtitle := he.tx.GetSz(&isTitle)
 		htitle, err = he.th.Evaluate(xtitle, &env)
 		if err != nil {
-			return 0, err
+			return err
 		}
 	}
 
 	xast := he.tx.GetSz(&zn.BlocksAST)
 	hast, err := he.th.Evaluate(xast, &env)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	hen := shtml.Endnotes(&env)
 
@@ -70,7 +70,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error)
 	head.ExtendBang(hm)
 	var sb strings.Builder
 	if hasTitle {
-		_, _ = he.textEnc.WriteInlines(&sb, &isTitle)
+		_ = he.textEnc.WriteInlines(&sb, &isTitle)
 	} else {
 		sb.Write(zn.Meta.Zid.Bytes())
 	}
@@ -96,30 +96,27 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error)
 }
 
 // WriteMeta encodes meta data as HTML5.
-func (he *htmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (he *htmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	env := shtml.MakeEnvironment(he.lang)
 	hm, err := he.th.Evaluate(he.tx.GetMeta(m), &env)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	gen := sxhtml.NewGenerator().SetNewline()
 	return gen.WriteListHTML(w, hm)
 }
 
 // WriteBlocks encodes a block slice.
-func (he *htmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (he *htmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
 	env := shtml.MakeEnvironment(he.lang)
 	hobj, err := he.th.Evaluate(he.tx.GetSz(bs), &env)
 	if err == nil {
 		gen := sxhtml.NewGenerator()
-		length, err2 := gen.WriteListHTML(w, hobj)
-		if err2 != nil {
-			return length, err2
+		if err = gen.WriteListHTML(w, hobj); err != nil {
+			return err
 		}
 
-		l, err2 := gen.WriteHTML(w, shtml.Endnotes(&env))
-		length += l
-		return length, err2
+		return gen.WriteHTML(w, shtml.Endnotes(&env))
 	}
-	return 0, err
+	return err
 }

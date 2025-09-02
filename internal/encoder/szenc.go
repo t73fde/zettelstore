@@ -30,18 +30,21 @@ type szEncoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *szEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (enc *szEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	content := enc.trans.GetSz(&zn.BlocksAST)
 	meta := enc.trans.GetMeta(zn.InhMeta)
-	return sx.MakeList(meta, content).Print(w)
+	_, err := sx.MakeList(meta, content).Print(w)
+	return err
 }
 
 // WriteMeta encodes meta data as s-expression.
-func (enc *szEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
-	return enc.trans.GetMeta(m).Print(w)
+func (enc *szEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
+	_, err := enc.trans.GetMeta(m).Print(w)
+	return err
 }
 
 // WriteBlocks writes a block slice to the writer
-func (enc *szEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
-	return enc.trans.GetSz(bs).Print(w)
+func (enc *szEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
+	_, err := enc.trans.GetSz(bs).Print(w)
+	return err
 }

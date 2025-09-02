@@ -483,8 +483,7 @@ func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWr
 
 	gen := sxhtml.NewGenerator().SetNewline()
 	var sb bytes.Buffer
-	_, err = gen.WriteHTML(&sb, pageObj)
-	if err != nil {
+	if err = gen.WriteHTML(&sb, pageObj); err != nil {
 		return err
 	}
 	wui.prepareAndWriteHeader(w, code)

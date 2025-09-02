@@ -54,8 +54,7 @@ func cmdFile(fs *flag.FlagSet) (int, error) {
 		fmt.Fprintf(os.Stderr, "Unknown format %q\n", enc)
 		return 2, nil
 	}
-	_, err = encdr.WriteZettel(os.Stdout, z)
-	if err != nil {
+	if err = encdr.WriteZettel(os.Stdout, z); err != nil {
 		return 2, err
 	}
 	fmt.Println()

@@ -31,7 +31,7 @@ import (
 type zmkEncoder struct{}
 
 // WriteZettel writes the encoded zettel to the writer.
-func (*zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (*zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	v := newZmkVisitor(w)
 	v.acceptMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {
@@ -40,16 +40,14 @@ func (*zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 		v.b.WriteLn()
 	}
 	ast.Walk(&v, &zn.BlocksAST)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 // WriteMeta encodes meta data as zmk.
-func (*zmkEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (*zmkEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	v := newZmkVisitor(w)
 	v.acceptMeta(m)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 func (v *zmkVisitor) acceptMeta(m *meta.Meta) {
@@ -59,11 +57,10 @@ func (v *zmkVisitor) acceptMeta(m *meta.Meta) {
 }
 
 // WriteBlocks writes the content of a block slice to the writer.
-func (*zmkEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (*zmkEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
 	v := newZmkVisitor(w)
 	ast.Walk(&v, bs)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 // zmkVisitor writes the abstract syntax tree to an io.Writer.
@@ -321,7 +318,7 @@ func (v *zmkVisitor) visitBLOB(bn *ast.BLOBNode) {
 		return
 	}
 	var sb strings.Builder
-	_, _ = v.textEnc.WriteInlines(&sb, &bn.Description)
+	_ = v.textEnc.WriteInlines(&sb, &bn.Description)
 	v.b.WriteStrings("%% Unable to display BLOB with description '", sb.String(), "' and syntax '", bn.Syntax, "'.")
 }
 

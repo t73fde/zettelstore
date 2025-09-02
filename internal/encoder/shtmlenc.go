@@ -33,36 +33,39 @@ type shtmlEncoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	env := shtml.MakeEnvironment(enc.lang)
 	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(zn.InhMeta), &env)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	contentSHTML, err := enc.th.Evaluate(enc.tx.GetSz(&zn.BlocksAST), &env)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	result := sx.Cons(metaSHTML, contentSHTML)
-	return result.Print(w)
+	_, err = result.Print(w)
+	return err
 }
 
 // WriteMeta encodes meta data as s-expression.
-func (enc *shtmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (enc *shtmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	env := shtml.MakeEnvironment(enc.lang)
 	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(m), &env)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return sx.Print(w, metaSHTML)
+	_, err = sx.Print(w, metaSHTML)
+	return err
 }
 
 // WriteBlocks writes a block slice to the writer
-func (enc *shtmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (enc *shtmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
 	env := shtml.MakeEnvironment(enc.lang)
 	hval, err := enc.th.Evaluate(enc.tx.GetSz(bs), &env)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return sx.Print(w, hval)
+	_, err = sx.Print(w, hval)
+	return err
 }

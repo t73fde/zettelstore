@@ -119,8 +119,7 @@ func (cv *cleanVisitor) visitHeading(hn *ast.HeadingNode) {
 	}
 	if hn.Slug == "" {
 		var sb strings.Builder
-		_, err := cv.textEnc.WriteInlines(&sb, &hn.Inlines)
-		if err != nil {
+		if err := cv.textEnc.WriteInlines(&sb, &hn.Inlines); err != nil {
 			return
 		}
 		hn.Slug = zerostrings.Slugify(sb.String())

@@ -31,7 +31,7 @@ type mdEncoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	v := newMDVisitor(w, me.lang)
 	v.acceptMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {
@@ -40,16 +40,14 @@ func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
 		v.b.WriteLn()
 	}
 	ast.Walk(&v, &zn.BlocksAST)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 // WriteMeta encodes meta data as markdown.
-func (me *mdEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (me *mdEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	v := newMDVisitor(w, me.lang)
 	v.acceptMeta(m)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 func (v *mdVisitor) acceptMeta(m *meta.Meta) {
@@ -59,11 +57,10 @@ func (v *mdVisitor) acceptMeta(m *meta.Meta) {
 }
 
 // WriteBlocks writes the content of a block slice to the writer.
-func (me *mdEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (me *mdEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
 	v := newMDVisitor(w, me.lang)
 	ast.Walk(&v, bs)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 // mdVisitor writes the abstract syntax tree to an EncWriter.

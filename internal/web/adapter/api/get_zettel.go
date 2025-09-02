@@ -158,11 +158,11 @@ func (a *API) writeEncodedZettelPart(
 	var buf bytes.Buffer
 	switch part {
 	case partZettel:
-		_, err = encdr.WriteZettel(&buf, zn)
+		err = encdr.WriteZettel(&buf, zn)
 	case partMeta:
-		_, err = encdr.WriteMeta(&buf, zn.InhMeta)
+		err = encdr.WriteMeta(&buf, zn.InhMeta)
 	case partContent:
-		_, err = encdr.WriteBlocks(&buf, &zn.BlocksAST)
+		err = encdr.WriteBlocks(&buf, &zn.BlocksAST)
 	}
 	if err != nil {
 		a.logger.Error("Unable to store data in buffer", "err", err, "zid", zn.Zid)

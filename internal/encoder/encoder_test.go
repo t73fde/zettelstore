@@ -117,7 +117,7 @@ func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr 
 
 func encode(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
 	var sb strings.Builder
-	_, err := e.WriteBlocks(&sb, &bs)
+	err := e.WriteBlocks(&sb, &bs)
 	return sb.String(), err
 }
 

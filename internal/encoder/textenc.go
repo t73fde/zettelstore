@@ -29,16 +29,15 @@ import (
 type TextEncoder struct{}
 
 // WriteZettel writes metadata and content.
-func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) (int, error) {
+func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	v := newTextVisitor(w)
-	_, _ = te.WriteMeta(&v.b, zn.InhMeta)
+	_ = te.WriteMeta(&v.b, zn.InhMeta)
 	v.visitBlockSlice(&zn.BlocksAST)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 // WriteMeta encodes metadata as text.
-func (te *TextEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
+func (te *TextEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	buf := newEncWriter(w)
 	for key, val := range m.Computed() {
 		if meta.Type(key) == meta.TypeTagSet {
@@ -48,8 +47,7 @@ func (te *TextEncoder) WriteMeta(w io.Writer, m *meta.Meta) (int, error) {
 		}
 		buf.WriteLn()
 	}
-	length, err := buf.Flush()
-	return length, err
+	return buf.Flush()
 }
 
 func writeTagSet(buf *encWriter, tags iter.Seq[meta.Value]) {
@@ -61,23 +59,20 @@ func writeTagSet(buf *encWriter, tags iter.Seq[meta.Value]) {
 		first = false
 		buf.WriteString(string(tag.CleanTag()))
 	}
-
 }
 
 // WriteBlocks writes the content of a block slice to the writer.
-func (*TextEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) (int, error) {
+func (*TextEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
 	v := newTextVisitor(w)
 	v.visitBlockSlice(bs)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 // WriteInlines writes an inline slice to the writer
-func (*TextEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) (int, error) {
+func (*TextEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) error {
 	v := newTextVisitor(w)
 	ast.Walk(&v, is)
-	length, err := v.b.Flush()
-	return length, err
+	return v.b.Flush()
 }
 
 // textVisitor writes the abstract syntax tree to an io.Writer.
