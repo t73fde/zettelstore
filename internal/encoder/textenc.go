@@ -19,7 +19,9 @@ import (
 	"io"
 	"iter"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/ast"
@@ -30,7 +32,7 @@ type TextEncoder struct{}
 
 // WriteZettel writes metadata and content.
 func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
-	v := newTextVisitor(w)
+	v := newTextVisitorAST(w)
 	_ = te.WriteMeta(&v.b, zn.InhMeta)
 	v.visitBlockSlice(&zn.BlocksAST)
 	return v.b.Flush()
@@ -63,29 +65,87 @@ func writeTagSet(buf *encWriter, tags iter.Seq[meta.Value]) {
 
 // WriteBlocks writes the content of a block slice to the writer.
 func (*TextEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
-	v := newTextVisitor(w)
+	v := newTextVisitorAST(w)
 	v.visitBlockSlice(bs)
 	return v.b.Flush()
 }
 
 // WriteInlines writes an inline slice to the writer
 func (*TextEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) error {
-	v := newTextVisitor(w)
+	v := newTextVisitorAST(w)
 	ast.Walk(&v, is)
 	return v.b.Flush()
 }
 
-// textVisitor writes the abstract syntax tree to an io.Writer.
+func (*TextEncoder) WriteSz(w io.Writer, node *sx.Pair) error {
+	v := newTextVisitor(w)
+	zsx.Walk(&v, node, nil)
+	return v.b.Flush()
+}
+
+// textVisitor writes the sx.Object-based AST to an io.Writer.
 type textVisitor struct {
-	b         encWriter
-	inlinePos int
+	b encWriter
 }
 
 func newTextVisitor(w io.Writer) textVisitor {
 	return textVisitor{b: newEncWriter(w)}
 }
+func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) (sx.Object, bool) {
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
+		switch sym {
+		case zsx.SymText:
+			if s, isString := sx.GetString(node.Tail().Car()); isString {
+				spaceFound := false
+				for _, ch := range s.GetValue() {
+					if input.IsSpace(ch) {
+						if !spaceFound {
+							v.b.WriteSpace()
+							spaceFound = true
+						}
+						continue
+					}
+					spaceFound = false
+					v.b.WriteString(string(ch))
+				}
+			}
 
-func (v *textVisitor) Visit(node ast.Node) ast.Visitor {
+		case zsx.SymRegionBlock, zsx.SymRegionQuote, zsx.SymRegionVerse:
+			_ = zsx.Walk(v, node.Tail().Tail().Head(), env)
+			if inlines := node.Tail().Tail().Tail(); inlines != nil {
+				v.b.WriteLn()
+				_ = zsx.Walk(v, inlines, env)
+			}
+
+		// case zsx.SymListOrdered, zsx.SymListUnordered, zsx.SymListQuote:
+
+		default:
+			return node, false
+		}
+		return node, true
+	}
+	return sx.Nil(), false
+}
+func (v *textVisitor) VisitAfter(node *sx.Pair, env *sx.Pair) sx.Object {
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
+		switch sym {
+		//case
+		}
+	}
+	return node
+}
+
+// textVisitorAST writes the abstract syntax tree to an io.Writer.
+type textVisitorAST struct {
+	b         encWriter
+	inlinePos int
+}
+
+func newTextVisitorAST(w io.Writer) textVisitorAST {
+	return textVisitorAST{b: newEncWriter(w)}
+}
+
+func (v *textVisitorAST) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
 		v.visitBlockSlice(n)
@@ -149,13 +209,13 @@ func (v *textVisitor) Visit(node ast.Node) ast.Visitor {
 	return v
 }
 
-func (v *textVisitor) visitVerbatim(vn *ast.VerbatimNode) {
+func (v *textVisitorAST) visitVerbatim(vn *ast.VerbatimNode) {
 	if vn.Kind != ast.VerbatimComment {
 		_, _ = v.b.Write(vn.Content)
 	}
 }
 
-func (v *textVisitor) visitNestedList(ln *ast.NestedListNode) {
+func (v *textVisitorAST) visitNestedList(ln *ast.NestedListNode) {
 	for i, item := range ln.Items {
 		v.writePosChar(i, '\n')
 		for j, it := range item {
@@ -165,7 +225,7 @@ func (v *textVisitor) visitNestedList(ln *ast.NestedListNode) {
 	}
 }
 
-func (v *textVisitor) visitDescriptionList(dl *ast.DescriptionListNode) {
+func (v *textVisitorAST) visitDescriptionList(dl *ast.DescriptionListNode) {
 	for i, descr := range dl.Descriptions {
 		v.writePosChar(i, '\n')
 		ast.Walk(v, &descr.Term)
@@ -179,7 +239,7 @@ func (v *textVisitor) visitDescriptionList(dl *ast.DescriptionListNode) {
 	}
 }
 
-func (v *textVisitor) visitTable(tn *ast.TableNode) {
+func (v *textVisitorAST) visitTable(tn *ast.TableNode) {
 	if len(tn.Header) > 0 {
 		v.writeRow(tn.Header)
 		v.b.WriteLn()
@@ -190,21 +250,21 @@ func (v *textVisitor) visitTable(tn *ast.TableNode) {
 	}
 }
 
-func (v *textVisitor) writeRow(row ast.TableRow) {
+func (v *textVisitorAST) writeRow(row ast.TableRow) {
 	for i, cell := range row {
 		v.writePosChar(i, ' ')
 		ast.Walk(v, &cell.Inlines)
 	}
 }
 
-func (v *textVisitor) visitBlockSlice(bs *ast.BlockSlice) {
+func (v *textVisitorAST) visitBlockSlice(bs *ast.BlockSlice) {
 	for i, bn := range *bs {
 		v.writePosChar(i, '\n')
 		ast.Walk(v, bn)
 	}
 }
 
-func (v *textVisitor) visitInlineSlice(is *ast.InlineSlice) {
+func (v *textVisitorAST) visitInlineSlice(is *ast.InlineSlice) {
 	for i, in := range *is {
 		v.inlinePos = i
 		ast.Walk(v, in)
@@ -212,7 +272,7 @@ func (v *textVisitor) visitInlineSlice(is *ast.InlineSlice) {
 	v.inlinePos = 0
 }
 
-func (v *textVisitor) visitText(s string) {
+func (v *textVisitorAST) visitText(s string) {
 	spaceFound := false
 	for _, ch := range s {
 		if input.IsSpace(ch) {
@@ -227,7 +287,7 @@ func (v *textVisitor) visitText(s string) {
 	}
 }
 
-func (v *textVisitor) writePosChar(pos int, ch byte) {
+func (v *textVisitorAST) writePosChar(pos int, ch byte) {
 	if pos > 0 {
 		_ = v.b.WriteByte(ch)
 	}

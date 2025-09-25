@@ -18,6 +18,7 @@ import (
 	"strings"
 	"testing"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
@@ -58,9 +59,11 @@ func TestEncoder(t *testing.T) {
 func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 	for testNum, tc := range testCases {
 		inp := input.NewInput([]byte(tc.zmk))
-		bs := parser.Parse(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
+		node, bs := parser.Parse(inp, nil, meta.ValueSyntaxZmk, config.NoHTML)
 		checkEncodings(t, testNum, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, bs, tc.inline, tc.descr)
+		_ = node
+		checkTextSz(t, testNum, node, tc.descr, tc.expect[encoderText], tc.inline)
 	}
 }
 
@@ -104,7 +107,28 @@ func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr 
 		t.Error(err)
 		return
 	}
-	got := val.String()
+	checkExpGot(t, testNum, descr, exp, val.String(), isInline)
+}
+
+func checkTextSz(t *testing.T, testNum int, node *sx.Pair, descr, expect string, isInline bool) {
+	t.Helper()
+	textEnc := encoder.TextEncoder{}
+	var sb strings.Builder
+	err := textEnc.WriteSz(&sb, node)
+	if err != nil {
+		t.Error(descr, err)
+	}
+	// checkExpGot(t, testNum, descr, expect, sb.String(), isInline)
+}
+
+func encode(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
+	var sb strings.Builder
+	err := e.WriteBlocks(&sb, &bs)
+	return sb.String(), err
+}
+
+func checkExpGot(t *testing.T, testNum int, descr, exp, got string, isInline bool) {
+	t.Helper()
 	if exp != got {
 		prefix := fmt.Sprintf("Test #%d", testNum)
 		if d := descr; d != "" {
@@ -113,12 +137,6 @@ func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr 
 		prefix += "\nMode:     " + mode(isInline)
 		t.Errorf("%s\n\nExpected: %q\nGot:      %q", prefix, exp, got)
 	}
-}
-
-func encode(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
-	var sb strings.Builder
-	err := e.WriteBlocks(&sb, &bs)
-	return sb.String(), err
 }
 
 func mode(isInline bool) string {

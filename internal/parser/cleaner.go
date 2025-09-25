@@ -25,9 +25,9 @@ import (
 	"zettelstore.de/z/internal/encoder"
 )
 
-// Clean cleans the given block list.
-func Clean(bs *ast.BlockSlice, allowHTML bool) {
-	cv := cleanVisitor{
+// CleanAST cleans the given block list.
+func CleanAST(bs *ast.BlockSlice, allowHTML bool) {
+	cv := cleanASTVisitor{
 		allowHTML: allowHTML,
 		hasMark:   false,
 		doMark:    false,
@@ -39,7 +39,7 @@ func Clean(bs *ast.BlockSlice, allowHTML bool) {
 	}
 }
 
-type cleanVisitor struct {
+type cleanASTVisitor struct {
 	textEnc   encoder.TextEncoder
 	ids       map[string]ast.Node
 	allowHTML bool
@@ -47,7 +47,7 @@ type cleanVisitor struct {
 	doMark    bool
 }
 
-func (cv *cleanVisitor) Visit(node ast.Node) ast.Visitor {
+func (cv *cleanASTVisitor) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
 		if !cv.allowHTML {
@@ -69,7 +69,7 @@ func (cv *cleanVisitor) Visit(node ast.Node) ast.Visitor {
 	return cv
 }
 
-func (cv *cleanVisitor) visitBlockSlice(bs *ast.BlockSlice) {
+func (cv *cleanASTVisitor) visitBlockSlice(bs *ast.BlockSlice) {
 	if bs == nil {
 		return
 	}
@@ -100,7 +100,7 @@ func (cv *cleanVisitor) visitBlockSlice(bs *ast.BlockSlice) {
 	*bs = (*bs)[:toPos:toPos]
 }
 
-func (cv *cleanVisitor) visitInlineSlice(is *ast.InlineSlice) {
+func (cv *cleanASTVisitor) visitInlineSlice(is *ast.InlineSlice) {
 	if is == nil {
 		return
 	}
@@ -113,7 +113,7 @@ func (cv *cleanVisitor) visitInlineSlice(is *ast.InlineSlice) {
 	}
 }
 
-func (cv *cleanVisitor) visitHeading(hn *ast.HeadingNode) {
+func (cv *cleanASTVisitor) visitHeading(hn *ast.HeadingNode) {
 	if cv.doMark || hn == nil || len(hn.Inlines) == 0 {
 		return
 	}
@@ -129,7 +129,7 @@ func (cv *cleanVisitor) visitHeading(hn *ast.HeadingNode) {
 	}
 }
 
-func (cv *cleanVisitor) visitMark(mn *ast.MarkNode) {
+func (cv *cleanASTVisitor) visitMark(mn *ast.MarkNode) {
 	if !cv.doMark {
 		cv.hasMark = true
 		return
@@ -145,7 +145,7 @@ func (cv *cleanVisitor) visitMark(mn *ast.MarkNode) {
 	mn.Fragment = cv.addIdentifier(mn.Slug, mn)
 }
 
-func (cv *cleanVisitor) addIdentifier(id string, node ast.Node) string {
+func (cv *cleanASTVisitor) addIdentifier(id string, node ast.Node) string {
 	if cv.ids == nil {
 		cv.ids = map[string]ast.Node{id: node}
 		return id

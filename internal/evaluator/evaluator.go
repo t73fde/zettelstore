@@ -98,7 +98,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, bns *
 		marker:          &ast.ZettelNode{},
 	}
 	ast.Walk(&e, bns)
-	parser.Clean(bns, true)
+	parser.CleanAST(bns, true)
 }
 
 type evaluator struct {

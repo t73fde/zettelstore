@@ -74,7 +74,7 @@ func TestMarkdownSpec(t *testing.T) {
 }
 
 func createMDBlockSlice(markdown string, hi config.HTMLInsecurity) ast.BlockSlice {
-	return parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, hi)
+	return parser.ParseAST(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, hi)
 }
 
 func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
@@ -98,7 +98,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// gotFirst := buf.String()
 
 		testID = tc.Example*100 + 2
-		secondAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		secondAst := parser.ParseAST(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		_ = zmkEncoder.WriteBlocks(&buf, &secondAst)
 		gotSecond := buf.String()
@@ -108,7 +108,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// }
 
 		testID = tc.Example*100 + 3
-		thirdAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		thirdAst := parser.ParseAST(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		_ = zmkEncoder.WriteBlocks(&buf, &thirdAst)
 		gotThird := buf.String()

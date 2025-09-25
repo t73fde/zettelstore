@@ -97,17 +97,30 @@ func IsImageFormat(syntax string) bool {
 	return pi.IsImageFormat
 }
 
-// Parse parses some input and returns a slice of block nodes.
-func Parse(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) ast.BlockSlice {
+// ParseAST parses some input and returns a slice of block nodes.
+func ParseAST(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) ast.BlockSlice {
 	if obj := Get(syntax).Parse(inp, m, syntax); obj != nil {
 		bs, err := sztrans.GetBlockSlice(obj)
 		if err == nil {
-			Clean(&bs, hi.AllowHTML(syntax))
+			CleanAST(&bs, hi.AllowHTML(syntax))
 			return bs
 		}
 		log.Printf("sztrans error: %v, for %v\n", err, obj)
 	}
 	return nil
+}
+
+// Parse parses some input and returns both a Sx.Object and a slice of block nodes.
+func Parse(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) (*sx.Pair, ast.BlockSlice) {
+	if obj := Get(syntax).Parse(inp, m, syntax); obj != nil {
+		bs, err := sztrans.GetBlockSlice(obj)
+		if err == nil {
+			CleanAST(&bs, hi.AllowHTML(syntax))
+			return obj, bs
+		}
+		log.Printf("sztrans error: %v, for %v\n", err, obj)
+	}
+	return nil, nil
 }
 
 // ParseDescriptionAST returns a suitable description stored in the metadata as an inline slice.
@@ -159,12 +172,13 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 	if rtConfig != nil {
 		hi = rtConfig.GetHTMLInsecurity()
 	}
-	bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
+	_, bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
 	return &ast.ZettelNode{
 		Meta:      m,
 		Content:   zettel.Content,
 		Zid:       m.Zid,
 		InhMeta:   inhMeta,
+		Blocks:    sx.Nil(), // TODO: implement Clean
 		BlocksAST: bs,
 		Syntax:    syntax,
 	}

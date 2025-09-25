@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"strings"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/internal/zettel"
@@ -30,6 +31,7 @@ type ZettelNode struct {
 	Content   zettel.Content // Original content
 	Zid       id.Zid         // Zettel identification.
 	InhMeta   *meta.Meta     // Metadata of the zettel, with inherited values.
+	Blocks    sx.Object      // Syntax tree, encodes as an sx.Object.
 	BlocksAST BlockSlice     // Zettel abstract syntax tree is a sequence of block nodes.
 	Syntax    string         // Syntax / parser that produced the Ast
 }
