@@ -153,7 +153,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 
 		case zsx.SymTable:
 			firstRow := true
-			for n := range node.Tail().Pairs() {
+			for n := range node.Tail().Tail().Pairs() {
 				row := n.Head()
 				if row == nil {
 					continue

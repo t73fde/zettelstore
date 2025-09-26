@@ -339,25 +339,28 @@ func handleDescription(rest *sx.Pair) sx.Object {
 
 func handleTable(rest *sx.Pair) sx.Object {
 	if rest != nil {
-		header := collectRow(rest.Head())
-		cols := len(header)
+		// attrs := rest.Head()
+		if rest = rest.Tail(); rest != nil {
+			header := collectRow(rest.Head())
+			cols := len(header)
 
-		var rows []ast.TableRow
-		for curr := range rest.Tail().Pairs() {
-			row := collectRow(curr.Head())
-			rows = append(rows, row)
-			cols = max(cols, len(row))
-		}
-		align := make([]ast.Alignment, cols)
-		for i := range cols {
-			align[i] = ast.AlignDefault
-		}
+			var rows []ast.TableRow
+			for curr := range rest.Tail().Pairs() {
+				row := collectRow(curr.Head())
+				rows = append(rows, row)
+				cols = max(cols, len(row))
+			}
+			align := make([]ast.Alignment, cols)
+			for i := range cols {
+				align[i] = ast.AlignDefault
+			}
 
-		return sxNode{&ast.TableNode{
-			Header: header,
-			Align:  align,
-			Rows:   rows,
-		}}
+			return sxNode{&ast.TableNode{
+				Header: header,
+				Align:  align,
+				Rows:   rows,
+			}}
+		}
 	}
 	log.Println("TABL", rest)
 	return rest

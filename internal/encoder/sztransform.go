@@ -199,7 +199,7 @@ func (t *SzTransformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair
 
 func (t *SzTransformer) getTable(tn *ast.TableNode) *sx.Pair {
 	var lb sx.ListBuilder
-	lb.AddN(zsx.SymTable, t.getHeader(tn.Header))
+	lb.AddN(zsx.SymTable, sx.Nil(), t.getHeader(tn.Header))
 	for _, row := range tn.Rows {
 		lb.Add(t.getRow(row))
 	}
