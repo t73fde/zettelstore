@@ -77,21 +77,22 @@ func (*TextEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) error {
 	return v.b.Flush()
 }
 
+// WriteSz writes SZ encoded content to the writer.
 func (*TextEncoder) WriteSz(w io.Writer, node *sx.Pair) error {
 	v := newTextVisitor(w)
-	zsx.Walk(&v, node, nil)
+	v.walk(node, nil)
 	return v.b.Flush()
 }
 
 // textVisitor writes the sx.Object-based AST to an io.Writer.
-type textVisitor struct {
-	b encWriter
-}
+type textVisitor struct{ b encWriter }
 
 func newTextVisitor(w io.Writer) textVisitor {
 	return textVisitor{b: newEncWriter(w)}
 }
-func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) (sx.Object, bool) {
+func (v *textVisitor) walk(node, env *sx.Pair)    { zsx.WalkIt(v, node, env) }
+func (v *textVisitor) walkList(lst, env *sx.Pair) { zsx.WalkItList(v, lst, 0, env) }
+func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
@@ -110,30 +111,123 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) (sx.Object, bool)
 				}
 			}
 
-		case zsx.SymRegionBlock, zsx.SymRegionQuote, zsx.SymRegionVerse:
-			_ = zsx.Walk(v, node.Tail().Tail().Head(), env)
-			if inlines := node.Tail().Tail().Tail(); inlines != nil {
-				v.b.WriteLn()
-				_ = zsx.Walk(v, inlines, env)
+		case zsx.SymHard:
+			v.b.WriteLn()
+		case zsx.SymSoft:
+			_ = v.b.WriteByte(' ')
+
+		case zsx.SymEndnote:
+			if zsx.GetWalkPos(env) > 0 {
+				_ = v.b.WriteByte(' ')
+			}
+			return false
+
+		case zsx.SymLiteralCode, zsx.SymLiteralInput, zsx.SymLiteralMath, zsx.SymLiteralOutput:
+			if s, found := sx.GetString(node.Tail().Tail().Car()); found {
+				v.b.WriteString(s.GetValue())
+			}
+		case zsx.SymLiteralComment:
+			// Do nothing
+
+		case zsx.SymBlock, zsx.SymInline:
+			first := true
+			for n := range node.Tail().Pairs() {
+				if first {
+					first = false
+				} else {
+					v.b.WriteLn()
+				}
+				v.walk(n.Head(), env)
 			}
 
-		// case zsx.SymListOrdered, zsx.SymListUnordered, zsx.SymListQuote:
+		case zsx.SymListOrdered, zsx.SymListUnordered, zsx.SymListQuote:
+			first := true
+			for n := range node.Tail().Tail().Pairs() {
+				if first {
+					first = false
+				} else {
+					v.b.WriteLn()
+				}
+				v.walk(n.Head(), env)
+			}
+
+		case zsx.SymTable:
+			firstRow := true
+			for n := range node.Tail().Pairs() {
+				row := n.Head()
+				if row == nil {
+					continue
+				}
+				if firstRow {
+					firstRow = false
+				} else {
+					v.b.WriteLn()
+				}
+				firstCell := true
+				for elem := range row.Pairs() {
+					if firstCell {
+						firstCell = false
+					} else {
+						_ = v.b.WriteByte(' ')
+					}
+					v.walk(elem.Head(), env)
+				}
+			}
+
+		case zsx.SymDescription:
+			first := true
+			for n := node.Tail().Tail(); n != nil; n = n.Tail() {
+				if first {
+					first = false
+				} else {
+					v.b.WriteLn()
+				}
+				v.walkList(n.Head(), env)
+				n = n.Tail()
+				if n == nil {
+					break
+				}
+				dvals := n.Head()
+				if zsx.SymBlock.IsEqual(dvals.Car()) {
+					for val := range dvals.Tail().Pairs() {
+						v.b.WriteLn()
+						v.walk(val.Head(), env)
+					}
+				}
+			}
+
+		case zsx.SymRegionBlock, zsx.SymRegionQuote, zsx.SymRegionVerse:
+			content := node.Tail().Tail()
+			first := true
+			for n := range content.Head().Pairs() {
+				if first {
+					first = false
+				} else {
+					v.b.WriteLn()
+				}
+				v.walk(n.Head(), env)
+			}
+			if inlines := content.Tail(); inlines != nil {
+				v.b.WriteLn()
+				v.walkList(inlines, env)
+			}
+
+		case zsx.SymVerbatimCode, zsx.SymVerbatimEval, zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:
+			if s, isString := sx.GetString(node.Tail().Tail().Car()); isString {
+				v.b.WriteString(s.GetValue())
+			}
+
+		case zsx.SymVerbatimComment:
+			// Do nothing
 
 		default:
-			return node, false
+			return false
 		}
-		return node, true
+		return true
 	}
-	return sx.Nil(), false
+	return false
 }
-func (v *textVisitor) VisitAfter(node *sx.Pair, env *sx.Pair) sx.Object {
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		//case
-		}
-	}
-	return node
-}
+func (v *textVisitor) VisitAfter(*sx.Pair, *sx.Pair) {}
 
 // textVisitorAST writes the abstract syntax tree to an io.Writer.
 type textVisitorAST struct {

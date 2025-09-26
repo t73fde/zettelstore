@@ -53,7 +53,7 @@ func TestEncoder(t *testing.T) {
 	for i := range tcsInline {
 		tcsInline[i].inline = true
 	}
-	executeTestCases(t, append(tcsBlock, tcsInline...))
+	executeTestCases(t, append(append([]zmkTestCase{}, tcsBlock...), tcsInline...))
 }
 
 func executeTestCases(t *testing.T, testCases []zmkTestCase) {
@@ -118,7 +118,7 @@ func checkTextSz(t *testing.T, testNum int, node *sx.Pair, descr, expect string,
 	if err != nil {
 		t.Error(descr, err)
 	}
-	// checkExpGot(t, testNum, descr, expect, sb.String(), isInline)
+	checkExpGot(t, testNum, descr, expect, sb.String(), isInline)
 }
 
 func encode(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
