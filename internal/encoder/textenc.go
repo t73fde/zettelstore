@@ -90,9 +90,9 @@ type textVisitor struct{ b encWriter }
 func newTextVisitor(w io.Writer) textVisitor {
 	return textVisitor{b: newEncWriter(w)}
 }
-func (v *textVisitor) walk(node, env *sx.Pair)    { zsx.WalkIt(v, node, env) }
-func (v *textVisitor) walkList(lst, env *sx.Pair) { zsx.WalkItList(v, lst, 0, env) }
-func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
+func (v *textVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
+func (v *textVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
+func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
@@ -117,7 +117,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 			_ = v.b.WriteByte(' ')
 
 		case zsx.SymEndnote:
-			if zsx.GetWalkPos(env) > 0 {
+			if zsx.GetWalkPos(alst) > 0 {
 				_ = v.b.WriteByte(' ')
 			}
 			return false
@@ -137,7 +137,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 				} else {
 					v.b.WriteLn()
 				}
-				v.walk(n.Head(), env)
+				v.walk(n.Head(), alst)
 			}
 
 		case zsx.SymListOrdered, zsx.SymListUnordered, zsx.SymListQuote:
@@ -148,7 +148,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 				} else {
 					v.b.WriteLn()
 				}
-				v.walk(n.Head(), env)
+				v.walk(n.Head(), alst)
 			}
 
 		case zsx.SymTable:
@@ -170,7 +170,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 					} else {
 						_ = v.b.WriteByte(' ')
 					}
-					v.walk(elem.Head(), env)
+					v.walk(elem.Head(), alst)
 				}
 			}
 
@@ -182,7 +182,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 				} else {
 					v.b.WriteLn()
 				}
-				v.walkList(n.Head(), env)
+				v.walkList(n.Head(), alst)
 				n = n.Tail()
 				if n == nil {
 					break
@@ -191,7 +191,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 				if zsx.SymBlock.IsEqual(dvals.Car()) {
 					for val := range dvals.Tail().Pairs() {
 						v.b.WriteLn()
-						v.walk(val.Head(), env)
+						v.walk(val.Head(), alst)
 					}
 				}
 			}
@@ -205,11 +205,11 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, env *sx.Pair) bool {
 				} else {
 					v.b.WriteLn()
 				}
-				v.walk(n.Head(), env)
+				v.walk(n.Head(), alst)
 			}
 			if inlines := content.Tail(); inlines != nil {
 				v.b.WriteLn()
-				v.walkList(inlines, env)
+				v.walkList(inlines, alst)
 			}
 
 		case zsx.SymVerbatimCode, zsx.SymVerbatimEval, zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:

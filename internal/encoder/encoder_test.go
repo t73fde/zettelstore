@@ -67,8 +67,7 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 		node, bs := parser.Parse(inp, nil, syntax, config.NoHTML)
 		checkEncodings(t, testNum, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, bs, tc.inline, tc.descr)
-		_ = node
-		// checkTextSz(t, testNum, node, tc.descr, tc.expect[encoderText], tc.inline)
+		checkTextSz(t, testNum, node, tc.descr, tc.expect[encoderText], tc.inline)
 	}
 }
 

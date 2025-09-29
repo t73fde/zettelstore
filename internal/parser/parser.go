@@ -115,6 +115,7 @@ func Parse(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecuri
 	if obj := Get(syntax).Parse(inp, m, syntax); obj != nil {
 		bs, err := sztrans.GetBlockSlice(obj)
 		if err == nil {
+			Clean(obj, hi.AllowHTML(syntax))
 			CleanAST(&bs, hi.AllowHTML(syntax))
 			return obj, bs
 		}
@@ -172,13 +173,13 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 	if rtConfig != nil {
 		hi = rtConfig.GetHTMLInsecurity()
 	}
-	_, bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
+	rootNode, bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
 	return &ast.ZettelNode{
 		Meta:      m,
 		Content:   zettel.Content,
 		Zid:       m.Zid,
 		InhMeta:   inhMeta,
-		Blocks:    sx.Nil(), // TODO: implement Clean
+		Blocks:    rootNode,
 		BlocksAST: bs,
 		Syntax:    syntax,
 	}
