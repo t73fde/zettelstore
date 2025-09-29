@@ -13,6 +13,12 @@
 
 package encoder_test
 
+import "t73f.de/r/zsc/domain/meta"
+
+// func TestEncoderBlock(t *testing.T) {
+// 	executeTestCases(t, tcsBlock)
+// }
+
 var tcsBlock = []zmkTestCase{
 	{
 		descr: "Empty Zettelmarkup should produce near nothing",
@@ -394,6 +400,18 @@ and much more
 		},
 	},
 	{
+		descr:  "Zettel with syntax HTML",
+		zmk:    "<h1>Hello</h1>\nWorld\n",
+		syntax: meta.ValueSyntaxHTML,
+		expect: expectMap{
+			encoderHTML:  ``,
+			encoderSz:    `(BLOCK)`,
+			encoderSHTML: `()`,
+			encoderText:  "",
+			encoderZmk:   "",
+		},
+	},
+	{
 		descr: "",
 		zmk:   ``,
 		expect: expectMap{
@@ -405,7 +423,3 @@ and much more
 		},
 	},
 }
-
-// func TestEncoderBlock(t *testing.T) {
-// 	executeTestCases(t, tcsBlock)
-// }

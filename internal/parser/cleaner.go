@@ -40,7 +40,6 @@ func CleanAST(bs *ast.BlockSlice, allowHTML bool) {
 }
 
 type cleanASTVisitor struct {
-	textEnc   encoder.TextEncoder
 	ids       map[string]ast.Node
 	allowHTML bool
 	hasMark   bool
@@ -119,7 +118,8 @@ func (cv *cleanASTVisitor) visitHeading(hn *ast.HeadingNode) {
 	}
 	if hn.Slug == "" {
 		var sb strings.Builder
-		if err := cv.textEnc.WriteInlines(&sb, &hn.Inlines); err != nil {
+		var textEnc encoder.TextEncoder
+		if err := textEnc.WriteInlines(&sb, &hn.Inlines); err != nil {
 			return
 		}
 		hn.Slug = zerostrings.Slugify(sb.String())
