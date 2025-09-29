@@ -35,7 +35,7 @@ type shtmlEncoder struct {
 // WriteZettel writes the encoded zettel to the writer.
 func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	env := shtml.MakeEnvironment(enc.lang)
-	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(zn.InhMeta), &env)
+	metaSHTML, err := enc.th.Evaluate(GetMetaSz(zn.InhMeta), &env)
 	if err != nil {
 		return err
 	}
@@ -51,11 +51,22 @@ func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 // WriteMeta encodes meta data as s-expression.
 func (enc *shtmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	env := shtml.MakeEnvironment(enc.lang)
-	metaSHTML, err := enc.th.Evaluate(enc.tx.GetMeta(m), &env)
+	metaSHTML, err := enc.th.Evaluate(GetMetaSz(m), &env)
 	if err != nil {
 		return err
 	}
 	_, err = sx.Print(w, metaSHTML)
+	return err
+}
+
+// WriteSz encodes SZ represented zettel content.
+func (enc *shtmlEncoder) WriteSz(w io.Writer, node *sx.Pair) error {
+	env := shtml.MakeEnvironment(enc.lang)
+	hval, err := enc.th.Evaluate(node, &env)
+	if err != nil {
+		return err
+	}
+	_, err = hval.Print(w)
 	return err
 }
 
@@ -66,6 +77,6 @@ func (enc *shtmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
 	if err != nil {
 		return err
 	}
-	_, err = sx.Print(w, hval)
+	_, err = hval.Print(w)
 	return err
 }

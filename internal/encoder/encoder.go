@@ -18,6 +18,7 @@ package encoder
 import (
 	"io"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
@@ -33,7 +34,13 @@ type Encoder interface {
 	// WriteMeta encodes just the metadata.
 	WriteMeta(io.Writer, *meta.Meta) error
 
+	// WriteSz encodes  SZ represented zettel content.
+	WriteSz(io.Writer, *sx.Pair) error
+
 	// WiteBlocks encodes a block slice, i.e. the zettel content.
+	//
+	// This method is deprecated and will be removed, if all implementations
+	// of WriteSz work correctly.
 	WriteBlocks(io.Writer, *ast.BlockSlice) error
 }
 

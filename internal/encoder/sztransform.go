@@ -316,8 +316,8 @@ var mapMetaTypeS = map[*meta.DescriptionType]*sx.Symbol{
 	meta.TypeWord:       sz.SymTypeWord,
 }
 
-// GetMeta transforms the given metadata into a sx list.
-func (t *SzTransformer) GetMeta(m *meta.Meta) *sx.Pair {
+// GetMetaSz transforms the given metadata into a sz list.
+func GetMetaSz(m *meta.Meta) *sx.Pair {
 	var lb sx.ListBuilder
 	lb.Add(sz.SymMeta)
 	for key, val := range m.Computed() {

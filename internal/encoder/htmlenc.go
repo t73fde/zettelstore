@@ -38,7 +38,7 @@ type htmlEncoder struct {
 // WriteZettel encodes a full zettel as HTML5.
 func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(he.tx.GetMeta(zn.InhMeta), &env)
+	hm, err := he.th.Evaluate(GetMetaSz(zn.InhMeta), &env)
 	if err != nil {
 		return err
 	}
@@ -98,12 +98,27 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 // WriteMeta encodes meta data as HTML5.
 func (he *htmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(he.tx.GetMeta(m), &env)
+	hm, err := he.th.Evaluate(GetMetaSz(m), &env)
 	if err != nil {
 		return err
 	}
 	gen := sxhtml.NewGenerator().SetNewline()
 	return gen.WriteListHTML(w, hm)
+}
+
+// WriteSz encodes SZ represented zettel content.
+func (he *htmlEncoder) WriteSz(w io.Writer, node *sx.Pair) error {
+	env := shtml.MakeEnvironment(he.lang)
+	hobj, err := he.th.Evaluate(node, &env)
+	if err == nil {
+		gen := sxhtml.NewGenerator()
+		if err = gen.WriteListHTML(w, hobj); err != nil {
+			return err
+		}
+
+		return gen.WriteHTML(w, shtml.Endnotes(&env))
+	}
+	return err
 }
 
 // WriteBlocks encodes a block slice.

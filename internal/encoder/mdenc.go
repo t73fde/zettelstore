@@ -18,6 +18,7 @@ package encoder
 import (
 	"io"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsx"
@@ -54,6 +55,12 @@ func (v *mdVisitor) acceptMeta(m *meta.Meta) {
 	for key, val := range m.Computed() {
 		v.b.WriteStrings(key, ": ", string(val), "\n")
 	}
+}
+
+// WriteSz encodes SZ represented zettel content.
+func (*mdEncoder) WriteSz(w io.Writer, _ *sx.Pair) error {
+	_, err := io.WriteString(w, "MD-SZ encoder not yet implemented")
+	return err
 }
 
 // WriteBlocks writes the content of a block slice to the writer.

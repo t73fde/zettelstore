@@ -191,7 +191,7 @@ var mapMetaKey = map[string]string{
 }
 
 func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
-	tm := g.tx.GetMeta(m)
+	tm := encoder.GetMetaSz(m)
 	env := shtml.MakeEnvironment(g.lang)
 	hm, err := g.th.Evaluate(tm, &env)
 	if err != nil {

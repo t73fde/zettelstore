@@ -20,6 +20,7 @@ import (
 	"io"
 	"strings"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx"
@@ -54,6 +55,12 @@ func (v *zmkVisitor) acceptMeta(m *meta.Meta) {
 	for key, val := range m.Computed() {
 		v.b.WriteStrings(key, ": ", string(val), "\n")
 	}
+}
+
+// WriteSz encodes SZ represented zettel content.
+func (*zmkEncoder) WriteSz(w io.Writer, _ *sx.Pair) error {
+	_, err := io.WriteString(w, "ZMK-SZ encoder not yet implemented")
+	return err
 }
 
 // WriteBlocks writes the content of a block slice to the writer.
