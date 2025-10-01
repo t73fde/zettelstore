@@ -2,6 +2,12 @@
 
 <a id="0_23"></a>
 <h2>Changes for Version 0.23.0 (pending)</h2>
+  *  SZ encoding of lists (ordered, unordered, and quotations) has been
+     simplified by allowing only block elements. Previously, inline elements
+     were also permitted to signal a compact list. However, this behavior is
+     only relevant for HTML generation. Therefore, the detection of compact
+     lists is now performed exclusively during HTML generation.
+     (breaking)
 
 <a id="0_22"></a>
 <h2>Changes for Version 0.22.0 (2025-07-07)</h2>

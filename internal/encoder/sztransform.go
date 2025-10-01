@@ -147,37 +147,14 @@ var mapNestedListKindS = map[ast.NestedListKind]*sx.Symbol{
 
 func (t *SzTransformer) getNestedList(ln *ast.NestedListNode) *sx.Pair {
 	var items sx.ListBuilder
-	isCompact := isCompactList(ln.Items)
 	for _, item := range ln.Items {
-		if isCompact && len(item) > 0 {
-			paragraph := t.GetSz(item[0])
-			items.Add(zsx.MakeInlineList(paragraph.Tail()))
-			continue
-		}
 		var itemObjs sx.ListBuilder
 		for _, in := range item {
 			itemObjs.Add(t.GetSz(in))
 		}
-		if isCompact {
-			items.Add(zsx.MakeInlineList(itemObjs.List()))
-		} else {
-			items.Add(zsx.MakeBlockList(itemObjs.List()))
-		}
+		items.Add(zsx.MakeBlockList(itemObjs.List()))
 	}
 	return zsx.MakeList(mapGetS(mapNestedListKindS, ln.Kind), getAttributes(ln.Attrs), items.List())
-}
-func isCompactList(itemSlice []ast.ItemSlice) bool {
-	for _, items := range itemSlice {
-		if len(items) > 1 {
-			return false
-		}
-		if len(items) == 1 {
-			if _, ok := items[0].(*ast.ParaNode); !ok {
-				return false
-			}
-		}
-	}
-	return true
 }
 
 func (t *SzTransformer) getDescriptionList(dn *ast.DescriptionListNode) *sx.Pair {
