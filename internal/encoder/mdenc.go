@@ -34,7 +34,7 @@ type mdEncoder struct {
 // WriteZettel writes the encoded zettel to the writer.
 func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	v := newMDVisitor(w, me.lang)
-	v.acceptMeta(zn.InhMeta)
+	me.writeMeta(v.b, zn.InhMeta)
 	if zn.InhMeta.YamlSep {
 		v.b.WriteString("---\n")
 	} else {
@@ -46,14 +46,14 @@ func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 
 // WriteMeta encodes meta data as markdown.
 func (me *mdEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
-	v := newMDVisitor(w, me.lang)
-	v.acceptMeta(m)
-	return v.b.Flush()
+	ew := newEncWriter(w)
+	me.writeMeta(ew, m)
+	return ew.Flush()
 }
 
-func (v *mdVisitor) acceptMeta(m *meta.Meta) {
+func (me *mdEncoder) writeMeta(ew encWriter, m *meta.Meta) {
 	for key, val := range m.Computed() {
-		v.b.WriteStrings(key, ": ", string(val), "\n")
+		ew.WriteStrings(key, ": ", string(val), "\n")
 	}
 }
 
@@ -70,8 +70,8 @@ func (me *mdEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
 	return v.b.Flush()
 }
 
-// mdVisitor writes the abstract syntax tree to an EncWriter.
-type mdVisitor struct {
+// mdVisitorAST writes the abstract syntax tree to an EncWriter.
+type mdVisitorAST struct {
 	b            encWriter
 	listInfo     []int
 	listPrefix   string
@@ -79,12 +79,12 @@ type mdVisitor struct {
 	quoteNesting uint
 }
 
-func newMDVisitor(w io.Writer, lang string) mdVisitor {
-	return mdVisitor{b: newEncWriter(w), langStack: shtml.NewLangStack(lang)}
+func newMDVisitor(w io.Writer, lang string) mdVisitorAST {
+	return mdVisitorAST{b: newEncWriter(w), langStack: shtml.NewLangStack(lang)}
 }
 
 // pushAttribute adds the current attributes to the visitor.
-func (v *mdVisitor) pushAttributes(a zsx.Attributes) {
+func (v *mdVisitorAST) pushAttributes(a zsx.Attributes) {
 	if value, ok := a.Get("lang"); ok {
 		v.langStack.Push(value)
 	} else {
@@ -93,18 +93,18 @@ func (v *mdVisitor) pushAttributes(a zsx.Attributes) {
 }
 
 // popAttributes removes the current attributes from the visitor.
-func (v *mdVisitor) popAttributes() { v.langStack.Pop() }
+func (v *mdVisitorAST) popAttributes() { v.langStack.Pop() }
 
 // getLanguage returns the current language,
-func (v *mdVisitor) getLanguage() string { return v.langStack.Top() }
+func (v *mdVisitorAST) getLanguage() string { return v.langStack.Top() }
 
-func (v *mdVisitor) getQuotes() (string, string, bool) {
+func (v *mdVisitorAST) getQuotes() (string, string, bool) {
 	qi := shtml.GetQuoteInfo(v.getLanguage())
 	leftQ, rightQ := qi.GetQuotes(v.quoteNesting)
 	return leftQ, rightQ, qi.GetNBSp()
 }
 
-func (v *mdVisitor) Visit(node ast.Node) ast.Visitor {
+func (v *mdVisitorAST) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
 		v.visitBlockSlice(n)
@@ -142,7 +142,7 @@ func (v *mdVisitor) Visit(node ast.Node) ast.Visitor {
 	return nil
 }
 
-func (v *mdVisitor) visitBlockSlice(bs *ast.BlockSlice) {
+func (v *mdVisitorAST) visitBlockSlice(bs *ast.BlockSlice) {
 	for i, bn := range *bs {
 		if i > 0 {
 			v.b.WriteString("\n\n")
@@ -151,7 +151,7 @@ func (v *mdVisitor) visitBlockSlice(bs *ast.BlockSlice) {
 	}
 }
 
-func (v *mdVisitor) visitVerbatim(vn *ast.VerbatimNode) {
+func (v *mdVisitorAST) visitVerbatim(vn *ast.VerbatimNode) {
 	lc := len(vn.Content)
 	if vn.Kind != ast.VerbatimCode || lc == 0 {
 		return
@@ -180,7 +180,7 @@ func (v *mdVisitor) visitVerbatim(vn *ast.VerbatimNode) {
 	}
 }
 
-func (v *mdVisitor) visitRegion(rn *ast.RegionNode) {
+func (v *mdVisitorAST) visitRegion(rn *ast.RegionNode) {
 	if rn.Kind != ast.RegionQuote {
 		return
 	}
@@ -202,7 +202,7 @@ func (v *mdVisitor) visitRegion(rn *ast.RegionNode) {
 	}
 }
 
-func (v *mdVisitor) visitHeading(hn *ast.HeadingNode) {
+func (v *mdVisitorAST) visitHeading(hn *ast.HeadingNode) {
 	v.pushAttributes(hn.Attrs)
 	defer v.popAttributes()
 
@@ -211,7 +211,7 @@ func (v *mdVisitor) visitHeading(hn *ast.HeadingNode) {
 	ast.Walk(v, &hn.Inlines)
 }
 
-func (v *mdVisitor) visitNestedList(ln *ast.NestedListNode) {
+func (v *mdVisitorAST) visitNestedList(ln *ast.NestedListNode) {
 	switch ln.Kind {
 	case ast.NestedListOrdered:
 		v.writeNestedList(ln, "1. ")
@@ -223,7 +223,7 @@ func (v *mdVisitor) visitNestedList(ln *ast.NestedListNode) {
 	v.listInfo = v.listInfo[:len(v.listInfo)-1]
 }
 
-func (v *mdVisitor) writeNestedList(ln *ast.NestedListNode, enum string) {
+func (v *mdVisitorAST) writeNestedList(ln *ast.NestedListNode, enum string) {
 	v.listInfo = append(v.listInfo, len(enum))
 	regIndent := 4*len(v.listInfo) - 4
 	paraIndent := regIndent + len(enum)
@@ -245,7 +245,7 @@ func (v *mdVisitor) writeNestedList(ln *ast.NestedListNode, enum string) {
 	}
 }
 
-func (v *mdVisitor) writeListQuote(ln *ast.NestedListNode) {
+func (v *mdVisitorAST) writeListQuote(ln *ast.NestedListNode) {
 	v.listInfo = append(v.listInfo, 0)
 	if len(v.listInfo) > 1 {
 		return
@@ -273,7 +273,7 @@ func (v *mdVisitor) writeListQuote(ln *ast.NestedListNode) {
 	v.listPrefix = prefix
 }
 
-func (v *mdVisitor) visitBreak(bn *ast.BreakNode) {
+func (v *mdVisitorAST) visitBreak(bn *ast.BreakNode) {
 	if bn.Hard {
 		v.b.WriteString("\\\n")
 	} else {
@@ -289,14 +289,14 @@ func (v *mdVisitor) visitBreak(bn *ast.BreakNode) {
 	}
 }
 
-func (v *mdVisitor) visitLink(ln *ast.LinkNode) {
+func (v *mdVisitorAST) visitLink(ln *ast.LinkNode) {
 	v.pushAttributes(ln.Attrs)
 	defer v.popAttributes()
 
 	v.writeReference(ln.Ref, ln.Inlines)
 }
 
-func (v *mdVisitor) visitEmbedRef(en *ast.EmbedRefNode) {
+func (v *mdVisitorAST) visitEmbedRef(en *ast.EmbedRefNode) {
 	v.pushAttributes(en.Attrs)
 	defer v.popAttributes()
 
@@ -304,7 +304,7 @@ func (v *mdVisitor) visitEmbedRef(en *ast.EmbedRefNode) {
 	v.writeReference(en.Ref, en.Inlines)
 }
 
-func (v *mdVisitor) writeReference(ref *ast.Reference, is ast.InlineSlice) {
+func (v *mdVisitorAST) writeReference(ref *ast.Reference, is ast.InlineSlice) {
 	if ref.State == ast.RefStateQuery {
 		ast.Walk(v, &is)
 	} else if len(is) > 0 {
@@ -329,7 +329,7 @@ func isAutoLinkable(ref *ast.Reference) bool {
 	return ref.URL.Scheme != ""
 }
 
-func (v *mdVisitor) visitFormat(fn *ast.FormatNode) {
+func (v *mdVisitorAST) visitFormat(fn *ast.FormatNode) {
 	v.pushAttributes(fn.Attrs)
 	defer v.popAttributes()
 
@@ -353,7 +353,7 @@ func (v *mdVisitor) visitFormat(fn *ast.FormatNode) {
 	}
 }
 
-func (v *mdVisitor) writeQuote(fn *ast.FormatNode) {
+func (v *mdVisitorAST) writeQuote(fn *ast.FormatNode) {
 	leftQ, rightQ, withNbsp := v.getQuotes()
 	v.b.WriteString(leftQ)
 	if withNbsp {
@@ -368,7 +368,7 @@ func (v *mdVisitor) writeQuote(fn *ast.FormatNode) {
 	v.b.WriteString(rightQ)
 }
 
-func (v *mdVisitor) visitLiteral(ln *ast.LiteralNode) {
+func (v *mdVisitorAST) visitLiteral(ln *ast.LiteralNode) {
 	switch ln.Kind {
 	case ast.LiteralCode, ast.LiteralInput, ast.LiteralOutput:
 		_ = v.b.WriteByte('`')
@@ -380,7 +380,7 @@ func (v *mdVisitor) visitLiteral(ln *ast.LiteralNode) {
 	}
 }
 
-func (v *mdVisitor) writeSpaces(n int) {
+func (v *mdVisitorAST) writeSpaces(n int) {
 	for range n {
 		v.b.WriteSpace()
 	}
