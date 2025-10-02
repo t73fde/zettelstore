@@ -16,6 +16,7 @@
 package sztrans
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 
@@ -441,11 +442,15 @@ func handleBLOB(rest *sx.Pair) sx.Object {
 				if syntax, isString := sx.GetString(curr.Car()); isString {
 					if curr = curr.Tail(); curr != nil {
 						if blob, isBlob := sx.GetString(curr.Car()); isBlob {
+							data, err := base64.StdEncoding.DecodeString(blob.GetValue())
+							if err != nil {
+								data = nil
+							}
 							return sxNode{&ast.BLOBNode{
 								Attrs:       attrs,
 								Description: ins,
 								Syntax:      syntax.GetValue(),
-								Blob:        []byte(blob.GetValue()),
+								Blob:        data,
 							}}
 
 						}

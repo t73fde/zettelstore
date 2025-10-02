@@ -16,6 +16,8 @@ package parser
 // blob provides a parser of binary data.
 
 import (
+	"encoding/base64"
+
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx"
@@ -61,5 +63,6 @@ func parseBlob(inp *input.Input, m *meta.Meta, syntax string) *sx.Pair {
 	if p := Get(syntax); p != nil {
 		syntax = p.Name
 	}
-	return zsx.MakeBlock(zsx.MakeBLOB(nil, ParseDescription(m), syntax, string(inp.Src)))
+	content := base64.StdEncoding.EncodeToString(inp.Src)
+	return zsx.MakeBlock(zsx.MakeBLOB(nil, ParseDescription(m), syntax, content))
 }

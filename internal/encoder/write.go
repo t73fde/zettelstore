@@ -14,7 +14,6 @@
 package encoder
 
 import (
-	"encoding/base64"
 	"io"
 
 	"t73f.de/r/zsc/domain/meta"
@@ -63,18 +62,6 @@ func (w *encWriter) WriteByte(b byte) error {
 
 // WriteBytes writes the content of bs.
 func (w *encWriter) WriteBytes(bs ...byte) { _, _ = w.Write(bs) }
-
-// WriteBase64 writes the content of p, encoded with base64.
-func (w *encWriter) WriteBase64(p []byte) {
-	if w.err == nil {
-		encoder := base64.NewEncoder(base64.StdEncoding, w.w)
-		_, w.err = encoder.Write(p)
-		err := encoder.Close()
-		if w.err == nil {
-			w.err = err
-		}
-	}
-}
 
 // WriteLn writes a new line character.
 func (w *encWriter) WriteLn() {

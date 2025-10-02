@@ -217,7 +217,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 				v.b.WriteString(s.GetValue())
 			}
 
-		case zsx.SymVerbatimComment:
+		case zsx.SymVerbatimComment, zsx.SymBLOB:
 			// Do nothing
 
 		default:

@@ -65,16 +65,45 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 			syntax = meta.ValueSyntaxZmk
 		}
 		node, bs := parser.Parse(inp, nil, syntax, config.NoHTML)
-		checkEncodings(t, testNum, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
+		checkEncodings(t, testNum, node, tc.inline, tc.descr, tc.expect, tc.zmk)
+		checkEncodingsAST(t, testNum, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, bs, tc.inline, tc.descr)
-		checkTextSz(t, testNum, node, tc.descr, tc.expect[encoderText], tc.inline)
 	}
 }
 
-func checkEncodings(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string, expected expectMap, zmkDefault string) {
+func checkEncodings(t *testing.T, testNum int, node *sx.Pair, isInline bool, descr string, expected expectMap, zmkDefault string) {
+	for enc, exp := range expected {
+		if enc == api.EncoderMD || enc == api.EncoderZmk {
+			continue
+		}
+		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
+		got, err := encode(encdr, node)
+		if err != nil {
+			prefix := fmt.Sprintf("Test #%d", testNum)
+			if d := descr; d != "" {
+				prefix += "\nReason:   " + d
+			}
+			prefix += "\nMode:     " + mode(isInline)
+			t.Errorf("%s\nEncoder:  %s\nError:    %v", prefix, enc, err)
+			continue
+		}
+		if enc == api.EncoderZmk && exp == useZmk {
+			exp = zmkDefault
+		}
+		if got != exp {
+			prefix := fmt.Sprintf("Test #%d", testNum)
+			if d := descr; d != "" {
+				prefix += "\nReason:   " + d
+			}
+			prefix += "\nMode:     " + mode(isInline)
+			t.Errorf("%s\nEncoder:  %s\nExpected: %q\nGot:      %q", prefix, enc, exp, got)
+		}
+	}
+}
+func checkEncodingsAST(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string, expected expectMap, zmkDefault string) {
 	for enc, exp := range expected {
 		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
-		got, err := encode(encdr, bs)
+		got, err := encodeAST(encdr, bs)
 		if err != nil {
 			prefix := fmt.Sprintf("Test #%d", testNum)
 			if d := descr; d != "" {
@@ -101,7 +130,7 @@ func checkEncodings(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool,
 func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string) {
 	t.Helper()
 	encdr := encoder.Create(encoderSz, nil)
-	exp, err := encode(encdr, bs)
+	exp, err := encodeAST(encdr, bs)
 	if err != nil {
 		t.Error(err)
 		return
@@ -111,29 +140,7 @@ func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr 
 		t.Error(err)
 		return
 	}
-	checkExpGot(t, testNum, descr, exp, val.String(), isInline)
-}
-
-func checkTextSz(t *testing.T, testNum int, node *sx.Pair, descr, expect string, isInline bool) {
-	t.Helper()
-	textEnc := encoder.TextEncoder{}
-	var sb strings.Builder
-	err := textEnc.WriteSz(&sb, node)
-	if err != nil {
-		t.Error(descr, err)
-	}
-	checkExpGot(t, testNum, descr, expect, sb.String(), isInline)
-}
-
-func encode(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
-	var sb strings.Builder
-	err := e.WriteBlocks(&sb, &bs)
-	return sb.String(), err
-}
-
-func checkExpGot(t *testing.T, testNum int, descr, exp, got string, isInline bool) {
-	t.Helper()
-	if exp != got {
+	if got := val.String(); exp != got {
 		prefix := fmt.Sprintf("Test #%d", testNum)
 		if d := descr; d != "" {
 			prefix += "\nReason:   " + d
@@ -141,6 +148,17 @@ func checkExpGot(t *testing.T, testNum int, descr, exp, got string, isInline boo
 		prefix += "\nMode:     " + mode(isInline)
 		t.Errorf("%s\n\nExpected: %q\nGot:      %q", prefix, exp, got)
 	}
+}
+
+func encode(e encoder.Encoder, node *sx.Pair) (string, error) {
+	var sb strings.Builder
+	err := e.WriteSz(&sb, node)
+	return sb.String(), err
+}
+func encodeAST(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
+	var sb strings.Builder
+	err := e.WriteBlocks(&sb, &bs)
+	return sb.String(), err
 }
 
 func mode(isInline bool) string {

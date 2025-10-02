@@ -16,7 +16,6 @@ package encoder
 import (
 	"encoding/base64"
 	"fmt"
-	"strings"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
@@ -214,7 +213,7 @@ func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
 	if bn.Syntax == meta.ValueSyntaxSVG {
 		content = string(bn.Blob)
 	} else {
-		content = getBase64String(bn.Blob)
+		content = base64.StdEncoding.EncodeToString(bn.Blob)
 	}
 	return zsx.MakeBLOB(getAttributes(bn.Attrs), t.getInlineList(bn.Description), bn.Syntax, content)
 }
@@ -232,7 +231,7 @@ func (t *SzTransformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
 	if en.Syntax == meta.ValueSyntaxSVG {
 		content = string(en.Blob)
 	} else {
-		content = getBase64String(en.Blob)
+		content = base64.StdEncoding.EncodeToString(en.Blob)
 	}
 	return zsx.MakeEmbedBLOB(getAttributes(en.Attrs), en.Syntax, content, t.getInlineList(en.Inlines))
 }
@@ -320,17 +319,4 @@ func mapGetS[T comparable](m map[T]*sx.Symbol, k T) *sx.Symbol {
 		return result
 	}
 	return sx.MakeSymbol(fmt.Sprintf("**%v:NOT-FOUND**", k))
-}
-
-func getBase64String(data []byte) string {
-	var sb strings.Builder
-	encoder := base64.NewEncoder(base64.StdEncoding, &sb)
-	_, err := encoder.Write(data)
-	if err == nil {
-		err = encoder.Close()
-	}
-	if err == nil {
-		return sb.String()
-	}
-	return ""
 }
