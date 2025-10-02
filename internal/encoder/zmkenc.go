@@ -34,7 +34,7 @@ type zmkEncoder struct{}
 // WriteZettel writes the encoded zettel to the writer.
 func (ze *zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	v := newZmkVisitorAST(w)
-	ze.writeMeta(v.b, zn.InhMeta)
+	v.b.WriteMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {
 		v.b.WriteString("---\n")
 	} else {
@@ -47,14 +47,8 @@ func (ze *zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 // WriteMeta encodes meta data as zmk.
 func (ze *zmkEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	ew := newEncWriter(w)
-	ze.writeMeta(ew, m)
+	ew.WriteMeta(m)
 	return ew.Flush()
-}
-
-func (*zmkEncoder) writeMeta(ew encWriter, m *meta.Meta) {
-	for key, val := range m.Computed() {
-		ew.WriteStrings(key, ": ", string(val), "\n")
-	}
 }
 
 // WriteSz encodes SZ represented zettel content.

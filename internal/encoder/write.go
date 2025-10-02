@@ -16,6 +16,8 @@ package encoder
 import (
 	"encoding/base64"
 	"io"
+
+	"t73f.de/r/zsc/domain/meta"
 )
 
 // encWriter is a specialized writer for encoding zettel.
@@ -85,6 +87,15 @@ func (w *encWriter) WriteLn() {
 func (w *encWriter) WriteSpace() {
 	if w.err == nil {
 		w.err = w.WriteByte(' ')
+	}
+}
+
+// WriteMeta write the content of the meta data in a standard way:
+//
+//	key: val
+func (w *encWriter) WriteMeta(m *meta.Meta) {
+	for key, val := range m.Computed() {
+		w.WriteStrings(key, ": ", string(val), "\n")
 	}
 }
 

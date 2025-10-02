@@ -34,7 +34,7 @@ type mdEncoder struct {
 // WriteZettel writes the encoded zettel to the writer.
 func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 	v := newMDVisitor(w, me.lang)
-	me.writeMeta(v.b, zn.InhMeta)
+	v.b.WriteMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {
 		v.b.WriteString("---\n")
 	} else {
@@ -47,14 +47,8 @@ func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
 // WriteMeta encodes meta data as markdown.
 func (me *mdEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	ew := newEncWriter(w)
-	me.writeMeta(ew, m)
+	ew.WriteMeta(m)
 	return ew.Flush()
-}
-
-func (me *mdEncoder) writeMeta(ew encWriter, m *meta.Meta) {
-	for key, val := range m.Computed() {
-		ew.WriteStrings(key, ": ", string(val), "\n")
-	}
 }
 
 // WriteSz encodes SZ represented zettel content.
