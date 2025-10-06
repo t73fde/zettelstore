@@ -44,7 +44,7 @@ var pngTestCases = []blobTestCase{
 		},
 		expect: expectMap{
 			encoderHTML:  `<p><img alt="Minimal PNG" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg=="></p>`,
-			encoderSz:    `(BLOCK (BLOB () ((TEXT "Minimal PNG")) "png" "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg=="))`,
+			encoderSz:    `(BLOCK (BLOB () "png" "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg==" (TEXT "Minimal PNG")))`,
 			encoderSHTML: `((p (img ((alt . "Minimal PNG") (src . "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGNiAAAABgADNjd8qAAAAABJRU5ErkJggg==")))))`,
 			encoderText:  "",
 			encoderZmk:   `%% Unable to display BLOB with description 'Minimal PNG' and syntax 'png'.`,
@@ -58,7 +58,7 @@ func TestBlob(t *testing.T) {
 		m.Set(meta.KeyTitle, meta.Value(tc.descr))
 		inp := input.NewInput(tc.blob)
 		node, bs := parser.Parse(inp, m, tc.syntax, config.NoHTML)
-		checkEncodings(t, testNum, node, false, tc.descr, tc.expect, "???")
+		checkEncodings(t, testNum+1000, node, false, tc.descr, tc.expect, "???")
 		checkEncodingsAST(t, testNum, bs, false, tc.descr, tc.expect, "???")
 	}
 }

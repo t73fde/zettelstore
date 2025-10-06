@@ -8,6 +8,9 @@
      only relevant for HTML generation. Therefore, the detection of compact
      lists is now performed exclusively during HTML generation.
      (breaking)
+  *  SZ encoding of BLOBs has be changed from <code>(BLOB attrs inlines syntax
+     data)</code> to <code>(BLOG attrs syntax data inline ...)</code>.
+     (breaking)
 
 <a id="0_22"></a>
 <h2>Changes for Version 0.22.0 (2025-07-07)</h2>
