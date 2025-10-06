@@ -107,9 +107,7 @@ func (v *mdVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 			v.visitBlock(node, alst)
 
 		case zsx.SymText:
-			if s, isString := sx.GetString(node.Tail().Car()); isString {
-				v.b.WriteString(s.GetValue())
-			}
+			v.b.WriteString(zsx.GetText(node))
 		case zsx.SymSoft:
 			v.visitBreak(false)
 		case zsx.SymHard:
@@ -153,9 +151,9 @@ func (v *mdVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 			v.b.WriteString("---")
 
 		case zsx.SymListOrdered:
-			v.visitNestedList(node, alst, "1. ")
+			v.visitNestedList(node, alst, enumOrdered)
 		case zsx.SymListUnordered:
-			v.visitNestedList(node, alst, "* ")
+			v.visitNestedList(node, alst, enumUnordered)
 		case zsx.SymListQuote:
 			if len(v.listInfo) == 0 {
 				v.visitListQuote(node, alst)
@@ -260,6 +258,9 @@ func (v *mdVisitor) visitQuote(node, alst *sx.Pair) {
 	}
 	v.b.WriteString(rightQ)
 }
+
+const enumOrdered = "1. "
+const enumUnordered = "* "
 
 func (v *mdVisitor) visitNestedList(node *sx.Pair, alst *sx.Pair, enum string) {
 	v.listInfo = append(v.listInfo, len(enum))

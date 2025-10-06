@@ -18,7 +18,6 @@ package sztrans
 import (
 	"encoding/base64"
 	"fmt"
-	"log"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/sz"
@@ -47,146 +46,133 @@ func GetBlockSlice(pair *sx.Pair) (ast.BlockSlice, error) {
 	return nil, fmt.Errorf("error walking %v", pair)
 }
 
-func (t *transformer) VisitBefore(pair *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
-	if sym, isSymbol := sx.GetSymbol(pair.Car()); isSymbol {
+func (t *transformer) VisitBefore(node *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
-			if p := pair.Tail(); p != nil {
-				if s, isString := sx.GetString(p.Car()); isString {
-					return sxNode{&ast.TextNode{Text: s.GetValue()}}, true
-				}
+			if s := zsx.GetText(node); s != "" {
+				return sxNode{&ast.TextNode{Text: s}}, true
 			}
 		case zsx.SymSoft:
 			return sxNode{&ast.BreakNode{Hard: false}}, true
 		case zsx.SymHard:
 			return sxNode{&ast.BreakNode{Hard: true}}, true
 		case zsx.SymLiteralCode:
-			return handleLiteral(ast.LiteralCode, pair.Tail())
+			return handleLiteral(ast.LiteralCode, node)
 		case zsx.SymLiteralComment:
-			return handleLiteral(ast.LiteralComment, pair.Tail())
+			return handleLiteral(ast.LiteralComment, node)
 		case zsx.SymLiteralInput:
-			return handleLiteral(ast.LiteralInput, pair.Tail())
+			return handleLiteral(ast.LiteralInput, node)
 		case zsx.SymLiteralMath:
-			return handleLiteral(ast.LiteralMath, pair.Tail())
+			return handleLiteral(ast.LiteralMath, node)
 		case zsx.SymLiteralOutput:
-			return handleLiteral(ast.LiteralOutput, pair.Tail())
+			return handleLiteral(ast.LiteralOutput, node)
 		case zsx.SymThematic:
-			return sxNode{&ast.HRuleNode{Attrs: zsx.GetAttributes(pair.Tail().Head())}}, true
+			return sxNode{&ast.HRuleNode{Attrs: zsx.GetAttributes(node.Tail().Head())}}, true
 		case zsx.SymVerbatimComment:
-			return handleVerbatim(ast.VerbatimComment, pair.Tail())
+			return handleVerbatim(ast.VerbatimComment, node)
 		case zsx.SymVerbatimEval:
-			return handleVerbatim(ast.VerbatimEval, pair.Tail())
+			return handleVerbatim(ast.VerbatimEval, node)
 		case zsx.SymVerbatimHTML:
-			return handleVerbatim(ast.VerbatimHTML, pair.Tail())
+			return handleVerbatim(ast.VerbatimHTML, node)
 		case zsx.SymVerbatimMath:
-			return handleVerbatim(ast.VerbatimMath, pair.Tail())
+			return handleVerbatim(ast.VerbatimMath, node)
 		case zsx.SymVerbatimCode:
-			return handleVerbatim(ast.VerbatimCode, pair.Tail())
+			return handleVerbatim(ast.VerbatimCode, node)
 		case zsx.SymVerbatimZettel:
-			return handleVerbatim(ast.VerbatimZettel, pair.Tail())
+			return handleVerbatim(ast.VerbatimZettel, node)
 		}
 	}
 	return sx.Nil(), false
 }
 
-func handleLiteral(kind ast.LiteralKind, rest *sx.Pair) (sx.Object, bool) {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			if s, isString := sx.GetString(curr.Car()); isString {
-				return sxNode{&ast.LiteralNode{
-					Kind:    kind,
-					Attrs:   attrs,
-					Content: []byte(s.GetValue())}}, true
-			}
-		}
+func handleLiteral(kind ast.LiteralKind, node *sx.Pair) (sx.Object, bool) {
+	if sym, attrs, content := zsx.GetLiteral(node); sym != nil {
+		return sxNode{&ast.LiteralNode{
+			Kind:    kind,
+			Attrs:   zsx.GetAttributes(attrs),
+			Content: []byte(content)}}, true
 	}
 	return nil, false
 }
 
-func handleVerbatim(kind ast.VerbatimKind, rest *sx.Pair) (sx.Object, bool) {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			if s, isString := sx.GetString(curr.Car()); isString {
-				return sxNode{&ast.VerbatimNode{
-					Kind:    kind,
-					Attrs:   attrs,
-					Content: []byte(s.GetValue()),
-				}}, true
-			}
-		}
+func handleVerbatim(kind ast.VerbatimKind, node *sx.Pair) (sx.Object, bool) {
+	if sym, attrs, content := zsx.GetVerbatim(node); sym != nil {
+		return sxNode{&ast.VerbatimNode{
+			Kind:    kind,
+			Attrs:   zsx.GetAttributes(attrs),
+			Content: []byte(content),
+		}}, true
 	}
 	return nil, false
 }
 
-func (t *transformer) VisitAfter(pair *sx.Pair, _ *sx.Pair) sx.Object {
-	if sym, isSymbol := sx.GetSymbol(pair.Car()); isSymbol {
+func (t *transformer) VisitAfter(node *sx.Pair, _ *sx.Pair) sx.Object {
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymBlock:
-			bns := collectBlocks(pair.Tail())
+			bns := collectBlocks(node.Tail())
 			return sxNode{&bns}
 		case zsx.SymPara:
-			return sxNode{&ast.ParaNode{Inlines: collectInlines(pair.Tail())}}
+			return sxNode{&ast.ParaNode{Inlines: collectInlines(node.Tail())}}
 		case zsx.SymHeading:
-			return handleHeading(pair.Tail())
+			return handleHeading(node)
 		case zsx.SymListOrdered:
-			return handleList(ast.NestedListOrdered, pair.Tail())
+			return handleList(ast.NestedListOrdered, node)
 		case zsx.SymListUnordered:
-			return handleList(ast.NestedListUnordered, pair.Tail())
+			return handleList(ast.NestedListUnordered, node)
 		case zsx.SymListQuote:
-			return handleList(ast.NestedListQuote, pair.Tail())
+			return handleList(ast.NestedListQuote, node)
 		case zsx.SymDescription:
-			return handleDescription(pair.Tail())
+			return handleDescription(node)
 		case zsx.SymTable:
-			return handleTable(pair.Tail())
+			return handleTable(node)
 		case zsx.SymCell:
-			return handleCell(pair.Tail())
+			return handleCell(node)
 		case zsx.SymRegionBlock:
-			return handleRegion(ast.RegionSpan, pair.Tail())
+			return handleRegion(ast.RegionSpan, node)
 		case zsx.SymRegionQuote:
-			return handleRegion(ast.RegionQuote, pair.Tail())
+			return handleRegion(ast.RegionQuote, node)
 		case zsx.SymRegionVerse:
-			return handleRegion(ast.RegionVerse, pair.Tail())
+			return handleRegion(ast.RegionVerse, node)
 		case zsx.SymTransclude:
-			return handleTransclude(pair.Tail())
+			return handleTransclude(node)
 		case zsx.SymBLOB:
-			return handleBLOB(pair.Tail())
+			return handleBLOB(node)
 
 		case zsx.SymLink:
-			return handleLink(pair.Tail())
+			return handleLink(node)
 		case zsx.SymEmbed:
-			return handleEmbed(pair.Tail())
+			return handleEmbed(node)
 		case zsx.SymEmbedBLOB:
-			return handleEmbedBLOB(pair.Tail())
+			return handleEmbedBLOB(node)
 		case zsx.SymCite:
-			return handleCite(pair.Tail())
+			return handleCite(node)
 		case zsx.SymMark:
-			return handleMark(pair.Tail())
+			return handleMark(node)
 		case zsx.SymEndnote:
-			return handleEndnote(pair.Tail())
+			return handleEndnote(node)
 		case zsx.SymFormatDelete:
-			return handleFormat(ast.FormatDelete, pair.Tail())
+			return handleFormat(ast.FormatDelete, node)
 		case zsx.SymFormatEmph:
-			return handleFormat(ast.FormatEmph, pair.Tail())
+			return handleFormat(ast.FormatEmph, node)
 		case zsx.SymFormatInsert:
-			return handleFormat(ast.FormatInsert, pair.Tail())
+			return handleFormat(ast.FormatInsert, node)
 		case zsx.SymFormatMark:
-			return handleFormat(ast.FormatMark, pair.Tail())
+			return handleFormat(ast.FormatMark, node)
 		case zsx.SymFormatQuote:
-			return handleFormat(ast.FormatQuote, pair.Tail())
+			return handleFormat(ast.FormatQuote, node)
 		case zsx.SymFormatSpan:
-			return handleFormat(ast.FormatSpan, pair.Tail())
+			return handleFormat(ast.FormatSpan, node)
 		case zsx.SymFormatSub:
-			return handleFormat(ast.FormatSub, pair.Tail())
+			return handleFormat(ast.FormatSub, node)
 		case zsx.SymFormatSuper:
-			return handleFormat(ast.FormatSuper, pair.Tail())
+			return handleFormat(ast.FormatSuper, node)
 		case zsx.SymFormatStrong:
-			return handleFormat(ast.FormatStrong, pair.Tail())
+			return handleFormat(ast.FormatStrong, node)
 		}
-		log.Println("MISS", pair)
 	}
-	return pair
+	return node
 }
 
 func collectBlocks(lst *sx.Pair) (result ast.BlockSlice) {
@@ -211,45 +197,29 @@ func collectInlines(lst *sx.Pair) (result ast.InlineSlice) {
 	return result
 }
 
-func handleHeading(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		if num, isNumber := rest.Car().(sx.Int64); isNumber && num > 0 && num < 6 {
-			if curr := rest.Tail(); curr != nil {
-				attrs := zsx.GetAttributes(curr.Head())
-				if curr = curr.Tail(); curr != nil {
-					if sSlug, isSlug := sx.GetString(curr.Car()); isSlug {
-						if curr = curr.Tail(); curr != nil {
-							if sUniq, isUniq := sx.GetString(curr.Car()); isUniq {
-								return sxNode{&ast.HeadingNode{
-									Level:    int(num),
-									Attrs:    attrs,
-									Slug:     sSlug.GetValue(),
-									Fragment: sUniq.GetValue(),
-									Inlines:  collectInlines(curr.Tail()),
-								}}
-							}
-						}
-					}
-				}
-			}
-		}
+func handleHeading(node *sx.Pair) sx.Object {
+	if level, attrs, inlines, slug, fragment := zsx.GetHeading(node); level > 0 && level < 6 {
+		return sxNode{&ast.HeadingNode{
+			Level:    level,
+			Attrs:    zsx.GetAttributes(attrs),
+			Slug:     slug,
+			Fragment: fragment,
+			Inlines:  collectInlines(inlines),
+		}}
 	}
-	log.Println("HEAD", rest)
-	return rest
+	return node
 }
 
-func handleList(kind ast.NestedListKind, rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
+func handleList(kind ast.NestedListKind, node *sx.Pair) sx.Object {
+	if sym, attrs, items := zsx.GetList(node); sym != nil {
 		return sxNode{&ast.NestedListNode{
 			Kind:  kind,
-			Items: collectItemSlices(rest.Tail()),
-			Attrs: attrs}}
+			Items: collectItemSlices(items),
+			Attrs: zsx.GetAttributes(attrs),
+		}}
 	}
-	log.Println("LIST", kind, rest)
-	return rest
+	return node
 }
-
 func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
 	for val := range lst.Values() {
 		if sxn, isNode := val.(sxNode); isNode {
@@ -276,97 +246,88 @@ func collectItemSlices(lst *sx.Pair) (result []ast.ItemSlice) {
 	return result
 }
 
-func handleDescription(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		var descs []ast.Description
-		for curr := rest.Tail(); curr != nil; {
-			term := collectInlines(curr.Head())
-			curr = curr.Tail()
-			if curr == nil {
-				descr := ast.Description{Term: term, Descriptions: nil}
-				descs = append(descs, descr)
-				break
-			}
+func handleDescription(node *sx.Pair) sx.Object {
+	attrs, termsVals := zsx.GetDescription(node)
 
-			car := curr.Car()
-			if sx.IsNil(car) {
-				descs = append(descs, ast.Description{Term: term, Descriptions: nil})
-				curr = curr.Tail()
+	var descs []ast.Description
+	for curr := termsVals; curr != nil; {
+		term := collectInlines(curr.Head())
+		curr = curr.Tail()
+		if curr == nil {
+			descr := ast.Description{Term: term, Descriptions: nil}
+			descs = append(descs, descr)
+			break
+		}
+
+		car := curr.Car()
+		if sx.IsNil(car) {
+			descs = append(descs, ast.Description{Term: term, Descriptions: nil})
+			curr = curr.Tail()
+			continue
+		}
+
+		sxn, isNode := car.(sxNode)
+		if !isNode {
+			descs = nil
+			break
+		}
+		blocks, isBlocks := sxn.node.(*ast.BlockSlice)
+		if !isBlocks {
+			descs = nil
+			break
+		}
+
+		descSlice := make([]ast.DescriptionSlice, 0, len(*blocks))
+		for _, bn := range *blocks {
+			bns, isBns := bn.(*ast.BlockSlice)
+			if !isBns {
 				continue
 			}
-
-			sxn, isNode := car.(sxNode)
-			if !isNode {
-				descs = nil
-				break
-			}
-			blocks, isBlocks := sxn.node.(*ast.BlockSlice)
-			if !isBlocks {
-				descs = nil
-				break
-			}
-
-			descSlice := make([]ast.DescriptionSlice, 0, len(*blocks))
-			for _, bn := range *blocks {
-				bns, isBns := bn.(*ast.BlockSlice)
-				if !isBns {
-					continue
+			ds := make(ast.DescriptionSlice, 0, len(*bns))
+			for _, b := range *bns {
+				if defNode, isDef := b.(ast.DescriptionNode); isDef {
+					ds = append(ds, defNode)
 				}
-				ds := make(ast.DescriptionSlice, 0, len(*bns))
-				for _, b := range *bns {
-					if defNode, isDef := b.(ast.DescriptionNode); isDef {
-						ds = append(ds, defNode)
-					}
-				}
-				descSlice = append(descSlice, ds)
 			}
-
-			descr := ast.Description{Term: term, Descriptions: descSlice}
-			descs = append(descs, descr)
-
-			curr = curr.Tail()
+			descSlice = append(descSlice, ds)
 		}
-		if len(descs) > 0 {
-			return sxNode{&ast.DescriptionListNode{
-				Attrs:        attrs,
-				Descriptions: descs,
-			}}
-		}
+
+		descr := ast.Description{Term: term, Descriptions: descSlice}
+		descs = append(descs, descr)
+
+		curr = curr.Tail()
 	}
-	log.Println("DESC", rest)
-	return rest
+	if len(descs) > 0 {
+		return sxNode{&ast.DescriptionListNode{
+			Attrs:        zsx.GetAttributes(attrs),
+			Descriptions: descs,
+		}}
+	}
+	return node
 }
 
-func handleTable(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		// attrs := rest.Head()
-		if rest = rest.Tail(); rest != nil {
-			header := collectRow(rest.Head())
-			cols := len(header)
+func handleTable(node *sx.Pair) sx.Object {
+	_, headerRow, rowList := zsx.GetTable(node)
+	header := collectRow(headerRow)
+	cols := len(header)
 
-			var rows []ast.TableRow
-			for curr := range rest.Tail().Pairs() {
-				row := collectRow(curr.Head())
-				rows = append(rows, row)
-				cols = max(cols, len(row))
-			}
-			align := make([]ast.Alignment, cols)
-			for i := range cols {
-				align[i] = ast.AlignDefault
-			}
-
-			return sxNode{&ast.TableNode{
-				Header: header,
-				Align:  align,
-				Rows:   rows,
-			}}
-		}
+	var rows []ast.TableRow
+	for curr := range rowList.Pairs() {
+		row := collectRow(curr.Head())
+		rows = append(rows, row)
+		cols = max(cols, len(row))
 	}
-	log.Println("TABL", rest)
-	return rest
-}
+	align := make([]ast.Alignment, cols)
+	for i := range cols {
+		align[i] = ast.AlignDefault
+	}
 
+	return sxNode{&ast.TableNode{
+		Header: header,
+		Align:  align,
+		Rows:   rows,
+	}}
+}
 func collectRow(lst *sx.Pair) (row ast.TableRow) {
 	for curr := range lst.Values() {
 		if sxn, isNode := curr.(sxNode); isNode {
@@ -378,89 +339,102 @@ func collectRow(lst *sx.Pair) (row ast.TableRow) {
 	return row
 }
 
-func handleCell(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		align := ast.AlignDefault
-		if alignPair := rest.Head().Assoc(zsx.SymAttrAlign); alignPair != nil {
-			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
-				align = ast.AlignCenter
-			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
-				align = ast.AlignLeft
-			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
-				align = ast.AlignRight
-			}
+func handleCell(node *sx.Pair) sx.Object {
+	attrs, inlines := zsx.GetCell(node)
+	align := ast.AlignDefault
+	if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
+		if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
+			align = ast.AlignCenter
+		} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
+			align = ast.AlignLeft
+		} else if zsx.AttrAlignRight.IsEqual(alignValue) {
+			align = ast.AlignRight
 		}
-		return sxNode{&ast.TableCell{
-			Align:   align,
-			Inlines: collectInlines(rest.Tail()),
+	}
+	return sxNode{&ast.TableCell{
+		Align:   align,
+		Inlines: collectInlines(inlines),
+	}}
+}
+
+func handleRegion(kind ast.RegionKind, node *sx.Pair) sx.Object {
+	if sym, attrs, blocks, inlines := zsx.GetRegion(node); sym != nil {
+		return sxNode{&ast.RegionNode{
+			Kind:    kind,
+			Attrs:   zsx.GetAttributes(attrs),
+			Blocks:  collectBlocks(blocks),
+			Inlines: collectInlines(inlines),
 		}}
 	}
-	log.Println("CELL", rest)
-	return rest
+	return node
 }
 
-func handleRegion(kind ast.RegionKind, rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			if blockList := curr.Head(); blockList != nil {
-				return sxNode{&ast.RegionNode{
-					Kind:    kind,
-					Attrs:   attrs,
-					Blocks:  collectBlocks(blockList),
-					Inlines: collectInlines(curr.Tail()),
-				}}
-			}
-		}
-	}
-	log.Println("REGI", rest)
-	return rest
-}
-
-func handleTransclude(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			ref := collectReference(curr.Head())
+func handleTransclude(node *sx.Pair) sx.Object {
+	if attrs, reference, inlines := zsx.GetTransclusion(node); reference != nil {
+		if ref := collectReference(reference); ref != nil {
 			return sxNode{&ast.TranscludeNode{
-				Attrs:   attrs,
+				Attrs:   zsx.GetAttributes(attrs),
 				Ref:     ref,
-				Inlines: collectInlines(curr.Tail()),
+				Inlines: collectInlines(inlines),
 			}}
 		}
 	}
-	log.Println("TRAN", rest)
-	return rest
+	return node
 }
 
-func handleBLOB(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			ins := collectInlines(curr.Head())
-			if curr = curr.Tail(); curr != nil {
-				if syntax, isString := sx.GetString(curr.Car()); isString {
-					if curr = curr.Tail(); curr != nil {
-						if blob, isBlob := sx.GetString(curr.Car()); isBlob {
-							data, err := base64.StdEncoding.DecodeString(blob.GetValue())
-							if err != nil {
-								data = nil
-							}
-							return sxNode{&ast.BLOBNode{
-								Attrs:       attrs,
-								Description: ins,
-								Syntax:      syntax.GetValue(),
-								Blob:        data,
-							}}
+func handleBLOB(node *sx.Pair) sx.Object {
+	if attrs, inlines, syntax, content := zsx.GetBLOB(node); content != "" {
+		data, err := base64.StdEncoding.DecodeString(content)
+		if err != nil {
+			data = nil
+		}
+		return sxNode{&ast.BLOBNode{
+			Attrs:       zsx.GetAttributes(attrs),
+			Description: collectInlines(inlines),
+			Syntax:      syntax,
+			Blob:        data,
+		}}
+	}
+	return node
+}
 
-						}
-					}
-				}
-			}
+func handleLink(node *sx.Pair) sx.Object {
+	if attrs, reference, inlines := zsx.GetLink(node); reference != nil {
+		if ref := collectReference(reference); ref != nil {
+			return sxNode{&ast.LinkNode{
+				Attrs:   zsx.GetAttributes(attrs),
+				Ref:     ref,
+				Inlines: collectInlines(inlines),
+			}}
 		}
 	}
-	log.Println("BLOB", rest)
-	return rest
+	return node
+}
+
+func handleEmbed(node *sx.Pair) sx.Object {
+	if attrs, reference, syntax, inlines := zsx.GetEmbed(node); reference != nil {
+		if ref := collectReference(reference); ref != nil {
+			return sxNode{&ast.EmbedRefNode{
+				Attrs:   zsx.GetAttributes(attrs),
+				Ref:     ref,
+				Syntax:  syntax,
+				Inlines: collectInlines(inlines),
+			}}
+		}
+	}
+	return node
+}
+
+func handleEmbedBLOB(node *sx.Pair) sx.Object {
+	if attrs, syntax, content, inlines := zsx.GetEmbedBLOB(node); syntax != "" {
+		return sxNode{&ast.EmbedBLOBNode{
+			Attrs:   zsx.GetAttributes(attrs),
+			Syntax:  syntax,
+			Blob:    []byte(content),
+			Inlines: collectInlines(inlines),
+		}}
+	}
+	return node
 }
 
 var mapRefState = map[*sx.Symbol]ast.RefState{
@@ -475,175 +449,57 @@ var mapRefState = map[*sx.Symbol]ast.RefState{
 	zsx.SymRefStateExternal: ast.RefStateExternal,
 }
 
-func handleLink(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			if szref := curr.Head(); szref != nil {
-				if stateSym, isSym := sx.GetSymbol(szref.Car()); isSym {
-					refval, isString := sx.GetString(szref.Cdr())
-					if !isString {
-						refval, isString = sx.GetString(szref.Tail().Car())
-					}
-					if isString {
-						ref := ast.ParseReference(refval.GetValue())
-						ref.State = mapRefState[stateSym]
-						ins := collectInlines(curr.Tail())
-						return sxNode{&ast.LinkNode{
-							Attrs:   attrs,
-							Ref:     ref,
-							Inlines: ins,
-						}}
-					}
-				}
-			}
-		}
-	}
-	log.Println("LINK", rest)
-	return rest
-}
-
-func handleEmbed(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			if ref := collectReference(curr.Head()); ref != nil {
-				if curr = curr.Tail(); curr != nil {
-					if syntax, isString := sx.GetString(curr.Car()); isString {
-						return sxNode{&ast.EmbedRefNode{
-							Attrs:   attrs,
-							Ref:     ref,
-							Syntax:  syntax.GetValue(),
-							Inlines: collectInlines(curr.Tail()),
-						}}
-					}
-				}
-			}
-		}
-	}
-	log.Println("EMBE", rest)
-	return rest
-}
-
-func handleEmbedBLOB(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			if syntax, isSyntax := sx.GetString(curr.Car()); isSyntax {
-				if curr = curr.Tail(); curr != nil {
-					if content, isContent := sx.GetString(curr.Car()); isContent {
-						return sxNode{&ast.EmbedBLOBNode{
-							Attrs:   attrs,
-							Syntax:  syntax.GetValue(),
-							Blob:    []byte(content.GetValue()),
-							Inlines: collectInlines(curr.Tail()),
-						}}
-					}
-				}
-			}
-		}
-	}
-	log.Println("EMBL", rest)
-	return rest
-}
-
-func collectReference(pair *sx.Pair) *ast.Reference {
-	if pair != nil {
-		if sym, isSymbol := sx.GetSymbol(pair.Car()); isSymbol {
-			if next := pair.Tail(); next != nil {
-				if sRef, isString := sx.GetString(next.Car()); isString {
-					ref := ast.ParseReference(sRef.GetValue())
-					switch sym {
-					case zsx.SymRefStateInvalid:
-						ref.State = ast.RefStateInvalid
-					case sz.SymRefStateZettel:
-						ref.State = ast.RefStateZettel
-					case zsx.SymRefStateSelf:
-						ref.State = ast.RefStateSelf
-					case sz.SymRefStateFound:
-						ref.State = ast.RefStateFound
-					case sz.SymRefStateBroken:
-						ref.State = ast.RefStateBroken
-					case zsx.SymRefStateHosted:
-						ref.State = ast.RefStateHosted
-					case sz.SymRefStateBased:
-						ref.State = ast.RefStateBased
-					case sz.SymRefStateQuery:
-						ref.State = ast.RefStateQuery
-					case zsx.SymRefStateExternal:
-						ref.State = ast.RefStateExternal
-					}
-					return ref
-				}
-			}
-		}
+func collectReference(node *sx.Pair) *ast.Reference {
+	if sym, val := zsx.GetReference(node); sym != nil {
+		ref := ast.ParseReference(val)
+		ref.State = mapRefState[sym]
+		return ref
 	}
 	return nil
 }
 
-func handleCite(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		if curr := rest.Tail(); curr != nil {
-			if sKey, isString := sx.GetString(curr.Car()); isString {
-				return sxNode{&ast.CiteNode{
-					Attrs:   attrs,
-					Key:     sKey.GetValue(),
-					Inlines: collectInlines(curr.Tail()),
-				}}
-			}
-		}
-	}
-	log.Println("CITE", rest)
-	return rest
-}
-
-func handleMark(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		if sMark, isMarkS := sx.GetString(rest.Car()); isMarkS {
-			if curr := rest.Tail(); curr != nil {
-				if sSlug, isSlug := sx.GetString(curr.Car()); isSlug {
-					if curr = curr.Tail(); curr != nil {
-						if sUniq, isUniq := sx.GetString(curr.Car()); isUniq {
-							return sxNode{&ast.MarkNode{
-								Mark:     sMark.GetValue(),
-								Slug:     sSlug.GetValue(),
-								Fragment: sUniq.GetValue(),
-								Inlines:  collectInlines(curr.Tail()),
-							}}
-						}
-					}
-				}
-			}
-		}
-	}
-	log.Println("MARK", rest)
-	return rest
-}
-
-func handleEndnote(rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
-		return sxNode{&ast.FootnoteNode{
-			Attrs:   attrs,
-			Inlines: collectInlines(rest.Tail()),
+func handleCite(node *sx.Pair) sx.Object {
+	if attrs, key, inlines := zsx.GetCite(node); key != "" {
+		return sxNode{&ast.CiteNode{
+			Attrs:   zsx.GetAttributes(attrs),
+			Key:     key,
+			Inlines: collectInlines(inlines),
 		}}
 	}
-	log.Println("ENDN", rest)
-	return rest
+	return node
 }
 
-func handleFormat(kind ast.FormatKind, rest *sx.Pair) sx.Object {
-	if rest != nil {
-		attrs := zsx.GetAttributes(rest.Head())
+func handleMark(node *sx.Pair) sx.Object {
+	if mark, slug, fragment, inlines := zsx.GetMark(node); mark != "" {
+		return sxNode{&ast.MarkNode{
+			Mark:     mark,
+			Slug:     slug,
+			Fragment: fragment,
+			Inlines:  collectInlines(inlines),
+		}}
+	}
+	return node
+}
+
+func handleEndnote(node *sx.Pair) sx.Object {
+	if attrs, inlines := zsx.GetEndnote(node); inlines != nil {
+		return sxNode{&ast.FootnoteNode{
+			Attrs:   zsx.GetAttributes(attrs),
+			Inlines: collectInlines(inlines),
+		}}
+	}
+	return node
+}
+
+func handleFormat(kind ast.FormatKind, node *sx.Pair) sx.Object {
+	if sym, attrs, inlines := zsx.GetFormat(node); sym != nil {
 		return sxNode{&ast.FormatNode{
 			Kind:    kind,
-			Attrs:   attrs,
-			Inlines: collectInlines(rest.Tail()),
+			Attrs:   zsx.GetAttributes(attrs),
+			Inlines: collectInlines(inlines),
 		}}
 	}
-	log.Println("FORM", kind, rest)
-	return rest
+	return node
 }
 
 type sxNode struct {

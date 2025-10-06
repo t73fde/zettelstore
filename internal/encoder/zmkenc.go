@@ -63,16 +63,16 @@ type zmkVisitor struct {
 	prefix []byte
 }
 
-func newZmkVisitor(w io.Writer) zmkVisitor        { return zmkVisitor{b: newEncWriter(w)} }
-func (v *zmkVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
-func (v *zmkVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
+func newZmkVisitor(w io.Writer) zmkVisitor { return zmkVisitor{b: newEncWriter(w)} }
+
+// func (v *zmkVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
+// func (v *zmkVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
+
 func (v *zmkVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
-			if s, isString := sx.GetString(node.Tail().Car()); isString {
-				v.writeText(s.GetValue())
-			}
+			v.writeText(zsx.GetText(node))
 		case zsx.SymSoft:
 			v.writeBreak(false)
 		case zsx.SymHard:

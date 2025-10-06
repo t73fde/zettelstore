@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161845
-modified: 20251006150031
+modified: 20251006182419
 
 === ''TEXT''
 :::syntax
@@ -49,7 +49,7 @@ The __InlineElement__ at the end of the list is interpreted as describing text.
 
 === ''EMBED-BLOB''
 :::syntax
-__EmbedBLOB__ **=** ''(EMBED-BLOB'' [[__Attributes__|00001012931000#attribute]] String,,1,, String,,2,, '')''.
+__EmbedBLOB__ **=** ''(EMBED-BLOB'' [[__Attributes__|00001012931000#attribute]] String,,1,, String,,2,, [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 If used if some processed image has to be embedded inside some inline material.
 The first string specifies the syntax of the image content.

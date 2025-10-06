@@ -96,19 +96,18 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
-			if s, isString := sx.GetString(node.Tail().Car()); isString {
-				spaceFound := false
-				for _, ch := range s.GetValue() {
-					if input.IsSpace(ch) {
-						if !spaceFound {
-							v.b.WriteSpace()
-							spaceFound = true
-						}
-						continue
+			s := zsx.GetText(node)
+			spaceFound := false
+			for _, ch := range s {
+				if input.IsSpace(ch) {
+					if !spaceFound {
+						v.b.WriteSpace()
+						spaceFound = true
 					}
-					spaceFound = false
-					v.b.WriteString(string(ch))
+					continue
 				}
+				spaceFound = false
+				v.b.WriteString(string(ch))
 			}
 
 		case zsx.SymHard:
@@ -129,9 +128,21 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 		case zsx.SymLiteralComment:
 			// Do nothing
 
-		case zsx.SymBlock, zsx.SymInline:
+		case zsx.SymBlock:
+			blocks := zsx.GetBlock(node)
 			first := true
-			for n := range node.Tail().Pairs() {
+			for n := range blocks.Pairs() {
+				if first {
+					first = false
+				} else {
+					v.b.WriteLn()
+				}
+				v.walk(n.Head(), alst)
+			}
+		case zsx.SymInline:
+			inlines := zsx.GetInline(node)
+			first := true
+			for n := range inlines.Pairs() {
 				if first {
 					first = false
 				} else {
@@ -141,8 +152,9 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 			}
 
 		case zsx.SymListOrdered, zsx.SymListUnordered, zsx.SymListQuote:
+			_, _, items := zsx.GetList(node)
 			first := true
-			for n := range node.Tail().Tail().Pairs() {
+			for n := range items.Pairs() {
 				if first {
 					first = false
 				} else {
@@ -152,8 +164,9 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 			}
 
 		case zsx.SymTable:
+			_, header, rowList := zsx.GetTable(node)
 			firstRow := true
-			for n := range node.Tail().Tail().Pairs() {
+			for n := range rowList.Cons(header).Pairs() {
 				row := n.Head()
 				if row == nil {
 					continue
@@ -175,8 +188,9 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 			}
 
 		case zsx.SymDescription:
+			_, termsVals := zsx.GetDescription(node)
 			first := true
-			for n := node.Tail().Tail(); n != nil; n = n.Tail() {
+			for n := termsVals; n != nil; n = n.Tail() {
 				if first {
 					first = false
 				} else {
@@ -197,9 +211,9 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 			}
 
 		case zsx.SymRegionBlock, zsx.SymRegionQuote, zsx.SymRegionVerse:
-			content := node.Tail().Tail()
+			_, _, content, inlines := zsx.GetRegion(node)
 			first := true
-			for n := range content.Head().Pairs() {
+			for n := range content.Pairs() {
 				if first {
 					first = false
 				} else {
@@ -207,15 +221,14 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 				}
 				v.walk(n.Head(), alst)
 			}
-			if inlines := content.Tail(); inlines != nil {
+			if inlines != nil {
 				v.b.WriteLn()
 				v.walkList(inlines, alst)
 			}
 
 		case zsx.SymVerbatimCode, zsx.SymVerbatimEval, zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:
-			if s, isString := sx.GetString(node.Tail().Tail().Car()); isString {
-				v.b.WriteString(s.GetValue())
-			}
+			_, _, s := zsx.GetVerbatim(node)
+			v.b.WriteString(s)
 
 		case zsx.SymVerbatimComment, zsx.SymBLOB:
 			// Do nothing
