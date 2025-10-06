@@ -327,6 +327,18 @@ var tcsInline = []zmkTestCase{
 		},
 	},
 	{
+		descr: "Nested Insert Quote formatting",
+		zmk:   `>>""abc"">>{lang=fr}`,
+		expect: expectMap{
+			encoderHTML:  `<p><ins lang="fr">&laquo;&nbsp;abc&nbsp;&raquo;</ins></p>`,
+			encoderMD:    "&laquo;&nbsp;abc&nbsp;&raquo;",
+			encoderSz:    `(BLOCK (PARA (FORMAT-INSERT (("lang" . "fr")) (FORMAT-QUOTE () (TEXT "abc")))))`,
+			encoderSHTML: `((p (ins ((lang . "fr")) (@L (@H "&laquo;" "&nbsp;") "abc" (@H "&nbsp;" "&raquo;")))))`,
+			encoderText:  `abc`,
+			encoderZmk:   `>>""abc"">>{lang="fr"}`,
+		},
+	},
+	{
 		descr: "Simple Citation",
 		zmk:   `[@Stern18]`,
 		expect: expectMap{

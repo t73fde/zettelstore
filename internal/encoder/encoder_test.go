@@ -73,9 +73,6 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 
 func checkEncodings(t *testing.T, testNum int, node *sx.Pair, isInline bool, descr string, expected expectMap, zmkDefault string) {
 	for enc, exp := range expected {
-		if enc == api.EncoderMD {
-			continue
-		}
 		if enc == api.EncoderZmk {
 			continue
 		}

@@ -103,6 +103,9 @@ func (v *mdVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, als
 func (v *mdVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
+		case zsx.SymBlock:
+			v.visitBlock(node, alst)
+
 		case zsx.SymText:
 			if s, isString := sx.GetString(node.Tail().Car()); isString {
 				v.b.WriteString(s.GetValue())
@@ -115,24 +118,61 @@ func (v *mdVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 		case zsx.SymLink:
 			attrs, ref, inlines := zsx.GetLink(node)
 			alst = v.setLanguage(alst, attrs)
-			v.writeReference(ref, inlines, alst)
+			v.visitReference(ref, inlines, alst)
 		case zsx.SymEmbed:
 			attrs, ref, _, inlines := zsx.GetEmbed(node)
 			alst = v.setLanguage(alst, attrs)
 			_ = v.b.WriteByte('!')
-			v.writeReference(ref, inlines, alst)
+			v.visitReference(ref, inlines, alst)
 
 		case zsx.SymFormatEmph:
-			v.writeFormat(node, alst, "*", "*")
+			v.visitFormat(node, alst, "*", "*")
 		case zsx.SymFormatStrong:
-			v.writeFormat(node, alst, "__", "__")
+			v.visitFormat(node, alst, "__", "__")
 		case zsx.SymFormatQuote:
-			v.writeQuote(node, alst)
+			v.visitQuote(node, alst)
 		case zsx.SymFormatMark:
-			v.writeFormat(node, alst, "<mark>", "</mark>")
+			v.visitFormat(node, alst, "<mark>", "</mark>")
+		case zsx.SymFormatSpan, zsx.SymFormatDelete, zsx.SymFormatInsert, zsx.SymFormatSub, zsx.SymFormatSuper:
+			v.visitFormat(node, alst, "", "")
 
-		case zsx.SymDescription, zsx.SymTable, zsx.SymEndnote:
+		case zsx.SymLiteralCode, zsx.SymLiteralInput, zsx.SymLiteralOutput:
+			_, _, content := zsx.GetLiteral(node)
+			v.b.WriteStrings("`", content, "`")
+		case zsx.SymLiteralMath:
+			_, _, content := zsx.GetLiteral(node)
+			v.b.WriteString(content)
+
+		case zsx.SymHeading:
+			level, attrs, text, _, _ := zsx.GetHeading(node)
+			const headingSigns = "###### "
+			v.b.WriteString(headingSigns[len(headingSigns)-level-1:])
+			v.walkList(text, v.setLanguage(alst, attrs))
+
+		case zsx.SymThematic:
+			v.b.WriteString("---")
+
+		case zsx.SymListOrdered:
+			v.visitNestedList(node, alst, "1. ")
+		case zsx.SymListUnordered:
+			v.visitNestedList(node, alst, "* ")
+		case zsx.SymListQuote:
+			if len(v.listInfo) == 0 {
+				v.visitListQuote(node, alst)
+			}
+
+		case zsx.SymVerbatimCode:
+			v.visitVerbatim(node)
+
+		case zsx.SymRegionQuote:
+			v.visitRegion(node, alst)
+
+		case zsx.SymRegionBlock, zsx.SymRegionVerse,
+			zsx.SymVerbatimComment, zsx.SymVerbatimEval, zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel,
+			zsx.SymDescription, zsx.SymTable, zsx.SymEndnote,
+			zsx.SymLiteralComment:
 			// Do nothing, ignore it.
+
 		default:
 			return false
 		}
@@ -142,6 +182,19 @@ func (v *mdVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 }
 
 func (v *mdVisitor) VisitAfter(*sx.Pair, *sx.Pair) {}
+
+func (v *mdVisitor) visitBlock(node *sx.Pair, alst *sx.Pair) {
+	first := true
+	for bn := range node.Tail().Pairs() {
+		if first {
+			first = false
+		} else {
+			v.b.WriteString("\n\n")
+		}
+		v.walk(bn.Head(), alst)
+	}
+}
+
 func (v *mdVisitor) visitBreak(isHard bool) {
 	if isHard {
 		v.b.WriteString("\\\n")
@@ -158,7 +211,7 @@ func (v *mdVisitor) visitBreak(isHard bool) {
 	}
 }
 
-func (v *mdVisitor) writeReference(ref, inlines, alst *sx.Pair) {
+func (v *mdVisitor) visitReference(ref, inlines, alst *sx.Pair) {
 	refState, val := zsx.GetReference(ref)
 	if sz.SymRefStateQuery.IsEqualSymbol(refState) {
 		v.walkList(inlines, alst)
@@ -184,14 +237,14 @@ func isAutoLinkable(refState *sx.Symbol, val string) bool {
 	return false
 }
 
-func (v *mdVisitor) writeFormat(node, alst *sx.Pair, delim1, delim2 string) {
+func (v *mdVisitor) visitFormat(node, alst *sx.Pair, delim1, delim2 string) {
 	_, attrs, inlines := zsx.GetFormat(node)
 	alst = v.setLanguage(alst, attrs)
 	v.b.WriteString(delim1)
 	v.walkList(inlines, alst)
 	v.b.WriteString(delim2)
 }
-func (v *mdVisitor) writeQuote(node, alst *sx.Pair) {
+func (v *mdVisitor) visitQuote(node, alst *sx.Pair) {
 	_, attrs, inlines := zsx.GetFormat(node)
 	alst = v.setLanguage(alst, attrs)
 	leftQ, rightQ, withNbsp := v.getQuotes(alst)
@@ -206,6 +259,117 @@ func (v *mdVisitor) writeQuote(node, alst *sx.Pair) {
 		v.b.WriteString("&nbsp;")
 	}
 	v.b.WriteString(rightQ)
+}
+
+func (v *mdVisitor) visitNestedList(node *sx.Pair, alst *sx.Pair, enum string) {
+	v.listInfo = append(v.listInfo, len(enum))
+	regIndent := 4*len(v.listInfo) - 4
+	paraIndent := regIndent + len(enum)
+	_, attrs, blocks := zsx.GetList(node)
+	alst = v.setLanguage(alst, attrs)
+	firstBlk := true
+	for blk := range blocks.Pairs() {
+		if firstBlk {
+			firstBlk = false
+		} else {
+			v.b.WriteLn()
+		}
+		v.writeSpaces(regIndent)
+		v.b.WriteString(enum)
+		first := true
+		for item := range blk.Head().Tail().Pairs() {
+			in := item.Head()
+			if first {
+				first = false
+			} else {
+				v.b.WriteLn()
+				if zsx.SymPara.IsEqual(in.Car()) {
+					v.writeSpaces(paraIndent)
+				}
+			}
+			v.walk(in, alst)
+		}
+	}
+	v.listInfo = v.listInfo[:len(v.listInfo)-1]
+}
+func (v *mdVisitor) visitListQuote(node *sx.Pair, alst *sx.Pair) {
+	v.listInfo = []int{0}
+	oldPrefix := v.listPrefix
+	v.listPrefix = "> "
+
+	_, attrs, blocks := zsx.GetList(node)
+	alst = v.setLanguage(alst, attrs)
+	firstBlk := true
+	for blk := range blocks.Pairs() {
+		if firstBlk {
+			firstBlk = false
+		} else {
+			v.b.WriteLn()
+		}
+		v.b.WriteString(v.listPrefix)
+		first := true
+		for item := range blk.Head().Tail().Pairs() {
+			in := item.Head()
+			if first {
+				first = false
+			} else {
+				v.b.WriteLn()
+				if zsx.SymPara.IsEqual(in.Car()) {
+					v.b.WriteString(v.listPrefix)
+				}
+			}
+			v.walk(in, alst)
+		}
+	}
+	v.listPrefix = oldPrefix
+	v.listInfo = nil
+}
+
+func (v *mdVisitor) visitVerbatim(node *sx.Pair) {
+	if _, _, content := zsx.GetVerbatim(node); content != "" {
+		lc := len(content)
+		v.writeSpaces(4)
+		lcm1 := lc - 1
+		for i := 0; i < lc; i++ {
+			b := content[i]
+			if b != '\n' && b != '\r' {
+				_ = v.b.WriteByte(b)
+				continue
+			}
+			j := i + 1
+			for ; j < lc; j++ {
+				c := content[j]
+				if c != '\n' && c != '\r' {
+					break
+				}
+			}
+			if j >= lcm1 {
+				break
+			}
+			v.b.WriteLn()
+			v.writeSpaces(4)
+			i = j - 1
+		}
+	}
+}
+
+func (v *mdVisitor) visitRegion(node *sx.Pair, alst *sx.Pair) {
+	_, attrs, blocks, _ := zsx.GetRegion(node)
+	alst = v.setLanguage(alst, attrs)
+
+	first := true
+	for n := range blocks.Pairs() {
+		blk := n.Head()
+		if zsx.SymPara.IsEqual(blk.Car()) {
+			if first {
+				first = false
+			} else {
+				v.b.WriteString("\n>\n")
+			}
+			v.b.WriteString("> ")
+			v.walk(blk, alst)
+		}
+	}
 }
 
 func (v *mdVisitor) writeSpaces(n int) {
