@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161845
-modified: 20251006182419
+modified: 20251007144653
 
 === ''TEXT''
 :::syntax
@@ -54,7 +54,7 @@ __EmbedBLOB__ **=** ''(EMBED-BLOB'' [[__Attributes__|00001012931000#attribute]] 
 If used if some processed image has to be embedded inside some inline material.
 The first string specifies the syntax of the image content.
 The second string contains the image content.
-If the syntax is ""SVG"", the image content is not encoded further.
+If the syntax is ""''svg''"", the image content is not encoded further.
 Otherwise a base64 encoding is used.
 
 === ''CITE''

@@ -95,7 +95,7 @@ func parseSVGInlines(inp *input.Input, syntax string) *sx.Pair {
 	if svgSrc == "" {
 		return nil
 	}
-	return sx.Cons(zsx.MakeEmbedBLOB(nil, syntax, svgSrc, nil), sx.Nil())
+	return sx.Cons(zsx.MakeEmbedBLOBuncode(nil, syntax, svgSrc, nil), sx.Nil())
 }
 
 func scanSVG(inp *input.Input) string {

@@ -16,7 +16,6 @@
 package sztrans
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	"t73f.de/r/sx"
@@ -383,11 +382,7 @@ func handleTransclude(node *sx.Pair) sx.Object {
 }
 
 func handleBLOB(node *sx.Pair) sx.Object {
-	if attrs, inlines, syntax, content := zsx.GetBLOB(node); content != "" {
-		data, err := base64.StdEncoding.DecodeString(content)
-		if err != nil {
-			data = nil
-		}
+	if attrs, syntax, data, inlines := zsx.GetBLOB(node); data != nil {
 		return sxNode{&ast.BLOBNode{
 			Attrs:       zsx.GetAttributes(attrs),
 			Description: collectInlines(inlines),
@@ -426,11 +421,11 @@ func handleEmbed(node *sx.Pair) sx.Object {
 }
 
 func handleEmbedBLOB(node *sx.Pair) sx.Object {
-	if attrs, syntax, content, inlines := zsx.GetEmbedBLOB(node); syntax != "" {
+	if attrs, syntax, data, inlines := zsx.GetEmbedBLOB(node); data != nil {
 		return sxNode{&ast.EmbedBLOBNode{
 			Attrs:   zsx.GetAttributes(attrs),
 			Syntax:  syntax,
-			Blob:    []byte(content),
+			Blob:    data,
 			Inlines: collectInlines(inlines),
 		}}
 	}

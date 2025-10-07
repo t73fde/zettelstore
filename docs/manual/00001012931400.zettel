@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20251006190303
+modified: 20251007144738
 
 === ''PARA''
 :::syntax
@@ -152,7 +152,7 @@ A BLOB contains an image in block mode.
 The inline elements states some description.
 The first string contains the syntax of the image.
 The second string contains the actual image.
-If the syntax is ""SVG"", then the second string contains the SVG code.
+If the syntax is ""''svg''"", then the second string contains the SVG code.
 Otherwise the (binary) image data is encoded with base64.
 
 === ''TRANSCLUDE''

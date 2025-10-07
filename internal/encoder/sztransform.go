@@ -14,7 +14,6 @@
 package encoder
 
 import (
-	"encoding/base64"
 	"fmt"
 
 	"t73f.de/r/sx"
@@ -209,13 +208,7 @@ func (t *SzTransformer) getCell(cell *ast.TableCell) *sx.Pair {
 }
 
 func (t *SzTransformer) getBLOB(bn *ast.BLOBNode) *sx.Pair {
-	var content string
-	if bn.Syntax == meta.ValueSyntaxSVG {
-		content = string(bn.Blob)
-	} else {
-		content = base64.StdEncoding.EncodeToString(bn.Blob)
-	}
-	return zsx.MakeBLOB(getAttributes(bn.Attrs), t.getInlineList(bn.Description), bn.Syntax, content)
+	return zsx.MakeBLOB(getAttributes(bn.Attrs), bn.Syntax, bn.Blob, t.getInlineList(bn.Description))
 }
 
 func (t *SzTransformer) getLink(ln *ast.LinkNode) *sx.Pair {
@@ -227,13 +220,7 @@ func (t *SzTransformer) getLink(ln *ast.LinkNode) *sx.Pair {
 }
 
 func (t *SzTransformer) getEmbedBLOB(en *ast.EmbedBLOBNode) *sx.Pair {
-	var content string
-	if en.Syntax == meta.ValueSyntaxSVG {
-		content = string(en.Blob)
-	} else {
-		content = base64.StdEncoding.EncodeToString(en.Blob)
-	}
-	return zsx.MakeEmbedBLOB(getAttributes(en.Attrs), en.Syntax, content, t.getInlineList(en.Inlines))
+	return zsx.MakeEmbedBLOB(getAttributes(en.Attrs), en.Syntax, en.Blob, t.getInlineList(en.Inlines))
 }
 
 func (t *SzTransformer) getBlockList(bs *ast.BlockSlice) *sx.Pair {

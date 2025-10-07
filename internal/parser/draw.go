@@ -63,7 +63,7 @@ func parseDraw(inp *input.Input, m *meta.Meta, _ string) *sx.Pair {
 	if len(svg) == 0 {
 		return zsx.MakeBlock(zsx.MakeParaList(noSVGErrMsg()))
 	}
-	return zsx.MakeBlock(zsx.MakeBLOB(nil, ParseDescription(m), meta.ValueSyntaxSVG, string(svg)))
+	return zsx.MakeBlock(zsx.MakeBLOB(nil, meta.ValueSyntaxSVG, svg, ParseDescription(m)))
 }
 
 // ParseDrawBlock parses the content of an eval verbatim node into an SVG image BLOB.
