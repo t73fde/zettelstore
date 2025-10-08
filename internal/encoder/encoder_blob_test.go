@@ -58,7 +58,7 @@ func TestBlob(t *testing.T) {
 		m.Set(meta.KeyTitle, meta.Value(tc.descr))
 		inp := input.NewInput(tc.blob)
 		node, bs := parser.Parse(inp, m, tc.syntax, config.NoHTML)
-		checkEncodings(t, testNum+1000, node, false, tc.descr, tc.expect, "???")
-		checkEncodingsAST(t, testNum, bs, false, tc.descr, tc.expect, "???")
+		checkEncodings(t, testNum, node, false, tc.descr, tc.expect, "???")
+		checkEncodingsAST(t, testNum+1000, bs, false, tc.descr, tc.expect, "???")
 	}
 }

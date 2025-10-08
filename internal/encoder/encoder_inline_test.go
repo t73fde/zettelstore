@@ -494,6 +494,18 @@ var tcsInline = []zmkTestCase{
 		},
 	},
 	{
+		descr: "Dummy Link with attribute",
+		zmk:   `[[abc]]{a="b"}`,
+		expect: expectMap{
+			encoderHTML:  `<p><a a="b" href="abc">abc</a></p>`,
+			encoderMD:    "[abc](abc)",
+			encoderSz:    `(BLOCK (PARA (LINK (("a" . "b")) (HOSTED "abc"))))`,
+			encoderSHTML: `((p (a ((a . "b") (href . "abc")) "abc")))`,
+			encoderText:  ``,
+			encoderZmk:   useZmk,
+		},
+	},
+	{
 		descr: "Simple URL",
 		zmk:   `[[https://zettelstore.de]]`,
 		expect: expectMap{
@@ -646,6 +658,30 @@ var tcsInline = []zmkTestCase{
 			encoderSz:    `(BLOCK (PARA (EMBED () (HOSTED "abc") "")))`,
 			encoderSHTML: `((p (img ((src . "abc")))))`,
 			encoderText:  ``,
+			encoderZmk:   useZmk,
+		},
+	},
+	{
+		descr: "Dummy Embed with attributes",
+		zmk:   `{{abc}}{a="b"}`,
+		expect: expectMap{
+			encoderHTML:  `<p><img a="b" src="abc"></p>`,
+			encoderMD:    "![abc](abc)",
+			encoderSz:    `(BLOCK (PARA (EMBED (("a" . "b")) (HOSTED "abc") "")))`,
+			encoderSHTML: `((p (img ((a . "b") (src . "abc")))))`,
+			encoderText:  ``,
+			encoderZmk:   useZmk,
+		},
+	},
+	{
+		descr: "Link and attributes with quotes",
+		zmk:   `[[text|/url]]{title="TITL \"\""}`,
+		expect: expectMap{
+			encoderHTML:  `<p><a href="/url" title="TITL &quot;&quot;">text</a></p>`,
+			encoderMD:    "[text](/url)", // better: [text](/url "TITL \"\"")
+			encoderSz:    `(BLOCK (PARA (LINK (("title" . "TITL \"\"")) (HOSTED "/url") (TEXT "text"))))`,
+			encoderSHTML: `((p (a ((href . "/url") (title . "TITL \"\"")) "text")))`,
+			encoderText:  `text`,
 			encoderZmk:   useZmk,
 		},
 	},

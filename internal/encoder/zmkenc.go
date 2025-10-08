@@ -22,7 +22,9 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/set"
+	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
@@ -66,9 +68,9 @@ type zmkVisitor struct {
 func newZmkVisitor(w io.Writer) zmkVisitor { return zmkVisitor{b: newEncWriter(w)} }
 
 // func (v *zmkVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
-// func (v *zmkVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
+func (v *zmkVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
 
-func (v *zmkVisitor) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
+func (v *zmkVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
@@ -78,6 +80,56 @@ func (v *zmkVisitor) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 		case zsx.SymHard:
 			v.writeBreak(true)
 
+		case zsx.SymFormatEmph:
+			v.visitFormat(node, alst, "__")
+		case zsx.SymFormatStrong:
+			v.visitFormat(node, alst, "**")
+		case zsx.SymFormatInsert:
+			v.visitFormat(node, alst, ">>")
+		case zsx.SymFormatDelete:
+			v.visitFormat(node, alst, "~~")
+		case zsx.SymFormatSuper:
+			v.visitFormat(node, alst, "^^")
+		case zsx.SymFormatSub:
+			v.visitFormat(node, alst, ",,")
+		case zsx.SymFormatQuote:
+			v.visitFormat(node, alst, `""`)
+		case zsx.SymFormatMark:
+			v.visitFormat(node, alst, "##")
+		case zsx.SymFormatSpan:
+			v.visitFormat(node, alst, "::")
+
+		case zsx.SymLiteralCode:
+			_, attrs, content := zsx.GetLiteral(node)
+			v.writeLiteral('`', attrs, content)
+		case zsx.SymLiteralMath:
+			_, attrs, content := zsx.GetLiteral(node)
+			v.b.WriteStrings("$$", content, "$$")
+			v.writeAttributes(attrs)
+		case zsx.SymLiteralInput:
+			_, attrs, content := zsx.GetLiteral(node)
+			v.writeLiteral('\'', attrs, content)
+		case zsx.SymLiteralOutput:
+			_, attrs, content := zsx.GetLiteral(node)
+			v.writeLiteral('=', attrs, content)
+		case zsx.SymLiteralComment:
+			_, attrs, content := zsx.GetLiteral(node)
+			v.b.WriteString("%%")
+			v.writeAttributes(attrs)
+			v.b.WriteSpace()
+			v.b.WriteString(content)
+
+		case zsx.SymLink:
+			v.visitLink(node, alst)
+		case zsx.SymEmbed:
+			v.visitEmbedRef(node, alst)
+		case zsx.SymEndnote:
+			v.visitEndnote(node, alst)
+		case zsx.SymCite:
+			v.visitCite(node, alst)
+		case zsx.SymMark:
+			v.visitMark(node, alst)
+
 		default:
 			return false
 		}
@@ -86,6 +138,74 @@ func (v *zmkVisitor) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 	return false
 }
 func (v *zmkVisitor) VisitAfter(*sx.Pair, *sx.Pair) {}
+
+func (v *zmkVisitor) visitFormat(node *sx.Pair, alst *sx.Pair, delim string) {
+	_, attrs, inlines := zsx.GetFormat(node)
+	v.b.WriteString(delim)
+	v.walkList(inlines, alst)
+	v.b.WriteString(delim)
+	v.writeAttributes(attrs)
+}
+
+func (v *zmkVisitor) writeLiteral(code byte, attrs *sx.Pair, content string) {
+	v.b.WriteBytes(code, code)
+	v.writeEscaped(content, code)
+	v.b.WriteBytes(code, code)
+	v.writeAttributes(attrs)
+}
+
+func (v *zmkVisitor) visitLink(node *sx.Pair, alst *sx.Pair) {
+	attrs, ref, inlines := zsx.GetLink(node)
+	v.b.WriteString("[[")
+	if inlines != nil {
+		v.walkList(inlines, alst)
+		_ = v.b.WriteByte('|')
+	}
+	v.writeRef(ref)
+	v.b.WriteString("]]")
+	v.writeAttributes(attrs)
+}
+
+func (v *zmkVisitor) visitEmbedRef(node *sx.Pair, alst *sx.Pair) {
+	attrs, ref, _, inlines := zsx.GetEmbed(node)
+	v.b.WriteString("{{")
+	if inlines != nil {
+		v.walkList(inlines, alst)
+		_ = v.b.WriteByte('|')
+	}
+	v.writeRef(ref)
+	v.b.WriteString("}}")
+	v.writeAttributes(attrs)
+}
+
+func (v *zmkVisitor) visitEndnote(node *sx.Pair, alst *sx.Pair) {
+	attrs, inlines := zsx.GetEndnote(node)
+	v.b.WriteString("[^")
+	v.walkList(inlines, alst)
+	_ = v.b.WriteByte(']')
+	v.writeAttributes(attrs)
+}
+
+func (v *zmkVisitor) visitCite(node *sx.Pair, alst *sx.Pair) {
+	attrs, key, inlines := zsx.GetCite(node)
+	v.b.WriteStrings("[@", key)
+	if inlines != nil {
+		v.b.WriteSpace()
+		v.walkList(inlines, alst)
+	}
+	_ = v.b.WriteByte(']')
+	v.writeAttributes(attrs)
+}
+
+func (v *zmkVisitor) visitMark(node *sx.Pair, alst *sx.Pair) {
+	mark, _, _, inlines := zsx.GetMark(node)
+	v.b.WriteStrings("[!", mark)
+	if inlines != nil {
+		_ = v.b.WriteByte('|')
+		v.walkList(inlines, alst)
+	}
+	_ = v.b.WriteByte(']')
+}
 
 func (v *zmkVisitor) writeText(text string) {
 	last := 0
@@ -118,6 +238,52 @@ func (v *zmkVisitor) writeBreak(isHard bool) {
 		v.b.WriteLn()
 	}
 	v.writePrefixSpaces()
+}
+
+func (v *zmkVisitor) writeAttributes(attrs *sx.Pair) {
+	a := zsx.GetAttributes(attrs)
+	if a.IsEmpty() {
+		return
+	}
+	_ = v.b.WriteByte('{')
+	for i, k := range a.Keys() {
+		if i > 0 {
+			v.b.WriteSpace()
+		}
+		if k == "-" {
+			_ = v.b.WriteByte('-')
+			continue
+		}
+		v.b.WriteString(k)
+		if vl := a[k]; len(vl) > 0 {
+			v.b.WriteString("=\"")
+			v.writeEscaped(vl, '"')
+			_ = v.b.WriteByte('"')
+		}
+	}
+	_ = v.b.WriteByte('}')
+}
+
+func (v *zmkVisitor) writeRef(ref *sx.Pair) {
+	refSym, refVal := zsx.GetReference(ref)
+	if sz.SymRefStateBased.IsEqualSymbol(refSym) {
+		_ = v.b.WriteByte('/')
+	} else if sz.SymRefStateQuery.IsEqualSymbol(refSym) {
+		v.b.WriteString(api.QueryPrefix)
+	}
+	v.b.WriteString(refVal)
+}
+
+func (v *zmkVisitor) writeEscaped(s string, toEscape byte) {
+	last := 0
+	for i := range len(s) {
+		if b := s[i]; b == toEscape || b == '\\' {
+			v.b.WriteString(s[last:i])
+			v.b.WriteBytes('\\', b)
+			last = i + 1
+		}
+	}
+	v.b.WriteString(s[last:])
 }
 
 func (v *zmkVisitor) writePrefixSpaces() {
@@ -439,6 +605,7 @@ func (v *zmkVisitorAST) visitLinkAST(ln *ast.LinkNode) {
 		_ = v.b.WriteByte('/')
 	}
 	v.b.WriteStrings(ln.Ref.String(), "]]")
+	v.visitAttributesAST(ln.Attrs)
 }
 
 func (v *zmkVisitorAST) visitEmbedRefAST(en *ast.EmbedRefNode) {
@@ -448,6 +615,7 @@ func (v *zmkVisitorAST) visitEmbedRefAST(en *ast.EmbedRefNode) {
 		_ = v.b.WriteByte('|')
 	}
 	v.b.WriteStrings(en.Ref.String(), "}}")
+	v.visitAttributesAST(en.Attrs)
 }
 
 func (v *zmkVisitorAST) visitEmbedBLOBAST(en *ast.EmbedBLOBNode) {
@@ -547,7 +715,8 @@ func (v *zmkVisitorAST) visitAttributesAST(a zsx.Attributes) {
 		}
 		v.b.WriteString(k)
 		if vl := a[k]; len(vl) > 0 {
-			v.b.WriteStrings("=\"", vl)
+			v.b.WriteString("=\"")
+			v.writeEscaped(vl, '"')
 			_ = v.b.WriteByte('"')
 		}
 	}
