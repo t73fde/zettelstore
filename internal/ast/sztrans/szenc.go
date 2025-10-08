@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package encoder
+package sztrans
 
 import (
 	"fmt"

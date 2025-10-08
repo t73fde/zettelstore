@@ -24,6 +24,7 @@ import (
 	"t73f.de/r/zsc/shtml"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/ast/sztrans"
 )
 
 // Encoder is an interface that allows to encode different parts of a zettel.
@@ -51,7 +52,7 @@ func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
 		// We need a new transformer every time, because tx.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &htmlEncoder{
-			tx:   NewSzTransformer(),
+			tx:   sztrans.NewSzTransformer(),
 			th:   shtml.NewEvaluator(1),
 			lang: params.Lang,
 		}
@@ -61,14 +62,14 @@ func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
 		// We need a new transformer every time, because tx.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &shtmlEncoder{
-			tx:   NewSzTransformer(),
+			tx:   sztrans.NewSzTransformer(),
 			th:   shtml.NewEvaluator(1),
 			lang: params.Lang,
 		}
 	case api.EncoderSz:
 		// We need a new transformer every time, because trans.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
-		return &szEncoder{trans: NewSzTransformer()}
+		return &szEncoder{trans: sztrans.NewSzTransformer()}
 	case api.EncoderText:
 		return (*TextEncoder)(nil)
 	case api.EncoderZmk:

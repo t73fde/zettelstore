@@ -29,7 +29,7 @@ import (
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/encoder"
+	"zettelstore.de/z/internal/ast/sztrans"
 )
 
 // Builder allows to build new URLs for the web service.
@@ -38,7 +38,7 @@ type urlBuilder interface {
 }
 
 type htmlGenerator struct {
-	tx    encoder.SzTransformer
+	tx    sztrans.SzTransformer
 	th    *shtml.Evaluator
 	lang  string
 	symAt *sx.Symbol
@@ -154,7 +154,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 	})
 
 	return &htmlGenerator{
-		tx:   encoder.NewSzTransformer(),
+		tx:   sztrans.NewSzTransformer(),
 		th:   th,
 		lang: lang,
 	}
@@ -191,7 +191,7 @@ var mapMetaKey = map[string]string{
 }
 
 func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
-	tm := encoder.GetMetaSz(m)
+	tm := sztrans.GetMetaSz(m)
 	env := shtml.MakeEnvironment(g.lang)
 	hm, err := g.th.Evaluate(tm, &env)
 	if err != nil {

@@ -12,7 +12,7 @@
 //-----------------------------------------------------------------------------
 
 // Package sztrans allows to transform a sz representation of text into an
-// abstract syntax tree.
+// abstract syntax tree and vice versa.
 package sztrans
 
 import (
