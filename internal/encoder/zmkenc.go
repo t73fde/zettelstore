@@ -34,7 +34,7 @@ import (
 type zmkEncoder struct{}
 
 // WriteZettel writes the encoded zettel to the writer.
-func (ze *zmkEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
+func (ze *zmkEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	v := newZmkVisitorAST(w)
 	v.b.WriteMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {

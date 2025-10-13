@@ -46,7 +46,7 @@ type Port interface {
 
 // EvaluateZettel evaluates the given zettel in the given context, with the
 // given ports, and the given environment.
-func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *ast.ZettelNode) {
+func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *ast.Zettel) {
 	switch zn.Syntax {
 	case meta.ValueSyntaxNone:
 		// AST is empty, evaluate to a description list of metadata.
@@ -95,7 +95,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, bns *
 		transcludeCount: 0,
 		costMap:         map[id.Zid]transcludeCost{},
 		embedMap:        map[string]ast.InlineSlice{},
-		marker:          &ast.ZettelNode{},
+		marker:          &ast.Zettel{},
 	}
 	ast.Walk(&e, bns)
 	parser.CleanAST(bns, true)
@@ -108,12 +108,12 @@ type evaluator struct {
 	transcludeMax   int
 	transcludeCount int
 	costMap         map[id.Zid]transcludeCost
-	marker          *ast.ZettelNode
+	marker          *ast.Zettel
 	embedMap        map[string]ast.InlineSlice
 }
 
 type transcludeCost struct {
-	zn *ast.ZettelNode
+	zn *ast.Zettel
 	ec int
 }
 
@@ -533,7 +533,7 @@ func createEmbeddedNodeLocal(ref *ast.Reference) *ast.EmbedRefNode {
 	}
 }
 
-func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.ZettelNode {
+func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
 	ast.Walk(e, &zn.BlocksAST)
 	return zn

@@ -34,7 +34,7 @@ type shtmlEncoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
+func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	env := shtml.MakeEnvironment(enc.lang)
 	metaSHTML, err := enc.th.Evaluate(sztrans.GetMetaSz(zn.InhMeta), &env)
 	if err != nil {

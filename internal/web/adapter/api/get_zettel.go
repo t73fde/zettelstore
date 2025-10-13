@@ -57,7 +57,7 @@ func (a *API) MakeGetZettelHandler(
 			a.writeSzData(ctx, w, zid, part, getZettel)
 
 		default:
-			var zn *ast.ZettelNode
+			var zn *ast.Zettel
 			if q.Has(api.QueryKeyParseOnly) {
 				zn, err = parseZettel.Run(ctx, zid, q.Get(meta.KeySyntax))
 			} else {
@@ -142,7 +142,7 @@ func (a *API) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid
 
 func (a *API) writeEncodedZettelPart(
 	ctx context.Context,
-	w http.ResponseWriter, zn *ast.ZettelNode,
+	w http.ResponseWriter, zn *ast.Zettel,
 	enc api.EncodingEnum, encStr string, part partType,
 ) {
 	encdr := encoder.Create(

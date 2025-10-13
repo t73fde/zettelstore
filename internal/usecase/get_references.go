@@ -31,7 +31,7 @@ func NewGetReferences() GetReferences { return GetReferences{} }
 
 // RunByState returns all references of a zettel, sparated by their state:
 // local, external, query. No zettel references are returned.
-func (uc GetReferences) RunByState(zn *ast.ZettelNode) (local, ext, query []*ast.Reference) {
+func (uc GetReferences) RunByState(zn *ast.Zettel) (local, ext, query []*ast.Reference) {
 	for ref := range collect.ReferenceSeq(zn) {
 		switch ref.State {
 		case ast.RefStateHosted, ast.RefStateBased: // Local
@@ -46,7 +46,7 @@ func (uc GetReferences) RunByState(zn *ast.ZettelNode) (local, ext, query []*ast
 }
 
 // RunByExternal returns an iterator of all external references of a zettel.
-func (uc GetReferences) RunByExternal(zn *ast.ZettelNode) iter.Seq[*ast.Reference] {
+func (uc GetReferences) RunByExternal(zn *ast.Zettel) iter.Seq[*ast.Reference] {
 	return zeroiter.FilterSeq(
 		collect.ReferenceSeq(zn),
 		func(ref *ast.Reference) bool { return ref.State == ast.RefStateExternal })

@@ -36,7 +36,7 @@ func (data *collectData) initialize() {
 	data.urls = store.NewWordSet()
 }
 
-func collectZettelIndexData(zn *ast.ZettelNode, data *collectData) {
+func collectZettelIndexData(zn *ast.Zettel, data *collectData) {
 	ast.Walk(data, &zn.BlocksAST)
 }
 

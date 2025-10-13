@@ -34,7 +34,7 @@ type mdEncoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
+func (me *mdEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	v := newMDVisitorAST(w, me.lang)
 	v.b.WriteMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {

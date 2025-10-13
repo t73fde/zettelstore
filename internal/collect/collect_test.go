@@ -32,7 +32,7 @@ func parseRef(s string) *ast.Reference {
 
 func TestReferenceSeq(t *testing.T) {
 	t.Parallel()
-	zn := &ast.ZettelNode{}
+	zn := &ast.Zettel{}
 	summary := slices.Collect(collect.ReferenceSeq(zn))
 	if len(summary) != 0 {
 		t.Error("No references expected, but got:", summary)
@@ -52,7 +52,7 @@ func TestReferenceSeq(t *testing.T) {
 		t.Error("Ref count does not work. Expected: 3, got", summary)
 	}
 
-	zn = &ast.ZettelNode{
+	zn = &ast.Zettel{
 		BlocksAST: ast.BlockSlice{ast.CreateParaNode(&ast.EmbedRefNode{Ref: parseRef("12345678901234")})},
 	}
 	summary = slices.Collect(collect.ReferenceSeq(zn))

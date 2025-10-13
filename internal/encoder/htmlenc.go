@@ -37,7 +37,7 @@ type htmlEncoder struct {
 }
 
 // WriteZettel encodes a full zettel as HTML5.
-func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
+func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	env := shtml.MakeEnvironment(he.lang)
 	hm, err := he.th.Evaluate(sztrans.GetMetaSz(zn.InhMeta), &env)
 	if err != nil {

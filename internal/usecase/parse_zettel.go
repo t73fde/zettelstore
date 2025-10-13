@@ -35,7 +35,7 @@ func NewParseZettel(rtConfig config.Config, getZettel GetZettel) ParseZettel {
 }
 
 // Run executes the use case.
-func (uc ParseZettel) Run(ctx context.Context, zid id.Zid, syntax string) (*ast.ZettelNode, error) {
+func (uc ParseZettel) Run(ctx context.Context, zid id.Zid, syntax string) (*ast.Zettel, error) {
 	zettel, err := uc.getZettel.Run(ctx, zid)
 	if err != nil {
 		return nil, err

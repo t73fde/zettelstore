@@ -115,7 +115,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 	})
 }
 
-func (wui *WebUI) getLocalExtQueryLinks(ucGetReferences usecase.GetReferences, zn *ast.ZettelNode) (locLinks, extLinks, queries *sx.Pair) {
+func (wui *WebUI) getLocalExtQueryLinks(ucGetReferences usecase.GetReferences, zn *ast.Zettel) (locLinks, extLinks, queries *sx.Pair) {
 	locRefs, extRefs, queryRefs := ucGetReferences.RunByState(zn)
 	var lbLoc, lbQueries, lbExt sx.ListBuilder
 	for _, ref := range locRefs {

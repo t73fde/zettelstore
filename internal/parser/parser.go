@@ -155,7 +155,7 @@ func ParseDescription(m *meta.Meta) *sx.Pair {
 }
 
 // ParseZettel parses the zettel based on the syntax.
-func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtConfig config.Config) *ast.ZettelNode {
+func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtConfig config.Config) *ast.Zettel {
 	m := zettel.Meta
 	inhMeta := m
 	if rtConfig != nil {
@@ -174,7 +174,7 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 		hi = rtConfig.GetHTMLInsecurity()
 	}
 	rootNode, bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
-	return &ast.ZettelNode{
+	return &ast.Zettel{
 		Meta:      m,
 		Content:   zettel.Content,
 		Zid:       m.Zid,

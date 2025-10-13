@@ -31,7 +31,7 @@ import (
 type TextEncoder struct{}
 
 // WriteZettel writes metadata and content.
-func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.ZettelNode) error {
+func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	v := newTextVisitorAST(w)
 	_ = te.WriteMeta(&v.b, zn.InhMeta)
 	v.visitBlockSlice(&zn.BlocksAST)

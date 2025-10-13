@@ -27,7 +27,7 @@ type refYielder struct {
 
 // ReferenceSeq returns an iterator of all references mentioned in the given
 // zettel. This also includes references to images.
-func ReferenceSeq(zn *ast.ZettelNode) iter.Seq[*ast.Reference] {
+func ReferenceSeq(zn *ast.Zettel) iter.Seq[*ast.Reference] {
 	return func(yield func(*ast.Reference) bool) {
 		yielder := refYielder{yield, false}
 		ast.Walk(&yielder, &zn.BlocksAST)
