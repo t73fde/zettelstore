@@ -85,7 +85,7 @@ func doParsePlain(inp *input.Input, syntax string, kind *sx.Symbol) *sx.Pair {
 func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
 	is := parseSVGInlines(inp, syntax)
 	if is == nil {
-		return nil
+		return zsx.MakeBlock()
 	}
 	return zsx.MakeBlock(zsx.MakeParaList(is))
 }

@@ -21,6 +21,7 @@ import (
 	"strings"
 	"testing"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
@@ -67,17 +68,29 @@ func TestMarkdownSpec(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		ast := createMDBlockSlice(tc.Markdown, config.NoHTML)
-		testAllEncodings(t, tc, &ast)
-		testZmkEncoding(t, tc, &ast)
+		node, ast := createMDBlockSlice(tc.Markdown, config.NoHTML)
+		testAllEncodings(t, tc, node)
+		testAllEncodingsAST(t, tc, &ast)
+		testZmkEncoding(t, tc, node)
+		testZmkEncodingAST(t, tc, &ast)
 	}
 }
 
-func createMDBlockSlice(markdown string, hi config.HTMLInsecurity) ast.BlockSlice {
-	return parser.ParseAST(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, hi)
+func createMDBlockSlice(markdown string, hi config.HTMLInsecurity) (*sx.Pair, ast.BlockSlice) {
+	return parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, hi)
 }
 
-func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
+func testAllEncodings(t *testing.T, tc markdownTestCase, node *sx.Pair) {
+	var sb strings.Builder
+	testID := tc.Example*100 + 1
+	for _, enc := range encodings {
+		t.Run(fmt.Sprintf("Encode %v %v", enc, testID), func(*testing.T) {
+			_ = encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN}).WriteSz(&sb, node)
+			sb.Reset()
+		})
+	}
+}
+func testAllEncodingsAST(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 	var sb strings.Builder
 	testID := tc.Example*100 + 1
 	for _, enc := range encodings {
@@ -88,7 +101,37 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 	}
 }
 
-func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
+func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
+	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
+	var buf bytes.Buffer
+	testID := tc.Example*100 + 1
+	t.Run(fmt.Sprintf("Encode zmk %14d", testID), func(st *testing.T) {
+		buf.Reset()
+		_ = zmkEncoder.WriteSz(&buf, node)
+		// gotFirst := buf.String()
+
+		testID = tc.Example*100 + 2
+		secondNode, _ := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		buf.Reset()
+		_ = zmkEncoder.WriteSz(&buf, secondNode)
+		gotSecond := buf.String()
+
+		// if gotFirst != gotSecond {
+		// 	st.Errorf("\nCMD: %q\n1st: %q\n2nd: %q", tc.Markdown, gotFirst, gotSecond)
+		// }
+
+		testID = tc.Example*100 + 3
+		thirdNode, _ := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		buf.Reset()
+		_ = zmkEncoder.WriteSz(&buf, thirdNode)
+		gotThird := buf.String()
+
+		if gotSecond != gotThird {
+			st.Errorf("\n1st: %q\n2nd: %q", gotSecond, gotThird)
+		}
+	})
+}
+func testZmkEncodingAST(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
 	var buf bytes.Buffer
 	testID := tc.Example*100 + 1
@@ -98,7 +141,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// gotFirst := buf.String()
 
 		testID = tc.Example*100 + 2
-		secondAst := parser.ParseAST(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		_, secondAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		_ = zmkEncoder.WriteBlocks(&buf, &secondAst)
 		gotSecond := buf.String()
@@ -108,7 +151,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, ast *ast.BlockSlice) {
 		// }
 
 		testID = tc.Example*100 + 3
-		thirdAst := parser.ParseAST(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
+		_, thirdAst := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, config.NoHTML)
 		buf.Reset()
 		_ = zmkEncoder.WriteBlocks(&buf, &thirdAst)
 		gotThird := buf.String()
@@ -129,11 +172,15 @@ func TestAdditionalMarkdown(t *testing.T) {
 	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
 	var sb strings.Builder
 	for i, tc := range testcases {
-		ast := createMDBlockSlice(tc.md, config.MarkdownHTML)
+		node, ast := createMDBlockSlice(tc.md, config.MarkdownHTML)
+		sb.Reset()
+		_ = zmkEncoder.WriteSz(&sb, node)
+		if got := sb.String(); got != tc.exp {
+			t.Errorf("%d: %q -> %q, but got %q", i, tc.md, tc.exp, got)
+		}
 		sb.Reset()
 		_ = zmkEncoder.WriteBlocks(&sb, &ast)
-		got := sb.String()
-		if got != tc.exp {
+		if got := sb.String(); got != tc.exp {
 			t.Errorf("%d: %q -> %q, but got %q", i, tc.md, tc.exp, got)
 		}
 	}

@@ -97,19 +97,6 @@ func IsImageFormat(syntax string) bool {
 	return pi.IsImageFormat
 }
 
-// ParseAST parses some input and returns a slice of block nodes.
-func ParseAST(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) ast.BlockSlice {
-	if obj := Get(syntax).Parse(inp, m, syntax); obj != nil {
-		bs, err := sztrans.GetBlockSlice(obj)
-		if err == nil {
-			CleanAST(&bs, hi.AllowHTML(syntax))
-			return bs
-		}
-		log.Printf("sztrans error: %v, for %v\n", err, obj)
-	}
-	return nil
-}
-
 // Parse parses some input and returns both a Sx.Object and a slice of block nodes.
 func Parse(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) (*sx.Pair, ast.BlockSlice) {
 	if obj := Get(syntax).Parse(inp, m, syntax); obj != nil {
