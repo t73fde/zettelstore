@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20250415154139
-modified: 20250416181257
+modified: 20251013185705
 
 The [[endpoint|00001012920000]] to retrieve references of a specific zettel is ''/r/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -41,7 +41,7 @@ https://spec.commonmark.org/0.31.2/
 https://github.com/yuin/goldmark
 ```
 
-These examples should make clean, that no duplicates are removed and no sorting takes place.
+These examples illustrate that the data remains unsorted and that duplicates are preserved.
 The client must handle this, e.g.:
 ```sh
 # curl 'http://127.0.0.1:23123/r/00001008010500' | sort -u
