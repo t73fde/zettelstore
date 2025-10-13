@@ -20,7 +20,6 @@ import (
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/ast/sztrans"
-	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
 )
 
@@ -40,7 +39,7 @@ func TestParseSVG(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			inp := input.NewInput([]byte(tc.src))
-			node, bs := parser.Parse(inp, nil, meta.ValueSyntaxSVG, config.NoHTML)
+			node, bs := parser.Parse(inp, nil, meta.ValueSyntaxSVG)
 			if got := node.String(); tc.exp != got {
 				t.Errorf("\nexp: %q\ngot: %q", tc.exp, got)
 			}

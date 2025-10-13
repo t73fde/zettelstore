@@ -30,9 +30,9 @@ func init() {
 		IsTextFormat:  true,
 		IsImageFormat: false,
 		Parse: func(inp *input.Input, _ *meta.Meta, _ string) *sx.Pair {
-			var parser zmk.Parser
-			parser.Initialize(inp)
-			return parser.Parse()
+			var zmkParser zmk.Parser
+			zmkParser.Initialize(inp)
+			return zmkParser.Parse()
 		},
 	})
 }

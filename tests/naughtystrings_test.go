@@ -23,7 +23,6 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
 
-	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
 
@@ -85,7 +84,7 @@ func TestNaughtyStringParser(t *testing.T) {
 	}
 	for _, s := range blns {
 		for _, pinfo := range pinfos {
-			node, bs := parser.Parse(input.NewInput([]byte(s)), &meta.Meta{}, pinfo.Name, config.NoHTML)
+			node, bs := parser.Parse(input.NewInput([]byte(s)), &meta.Meta{}, pinfo.Name)
 			for _, enc := range encs {
 				if err = enc.WriteSz(io.Discard, node); err != nil {
 					t.Error(err)

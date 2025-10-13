@@ -98,12 +98,10 @@ func IsImageFormat(syntax string) bool {
 }
 
 // Parse parses some input and returns both a Sx.Object and a slice of block nodes.
-func Parse(inp *input.Input, m *meta.Meta, syntax string, hi config.HTMLInsecurity) (*sx.Pair, ast.BlockSlice) {
+func Parse(inp *input.Input, m *meta.Meta, syntax string) (*sx.Pair, ast.BlockSlice) {
 	if obj := Get(syntax).Parse(inp, m, syntax); obj != nil {
 		bs, err := sztrans.GetBlockSlice(obj)
 		if err == nil {
-			Clean(obj, hi.AllowHTML(syntax))
-			CleanAST(&bs, hi.AllowHTML(syntax))
 			return obj, bs
 		}
 		log.Printf("sztrans error: %v, for %v\n", err, obj)
@@ -156,11 +154,7 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 		parseMeta = m
 	}
 
-	hi := config.NoHTML
-	if rtConfig != nil {
-		hi = rtConfig.GetHTMLInsecurity()
-	}
-	rootNode, bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, hi)
+	rootNode, bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax)
 	return &ast.Zettel{
 		Meta:      m,
 		Content:   zettel.Content,

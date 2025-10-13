@@ -19,7 +19,6 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
 
-	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
 )
 
@@ -27,6 +26,6 @@ func FuzzParseDraw(f *testing.F) {
 	f.Fuzz(func(t *testing.T, src []byte) {
 		t.Parallel()
 		inp := input.NewInput(src)
-		parser.Parse(inp, nil, meta.ValueSyntaxDraw, config.NoHTML)
+		parser.Parse(inp, nil, meta.ValueSyntaxDraw)
 	})
 }

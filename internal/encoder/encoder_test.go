@@ -25,7 +25,6 @@ import (
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
 )
@@ -64,7 +63,9 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 		if syntax == "" {
 			syntax = meta.ValueSyntaxZmk
 		}
-		node, bs := parser.Parse(inp, nil, syntax, config.NoHTML)
+		node, bs := parser.Parse(inp, nil, syntax)
+		parser.Clean(node, false)
+		parser.CleanAST(&bs, false)
 		checkEncodings(t, testNum, node, tc.inline, tc.descr, tc.expect, tc.zmk)
 		checkEncodingsAST(t, testNum+1000, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
 		checkSz(t, testNum, bs, tc.inline, tc.descr)

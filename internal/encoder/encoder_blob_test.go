@@ -20,7 +20,6 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
 
-	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
 )
 
@@ -57,7 +56,7 @@ func TestBlob(t *testing.T) {
 	for testNum, tc := range pngTestCases {
 		m.Set(meta.KeyTitle, meta.Value(tc.descr))
 		inp := input.NewInput(tc.blob)
-		node, bs := parser.Parse(inp, m, tc.syntax, config.NoHTML)
+		node, bs := parser.Parse(inp, m, tc.syntax)
 		checkEncodings(t, testNum, node, false, tc.descr, tc.expect, "???")
 		checkEncodingsAST(t, testNum+1000, bs, false, tc.descr, tc.expect, "???")
 	}
