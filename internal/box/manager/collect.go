@@ -16,9 +16,12 @@ package manager
 import (
 	"strings"
 
+	"t73f.de/r/sx"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box/manager/store"
@@ -38,6 +41,48 @@ func (data *collectData) initialize() {
 
 func collectZettelIndexData(zn *ast.Zettel, data *collectData) {
 	ast.Walk(data, &zn.BlocksAST)
+	// zsx.WalkIt(data, zn.Blocks, nil)
+}
+
+func (data *collectData) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
+		switch sym {
+		case zsx.SymText:
+			data.addText(zsx.GetText(node))
+		case zsx.SymVerbatimCode, zsx.SymVerbatimComment, zsx.SymVerbatimEval,
+			zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:
+			_, _, s := zsx.GetVerbatim(node)
+			data.addText(s)
+		case zsx.SymLiteralCode, zsx.SymLiteralComment, zsx.SymLiteralInput,
+			zsx.SymLiteralMath, zsx.SymLiteralOutput:
+			_, _, s := zsx.GetLiteral(node)
+			data.addText(s)
+		case zsx.SymLink:
+			_, ref, _ := zsx.GetLink(node)
+			data.addRef(ref)
+		case zsx.SymEmbed:
+			_, ref, _, _ := zsx.GetEmbed(node)
+			data.addRef(ref)
+		case zsx.SymTransclude:
+			_, ref, _ := zsx.GetTransclusion(node)
+			data.addRef(ref)
+		case zsx.SymCite:
+			_, key, _ := zsx.GetCite(node)
+			data.addText(key)
+		}
+	}
+	return false
+}
+func (data *collectData) VisitAfter(*sx.Pair, *sx.Pair) {}
+func (data *collectData) addRef(ref *sx.Pair) {
+	sym, refValue := zsx.GetReference(ref)
+	if zsx.SymRefStateExternal.IsEqual(sym) {
+		data.urls.Add(strings.ToLower(refValue))
+	} else if sz.SymRefStateZettel.IsEqual(sym) {
+		if zid, err := id.Parse(refValue); err == nil {
+			data.refs.Add(zid)
+		}
+	}
 }
 
 func (data *collectData) Visit(node ast.Node) ast.Visitor {
@@ -45,13 +90,13 @@ func (data *collectData) Visit(node ast.Node) ast.Visitor {
 	case *ast.VerbatimNode:
 		data.addText(string(n.Content))
 	case *ast.TranscludeNode:
-		data.addRef(n.Ref)
+		data.addRefAST(n.Ref)
 	case *ast.TextNode:
 		data.addText(n.Text)
 	case *ast.LinkNode:
-		data.addRef(n.Ref)
+		data.addRefAST(n.Ref)
 	case *ast.EmbedRefNode:
-		data.addRef(n.Ref)
+		data.addRefAST(n.Ref)
 	case *ast.CiteNode:
 		data.addText(n.Key)
 	case *ast.LiteralNode:
@@ -66,7 +111,7 @@ func (data *collectData) addText(s string) {
 	}
 }
 
-func (data *collectData) addRef(ref *ast.Reference) {
+func (data *collectData) addRefAST(ref *ast.Reference) {
 	if ref == nil {
 		return
 	}
