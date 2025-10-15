@@ -16,6 +16,7 @@ package parser
 import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx/input"
 )
 
@@ -28,6 +29,8 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: false,
-		Parse:         func(*input.Input, *meta.Meta, string) *sx.Pair { return nil },
+		Parse: func(inp *input.Input, _ *meta.Meta, _ string) *sx.Pair {
+			return sz.ParseNoneBlocks(inp)
+		},
 	})
 }

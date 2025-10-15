@@ -21,6 +21,7 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
 )
@@ -40,7 +41,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse:         parsePlainHTML,
+		Parse:         parsePlain,
 	})
 	register(&Info{
 		Name:          meta.ValueSyntaxCSS,
@@ -69,17 +70,7 @@ func init() {
 }
 
 func parsePlain(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
-	return doParsePlain(inp, syntax, zsx.SymVerbatimCode)
-}
-func parsePlainHTML(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
-	return doParsePlain(inp, syntax, zsx.SymVerbatimHTML)
-}
-func doParsePlain(inp *input.Input, syntax string, kind *sx.Symbol) *sx.Pair {
-	return zsx.MakeBlock(zsx.MakeVerbatim(
-		kind,
-		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString(syntax)), sx.Nil()),
-		string(inp.ScanLineContent()),
-	))
+	return sz.ParsePlainBlocks(inp, syntax)
 }
 
 func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
