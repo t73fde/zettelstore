@@ -40,8 +40,7 @@ func (data *collectData) initialize() {
 }
 
 func collectZettelIndexData(zn *ast.Zettel, data *collectData) {
-	ast.Walk(data, &zn.BlocksAST)
-	// zsx.WalkIt(data, zn.Blocks, nil)
+	zsx.WalkIt(data, zn.Blocks, nil)
 }
 
 func (data *collectData) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
@@ -74,6 +73,7 @@ func (data *collectData) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 	return false
 }
 func (data *collectData) VisitAfter(*sx.Pair, *sx.Pair) {}
+
 func (data *collectData) addRef(ref *sx.Pair) {
 	sym, refValue := zsx.GetReference(ref)
 	if zsx.SymRefStateExternal.IsEqual(sym) {
@@ -85,43 +85,8 @@ func (data *collectData) addRef(ref *sx.Pair) {
 	}
 }
 
-func (data *collectData) Visit(node ast.Node) ast.Visitor {
-	switch n := node.(type) {
-	case *ast.VerbatimNode:
-		data.addText(string(n.Content))
-	case *ast.TranscludeNode:
-		data.addRefAST(n.Ref)
-	case *ast.TextNode:
-		data.addText(n.Text)
-	case *ast.LinkNode:
-		data.addRefAST(n.Ref)
-	case *ast.EmbedRefNode:
-		data.addRefAST(n.Ref)
-	case *ast.CiteNode:
-		data.addText(n.Key)
-	case *ast.LiteralNode:
-		data.addText(string(n.Content))
-	}
-	return data
-}
-
 func (data *collectData) addText(s string) {
 	for _, word := range zerostrings.NormalizeWords(s) {
 		data.words.Add(word)
-	}
-}
-
-func (data *collectData) addRefAST(ref *ast.Reference) {
-	if ref == nil {
-		return
-	}
-	if ref.IsExternal() {
-		data.urls.Add(strings.ToLower(ref.Value))
-	}
-	if !ref.IsZettel() {
-		return
-	}
-	if zid, err := id.Parse(ref.URL.Path); err == nil {
-		data.refs.Add(zid)
 	}
 }

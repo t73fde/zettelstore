@@ -300,4 +300,4 @@ type BLOBNode struct {
 func (*BLOBNode) blockNode() { /* Just a marker */ }
 
 // WalkChildren does nothing.
-func (*BLOBNode) WalkChildren(Visitor) { /* No children*/ }
+func (bn *BLOBNode) WalkChildren(v Visitor) { Walk(v, &bn.Description) }
