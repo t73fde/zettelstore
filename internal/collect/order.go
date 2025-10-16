@@ -17,8 +17,8 @@ package collect
 import "zettelstore.de/z/internal/ast"
 
 // OrderAST of internal links within the given zettel.
-func OrderAST(zn *ast.Zettel) (result []*ast.LinkNode) {
-	for _, bn := range zn.BlocksAST {
+func OrderAST(bns *ast.BlockSlice) (result []*ast.LinkNode) {
+	for _, bn := range *bns {
 		ln, ok := bn.(*ast.NestedListNode)
 		if !ok {
 			continue

@@ -132,7 +132,7 @@ func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, 
 		if err != nil {
 			continue
 		}
-		for _, ln := range collect.OrderAST(zn) {
+		for _, ln := range collect.OrderAST(&zn.BlocksAST) {
 			ref := ln.Ref
 			if !ref.IsZettel() {
 				continue

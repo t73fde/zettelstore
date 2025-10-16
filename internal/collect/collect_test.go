@@ -33,7 +33,7 @@ func parseRef(s string) *ast.Reference {
 func TestReferenceSeq(t *testing.T) {
 	t.Parallel()
 	zn := &ast.Zettel{}
-	summary := slices.Collect(collect.ReferenceSeqAST(zn))
+	summary := slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
 	if len(summary) != 0 {
 		t.Error("No references expected, but got:", summary)
 	}
@@ -41,13 +41,13 @@ func TestReferenceSeq(t *testing.T) {
 	intNode := &ast.LinkNode{Ref: parseRef("01234567890123")}
 	para := ast.CreateParaNode(intNode, &ast.LinkNode{Ref: parseRef("https://zettelstore.de/z")})
 	zn.BlocksAST = ast.BlockSlice{para}
-	summary = slices.Collect(collect.ReferenceSeqAST(zn))
+	summary = slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
 	if len(summary) != 2 {
 		t.Error("2 refs expected, but got:", summary)
 	}
 
 	para.Inlines = append(para.Inlines, intNode)
-	summary = slices.Collect(collect.ReferenceSeqAST(zn))
+	summary = slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
 	if cnt := len(summary); cnt != 3 {
 		t.Error("Ref count does not work. Expected: 3, got", summary)
 	}
@@ -55,7 +55,7 @@ func TestReferenceSeq(t *testing.T) {
 	zn = &ast.Zettel{
 		BlocksAST: ast.BlockSlice{ast.CreateParaNode(&ast.EmbedRefNode{Ref: parseRef("12345678901234")})},
 	}
-	summary = slices.Collect(collect.ReferenceSeqAST(zn))
+	summary = slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
 	if len(summary) != 1 {
 		t.Error("Only one image ref expected, but got: ", summary)
 	}

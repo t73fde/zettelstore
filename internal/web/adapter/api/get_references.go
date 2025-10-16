@@ -53,12 +53,12 @@ func (a *API) MakeGetReferencesHandler(
 		case partZettel:
 			seq = zeroiter.CatSeq(
 				ucGetReferences.RunByMeta(zn.InhMeta),
-				getExternalURLs(zn, ucGetReferences),
+				getExternalURLsAST(&zn.BlocksAST, ucGetReferences),
 			)
 		case partMeta:
 			seq = ucGetReferences.RunByMeta(zn.InhMeta)
 		case partContent:
-			seq = getExternalURLs(zn, ucGetReferences)
+			seq = getExternalURLsAST(&zn.BlocksAST, ucGetReferences)
 		}
 
 		enc, _ := getEncoding(r, q)
@@ -82,9 +82,9 @@ func (a *API) MakeGetReferencesHandler(
 	})
 }
 
-func getExternalURLs(zn *ast.Zettel, ucGetReferences usecase.GetReferences) iter.Seq[string] {
+func getExternalURLsAST(bns *ast.BlockSlice, ucGetReferences usecase.GetReferences) iter.Seq[string] {
 	return zeroiter.MapSeq(
-		ucGetReferences.RunByExternalAST(zn),
+		ucGetReferences.RunByExternalAST(bns),
 		func(ref *ast.Reference) string { return ref.Value },
 	)
 }

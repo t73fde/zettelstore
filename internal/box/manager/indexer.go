@@ -152,7 +152,8 @@ func (mgr *Manager) idxUpdateZettel(ctx context.Context, zettel zettel.Zettel) {
 	var cData collectData
 	cData.initialize()
 	if mustIndexZettel(zettel.Meta) {
-		collectZettelIndexData(parser.ParseZettel(ctx, zettel, "", mgr.rtConfig), &cData)
+		zn := parser.ParseZettel(ctx, zettel, "", mgr.rtConfig)
+		collectZettelIndexData(zn.Blocks, &cData)
 	}
 
 	m := zettel.Meta

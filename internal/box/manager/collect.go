@@ -23,7 +23,6 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box/manager/store"
 )
 
@@ -39,8 +38,8 @@ func (data *collectData) initialize() {
 	data.urls = store.NewWordSet()
 }
 
-func collectZettelIndexData(zn *ast.Zettel, data *collectData) {
-	zsx.WalkIt(data, zn.Blocks, nil)
+func collectZettelIndexData(blocks *sx.Pair, data *collectData) {
+	zsx.WalkIt(data, blocks, nil)
 }
 
 func (data *collectData) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {

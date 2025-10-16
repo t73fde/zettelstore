@@ -363,7 +363,7 @@ func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {
 
 	htmlgen := wui.getSimpleHTMLEncoder(lang)
 	var lb sx.ListBuilder
-	for _, ln := range collect.OrderAST(zn) {
+	for _, ln := range collect.OrderAST(&zn.BlocksAST) {
 		lb.Add(htmlgen.nodeSxHTML(ln))
 	}
 	return lb.List()
@@ -379,7 +379,8 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) *sx
 		return nil
 	}
 	var lb sx.ListBuilder
-	for _, ln := range collect.OrderAST(parser.ParseZettel(ctx, menu, "", wui.rtConfig)) {
+	zn := parser.ParseZettel(ctx, menu, "", wui.rtConfig)
+	for _, ln := range collect.OrderAST(&zn.BlocksAST) {
 		ref := ln.Ref
 		if !ref.IsZettel() {
 			continue
