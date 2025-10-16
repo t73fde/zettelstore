@@ -81,7 +81,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		}
 
 		enc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, meta.KeyLang))
-		entries, _ := evaluator.QueryAction(ctx, nil, unlinkedMeta)
+		entries, _ := evaluator.QueryActionAST(ctx, nil, unlinkedMeta)
 		bns := ucEvaluate.RunBlockNode(ctx, entries)
 		unlinkedContent, _, err := enc.BlocksSxn(&bns)
 		if err != nil {
@@ -116,7 +116,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 }
 
 func (wui *WebUI) getLocalExtQueryLinks(ucGetReferences usecase.GetReferences, zn *ast.Zettel) (locLinks, extLinks, queries *sx.Pair) {
-	locRefs, extRefs, queryRefs := ucGetReferences.RunByState(zn)
+	locRefs, extRefs, queryRefs := ucGetReferences.RunByStateAST(zn)
 	var lbLoc, lbQueries, lbExt sx.ListBuilder
 	for _, ref := range locRefs {
 		lbLoc.Add(sx.MakeString(ref.String()))

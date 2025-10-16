@@ -132,7 +132,7 @@ func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, 
 		if err != nil {
 			continue
 		}
-		for _, ln := range collect.Order(zn) {
+		for _, ln := range collect.OrderAST(zn) {
 			ref := ln.Ref
 			if !ref.IsZettel() {
 				continue
@@ -204,7 +204,7 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 		if err != nil {
 			continue
 		}
-		v := unlinkedVisitor{
+		v := unlinkedVisitorAST{
 			words: words,
 			found: false,
 		}
@@ -223,20 +223,20 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 	return result
 }
 
-func (*unlinkedVisitor) joinWords(words []string) string {
+func (*unlinkedVisitorAST) joinWords(words []string) string {
 	return " " + strings.ToLower(strings.Join(words, " ")) + " "
 }
 
-type unlinkedVisitor struct {
+type unlinkedVisitorAST struct {
 	words []string
 	text  string
 	found bool
 }
 
-func (v *unlinkedVisitor) Visit(node ast.Node) ast.Visitor {
+func (v *unlinkedVisitorAST) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.InlineSlice:
-		v.checkWords(n)
+		v.checkWordsAST(n)
 		return nil
 	case *ast.HeadingNode:
 		return nil
@@ -246,18 +246,18 @@ func (v *unlinkedVisitor) Visit(node ast.Node) ast.Visitor {
 	return v
 }
 
-func (v *unlinkedVisitor) checkWords(is *ast.InlineSlice) {
+func (v *unlinkedVisitorAST) checkWordsAST(is *ast.InlineSlice) {
 	if len(*is) < 2*len(v.words)-1 {
 		return
 	}
-	for _, text := range v.splitInlineTextList(is) {
+	for _, text := range v.splitInlineTextListAST(is) {
 		if strings.Contains(text, v.text) {
 			v.found = true
 		}
 	}
 }
 
-func (v *unlinkedVisitor) splitInlineTextList(is *ast.InlineSlice) []string {
+func (v *unlinkedVisitorAST) splitInlineTextListAST(is *ast.InlineSlice) []string {
 	var result []string
 	var curList []string
 	for _, in := range *is {

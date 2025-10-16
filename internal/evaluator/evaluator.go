@@ -50,15 +50,15 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	switch zn.Syntax {
 	case meta.ValueSyntaxNone:
 		// AST is empty, evaluate to a description list of metadata.
-		zn.BlocksAST = evaluateMetadata(zn.Meta)
+		zn.BlocksAST = evaluateMetadataAST(zn.Meta)
 	case meta.ValueSyntaxSxn:
-		zn.BlocksAST = evaluateSxn(zn.BlocksAST)
+		zn.BlocksAST = evaluateSxnAST(zn.BlocksAST)
 	default:
-		EvaluateBlock(ctx, port, rtConfig, &zn.BlocksAST)
+		EvaluateBlockAST(ctx, port, rtConfig, &zn.BlocksAST)
 	}
 }
 
-func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
+func evaluateSxnAST(bs ast.BlockSlice) ast.BlockSlice {
 	// Check for structure made in parser/plain/plain.go:parseSxnBlocks
 	if len(bs) == 1 {
 		// If len(bs) > 1 --> an error was found during parsing
@@ -84,10 +84,10 @@ func evaluateSxn(bs ast.BlockSlice) ast.BlockSlice {
 	return bs
 }
 
-// EvaluateBlock evaluates the given block list in the given context, with
+// EvaluateBlockAST evaluates the given block list in the given context, with
 // the given ports, and the given environment.
-func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, bns *ast.BlockSlice) {
-	e := evaluator{
+func EvaluateBlockAST(ctx context.Context, port Port, rtConfig config.Config, bns *ast.BlockSlice) {
+	e := evaluatorAST{
 		ctx:             ctx,
 		port:            port,
 		rtConfig:        rtConfig,
@@ -101,7 +101,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, bns *
 	parser.CleanAST(bns, true)
 }
 
-type evaluator struct {
+type evaluatorAST struct {
 	ctx             context.Context
 	port            Port
 	rtConfig        config.Config
@@ -117,34 +117,34 @@ type transcludeCost struct {
 	ec int
 }
 
-func (e *evaluator) Visit(node ast.Node) ast.Visitor {
+func (e *evaluatorAST) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
-		e.visitBlockSlice(n)
+		e.visitBlockSliceAST(n)
 	case *ast.InlineSlice:
-		e.visitInlineSlice(n)
+		e.visitInlineSliceAST(n)
 	default:
 		return e
 	}
 	return nil
 }
 
-func (e *evaluator) visitBlockSlice(bs *ast.BlockSlice) {
+func (e *evaluatorAST) visitBlockSliceAST(bs *ast.BlockSlice) {
 	for i := 0; i < len(*bs); i++ {
 		bn := (*bs)[i]
 		ast.Walk(e, bn)
 		switch n := bn.(type) {
 		case *ast.VerbatimNode:
-			i += transcludeNode(bs, i, e.evalVerbatimNode(n))
+			i += transcludeNodeAST(bs, i, e.evalVerbatimNodeAST(n))
 		case *ast.TranscludeNode:
-			i += transcludeNode(bs, i, e.evalTransclusionNode(n))
+			i += transcludeNodeAST(bs, i, e.evalTransclusionNodeAST(n))
 		}
 	}
 }
 
-func transcludeNode(bln *ast.BlockSlice, i int, bn ast.BlockNode) int {
+func transcludeNodeAST(bln *ast.BlockSlice, i int, bn ast.BlockNode) int {
 	if ln, ok := bn.(*ast.BlockSlice); ok {
-		*bln = replaceWithBlockNodes(*bln, i, *ln)
+		*bln = replaceWithBlockNodesAST(*bln, i, *ln)
 		return len(*ln) - 1
 	}
 	if bn == nil {
@@ -155,7 +155,7 @@ func transcludeNode(bln *ast.BlockSlice, i int, bn ast.BlockNode) int {
 	return 0
 }
 
-func replaceWithBlockNodes(bns []ast.BlockNode, i int, replaceBns []ast.BlockNode) []ast.BlockNode {
+func replaceWithBlockNodesAST(bns []ast.BlockNode, i int, replaceBns []ast.BlockNode) []ast.BlockNode {
 	if len(replaceBns) == 1 {
 		bns[i] = replaceBns[0]
 		return bns
@@ -173,19 +173,19 @@ func replaceWithBlockNodes(bns []ast.BlockNode, i int, replaceBns []ast.BlockNod
 	return newIns
 }
 
-func (e *evaluator) evalVerbatimNode(vn *ast.VerbatimNode) ast.BlockNode {
+func (e *evaluatorAST) evalVerbatimNodeAST(vn *ast.VerbatimNode) ast.BlockNode {
 	switch vn.Kind {
 	case ast.VerbatimZettel:
-		return e.evalVerbatimZettel(vn)
+		return e.evalVerbatimZettelAST(vn)
 	case ast.VerbatimEval:
 		if syntax, found := vn.Attrs.Get(""); found && syntax == meta.ValueSyntaxDraw {
-			return parser.ParseDrawBlock(vn)
+			return parser.ParseDrawBlockAST(vn)
 		}
 	}
 	return vn
 }
 
-func (e *evaluator) evalVerbatimZettel(vn *ast.VerbatimNode) ast.BlockNode {
+func (e *evaluatorAST) evalVerbatimZettelAST(vn *ast.VerbatimNode) ast.BlockNode {
 	m := meta.New(id.Invalid)
 	m.Set(meta.KeySyntax, getSyntax(vn.Attrs, meta.ValueSyntaxText))
 	zettel := zettel.Zettel{
@@ -209,35 +209,35 @@ func getSyntax(a zsx.Attributes, defSyntax meta.Value) meta.Value {
 	return defSyntax
 }
 
-func (e *evaluator) evalTransclusionNode(tn *ast.TranscludeNode) ast.BlockNode {
+func (e *evaluatorAST) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.BlockNode {
 	ref := tn.Ref
 
 	// To prevent e.embedCount from counting
-	if errText := e.checkMaxTransclusions(ref); errText != nil {
-		return makeBlockNode(errText)
+	if errText := e.checkMaxTransclusionsAST(ref); errText != nil {
+		return makeBlockNodeAST(errText)
 	}
 	switch ref.State {
 	case ast.RefStateZettel:
 		// Only zettel references will be evaluated.
 	case ast.RefStateInvalid, ast.RefStateBroken:
 		e.transcludeCount++
-		return makeBlockNode(createInlineErrorText(ref, "Invalid", "or", "broken", "transclusion", "reference"))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Invalid", "or", "broken", "transclusion", "reference"))
 	case ast.RefStateSelf:
 		e.transcludeCount++
-		return makeBlockNode(createInlineErrorText(ref, "Self", "transclusion", "reference"))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Self", "transclusion", "reference"))
 	case ast.RefStateFound, ast.RefStateExternal:
 		return tn
 	case ast.RefStateHosted, ast.RefStateBased:
-		if n := createEmbeddedNodeLocal(ref); n != nil {
+		if n := createEmbeddedNodeLocalAST(ref); n != nil {
 			n.Attrs = tn.Attrs
-			return makeBlockNode(n)
+			return makeBlockNodeAST(n)
 		}
 		return tn
 	case ast.RefStateQuery:
 		e.transcludeCount++
-		return e.evalQueryTransclusion(tn.Ref.Value)
+		return e.evalQueryTransclusionAST(tn.Ref.Value)
 	default:
-		return makeBlockNode(createInlineErrorText(ref, "Illegal", "block", "state", strconv.Itoa(int(ref.State))))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Illegal", "block", "state", strconv.Itoa(int(ref.State))))
 	}
 
 	zid, err := id.Parse(ref.URL.Path)
@@ -249,7 +249,7 @@ func (e *evaluator) evalTransclusionNode(tn *ast.TranscludeNode) ast.BlockNode {
 	zn := cost.zn
 	if zn == e.marker {
 		e.transcludeCount++
-		return makeBlockNode(createInlineErrorText(ref, "Recursive", "transclusion"))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Recursive", "transclusion"))
 	}
 	if !ok {
 		zettel, err1 := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
@@ -258,7 +258,7 @@ func (e *evaluator) evalTransclusionNode(tn *ast.TranscludeNode) ast.BlockNode {
 				return nil
 			}
 			e.transcludeCount++
-			return makeBlockNode(createInlineErrorText(ref, "Unable", "to", "get", "zettel"))
+			return makeBlockNodeAST(createInlineErrorTextAST(ref, "Unable", "to", "get", "zettel"))
 		}
 		setMetadataFromAttributes(zettel.Meta, tn.Attrs)
 		ec := e.transcludeCount
@@ -274,33 +274,33 @@ func (e *evaluator) evalTransclusionNode(tn *ast.TranscludeNode) ast.BlockNode {
 	return &zn.BlocksAST
 }
 
-func (e *evaluator) evalQueryTransclusion(expr string) ast.BlockNode {
+func (e *evaluatorAST) evalQueryTransclusionAST(expr string) ast.BlockNode {
 	q := query.Parse(expr)
 	ml, err := e.port.QueryMeta(e.ctx, q)
 	if err != nil {
 		if errors.Is(err, &box.ErrNotAllowed{}) {
 			return nil
 		}
-		return makeBlockNode(createInlineErrorText(nil, "Unable", "to", "search", "zettel"))
+		return makeBlockNodeAST(createInlineErrorTextAST(nil, "Unable", "to", "search", "zettel"))
 	}
-	result, _ := QueryAction(e.ctx, q, ml)
+	result, _ := QueryActionAST(e.ctx, q, ml)
 	if result != nil {
 		ast.Walk(e, result)
 	}
 	return result
 }
 
-func (e *evaluator) checkMaxTransclusions(ref *ast.Reference) ast.InlineNode {
+func (e *evaluatorAST) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNode {
 	if maxTrans := e.transcludeMax; e.transcludeCount > maxTrans {
 		e.transcludeCount = maxTrans + 1
-		return createInlineErrorText(ref,
+		return createInlineErrorTextAST(ref,
 			"Too", "many", "transclusions", "(must", "be", "at", "most", strconv.Itoa(maxTrans)+",",
 			"see", "runtime", "configuration", "key", "max-transclusions)")
 	}
 	return nil
 }
 
-func makeBlockNode(in ast.InlineNode) ast.BlockNode { return ast.CreateParaNode(in) }
+func makeBlockNodeAST(in ast.InlineNode) ast.BlockNode { return ast.CreateParaNode(in) }
 
 func setMetadataFromAttributes(m *meta.Meta, a zsx.Attributes) {
 	for aKey, aVal := range a {
@@ -310,22 +310,22 @@ func setMetadataFromAttributes(m *meta.Meta, a zsx.Attributes) {
 	}
 }
 
-func (e *evaluator) visitInlineSlice(is *ast.InlineSlice) {
+func (e *evaluatorAST) visitInlineSliceAST(is *ast.InlineSlice) {
 	for i := 0; i < len(*is); i++ {
 		in := (*is)[i]
 		ast.Walk(e, in)
 		switch n := in.(type) {
 		case *ast.LinkNode:
-			(*is)[i] = e.evalLinkNode(n)
+			(*is)[i] = e.evalLinkNodeAST(n)
 		case *ast.EmbedRefNode:
-			i += embedNode(is, i, e.evalEmbedRefNode(n))
+			i += embedNodeAST(is, i, e.evalEmbedRefNodeAST(n))
 		}
 	}
 }
 
-func embedNode(is *ast.InlineSlice, i int, in ast.InlineNode) int {
+func embedNodeAST(is *ast.InlineSlice, i int, in ast.InlineNode) int {
 	if ln, ok := in.(*ast.InlineSlice); ok {
-		*is = replaceWithInlineNodes(*is, i, *ln)
+		*is = replaceWithInlineNodesAST(*is, i, *ln)
 		return len(*ln) - 1
 	}
 	if in == nil {
@@ -336,7 +336,7 @@ func embedNode(is *ast.InlineSlice, i int, in ast.InlineNode) int {
 	return 0
 }
 
-func replaceWithInlineNodes(ins ast.InlineSlice, i int, replaceIns ast.InlineSlice) ast.InlineSlice {
+func replaceWithInlineNodesAST(ins ast.InlineSlice, i int, replaceIns ast.InlineSlice) ast.InlineSlice {
 	if len(replaceIns) == 1 {
 		ins[i] = replaceIns[0]
 		return ins
@@ -354,7 +354,7 @@ func replaceWithInlineNodes(ins ast.InlineSlice, i int, replaceIns ast.InlineSli
 	return newIns
 }
 
-func (e *evaluator) evalLinkNode(ln *ast.LinkNode) ast.InlineNode {
+func (e *evaluatorAST) evalLinkNodeAST(ln *ast.LinkNode) ast.InlineNode {
 	if len(ln.Inlines) == 0 {
 		ln.Inlines = ast.InlineSlice{&ast.TextNode{Text: ln.Ref.Value}}
 	}
@@ -363,13 +363,13 @@ func (e *evaluator) evalLinkNode(ln *ast.LinkNode) ast.InlineNode {
 		return ln
 	}
 
-	zid := mustParseZid(ref)
+	zid := mustParseZidAST(ref)
 	_, err := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
 	if errors.Is(err, &box.ErrNotAllowed{}) {
 		return &ast.FormatNode{
 			Kind:    ast.FormatSpan,
 			Attrs:   ln.Attrs,
-			Inlines: getLinkInline(ln),
+			Inlines: getLinkInlineAST(ln),
 		}
 	} else if err != nil {
 		ln.Ref.State = ast.RefStateBroken
@@ -380,18 +380,18 @@ func (e *evaluator) evalLinkNode(ln *ast.LinkNode) ast.InlineNode {
 	return ln
 }
 
-func getLinkInline(ln *ast.LinkNode) ast.InlineSlice {
+func getLinkInlineAST(ln *ast.LinkNode) ast.InlineSlice {
 	if ln.Inlines != nil {
 		return ln.Inlines
 	}
 	return ast.InlineSlice{&ast.TextNode{Text: ln.Ref.Value}}
 }
 
-func (e *evaluator) evalEmbedRefNode(en *ast.EmbedRefNode) ast.InlineNode {
+func (e *evaluatorAST) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode {
 	ref := en.Ref
 
 	// To prevent e.embedCount from counting
-	if errText := e.checkMaxTransclusions(ref); errText != nil {
+	if errText := e.checkMaxTransclusionsAST(ref); errText != nil {
 		return errText
 	}
 
@@ -400,47 +400,47 @@ func (e *evaluator) evalEmbedRefNode(en *ast.EmbedRefNode) ast.InlineNode {
 		// Only zettel references will be evaluated.
 	case ast.RefStateInvalid, ast.RefStateBroken:
 		e.transcludeCount++
-		return createInlineErrorImage(en)
+		return createInlineErrorImageAST(en)
 	case ast.RefStateSelf:
 		e.transcludeCount++
-		return createInlineErrorText(ref, "Self", "embed", "reference")
+		return createInlineErrorTextAST(ref, "Self", "embed", "reference")
 	case ast.RefStateFound, ast.RefStateExternal:
 		return en
 	case ast.RefStateHosted, ast.RefStateBased:
-		if n := createEmbeddedNodeLocal(ref); n != nil {
+		if n := createEmbeddedNodeLocalAST(ref); n != nil {
 			n.Attrs = en.Attrs
 			n.Inlines = en.Inlines
 			return n
 		}
 		return en
 	default:
-		return createInlineErrorText(ref, "Illegal", "inline", "state", strconv.Itoa(int(ref.State)))
+		return createInlineErrorTextAST(ref, "Illegal", "inline", "state", strconv.Itoa(int(ref.State)))
 	}
 
-	zid := mustParseZid(ref)
+	zid := mustParseZidAST(ref)
 	zettel, err := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
 	if err != nil {
 		if errors.Is(err, &box.ErrNotAllowed{}) {
 			return nil
 		}
 		e.transcludeCount++
-		return createInlineErrorImage(en)
+		return createInlineErrorImageAST(en)
 	}
 
 	if syntax := string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)); parser.IsImageFormat(syntax) {
-		e.updateImageRefNode(en, zettel.Meta, syntax)
+		e.updateImageRefNodeAST(en, zettel.Meta, syntax)
 		return en
 	} else if !parser.IsASTParser(syntax) {
 		// Not embeddable.
 		e.transcludeCount++
-		return createInlineErrorText(ref, "Not", "embeddable (syntax="+syntax+")")
+		return createInlineErrorTextAST(ref, "Not", "embeddable (syntax="+syntax+")")
 	}
 
 	cost, ok := e.costMap[zid]
 	zn := cost.zn
 	if zn == e.marker {
 		e.transcludeCount++
-		return createInlineErrorText(ref, "Recursive", "transclusion")
+		return createInlineErrorTextAST(ref, "Recursive", "transclusion")
 	}
 	if !ok {
 		ec := e.transcludeCount
@@ -454,7 +454,7 @@ func (e *evaluator) evalEmbedRefNode(en *ast.EmbedRefNode) ast.InlineNode {
 	result, ok := e.embedMap[ref.Value]
 	if !ok {
 		// Search for text to be embedded.
-		result = findInlineSlice(&zn.BlocksAST, ref.URL.Fragment)
+		result = findInlineSliceAST(&zn.BlocksAST, ref.URL.Fragment)
 		e.embedMap[ref.Value] = result
 	}
 	if len(result) == 0 {
@@ -471,7 +471,7 @@ func (e *evaluator) evalEmbedRefNode(en *ast.EmbedRefNode) ast.InlineNode {
 	return &result
 }
 
-func mustParseZid(ref *ast.Reference) id.Zid {
+func mustParseZidAST(ref *ast.Reference) id.Zid {
 	zid, err := id.Parse(ref.URL.Path)
 	if err != nil {
 		panic(fmt.Sprintf("%v: %q (state %v) -> %v", err, ref.URL.Path, ref.State, ref))
@@ -479,7 +479,7 @@ func mustParseZid(ref *ast.Reference) id.Zid {
 	return zid
 }
 
-func (e *evaluator) updateImageRefNode(en *ast.EmbedRefNode, m *meta.Meta, syntax string) {
+func (e *evaluatorAST) updateImageRefNodeAST(en *ast.EmbedRefNode, m *meta.Meta, syntax string) {
 	en.Syntax = syntax
 	if len(en.Inlines) == 0 {
 		is := parser.ParseDescriptionAST(m)
@@ -492,7 +492,7 @@ func (e *evaluator) updateImageRefNode(en *ast.EmbedRefNode, m *meta.Meta, synta
 	}
 }
 
-func createInlineErrorImage(en *ast.EmbedRefNode) *ast.EmbedRefNode {
+func createInlineErrorImageAST(en *ast.EmbedRefNode) *ast.EmbedRefNode {
 	errorZid := id.ZidEmoji
 	en.Ref = ast.ParseReference(errorZid.String())
 	if len(en.Inlines) == 0 {
@@ -501,7 +501,7 @@ func createInlineErrorImage(en *ast.EmbedRefNode) *ast.EmbedRefNode {
 	return en
 }
 
-func createInlineErrorText(ref *ast.Reference, msgWords ...string) ast.InlineNode {
+func createInlineErrorTextAST(ref *ast.Reference, msgWords ...string) ast.InlineNode {
 	text := strings.Join(msgWords, " ")
 	if ref != nil {
 		text += ": " + ref.String() + "."
@@ -518,7 +518,7 @@ func createInlineErrorText(ref *ast.Reference, msgWords ...string) ast.InlineNod
 	return fn
 }
 
-func createEmbeddedNodeLocal(ref *ast.Reference) *ast.EmbedRefNode {
+func createEmbeddedNodeLocalAST(ref *ast.Reference) *ast.EmbedRefNode {
 	ext := path.Ext(ref.Value)
 	if ext != "" && ext[0] == '.' {
 		ext = ext[1:]
@@ -533,22 +533,22 @@ func createEmbeddedNodeLocal(ref *ast.Reference) *ast.EmbedRefNode {
 	}
 }
 
-func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
+func (e *evaluatorAST) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
 	ast.Walk(e, &zn.BlocksAST)
 	return zn
 }
 
-func findInlineSlice(bs *ast.BlockSlice, fragment string) ast.InlineSlice {
+func findInlineSliceAST(bs *ast.BlockSlice, fragment string) ast.InlineSlice {
 	if fragment == "" {
-		return firstInlinesToEmbed(*bs)
+		return firstInlinesToEmbedAST(*bs)
 	}
-	fs := fragmentSearcher{fragment: fragment}
+	fs := fragmentSearcherAST{fragment: fragment}
 	ast.Walk(&fs, bs)
 	return fs.result
 }
 
-func firstInlinesToEmbed(bs ast.BlockSlice) ast.InlineSlice {
+func firstInlinesToEmbedAST(bs ast.BlockSlice) ast.InlineSlice {
 	if ins := bs.FirstParagraphInlines(); ins != nil {
 		return ins
 	}
@@ -565,27 +565,27 @@ func firstInlinesToEmbed(bs ast.BlockSlice) ast.InlineSlice {
 	return nil
 }
 
-type fragmentSearcher struct {
+type fragmentSearcherAST struct {
 	fragment string
 	result   ast.InlineSlice
 }
 
-func (fs *fragmentSearcher) Visit(node ast.Node) ast.Visitor {
+func (fs *fragmentSearcherAST) Visit(node ast.Node) ast.Visitor {
 	if len(fs.result) > 0 {
 		return nil
 	}
 	switch n := node.(type) {
 	case *ast.BlockSlice:
-		fs.visitBlockSlice(n)
+		fs.visitBlockSliceAST(n)
 	case *ast.InlineSlice:
-		fs.visitInlineSlice(n)
+		fs.visitInlineSliceAST(n)
 	default:
 		return fs
 	}
 	return nil
 }
 
-func (fs *fragmentSearcher) visitBlockSlice(bs *ast.BlockSlice) {
+func (fs *fragmentSearcherAST) visitBlockSliceAST(bs *ast.BlockSlice) {
 	for i, bn := range *bs {
 		if hn, ok := bn.(*ast.HeadingNode); ok && hn.Fragment == fs.fragment {
 			fs.result = (*bs)[i+1:].FirstParagraphInlines()
@@ -595,10 +595,10 @@ func (fs *fragmentSearcher) visitBlockSlice(bs *ast.BlockSlice) {
 	}
 }
 
-func (fs *fragmentSearcher) visitInlineSlice(is *ast.InlineSlice) {
+func (fs *fragmentSearcherAST) visitInlineSliceAST(is *ast.InlineSlice) {
 	for i, in := range *is {
 		if mn, ok := in.(*ast.MarkNode); ok && mn.Fragment == fs.fragment {
-			ris := skipBreakeNodes((*is)[i+1:])
+			ris := skipBreakeNodesAST((*is)[i+1:])
 			if len(mn.Inlines) > 0 {
 				fs.result = slices.Clone(mn.Inlines)
 				fs.result = append(fs.result, &ast.TextNode{Text: " "})
@@ -612,7 +612,7 @@ func (fs *fragmentSearcher) visitInlineSlice(is *ast.InlineSlice) {
 	}
 }
 
-func skipBreakeNodes(ins ast.InlineSlice) ast.InlineSlice {
+func skipBreakeNodesAST(ins ast.InlineSlice) ast.InlineSlice {
 	for i, in := range ins {
 		switch in.(type) {
 		case *ast.BreakNode:

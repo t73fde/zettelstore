@@ -20,22 +20,22 @@ import (
 	"zettelstore.de/z/internal/ast"
 )
 
-type refYielder struct {
+type refYielderAST struct {
 	yield func(*ast.Reference) bool
 	stop  bool
 }
 
-// ReferenceSeq returns an iterator of all references mentioned in the given
+// ReferenceSeqAST returns an iterator of all references mentioned in the given
 // zettel. This also includes references to images.
-func ReferenceSeq(zn *ast.Zettel) iter.Seq[*ast.Reference] {
+func ReferenceSeqAST(zn *ast.Zettel) iter.Seq[*ast.Reference] {
 	return func(yield func(*ast.Reference) bool) {
-		yielder := refYielder{yield, false}
+		yielder := refYielderAST{yield, false}
 		ast.Walk(&yielder, &zn.BlocksAST)
 	}
 }
 
 // Visit all node to collect data for the summary.
-func (y *refYielder) Visit(node ast.Node) ast.Visitor {
+func (y *refYielderAST) Visit(node ast.Node) ast.Visitor {
 	if y.stop {
 		return nil
 	}

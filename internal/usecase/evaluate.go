@@ -65,7 +65,7 @@ func (uc *Evaluate) RunBlockNode(ctx context.Context, bn ast.BlockNode) ast.Bloc
 		return nil
 	}
 	bns := ast.BlockSlice{bn}
-	evaluator.EvaluateBlock(ctx, uc, uc.rtConfig, &bns)
+	evaluator.EvaluateBlockAST(ctx, uc, uc.rtConfig, &bns)
 	return bns
 }
 

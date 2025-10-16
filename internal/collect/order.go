@@ -16,8 +16,8 @@ package collect
 
 import "zettelstore.de/z/internal/ast"
 
-// Order of internal links within the given zettel.
-func Order(zn *ast.Zettel) (result []*ast.LinkNode) {
+// OrderAST of internal links within the given zettel.
+func OrderAST(zn *ast.Zettel) (result []*ast.LinkNode) {
 	for _, bn := range zn.BlocksAST {
 		ln, ok := bn.(*ast.NestedListNode)
 		if !ok {
@@ -26,7 +26,7 @@ func Order(zn *ast.Zettel) (result []*ast.LinkNode) {
 		switch ln.Kind {
 		case ast.NestedListOrdered, ast.NestedListUnordered:
 			for _, is := range ln.Items {
-				if ln := firstItemZettelLink(is); ln != nil {
+				if ln := firstItemZettelLinkAST(is); ln != nil {
 					result = append(result, ln)
 				}
 			}
@@ -35,10 +35,10 @@ func Order(zn *ast.Zettel) (result []*ast.LinkNode) {
 	return result
 }
 
-func firstItemZettelLink(is ast.ItemSlice) *ast.LinkNode {
+func firstItemZettelLinkAST(is ast.ItemSlice) *ast.LinkNode {
 	for _, in := range is {
 		if pn, ok := in.(*ast.ParaNode); ok {
-			if ln := firstInlineZettelLink(pn.Inlines); ln != nil {
+			if ln := firstInlineZettelLinkAST(pn.Inlines); ln != nil {
 				return ln
 			}
 		}
@@ -46,22 +46,22 @@ func firstItemZettelLink(is ast.ItemSlice) *ast.LinkNode {
 	return nil
 }
 
-func firstInlineZettelLink(is ast.InlineSlice) (result *ast.LinkNode) {
+func firstInlineZettelLinkAST(is ast.InlineSlice) (result *ast.LinkNode) {
 	for _, inl := range is {
 		switch in := inl.(type) {
 		case *ast.LinkNode:
 			return in
 		case *ast.EmbedRefNode:
-			result = firstInlineZettelLink(in.Inlines)
+			result = firstInlineZettelLinkAST(in.Inlines)
 		case *ast.EmbedBLOBNode:
-			result = firstInlineZettelLink(in.Inlines)
+			result = firstInlineZettelLinkAST(in.Inlines)
 		case *ast.CiteNode:
-			result = firstInlineZettelLink(in.Inlines)
+			result = firstInlineZettelLinkAST(in.Inlines)
 		case *ast.FootnoteNode:
 			// Ignore references in footnotes
 			continue
 		case *ast.FormatNode:
-			result = firstInlineZettelLink(in.Inlines)
+			result = firstInlineZettelLinkAST(in.Inlines)
 		default:
 			continue
 		}

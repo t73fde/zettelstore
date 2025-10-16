@@ -19,24 +19,24 @@ import (
 	"zettelstore.de/z/internal/ast"
 )
 
-func evaluateMetadata(m *meta.Meta) ast.BlockSlice {
+func evaluateMetadataAST(m *meta.Meta) ast.BlockSlice {
 	descrlist := &ast.DescriptionListNode{}
 	for key, val := range m.All() {
 		descrlist.Descriptions = append(
-			descrlist.Descriptions, getMetadataDescription(key, val))
+			descrlist.Descriptions, getMetadataDescriptionAST(key, val))
 	}
 	return ast.BlockSlice{descrlist}
 }
 
-func getMetadataDescription(key string, value meta.Value) ast.Description {
-	is := convertMetavalueToInlineSlice(value, meta.Type(key))
+func getMetadataDescriptionAST(key string, value meta.Value) ast.Description {
+	is := convertMetavalueToInlineSliceAST(value, meta.Type(key))
 	return ast.Description{
 		Term:         ast.InlineSlice{&ast.TextNode{Text: key}},
 		Descriptions: []ast.DescriptionSlice{{&ast.ParaNode{Inlines: is}}},
 	}
 }
 
-func convertMetavalueToInlineSlice(value meta.Value, dt *meta.DescriptionType) ast.InlineSlice {
+func convertMetavalueToInlineSliceAST(value meta.Value, dt *meta.DescriptionType) ast.InlineSlice {
 	var sliceData []string
 	if dt.IsSet {
 		sliceData = value.AsSlice()

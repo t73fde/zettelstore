@@ -84,7 +84,7 @@ func (a *API) MakeGetReferencesHandler(
 
 func getExternalURLs(zn *ast.Zettel, ucGetReferences usecase.GetReferences) iter.Seq[string] {
 	return zeroiter.MapSeq(
-		ucGetReferences.RunByExternal(zn),
+		ucGetReferences.RunByExternalAST(zn),
 		func(ref *ast.Reference) string { return ref.Value },
 	)
 }

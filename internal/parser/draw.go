@@ -66,8 +66,8 @@ func parseDraw(inp *input.Input, m *meta.Meta, _ string) *sx.Pair {
 	return zsx.MakeBlock(zsx.MakeBLOB(nil, meta.ValueSyntaxSVG, svg, ParseDescription(m)))
 }
 
-// ParseDrawBlock parses the content of an eval verbatim node into an SVG image BLOB.
-func ParseDrawBlock(vn *ast.VerbatimNode) ast.BlockNode {
+// ParseDrawBlockAST parses the content of an eval verbatim node into an SVG image BLOB.
+func ParseDrawBlockAST(vn *ast.VerbatimNode) ast.BlockNode {
 	font := defaultFont
 	if val, found := vn.Attrs.Get("font"); found {
 		font = val

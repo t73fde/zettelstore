@@ -29,9 +29,9 @@ import (
 	"zettelstore.de/z/internal/query"
 )
 
-// QueryAction transforms a list of metadata according to query actions into a AST nested list.
-func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (ast.BlockNode, int) {
-	ap := actionPara{
+// QueryActionAST transforms a list of metadata according to query actions into a AST nested list.
+func QueryActionAST(ctx context.Context, q *query.Query, ml []*meta.Meta) (ast.BlockNode, int) {
+	ap := actionParaAST{
 		ctx:    ctx,
 		q:      q,
 		ml:     ml,
@@ -41,7 +41,7 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (ast.Bloc
 	}
 	actions := q.Actions()
 	if len(actions) == 0 {
-		return ap.createBlockNodeMeta("")
+		return ap.createBlockNodeMetaAST("")
 	}
 
 	acts := make([]string, 0, len(actions))
@@ -71,27 +71,27 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (ast.Bloc
 	for _, act := range acts {
 		switch act {
 		case api.KeysAction:
-			return ap.createBlockNodeMetaKeys()
+			return ap.createBlockNodeMetaKeysAST()
 		}
 		key := strings.ToLower(act)
 		switch meta.Type(key) {
 		case meta.TypeWord:
-			return ap.createBlockNodeWord(key)
+			return ap.createBlockNodeWordAST(key)
 		case meta.TypeTagSet:
-			return ap.createBlockNodeTagSet(key)
+			return ap.createBlockNodeTagSetAST(key)
 		}
 		if firstUnknowAct == "" {
 			firstUnknowAct = act
 		}
 	}
-	bn, numItems := ap.createBlockNodeMeta(strings.ToLower(firstUnknowAct))
+	bn, numItems := ap.createBlockNodeMetaAST(strings.ToLower(firstUnknowAct))
 	if bn != nil && numItems == 0 && firstUnknowAct == strings.ToUpper(firstUnknowAct) {
-		bn, numItems = ap.createBlockNodeMeta("")
+		bn, numItems = ap.createBlockNodeMetaAST("")
 	}
 	return bn, numItems
 }
 
-type actionPara struct {
+type actionParaAST struct {
 	ctx    context.Context
 	q      *query.Query
 	ml     []*meta.Meta
@@ -100,7 +100,7 @@ type actionPara struct {
 	maxVal int
 }
 
-func (ap *actionPara) createBlockNodeWord(key string) (ast.BlockNode, int) {
+func (ap *actionParaAST) createBlockNodeWordAST(key string) (ast.BlockNode, int) {
 	var buf bytes.Buffer
 	ccs, bufLen := ap.prepareCatAction(key, &buf)
 	if len(ccs) == 0 {
@@ -124,7 +124,7 @@ func (ap *actionPara) createBlockNodeWord(key string) (ast.BlockNode, int) {
 	}, len(items)
 }
 
-func (ap *actionPara) createBlockNodeTagSet(key string) (ast.BlockNode, int) {
+func (ap *actionParaAST) createBlockNodeTagSetAST(key string) (ast.BlockNode, int) {
 	var buf bytes.Buffer
 	ccs, bufLen := ap.prepareCatAction(key, &buf)
 	if len(ccs) == 0 {
@@ -160,7 +160,7 @@ func (ap *actionPara) createBlockNodeTagSet(key string) (ast.BlockNode, int) {
 	return &ast.ParaNode{Inlines: para}, len(ccs)
 }
 
-func (ap *actionPara) limitTags(ccs meta.CountedCategories) meta.CountedCategories {
+func (ap *actionParaAST) limitTags(ccs meta.CountedCategories) meta.CountedCategories {
 	if minVal, maxVal := ap.minVal, ap.maxVal; minVal > 0 || maxVal > 0 {
 		if minVal < 0 {
 			minVal = ccs[len(ccs)-1].Count
@@ -181,7 +181,7 @@ func (ap *actionPara) limitTags(ccs meta.CountedCategories) meta.CountedCategori
 	return ccs
 }
 
-func (ap *actionPara) createBlockNodeMetaKeys() (ast.BlockNode, int) {
+func (ap *actionParaAST) createBlockNodeMetaKeysAST() (ast.BlockNode, int) {
 	arr := make(meta.Arrangement, 128)
 	for _, m := range ap.ml {
 		for k := range m.Map() {
@@ -230,7 +230,7 @@ func (ap *actionPara) createBlockNodeMetaKeys() (ast.BlockNode, int) {
 	}, len(items)
 }
 
-func (ap *actionPara) createBlockNodeMeta(key string) (ast.BlockNode, int) {
+func (ap *actionParaAST) createBlockNodeMetaAST(key string) (ast.BlockNode, int) {
 	if len(ap.ml) == 0 {
 		return nil, 0
 	}
@@ -254,7 +254,7 @@ func (ap *actionPara) createBlockNodeMeta(key string) (ast.BlockNode, int) {
 	}, len(items)
 }
 
-func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.CountedCategories, int) {
+func (ap *actionParaAST) prepareCatAction(key string, buf *bytes.Buffer) (meta.CountedCategories, int) {
 	if len(ap.ml) == 0 {
 		return nil, 0
 	}
@@ -271,7 +271,7 @@ func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.Coun
 	return ccs, bufLen
 }
 
-func (ap *actionPara) prepareSimpleQuery(buf *bytes.Buffer) int {
+func (ap *actionParaAST) prepareSimpleQuery(buf *bytes.Buffer) int {
 	sea := ap.q.Clone()
 	sea.RemoveActions()
 	buf.WriteString(ast.QueryPrefix)
@@ -285,7 +285,7 @@ func (ap *actionPara) prepareSimpleQuery(buf *bytes.Buffer) int {
 const fontSizes = 6 // Must be the number of CSS classes zs-font-size-* in base.css
 const fontSizes64 = float64(fontSizes)
 
-func (*actionPara) calcFontSizes(ccs meta.CountedCategories) map[int]zsx.Attributes {
+func (*actionParaAST) calcFontSizes(ccs meta.CountedCategories) map[int]zsx.Attributes {
 	var fsAttrs [fontSizes]zsx.Attributes
 	var a zsx.Attributes
 	for i := range fontSizes {

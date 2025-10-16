@@ -71,7 +71,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 
 		var content, endnotes *sx.Pair
 		numEntries := 0
-		if bn, cnt := evaluator.QueryAction(ctx, q, metaSeq); bn != nil {
+		if bn, cnt := evaluator.QueryActionAST(ctx, q, metaSeq); bn != nil {
 			enc := wui.getSimpleHTMLEncoder(userLang)
 			content, endnotes, err = enc.BlocksSxn(&ast.BlockSlice{bn})
 			if err != nil {
