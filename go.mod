@@ -12,7 +12,7 @@ require (
 	t73f.de/r/webs v0.0.0-20250930141330-11da1688d11c
 	t73f.de/r/zero v0.0.0-20250904163008-d96be3da2aef
 	t73f.de/r/zsc v0.0.0-20251015165332-08ebb13e8975
-	t73f.de/r/zsx v0.0.0-20251007133258-f1844bbf951e
+	t73f.de/r/zsx v0.0.0-20251016150523-fdf6a68b0392
 )
 
 require (
