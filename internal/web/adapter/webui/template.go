@@ -31,6 +31,8 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/auth/user"
@@ -363,8 +365,8 @@ func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {
 
 	htmlgen := wui.getSimpleHTMLEncoder(lang)
 	var lb sx.ListBuilder
-	for _, ln := range collect.OrderAST(&zn.BlocksAST) {
-		lb.Add(htmlgen.nodeSxHTML(ln))
+	for ln := range collect.Order(zn.Blocks).Pairs() {
+		lb.Add(htmlgen.szToSxHTML(ln.Head()))
 	}
 	return lb.List()
 }
@@ -380,12 +382,13 @@ func (wui *WebUI) fetchNewTemplatesSxn(ctx context.Context, user *meta.Meta) *sx
 	}
 	var lb sx.ListBuilder
 	zn := parser.ParseZettel(ctx, menu, "", wui.rtConfig)
-	for _, ln := range collect.OrderAST(&zn.BlocksAST) {
-		ref := ln.Ref
-		if !ref.IsZettel() {
+	for ln := range collect.Order(zn.Blocks).Pairs() {
+		_, ref, _ := zsx.GetLink(ln.Head())
+		sym, val := zsx.GetReference(ref)
+		if !sz.SymRefStateZettel.IsEqualSymbol(sym) {
 			continue
 		}
-		zid, err2 := id.Parse(ref.URL.Path)
+		zid, err2 := id.Parse(val)
 		if err2 != nil {
 			continue
 		}

@@ -277,10 +277,9 @@ func (g *htmlGenerator) BlocksSxn(bs *ast.BlockSlice) (content, endnotes *sx.Pai
 	return sh, shtml.Endnotes(&env), nil
 }
 
-func (g *htmlGenerator) nodeSxHTML(node ast.Node) *sx.Pair {
-	sz := g.tx.GetSz(node)
+func (g *htmlGenerator) szToSxHTML(node *sx.Pair) *sx.Pair {
 	env := shtml.MakeEnvironment(g.lang)
-	sh, err := g.th.Evaluate(sz, &env)
+	sh, err := g.th.Evaluate(node, &env)
 	if err != nil {
 		return nil
 	}
