@@ -24,6 +24,7 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/auth/user"
@@ -67,7 +68,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 			lbMetadata.Add(sx.Cons(sx.MakeString(key), sxval))
 		}
 
-		locLinks, extLinks, queryLinks := wui.getLocalExtQueryLinks(ucGetReferences, zn)
+		locLinks, extLinks, queryLinks := wui.getLocalExtQueryLinks(ucGetReferences, zn.Blocks)
 
 		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())
 		phrase := q.Get(api.QueryKeyPhrase)
@@ -115,20 +116,23 @@ func (wui *WebUI) MakeGetInfoHandler(
 	})
 }
 
-func (wui *WebUI) getLocalExtQueryLinks(ucGetReferences usecase.GetReferences, zn *ast.Zettel) (locLinks, extLinks, queries *sx.Pair) {
-	locRefs, extRefs, queryRefs := ucGetReferences.RunByStateAST(&zn.BlocksAST)
+func (wui *WebUI) getLocalExtQueryLinks(ucGetReferences usecase.GetReferences, blocks *sx.Pair) (locLinks, extLinks, queries *sx.Pair) {
+	locRefs, extRefs, queryRefs := ucGetReferences.RunByState(blocks)
 	var lbLoc, lbQueries, lbExt sx.ListBuilder
-	for _, ref := range locRefs {
-		lbLoc.Add(sx.MakeString(ref.String()))
+	for ref := range locRefs.Pairs() {
+		_, value := zsx.GetReference(ref.Head())
+		lbLoc.Add(sx.MakeString(value))
 	}
-	for _, ref := range extRefs {
-		lbExt.Add(sx.MakeString(ref.String()))
+	for ref := range extRefs.Pairs() {
+		_, value := zsx.GetReference(ref.Head())
+		lbExt.Add(sx.MakeString(value))
 	}
-	for _, ref := range queryRefs {
+	for ref := range queryRefs.Pairs() {
+		_, value := zsx.GetReference(ref.Head())
 		lbQueries.Add(
 			sx.Cons(
-				sx.MakeString(ref.Value),
-				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(ref.Value).String())))
+				sx.MakeString(value),
+				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(value).String())))
 	}
 	return lbLoc.List(), lbExt.List(), lbQueries.List()
 }

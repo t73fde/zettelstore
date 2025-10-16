@@ -16,8 +16,11 @@ package usecase
 import (
 	"iter"
 
+	"t73f.de/r/sx"
 	zeroiter "t73f.de/r/zero/iter"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/collect"
@@ -29,20 +32,22 @@ type GetReferences struct{}
 // NewGetReferences creates a new usecase object.
 func NewGetReferences() GetReferences { return GetReferences{} }
 
-// RunByStateAST returns all references of a zettel, sparated by their state:
+// RunByState returns all references of a zettel, sparated by their state:
 // local, external, query. No zettel references are returned.
-func (uc GetReferences) RunByStateAST(bns *ast.BlockSlice) (local, ext, query []*ast.Reference) {
-	for ref := range collect.ReferenceSeqAST(bns) {
-		switch ref.State {
-		case ast.RefStateHosted, ast.RefStateBased: // Local
-			local = append(local, ref)
-		case ast.RefStateExternal:
-			ext = append(ext, ref)
-		case ast.RefStateQuery:
-			query = append(query, ref)
+func (uc GetReferences) RunByState(block *sx.Pair) (local, ext, query *sx.Pair) {
+	var lbLoc, lbQueries, lbExt sx.ListBuilder
+	for ref := range collect.ReferenceSeq(block) {
+		sym, _ := zsx.GetReference(ref)
+		switch sym {
+		case zsx.SymRefStateHosted, sz.SymRefStateBased:
+			lbLoc.Add(ref)
+		case zsx.SymRefStateExternal:
+			lbExt.Add(ref)
+		case sz.SymRefStateQuery:
+			lbQueries.Add(ref)
 		}
 	}
-	return local, ext, query
+	return lbLoc.List(), lbExt.List(), lbQueries.List()
 }
 
 // RunByExternalAST returns an iterator of all external references of a zettel.

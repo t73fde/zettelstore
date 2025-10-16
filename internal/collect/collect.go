@@ -17,8 +17,52 @@ package collect
 import (
 	"iter"
 
+	"t73f.de/r/sx"
+	"t73f.de/r/zsx"
+
 	"zettelstore.de/z/internal/ast"
 )
+
+type refYielder struct {
+	yield func(*sx.Pair) bool
+	stop  bool
+}
+
+// ReferenceSeq returns an iterator of all references mentioned in the given
+// block slice. This also includes references to images.
+func ReferenceSeq(block *sx.Pair) iter.Seq[*sx.Pair] {
+	return func(yield func(*sx.Pair) bool) {
+		yielder := refYielder{yield, false}
+		zsx.WalkIt(&yielder, block, nil)
+	}
+}
+
+// Visit all node to collect data for the summary.
+func (y *refYielder) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
+	if y.stop {
+		return true
+	}
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
+		switch sym {
+		case zsx.SymLink:
+			_, ref, _ := zsx.GetLink(node)
+			y.stop = !y.yield(ref)
+
+		case zsx.SymEmbed:
+			_, ref, _, _ := zsx.GetEmbed(node)
+			y.stop = !y.yield(ref)
+
+		case zsx.SymTransclude:
+			_, ref, _ := zsx.GetTransclusion(node)
+			y.stop = !y.yield(ref)
+		}
+		if y.stop {
+			return true
+		}
+	}
+	return false
+}
+func (*refYielder) VisitAfter(*sx.Pair, *sx.Pair) {}
 
 type refYielderAST struct {
 	yield func(*ast.Reference) bool
