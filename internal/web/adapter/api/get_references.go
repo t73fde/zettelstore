@@ -22,8 +22,8 @@ import (
 	zeroiter "t73f.de/r/zero/iter"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/content"
 )
@@ -53,12 +53,12 @@ func (a *API) MakeGetReferencesHandler(
 		case partZettel:
 			seq = zeroiter.CatSeq(
 				ucGetReferences.RunByMeta(zn.InhMeta),
-				getExternalURLsAST(&zn.BlocksAST, ucGetReferences),
+				getExternalURLs(zn.Blocks, ucGetReferences),
 			)
 		case partMeta:
 			seq = ucGetReferences.RunByMeta(zn.InhMeta)
 		case partContent:
-			seq = getExternalURLsAST(&zn.BlocksAST, ucGetReferences)
+			seq = getExternalURLs(zn.Blocks, ucGetReferences)
 		}
 
 		enc, _ := getEncoding(r, q)
@@ -82,9 +82,12 @@ func (a *API) MakeGetReferencesHandler(
 	})
 }
 
-func getExternalURLsAST(bns *ast.BlockSlice, ucGetReferences usecase.GetReferences) iter.Seq[string] {
+func getExternalURLs(blocks *sx.Pair, ucGetReferences usecase.GetReferences) iter.Seq[string] {
 	return zeroiter.MapSeq(
-		ucGetReferences.RunByExternalAST(bns),
-		func(ref *ast.Reference) string { return ref.Value },
+		ucGetReferences.RunByExternal(blocks),
+		func(ref *sx.Pair) string {
+			_, val := zsx.GetReference(ref)
+			return val
+		},
 	)
 }

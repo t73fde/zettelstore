@@ -19,8 +19,6 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsx"
-
-	"zettelstore.de/z/internal/ast"
 )
 
 type refYielder struct {
@@ -63,38 +61,3 @@ func (y *refYielder) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 	return false
 }
 func (*refYielder) VisitAfter(*sx.Pair, *sx.Pair) {}
-
-type refYielderAST struct {
-	yield func(*ast.Reference) bool
-	stop  bool
-}
-
-// ReferenceSeqAST returns an iterator of all references mentioned in the given
-// zettel. This also includes references to images.
-func ReferenceSeqAST(bns *ast.BlockSlice) iter.Seq[*ast.Reference] {
-	return func(yield func(*ast.Reference) bool) {
-		yielder := refYielderAST{yield, false}
-		ast.Walk(&yielder, bns)
-	}
-}
-
-// Visit all node to collect data for the summary.
-func (y *refYielderAST) Visit(node ast.Node) ast.Visitor {
-	if y.stop {
-		return nil
-	}
-	var stop bool
-	switch n := node.(type) {
-	case *ast.TranscludeNode:
-		stop = !y.yield(n.Ref)
-	case *ast.LinkNode:
-		stop = !y.yield(n.Ref)
-	case *ast.EmbedRefNode:
-		stop = !y.yield(n.Ref)
-	}
-	if stop {
-		y.stop = true
-		return nil
-	}
-	return y
-}

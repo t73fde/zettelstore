@@ -18,13 +18,17 @@ import (
 	"slices"
 	"testing"
 
-	"zettelstore.de/z/internal/ast"
+	"t73f.de/r/sx"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
+
 	"zettelstore.de/z/internal/collect"
 )
 
-func parseRef(s string) *ast.Reference {
-	r := ast.ParseReference(s)
-	if !r.IsValid() {
+func parseRef(s string) *sx.Pair {
+	r := sz.ScanReference(s)
+	sym, _ := zsx.GetReference(r)
+	if zsx.SymRefStateInvalid.IsEqualSymbol(sym) {
 		panic(s)
 	}
 	return r
@@ -32,30 +36,27 @@ func parseRef(s string) *ast.Reference {
 
 func TestReferenceSeq(t *testing.T) {
 	t.Parallel()
-	zn := &ast.Zettel{}
-	summary := slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
+	summary := slices.Collect(collect.ReferenceSeq(nil))
 	if len(summary) != 0 {
 		t.Error("No references expected, but got:", summary)
 	}
 
-	intNode := &ast.LinkNode{Ref: parseRef("01234567890123")}
-	para := ast.CreateParaNode(intNode, &ast.LinkNode{Ref: parseRef("https://zettelstore.de/z")})
-	zn.BlocksAST = ast.BlockSlice{para}
-	summary = slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
+	intNode := zsx.MakeLink(nil, parseRef("01234567890123"), nil)
+	para := zsx.MakePara(intNode, zsx.MakeLink(nil, parseRef("https://zettelstore.de/z"), nil))
+	blocks := zsx.MakeBlock(para)
+	summary = slices.Collect(collect.ReferenceSeq(blocks))
 	if len(summary) != 2 {
 		t.Error("2 refs expected, but got:", summary)
 	}
 
-	para.Inlines = append(para.Inlines, intNode)
-	summary = slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
+	para.LastPair().AppendBang(intNode)
+	summary = slices.Collect(collect.ReferenceSeq(blocks))
 	if cnt := len(summary); cnt != 3 {
 		t.Error("Ref count does not work. Expected: 3, got", summary)
 	}
 
-	zn = &ast.Zettel{
-		BlocksAST: ast.BlockSlice{ast.CreateParaNode(&ast.EmbedRefNode{Ref: parseRef("12345678901234")})},
-	}
-	summary = slices.Collect(collect.ReferenceSeqAST(&zn.BlocksAST))
+	blocks = zsx.MakeBlock(zsx.MakePara(zsx.MakeEmbed(nil, parseRef("12345678901234"), "", nil)))
+	summary = slices.Collect(collect.ReferenceSeq(blocks))
 	if len(summary) != 1 {
 		t.Error("Only one image ref expected, but got: ", summary)
 	}

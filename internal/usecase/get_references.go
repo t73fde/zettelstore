@@ -22,7 +22,6 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/collect"
 )
 
@@ -50,11 +49,14 @@ func (uc GetReferences) RunByState(block *sx.Pair) (local, ext, query *sx.Pair) 
 	return lbLoc.List(), lbExt.List(), lbQueries.List()
 }
 
-// RunByExternalAST returns an iterator of all external references of a zettel.
-func (uc GetReferences) RunByExternalAST(bns *ast.BlockSlice) iter.Seq[*ast.Reference] {
+// RunByExternal returns an iterator of all external references of a zettel.
+func (uc GetReferences) RunByExternal(blocks *sx.Pair) iter.Seq[*sx.Pair] {
 	return zeroiter.FilterSeq(
-		collect.ReferenceSeqAST(bns),
-		func(ref *ast.Reference) bool { return ref.State == ast.RefStateExternal })
+		collect.ReferenceSeq(blocks),
+		func(ref *sx.Pair) bool {
+			sym, _ := zsx.GetReference(ref)
+			return zsx.SymRefStateExternal.IsEqualSymbol(sym)
+		})
 }
 
 // RunByMeta returns all URLs that are stored in the metadata.
