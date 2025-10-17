@@ -14,54 +14,50 @@
 package evaluator
 
 import (
-	"t73f.de/r/zsc/domain/meta"
+	"iter"
 
-	"zettelstore.de/z/internal/ast"
+	"t73f.de/r/sx"
+	zeroiter "t73f.de/r/zero/iter"
+	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 )
 
-func evaluateMetadataAST(m *meta.Meta) ast.BlockSlice {
-	descrlist := &ast.DescriptionListNode{}
+func evaluateMetadata(m *meta.Meta) *sx.Pair {
+	var lb sx.ListBuilder
+	lb.AddN(zsx.SymDescription, nil)
 	for key, val := range m.All() {
-		descrlist.Descriptions = append(
-			descrlist.Descriptions, getMetadataDescriptionAST(key, val))
+		lb.Add(sx.MakeList(zsx.MakeText(key)))
+		inlines := convertMetavalueToInlineSlice(val, meta.Type(key))
+		lb.Add(zsx.MakeBlock(zsx.MakeBlock(zsx.MakeParaList(inlines))))
 	}
-	return ast.BlockSlice{descrlist}
+	return zsx.MakeBlock(lb.List())
 }
 
-func getMetadataDescriptionAST(key string, value meta.Value) ast.Description {
-	is := convertMetavalueToInlineSliceAST(value, meta.Type(key))
-	return ast.Description{
-		Term:         ast.InlineSlice{&ast.TextNode{Text: key}},
-		Descriptions: []ast.DescriptionSlice{{&ast.ParaNode{Inlines: is}}},
-	}
-}
-
-func convertMetavalueToInlineSliceAST(value meta.Value, dt *meta.DescriptionType) ast.InlineSlice {
-	var sliceData []string
+func convertMetavalueToInlineSlice(val meta.Value, dt *meta.DescriptionType) *sx.Pair {
+	var vals iter.Seq[string]
 	if dt.IsSet {
-		sliceData = value.AsSlice()
-		if len(sliceData) == 0 {
-			return nil
-		}
+		vals = val.Fields()
 	} else {
-		sliceData = []string{string(value)}
+		vals = zeroiter.OneSeq(string(val))
 	}
 	makeLink := dt == meta.TypeID || dt == meta.TypeIDSet
 
-	result := make(ast.InlineSlice, 0, 2*len(sliceData)-1)
-	for i, val := range sliceData {
-		if i > 0 {
-			result = append(result, &ast.TextNode{Text: " "})
-		}
-		tn := &ast.TextNode{Text: val}
-		if makeLink {
-			result = append(result, &ast.LinkNode{
-				Ref:     ast.ParseReference(val),
-				Inlines: ast.InlineSlice{tn},
-			})
+	var lb sx.ListBuilder
+	first := true
+	for s := range vals {
+		if first {
+			first = false
 		} else {
-			result = append(result, tn)
+			lb.Add(zsx.MakeText(" "))
+		}
+		tn := zsx.MakeText(s)
+		if makeLink {
+			lb.Add(zsx.MakeLink(nil, sz.ScanReference(s), sx.MakeList(tn)))
+		} else {
+			lb.Add(tn)
 		}
 	}
-	return result
+
+	return lb.List()
 }

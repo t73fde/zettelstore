@@ -48,8 +48,7 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	switch zn.Syntax {
 	case meta.ValueSyntaxNone:
 		// AST is empty, evaluate to a description list of metadata.
-		zn.BlocksAST = evaluateMetadataAST(zn.Meta)
-		return
+		zn.Blocks = evaluateMetadata(zn.Meta)
 	case meta.ValueSyntaxSxn:
 		zn.Blocks = evaluateSxn(zn.Blocks)
 	default:
