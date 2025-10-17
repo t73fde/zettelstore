@@ -15,7 +15,6 @@
 package evaluator
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -24,13 +23,12 @@ import (
 	"strconv"
 	"strings"
 
-	"t73f.de/r/sx/sxbuiltins"
-	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
@@ -51,37 +49,17 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	case meta.ValueSyntaxNone:
 		// AST is empty, evaluate to a description list of metadata.
 		zn.BlocksAST = evaluateMetadataAST(zn.Meta)
+		return
 	case meta.ValueSyntaxSxn:
-		zn.BlocksAST = evaluateSxnAST(zn.BlocksAST)
+		zn.Blocks = evaluateSxn(zn.Blocks)
 	default:
 		EvaluateBlockAST(ctx, port, rtConfig, &zn.BlocksAST)
+		return
 	}
-}
 
-func evaluateSxnAST(bs ast.BlockSlice) ast.BlockSlice {
-	// Check for structure made in parser/plain/plain.go:parseSxnBlocks
-	if len(bs) == 1 {
-		// If len(bs) > 1 --> an error was found during parsing
-		if vn, isVerbatim := bs[0].(*ast.VerbatimNode); isVerbatim && vn.Kind == ast.VerbatimCode {
-			if classAttr, hasClass := vn.Attrs.Get(""); hasClass && classAttr == meta.ValueSyntaxSxn {
-				rd := sxreader.MakeReader(bytes.NewReader(vn.Content))
-				if objs, err := rd.ReadAll(); err == nil {
-					result := make(ast.BlockSlice, len(objs))
-					for i, obj := range objs {
-						var buf bytes.Buffer
-						_, _ = sxbuiltins.Print(&buf, obj)
-						result[i] = &ast.VerbatimNode{
-							Kind:    ast.VerbatimCode,
-							Attrs:   zsx.Attributes{"": classAttr},
-							Content: buf.Bytes(),
-						}
-					}
-					return result
-				}
-			}
-		}
+	if blk, err := sztrans.GetBlockSlice(zn.Blocks); err == nil {
+		zn.BlocksAST = blk
 	}
-	return bs
 }
 
 // EvaluateBlockAST evaluates the given block list in the given context, with
