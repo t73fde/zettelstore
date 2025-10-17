@@ -503,6 +503,7 @@ type sxNode struct {
 
 func (sxNode) IsNil() bool        { return false }
 func (sxNode) IsAtom() bool       { return true }
+func (sxNode) IsTrue() bool       { return true }
 func (n sxNode) String() string   { return fmt.Sprintf("%T/%v", n.node, n.node) }
 func (n sxNode) GoString() string { return n.String() }
 func (n sxNode) IsEqual(other sx.Object) bool {
