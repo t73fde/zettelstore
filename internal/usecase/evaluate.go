@@ -64,9 +64,7 @@ func (uc *Evaluate) RunBlockNode(ctx context.Context, bn ast.BlockNode) ast.Bloc
 	if bn == nil {
 		return nil
 	}
-	bns := ast.BlockSlice{bn}
-	evaluator.EvaluateBlockAST(ctx, uc, uc.rtConfig, &bns)
-	return bns
+	return evaluator.EvaluateBlockAST(ctx, uc, uc.rtConfig, ast.BlockSlice{bn})
 }
 
 // GetZettel retrieves the full zettel of a given zettel identifier.

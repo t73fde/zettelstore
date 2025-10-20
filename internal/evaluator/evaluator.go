@@ -51,7 +51,7 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	case meta.ValueSyntaxSxn:
 		zn.Blocks = evaluateSxn(zn.Blocks)
 	default:
-		EvaluateBlockAST(ctx, port, rtConfig, &zn.BlocksAST)
+		zn.BlocksAST = EvaluateBlockAST(ctx, port, rtConfig, zn.BlocksAST)
 		return
 	}
 
@@ -62,7 +62,7 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 
 // EvaluateBlockAST evaluates the given block list in the given context, with
 // the given ports, and the given environment.
-func EvaluateBlockAST(ctx context.Context, port Port, rtConfig config.Config, bns *ast.BlockSlice) {
+func EvaluateBlockAST(ctx context.Context, port Port, rtConfig config.Config, bns ast.BlockSlice) ast.BlockSlice {
 	e := evaluatorAST{
 		ctx:             ctx,
 		port:            port,
@@ -73,8 +73,9 @@ func EvaluateBlockAST(ctx context.Context, port Port, rtConfig config.Config, bn
 		embedMap:        map[string]ast.InlineSlice{},
 		marker:          &ast.Zettel{},
 	}
-	ast.Walk(&e, bns)
-	parser.CleanAST(bns, true)
+	ast.Walk(&e, &bns)
+	parser.CleanAST(&bns, true)
+	return bns
 }
 
 type evaluatorAST struct {
