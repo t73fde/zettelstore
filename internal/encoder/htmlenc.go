@@ -23,6 +23,8 @@ import (
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/ast/sztrans"
@@ -48,9 +50,8 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	var htitle *sx.Pair
 	plainTitle, hasTitle := zn.InhMeta.Get(meta.KeyTitle)
 	if hasTitle {
-		isTitle = ast.ParseSpacedTextAST(string(plainTitle))
-		xtitle := he.tx.GetSz(&isTitle)
-		htitle, err = he.th.Evaluate(xtitle, &env)
+		szTitle := zsx.MakeInline((zsx.MakeText(sz.NormalizedSpacedText(string(plainTitle)))))
+		htitle, err = he.th.Evaluate(szTitle, &env)
 		if err != nil {
 			return err
 		}

@@ -24,6 +24,7 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
@@ -459,7 +460,7 @@ func mustParseZidAST(ref *ast.Reference) id.Zid {
 func (e *evaluatorAST) updateImageRefNodeAST(en *ast.EmbedRefNode, m *meta.Meta, syntax string) {
 	en.Syntax = syntax
 	if len(en.Inlines) == 0 {
-		is := parser.ParseDescriptionAST(m)
+		is := parseDescriptionAST(m)
 		if len(is) > 0 {
 			ast.Walk(e, &is)
 			if len(is) > 0 {
@@ -467,6 +468,19 @@ func (e *evaluatorAST) updateImageRefNodeAST(en *ast.EmbedRefNode, m *meta.Meta,
 			}
 		}
 	}
+}
+func parseDescriptionAST(m *meta.Meta) ast.InlineSlice {
+	// Non-AST function in package parser.
+	if m == nil {
+		return nil
+	}
+	if summary, found := m.Get(meta.KeySummary); found {
+		return ast.InlineSlice{&ast.TextNode{Text: sz.NormalizedSpacedText(string(summary))}}
+	}
+	if title, found := m.Get(meta.KeyTitle); found {
+		return ast.InlineSlice{&ast.TextNode{Text: sz.NormalizedSpacedText(string(title))}}
+	}
+	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title/summary: " + m.Zid.String()}}
 }
 
 func createInlineErrorImageAST(en *ast.EmbedRefNode) *ast.EmbedRefNode {

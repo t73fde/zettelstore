@@ -14,11 +14,7 @@
 // Package ast provides the abstract syntax tree for parsed zettel content.
 package ast
 
-import (
-	"net/url"
-
-	"t73f.de/r/zsc/sz"
-)
+import "net/url"
 
 // Node is the interface, all nodes must implement.
 type Node interface {
@@ -77,10 +73,3 @@ const (
 	RefStateQuery                    // Reference to a zettel query
 	RefStateExternal                 // Reference to external material
 )
-
-// ParseSpacedTextAST returns an inline slice that consists just of test and space node.
-// No Zettelmarkup parsing is done. It is typically used to transform the zettel
-// description into an inline slice.
-func ParseSpacedTextAST(s string) InlineSlice {
-	return InlineSlice{&TextNode{Text: sz.NormalizedSpacedText(s)}}
-}

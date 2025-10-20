@@ -110,21 +110,6 @@ func Parse(inp *input.Input, m *meta.Meta, syntax string) (*sx.Pair, ast.BlockSl
 	return nil, nil
 }
 
-// ParseDescriptionAST returns a suitable description stored in the metadata as an inline slice.
-// This is done for an image in most cases.
-func ParseDescriptionAST(m *meta.Meta) ast.InlineSlice {
-	if m == nil {
-		return nil
-	}
-	if summary, found := m.Get(meta.KeySummary); found {
-		return ast.ParseSpacedTextAST(string(summary))
-	}
-	if title, found := m.Get(meta.KeyTitle); found {
-		return ast.ParseSpacedTextAST(string(title))
-	}
-	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title/summary: " + m.Zid.String()}}
-}
-
 // ParseDescription returns a suitable description stored in the metadata as an inline list.
 // This is done for an image in most cases.
 func ParseDescription(m *meta.Meta) *sx.Pair {
