@@ -22,6 +22,7 @@ import (
 	"slices"
 	"strconv"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
@@ -52,7 +53,7 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	case meta.ValueSyntaxSxn:
 		zn.Blocks = evaluateSxn(zn.Blocks)
 	default:
-		zn.BlocksAST = EvaluateBlockAST(ctx, port, rtConfig, zn.BlocksAST)
+		zn.BlocksAST = EvaluateBlock(ctx, port, rtConfig, zn.Blocks)
 		return
 	}
 
@@ -61,17 +62,23 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	}
 }
 
-// EvaluateBlockAST evaluates the given block list in the given context, with
+// EvaluateBlock evaluates the given block list in the given context, with
 // the given ports, and the given environment.
-func EvaluateBlockAST(ctx context.Context, port Port, rtConfig config.Config, bns ast.BlockSlice) ast.BlockSlice {
-	e := evaluatorAST{
+func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, blkList *sx.Pair) ast.BlockSlice {
+	bns, err := sztrans.GetBlockSlice(blkList)
+	if err != nil {
+		panic(err)
+	}
+
+	e := evaluator{
 		ctx:             ctx,
 		port:            port,
 		rtConfig:        rtConfig,
 		transcludeMax:   rtConfig.GetMaxTransclusions(),
 		transcludeCount: 0,
 		costMap:         map[id.Zid]transcludeCost{},
-		embedMap:        map[string]ast.InlineSlice{},
+		embedMap:        map[string]*sx.Pair{},
+		embedMapAST:     map[string]ast.InlineSlice{},
 		marker:          &ast.Zettel{},
 	}
 	ast.Walk(&e, &bns)
@@ -79,7 +86,7 @@ func EvaluateBlockAST(ctx context.Context, port Port, rtConfig config.Config, bn
 	return bns
 }
 
-type evaluatorAST struct {
+type evaluator struct {
 	ctx             context.Context
 	port            Port
 	rtConfig        config.Config
@@ -87,7 +94,8 @@ type evaluatorAST struct {
 	transcludeCount int
 	costMap         map[id.Zid]transcludeCost
 	marker          *ast.Zettel
-	embedMap        map[string]ast.InlineSlice
+	embedMap        map[string]*sx.Pair
+	embedMapAST     map[string]ast.InlineSlice
 }
 
 type transcludeCost struct {
@@ -95,7 +103,7 @@ type transcludeCost struct {
 	ec int
 }
 
-func (e *evaluatorAST) Visit(node ast.Node) ast.Visitor {
+func (e *evaluator) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
 		e.visitBlockSliceAST(n)
@@ -107,7 +115,7 @@ func (e *evaluatorAST) Visit(node ast.Node) ast.Visitor {
 	return nil
 }
 
-func (e *evaluatorAST) visitBlockSliceAST(bs *ast.BlockSlice) {
+func (e *evaluator) visitBlockSliceAST(bs *ast.BlockSlice) {
 	for i := 0; i < len(*bs); i++ {
 		bn := (*bs)[i]
 		ast.Walk(e, bn)
@@ -151,7 +159,7 @@ func replaceWithBlockNodesAST(bns []ast.BlockNode, i int, replaceBns []ast.Block
 	return newIns
 }
 
-func (e *evaluatorAST) evalVerbatimNodeAST(vn *ast.VerbatimNode) ast.BlockNode {
+func (e *evaluator) evalVerbatimNodeAST(vn *ast.VerbatimNode) ast.BlockNode {
 	switch vn.Kind {
 	case ast.VerbatimZettel:
 		return e.evalVerbatimZettelAST(vn)
@@ -163,7 +171,7 @@ func (e *evaluatorAST) evalVerbatimNodeAST(vn *ast.VerbatimNode) ast.BlockNode {
 	return vn
 }
 
-func (e *evaluatorAST) evalVerbatimZettelAST(vn *ast.VerbatimNode) ast.BlockNode {
+func (e *evaluator) evalVerbatimZettelAST(vn *ast.VerbatimNode) ast.BlockNode {
 	m := meta.New(id.Invalid)
 	m.Set(meta.KeySyntax, getSyntax(vn.Attrs, meta.ValueSyntaxText))
 	zettel := zettel.Zettel{
@@ -187,7 +195,7 @@ func getSyntax(a zsx.Attributes, defSyntax meta.Value) meta.Value {
 	return defSyntax
 }
 
-func (e *evaluatorAST) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.BlockNode {
+func (e *evaluator) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.BlockNode {
 	ref := tn.Ref
 
 	// To prevent e.embedCount from counting
@@ -252,7 +260,7 @@ func (e *evaluatorAST) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.Block
 	return &zn.BlocksAST
 }
 
-func (e *evaluatorAST) evalQueryTransclusionAST(expr string) ast.BlockNode {
+func (e *evaluator) evalQueryTransclusionAST(expr string) ast.BlockNode {
 	q := query.Parse(expr)
 	ml, err := e.port.QueryMeta(e.ctx, q)
 	if err != nil {
@@ -268,7 +276,7 @@ func (e *evaluatorAST) evalQueryTransclusionAST(expr string) ast.BlockNode {
 	return result
 }
 
-func (e *evaluatorAST) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNode {
+func (e *evaluator) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNode {
 	if maxTrans := e.transcludeMax; e.transcludeCount > maxTrans {
 		e.transcludeCount = maxTrans + 1
 		return createInlineErrorTextAST(ref,
@@ -288,7 +296,7 @@ func setMetadataFromAttributes(m *meta.Meta, a zsx.Attributes) {
 	}
 }
 
-func (e *evaluatorAST) visitInlineSliceAST(is *ast.InlineSlice) {
+func (e *evaluator) visitInlineSliceAST(is *ast.InlineSlice) {
 	for i := 0; i < len(*is); i++ {
 		in := (*is)[i]
 		ast.Walk(e, in)
@@ -332,7 +340,7 @@ func replaceWithInlineNodesAST(ins ast.InlineSlice, i int, replaceIns ast.Inline
 	return newIns
 }
 
-func (e *evaluatorAST) evalLinkNodeAST(ln *ast.LinkNode) ast.InlineNode {
+func (e *evaluator) evalLinkNodeAST(ln *ast.LinkNode) ast.InlineNode {
 	if len(ln.Inlines) == 0 {
 		ln.Inlines = ast.InlineSlice{&ast.TextNode{Text: ln.Ref.Value}}
 	}
@@ -365,7 +373,7 @@ func getLinkInlineAST(ln *ast.LinkNode) ast.InlineSlice {
 	return ast.InlineSlice{&ast.TextNode{Text: ln.Ref.Value}}
 }
 
-func (e *evaluatorAST) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode {
+func (e *evaluator) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode {
 	ref := en.Ref
 
 	// To prevent e.embedCount from counting
@@ -429,11 +437,11 @@ func (e *evaluatorAST) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode 
 	}
 	e.transcludeCount++
 
-	result, ok := e.embedMap[ref.Value]
+	result, ok := e.embedMapAST[ref.Value]
 	if !ok {
 		// Search for text to be embedded.
 		result = findInlineSliceAST(&zn.BlocksAST, ref.URL.Fragment)
-		e.embedMap[ref.Value] = result
+		e.embedMapAST[ref.Value] = result
 	}
 	if len(result) == 0 {
 		return &ast.LiteralNode{
@@ -457,7 +465,7 @@ func mustParseZidAST(ref *ast.Reference) id.Zid {
 	return zid
 }
 
-func (e *evaluatorAST) updateImageRefNodeAST(en *ast.EmbedRefNode, m *meta.Meta, syntax string) {
+func (e *evaluator) updateImageRefNodeAST(en *ast.EmbedRefNode, m *meta.Meta, syntax string) {
 	en.Syntax = syntax
 	if len(en.Inlines) == 0 {
 		is := parseDescriptionAST(m)
@@ -524,7 +532,7 @@ func createEmbeddedNodeLocalAST(ref *ast.Reference) *ast.EmbedRefNode {
 	}
 }
 
-func (e *evaluatorAST) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
+func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
 	ast.Walk(e, &zn.BlocksAST)
 	return zn

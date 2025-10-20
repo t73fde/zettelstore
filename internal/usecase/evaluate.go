@@ -16,8 +16,10 @@ package usecase
 import (
 	"context"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/config"
@@ -59,12 +61,12 @@ func (uc *Evaluate) RunZettel(ctx context.Context, zettel zettel.Zettel, syntax 
 	return zn
 }
 
-// RunBlockNodeAST executes the use case for a metadata list.
-func (uc *Evaluate) RunBlockNodeAST(ctx context.Context, bn ast.BlockNode) ast.BlockSlice {
-	if bn == nil {
+// RunBlockNode executes the use case for a metadata list, formatted as a block.
+func (uc *Evaluate) RunBlockNode(ctx context.Context, block *sx.Pair) ast.BlockSlice {
+	if block == nil {
 		return nil
 	}
-	return evaluator.EvaluateBlockAST(ctx, uc, uc.rtConfig, ast.BlockSlice{bn})
+	return evaluator.EvaluateBlock(ctx, uc, uc.rtConfig, zsx.MakeBlock(block))
 }
 
 // GetZettel retrieves the full zettel of a given zettel identifier.
