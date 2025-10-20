@@ -23,8 +23,6 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
-
-	"zettelstore.de/z/internal/ast"
 )
 
 func init() {
@@ -66,18 +64,19 @@ func parseDraw(inp *input.Input, m *meta.Meta, _ string) *sx.Pair {
 	return zsx.MakeBlock(zsx.MakeBLOB(nil, meta.ValueSyntaxSVG, svg, ParseDescription(m)))
 }
 
-// ParseDrawBlockAST parses the content of an eval verbatim node into an SVG image BLOB.
-func ParseDrawBlockAST(vn *ast.VerbatimNode) ast.BlockNode {
+// ParseDrawBlock parses the content of an eval verbatim node into an SVG image BLOB.
+func ParseDrawBlock(attrs *sx.Pair, content []byte) *sx.Pair {
+	a := zsx.GetAttributes(attrs)
 	font := defaultFont
-	if val, found := vn.Attrs.Get("font"); found {
+	if val, found := a.Get("font"); found {
 		font = val
 	}
-	scaleX := getScale(vn.Attrs, "x-scale", defaultScaleX)
-	scaleY := getScale(vn.Attrs, "y-scale", defaultScaleY)
+	scaleX := getScaleAST(a, "x-scale", defaultScaleX)
+	scaleY := getScaleAST(a, "y-scale", defaultScaleY)
 
-	canvas, err := aasvg.NewCanvas(vn.Content)
+	canvas, err := aasvg.NewCanvas(content)
 	if err != nil {
-		return ast.CreateParaNode(ast.InlineSlice{&ast.TextNode{Text: "Error: " + err.Error()}}...)
+		return zsx.MakePara(zsx.MakeText("Error: " + err.Error()))
 	}
 	if scaleX < 1 || 1000000 < scaleX {
 		scaleX = defaultScaleX
@@ -87,16 +86,17 @@ func ParseDrawBlockAST(vn *ast.VerbatimNode) ast.BlockNode {
 	}
 	svg := aasvg.CanvasToSVG(canvas, font, scaleX, scaleY)
 	if len(svg) == 0 {
-		return ast.CreateParaNode(ast.InlineSlice{&ast.TextNode{Text: "NO IMAGE"}}...)
+		return zsx.MakePara(zsx.MakeText("NO IMAGE"))
 	}
-	return &ast.BLOBNode{
-		Description: nil, // TODO: look for attribute "summary" / "title"
-		Syntax:      meta.ValueSyntaxSVG,
-		Blob:        svg,
-	}
+	return zsx.MakeBLOB(
+		nil,
+		meta.ValueSyntaxSVG,
+		svg,
+		nil, // TODO: look for attribute "summary" / "title" for a description.
+	)
 }
 
-func getScale(a zsx.Attributes, key string, defVal int) int {
+func getScaleAST(a zsx.Attributes, key string, defVal int) int {
 	if val, found := a.Get(key); found {
 		if n, err := strconv.Atoi(val); err == nil && 0 < n && n < 100000 {
 			return n

@@ -64,12 +64,7 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 
 // EvaluateBlock evaluates the given block list in the given context, with
 // the given ports, and the given environment.
-func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, blkList *sx.Pair) ast.BlockSlice {
-	bns, err := sztrans.GetBlockSlice(blkList)
-	if err != nil {
-		panic(err)
-	}
-
+func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block *sx.Pair) ast.BlockSlice {
 	e := evaluator{
 		ctx:             ctx,
 		port:            port,
@@ -81,6 +76,19 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, blkLi
 		embedMapAST:     map[string]ast.InlineSlice{},
 		marker:          &ast.Zettel{},
 	}
+
+	obj := zsx.Walk(&e, block, nil)
+	evalBlock, isPair := sx.GetPair(obj)
+	if !isPair {
+		panic(fmt.Sprintf("not a pair after evaluate: %T/%v", obj, obj))
+	}
+	bns, err := sztrans.GetBlockSlice(evalBlock)
+	if err != nil {
+		panic(err)
+	}
+
+	// Now evaluate everything that was not evaluated by SZ-walker.
+
 	ast.Walk(&e, &bns)
 	parser.CleanAST(&bns, true)
 	return bns
@@ -103,6 +111,72 @@ type transcludeCost struct {
 	ec int
 }
 
+func (e *evaluator) VisitBefore(_ *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
+	return sx.Nil(), false
+}
+func (e *evaluator) VisitAfter(node *sx.Pair, _ *sx.Pair) sx.Object {
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
+		switch sym {
+		case zsx.SymLink:
+			return e.evalLink(node)
+		case zsx.SymEmbed:
+		case zsx.SymVerbatimEval:
+			return e.evalVerbatimEval(node)
+		}
+	}
+	return node
+}
+
+func (e *evaluator) evalLink(node *sx.Pair) *sx.Pair {
+	attrs, ref, inlines := zsx.GetLink(node)
+	refState, refVal := zsx.GetReference(ref)
+	newInlines := inlines
+	if inlines == nil {
+		newInlines = sx.MakeList(zsx.MakeText(refVal))
+	}
+	if !sz.SymRefStateZettel.IsEqualSymbol(refState) {
+		if newInlines != inlines {
+			return zsx.MakeLink(attrs, ref, newInlines)
+		}
+		return node
+	}
+
+	zid := mustParseZid(ref, refVal)
+	_, err := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
+	if errors.Is(err, &box.ErrNotAllowed{}) {
+		return zsx.MakeFormat(zsx.SymFormatSpan, attrs, newInlines)
+	}
+	if err != nil {
+		return zsx.MakeLink(attrs, zsx.MakeReference(sz.SymRefStateBroken, refVal), newInlines)
+	}
+
+	if newInlines != inlines {
+		return zsx.MakeLink(attrs, ref, newInlines)
+	}
+	return node
+}
+
+func (e *evaluator) evalVerbatimEval(node *sx.Pair) *sx.Pair {
+	_, attrs, content := zsx.GetVerbatim(node)
+	if p := attrs.Assoc(sx.MakeString("")); p != nil {
+		if s, isString := sx.GetString(p.Cdr()); isString && s.GetValue() == meta.ValueSyntaxDraw {
+			return parser.ParseDrawBlock(attrs, []byte(content))
+		}
+	}
+	return node
+}
+
+func mustParseZid(ref *sx.Pair, refVal string) id.Zid {
+	zid, err := id.Parse(refVal)
+	if err != nil {
+		refState, _ := zsx.GetReference(ref)
+		panic(fmt.Sprintf("%v: %q (state %v) -> %v", err, refVal, refState, ref))
+	}
+	return zid
+}
+
+// AST-based code, deprecated.
+
 func (e *evaluator) Visit(node ast.Node) ast.Visitor {
 	switch n := node.(type) {
 	case *ast.BlockSlice:
@@ -121,7 +195,9 @@ func (e *evaluator) visitBlockSliceAST(bs *ast.BlockSlice) {
 		ast.Walk(e, bn)
 		switch n := bn.(type) {
 		case *ast.VerbatimNode:
-			i += transcludeNodeAST(bs, i, e.evalVerbatimNodeAST(n))
+			if n.Kind == ast.VerbatimZettel {
+				i += transcludeNodeAST(bs, i, e.evalVerbatimZettelNodeAST(n))
+			}
 		case *ast.TranscludeNode:
 			i += transcludeNodeAST(bs, i, e.evalTransclusionNodeAST(n))
 		}
@@ -159,31 +235,19 @@ func replaceWithBlockNodesAST(bns []ast.BlockNode, i int, replaceBns []ast.Block
 	return newIns
 }
 
-func (e *evaluator) evalVerbatimNodeAST(vn *ast.VerbatimNode) ast.BlockNode {
-	switch vn.Kind {
-	case ast.VerbatimZettel:
-		return e.evalVerbatimZettelAST(vn)
-	case ast.VerbatimEval:
-		if syntax, found := vn.Attrs.Get(""); found && syntax == meta.ValueSyntaxDraw {
-			return parser.ParseDrawBlockAST(vn)
-		}
-	}
-	return vn
-}
-
-func (e *evaluator) evalVerbatimZettelAST(vn *ast.VerbatimNode) ast.BlockNode {
+func (e *evaluator) evalVerbatimZettelNodeAST(vn *ast.VerbatimNode) ast.BlockNode {
 	m := meta.New(id.Invalid)
-	m.Set(meta.KeySyntax, getSyntax(vn.Attrs, meta.ValueSyntaxText))
+	m.Set(meta.KeySyntax, getSyntaxAST(vn.Attrs, meta.ValueSyntaxText))
 	zettel := zettel.Zettel{
 		Meta:    m,
 		Content: zettel.NewContent(vn.Content),
 	}
 	e.transcludeCount++
-	zn := e.evaluateEmbeddedZettel(zettel)
+	zn := e.evaluateEmbeddedZettelAST(zettel)
 	return &zn.BlocksAST
 }
 
-func getSyntax(a zsx.Attributes, defSyntax meta.Value) meta.Value {
+func getSyntaxAST(a zsx.Attributes, defSyntax meta.Value) meta.Value {
 	if a != nil {
 		if val, ok := a.Get(meta.KeySyntax); ok {
 			return meta.Value(val)
@@ -246,10 +310,10 @@ func (e *evaluator) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.BlockNod
 			e.transcludeCount++
 			return makeBlockNodeAST(createInlineErrorTextAST(ref, "Unable to get zettel"))
 		}
-		setMetadataFromAttributes(zettel.Meta, tn.Attrs)
+		setMetadataFromAttributesAST(zettel.Meta, tn.Attrs)
 		ec := e.transcludeCount
 		e.costMap[zid] = transcludeCost{zn: e.marker, ec: ec}
-		zn = e.evaluateEmbeddedZettel(zettel)
+		zn = e.evaluateEmbeddedZettelAST(zettel)
 		e.costMap[zid] = transcludeCost{zn: zn, ec: e.transcludeCount - ec}
 		e.transcludeCount = 0 // No stack needed, because embedding is done left-recursive, depth-first.
 	}
@@ -288,7 +352,7 @@ func (e *evaluator) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNode 
 
 func makeBlockNodeAST(in ast.InlineNode) ast.BlockNode { return ast.CreateParaNode(in) }
 
-func setMetadataFromAttributes(m *meta.Meta, a zsx.Attributes) {
+func setMetadataFromAttributesAST(m *meta.Meta, a zsx.Attributes) {
 	for aKey, aVal := range a {
 		if meta.KeyIsValid(aKey) {
 			m.Set(aKey, meta.Value(aVal))
@@ -301,8 +365,6 @@ func (e *evaluator) visitInlineSliceAST(is *ast.InlineSlice) {
 		in := (*is)[i]
 		ast.Walk(e, in)
 		switch n := in.(type) {
-		case *ast.LinkNode:
-			(*is)[i] = e.evalLinkNodeAST(n)
 		case *ast.EmbedRefNode:
 			i += embedNodeAST(is, i, e.evalEmbedRefNodeAST(n))
 		}
@@ -338,39 +400,6 @@ func replaceWithInlineNodesAST(ins ast.InlineSlice, i int, replaceIns ast.Inline
 		newIns = append(newIns, ins[i+1:]...)
 	}
 	return newIns
-}
-
-func (e *evaluator) evalLinkNodeAST(ln *ast.LinkNode) ast.InlineNode {
-	if len(ln.Inlines) == 0 {
-		ln.Inlines = ast.InlineSlice{&ast.TextNode{Text: ln.Ref.Value}}
-	}
-	ref := ln.Ref
-	if ref == nil || ref.State != ast.RefStateZettel {
-		return ln
-	}
-
-	zid := mustParseZidAST(ref)
-	_, err := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
-	if errors.Is(err, &box.ErrNotAllowed{}) {
-		return &ast.FormatNode{
-			Kind:    ast.FormatSpan,
-			Attrs:   ln.Attrs,
-			Inlines: getLinkInlineAST(ln),
-		}
-	} else if err != nil {
-		ln.Ref.State = ast.RefStateBroken
-		return ln
-	}
-
-	ln.Ref.State = ast.RefStateZettel
-	return ln
-}
-
-func getLinkInlineAST(ln *ast.LinkNode) ast.InlineSlice {
-	if ln.Inlines != nil {
-		return ln.Inlines
-	}
-	return ast.InlineSlice{&ast.TextNode{Text: ln.Ref.Value}}
 }
 
 func (e *evaluator) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode {
@@ -431,7 +460,7 @@ func (e *evaluator) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode {
 	if !ok {
 		ec := e.transcludeCount
 		e.costMap[zid] = transcludeCost{zn: e.marker, ec: ec}
-		zn = e.evaluateEmbeddedZettel(zettel)
+		zn = e.evaluateEmbeddedZettelAST(zettel)
 		e.costMap[zid] = transcludeCost{zn: zn, ec: e.transcludeCount - ec}
 		e.transcludeCount = 0 // No stack needed, because embedding is done left-recursive, depth-first.
 	}
@@ -532,7 +561,7 @@ func createEmbeddedNodeLocalAST(ref *ast.Reference) *ast.EmbedRefNode {
 	}
 }
 
-func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
+func (e *evaluator) evaluateEmbeddedZettelAST(zettel zettel.Zettel) *ast.Zettel {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
 	ast.Walk(e, &zn.BlocksAST)
 	return zn
