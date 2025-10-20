@@ -260,7 +260,7 @@ func (e *evaluatorAST) evalQueryTransclusionAST(expr string) ast.BlockNode {
 		}
 		return makeBlockNodeAST(createInlineErrorTextAST(nil, "Unable to search zettel"))
 	}
-	result, _ := QueryActionAST(e.ctx, q, ml)
+	result := QueryActionAST(e.ctx, q, ml)
 	if result != nil {
 		ast.Walk(e, result)
 	}

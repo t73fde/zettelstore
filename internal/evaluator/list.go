@@ -21,33 +21,42 @@ import (
 	"strconv"
 	"strings"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/query"
 )
 
-// QueryActionAST transforms a list of metadata according to query actions into a AST nested list.
-func QueryActionAST(ctx context.Context, q *query.Query, ml []*meta.Meta) (ast.BlockNode, int) {
-	ap := actionParaAST{
+// QueryActionAST transforms a list of metadata according to query actions into an AST nested list.
+func QueryActionAST(ctx context.Context, q *query.Query, ml []*meta.Meta) ast.BlockNode {
+	bn, _ := QueryAction(ctx, q, ml)
+	return sztrans.MustGetBlock(bn)
+}
+
+// QueryAction transforms a list of metadata according to query actions into a SZ nested list.
+func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (*sx.Pair, int) {
+	ap := actionPara{
 		ctx:    ctx,
 		q:      q,
 		ml:     ml,
-		kind:   ast.NestedListUnordered,
+		kind:   zsx.SymListUnordered,
 		minVal: -1,
 		maxVal: -1,
 	}
 	actions := q.Actions()
 	if len(actions) == 0 {
-		return ap.createBlockNodeMetaAST("")
+		return ap.createBlockNodeMeta("")
 	}
 
 	acts := make([]string, 0, len(actions))
 	for _, act := range actions {
 		if strings.HasPrefix(act, api.NumberedAction[0:1]) {
-			ap.kind = ast.NestedListOrdered
+			ap.kind = zsx.SymListOrdered
 			continue
 		}
 		if strings.HasPrefix(act, api.MinAction) {
@@ -71,60 +80,60 @@ func QueryActionAST(ctx context.Context, q *query.Query, ml []*meta.Meta) (ast.B
 	for _, act := range acts {
 		switch act {
 		case api.KeysAction:
-			return ap.createBlockNodeMetaKeysAST()
+			return ap.createBlockNodeMetaKeys()
 		}
 		key := strings.ToLower(act)
 		switch meta.Type(key) {
 		case meta.TypeWord:
-			return ap.createBlockNodeWordAST(key)
+			return ap.createBlockNodeWord(key)
 		case meta.TypeTagSet:
-			return ap.createBlockNodeTagSetAST(key)
+			return ap.createBlockNodeTagSet(key)
 		}
 		if firstUnknowAct == "" {
 			firstUnknowAct = act
 		}
 	}
-	bn, numItems := ap.createBlockNodeMetaAST(strings.ToLower(firstUnknowAct))
+
+	bn, numItems := ap.createBlockNodeMeta(strings.ToLower(firstUnknowAct))
 	if bn != nil && numItems == 0 && firstUnknowAct == strings.ToUpper(firstUnknowAct) {
-		bn, numItems = ap.createBlockNodeMetaAST("")
+		bn, numItems = ap.createBlockNodeMeta("")
 	}
 	return bn, numItems
 }
 
-type actionParaAST struct {
+type actionPara struct {
 	ctx    context.Context
 	q      *query.Query
 	ml     []*meta.Meta
-	kind   ast.NestedListKind
+	kind   *sx.Symbol
 	minVal int
 	maxVal int
 }
 
-func (ap *actionParaAST) createBlockNodeWordAST(key string) (ast.BlockNode, int) {
+func (ap *actionPara) createBlockNodeWord(key string) (*sx.Pair, int) {
 	var buf bytes.Buffer
 	ccs, bufLen := ap.prepareCatAction(key, &buf)
 	if len(ccs) == 0 {
 		return nil, 0
 	}
-	items := make([]ast.ItemSlice, 0, len(ccs))
+
 	ccs.SortByName()
+	var items sx.ListBuilder
+	count := 0
 	for _, cat := range ccs {
 		buf.WriteString(string(cat.Name))
-		items = append(items, ast.ItemSlice{ast.CreateParaNode(&ast.LinkNode{
-			Attrs:   nil,
-			Ref:     ast.ParseReference(buf.String()),
-			Inlines: ast.InlineSlice{&ast.TextNode{Text: string(cat.Name)}},
-		})})
+		items.Add(zsx.MakeBlock(zsx.MakePara(
+			zsx.MakeLink(nil,
+				sz.ScanReference(buf.String()),
+				sx.MakeList(zsx.MakeText(string(cat.Name)))),
+		)))
+		count++
 		buf.Truncate(bufLen)
 	}
-	return &ast.NestedListNode{
-		Kind:  ap.kind,
-		Items: items,
-		Attrs: nil,
-	}, len(items)
+	return zsx.MakeList(ap.kind, nil, items.List()), count
 }
 
-func (ap *actionParaAST) createBlockNodeTagSetAST(key string) (ast.BlockNode, int) {
+func (ap *actionPara) createBlockNodeTagSet(key string) (*sx.Pair, int) {
 	var buf bytes.Buffer
 	ccs, bufLen := ap.prepareCatAction(key, &buf)
 	if len(ccs) == 0 {
@@ -132,35 +141,32 @@ func (ap *actionParaAST) createBlockNodeTagSetAST(key string) (ast.BlockNode, in
 	}
 	ccs.SortByCount()
 	ccs = ap.limitTags(ccs)
-	countMap := ap.calcFontSizes(ccs)
+	countClassAttrs := ap.calcFontSizes(ccs)
 
-	para := make(ast.InlineSlice, 0, len(ccs))
 	ccs.SortByName()
+	var tags sx.ListBuilder
+	count := 0
 	for i, cat := range ccs {
 		if i > 0 {
-			para = append(para, &ast.TextNode{Text: " "})
+			tags.Add(zsx.MakeText(" "))
 		}
 		buf.WriteString(string(cat.Name))
-		para = append(para,
-			&ast.LinkNode{
-				Attrs: countMap[cat.Count],
-				Ref:   ast.ParseReference(buf.String()),
-				Inlines: ast.InlineSlice{
-					&ast.TextNode{Text: string(cat.Name)},
-				},
-			},
-			&ast.FormatNode{
-				Kind:    ast.FormatSuper,
-				Attrs:   nil,
-				Inlines: ast.InlineSlice{&ast.TextNode{Text: strconv.Itoa(cat.Count)}},
-			},
+		tags.AddN(
+			zsx.MakeLink(
+				countClassAttrs[cat.Count],
+				sz.ScanReference(buf.String()),
+				sx.MakeList(zsx.MakeText(string(cat.Name)))),
+			zsx.MakeFormat(zsx.SymFormatSuper,
+				nil,
+				sx.MakeList(zsx.MakeText(strconv.Itoa(cat.Count)))),
 		)
+		count++
 		buf.Truncate(bufLen)
 	}
-	return &ast.ParaNode{Inlines: para}, len(ccs)
+	return zsx.MakeParaList(tags.List()), count
 }
 
-func (ap *actionParaAST) limitTags(ccs meta.CountedCategories) meta.CountedCategories {
+func (ap *actionPara) limitTags(ccs meta.CountedCategories) meta.CountedCategories {
 	if minVal, maxVal := ap.minVal, ap.maxVal; minVal > 0 || maxVal > 0 {
 		if minVal < 0 {
 			minVal = ccs[len(ccs)-1].Count
@@ -181,7 +187,7 @@ func (ap *actionParaAST) limitTags(ccs meta.CountedCategories) meta.CountedCateg
 	return ccs
 }
 
-func (ap *actionParaAST) createBlockNodeMetaKeysAST() (ast.BlockNode, int) {
+func (ap *actionPara) createBlockNodeMetaKeys() (*sx.Pair, int) {
 	arr := make(meta.Arrangement, 128)
 	for _, m := range ap.ml {
 		for k := range m.Map() {
@@ -196,7 +202,8 @@ func (ap *actionParaAST) createBlockNodeMetaKeysAST() (ast.BlockNode, int) {
 
 	var buf bytes.Buffer
 	bufLen := ap.prepareSimpleQuery(&buf)
-	items := make([]ast.ItemSlice, 0, len(ccs))
+	var items sx.ListBuilder
+	count := 0
 	for _, cat := range ccs {
 		buf.WriteString(string(cat.Name))
 		buf.WriteString(api.ExistOperator)
@@ -207,54 +214,45 @@ func (ap *actionParaAST) createBlockNodeMetaKeysAST() (ast.BlockNode, int) {
 		q2 := buf.String()
 		buf.Truncate(bufLen)
 
-		items = append(items, ast.ItemSlice{ast.CreateParaNode(
-			&ast.LinkNode{
-				Attrs:   nil,
-				Ref:     ast.ParseReference(q1),
-				Inlines: ast.InlineSlice{&ast.TextNode{Text: string(cat.Name)}},
-			},
-			&ast.TextNode{Text: " "},
-			&ast.TextNode{Text: "(" + strconv.Itoa(cat.Count) + ", "},
-			&ast.LinkNode{
-				Attrs:   nil,
-				Ref:     ast.ParseReference(q2),
-				Inlines: ast.InlineSlice{&ast.TextNode{Text: "values"}},
-			},
-			&ast.TextNode{Text: ")"},
-		)})
+		items.Add(zsx.MakeBlock(zsx.MakePara(
+			zsx.MakeLink(nil,
+				sz.ScanReference(q1),
+				sx.MakeList(zsx.MakeText(string(cat.Name)))),
+			zsx.MakeText(" "),
+			zsx.MakeText("("+strconv.Itoa(cat.Count)+", "),
+			zsx.MakeLink(nil,
+				sz.ScanReference(q2),
+				sx.MakeList(zsx.MakeText("values"))),
+			zsx.MakeText(")"),
+		)))
+		count++
 	}
-	return &ast.NestedListNode{
-		Kind:  ap.kind,
-		Items: items,
-		Attrs: nil,
-	}, len(items)
+	return zsx.MakeList(ap.kind, nil, items.List()), count
 }
 
-func (ap *actionParaAST) createBlockNodeMetaAST(key string) (ast.BlockNode, int) {
+func (ap *actionPara) createBlockNodeMeta(key string) (*sx.Pair, int) {
 	if len(ap.ml) == 0 {
 		return nil, 0
 	}
-	items := make([]ast.ItemSlice, 0, len(ap.ml))
+	var items sx.ListBuilder
+	count := 0
 	for _, m := range ap.ml {
 		if key != "" {
 			if _, found := m.Get(key); !found {
 				continue
 			}
 		}
-		items = append(items, ast.ItemSlice{ast.CreateParaNode(&ast.LinkNode{
-			Attrs:   nil,
-			Ref:     ast.ParseReference(m.Zid.String()),
-			Inlines: ast.ParseSpacedText(m.GetTitle()),
-		})})
+		items.Add(zsx.MakeBlock(zsx.MakePara(
+			zsx.MakeLink(nil,
+				sz.ScanReference(m.Zid.String()),
+				sx.MakeList(zsx.MakeText(ast.NormalizedSpacedText(m.GetTitle())))),
+		)))
+		count++
 	}
-	return &ast.NestedListNode{
-		Kind:  ap.kind,
-		Items: items,
-		Attrs: nil,
-	}, len(items)
+	return zsx.MakeList(ap.kind, nil, items.List()), count
 }
 
-func (ap *actionParaAST) prepareCatAction(key string, buf *bytes.Buffer) (meta.CountedCategories, int) {
+func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.CountedCategories, int) {
 	if len(ap.ml) == 0 {
 		return nil, 0
 	}
@@ -271,7 +269,7 @@ func (ap *actionParaAST) prepareCatAction(key string, buf *bytes.Buffer) (meta.C
 	return ccs, bufLen
 }
 
-func (ap *actionParaAST) prepareSimpleQuery(buf *bytes.Buffer) int {
+func (ap *actionPara) prepareSimpleQuery(buf *bytes.Buffer) int {
 	sea := ap.q.Clone()
 	sea.RemoveActions()
 	buf.WriteString(ast.QueryPrefix)
@@ -285,11 +283,10 @@ func (ap *actionParaAST) prepareSimpleQuery(buf *bytes.Buffer) int {
 const fontSizes = 6 // Must be the number of CSS classes zs-font-size-* in base.css
 const fontSizes64 = float64(fontSizes)
 
-func (*actionParaAST) calcFontSizes(ccs meta.CountedCategories) map[int]zsx.Attributes {
-	var fsAttrs [fontSizes]zsx.Attributes
-	var a zsx.Attributes
+func (*actionPara) calcFontSizes(ccs meta.CountedCategories) map[int]*sx.Pair {
+	var fsAttrs [fontSizes]*sx.Pair
 	for i := range fontSizes {
-		fsAttrs[i] = a.AddClass("zs-font-size-" + strconv.Itoa(i))
+		fsAttrs[i] = sx.MakeList(sx.Cons(sx.MakeString("class"), sx.MakeString("zs-font-size-"+strconv.Itoa(i))))
 	}
 
 	countMap := make(map[int]int, len(ccs))
@@ -303,7 +300,7 @@ func (*actionParaAST) calcFontSizes(ccs meta.CountedCategories) map[int]zsx.Attr
 	}
 	slices.Sort(countList)
 
-	result := make(map[int]zsx.Attributes, len(countList))
+	result := make(map[int]*sx.Pair, len(countList))
 	if len(countList) <= fontSizes {
 		// If we have less different counts, center them inside the fsAttrs vector.
 		curSize := (fontSizes - len(countList)) / 2

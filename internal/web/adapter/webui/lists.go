@@ -26,8 +26,8 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/usecase"
@@ -71,9 +71,9 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 
 		var content, endnotes *sx.Pair
 		numEntries := 0
-		if bn, cnt := evaluator.QueryActionAST(ctx, q, metaSeq); bn != nil {
+		if bn, cnt := evaluator.QueryAction(ctx, q, metaSeq); bn != nil {
 			enc := wui.getSimpleHTMLEncoder(userLang)
-			content, endnotes, err = enc.BlocksSxn(&ast.BlockSlice{bn})
+			content, endnotes, err = enc.BlocksSxn(zsx.MakeBlock(bn))
 			if err != nil {
 				wui.reportError(ctx, w, err)
 				return

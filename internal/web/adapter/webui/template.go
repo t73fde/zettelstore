@@ -412,7 +412,7 @@ func (wui *WebUI) calculateFooterSxn(ctx context.Context) *sx.Pair {
 	if footerZid, err := id.Parse(wui.getConfig(ctx, nil, config.KeyFooterZettel)); err == nil {
 		if zn, err2 := wui.evalZettel.Run(ctx, footerZid, ""); err2 == nil {
 			htmlEnc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, meta.KeyLang)).SetUnique("footer-")
-			if content, endnotes, err3 := htmlEnc.BlocksSxn(&zn.BlocksAST); err3 == nil {
+			if content, endnotes, err3 := htmlEnc.BlocksSxnAST(&zn.BlocksAST); err3 == nil {
 				if content != nil && endnotes != nil {
 					content.LastPair().SetCdr(sx.Cons(endnotes, nil))
 				}

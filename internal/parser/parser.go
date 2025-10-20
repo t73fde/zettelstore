@@ -116,10 +116,10 @@ func ParseDescriptionAST(m *meta.Meta) ast.InlineSlice {
 		return nil
 	}
 	if summary, found := m.Get(meta.KeySummary); found {
-		return ast.ParseSpacedText(string(summary))
+		return ast.ParseSpacedTextAST(string(summary))
 	}
 	if title, found := m.Get(meta.KeyTitle); found {
-		return ast.ParseSpacedText(string(title))
+		return ast.ParseSpacedTextAST(string(title))
 	}
 	return ast.InlineSlice{&ast.TextNode{Text: "Zettel without title/summary: " + m.Zid.String()}}
 }

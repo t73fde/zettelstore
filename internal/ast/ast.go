@@ -77,10 +77,10 @@ const (
 	RefStateExternal                 // Reference to external material
 )
 
-// ParseSpacedText returns an inline slice that consists just of test and space node.
+// ParseSpacedTextAST returns an inline slice that consists just of test and space node.
 // No Zettelmarkup parsing is done. It is typically used to transform the zettel
 // description into an inline slice.
-func ParseSpacedText(s string) InlineSlice {
+func ParseSpacedTextAST(s string) InlineSlice {
 	return InlineSlice{&TextNode{Text: NormalizedSpacedText(s)}}
 }
 

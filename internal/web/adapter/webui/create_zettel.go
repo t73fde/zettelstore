@@ -172,8 +172,8 @@ func (wui *WebUI) MakeGetZettelFromListHandler(
 			wui.reportError(ctx, w, err)
 			return
 		}
-		entries, _ := evaluator.QueryActionAST(ctx, q, metaSeq)
-		bns := evaluate.RunBlockNode(ctx, entries)
+		entries := evaluator.QueryActionAST(ctx, q, metaSeq)
+		bns := evaluate.RunBlockNodeAST(ctx, entries)
 		enc := encoder.Create(api.EncoderZmk, nil)
 		var zmkContent bytes.Buffer
 		if err = enc.WriteBlocks(&zmkContent, &bns); err != nil {

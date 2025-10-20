@@ -27,7 +27,25 @@ import (
 
 type transformer struct{}
 
-// GetBlockSlice returns the sz representations as a AST BlockSlice
+// MustGetBlock returns the sz representation as an AST BlockNode. Panic on error.
+func MustGetBlock(pair *sx.Pair) ast.BlockNode {
+	if pair == nil {
+		return nil
+	}
+	var t transformer
+	if obj := zsx.Walk(&t, pair, nil); !obj.IsNil() {
+		if sxn, isNode := obj.(sxNode); isNode {
+			if bn, ok := sxn.node.(ast.BlockNode); ok {
+				return bn
+			}
+			panic(fmt.Sprintf("no BlockNode AST: %T/%v for %v", sxn.node, sxn.node, pair))
+		}
+		panic(fmt.Sprintf("no AST for %v: %v", pair, obj))
+	}
+	panic(fmt.Sprintf("error walking %v", pair))
+}
+
+// GetBlockSlice returns the sz representation as an AST BlockSlice
 func GetBlockSlice(pair *sx.Pair) (ast.BlockSlice, error) {
 	if pair == nil {
 		return nil, nil

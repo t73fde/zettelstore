@@ -264,17 +264,23 @@ func (g *htmlGenerator) transformMetaTags(tags meta.Value) *sx.Pair {
 	return g.th.EvaluateMeta(zsx.Attributes{"name": "keywords", "content": metaTags})
 }
 
-func (g *htmlGenerator) BlocksSxn(bs *ast.BlockSlice) (content, endnotes *sx.Pair, _ error) {
-	if bs == nil || len(*bs) == 0 {
+func (g *htmlGenerator) BlocksSxn(block *sx.Pair) (content, endnotes *sx.Pair, _ error) {
+	if block == nil || block.Tail() == nil {
 		return nil, nil, nil
 	}
-	sx := g.tx.GetSz(bs)
 	env := shtml.MakeEnvironment(g.lang)
-	sh, err := g.th.Evaluate(sx, &env)
+	sh, err := g.th.Evaluate(block, &env)
 	if err != nil {
 		return nil, nil, err
 	}
 	return sh, shtml.Endnotes(&env), nil
+}
+func (g *htmlGenerator) BlocksSxnAST(bs *ast.BlockSlice) (content, endnotes *sx.Pair, _ error) {
+	if bs == nil || len(*bs) == 0 {
+		return nil, nil, nil
+	}
+	sx := g.tx.GetSz(bs)
+	return g.BlocksSxn(sx)
 }
 
 func (g *htmlGenerator) szToSxHTML(node *sx.Pair) *sx.Pair {

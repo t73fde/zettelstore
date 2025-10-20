@@ -48,7 +48,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	var htitle *sx.Pair
 	plainTitle, hasTitle := zn.InhMeta.Get(meta.KeyTitle)
 	if hasTitle {
-		isTitle = ast.ParseSpacedText(string(plainTitle))
+		isTitle = ast.ParseSpacedTextAST(string(plainTitle))
 		xtitle := he.tx.GetSz(&isTitle)
 		htitle, err = he.th.Evaluate(xtitle, &env)
 		if err != nil {
