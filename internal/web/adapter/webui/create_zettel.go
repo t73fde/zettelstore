@@ -23,8 +23,8 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/encoder"
@@ -65,8 +65,8 @@ func (wui *WebUI) MakeGetCreateZettelHandler(
 		case actionFolge:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareFolge(origZettel), "Folge Zettel", "", roleData, syntaxData)
 		case actionNew:
-			title := ast.NormalizedSpacedText(origZettel.Meta.GetTitle())
-			newTitle := ast.NormalizedSpacedText(q.Get(meta.KeyTitle))
+			title := sz.NormalizedSpacedText(origZettel.Meta.GetTitle())
+			newTitle := sz.NormalizedSpacedText(q.Get(meta.KeyTitle))
 			wui.renderZettelForm(ctx, w, createZettel.PrepareNew(origZettel, newTitle), title, "", roleData, syntaxData)
 		case actionSequel:
 			wui.renderZettelForm(ctx, w, createZettel.PrepareSequel(origZettel), "Sequel Zettel", "", roleData, syntaxData)

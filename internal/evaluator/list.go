@@ -245,7 +245,7 @@ func (ap *actionPara) createBlockNodeMeta(key string) (*sx.Pair, int) {
 		items.Add(zsx.MakeBlock(zsx.MakePara(
 			zsx.MakeLink(nil,
 				sz.ScanReference(m.Zid.String()),
-				sx.MakeList(zsx.MakeText(ast.NormalizedSpacedText(m.GetTitle())))),
+				sx.MakeList(zsx.MakeText(sz.NormalizedSpacedText(m.GetTitle())))),
 		)))
 		count++
 	}

@@ -24,8 +24,8 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsc/sz"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
@@ -65,7 +65,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		user := user.GetCurrentUser(ctx)
 		getTextTitle := wui.makeGetTextTitle(ctx, getZettel)
 
-		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())
+		title := sz.NormalizedSpacedText(zn.InhMeta.GetTitle())
 		env, rb := wui.createRenderEnvironment(ctx, "zettel", zettelLang, title, user)
 		rb.bindSymbol(symMetaHeader, metaObj)
 		rb.bindString("heading", sx.MakeString(title))

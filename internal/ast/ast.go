@@ -16,7 +16,8 @@ package ast
 
 import (
 	"net/url"
-	"strings"
+
+	"t73f.de/r/zsc/sz"
 )
 
 // Node is the interface, all nodes must implement.
@@ -81,8 +82,5 @@ const (
 // No Zettelmarkup parsing is done. It is typically used to transform the zettel
 // description into an inline slice.
 func ParseSpacedTextAST(s string) InlineSlice {
-	return InlineSlice{&TextNode{Text: NormalizedSpacedText(s)}}
+	return InlineSlice{&TextNode{Text: sz.NormalizedSpacedText(s)}}
 }
-
-// NormalizedSpacedText returns the given string, but normalize multiple spaces to one space.
-func NormalizedSpacedText(s string) string { return strings.Join(strings.Fields(s), " ") }

@@ -24,9 +24,9 @@ import (
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/encoder"
@@ -70,7 +70,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 
 		locLinks, extLinks, queryLinks := wui.getLocalExtQueryLinks(ucGetReferences, zn.Blocks)
 
-		title := ast.NormalizedSpacedText(zn.InhMeta.GetTitle())
+		title := sz.NormalizedSpacedText(zn.InhMeta.GetTitle())
 		phrase := q.Get(api.QueryKeyPhrase)
 		if phrase == "" {
 			phrase = title

@@ -21,6 +21,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
 
@@ -131,10 +132,10 @@ func ParseDescription(m *meta.Meta) *sx.Pair {
 		return nil
 	}
 	if summary, found := m.Get(meta.KeySummary); found {
-		return sx.Cons(zsx.MakeText(ast.NormalizedSpacedText(string(summary))), sx.Nil())
+		return sx.Cons(zsx.MakeText(sz.NormalizedSpacedText(string(summary))), sx.Nil())
 	}
 	if title, found := m.Get(meta.KeyTitle); found {
-		return sx.Cons(zsx.MakeText(ast.NormalizedSpacedText(string(title))), sx.Nil())
+		return sx.Cons(zsx.MakeText(sz.NormalizedSpacedText(string(title))), sx.Nil())
 	}
 	return sx.Cons(zsx.MakeText("Zettel without title/summary: "+m.Zid.String()), sx.Nil())
 }
