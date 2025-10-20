@@ -21,7 +21,6 @@ import (
 	"path"
 	"slices"
 	"strconv"
-	"strings"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -198,10 +197,10 @@ func (e *evaluatorAST) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.Block
 		// Only zettel references will be evaluated.
 	case ast.RefStateInvalid, ast.RefStateBroken:
 		e.transcludeCount++
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Invalid", "or", "broken", "transclusion", "reference"))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Invalid or broken transclusion reference"))
 	case ast.RefStateSelf:
 		e.transcludeCount++
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Self", "transclusion", "reference"))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Self transclusion reference"))
 	case ast.RefStateFound, ast.RefStateExternal:
 		return tn
 	case ast.RefStateHosted, ast.RefStateBased:
@@ -214,7 +213,7 @@ func (e *evaluatorAST) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.Block
 		e.transcludeCount++
 		return e.evalQueryTransclusionAST(tn.Ref.Value)
 	default:
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Illegal", "block", "state", strconv.Itoa(int(ref.State))))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Illegal block state "+strconv.Itoa(int(ref.State))))
 	}
 
 	zid, err := id.Parse(ref.URL.Path)
@@ -226,7 +225,7 @@ func (e *evaluatorAST) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.Block
 	zn := cost.zn
 	if zn == e.marker {
 		e.transcludeCount++
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Recursive", "transclusion"))
+		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Recursive transclusion"))
 	}
 	if !ok {
 		zettel, err1 := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
@@ -235,7 +234,7 @@ func (e *evaluatorAST) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.Block
 				return nil
 			}
 			e.transcludeCount++
-			return makeBlockNodeAST(createInlineErrorTextAST(ref, "Unable", "to", "get", "zettel"))
+			return makeBlockNodeAST(createInlineErrorTextAST(ref, "Unable to get zettel"))
 		}
 		setMetadataFromAttributes(zettel.Meta, tn.Attrs)
 		ec := e.transcludeCount
@@ -258,7 +257,7 @@ func (e *evaluatorAST) evalQueryTransclusionAST(expr string) ast.BlockNode {
 		if errors.Is(err, &box.ErrNotAllowed{}) {
 			return nil
 		}
-		return makeBlockNodeAST(createInlineErrorTextAST(nil, "Unable", "to", "search", "zettel"))
+		return makeBlockNodeAST(createInlineErrorTextAST(nil, "Unable to search zettel"))
 	}
 	result, _ := QueryActionAST(e.ctx, q, ml)
 	if result != nil {
@@ -271,8 +270,8 @@ func (e *evaluatorAST) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNo
 	if maxTrans := e.transcludeMax; e.transcludeCount > maxTrans {
 		e.transcludeCount = maxTrans + 1
 		return createInlineErrorTextAST(ref,
-			"Too", "many", "transclusions", "(must", "be", "at", "most", strconv.Itoa(maxTrans)+",",
-			"see", "runtime", "configuration", "key", "max-transclusions)")
+			"Too many transclusions (must be at most "+strconv.Itoa(maxTrans)+
+				", see runtime configuration key max-transclusions)")
 	}
 	return nil
 }
@@ -380,7 +379,7 @@ func (e *evaluatorAST) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode 
 		return createInlineErrorImageAST(en)
 	case ast.RefStateSelf:
 		e.transcludeCount++
-		return createInlineErrorTextAST(ref, "Self", "embed", "reference")
+		return createInlineErrorTextAST(ref, "Self embed reference")
 	case ast.RefStateFound, ast.RefStateExternal:
 		return en
 	case ast.RefStateHosted, ast.RefStateBased:
@@ -391,7 +390,7 @@ func (e *evaluatorAST) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode 
 		}
 		return en
 	default:
-		return createInlineErrorTextAST(ref, "Illegal", "inline", "state", strconv.Itoa(int(ref.State)))
+		return createInlineErrorTextAST(ref, "Illegal inline state"+strconv.Itoa(int(ref.State)))
 	}
 
 	zid := mustParseZidAST(ref)
@@ -410,14 +409,14 @@ func (e *evaluatorAST) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode 
 	} else if !parser.IsASTParser(syntax) {
 		// Not embeddable.
 		e.transcludeCount++
-		return createInlineErrorTextAST(ref, "Not", "embeddable (syntax="+syntax+")")
+		return createInlineErrorTextAST(ref, "Not embeddable (syntax="+syntax+")")
 	}
 
 	cost, ok := e.costMap[zid]
 	zn := cost.zn
 	if zn == e.marker {
 		e.transcludeCount++
-		return createInlineErrorTextAST(ref, "Recursive", "transclusion")
+		return createInlineErrorTextAST(ref, "Recursive transclusion")
 	}
 	if !ok {
 		ec := e.transcludeCount
@@ -478,8 +477,8 @@ func createInlineErrorImageAST(en *ast.EmbedRefNode) *ast.EmbedRefNode {
 	return en
 }
 
-func createInlineErrorTextAST(ref *ast.Reference, msgWords ...string) ast.InlineNode {
-	text := strings.Join(msgWords, " ")
+func createInlineErrorTextAST(ref *ast.Reference, message string) ast.InlineNode {
+	text := message
 	if ref != nil {
 		text += ": " + ref.String() + "."
 	}
