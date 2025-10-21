@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403153903
-modified: 20250102213403
+modified: 20251021190931
 
 Zettel in a [[Sz encoding|00001012920516]] are represented as a [[symbolic expression|00001012930000]].
 To process these symbolic expressions, you need to know, how a specific part of a zettel is represented by a symbolic expression.
@@ -68,13 +68,24 @@ Or there are attributes.
 In this case, the first element of the list must be the symbol ''quote'': ''(quote'' ''('' A,,1,, A,,2,, &hellip; A,,n,, '')'''')''.
 
 === Other
+==== ''UNKNOWN''
 A list with ''UNKNOWN'' as its first element signals an internal error during transforming a zettel into the Sz encoding.
-It may be ignored, or it may produce an error.
+It may be ignored or may result in an error.
 
 :::syntax
 __Unknown__ **=** ''(UNKNOWN'' Object &hellip; '')''.
 :::
 
-The list may only contain the symbol ''UNKNOWN'', or additionally an unlimited amount of other objects.
+The list may only contain the symbol ''UNKNOWN'', or, in addition, an unlimited amount of other objects.
 
-Similar, any symbol with the pattern ''**xyz:NOT-FOUND**'', where ''xyz'' is any string, signals an internal error.
+==== ''**xyz:NOT-FOUND**''
+Any symbol with the pattern ''**xyz:NOT-FOUND**'', where ""''xyz''"" is any string, signals an internal error.
+
+==== ''*SPLICE-NODES*''
+A list with ''*SPLICE-NODES*'' as its first element may occur during internal processing.
+It signals that some processing routine intends to return more than one object instead of just one [[__BlockElement__|00001012931400]] or one [[__InlineElement__|00001012931600]].
+The elements of such a list should be ""spliced"" into the parent list.
+
+==== NIL (or ''()'')
+Analogous to a splice node, which signal that more than one values is about to be returned, a ""NIL"" value (denoted as ""''()''"") signals that no object should be returned.
+Therefore, a [[__BlockElement__|00001012931400]] or an [[__InlineElement__|00001012931600]] may be ""NIL"".

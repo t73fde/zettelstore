@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"path"
 	"slices"
 	"strconv"
@@ -167,12 +168,16 @@ func (e *evaluator) evalVerbatimEval(node *sx.Pair) *sx.Pair {
 }
 
 func mustParseZid(ref *sx.Pair, refVal string) id.Zid {
-	zid, err := id.Parse(refVal)
-	if err != nil {
-		refState, _ := zsx.GetReference(ref)
-		panic(fmt.Sprintf("%v: %q (state %v) -> %v", err, refVal, refState, ref))
+	u, err := url.Parse(refVal)
+	var zid id.Zid
+	if err == nil {
+		zid, err = id.Parse(u.Path)
 	}
-	return zid
+	if err == nil {
+		return zid
+	}
+	refState, _ := zsx.GetReference(ref)
+	panic(fmt.Sprintf("%v: %q (state %v) -> %v", err, refVal, refState, ref))
 }
 
 // AST-based code, deprecated.
