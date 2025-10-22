@@ -28,15 +28,8 @@ import (
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/query"
 )
-
-// QueryActionAST transforms a list of metadata according to query actions into an AST nested list.
-func QueryActionAST(ctx context.Context, q *query.Query, ml []*meta.Meta) ast.BlockNode {
-	bn, _ := QueryAction(ctx, q, ml)
-	return sztrans.MustGetBlock(bn)
-}
 
 // QueryAction transforms a list of metadata according to query actions into a SZ nested list.
 func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (*sx.Pair, int) {

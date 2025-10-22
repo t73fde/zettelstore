@@ -78,11 +78,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block
 		marker:          &ast.Zettel{},
 	}
 
-	obj := zsx.Walk(&e, block, nil)
-	evalBlock, isPair := sx.GetPair(obj)
-	if !isPair {
-		panic(fmt.Sprintf("not a pair after evaluate: %T/%v", obj, obj))
-	}
+	evalBlock := mustPair(zsx.Walk(&e, block, nil))
 	bns, err := sztrans.GetBlockSlice(evalBlock)
 	if err != nil {
 		panic(err)
@@ -121,8 +117,13 @@ func (e *evaluator) VisitAfter(node *sx.Pair, _ *sx.Pair) sx.Object {
 		case zsx.SymLink:
 			return e.evalLink(node)
 		case zsx.SymEmbed:
+			return e.evalEmbed(node)
 		case zsx.SymVerbatimEval:
 			return e.evalVerbatimEval(node)
+		case zsx.SymTransclude:
+			return e.evalTransclusion(node)
+		case zsx.SymVerbatimZettel:
+			return e.evalVerbatimZettel(node)
 		}
 	}
 	return node
@@ -157,6 +158,8 @@ func (e *evaluator) evalLink(node *sx.Pair) *sx.Pair {
 	return node
 }
 
+func (e *evaluator) evalEmbed(en *sx.Pair) *sx.Pair { return en }
+
 func (e *evaluator) evalVerbatimEval(node *sx.Pair) *sx.Pair {
 	_, attrs, content := zsx.GetVerbatim(node)
 	if p := attrs.Assoc(sx.MakeString("")); p != nil {
@@ -165,6 +168,120 @@ func (e *evaluator) evalVerbatimEval(node *sx.Pair) *sx.Pair {
 		}
 	}
 	return node
+}
+
+func (e *evaluator) evalVerbatimZettel(vn *sx.Pair) *sx.Pair {
+	_, attrs, content := zsx.GetVerbatim(vn)
+	m := meta.New(id.Invalid)
+	m.Set(meta.KeySyntax, getSyntax(attrs, meta.ValueSyntaxText))
+	zettel := zettel.Zettel{
+		Meta:    m,
+		Content: zettel.NewContent([]byte(content)),
+	}
+	e.transcludeCount++
+	zn := e.evaluateEmbeddedZettel(zettel)
+	return splicedBlocks(zn.Blocks)
+}
+
+func (e *evaluator) evalTransclusion(tn *sx.Pair) *sx.Pair {
+	attrs, ref, text := zsx.GetTransclusion(tn)
+	refSym, refVal := zsx.GetReference(ref)
+
+	// To prevent e.embedCount from counting
+	if errText := e.checkMaxTransclusions(ref); errText != nil {
+		return makeBlock(errText)
+	}
+	if !sz.SymRefStateZettel.IsEqualSymbol(refSym) {
+		switch refSym {
+		case zsx.SymRefStateInvalid, sz.SymRefStateBroken:
+			e.transcludeCount++
+			return makeBlock(createInlineErrorText(ref, "Invalid or broken transclusion reference"))
+		case zsx.SymRefStateSelf:
+			e.transcludeCount++
+			return makeBlock(createInlineErrorText(ref, "Self transclusion reference"))
+		case sz.SymRefStateFound, zsx.SymRefStateExternal:
+			return tn
+		case zsx.SymRefStateHosted, sz.SymRefStateBased:
+			return makeBlock(e.evalEmbed(zsx.MakeEmbed(attrs, ref, "", text)))
+		case sz.SymRefStateQuery:
+			e.transcludeCount++
+			return e.evalQueryTransclusion(refVal)
+		default:
+			return makeBlock(createInlineErrorText(ref, "Illegal reference symvol "+refSym.GetValue()))
+		}
+	}
+
+	zid := mustParseZid(ref, refVal)
+
+	cost, ok := e.costMap[zid]
+	zn := cost.zn
+	if zn == e.marker {
+		e.transcludeCount++
+		return makeBlock(createInlineErrorText(ref, "Recursive transclusion"))
+	}
+	if !ok {
+		zettel, err1 := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
+		if err1 != nil {
+			if errors.Is(err1, &box.ErrNotAllowed{}) {
+				return nil
+			}
+			e.transcludeCount++
+			return makeBlock(createInlineErrorText(ref, "Unable to get zettel"))
+		}
+		setMetadataFromAttributes(zettel.Meta, attrs)
+		ec := e.transcludeCount
+		e.costMap[zid] = transcludeCost{zn: e.marker, ec: ec}
+		zn = e.evaluateEmbeddedZettel(zettel)
+		e.costMap[zid] = transcludeCost{zn: zn, ec: e.transcludeCount - ec}
+		e.transcludeCount = 0 // No stack needed, because embedding is done left-recursive, depth-first.
+	}
+	e.transcludeCount++
+	if ec := cost.ec; ec > 0 {
+		e.transcludeCount += cost.ec
+	}
+	return splicedBlocks(zn.Blocks)
+}
+
+func (e *evaluator) evalQueryTransclusion(expr string) *sx.Pair {
+	q := query.Parse(expr)
+	ml, err := e.port.QueryMeta(e.ctx, q)
+	if err != nil {
+		if errors.Is(err, &box.ErrNotAllowed{}) {
+			return nil
+		}
+		return makeBlock(createInlineErrorText(nil, "Unable to search zettel"))
+	}
+	result, _ := QueryAction(e.ctx, q, ml)
+	if result != nil {
+		result = mustPair(zsx.Walk(e, result, nil))
+	}
+	return result
+}
+
+func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
+	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
+	zn.Blocks = mustPair(zsx.Walk(e, zn.Blocks, nil))
+	return zn
+}
+
+func setMetadataFromAttributes(m *meta.Meta, attrs *sx.Pair) {
+	for obj := range attrs.Values() {
+		if pair, isPair := sx.GetPair(obj); isPair {
+			if key, isKey := sx.GetString(pair.Car()); isKey && meta.KeyIsValid(key.GetValue()) {
+				if val, isVal := sx.GetString(pair.Cdr()); isVal {
+					m.Set(key.GetValue(), meta.Value(val.GetValue()))
+				}
+			}
+		}
+	}
+}
+
+func mustPair(obj sx.Object) *sx.Pair {
+	p, isPair := sx.GetPair(obj)
+	if !isPair {
+		panic(fmt.Sprintf("not a pair after evaluate: %T/%v", obj, obj))
+	}
+	return p
 }
 
 func mustParseZid(ref *sx.Pair, refVal string) id.Zid {
@@ -180,189 +297,63 @@ func mustParseZid(ref *sx.Pair, refVal string) id.Zid {
 	panic(fmt.Sprintf("%v: %q (state %v) -> %v", err, refVal, refState, ref))
 }
 
-// AST-based code, deprecated.
-
-func (e *evaluator) Visit(node ast.Node) ast.Visitor {
-	switch n := node.(type) {
-	case *ast.BlockSlice:
-		e.visitBlockSliceAST(n)
-	case *ast.InlineSlice:
-		e.visitInlineSliceAST(n)
-	default:
-		return e
-	}
-	return nil
-}
-
-func (e *evaluator) visitBlockSliceAST(bs *ast.BlockSlice) {
-	for i := 0; i < len(*bs); i++ {
-		bn := (*bs)[i]
-		ast.Walk(e, bn)
-		switch n := bn.(type) {
-		case *ast.VerbatimNode:
-			if n.Kind == ast.VerbatimZettel {
-				i += transcludeNodeAST(bs, i, e.evalVerbatimZettelNodeAST(n))
+func getSyntax(attrs *sx.Pair, defSyntax meta.Value) meta.Value {
+	for a := range attrs.Values() {
+		if pair, isPair := sx.GetPair(a); isPair {
+			car := pair.Car()
+			if car.IsEqual(sx.MakeString(meta.KeySyntax)) || car.IsEqual(sx.MakeString("")) {
+				if val, isString := sx.GetString(pair.Cdr()); isString {
+					return meta.Value(val.GetValue())
+				}
 			}
-		case *ast.TranscludeNode:
-			i += transcludeNodeAST(bs, i, e.evalTransclusionNodeAST(n))
-		}
-	}
-}
-
-func transcludeNodeAST(bln *ast.BlockSlice, i int, bn ast.BlockNode) int {
-	if ln, ok := bn.(*ast.BlockSlice); ok {
-		*bln = replaceWithBlockNodesAST(*bln, i, *ln)
-		return len(*ln) - 1
-	}
-	if bn == nil {
-		(*bln) = (*bln)[:i+copy((*bln)[i:], (*bln)[i+1:])]
-		return -1
-	}
-	(*bln)[i] = bn
-	return 0
-}
-
-func replaceWithBlockNodesAST(bns []ast.BlockNode, i int, replaceBns []ast.BlockNode) []ast.BlockNode {
-	if len(replaceBns) == 1 {
-		bns[i] = replaceBns[0]
-		return bns
-	}
-	newIns := make([]ast.BlockNode, 0, len(bns)+len(replaceBns)-1)
-	if i > 0 {
-		newIns = append(newIns, bns[:i]...)
-	}
-	if len(replaceBns) > 0 {
-		newIns = append(newIns, replaceBns...)
-	}
-	if i+1 < len(bns) {
-		newIns = append(newIns, bns[i+1:]...)
-	}
-	return newIns
-}
-
-func (e *evaluator) evalVerbatimZettelNodeAST(vn *ast.VerbatimNode) ast.BlockNode {
-	m := meta.New(id.Invalid)
-	m.Set(meta.KeySyntax, getSyntaxAST(vn.Attrs, meta.ValueSyntaxText))
-	zettel := zettel.Zettel{
-		Meta:    m,
-		Content: zettel.NewContent(vn.Content),
-	}
-	e.transcludeCount++
-	zn := e.evaluateEmbeddedZettelAST(zettel)
-	return &zn.BlocksAST
-}
-
-func getSyntaxAST(a zsx.Attributes, defSyntax meta.Value) meta.Value {
-	if a != nil {
-		if val, ok := a.Get(meta.KeySyntax); ok {
-			return meta.Value(val)
-		}
-		if val, ok := a.Get(""); ok {
-			return meta.Value(val)
 		}
 	}
 	return defSyntax
 }
 
-func (e *evaluator) evalTransclusionNodeAST(tn *ast.TranscludeNode) ast.BlockNode {
-	ref := tn.Ref
-
-	// To prevent e.embedCount from counting
-	if errText := e.checkMaxTransclusionsAST(ref); errText != nil {
-		return makeBlockNodeAST(errText)
-	}
-	switch ref.State {
-	case ast.RefStateZettel:
-		// Only zettel references will be evaluated.
-	case ast.RefStateInvalid, ast.RefStateBroken:
-		e.transcludeCount++
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Invalid or broken transclusion reference"))
-	case ast.RefStateSelf:
-		e.transcludeCount++
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Self transclusion reference"))
-	case ast.RefStateFound, ast.RefStateExternal:
-		return tn
-	case ast.RefStateHosted, ast.RefStateBased:
-		if n := createEmbeddedNodeLocalAST(ref); n != nil {
-			n.Attrs = tn.Attrs
-			return makeBlockNodeAST(n)
-		}
-		return tn
-	case ast.RefStateQuery:
-		e.transcludeCount++
-		return e.evalQueryTransclusionAST(tn.Ref.Value)
-	default:
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Illegal block state "+strconv.Itoa(int(ref.State))))
-	}
-
-	zid, err := id.Parse(ref.URL.Path)
-	if err != nil {
-		panic(err)
-	}
-
-	cost, ok := e.costMap[zid]
-	zn := cost.zn
-	if zn == e.marker {
-		e.transcludeCount++
-		return makeBlockNodeAST(createInlineErrorTextAST(ref, "Recursive transclusion"))
-	}
-	if !ok {
-		zettel, err1 := e.port.GetZettel(box.NoEnrichContext(e.ctx), zid)
-		if err1 != nil {
-			if errors.Is(err1, &box.ErrNotAllowed{}) {
-				return nil
-			}
-			e.transcludeCount++
-			return makeBlockNodeAST(createInlineErrorTextAST(ref, "Unable to get zettel"))
-		}
-		setMetadataFromAttributesAST(zettel.Meta, tn.Attrs)
-		ec := e.transcludeCount
-		e.costMap[zid] = transcludeCost{zn: e.marker, ec: ec}
-		zn = e.evaluateEmbeddedZettelAST(zettel)
-		e.costMap[zid] = transcludeCost{zn: zn, ec: e.transcludeCount - ec}
-		e.transcludeCount = 0 // No stack needed, because embedding is done left-recursive, depth-first.
-	}
-	e.transcludeCount++
-	if ec := cost.ec; ec > 0 {
-		e.transcludeCount += cost.ec
-	}
-	return &zn.BlocksAST
-}
-
-func (e *evaluator) evalQueryTransclusionAST(expr string) ast.BlockNode {
-	q := query.Parse(expr)
-	ml, err := e.port.QueryMeta(e.ctx, q)
-	if err != nil {
-		if errors.Is(err, &box.ErrNotAllowed{}) {
-			return nil
-		}
-		return makeBlockNodeAST(createInlineErrorTextAST(nil, "Unable to search zettel"))
-	}
-	result := QueryActionAST(e.ctx, q, ml)
-	if result != nil {
-		ast.Walk(e, result)
-	}
-	return result
-}
-
-func (e *evaluator) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNode {
+func (e *evaluator) checkMaxTransclusions(ref *sx.Pair) *sx.Pair {
 	if maxTrans := e.transcludeMax; e.transcludeCount > maxTrans {
 		e.transcludeCount = maxTrans + 1
-		return createInlineErrorTextAST(ref,
+		return createInlineErrorText(ref,
 			"Too many transclusions (must be at most "+strconv.Itoa(maxTrans)+
 				", see runtime configuration key max-transclusions)")
 	}
 	return nil
 }
 
-func makeBlockNodeAST(in ast.InlineNode) ast.BlockNode { return ast.CreateParaNode(in) }
-
-func setMetadataFromAttributesAST(m *meta.Meta, a zsx.Attributes) {
-	for aKey, aVal := range a {
-		if meta.KeyIsValid(aKey) {
-			m.Set(aKey, meta.Value(aVal))
-		}
+func createInlineErrorText(ref *sx.Pair, message string) *sx.Pair {
+	text := message
+	if ref != nil {
+		text += ": " + sz.ReferenceString(ref) + "."
 	}
+	ln := zsx.MakeLiteral(zsx.SymLiteralOutput, nil, text)
+	fn := zsx.MakeFormat(zsx.SymFormatStrong,
+		sx.MakeList(sx.Cons(sx.MakeString("class"), sx.MakeString("error"))),
+		sx.MakeList(ln))
+	return fn
+}
+
+func makeBlock(inl *sx.Pair) *sx.Pair { return zsx.MakePara(inl) }
+
+func splicedBlocks(block *sx.Pair) *sx.Pair {
+	blocks := zsx.GetBlock(block)
+	if blocks.Tail() == nil {
+		return blocks.Head()
+	}
+	return blocks.Cons(zsx.SymSpecialSplice)
+}
+
+// ---------------------------------------------------------------------------
+// AST-based code, deprecated.
+
+func (e *evaluator) Visit(node ast.Node) ast.Visitor {
+	switch n := node.(type) {
+	case *ast.InlineSlice:
+		e.visitInlineSliceAST(n)
+	default:
+		return e
+	}
+	return nil
 }
 
 func (e *evaluator) visitInlineSliceAST(is *ast.InlineSlice) {
@@ -489,6 +480,16 @@ func (e *evaluator) evalEmbedRefNodeAST(en *ast.EmbedRefNode) ast.InlineNode {
 		e.transcludeCount += cost.ec
 	}
 	return &result
+}
+
+func (e *evaluator) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNode {
+	if maxTrans := e.transcludeMax; e.transcludeCount > maxTrans {
+		e.transcludeCount = maxTrans + 1
+		return createInlineErrorTextAST(ref,
+			"Too many transclusions (must be at most "+strconv.Itoa(maxTrans)+
+				", see runtime configuration key max-transclusions)")
+	}
+	return nil
 }
 
 func mustParseZidAST(ref *ast.Reference) id.Zid {
