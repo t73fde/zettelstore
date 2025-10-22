@@ -22,7 +22,6 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/set"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
@@ -161,7 +160,7 @@ func (v *zmkVisitor) visitLink(node *sx.Pair, alst *sx.Pair) {
 		v.walkList(inlines, alst)
 		_ = v.b.WriteByte('|')
 	}
-	v.writeRef(ref)
+	_ = sz.WriteReference(&v.b, ref)
 	v.b.WriteString("]]")
 	v.writeAttributes(attrs)
 }
@@ -173,7 +172,7 @@ func (v *zmkVisitor) visitEmbedRef(node *sx.Pair, alst *sx.Pair) {
 		v.walkList(inlines, alst)
 		_ = v.b.WriteByte('|')
 	}
-	v.writeRef(ref)
+	_ = sz.WriteReference(&v.b, ref)
 	v.b.WriteString("}}")
 	v.writeAttributes(attrs)
 }
@@ -262,16 +261,6 @@ func (v *zmkVisitor) writeAttributes(attrs *sx.Pair) {
 		}
 	}
 	_ = v.b.WriteByte('}')
-}
-
-func (v *zmkVisitor) writeRef(ref *sx.Pair) {
-	refSym, refVal := zsx.GetReference(ref)
-	if sz.SymRefStateBased.IsEqualSymbol(refSym) {
-		_ = v.b.WriteByte('/')
-	} else if sz.SymRefStateQuery.IsEqualSymbol(refSym) {
-		v.b.WriteString(api.QueryPrefix)
-	}
-	v.b.WriteString(refVal)
 }
 
 func (v *zmkVisitor) writeEscaped(s string, toEscape byte) {
