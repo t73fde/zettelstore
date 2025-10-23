@@ -83,8 +83,8 @@ func (wui *WebUI) MakeGetInfoHandler(
 
 		enc := wui.getSimpleHTMLEncoder(wui.getConfig(ctx, zn.InhMeta, meta.KeyLang))
 		entries, _ := evaluator.QueryAction(ctx, nil, unlinkedMeta)
-		bns := ucEvaluate.RunBlockNode(ctx, entries)
-		unlinkedContent, _, err := enc.BlocksSxnAST(&bns)
+		blocks := ucEvaluate.RunBlockNode(ctx, entries)
+		unlinkedContent, _, err := enc.BlocksSxn(blocks)
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return

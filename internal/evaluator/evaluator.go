@@ -49,8 +49,7 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 	case meta.ValueSyntaxSxn:
 		zn.Blocks = evaluateSxn(zn.Blocks)
 	default:
-		zn.BlocksAST = EvaluateBlock(ctx, port, rtConfig, zn.Blocks)
-		return
+		zn.Blocks = EvaluateBlock(ctx, port, rtConfig, zn.Blocks)
 	}
 
 	if blk, err := sztrans.GetBlockSlice(zn.Blocks); err == nil {
@@ -60,7 +59,7 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 
 // EvaluateBlock evaluates the given block list in the given context, with
 // the given ports, and the given environment.
-func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block *sx.Pair) ast.BlockSlice {
+func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block *sx.Pair) *sx.Pair {
 	e := evaluator{
 		ctx:             ctx,
 		port:            port,
@@ -72,16 +71,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block
 		embedMapAST:     map[string]ast.InlineSlice{},
 		marker:          &ast.Zettel{},
 	}
-
-	evalBlock := mustPair(zsx.Walk(&e, block, nil))
-	bns, err := sztrans.GetBlockSlice(evalBlock)
-	if err != nil {
-		panic(err)
-	}
-
-	// Now evaluate everything that was not evaluated by SZ-walker.
-
-	return bns
+	return mustPair(zsx.Walk(&e, block, nil))
 }
 
 type evaluator struct {

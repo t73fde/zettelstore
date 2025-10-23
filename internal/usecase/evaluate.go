@@ -62,7 +62,7 @@ func (uc *Evaluate) RunZettel(ctx context.Context, zettel zettel.Zettel, syntax 
 }
 
 // RunBlockNode executes the use case for a metadata list, formatted as a block.
-func (uc *Evaluate) RunBlockNode(ctx context.Context, block *sx.Pair) ast.BlockSlice {
+func (uc *Evaluate) RunBlockNode(ctx context.Context, block *sx.Pair) *sx.Pair {
 	if block == nil {
 		return nil
 	}
