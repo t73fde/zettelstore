@@ -128,3 +128,11 @@ func (e *evaluator) evalQueryTransclusion(expr string) *sx.Pair {
 }
 
 func makeBlock(inl *sx.Pair) *sx.Pair { return zsx.MakePara(inl) }
+
+func splicedBlocks(block *sx.Pair) *sx.Pair {
+	blocks := zsx.GetBlock(block)
+	if blocks.Tail() == nil {
+		return blocks.Head()
+	}
+	return blocks.Cons(zsx.SymSpecialSplice)
+}

@@ -17,7 +17,6 @@ package evaluator
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"strconv"
 
 	"t73f.de/r/sx"
@@ -82,8 +81,6 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block
 
 	// Now evaluate everything that was not evaluated by SZ-walker.
 
-	ast.Walk(&e, &bns)
-	parser.CleanAST(&bns, true)
 	return bns
 }
 
@@ -127,6 +124,7 @@ func (e *evaluator) VisitAfter(node *sx.Pair, _ *sx.Pair) sx.Object {
 
 func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
+	parser.Clean(zn.Blocks, true)
 	zn.Blocks = mustPair(zsx.Walk(e, zn.Blocks, nil))
 	return zn
 }
@@ -152,11 +150,8 @@ func mustPair(obj sx.Object) *sx.Pair {
 }
 
 func mustParseZid(ref *sx.Pair, refVal string) id.Zid {
-	u, err := url.Parse(refVal)
-	var zid id.Zid
-	if err == nil {
-		zid, err = id.Parse(u.Path)
-	}
+	baseVal, _ := sz.SplitFragment(refVal)
+	zid, err := id.Parse(baseVal)
 	if err == nil {
 		return zid
 	}
@@ -200,73 +195,10 @@ func createInlineErrorText(ref *sx.Pair, message string) *sx.Pair {
 	return fn
 }
 
-func splicedBlocks(block *sx.Pair) *sx.Pair {
-	blocks := zsx.GetBlock(block)
-	if blocks.Tail() == nil {
-		return blocks.Head()
+func createInlineErrorImage(attrs *sx.Pair, text *sx.Pair) *sx.Pair {
+	ref := sz.ScanReference(id.ZidEmoji.String())
+	if text == nil {
+		text = sx.MakeList(zsx.MakeText("Error placeholder"))
 	}
-	return blocks.Cons(zsx.SymSpecialSplice)
-}
-
-// ---------------------------------------------------------------------------
-// AST-based code, deprecated.
-
-func (e *evaluator) Visit(node ast.Node) ast.Visitor {
-	switch n := node.(type) {
-	case *ast.InlineSlice:
-		e.visitInlineSliceAST(n)
-	default:
-		return e
-	}
-	return nil
-}
-
-func (e *evaluator) checkMaxTransclusionsAST(ref *ast.Reference) ast.InlineNode {
-	if maxTrans := e.transcludeMax; e.transcludeCount > maxTrans {
-		e.transcludeCount = maxTrans + 1
-		return createInlineErrorTextAST(ref,
-			"Too many transclusions (must be at most "+strconv.Itoa(maxTrans)+
-				", see runtime configuration key max-transclusions)")
-	}
-	return nil
-}
-
-func mustParseZidAST(ref *ast.Reference) id.Zid {
-	zid, err := id.Parse(ref.URL.Path)
-	if err != nil {
-		panic(fmt.Sprintf("%v: %q (state %v) -> %v", err, ref.URL.Path, ref.State, ref))
-	}
-	return zid
-}
-
-func createInlineErrorImageAST(en *ast.EmbedRefNode) *ast.EmbedRefNode {
-	errorZid := id.ZidEmoji
-	en.Ref = ast.ParseReference(errorZid.String())
-	if len(en.Inlines) == 0 {
-		en.Inlines = ast.InlineSlice{&ast.TextNode{Text: "Error placeholder"}}
-	}
-	return en
-}
-
-func createInlineErrorTextAST(ref *ast.Reference, message string) ast.InlineNode {
-	text := message
-	if ref != nil {
-		text += ": " + ref.String() + "."
-	}
-	ln := &ast.LiteralNode{
-		Kind:    ast.LiteralInput,
-		Content: []byte(text),
-	}
-	fn := &ast.FormatNode{
-		Kind:    ast.FormatStrong,
-		Inlines: ast.InlineSlice{ln},
-	}
-	fn.Attrs = fn.Attrs.AddClass("error")
-	return fn
-}
-
-func (e *evaluator) evaluateEmbeddedZettelAST(zettel zettel.Zettel) *ast.Zettel {
-	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
-	ast.Walk(e, &zn.BlocksAST)
-	return zn
+	return zsx.MakeEmbed(attrs, ref, "", text)
 }
