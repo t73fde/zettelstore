@@ -42,7 +42,7 @@ func collectZettelIndexData(blocks *sx.Pair, data *collectData) {
 	zsx.WalkIt(data, blocks, nil)
 }
 
-func (data *collectData) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
+func (data *collectData) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
@@ -71,7 +71,7 @@ func (data *collectData) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 	}
 	return false
 }
-func (data *collectData) VisitAfter(*sx.Pair, *sx.Pair) {}
+func (data *collectData) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
 func (data *collectData) addRef(ref *sx.Pair) {
 	sym, refValue := zsx.GetReference(ref)

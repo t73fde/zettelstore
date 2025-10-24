@@ -100,7 +100,7 @@ func (v *mdVisitor) getQuotes(alst *sx.Pair) (string, string, bool) {
 }
 func (v *mdVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
 func (v *mdVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
-func (v *mdVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
+func (v *mdVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymBlock:
@@ -179,7 +179,7 @@ func (v *mdVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	return false
 }
 
-func (v *mdVisitor) VisitAfter(*sx.Pair, *sx.Pair) {}
+func (v *mdVisitor) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
 func (v *mdVisitor) visitBlock(node *sx.Pair, alst *sx.Pair) {
 	first := true

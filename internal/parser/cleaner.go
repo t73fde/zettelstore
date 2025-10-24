@@ -43,7 +43,7 @@ type cleanPhase1 struct {
 	hasMark   bool // Mark nodes will be cleaned in phase 2 only
 }
 
-func (v *cleanPhase1) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
+func (v *cleanPhase1) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymBlock:
@@ -67,7 +67,7 @@ func (v *cleanPhase1) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 	}
 	return false
 }
-func (v *cleanPhase1) VisitAfter(node *sx.Pair, _ *sx.Pair) {
+func (v *cleanPhase1) VisitItAfter(node *sx.Pair, _ *sx.Pair) {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymHeading:
@@ -94,7 +94,7 @@ type cleanPhase2 struct {
 	ids idsNode
 }
 
-func (v *cleanPhase2) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
+func (v *cleanPhase2) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymMark:
@@ -111,7 +111,7 @@ func (v *cleanPhase2) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 	}
 	return false
 }
-func (v *cleanPhase2) VisitAfter(*sx.Pair, *sx.Pair) {}
+func (v *cleanPhase2) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
 type idsNode map[string]*sx.Pair
 

@@ -36,7 +36,7 @@ func ReferenceSeq(block *sx.Pair) iter.Seq[*sx.Pair] {
 }
 
 // Visit all node to collect data for the summary.
-func (y *refYielder) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
+func (y *refYielder) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	if y.stop {
 		return true
 	}
@@ -60,4 +60,4 @@ func (y *refYielder) VisitBefore(node *sx.Pair, _ *sx.Pair) bool {
 	}
 	return false
 }
-func (*refYielder) VisitAfter(*sx.Pair, *sx.Pair) {}
+func (*refYielder) VisitItAfter(*sx.Pair, *sx.Pair) {}

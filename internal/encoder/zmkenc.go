@@ -69,7 +69,7 @@ func newZmkVisitor(w io.Writer) zmkVisitor { return zmkVisitor{b: newEncWriter(w
 // func (v *zmkVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
 func (v *zmkVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
 
-func (v *zmkVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
+func (v *zmkVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
@@ -136,7 +136,7 @@ func (v *zmkVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	}
 	return false
 }
-func (v *zmkVisitor) VisitAfter(*sx.Pair, *sx.Pair) {}
+func (v *zmkVisitor) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
 func (v *zmkVisitor) visitFormat(node *sx.Pair, alst *sx.Pair, delim string) {
 	_, attrs, inlines := zsx.GetFormat(node)

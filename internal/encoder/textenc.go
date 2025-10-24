@@ -92,7 +92,7 @@ func newTextVisitor(w io.Writer) textVisitor {
 }
 func (v *textVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
 func (v *textVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
-func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
+func (v *textVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymText:
@@ -240,7 +240,7 @@ func (v *textVisitor) VisitBefore(node *sx.Pair, alst *sx.Pair) bool {
 	}
 	return false
 }
-func (v *textVisitor) VisitAfter(*sx.Pair, *sx.Pair) {}
+func (v *textVisitor) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
 // textVisitorAST writes the abstract syntax tree to an io.Writer.
 type textVisitorAST struct {
