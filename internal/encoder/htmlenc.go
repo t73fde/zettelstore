@@ -45,11 +45,11 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 		return err
 	}
 
-	var isTitle ast.InlineSlice
+	var szTitle *sx.Pair
 	var htitle *sx.Pair
 	plainTitle, hasTitle := zn.InhMeta.Get(meta.KeyTitle)
 	if hasTitle {
-		szTitle := zsx.MakeInline((zsx.MakeText(sz.NormalizedSpacedText(string(plainTitle)))))
+		szTitle = zsx.MakeInline((zsx.MakeText(sz.NormalizedSpacedText(string(plainTitle)))))
 		htitle, err = he.th.Evaluate(szTitle, &env)
 		if err != nil {
 			return err
@@ -70,7 +70,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	head.ExtendBang(hm)
 	var sb strings.Builder
 	if hasTitle {
-		_ = he.textEnc.WriteInlines(&sb, &isTitle)
+		_ = he.textEnc.WriteSz(&sb, szTitle)
 	} else {
 		sb.Write(zn.Meta.Zid.Bytes())
 	}
