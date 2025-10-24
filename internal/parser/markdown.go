@@ -179,7 +179,7 @@ func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
 	var result sx.ListBuilder
 	for elem := node.FirstChild(); elem != nil; elem = elem.NextSibling() {
 		if item := p.acceptBlock(elem); item != nil {
-			result.Add(item)
+			result.Add(zsx.MakeBlock(item))
 		}
 	}
 	return result.List()

@@ -126,7 +126,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 		gotThird := buf.String()
 
 		if gotSecond != gotThird {
-			st.Errorf("\n1st: %q\n2nd: %q", gotSecond, gotThird)
+			st.Errorf("\ncmd: %q\n1st: %q\n2nd: %q", tc.Markdown, gotSecond, gotThird)
 		}
 	})
 }
