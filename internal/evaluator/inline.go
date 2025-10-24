@@ -162,152 +162,59 @@ func (e *evaluator) updateImageRefNode(
 }
 
 func findFragmentInBlocks(blocks *sx.Pair, fragment string) *sx.Pair {
-	var result *sx.Pair
-	for bn := range blocks.Pairs() {
-		blk := bn.Head()
-		if sym, isSymbol := sx.GetSymbol(blk.Car()); isSymbol {
-			switch sym {
-			case zsx.SymPara:
-				inlines := zsx.GetPara(blk)
-				result = findFragmentInInlines(inlines, fragment)
+	fs := fragmentSearcher{fragment: fragment}
+	zsx.WalkItList(&fs, blocks, 0, nil)
+	return fs.result
+}
 
-			case zsx.SymHeading:
-				_, _, inlines, _, frag := zsx.GetHeading(blk)
-				if frag == fragment {
-					return firstInlinesToEmbed(bn.Tail())
-				}
-				result = findFragmentInInlines(inlines, fragment)
+type fragmentSearcher struct {
+	result   *sx.Pair
+	fragment string
+}
 
-			case zsx.SymRegionBlock, zsx.SymRegionQuote, zsx.SymRegionVerse:
-				_, _, regionBlocks, inlines := zsx.GetRegion(blk)
-				if result = findFragmentInBlocks(regionBlocks, fragment); result == nil {
-					result = findFragmentInInlines(inlines, fragment)
-				}
+func (fs *fragmentSearcher) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
+	if fs.result != nil {
+		return true
+	}
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
+		switch sym {
+		case zsx.SymHeading:
+			_, _, _, _, frag := zsx.GetHeading(node)
+			if frag == fs.fragment {
+				bn := zsx.GetWalkList(alst)
+				fs.result = firstInlinesToEmbed(bn.Tail())
+				return true
+			}
 
-			case zsx.SymListOrdered, zsx.SymListUnordered, zsx.SymListQuote:
-				_, _, items := zsx.GetList(blk)
-				for itemNode := range items.Pairs() {
-					itemBlocks := zsx.GetBlock(itemNode.Head())
-					if result = findFragmentInBlocks(itemBlocks, fragment); result != nil {
-						return result
-					}
-				}
-
-			case zsx.SymDescription:
-				_, termVals := zsx.GetDescription(blk)
-				for n := termVals; n != nil; n = n.Tail() {
-					if result = findFragmentInInlines(n.Head(), fragment); result != nil {
-						return result
-					}
-					if n = n.Tail(); n == nil {
+		case zsx.SymMark:
+			_, _, frag, inlines := zsx.GetMark(node)
+			if frag == fs.fragment {
+				next := zsx.GetWalkList(alst).Tail()
+				for ; next != nil; next = next.Tail() {
+					car := next.Head().Car()
+					if !zsx.SymSoft.IsEqual(car) && !zsx.SymHard.IsEqual(car) {
 						break
 					}
-					for valBlkNode := range zsx.GetBlock(n.Head()).Pairs() {
-						valBlocks := zsx.GetBlock(valBlkNode.Head())
-						if result = findFragmentInBlocks(valBlocks, fragment); result != nil {
-							return result
-						}
-					}
-
+				}
+				if next == nil { // Mark is last in inline list
+					fs.result = inlines
+					return true
 				}
 
-			case zsx.SymTable:
-				_, headerRow, rows := zsx.GetTable(blk)
-				if result = findFragmentInRow(headerRow, fragment); result != nil {
-					return result
+				var lb sx.ListBuilder
+				if inlines != nil {
+					lb.Collect(inlines.Values())
 				}
-				for row := range rows.Pairs() {
-					if result = findFragmentInRow(row.Head(), fragment); result != nil {
-						return result
-					}
-				}
-
-			case zsx.SymBLOB:
-				_, _, _, inlines := zsx.GetBLOBuncode(blk)
-				result = findFragmentInInlines(inlines, fragment)
-
-			case zsx.SymTransclude:
-				_, _, inlines := zsx.GetTransclusion(blk)
-				result = findFragmentInInlines(inlines, fragment)
+				lb.Collect(next.Values())
+				fs.result = lb.List()
+				return true
 			}
-			if result != nil {
-				return result
-			}
+
 		}
 	}
-	return nil
+	return false
 }
-
-func findFragmentInRow(row *sx.Pair, fragment string) *sx.Pair {
-	for cell := range row.Pairs() {
-		_, inlines := zsx.GetCell(cell.Head())
-		return findFragmentInInlines(inlines, fragment)
-	}
-	return nil
-}
-
-func findFragmentInInlines(ins *sx.Pair, fragment string) *sx.Pair {
-	var result *sx.Pair
-	for in := range ins.Pairs() {
-		inl := in.Head()
-		if sym, isSymbol := sx.GetSymbol(inl.Car()); isSymbol {
-			switch sym {
-			case zsx.SymLink:
-				_, _, inlines := zsx.GetLink(inl)
-				result = findFragmentInInlines(inlines, fragment)
-
-			case zsx.SymEmbed:
-				_, _, _, inlines := zsx.GetEmbed(inl)
-				result = findFragmentInInlines(inlines, fragment)
-
-			case zsx.SymEmbedBLOB:
-				_, _, _, inlines := zsx.GetEmbedBLOBuncode(inl)
-				result = findFragmentInInlines(inlines, fragment)
-
-			case zsx.SymCite:
-				_, _, inlines := zsx.GetCite(inl)
-				result = findFragmentInInlines(inlines, fragment)
-
-			case zsx.SymMark:
-				_, _, frag, inlines := zsx.GetMark(inl)
-				if frag == fragment {
-					next := in.Tail()
-					for ; next != nil; next = next.Tail() {
-						car := next.Head().Car()
-						if !zsx.SymSoft.IsEqual(car) && !zsx.SymHard.IsEqual(car) {
-							break
-						}
-					}
-					if next == nil { // Mark is last in inline list
-						return inlines
-					}
-
-					var lb sx.ListBuilder
-					if inlines != nil {
-						lb.Collect(inlines.Values())
-					}
-					lb.Collect(next.Values())
-					return lb.List()
-				}
-				result = findFragmentInInlines(inlines, fragment)
-
-			case zsx.SymEndnote:
-				_, inlines := zsx.GetEndnote(inl)
-				result = findFragmentInInlines(inlines, fragment)
-
-			case zsx.SymFormatDelete, zsx.SymFormatEmph, zsx.SymFormatInsert, zsx.SymFormatMark,
-				zsx.SymFormatQuote, zsx.SymFormatSpan, zsx.SymFormatStrong, zsx.SymFormatSub,
-				zsx.SymFormatSuper:
-				_, _, inlines := zsx.GetFormat(inl)
-				result = findFragmentInInlines(inlines, fragment)
-			}
-			if result != nil {
-				return result
-			}
-		}
-	}
-	return nil
-}
+func (fs *fragmentSearcher) VisitItAfter(node *sx.Pair, _ *sx.Pair) {}
 
 func firstInlinesToEmbed(blocks *sx.Pair) *sx.Pair {
 	if blocks != nil {
