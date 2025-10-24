@@ -63,13 +63,6 @@ func writeTagSet(buf *encWriter, tags iter.Seq[meta.Value]) {
 	}
 }
 
-// WriteBlocks writes the content of a block slice to the writer.
-func (*TextEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
-	v := newTextVisitorAST(w)
-	v.visitBlockSlice(bs)
-	return v.b.Flush()
-}
-
 // WriteInlines writes an inline slice to the writer
 func (*TextEncoder) WriteInlines(w io.Writer, is *ast.InlineSlice) error {
 	v := newTextVisitorAST(w)

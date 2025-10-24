@@ -48,9 +48,3 @@ func (*szEncoder) WriteSz(w io.Writer, node *sx.Pair) error {
 	_, err := node.Print(w)
 	return err
 }
-
-// WriteBlocks writes a block slice to the writer
-func (enc *szEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
-	_, err := enc.trans.GetSz(bs).Print(w)
-	return err
-}

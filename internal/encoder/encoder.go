@@ -37,12 +37,6 @@ type Encoder interface {
 
 	// WriteSz encodes  SZ represented zettel content.
 	WriteSz(io.Writer, *sx.Pair) error
-
-	// WiteBlocks encodes a block slice, i.e. the zettel content.
-	//
-	// This method is deprecated and will be removed, if all implementations
-	// of WriteSz work correctly.
-	WriteBlocks(io.Writer, *ast.BlockSlice) error
 }
 
 // Create builds a new encoder with the given options.
@@ -52,7 +46,6 @@ func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
 		// We need a new transformer every time, because tx.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &htmlEncoder{
-			tx:   sztrans.NewSzTransformer(),
 			th:   shtml.NewEvaluator(1),
 			lang: params.Lang,
 		}
@@ -62,7 +55,6 @@ func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
 		// We need a new transformer every time, because tx.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &shtmlEncoder{
-			tx:   sztrans.NewSzTransformer(),
 			th:   shtml.NewEvaluator(1),
 			lang: params.Lang,
 		}

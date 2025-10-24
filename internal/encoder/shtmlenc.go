@@ -28,7 +28,6 @@ import (
 
 // shtmlEncoder contains all data needed for encoding.
 type shtmlEncoder struct {
-	tx   sztrans.SzTransformer
 	th   *shtml.Evaluator
 	lang string
 }
@@ -64,17 +63,6 @@ func (enc *shtmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 func (enc *shtmlEncoder) WriteSz(w io.Writer, node *sx.Pair) error {
 	env := shtml.MakeEnvironment(enc.lang)
 	hval, err := enc.th.Evaluate(node, &env)
-	if err != nil {
-		return err
-	}
-	_, err = hval.Print(w)
-	return err
-}
-
-// WriteBlocks writes a block slice to the writer
-func (enc *shtmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
-	env := shtml.MakeEnvironment(enc.lang)
-	hval, err := enc.th.Evaluate(enc.tx.GetSz(bs), &env)
 	if err != nil {
 		return err
 	}

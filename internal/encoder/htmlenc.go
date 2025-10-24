@@ -32,7 +32,6 @@ import (
 
 // htmlEncoder contains all data needed for encoding.
 type htmlEncoder struct {
-	tx      sztrans.SzTransformer
 	th      *shtml.Evaluator
 	lang    string
 	textEnc TextEncoder
@@ -111,21 +110,6 @@ func (he *htmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 func (he *htmlEncoder) WriteSz(w io.Writer, node *sx.Pair) error {
 	env := shtml.MakeEnvironment(he.lang)
 	hobj, err := he.th.Evaluate(node, &env)
-	if err == nil {
-		gen := sxhtml.NewGenerator()
-		if err = gen.WriteListHTML(w, hobj); err != nil {
-			return err
-		}
-
-		return gen.WriteHTML(w, shtml.Endnotes(&env))
-	}
-	return err
-}
-
-// WriteBlocks encodes a block slice.
-func (he *htmlEncoder) WriteBlocks(w io.Writer, bs *ast.BlockSlice) error {
-	env := shtml.MakeEnvironment(he.lang)
-	hobj, err := he.th.Evaluate(he.tx.GetSz(bs), &env)
 	if err == nil {
 		gen := sxhtml.NewGenerator()
 		if err = gen.WriteListHTML(w, hobj); err != nil {
