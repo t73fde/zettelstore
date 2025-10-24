@@ -57,8 +57,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 		}
 	}
 
-	xast := he.tx.GetSz(&zn.BlocksAST)
-	hast, err := he.th.Evaluate(xast, &env)
+	hast, err := he.th.Evaluate(zn.Blocks, &env)
 	if err != nil {
 		return err
 	}

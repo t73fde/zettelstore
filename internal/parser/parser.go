@@ -17,7 +17,6 @@ package parser
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
@@ -26,7 +25,6 @@ import (
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -99,15 +97,8 @@ func IsImageFormat(syntax string) bool {
 }
 
 // Parse parses some input and returns both a Sx.Object and a slice of block nodes.
-func Parse(inp *input.Input, m *meta.Meta, syntax string) (*sx.Pair, ast.BlockSlice) {
-	if obj := Get(syntax).Parse(inp, m, syntax); obj != nil {
-		bs, err := sztrans.GetBlockSlice(obj)
-		if err == nil {
-			return obj, bs
-		}
-		log.Printf("sztrans error: %v, for %v\n", err, obj)
-	}
-	return nil, nil
+func Parse(inp *input.Input, m *meta.Meta, syntax string) *sx.Pair {
+	return Get(syntax).Parse(inp, m, syntax)
 }
 
 // ParseDescription returns a suitable description stored in the metadata as an inline list.
@@ -140,14 +131,13 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 		parseMeta = m
 	}
 
-	rootNode, bs := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax)
+	rootNode := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax)
 	return &ast.Zettel{
-		Meta:      m,
-		Content:   zettel.Content,
-		Zid:       m.Zid,
-		InhMeta:   inhMeta,
-		Blocks:    rootNode,
-		BlocksAST: bs,
-		Syntax:    syntax,
+		Meta:    m,
+		Content: zettel.Content,
+		Zid:     m.Zid,
+		InhMeta: inhMeta,
+		Blocks:  rootNode,
+		Syntax:  syntax,
 	}
 }

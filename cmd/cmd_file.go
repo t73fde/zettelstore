@@ -48,7 +48,6 @@ func cmdFile(fs *flag.FlagSet) (int, error) {
 		nil,
 	)
 	parser.Clean(z.Blocks, false)
-	parser.CleanAST(&z.BlocksAST, false)
 	encdr := encoder.Create(
 		api.Encoder(enc),
 		&encoder.CreateParameter{Lang: string(m.GetDefault(meta.KeyLang, meta.ValueLangEN))})

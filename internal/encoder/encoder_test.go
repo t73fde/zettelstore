@@ -19,12 +19,10 @@ import (
 	"testing"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/parser"
 )
@@ -63,12 +61,9 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 		if syntax == "" {
 			syntax = meta.ValueSyntaxZmk
 		}
-		node, bs := parser.Parse(inp, nil, syntax)
+		node := parser.Parse(inp, nil, syntax)
 		parser.Clean(node, false)
-		parser.CleanAST(&bs, false)
 		checkEncodings(t, testNum, node, tc.inline, tc.descr, tc.expect, tc.zmk)
-		checkEncodingsAST(t, testNum+1000, bs, tc.inline, tc.descr, tc.expect, tc.zmk)
-		checkSz(t, testNum, bs, tc.inline, tc.descr)
 	}
 }
 
@@ -98,64 +93,10 @@ func checkEncodings(t *testing.T, testNum int, node *sx.Pair, isInline bool, des
 		}
 	}
 }
-func checkEncodingsAST(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string, expected expectMap, zmkDefault string) {
-	for enc, exp := range expected {
-		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
-		got, err := encodeAST(encdr, bs)
-		if err != nil {
-			prefix := fmt.Sprintf("Test #%d", testNum)
-			if d := descr; d != "" {
-				prefix += "\nReason:   " + d
-			}
-			prefix += "\nMode:     " + mode(isInline)
-			t.Errorf("%s\nEncoder:  %s\nError:    %v", prefix, enc, err)
-			continue
-		}
-		if enc == api.EncoderZmk && exp == useZmk {
-			exp = zmkDefault
-		}
-		if got != exp {
-			prefix := fmt.Sprintf("Test #%d", testNum)
-			if d := descr; d != "" {
-				prefix += "\nReason:   " + d
-			}
-			prefix += "\nMode:     " + mode(isInline)
-			t.Errorf("%s\nEncoder:  %s\nExpected: %q\nGot:      %q", prefix, enc, exp, got)
-		}
-	}
-}
-
-func checkSz(t *testing.T, testNum int, bs ast.BlockSlice, isInline bool, descr string) {
-	t.Helper()
-	encdr := encoder.Create(encoderSz, nil)
-	exp, err := encodeAST(encdr, bs)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	val, err := sxreader.MakeReader(strings.NewReader(exp)).Read()
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	if got := val.String(); exp != got {
-		prefix := fmt.Sprintf("Test #%d", testNum)
-		if d := descr; d != "" {
-			prefix += "\nReason:   " + d
-		}
-		prefix += "\nMode:     " + mode(isInline)
-		t.Errorf("%s\n\nExpected: %q\nGot:      %q", prefix, exp, got)
-	}
-}
 
 func encode(e encoder.Encoder, node *sx.Pair) (string, error) {
 	var sb strings.Builder
 	err := e.WriteSz(&sb, node)
-	return sb.String(), err
-}
-func encodeAST(e encoder.Encoder, bs ast.BlockSlice) (string, error) {
-	var sb strings.Builder
-	err := e.WriteBlocks(&sb, &bs)
 	return sb.String(), err
 }
 

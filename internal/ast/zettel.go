@@ -24,11 +24,10 @@ import (
 // Zettel is the root node of the abstract syntax tree.
 // It is *not* part of the visitor pattern.
 type Zettel struct {
-	Meta      *meta.Meta     // Original metadata
-	Content   zettel.Content // Original content
-	Zid       id.Zid         // Zettel identification.
-	InhMeta   *meta.Meta     // Metadata of the zettel, with inherited values.
-	Blocks    *sx.Pair       // Syntax tree, encodes as an sx.Object.
-	BlocksAST BlockSlice     // Zettel abstract syntax tree is a sequence of block nodes.
-	Syntax    string         // Syntax / parser that produced the Ast
+	Meta    *meta.Meta     // Original metadata
+	Content zettel.Content // Original content
+	Zid     id.Zid         // Zettel identification.
+	InhMeta *meta.Meta     // Metadata of the zettel, with inherited values.
+	Blocks  *sx.Pair       // Syntax tree, encodes as an sx.Object.
+	Syntax  string         // Syntax / parser that produced the Ast
 }

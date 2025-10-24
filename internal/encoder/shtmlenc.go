@@ -40,7 +40,7 @@ func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 	if err != nil {
 		return err
 	}
-	contentSHTML, err := enc.th.Evaluate(enc.tx.GetSz(&zn.BlocksAST), &env)
+	contentSHTML, err := enc.th.Evaluate(zn.Blocks, &env)
 	if err != nil {
 		return err
 	}

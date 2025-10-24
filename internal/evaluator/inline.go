@@ -214,7 +214,7 @@ func (fs *fragmentSearcher) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 	}
 	return false
 }
-func (fs *fragmentSearcher) VisitItAfter(node *sx.Pair, _ *sx.Pair) {}
+func (fs *fragmentSearcher) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
 func firstInlinesToEmbed(blocks *sx.Pair) *sx.Pair {
 	if blocks != nil {

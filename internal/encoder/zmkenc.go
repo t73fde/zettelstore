@@ -34,14 +34,14 @@ type zmkEncoder struct{}
 
 // WriteZettel writes the encoded zettel to the writer.
 func (ze *zmkEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
-	v := newZmkVisitorAST(w)
+	v := newZmkVisitor(w)
 	v.b.WriteMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {
 		v.b.WriteString("---\n")
 	} else {
 		v.b.WriteLn()
 	}
-	ast.Walk(&v, &zn.BlocksAST)
+	v.walk(zn.Blocks, nil)
 	return v.b.Flush()
 }
 

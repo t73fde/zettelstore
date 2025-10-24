@@ -71,14 +71,12 @@ const (
 	partMeta
 	partContent
 	partZettel
-	partSz // TEMP: SZ encoded content
 )
 
 var partMap = map[string]partType{
 	api.PartMeta:    partMeta,
 	api.PartContent: partContent,
 	api.PartZettel:  partZettel,
-	"sz":            partSz,
 }
 
 func getPart(q url.Values, defPart partType) partType {

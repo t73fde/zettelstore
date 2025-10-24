@@ -26,7 +26,6 @@ import (
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
@@ -50,10 +49,6 @@ func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *
 		zn.Blocks = evaluateSxn(zn.Blocks)
 	default:
 		zn.Blocks = EvaluateBlock(ctx, port, rtConfig, zn.Blocks)
-	}
-
-	if blk, err := sztrans.GetBlockSlice(zn.Blocks); err == nil {
-		zn.BlocksAST = blk
 	}
 }
 

@@ -32,9 +32,9 @@ type TextEncoder struct{}
 
 // WriteZettel writes metadata and content.
 func (te *TextEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
-	v := newTextVisitorAST(w)
+	v := newTextVisitor(w)
 	_ = te.WriteMeta(&v.b, zn.InhMeta)
-	v.visitBlockSlice(&zn.BlocksAST)
+	v.walk(zn.Blocks, nil)
 	return v.b.Flush()
 }
 

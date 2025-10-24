@@ -162,8 +162,6 @@ func (a *API) writeEncodedZettelPart(
 	case partMeta:
 		err = encdr.WriteMeta(&buf, zn.InhMeta)
 	case partContent:
-		err = encdr.WriteBlocks(&buf, &zn.BlocksAST)
-	case partSz: // TEMP
 		err = encdr.WriteSz(&buf, zn.Blocks)
 	}
 	if err != nil {

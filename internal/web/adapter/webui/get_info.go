@@ -169,13 +169,9 @@ var apiParts = []string{api.PartZettel, api.PartMeta, api.PartContent}
 
 func (wui *WebUI) infoAPIMatrix(zid id.Zid, parseOnly bool, encTexts []string) *sx.Pair {
 	matrix := sx.Nil()
-	apiPartsAndSz := apiParts
-	if parseOnly {
-		apiPartsAndSz = append(apiPartsAndSz, "sz") // TEMP
-	}
 	u := wui.NewURLBuilder('z').SetZid(zid)
-	for ip := len(apiPartsAndSz) - 1; ip >= 0; ip-- {
-		part := apiPartsAndSz[ip]
+	for ip := len(apiParts) - 1; ip >= 0; ip-- {
+		part := apiParts[ip]
 		row := sx.Nil()
 		for je := len(encTexts) - 1; je >= 0; je-- {
 			enc := encTexts[je]

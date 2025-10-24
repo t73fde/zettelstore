@@ -28,7 +28,6 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/ast/sztrans"
 )
 
@@ -274,13 +273,6 @@ func (g *htmlGenerator) BlocksSxn(block *sx.Pair) (content, endnotes *sx.Pair, _
 		return nil, nil, err
 	}
 	return sh, shtml.Endnotes(&env), nil
-}
-func (g *htmlGenerator) BlocksSxnAST(bs *ast.BlockSlice) (content, endnotes *sx.Pair, _ error) {
-	if bs == nil || len(*bs) == 0 {
-		return nil, nil, nil
-	}
-	sx := g.tx.GetSz(bs)
-	return g.BlocksSxn(sx)
 }
 
 func (g *htmlGenerator) szToSxHTML(node *sx.Pair) *sx.Pair {

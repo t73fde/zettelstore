@@ -32,9 +32,8 @@ type szEncoder struct {
 
 // WriteZettel writes the encoded zettel to the writer.
 func (enc *szEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
-	content := enc.trans.GetSz(&zn.BlocksAST)
 	meta := sztrans.GetMetaSz(zn.InhMeta)
-	_, err := sx.MakeList(meta, content).Print(w)
+	_, err := sx.MakeList(meta, zn.Blocks).Print(w)
 	return err
 }
 

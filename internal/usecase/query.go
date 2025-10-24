@@ -25,6 +25,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/parser"
@@ -132,15 +133,17 @@ func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, 
 		if err != nil {
 			continue
 		}
-		for _, ln := range collect.OrderAST(&zn.BlocksAST) {
-			ref := ln.Ref
-			if !ref.IsZettel() {
-				continue
-			}
+		if blk, errTx := sztrans.GetBlockSlice(zn.Blocks); errTx == nil {
+			for _, ln := range collect.OrderAST(&blk) {
+				ref := ln.Ref
+				if !ref.IsZettel() {
+					continue
+				}
 
-			if collectedZid, err2 := id.Parse(ref.URL.Path); err2 == nil {
-				if z, err3 := uc.port.GetZettel(ctx, collectedZid); err3 == nil {
-					result = append(result, z.Meta)
+				if collectedZid, err2 := id.Parse(ref.URL.Path); err2 == nil {
+					if z, err3 := uc.port.GetZettel(ctx, collectedZid); err3 == nil {
+						result = append(result, z.Meta)
+					}
 				}
 			}
 		}
@@ -215,9 +218,12 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 			continue
 		}
 		zn := uc.ucEvaluate.RunZettel(ctx, zettel, syntax)
-		ast.Walk(&v, &zn.BlocksAST)
-		if v.found {
-			result = append(result, cand)
+
+		if blk, errTx := sztrans.GetBlockSlice(zn.Blocks); errTx == nil {
+			ast.Walk(&v, &blk)
+			if v.found {
+				result = append(result, cand)
+			}
 		}
 	}
 	return result
