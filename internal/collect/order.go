@@ -17,8 +17,6 @@ package collect
 import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zsx"
-
-	"zettelstore.de/z/internal/ast"
 )
 
 // Order returns links in the items of the first list found in the given block node.
@@ -80,62 +78,6 @@ func firstInlineZettelLink(inlines *sx.Pair) (result *sx.Pair) {
 			if result != nil {
 				return result
 			}
-		}
-	}
-	return nil
-}
-
-// OrderAST of internal links within the given zettel.
-func OrderAST(bns *ast.BlockSlice) (result []*ast.LinkNode) {
-	for _, bn := range *bns {
-		ln, ok := bn.(*ast.NestedListNode)
-		if !ok {
-			continue
-		}
-		switch ln.Kind {
-		case ast.NestedListOrdered, ast.NestedListUnordered:
-			for _, is := range ln.Items {
-				if ln := firstItemZettelLinkAST(is); ln != nil {
-					result = append(result, ln)
-				}
-			}
-		}
-	}
-	return result
-}
-
-func firstItemZettelLinkAST(is ast.ItemSlice) *ast.LinkNode {
-	for _, in := range is {
-		if pn, ok := in.(*ast.ParaNode); ok {
-			if ln := firstInlineZettelLinkAST(pn.Inlines); ln != nil {
-				return ln
-			}
-		}
-	}
-	return nil
-}
-
-func firstInlineZettelLinkAST(is ast.InlineSlice) (result *ast.LinkNode) {
-	for _, inl := range is {
-		switch in := inl.(type) {
-		case *ast.LinkNode:
-			return in
-		case *ast.EmbedRefNode:
-			result = firstInlineZettelLinkAST(in.Inlines)
-		case *ast.EmbedBLOBNode:
-			result = firstInlineZettelLinkAST(in.Inlines)
-		case *ast.CiteNode:
-			result = firstInlineZettelLinkAST(in.Inlines)
-		case *ast.FootnoteNode:
-			// Ignore references in footnotes
-			continue
-		case *ast.FormatNode:
-			result = firstInlineZettelLinkAST(in.Inlines)
-		default:
-			continue
-		}
-		if result != nil {
-			return result
 		}
 	}
 	return nil

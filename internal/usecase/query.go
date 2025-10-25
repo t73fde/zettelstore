@@ -23,6 +23,8 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/ast/sztrans"
@@ -133,16 +135,13 @@ func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, 
 		if err != nil {
 			continue
 		}
-		if blk, errTx := sztrans.GetBlockSlice(zn.Blocks); errTx == nil {
-			for _, ln := range collect.OrderAST(&blk) {
-				ref := ln.Ref
-				if !ref.IsZettel() {
-					continue
-				}
-
-				if collectedZid, err2 := id.Parse(ref.URL.Path); err2 == nil {
-					if z, err3 := uc.port.GetZettel(ctx, collectedZid); err3 == nil {
-						result = append(result, z.Meta)
+		for ln := range collect.Order(zn.Blocks).Pairs() {
+			_, ref, _ := zsx.GetLink(ln.Head())
+			if refSym, refVal := zsx.GetReference(ref); sz.SymRefStateZettel.IsEqualSymbol(refSym) {
+				val, _ := sz.SplitFragment(refVal)
+				if collectedZid, err2 := id.Parse(val); err2 == nil {
+					if collectedMeta, err3 := uc.port.GetMeta(ctx, collectedZid); err3 == nil {
+						result = append(result, collectedMeta)
 					}
 				}
 			}
