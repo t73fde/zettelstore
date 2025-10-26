@@ -28,7 +28,7 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast/sztrans"
+	"zettelstore.de/z/internal/ast"
 )
 
 // Builder allows to build new URLs for the web service.
@@ -188,7 +188,7 @@ var mapMetaKey = map[string]string{
 }
 
 func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
-	tm := sztrans.GetMetaSz(m)
+	tm := ast.GetMetaSz(m)
 	env := shtml.MakeEnvironment(g.lang)
 	hm, err := g.th.Evaluate(tm, &env)
 	if err != nil {
