@@ -134,7 +134,7 @@ func (e *evaluator) evalEmbed(en *sx.Pair) *sx.Pair {
 	}
 	if result == nil {
 		return zsx.MakeLiteral(zsx.SymLiteralComment,
-			sx.MakeList(sx.Cons(sx.MakeString("-"), sx.MakeString(""))),
+			sx.MakeList(sx.Cons(sx.MakeString(zsx.DefaultAttribute), sx.MakeString(""))),
 			"Nothing to transclude: "+sz.ReferenceString(ref),
 		)
 	}

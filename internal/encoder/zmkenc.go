@@ -489,7 +489,7 @@ func (v *zmkVisitor) writeAttributes(attrs *sx.Pair) {
 		if i > 0 {
 			v.b.WriteSpace()
 		}
-		if k == "-" {
+		if k == zsx.DefaultAttribute {
 			_ = v.b.WriteByte('-')
 			continue
 		}
