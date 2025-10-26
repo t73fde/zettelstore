@@ -239,6 +239,8 @@ func (v *unlinkedVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 			// No further search.
 			return true
 		case zsx.SymText:
+			// TODO: this is way too simple. For example, two text nodes may
+			// be separated by a SOFT or HARD node.
 			textWords := zerostrings.SplitWords(zsx.GetText(node))
 			if len(v.words) <= len(textWords) {
 				v.found = slices.Equal(v.words, textWords[:len(v.words)])
