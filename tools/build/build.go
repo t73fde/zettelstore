@@ -63,7 +63,7 @@ func readFossilDirty() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	for _, line := range zerostrings.SplitLines(s) {
+	for line := range zerostrings.SplitLineSeq(s) {
 		for _, prefix := range dirtyPrefixes {
 			if strings.HasPrefix(line, prefix) {
 				return dirtySuffix, nil

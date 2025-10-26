@@ -142,7 +142,7 @@ func createUnlinkedQuery(zid id.Zid, phrase string) *query.Query {
 	sb.Write(zid.Bytes())
 	sb.WriteByte(' ')
 	sb.WriteString(api.UnlinkedDirective)
-	for _, word := range zerostrings.MakeWords(phrase) {
+	for word := range zerostrings.SplitWordSeq(phrase) {
 		sb.WriteByte(' ')
 		sb.WriteString(api.PhraseDirective)
 		sb.WriteByte(' ')

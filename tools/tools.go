@@ -118,7 +118,7 @@ func CheckGoTest(pkg string, testParams ...string) error {
 	args = append(args, testParams...)
 	out, err := ExecuteCommand(env, "go", args...)
 	if err != nil {
-		for _, line := range zerostrings.SplitLines(out) {
+		for line := range zerostrings.SplitLineSeq(out) {
 			if strings.HasPrefix(line, "ok") || strings.HasPrefix(line, "?") {
 				continue
 			}
@@ -242,8 +242,11 @@ func checkFossilExtra() error {
 	}
 	if len(out) > 0 {
 		fmt.Fprint(os.Stderr, "Warning: unversioned file(s):")
-		for i, extra := range zerostrings.SplitLines(out) {
-			if i > 0 {
+		first := true
+		for extra := range zerostrings.SplitLineSeq(out) {
+			if first {
+				first = false
+			} else {
 				fmt.Fprint(os.Stderr, ",")
 			}
 			fmt.Fprintf(os.Stderr, " %q", extra)

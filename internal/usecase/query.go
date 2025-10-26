@@ -268,7 +268,7 @@ func (v *unlinkedVisitorAST) splitInlineTextListAST(is *ast.InlineSlice) []strin
 	for _, in := range *is {
 		switch n := in.(type) {
 		case *ast.TextNode:
-			curList = append(curList, zerostrings.MakeWords(n.Text)...)
+			curList = append(curList, zerostrings.SplitWords(n.Text)...)
 		default:
 			if curList != nil {
 				result = append(result, v.joinWords(curList))
