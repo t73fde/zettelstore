@@ -27,7 +27,6 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/query"
 )
 
@@ -265,9 +264,9 @@ func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.Coun
 func (ap *actionPara) prepareSimpleQuery(buf *bytes.Buffer) int {
 	sea := ap.q.Clone()
 	sea.RemoveActions()
-	buf.WriteString(ast.QueryPrefix)
+	buf.WriteString(api.QueryPrefix)
 	sea.Print(buf)
-	if buf.Len() > len(ast.QueryPrefix) {
+	if buf.Len() > len(api.QueryPrefix) {
 		buf.WriteByte(' ')
 	}
 	return buf.Len()

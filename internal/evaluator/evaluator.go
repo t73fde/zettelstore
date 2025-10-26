@@ -63,7 +63,6 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block
 		transcludeCount: 0,
 		costMap:         map[id.Zid]transcludeCost{},
 		embedMap:        map[string]*sx.Pair{},
-		embedMapAST:     map[string]ast.InlineSlice{},
 		marker:          &ast.Zettel{},
 	}
 	return mustPair(zsx.Walk(&e, block, nil))
@@ -78,7 +77,6 @@ type evaluator struct {
 	costMap         map[id.Zid]transcludeCost
 	marker          *ast.Zettel
 	embedMap        map[string]*sx.Pair
-	embedMapAST     map[string]ast.InlineSlice
 }
 
 type transcludeCost struct {

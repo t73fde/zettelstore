@@ -37,7 +37,6 @@ type urlBuilder interface {
 }
 
 type htmlGenerator struct {
-	tx    sztrans.SzTransformer
 	th    *shtml.Evaluator
 	lang  string
 	symAt *sx.Symbol
@@ -153,7 +152,6 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 	})
 
 	return &htmlGenerator{
-		tx:   sztrans.NewSzTransformer(),
 		th:   th,
 		lang: lang,
 	}

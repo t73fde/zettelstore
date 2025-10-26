@@ -13,21 +13,3 @@
 
 // Package ast provides the abstract syntax tree for parsed zettel content.
 package ast
-
-import (
-	"t73f.de/r/sx"
-	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/meta"
-	"zettelstore.de/z/internal/zettel"
-)
-
-// Zettel is the root node of the abstract syntax tree.
-// It is *not* part of the visitor pattern.
-type Zettel struct {
-	Meta    *meta.Meta     // Original metadata
-	Content zettel.Content // Original content
-	Zid     id.Zid         // Zettel identification.
-	InhMeta *meta.Meta     // Metadata of the zettel, with inherited values.
-	Blocks  *sx.Pair       // Syntax tree, encodes as an sx.Object.
-	Syntax  string         // Syntax / parser that produced the Ast
-}

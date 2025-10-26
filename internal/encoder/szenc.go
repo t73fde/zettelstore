@@ -26,9 +26,7 @@ import (
 )
 
 // szEncoder contains all data needed for encoding.
-type szEncoder struct {
-	trans sztrans.SzTransformer
-}
+type szEncoder struct{}
 
 // WriteZettel writes the encoded zettel to the writer.
 func (enc *szEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
