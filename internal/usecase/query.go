@@ -17,8 +17,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
+	"t73f.de/r/sx"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
@@ -26,8 +28,6 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/ast/sztrans"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/parser"
@@ -201,16 +201,12 @@ func filterByZid(candidates []*meta.Meta, ignoreSeq *idset.Set) []*meta.Meta {
 
 func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, words []string) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
+	ulv := unlinkedVisitor{words: words}
 	for _, cand := range candidates {
 		zettel, err := uc.port.GetZettel(ctx, cand.Zid)
 		if err != nil {
 			continue
 		}
-		v := unlinkedVisitorAST{
-			words: words,
-			found: false,
-		}
-		v.text = v.joinWords(words)
 
 		syntax := string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 		if !parser.IsASTParser(syntax) {
@@ -218,66 +214,37 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 		}
 		zn := uc.ucEvaluate.RunZettel(ctx, zettel, syntax)
 
-		if blk, errTx := sztrans.GetBlockSlice(zn.Blocks); errTx == nil {
-			ast.Walk(&v, &blk)
-			if v.found {
-				result = append(result, cand)
-			}
+		ulv.found = false
+		zsx.WalkIt(&ulv, zn.Blocks, nil)
+		if ulv.found {
+			result = append(result, cand)
 		}
 	}
 	return result
 }
 
-func (*unlinkedVisitorAST) joinWords(words []string) string {
-	return " " + strings.ToLower(strings.Join(words, " ")) + " "
-}
-
-type unlinkedVisitorAST struct {
+type unlinkedVisitor struct {
 	words []string
-	text  string
 	found bool
 }
 
-func (v *unlinkedVisitorAST) Visit(node ast.Node) ast.Visitor {
-	switch n := node.(type) {
-	case *ast.InlineSlice:
-		v.checkWordsAST(n)
-		return nil
-	case *ast.HeadingNode:
-		return nil
-	case *ast.LinkNode, *ast.EmbedRefNode, *ast.EmbedBLOBNode, *ast.CiteNode:
-		return nil
+func (v *unlinkedVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
+	if v.found {
+		return true
 	}
-	return v
-}
-
-func (v *unlinkedVisitorAST) checkWordsAST(is *ast.InlineSlice) {
-	if len(*is) < 2*len(v.words)-1 {
-		return
-	}
-	for _, text := range v.splitInlineTextListAST(is) {
-		if strings.Contains(text, v.text) {
-			v.found = true
-		}
-	}
-}
-
-func (v *unlinkedVisitorAST) splitInlineTextListAST(is *ast.InlineSlice) []string {
-	var result []string
-	var curList []string
-	for _, in := range *is {
-		switch n := in.(type) {
-		case *ast.TextNode:
-			curList = append(curList, zerostrings.SplitWords(n.Text)...)
-		default:
-			if curList != nil {
-				result = append(result, v.joinWords(curList))
-				curList = nil
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
+		switch sym {
+		case zsx.SymHeading,
+			zsx.SymLink, zsx.SymEmbed, zsx.SymEmbedBLOB, zsx.SymCite:
+			// No further search.
+			return true
+		case zsx.SymText:
+			textWords := zerostrings.SplitWords(zsx.GetText(node))
+			if len(v.words) <= len(textWords) {
+				v.found = slices.Equal(v.words, textWords[:len(v.words)])
 			}
 		}
 	}
-	if curList != nil {
-		result = append(result, v.joinWords(curList))
-	}
-	return result
+	return false
 }
+func (*unlinkedVisitor) VisitItAfter(*sx.Pair, *sx.Pair) {}
