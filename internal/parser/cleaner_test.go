@@ -46,6 +46,9 @@ func TestCleaner(t *testing.T) {
 		{name: "mark before heading",
 			src: "(BLOCK (HEADING 1 () \"\" \"\" (TEXT \"x\")) (PARA (MARK \"x\" \"\" \"\")))",
 			exp: "(BLOCK (HEADING 1 () \"x\" \"x\" (TEXT \"x\")) (PARA (MARK \"x\" \"x\" \"x-1\")))"},
+		{name: "mark in mark with text",
+			src: `(MARK "m" "" "" (MARK "m" "" "" (TEXT "x")))`,
+			exp: `(MARK "m" "m" "m" (MARK "m" "m" "m-1" (TEXT "x")))`},
 	}
 
 	for _, tc := range testcases {

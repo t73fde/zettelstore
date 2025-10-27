@@ -64,7 +64,7 @@ func (v *cleanPhase1) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	}
 	return false
 }
-func (v *cleanPhase1) VisitItAfter(node *sx.Pair, _ *sx.Pair) {}
+func (v *cleanPhase1) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
 type cleanPhase2 struct {
 	ids idsNode

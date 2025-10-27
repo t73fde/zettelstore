@@ -16,29 +16,67 @@ package parser_test
 import (
 	"testing"
 
+	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/parser"
 )
 
-func TestParseSVG(t *testing.T) {
+func TestParsePlain(t *testing.T) {
 	testCases := []struct {
-		name string
-		src  string
-		exp  string
+		name      string
+		syntax    string
+		src       string
+		allowHTML bool
+		exp       string
 	}{
-		{"common", " <svg bla", "(BLOCK (PARA (EMBED-BLOB () \"svg\" \"<svg bla\")))"},
-		{"inkscape", "<svg\nbla", "(BLOCK (PARA (EMBED-BLOB () \"svg\" \"<svg\\nbla\")))"},
-		{"selfmade", "<svg>", "(BLOCK (PARA (EMBED-BLOB () \"svg\" \"<svg>\")))"},
-		{"error", "<svgbla", "(BLOCK)"},
-		{"error-", "<svg-bla", "(BLOCK)"},
-		{"error#", "<svg2bla", "(BLOCK)"},
+		{name: "empty-default", syntax: "",
+			src: "",
+			exp: "(BLOCK (VERBATIM-CODE ((\"\" . \"\")) \"\"))"},
+		{name: "empty-html", syntax: meta.ValueSyntaxHTML,
+			src: "",
+			exp: "(BLOCK (VERBATIM-CODE ((\"\" . \"html\")) \"\"))"},
+		{name: "empty-html-allow", syntax: meta.ValueSyntaxHTML, allowHTML: true,
+			src: "",
+			exp: "(BLOCK (VERBATIM-HTML ((\"\" . \"html\")) \"\"))"},
+		{name: "empty-sxn", syntax: meta.ValueSyntaxSxn,
+			src: "",
+			exp: "(BLOCK (VERBATIM-CODE ((\"\" . \"sxn\")) \"\"))"},
+		{name: "valid-sxn", syntax: meta.ValueSyntaxSxn,
+			src: "(+ 3 4)",
+			exp: "(BLOCK (VERBATIM-CODE ((\"\" . \"sxn\")) \"(+ 3 4)\"))"},
+		{name: "invalid-sxn", syntax: meta.ValueSyntaxSxn,
+			src: "(+ 3 4",
+			exp: "(BLOCK (VERBATIM-CODE ((\"\" . \"sxn\")) \"(+ 3 4\") (PARA (TEXT \"ReaderError 1-6: unexpected EOF\")))"},
+
+		{name: "svg-common", syntax: meta.ValueSyntaxSVG,
+			src: " <svg bla",
+			exp: "(BLOCK (PARA (EMBED-BLOB () \"svg\" \"<svg bla\")))"},
+		{name: "svg-inkscape", syntax: meta.ValueSyntaxSVG,
+			src: "<svg\nbla",
+			exp: "(BLOCK (PARA (EMBED-BLOB () \"svg\" \"<svg\\nbla\")))"},
+		{name: "svg-selfmade", syntax: meta.ValueSyntaxSVG,
+			src: "<svg>",
+			exp: "(BLOCK (PARA (EMBED-BLOB () \"svg\" \"<svg>\")))"},
+		{name: "svg-error", syntax: meta.ValueSyntaxSVG,
+			src: "<svgbla",
+			exp: "(BLOCK)"},
+		{name: "svg-error-", syntax: meta.ValueSyntaxSVG,
+			src: "<svg-bla",
+			exp: "(BLOCK)"},
+		{name: "svg-error#", syntax: meta.ValueSyntaxSVG,
+			src: "<svg2bla",
+			exp: "(BLOCK)"},
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			inp := input.NewInput([]byte(tc.src))
-			node := parser.Parse(inp, nil, meta.ValueSyntaxSVG, nil)
+			alst := sx.Nil()
+			if tc.allowHTML {
+				alst = alst.Cons(sx.Cons(parser.SymAllowHTML, nil))
+			}
+			node := parser.Parse(inp, nil, tc.syntax, alst)
 			if got := node.String(); tc.exp != got {
 				t.Errorf("\nexp: %q\ngot: %q", tc.exp, got)
 			}
