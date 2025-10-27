@@ -73,7 +73,7 @@ func TestMarkdownSpec(t *testing.T) {
 }
 
 func createMDBlockSlice(markdown string) *sx.Pair {
-	return parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown)
+	return parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, nil)
 }
 
 func testAllEncodings(t *testing.T, tc markdownTestCase, node *sx.Pair) {
@@ -97,7 +97,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 		// gotFirst := buf.String()
 
 		testID = tc.Example*100 + 2
-		secondNode := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk)
+		secondNode := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, nil)
 		buf.Reset()
 		_ = zmkEncoder.WriteSz(&buf, secondNode)
 		gotSecond := buf.String()
@@ -107,7 +107,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 		// }
 
 		testID = tc.Example*100 + 3
-		thirdNode := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk)
+		thirdNode := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, nil)
 		buf.Reset()
 		_ = zmkEncoder.WriteSz(&buf, thirdNode)
 		gotThird := buf.String()

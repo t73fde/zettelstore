@@ -46,19 +46,20 @@ func init() {
 	})
 }
 
-func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string) *sx.Pair {
+func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.Pair {
 	source := []byte(inp.Src[inp.Pos:])
 	parser := gm.DefaultParser()
 	node := parser.Parse(gmText.NewReader(source))
 	textEnc := encoder.Create(api.EncoderText, nil)
-	p := mdP{source: source, docNode: node, textEnc: textEnc}
+	p := mdP{source: source, docNode: node, textEnc: textEnc, allowHTML: alst.Assoc(SymAllowHTML) != nil}
 	return p.acceptBlockChildren(p.docNode)
 }
 
 type mdP struct {
-	source  []byte
-	docNode gmAst.Node
-	textEnc encoder.Encoder
+	source    []byte
+	docNode   gmAst.Node
+	textEnc   encoder.Encoder
+	allowHTML bool
 }
 
 func (p *mdP) acceptBlockChildren(docNode gmAst.Node) *sx.Pair {
@@ -204,7 +205,10 @@ func (p *mdP) acceptHTMLBlock(node *gmAst.HTMLBlock) *sx.Pair {
 		}
 		content = append(content, closure...)
 	}
-	return zsx.MakeVerbatim(zsx.SymVerbatimHTML, nil, string(content))
+	if p.allowHTML {
+		return zsx.MakeVerbatim(zsx.SymVerbatimHTML, nil, string(content))
+	}
+	return zsx.MakeVerbatim(zsx.SymVerbatimCode, makeAttrHTML(), string(content))
 }
 
 func (p *mdP) acceptInlineChildren(node gmAst.Node) *sx.Pair {
@@ -369,9 +373,9 @@ func (p *mdP) acceptRawHTML(node *gmAst.RawHTML) (*sx.Pair, *sx.Pair) {
 		segment := node.Segments.At(i)
 		segs = append(segs, segment.Value(p.source))
 	}
-	return zsx.MakeLiteral(
-		zsx.SymLiteralCode,
-		sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString("html")), sx.Nil()),
-		string(bytes.Join(segs, nil)),
-	), nil
+	return zsx.MakeLiteral(zsx.SymLiteralCode, makeAttrHTML(), string(bytes.Join(segs, nil))), nil
+}
+
+func makeAttrHTML() *sx.Pair {
+	return sx.Cons(sx.Cons(sx.MakeString(""), sx.MakeString("html")), sx.Nil())
 }

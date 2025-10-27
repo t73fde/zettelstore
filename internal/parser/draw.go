@@ -42,7 +42,7 @@ const (
 	defaultScaleY = 20
 )
 
-func parseDraw(inp *input.Input, m *meta.Meta, _ string) *sx.Pair {
+func parseDraw(inp *input.Input, m *meta.Meta, _ string, _ *sx.Pair) *sx.Pair {
 	font := m.GetDefault("font", defaultFont)
 	scaleX := m.GetNumber("x-scale", defaultScaleX)
 	scaleY := m.GetNumber("y-scale", defaultScaleY)

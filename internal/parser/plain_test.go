@@ -38,7 +38,7 @@ func TestParseSVG(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			inp := input.NewInput([]byte(tc.src))
-			node := parser.Parse(inp, nil, meta.ValueSyntaxSVG)
+			node := parser.Parse(inp, nil, meta.ValueSyntaxSVG, nil)
 			if got := node.String(); tc.exp != got {
 				t.Errorf("\nexp: %q\ngot: %q", tc.exp, got)
 			}

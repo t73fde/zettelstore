@@ -84,7 +84,7 @@ func TestNaughtyStringParser(t *testing.T) {
 	}
 	for _, s := range blns {
 		for _, pinfo := range pinfos {
-			node := parser.Parse(input.NewInput([]byte(s)), &meta.Meta{}, pinfo.Name)
+			node := parser.Parse(input.NewInput([]byte(s)), &meta.Meta{}, pinfo.Name, nil)
 			for _, enc := range encs {
 				if err = enc.WriteSz(io.Discard, node); err != nil {
 					t.Error(err)

@@ -28,11 +28,12 @@ import (
 )
 
 type zmkTestCase struct {
-	descr  string
-	zmk    string
-	syntax string
-	inline bool
-	expect expectMap
+	descr     string
+	zmk       string
+	syntax    string
+	allowHTML bool
+	inline    bool
+	expect    expectMap
 }
 
 type expectMap map[api.EncodingEnum]string
@@ -61,8 +62,12 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 		if syntax == "" {
 			syntax = meta.ValueSyntaxZmk
 		}
-		node := parser.Parse(inp, nil, syntax)
-		parser.Clean(node, false)
+		alst := sx.Nil()
+		if tc.allowHTML {
+			alst = alst.Cons(sx.Cons(parser.SymAllowHTML, nil))
+		}
+		node := parser.Parse(inp, nil, syntax, alst)
+		parser.Clean(node)
 		checkEncodings(t, testNum, node, tc.inline, tc.descr, tc.expect, tc.zmk)
 	}
 }

@@ -57,7 +57,7 @@ func init() {
 	})
 }
 
-func parseBlob(inp *input.Input, m *meta.Meta, syntax string) *sx.Pair {
+func parseBlob(inp *input.Input, m *meta.Meta, syntax string, _ *sx.Pair) *sx.Pair {
 	if p := Get(syntax); p != nil {
 		syntax = p.Name
 	}

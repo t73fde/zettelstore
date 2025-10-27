@@ -27,8 +27,8 @@ import (
 )
 
 // Clean the given SZ syntax tree.
-func Clean(node *sx.Pair, allowHTML bool) {
-	v1 := cleanPhase1{ids: idsNode{}, allowHTML: allowHTML}
+func Clean(node *sx.Pair) {
+	v1 := cleanPhase1{ids: idsNode{}}
 	zsx.WalkIt(&v1, node, nil)
 	if v1.hasMark {
 		v2 := cleanPhase2{ids: v1.ids}
@@ -37,36 +37,11 @@ func Clean(node *sx.Pair, allowHTML bool) {
 }
 
 type cleanPhase1 struct {
-	ids       idsNode
-	allowHTML bool
-	hasMark   bool // Mark nodes will be cleaned in phase 2 only
+	ids     idsNode
+	hasMark bool // Mark nodes will be cleaned in phase 2 only
 }
 
 func (v *cleanPhase1) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		case zsx.SymBlock:
-			if !v.allowHTML {
-				curr, next := node, node.Tail()
-				for next != nil {
-					sy, ok := sx.GetSymbol(next.Head().Car())
-					if !ok || sy != zsx.SymVerbatimHTML {
-						curr = next
-						next = next.Tail()
-					} else {
-						next = next.Tail()
-						curr.SetCdr(next)
-					}
-				}
-			}
-
-		case zsx.SymMark:
-			v.hasMark = true
-		}
-	}
-	return false
-}
-func (v *cleanPhase1) VisitItAfter(node *sx.Pair, _ *sx.Pair) {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymHeading:
@@ -78,16 +53,18 @@ func (v *cleanPhase1) VisitItAfter(node *sx.Pair, _ *sx.Pair) {
 			textNode := fragmentNode.Tail()
 			var sb strings.Builder
 			var textEnc encoder.TextEncoder
-			if err := textEnc.WriteSz(&sb, textNode.Cons(zsx.SymPara)); err != nil {
-				return
+			if err := textEnc.WriteSz(&sb, textNode.Cons(zsx.SymPara)); err == nil {
+				slugText := zerostrings.Slugify(sb.String())
+				slugNode.SetCar(sx.MakeString(slugText))
+				fragmentNode.SetCar(sx.MakeString(v.ids.addIdentifier(slugText, node)))
 			}
-
-			slugText := zerostrings.Slugify(sb.String())
-			slugNode.SetCar(sx.MakeString(slugText))
-			fragmentNode.SetCar(sx.MakeString(v.ids.addIdentifier(slugText, node)))
+		case zsx.SymMark:
+			v.hasMark = true
 		}
 	}
+	return false
 }
+func (v *cleanPhase1) VisitItAfter(node *sx.Pair, _ *sx.Pair) {}
 
 type cleanPhase2 struct {
 	ids idsNode

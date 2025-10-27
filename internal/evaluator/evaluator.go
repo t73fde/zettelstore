@@ -107,7 +107,7 @@ func (e *evaluator) VisitAfter(node *sx.Pair, _ *sx.Pair) sx.Object {
 
 func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *ast.Zettel {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
-	parser.Clean(zn.Blocks, true)
+	parser.Clean(zn.Blocks)
 	zn.Blocks = mustPair(zsx.Walk(e, zn.Blocks, nil))
 	return zn
 }

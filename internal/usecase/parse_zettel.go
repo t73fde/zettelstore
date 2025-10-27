@@ -42,6 +42,6 @@ func (uc ParseZettel) Run(ctx context.Context, zid id.Zid, syntax string) (*ast.
 	}
 
 	z := parser.ParseZettel(ctx, zettel, syntax, uc.rtConfig)
-	parser.Clean(z.Blocks, uc.rtConfig.GetHTMLInsecurity().AllowHTML(syntax))
+	parser.Clean(z.Blocks)
 	return z, nil
 }

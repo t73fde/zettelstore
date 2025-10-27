@@ -69,11 +69,26 @@ func init() {
 	})
 }
 
-func parsePlain(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
-	return sz.ParsePlainBlocks(inp, syntax)
+func parsePlain(inp *input.Input, _ *meta.Meta, syntax string, alst *sx.Pair) *sx.Pair {
+	result := sz.ParsePlainBlocks(inp, syntax)
+	if syntax == meta.ValueSyntaxHTML && alst.Assoc(SymAllowHTML) == nil {
+		zsx.WalkIt(removeHTMLVisitor{}, result, nil)
+	}
+	return result
 }
 
-func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
+type removeHTMLVisitor struct{}
+
+func (removeHTMLVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
+	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol && zsx.SymVerbatimHTML.IsEqualSymbol(sym) {
+		node.SetCar(zsx.SymVerbatimCode)
+		return true
+	}
+	return false
+}
+func (removeHTMLVisitor) VisitItAfter(*sx.Pair, *sx.Pair) {}
+
+func parsePlainSVG(inp *input.Input, _ *meta.Meta, syntax string, _ *sx.Pair) *sx.Pair {
 	is := parseSVGInlines(inp, syntax)
 	if is == nil {
 		return zsx.MakeBlock()
@@ -103,7 +118,7 @@ func scanSVG(inp *input.Input) string {
 	return ""
 }
 
-func parsePlainSxn(inp *input.Input, _ *meta.Meta, syntax string) *sx.Pair {
+func parsePlainSxn(inp *input.Input, _ *meta.Meta, syntax string, _ *sx.Pair) *sx.Pair {
 	rd := sxreader.MakeReader(bytes.NewReader(inp.Src))
 	_, err := rd.ReadAll()
 

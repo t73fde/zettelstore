@@ -29,9 +29,9 @@ func init() {
 		IsASTParser:   true,
 		IsTextFormat:  true,
 		IsImageFormat: false,
-		Parse: func(inp *input.Input, _ *meta.Meta, _ string) *sx.Pair {
+		Parse: func(inp *input.Input, _ *meta.Meta, _ string, _ *sx.Pair) *sx.Pair {
 			var zmkParser zmk.Parser
-			zmkParser.Initialize(inp)
+			zmkParser.Initialize(inp) // TODO: add alst
 			return zmkParser.Parse()
 		},
 	})

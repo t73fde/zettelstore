@@ -39,7 +39,9 @@ type Info struct {
 	IsASTParser   bool
 	IsTextFormat  bool
 	IsImageFormat bool
-	Parse         func(*input.Input, *meta.Meta, string) *sx.Pair
+
+	// Parse the input, with the given metadata, the given syntax, and the given config.
+	Parse func(*input.Input, *meta.Meta, string, *sx.Pair) *sx.Pair
 }
 
 var registry = map[string]*Info{}
@@ -97,9 +99,12 @@ func IsImageFormat(syntax string) bool {
 }
 
 // Parse parses some input and returns both a Sx.Object and a slice of block nodes.
-func Parse(inp *input.Input, m *meta.Meta, syntax string) *sx.Pair {
-	return Get(syntax).Parse(inp, m, syntax)
+func Parse(inp *input.Input, m *meta.Meta, syntax string, alst *sx.Pair) *sx.Pair {
+	return Get(syntax).Parse(inp, m, syntax, alst)
 }
+
+// SymAllowHTML signals a parser to allow HTML content during parsing.
+var SymAllowHTML = sx.MakeSymbol("ALLOW-HTML")
 
 // ParseDescription returns a suitable description stored in the metadata as an inline list.
 // This is done for an image in most cases.
@@ -126,12 +131,17 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 	if syntax == "" {
 		syntax = string(inhMeta.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 	}
+	var alst *sx.Pair
+	if rtConfig != nil && rtConfig.GetHTMLInsecurity().AllowHTML(syntax) {
+		alst = alst.Cons(sx.Cons(SymAllowHTML, nil))
+	}
+
 	parseMeta := inhMeta
 	if syntax == meta.ValueSyntaxNone {
 		parseMeta = m
 	}
 
-	rootNode := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax)
+	rootNode := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, alst)
 	return &ast.Zettel{
 		Meta:    m,
 		Content: zettel.Content,

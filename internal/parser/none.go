@@ -29,7 +29,7 @@ func init() {
 		IsASTParser:   false,
 		IsTextFormat:  false,
 		IsImageFormat: false,
-		Parse: func(inp *input.Input, _ *meta.Meta, _ string) *sx.Pair {
+		Parse: func(inp *input.Input, _ *meta.Meta, _ string, _ *sx.Pair) *sx.Pair {
 			return sz.ParseNoneBlocks(inp)
 		},
 	})

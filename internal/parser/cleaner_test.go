@@ -24,10 +24,9 @@ import (
 
 func TestCleaner(t *testing.T) {
 	var testcases = []struct {
-		name      string
-		src       string
-		allowHTML bool
-		exp       string
+		name string
+		src  string
+		exp  string
 	}{
 		{name: "nil", src: "()", exp: "()"},
 
@@ -47,26 +46,6 @@ func TestCleaner(t *testing.T) {
 		{name: "mark before heading",
 			src: "(BLOCK (HEADING 1 () \"\" \"\" (TEXT \"x\")) (PARA (MARK \"x\" \"\" \"\")))",
 			exp: "(BLOCK (HEADING 1 () \"x\" \"x\" (TEXT \"x\")) (PARA (MARK \"x\" \"x\" \"x-1\")))"},
-
-		{name: "remove-html-0",
-			src: "(BLOCK (VERBATIM-HTML () \"<h1>Heading</h1>\"))",
-			exp: "(BLOCK)"},
-		{name: "remove-html-0-1",
-			src: "(BLOCK (VERBATIM-HTML () \"<h1>Heading</h1>\") (PARA (TEXT \"ABC\")))",
-			exp: "(BLOCK (PARA (TEXT \"ABC\")))"},
-		{name: "remove-html-1-0",
-			src: "(BLOCK (PARA (TEXT \"ABC\")) (VERBATIM-HTML () \"<h1>Heading</h1>\"))",
-			exp: "(BLOCK (PARA (TEXT \"ABC\")))"},
-		{name: "remove-html-1-2",
-			src: "(BLOCK (PARA (TEXT \"ABC\")) (VERBATIM-HTML () \"<h1>Heading</h1>\") (VERBATIM-HTML () \"<h2>Head</h2>\"))",
-			exp: "(BLOCK (PARA (TEXT \"ABC\")))"},
-
-		{name: "allow HTML", allowHTML: true,
-			src: "(BLOCK (VERBATIM-HTML () \"<h1>Heading</h1>\"))",
-			exp: "(BLOCK (VERBATIM-HTML () \"<h1>Heading</h1>\"))"},
-		{name: "allow-html-1-2", allowHTML: true,
-			src: "(BLOCK (PARA (TEXT \"ABC\")) (VERBATIM-HTML () \"<h1>Heading</h1>\") (VERBATIM-HTML () \"<h2>Head</h2>\"))",
-			exp: "(BLOCK (PARA (TEXT \"ABC\")) (VERBATIM-HTML () \"<h1>Heading</h1>\") (VERBATIM-HTML () \"<h2>Head</h2>\"))"},
 	}
 
 	for _, tc := range testcases {
@@ -81,7 +60,7 @@ func TestCleaner(t *testing.T) {
 			if !isPair {
 				t.Error("not a pair:", obj)
 			}
-			parser.Clean(node, tc.allowHTML)
+			parser.Clean(node)
 			if got := node.String(); got != tc.exp {
 				t.Errorf("\nexpected: %q\n but got: %q", tc.exp, got)
 			}
