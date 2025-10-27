@@ -26,13 +26,10 @@ import (
 	gmText "github.com/yuin/goldmark/text"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
-
-	"zettelstore.de/z/internal/encoder"
 )
 
 func init() {
@@ -50,15 +47,13 @@ func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.
 	source := []byte(inp.Src[inp.Pos:])
 	parser := gm.DefaultParser()
 	node := parser.Parse(gmText.NewReader(source))
-	textEnc := encoder.Create(api.EncoderText, nil)
-	p := mdP{source: source, docNode: node, textEnc: textEnc, allowHTML: alst.Assoc(SymAllowHTML) != nil}
+	p := mdP{source: source, docNode: node, allowHTML: alst.Assoc(SymAllowHTML) != nil}
 	return p.acceptBlockChildren(p.docNode)
 }
 
 type mdP struct {
 	source    []byte
 	docNode   gmAst.Node
-	textEnc   encoder.Encoder
 	allowHTML bool
 }
 
