@@ -7,12 +7,12 @@ require (
 	github.com/yuin/goldmark v1.7.13
 	golang.org/x/crypto v0.43.0
 	golang.org/x/term v0.36.0
-	t73f.de/r/sx v0.0.0-20251017161911-2f8291157520
-	t73f.de/r/sxwebs v0.0.0-20251017162422-9f8d0174bc1f
-	t73f.de/r/webs v0.0.0-20250930141330-11da1688d11c
-	t73f.de/r/zero v0.0.0-20251026094101-f5f3621c0f9b
-	t73f.de/r/zsc v0.0.0-20251023124813-c5ebcbb1022f
-	t73f.de/r/zsx v0.0.0-20251026111929-14a2ffbc29f5
+	t73f.de/r/sx v0.0.0-20251106134512-57bd2ba0e8e3
+	t73f.de/r/sxwebs v0.0.0-20251106134640-a792e6dfefd8
+	t73f.de/r/webs v0.0.0-20251106132628-d89a2b2c2373
+	t73f.de/r/zero v0.0.0-20251106132433-8bb93fc3269f
+	t73f.de/r/zsc v0.0.0-20251106134919-31f6048e2c2e
+	t73f.de/r/zsx v0.0.0-20251106134735-30b13dc3ce8a
 )
 
 require (
