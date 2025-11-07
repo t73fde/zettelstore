@@ -16,6 +16,7 @@ package evaluator
 
 import (
 	"errors"
+	"strings"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
@@ -49,7 +50,7 @@ func (e *evaluator) evalVerbatimZettel(vn *sx.Pair) *sx.Pair {
 	}
 	e.transcludeCount++
 	zn := e.evaluateEmbeddedZettel(zettel)
-	return splicedBlocks(zn.Blocks)
+	return regionedBlocks(zn.Blocks, nil)
 }
 
 func (e *evaluator) evalTransclusion(tn *sx.Pair) *sx.Pair {
@@ -108,7 +109,7 @@ func (e *evaluator) evalTransclusion(tn *sx.Pair) *sx.Pair {
 	if ec := cost.ec; ec > 0 {
 		e.transcludeCount += cost.ec
 	}
-	return splicedBlocks(zn.Blocks)
+	return regionedBlocks(zn.Blocks, attrs)
 }
 
 func (e *evaluator) evalQueryTransclusion(expr string) *sx.Pair {
@@ -129,10 +130,45 @@ func (e *evaluator) evalQueryTransclusion(expr string) *sx.Pair {
 
 func makeBlock(inl *sx.Pair) *sx.Pair { return zsx.MakePara(inl) }
 
-func splicedBlocks(block *sx.Pair) *sx.Pair {
+func regionedBlocks(block *sx.Pair, attrs *sx.Pair) *sx.Pair {
+	newAttrs := styleAttr(attrs, "width")
 	blocks := zsx.GetBlock(block)
 	if blocks.Tail() == nil {
-		return blocks.Head()
+		result := blocks.Head()
+		return zsx.MakeRegion(zsx.SymRegionBlock, newAttrs, zsx.MakeBlock(result), nil)
 	}
-	return blocks.Cons(zsx.SymSpecialSplice)
+	return zsx.MakeRegion(zsx.SymRegionBlock, newAttrs, blocks, nil)
+}
+
+func styleAttr(attrs *sx.Pair, keys ...string) *sx.Pair {
+	if attrs == nil {
+		return attrs
+	}
+	a := zsx.GetAttributes(attrs)
+	style := strings.TrimSpace(a["style"])
+	var sb strings.Builder
+	sb.WriteString(style)
+	if style != "" && style[len(style)-1] != ';' {
+		sb.WriteByte(';')
+	}
+	found := false
+	for _, key := range keys {
+		if val, ok := a[key]; ok {
+			if found || style != "" {
+				sb.WriteByte(' ')
+			}
+			sb.WriteString(key)
+			sb.WriteString(": ")
+			sb.WriteString(val)
+			sb.WriteByte(';')
+			delete(a, key)
+			found = true
+		}
+	}
+
+	if found {
+		a["style"] = sb.String()
+		return a.AsAssoc()
+	}
+	return attrs
 }

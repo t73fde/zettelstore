@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220809132350
-modified: 20250102165258
+modified: 20251107193607
 
 A zettel transclusion is specified by the following sequence, starting at the first position in a line: ''{{{zettel-identifier}}}''.
 
@@ -16,7 +16,9 @@ Instead an error message replaces the transclude specification.
 An error message is also given, if the zettel cannot be read or if too many transclusions are made.
 The maximum number of transclusion can be controlled by setting the value [[''max-transclusions''|00001004020000#max-transclusions]] of the runtime configuration zettel.
 
-If everything went well, the referenced, expanded zettel will replace the transclusion element.
+If everything goes well, the referenced and expanded zettel will replace the transclusion element after being wrapped in a [[region block|00001007030800]].
+The region block serves two purposes: first, it marks that the content originates from a transclusion; second, it inherits the attributes of the transclusion element.
+However, if the element has an attribute with the key ''width'', this attribute is converted into a ''style'' attributes in the form ''style="width: VAL;"'', where ''VAL'' is the value of the original ''width'' attribute.
 
 For example, to include the text of the Zettel titled ""Zettel identifier"", just specify its identifier [[''00001006050000''|00001006050000]] in the transclusion element:
 ```zmk
@@ -31,12 +33,22 @@ Please note: if the referenced zettel is changed, all transclusions will also ch
 
 This allows, for example, to create a bigger document just by transcluding smaller zettel.
 
+With a ''width'' attribute, the same transclusion results in a region block that includes the corresponding inline style, for example:
+```zmk
+{{{00001006050000}}}{width=50%}
+```
+This will result in:
+:::example
+{{{00001006050000}}}{width=50%}
+:::
+
+
 In addition, if a zettel __z__ transcludes a zettel __t__, but the current user is not allowed to view zettel __t__ (but zettel __z__), then the transclusion will not take place.
 To the current user, it seems that there was no transclusion in zettel __z__.
 This allows to create a zettel with content that seems to be changed, depending on the authorization of the current user.
 
 ---
-Any [[attributes|00001007050000]] added to the transclusion will set/overwrite the appropriate metadata of the included zettel.
+Any [[attributes|00001007050000]] added to the transclusion will also set/overwrite the appropriate metadata of the included zettel.
 Of course, this applies only to those attributes, which have a valid name for a metadata key.
 This allows to control the evaluation of the included zettel, especially for zettel containing a diagram description.
 

@@ -11,6 +11,10 @@
   *  SZ encoding of BLOBs has be changed from <code>(BLOB attrs inlines syntax
      data)</code> to <code>(BLOG attrs syntax data inline ...)</code>.
      (breaking)
+  *  The result of a block transclusion is now wrapped into an region block,
+     which inherits the attributes of the transclusion. A <code>width</code>
+     attribute is converted into an approriate <code>style</code> attribute.
+     (minor: zettelmarkup)
 
 <a id="0_22"></a>
 <h2>Changes for Version 0.22.0 (2025-07-07)</h2>
