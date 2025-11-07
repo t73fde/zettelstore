@@ -3,7 +3,7 @@ title: Required Software
 role: zettel
 syntax: zmk
 created: 20210916193200
-modified: 20241213124936
+modified: 20251107151939
 
 The following software must be installed:
 
@@ -18,12 +18,14 @@ export PATH=$PATH:$(go env GOPATH)/bin
 ```
 
 The internal build tool needs the following software tools.
-They can be installed / updated via the build tool itself: ``go run tools/devtools/devtools.go``.
+They can be installed / updated via the build tool itself: ``go run tools/devtools/devtools.go``{=sh}.
 
 Otherwise you can install the software by hand:
 
-* [[shadow|https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/shadow]] via ``go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest``,
-* [[staticcheck|https://staticcheck.io/]] via ``go install honnef.co/go/tools/cmd/staticcheck@latest``,
-* [[unparam|https://mvdan.cc/unparam]][^[[GitHub|https://github.com/mvdan/unparam]]] via ``go install mvdan.cc/unparam@latest``,
-* [[revive|https://revive.run]] via ``go install github.com/mgechev/revive@vlatest``,
-* [[govulncheck|https://golang.org/x/vuln/cmd/govulncheck]] via ``go install golang.org/x/vuln/cmd/govulncheck@latest``,
+* [[shadow|https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/shadow]] via ``go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest``{=sh},
+* [[unparam|https://mvdan.cc/unparam]][^[[GitHub|https://github.com/mvdan/unparam]]] via ``go install mvdan.cc/unparam@latest``{=sh},
+* [[staticcheck|https://staticcheck.io/]] via ``go install honnef.co/go/tools/cmd/staticcheck@latest``{=sh},
+* [[deadcode|https://pkg.go.dev/golang.org/x/tools/cmd/deadcode]] via ``go install golang.org/x/tools/cmd/deadcode@latest``{=sh},
+* [[errcheck|https://github.com/kisielk/errcheck]] via ``go install github.com/kisielk/errcheck@latest``{=sh},
+* [[revive|https://revive.run]] via ``go install github.com/mgechev/revive@vlatest``{=sh},
+* [[govulncheck|https://golang.org/x/vuln/cmd/govulncheck]] via ``go install golang.org/x/vuln/cmd/govulncheck@latest``{=sh},
