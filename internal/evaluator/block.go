@@ -133,10 +133,6 @@ func makeBlock(inl *sx.Pair) *sx.Pair { return zsx.MakePara(inl) }
 func regionedBlocks(block *sx.Pair, attrs *sx.Pair) *sx.Pair {
 	newAttrs := styleAttr(attrs, "width")
 	blocks := zsx.GetBlock(block)
-	if blocks.Tail() == nil {
-		result := blocks.Head()
-		return zsx.MakeRegion(zsx.SymRegionBlock, newAttrs, zsx.MakeBlock(result), nil)
-	}
 	return zsx.MakeRegion(zsx.SymRegionBlock, newAttrs, blocks, nil)
 }
 
