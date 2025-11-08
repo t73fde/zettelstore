@@ -94,19 +94,19 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		rb.bindString("query-value", sx.MakeString(q.String()))
 		if tzl := q.GetMetaValues(meta.KeyTags, false); len(tzl) > 0 {
 			sxTzl, sxNoTzl := wui.transformTagZettelList(ctx, tagZettel, tzl)
-			if !sx.IsNil(sxTzl) {
+			if sxTzl != nil {
 				rb.bindString("tag-zettel", sxTzl)
 			}
-			if !sx.IsNil(sxNoTzl) && wui.canCreate(ctx, user) {
+			if sxNoTzl != nil && wui.canCreate(ctx, user) {
 				rb.bindString("create-tag-zettel", sxNoTzl)
 			}
 		}
 		if rzl := q.GetMetaValues(meta.KeyRole, false); len(rzl) > 0 {
 			sxRzl, sxNoRzl := wui.transformRoleZettelList(ctx, roleZettel, rzl)
-			if !sx.IsNil(sxRzl) {
+			if sxRzl != nil {
 				rb.bindString("role-zettel", sxRzl)
 			}
-			if !sx.IsNil(sxNoRzl) && wui.canCreate(ctx, user) {
+			if sxNoRzl != nil && wui.canCreate(ctx, user) {
 				rb.bindString("create-role-zettel", sxNoRzl)
 			}
 		}
