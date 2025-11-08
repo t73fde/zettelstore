@@ -23,8 +23,11 @@ import (
 )
 
 const (
-	abcZid   = id.Zid(20211020121000)
-	abc10Zid = id.Zid(20211020121100)
+	abcZid      = id.Zid(20211020121000)
+	abc10Zid    = id.Zid(20211020121100)
+	abc100Zid   = id.Zid(20211020121145)
+	abc1000Zid  = id.Zid(20211020121300)
+	abc10000Zid = id.Zid(20211020121400)
 )
 
 func TestZettelTransclusion(t *testing.T) {
@@ -32,20 +35,14 @@ func TestZettelTransclusion(t *testing.T) {
 	c := getClient()
 	c.SetAuth("owner", "owner")
 
-	const abc10000Zid = id.Zid(20211020121400)
-	contentMap := map[id.Zid]int{
-		abcZid:                 1,
-		abc10Zid:               10,
-		id.Zid(20211020121145): 100,
-		id.Zid(20211020121300): 1000,
-	}
 	content, err := c.GetZettel(context.Background(), abcZid, api.PartContent)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	baseContent := string(content)
-	for zid, siz := range contentMap {
+	expect := string(content)
+	for count, zid := range []id.Zid{abc10Zid, abc100Zid, abc1000Zid} {
+		expect = strings.Repeat("<span>"+expect+"</span>", 10)
 		content, err = c.GetEvaluatedZettel(context.Background(), zid, api.EncoderHTML)
 		if err != nil {
 			t.Error(err)
@@ -62,9 +59,8 @@ func TestZettelTransclusion(t *testing.T) {
 			t.Errorf("Content of zettel %q does not end with %q: %q", zid, suffix, stringTail(sContent))
 			continue
 		}
-		got := sContent[len(prefix) : len(content)-len(suffix)]
-		if expect := strings.Repeat(baseContent, siz); expect != got {
-			t.Errorf("Unexpected content for zettel %q\nExpect: %q\nGot:    %q", zid, expect, got)
+		if got := sContent[len(prefix) : len(content)-len(suffix)]; expect != got {
+			t.Errorf("(10^%d) Unexpected content for zettel %q\nExpect: %q\nGot:    %q", count, zid, expect, got)
 		}
 	}
 

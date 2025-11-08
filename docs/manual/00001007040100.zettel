@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250106174436
+modified: 20251108162610
 
 Text formatting is the way to make your text visually different.
 Every text formatting element begins with two identical characters.
@@ -33,5 +33,6 @@ The following characters begin a text formatting:
 * The number sign (""''#''"", U+0023) marks the text visually, where the mark does not belong to the text itself.
   It is typically used to highlight some text that is important for you, but was not important for the original author.
 ** Example: ``abc ##def## ghi`` is rendered in HTML as: ::abc ##def## ghi::{=example}.
-* The colon character (""'':''"", U+003A) marks some text that should belong together. It fills a similar role as [[region blocks|00001007030800]], but just for inline elements.
+* [!inline-span]The colon character (""'':''"", U+003A) marks some text that should belong together.
+  It fills a similar role as [[region blocks|00001007030800]], but just for inline elements (called: ""inline span"").
 ** Example: ``abc ::def::{=example} ghi`` is rendered in HTML as: abc ::def::{=example} ghi.

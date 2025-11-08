@@ -11,12 +11,10 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package evaluator interprets and evaluates the AST.
 package evaluator
 
 import (
 	"errors"
-	"strings"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
@@ -134,37 +132,4 @@ func regionedBlocks(block *sx.Pair, attrs *sx.Pair) *sx.Pair {
 	newAttrs := styleAttr(attrs, "width")
 	blocks := zsx.GetBlock(block)
 	return zsx.MakeRegion(zsx.SymRegionBlock, newAttrs, blocks, nil)
-}
-
-func styleAttr(attrs *sx.Pair, keys ...string) *sx.Pair {
-	if attrs == nil {
-		return attrs
-	}
-	a := zsx.GetAttributes(attrs)
-	style := strings.TrimSpace(a["style"])
-	var sb strings.Builder
-	sb.WriteString(style)
-	if style != "" && style[len(style)-1] != ';' {
-		sb.WriteByte(';')
-	}
-	found := false
-	for _, key := range keys {
-		if val, ok := a[key]; ok {
-			if found || style != "" {
-				sb.WriteByte(' ')
-			}
-			sb.WriteString(key)
-			sb.WriteString(": ")
-			sb.WriteString(val)
-			sb.WriteByte(';')
-			delete(a, key)
-			found = true
-		}
-	}
-
-	if found {
-		a["style"] = sb.String()
-		return a.AsAssoc()
-	}
-	return attrs
 }

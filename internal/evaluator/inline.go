@@ -11,7 +11,6 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package evaluator interprets and evaluates the AST.
 package evaluator
 
 import (
@@ -142,10 +141,9 @@ func (e *evaluator) evalEmbed(en *sx.Pair) *sx.Pair {
 	if ec := cost.ec; ec > 0 {
 		e.transcludeCount += cost.ec
 	}
-	if result.Tail() == nil {
-		return result.Head()
-	}
-	return result.Cons(zsx.SymSpecialSplice)
+
+	newAttrs := styleAttr(attrs, "width")
+	return zsx.MakeFormat(zsx.SymFormatSpan, newAttrs, result)
 }
 
 func (e *evaluator) updateImageRefNode(

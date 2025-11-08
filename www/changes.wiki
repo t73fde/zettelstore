@@ -14,6 +14,8 @@
   *  The result of a block transclusion is now wrapped into an region block,
      which inherits the attributes of the transclusion. A <code>width</code>
      attribute is converted into an approriate <code>style</code> attribute.
+     Similar, the result of an inline transclusion is now wrapped into an
+     inline span element.
      (minor: zettelmarkup)
 
 <a id="0_22"></a>

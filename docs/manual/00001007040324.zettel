@@ -4,17 +4,17 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210811154251
-modified: 20250102183508
+modified: 20251108163237
 
-Inline-mode transclusion applies to all zettel that are parsed in a non-trivial way, e.g. as structured textual content.
-For example, textual content is assumed if the [[syntax|00001006020000#syntax]] of a zettel is ""zmk"" ([[Zettelmarkup|00001007000000]]), or ""markdown"" / ""md"" ([[Markdown|00001008010000]]).
+Inline-mode transclusion is applied to any zettel that is parsed in a non-trivial way, such as when the content is structured text.
+For instance, this applies to zettel written in [[Zettelmarkup|00001007000000]] or [[Markdown|00001008010000]].
 
-Since this type of transclusion is at the level of [[inline-structured elements|00001007040000]], the transclude specification must be replaced with some inline-structured elements.
+Since this type of transclusion involves [[inline-structured elements|00001007040000]], the transclusion specification must be replaced with an appropriate inline-structured content.
+Specifically, the transclusion specification is replaced with an [[inline span|00001007040100#inline-span]] containing the inline-structured content.
 
-First, the referenced zettel is read.
-If it contains other transclusions, these will be expanded, recursively.
-When an endless recursion is detected, expansion does not take place.
-Instead an error message replaces the transclude specification.
+The process begins by reading the referenced zettel.
+If the zettel contains other transclusions, these will be expanded recursively.
+If an infinite recursion is detected, the expansion is halted, and an error message replaces the transclusion specification.
 
 The result of this (indirect) transclusion is searched for inline-structured elements.
 
