@@ -373,11 +373,12 @@ func (ds *DirService) onDeleteFileEvent(entries entrySet, name string) id.Zid {
 			return zid
 		}
 	}
-	if name == entry.ContentName {
+	switch name {
+	case entry.ContentName:
 		entry.ContentName = ""
 		entry.ContentExt = ""
 		ds.replayUpdateUselessFiles(entry)
-	} else if name == entry.MetaName {
+	case entry.MetaName:
 		entry.MetaName = ""
 		ds.replayUpdateUselessFiles(entry)
 	}
