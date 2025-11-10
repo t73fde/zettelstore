@@ -147,7 +147,7 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 			return obj
 		}
 		u := builder.NewURLBuilder('z').SetZid(zid)
-		imgAttr := attr.Tail().Cons(sx.Cons(shtml.SymAttrSrc, sx.MakeString(u.String())))
+		imgAttr := attr.Cons(sx.Cons(shtml.SymAttrSrc, sx.MakeString(u.String())))
 		return pair.Tail().Tail().Cons(imgAttr).Cons(shtml.SymIMG)
 	})
 
