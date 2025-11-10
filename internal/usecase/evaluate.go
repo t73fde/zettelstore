@@ -58,6 +58,7 @@ func (uc *Evaluate) Run(ctx context.Context, zid id.Zid, syntax string) (*ast.Ze
 func (uc *Evaluate) RunZettel(ctx context.Context, zettel zettel.Zettel, syntax string) *ast.Zettel {
 	zn := parser.ParseZettel(ctx, zettel, syntax, uc.rtConfig)
 	evaluator.EvaluateZettel(ctx, uc, uc.rtConfig, zn)
+	parser.Clean(zn.Blocks)
 	return zn
 }
 

@@ -149,7 +149,7 @@ func (e *evaluator) evalEmbed(en *sx.Pair) *sx.Pair {
 func (e *evaluator) updateImageRefNode(
 	attrs *sx.Pair, ref *sx.Pair, inlines *sx.Pair, m *meta.Meta, syntax string,
 ) *sx.Pair {
-	if inlines != nil {
+	if inlines == nil {
 		if is := parser.ParseDescription(m); is != nil {
 			if is = mustPair(zsx.Walk(e, is, nil)); is != nil {
 				inlines = is
