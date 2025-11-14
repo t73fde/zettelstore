@@ -11,20 +11,17 @@
 // SPDX-FileCopyrightText: 2025-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package user provides services for working with user data.
-package user
+package auth
 
 import (
 	"context"
 	"time"
 
 	"t73f.de/r/zsc/domain/meta"
-
-	"zettelstore.de/z/internal/auth"
 )
 
-// AuthData stores all relevant authentication data for a context.
-type AuthData struct {
+// UserData stores all relevant authentication data for a context.
+type UserData struct {
 	User    *meta.Meta
 	Token   []byte
 	Now     time.Time
@@ -33,9 +30,9 @@ type AuthData struct {
 }
 
 // GetAuthData returns the full authentication data from the context.
-func GetAuthData(ctx context.Context) *AuthData {
+func GetAuthData(ctx context.Context) *UserData {
 	if ctx != nil {
-		if data, ok := ctx.Value(ctxKeyTypeSession{}).(*AuthData); ok {
+		if data, ok := ctx.Value(ctxKeyTypeSession{}).(*UserData); ok {
 			return data
 		}
 	}
@@ -54,14 +51,14 @@ func GetCurrentUser(ctx context.Context) *meta.Meta {
 type ctxKeyTypeSession struct{}
 
 // UpdateContext enriches the given context with some data of the current user.
-func UpdateContext(ctx context.Context, user *meta.Meta, data *auth.TokenData) context.Context {
+func UpdateContext(ctx context.Context, user *meta.Meta, data *TokenData) context.Context {
 	if data == nil {
-		return context.WithValue(ctx, ctxKeyTypeSession{}, &AuthData{User: user})
+		return context.WithValue(ctx, ctxKeyTypeSession{}, &UserData{User: user})
 	}
 	return context.WithValue(
 		ctx,
 		ctxKeyTypeSession{},
-		&AuthData{
+		&UserData{
 			User:    user,
 			Token:   data.Token,
 			Now:     data.Now,

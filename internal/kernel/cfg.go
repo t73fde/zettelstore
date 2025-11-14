@@ -25,7 +25,7 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/auth/user"
+	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/logging"
@@ -220,7 +220,7 @@ func (cs *configService) Get(ctx context.Context, m *meta.Meta, key string) stri
 			return string(val)
 		}
 	}
-	if user := user.GetCurrentUser(ctx); user != nil {
+	if user := auth.GetCurrentUser(ctx); user != nil {
 		if val, found := user.Get(key); found {
 			return string(val)
 		}

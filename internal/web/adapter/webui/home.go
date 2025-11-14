@@ -20,7 +20,7 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/auth/user"
+	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/web/adapter"
@@ -52,7 +52,7 @@ func (wui *WebUI) MakeGetRootHandler(s getRootPort) http.Handler {
 			wui.redirectFound(w, r, wui.NewURLBuilder('h').SetZid(homeZid))
 			return
 		}
-		if errors.Is(err, &box.ErrNotAllowed{}) && wui.authz.WithAuth() && user.GetCurrentUser(ctx) == nil {
+		if errors.Is(err, &box.ErrNotAllowed{}) && wui.authz.WithAuth() && auth.GetCurrentUser(ctx) == nil {
 			wui.redirectFound(w, r, wui.NewURLBuilder('i'))
 			return
 		}

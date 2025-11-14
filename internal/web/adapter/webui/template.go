@@ -35,7 +35,7 @@ import (
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
-	"zettelstore.de/z/internal/auth/user"
+	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/config"
@@ -505,7 +505,7 @@ func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err er
 	} else {
 		wui.logger.Debug("reportError", "err", err)
 	}
-	user := user.GetCurrentUser(ctx)
+	user := auth.GetCurrentUser(ctx)
 	bind, rb := wui.createRenderEnvironment(ctx, "error", meta.ValueLangEN, "Error", user)
 	rb.bindString("heading", sx.MakeString(http.StatusText(code)))
 	rb.bindString("message", sx.MakeString(text))

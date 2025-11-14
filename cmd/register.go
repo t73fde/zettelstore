@@ -13,7 +13,7 @@
 
 package cmd
 
-// Mention all needed boxes, encoders, and parsers to have them registered.
+// Mention all needed boxes to have them registered.
 import (
 	_ "zettelstore.de/z/internal/box/compbox"  // Allow to use computed box.
 	_ "zettelstore.de/z/internal/box/constbox" // Allow to use global internal box.

@@ -54,7 +54,10 @@ func GetMetaSz(m *meta.Meta) *sx.Pair {
 	lb.Add(sz.SymMeta)
 	for key, val := range m.Computed() {
 		ty := m.Type(key)
-		symType := mapGetS(mapMetaTypeS, ty)
+		symType, found := mapMetaTypeS[ty]
+		if !found {
+			symType = sx.MakeSymbol(fmt.Sprintf("**%v:NOT-FOUND**", ty))
+		}
 		var obj sx.Object
 		if ty.IsSet {
 			var setObjs sx.ListBuilder
@@ -65,14 +68,7 @@ func GetMetaSz(m *meta.Meta) *sx.Pair {
 		} else {
 			obj = sx.MakeString(string(val))
 		}
-		lb.Add(sx.Nil().Cons(obj).Cons(sx.MakeSymbol(key)).Cons(symType))
+		lb.Add(sx.MakeList(symType, sx.MakeSymbol(key), obj))
 	}
 	return lb.List()
-}
-
-func mapGetS[T comparable](m map[T]*sx.Symbol, k T) *sx.Symbol {
-	if result, found := m[k]; found {
-		return result
-	}
-	return sx.MakeSymbol(fmt.Sprintf("**%v:NOT-FOUND**", k))
 }

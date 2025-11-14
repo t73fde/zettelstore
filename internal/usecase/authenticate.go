@@ -25,7 +25,6 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/auth/cred"
 )
 
 // Authenticate is the data for this use case.
@@ -59,7 +58,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 	}
 
 	if hashCred, ok := identMeta.Get(meta.KeyCredential); ok {
-		ok, err = cred.CompareHashAndCredential(string(hashCred), identMeta.Zid, ident, credential)
+		ok, err = auth.CompareHashAndCredential(string(hashCred), identMeta.Zid, ident, credential)
 		if err != nil {
 			uc.log.Info("Error while comparing credentials", "ident", ident, "err", err, "remote", ip.GetRemoteAddr(r))
 			return nil, err
@@ -83,7 +82,7 @@ func (uc *Authenticate) Run(ctx context.Context, r *http.Request, ident, credent
 
 // compensateCompare if normal comapare is not possible, to avoid timing hints.
 func compensateCompare() {
-	_, _ = cred.CompareHashAndCredential(
+	_, _ = auth.CompareHashAndCredential(
 		"$2a$10$WHcSO3G9afJ3zlOYQR1suuf83bCXED2jmzjti/MH4YH4l2mivDuze", id.Invalid, "", "")
 }
 

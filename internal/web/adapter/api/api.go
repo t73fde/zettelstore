@@ -25,7 +25,6 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/auth/user"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/web/adapter"
@@ -63,8 +62,8 @@ func New(logger *slog.Logger, b server.Builder, authz auth.AuthzManager, token a
 // NewURLBuilder creates a new URL builder object with the given key.
 func (a *API) NewURLBuilder(key byte) *api.URLBuilder { return a.b.NewURLBuilder(key) }
 
-func (a *API) getAuthData(ctx context.Context) *user.AuthData {
-	return user.GetAuthData(ctx)
+func (a *API) getAuthData(ctx context.Context) *auth.UserData {
+	return auth.GetAuthData(ctx)
 }
 func (a *API) withAuth() bool { return a.authz.WithAuth() }
 func (a *API) getToken(ident *meta.Meta) ([]byte, error) {
@@ -88,7 +87,7 @@ func writeBuffer(w http.ResponseWriter, buf *bytes.Buffer, contentType string) e
 
 func (a *API) getRights(ctx context.Context, m *meta.Meta) (result api.ZettelRights) {
 	pol := a.policy
-	user := user.GetCurrentUser(ctx)
+	user := auth.GetCurrentUser(ctx)
 	if pol.CanCreate(user, m) {
 		result |= api.ZettelCanCreate
 	}

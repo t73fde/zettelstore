@@ -26,7 +26,7 @@ import (
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
 
-	"zettelstore.de/z/internal/auth/user"
+	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/usecase"
@@ -62,7 +62,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 			return
 		}
 
-		user := user.GetCurrentUser(ctx)
+		user := auth.GetCurrentUser(ctx)
 		getTextTitle := wui.makeGetTextTitle(ctx, getZettel)
 
 		title := sz.NormalizedSpacedText(zn.InhMeta.GetTitle())

@@ -75,9 +75,7 @@ func init() {
 		Simple: true,
 		Boxes:  true,
 		Header: true,
-		// LineServer: true,
 		SetFlags: func(fs *flag.FlagSet) {
-			// fs.Uint("a", 0, "port number kernel service (0=disable)")
 			fs.String("d", "", "zettel directory")
 		},
 	})

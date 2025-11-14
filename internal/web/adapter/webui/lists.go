@@ -28,7 +28,7 @@ import (
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/auth/user"
+	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
@@ -82,7 +82,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		}
 
 		siteName := wui.rtConfig.GetSiteName()
-		user := user.GetCurrentUser(ctx)
+		user := auth.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnvironment(ctx, "list", userLang, siteName, user)
 		if q == nil {
 			rb.bindString("heading", sx.MakeString(siteName))

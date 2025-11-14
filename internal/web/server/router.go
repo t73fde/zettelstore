@@ -25,7 +25,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/auth/user"
 )
 
 type (
@@ -183,7 +182,7 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 		if remoteAddr := ip.GetRemoteAddr(r); ip.IsLoopbackAddr(remoteAddr) {
 			if u, err := rt.ur.GetUser(ctx, rt.loopbackZid, rt.loopbackIdent); err == nil {
 				if u != nil {
-					return r.WithContext(user.UpdateContext(ctx, u, nil))
+					return r.WithContext(auth.UpdateContext(ctx, u, nil))
 				}
 				rt.log.Error("No match to loopback-zid", "loopback-ident", rt.loopbackIdent)
 			}
@@ -215,7 +214,7 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 			"remote", ip.GetRemoteAddr(r))
 		return r
 	}
-	return r.WithContext(user.UpdateContext(ctx, u, &tokenData))
+	return r.WithContext(auth.UpdateContext(ctx, u, &tokenData))
 }
 
 func getSessionToken(r *http.Request) []byte {

@@ -25,7 +25,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
 
-	"zettelstore.de/z/internal/auth/user"
+	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/evaluator"
@@ -98,7 +98,7 @@ func (wui *WebUI) renderZettelForm(
 	roleData []string,
 	syntaxData []string,
 ) {
-	user := user.GetCurrentUser(ctx)
+	user := auth.GetCurrentUser(ctx)
 	m := ztl.Meta
 
 	var sb strings.Builder

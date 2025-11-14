@@ -11,8 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package cred provides some function for handling credentials.
-package cred
+package auth
 
 import (
 	"bytes"

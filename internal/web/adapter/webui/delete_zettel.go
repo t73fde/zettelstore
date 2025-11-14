@@ -22,7 +22,7 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/auth/user"
+	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/usecase"
 )
@@ -49,7 +49,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		}
 		m := zs[0].Meta
 
-		user := user.GetCurrentUser(ctx)
+		user := auth.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnvironment(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
 		if len(zs) > 1 {

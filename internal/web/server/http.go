@@ -27,7 +27,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/auth/user"
 )
 
 type webServer struct {
@@ -138,14 +137,14 @@ func (srv *webServer) SetToken(w http.ResponseWriter, token []byte, d time.Durat
 
 // ClearToken invalidates the session cookie by sending an empty one.
 func (srv *webServer) ClearToken(ctx context.Context, w http.ResponseWriter) context.Context {
-	if authData := user.GetAuthData(ctx); authData == nil {
+	if authData := auth.GetAuthData(ctx); authData == nil {
 		// No authentication data stored in session, nothing to do.
 		return ctx
 	}
 	if w != nil {
 		srv.SetToken(w, nil, 0)
 	}
-	return user.UpdateContext(ctx, nil, nil)
+	return auth.UpdateContext(ctx, nil, nil)
 }
 
 func (srv *webServer) Run() error { return srv.httpServer.start() }
