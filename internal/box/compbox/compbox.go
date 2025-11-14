@@ -139,18 +139,6 @@ func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrain
 	return nil
 }
 
-func (*compBox) CanDeleteZettel(context.Context, id.Zid) bool { return false }
-
-func (cb *compBox) DeleteZettel(_ context.Context, zid id.Zid) (err error) {
-	if _, ok := myZettel[zid]; ok {
-		err = box.ErrReadOnly
-	} else {
-		err = box.ErrZettelNotFound{Zid: zid}
-	}
-	logging.LogTrace(cb.logger, "DeleteZettel", "err", err)
-	return err
-}
-
 func (cb *compBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
 	st.Zettel = len(myZettel)

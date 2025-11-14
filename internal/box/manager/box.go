@@ -52,8 +52,8 @@ func (mgr *Manager) CanCreateZettel(ctx context.Context) bool {
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
-	if box, isWriteBox := mgr.boxes[0].(box.WriteBox); isWriteBox {
-		return box.CanCreateZettel(ctx)
+	if CreateBox, isCreateBox := mgr.boxes[0].(box.CreateBox); isCreateBox {
+		return CreateBox.CanCreateZettel(ctx)
 	}
 	return false
 }
@@ -66,9 +66,9 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
-	if box, isWriteBox := mgr.boxes[0].(box.WriteBox); isWriteBox {
+	if createBox, isCreateBox := mgr.boxes[0].(box.CreateBox); isCreateBox {
 		ztl.Meta = mgr.cleanMetaProperties(ztl.Meta)
-		zid, err := box.CreateZettel(ctx, ztl)
+		zid, err := createBox.CreateZettel(ctx, ztl)
 		if err == nil {
 			mgr.idxUpdateZettel(ctx, ztl)
 		}
@@ -234,8 +234,8 @@ func (mgr *Manager) CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) b
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
-	if box, isWriteBox := mgr.boxes[0].(box.WriteBox); isWriteBox {
-		return box.CanUpdateZettel(ctx, zettel)
+	if updateBox, isUpdateBox := mgr.boxes[0].(box.UpdateBox); isUpdateBox {
+		return updateBox.CanUpdateZettel(ctx, zettel)
 	}
 	return false
 
@@ -250,9 +250,9 @@ func (mgr *Manager) UpdateZettel(ctx context.Context, zettel zettel.Zettel) erro
 	return mgr.updateZettel(ctx, zettel)
 }
 func (mgr *Manager) updateZettel(ctx context.Context, zettel zettel.Zettel) error {
-	if box, isWriteBox := mgr.boxes[0].(box.WriteBox); isWriteBox {
+	if updateBox, isUpdateBox := mgr.boxes[0].(box.UpdateBox); isUpdateBox {
 		zettel.Meta = mgr.cleanMetaProperties(zettel.Meta)
-		if err := box.UpdateZettel(ctx, zettel); err != nil {
+		if err := updateBox.UpdateZettel(ctx, zettel); err != nil {
 			return err
 		}
 		mgr.idxUpdateZettel(ctx, zettel)
@@ -269,7 +269,7 @@ func (mgr *Manager) CanDeleteZettel(ctx context.Context, zid id.Zid) bool {
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	for _, p := range mgr.boxes {
-		if p.CanDeleteZettel(ctx, zid) {
+		if deleteBox, isDeleteBox := p.(box.DeleteBox); isDeleteBox && deleteBox.CanDeleteZettel(ctx, zid) {
 			return true
 		}
 	}
@@ -285,14 +285,16 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	for _, p := range mgr.boxes {
-		err := p.DeleteZettel(ctx, zid)
-		if err == nil {
-			mgr.idxDeleteZettel(ctx, zid)
-			return err
-		}
-		var errZNF box.ErrZettelNotFound
-		if !errors.As(err, &errZNF) && !errors.Is(err, box.ErrReadOnly) {
-			return err
+		if deleteBox, isDeleteBox := p.(box.DeleteBox); isDeleteBox {
+			err := deleteBox.DeleteZettel(ctx, zid)
+			if err == nil {
+				mgr.idxDeleteZettel(ctx, zid)
+				return err
+			}
+			var errZNF box.ErrZettelNotFound
+			if !errors.As(err, &errZNF) && !errors.Is(err, box.ErrReadOnly) {
+				return err
+			}
 		}
 	}
 	return box.ErrZettelNotFound{Zid: zid}

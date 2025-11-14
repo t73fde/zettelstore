@@ -36,28 +36,34 @@ type BaseBox interface {
 
 	// GetZettel retrieves a specific zettel.
 	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)
-
-	// CanDeleteZettel returns true, if box could possibly delete the given zettel.
-	CanDeleteZettel(ctx context.Context, zid id.Zid) bool
-
-	// DeleteZettel removes the zettel from the box.
-	DeleteZettel(ctx context.Context, zid id.Zid) error
 }
 
-// WriteBox is a box that can create / update zettel content.
-type WriteBox interface {
+// CreateBox is a box that can create zettel content.
+type CreateBox interface {
 	// CanCreateZettel returns true, if box could possibly create a new zettel.
 	CanCreateZettel(ctx context.Context) bool
 
 	// CreateZettel creates a new zettel.
 	// Returns the new zettel id (and an error indication).
 	CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zid, error)
+}
 
+// UpdateBox is a box that can update zettel content.
+type UpdateBox interface {
 	// CanUpdateZettel returns true, if box could possibly update the given zettel.
 	CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) bool
 
 	// UpdateZettel updates an existing zettel.
 	UpdateZettel(ctx context.Context, zettel zettel.Zettel) error
+}
+
+// DeleteBox is a box that can delete zettel content.
+type DeleteBox interface {
+	// CanDeleteZettel returns true, if box could possibly delete the given zettel.
+	CanDeleteZettel(ctx context.Context, zid id.Zid) bool
+
+	// DeleteZettel removes the zettel from the box.
+	DeleteZettel(ctx context.Context, zid id.Zid) error
 }
 
 // ZidFunc is a function that processes identifier of a zettel.
@@ -129,7 +135,9 @@ type Refresher interface {
 // Box is to be used outside the box package and its descendants.
 type Box interface {
 	BaseBox
-	WriteBox
+	CreateBox
+	UpdateBox
+	DeleteBox
 
 	// FetchZids returns the set of all zettel identifer managed by the box.
 	FetchZids(ctx context.Context) (*idset.Set, error)

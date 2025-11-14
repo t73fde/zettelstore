@@ -175,18 +175,6 @@ func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 	return reader.Close()
 }
 
-func (*zipBox) CanDeleteZettel(context.Context, id.Zid) bool { return false }
-
-func (zb *zipBox) DeleteZettel(_ context.Context, zid id.Zid) error {
-	err := box.ErrReadOnly
-	entry := zb.dirSrv.GetDirEntry(zid)
-	if !entry.IsValid() {
-		err = box.ErrZettelNotFound{Zid: zid}
-	}
-	logging.LogTrace(zb.logger, "DeleteZettel", "err", err)
-	return err
-}
-
 func (zb *zipBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
 	st.Zettel = zb.dirSrv.NumDirEntries()
