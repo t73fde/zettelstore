@@ -28,7 +28,7 @@ import (
 	"zettelstore.de/z/internal/zettel"
 )
 
-// Conatains all box.Box related functions
+// Contains all box.Box related functions
 
 // Location returns some information where the box is located.
 func (mgr *Manager) Location() string {
