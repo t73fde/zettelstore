@@ -166,7 +166,7 @@ func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
 		if !ok {
 			panic(fmt.Sprintf("Expected list item node, but got %v", child.Kind()))
 		}
-		items.Add(p.acceptItemSlice(item))
+		items.Add(zsx.MakeBlockList(p.acceptItemSlice(item)))
 	}
 	return zsx.MakeList(kind, a.List(), items.List())
 }
@@ -175,7 +175,7 @@ func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
 	var result sx.ListBuilder
 	for elem := node.FirstChild(); elem != nil; elem = elem.NextSibling() {
 		if item := p.acceptBlock(elem); item != nil {
-			result.Add(zsx.MakeBlock(item))
+			result.Add(item)
 		}
 	}
 	return result.List()
