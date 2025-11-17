@@ -4,27 +4,37 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 20220113183435
-modified: 20250115200458
+modified: 20251117105808
 url: https://commonmark.org/
 
-[[CommonMark|https://commonmark.org/]] is a Markdown dialect, an [[attempt|https://xkcd.com/927/]] to unify all the different, divergent dialects of Markdown by providing an unambiguous syntax specification for Markdown, together with a suite of comprehensive tests to validate implementation.
+[[CommonMark|https://commonmark.org/]] is a Markdown dialect aimed at [[unifying|https://xkcd.com/927/]] the various, often divergent, Markdown dialects by providing an unambiguous syntax specification.
+It also includes a suite of comprehensive tests to validate implementations.
 
-Time will show, if this attempt is successful.
+Time will tell whether this attempt is ultimately successful.
 
-However, CommonMark is a well specified Markdown dialect, in contrast to most (if not all) other dialects.
-Other software adopts CommonMark somehow, notably [[GitHub Flavored Markdown|https://github.github.com/gfm/]] (GFM).
-But they provide proprietary extensions, which makes it harder to change to another CommonMark implementation if needed.
-Plus, they sometimes build on an older specification of CommonMark.
+However, CommonMark stands out as a well-specified Markdown dialect, unlike most (if not all) other dialects.
+Other software implementations, such as [[GitHub Flavored Markdown|https://github.github.com/gfm/]] (GFM), adopt CommonMark to some extent, but they also provide proprietary extensions.
+This makes it harder to switch to another CommonMark implementation if needed.
+Additionally, some implementations are based on older versions of the CommonMark specification.
 
 Zettelstore supports the latest CommonMark [[specification version 0.31.2 (2024-01-28)|https://spec.commonmark.org/0.31.2/]].
-If possible, Zettelstore will adapt to newer versions when they are available.
+If possible, Zettelstore will adapt to newer versions as they become available.
 
-To provide CommonMark support, Zettelstore uses currently the [[Goldmark|https://github.com/yuin/goldmark]] implementation, which passes all validation tests of CommonMark.
-Effectively, Markdown and CommonMark are super-sets of HTML.
-Internally, CommonMark is translated into [[Zettelmarkup|00001007000000]].
-Since Zettelmarkup supports HTML content only at the block level via [[Inline Zettel|00001007031200]], most uses of HTML within a CommonMark zettel are not translated as expected.
-Instead, inline level HTML is translated into [[literal text|00001007040200#literal-text]] with a [[generic attribute|00001007050000]] set to ``html``.
+To provide CommonMark support, Zettelstore uses currently the [[Goldmark|https://github.com/yuin/goldmark]] implementation, which passes all CommonMark validation tests.
+Effectively, both Markdown and CommonMark can be considered superset languages of HTML.
 
-Therefore, Zettelstore itself will not pass the CommonMark test suite fully.
+Internally, CommonMark is translated into [[Sz Encoding|00001012920516]].
+Most aspects of Sz encoding can be represented in [[Zettelmarkup|00001007000000]].
+However, Sz encoding supports HTML content only at the block level through [[literal text|00001007040200#literal-text]] with a [[generic attribute|00001007050000]] set to ``html``
+Therefore, most uses of HTML within a CommonMark zettel are not translated as expected.
+
+Markdown's nested block quotes, e.g. ``> > > foo``{=md} can be represented in Sz encoding, but not in Zettelmarkup.
+Zettelmarkup provides [[quotation blocks|00001007030600]] instead.
+
+As a result, Zettelstore does not fully pass the CommonMark test suite.
+However, with the exception of inline HTML, no CommonMark language element fails to be encoded as HTML.
+In most cases, these differences are not visible to users but can only be identified by comparing the generated HTML output.
+
+Therefore, Zettelstore itself does not pass the CommonMark test suite fully.
 However, no CommonMark language element except inline HTML will fail to be encoded as HTML.
 In most cases, the differences are not visible for a user, but only by comparing the generated HTML code.

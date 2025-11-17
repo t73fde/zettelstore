@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
@@ -87,7 +88,13 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 	}
 }
 
+// zmkIgnoreExamples stores all markdown examples that are not representable in zmk
+var zmkIgnoreExamples = set.New(250, 251, 259, 292, 293)
+
 func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
+	if zmkIgnoreExamples.Contains(tc.Example) {
+		return
+	}
 	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
 	var buf bytes.Buffer
 	testID := tc.Example*100 + 1
