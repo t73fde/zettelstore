@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20230403151127
-modified: 20250627124837
+modified: 20251117170933
 
 === Syntax of lists
 A list always starts with the left parenthesis (""''(''"", U+0028) and ends with a right parenthesis (""'')''"", U+0029).
@@ -71,7 +71,7 @@ Unicode characters with a code less than U+FFFFFF are encoded by the sequence ""
 In addition, the sequence ""''\\t''"" encodes a horizontal tab (U+0009), the sequence ""''\\n''"" encodes a line feed (U+000A).
 
 === See also
-* Currently, Zettelstore uses [[Sx|https://t73f.de/r/sx]] (""Symbolic eXpression framework"") to implement symbolic expressions.
+* Currently, Zettelstore uses [[Sx|https://t73f.de/r/sx/]] (""Symbolic eXpression framework"") to implement symbolic expressions.
   The project page might contain additional information about the full syntax.
 
   Zettelstore only uses lists, numbers, strings, and symbols to represent zettel.

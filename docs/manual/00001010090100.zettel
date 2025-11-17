@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #encryption #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250828135632
+modified: 20251117152142
 
 Since Zettelstore does not encrypt the messages it exchanges with its clients, you may need some additional software to enable encryption.
 
@@ -75,8 +75,8 @@ This is to allow Zettelstore to ignore the prefix while reading web requests and
 Zettelstore protects you against [[Cross-Site Request Forgery (CSRF)|https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/CSRF]].
 The protection will work only if the external server forwards certain HTTP request headers to Zettelstore:
 
-* [[''Sec-Fetch-Site''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Sec-Fetch-Site]] is read first and should contain the values ""same-origin"" or ""none"".
-* [[''Origin''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Origin]] is read next, if ''Sec-Fetch-Site'' is either missing or contains other values.
+* [[''Sec-Fetch-Site''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Sec-Fetch-Site]] is read first and should contain the values ""same-origin"" or ""none"".
+* [[''Origin''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin]] is read next, if ''Sec-Fetch-Site'' is either missing or contains other values.
   In this case ''Origin'' should contain the same host name as read via header [[''Host''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host]].
 
 Otherwise, an cross-origin request will be detected.

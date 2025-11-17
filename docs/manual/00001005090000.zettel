@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627163000
+modified: 20251117171155
 
 The following table lists all predefined zettel with their purpose.
 
@@ -22,7 +22,7 @@ However, metadata is always indexed, e.g. ""[[query:title:license]]"" will find 
 | [[00000000000007]] | Zettelstore Modules | List of all dependent Go modules
 | [[00000000000009]] | Zettelstore Log | Lists the last 8192 log messages
 | [[00000000000010]] | Zettelstore Memory | Some statistics about main memory usage
-| [[00000000000011]] | Zettelstore Sx Engine | Statistics about the [[Sx|https://t73f.de/r/sx]] engine, which interprets symbolic expressions
+| [[00000000000011]] | Zettelstore Sx Engine | Statistics about the [[Sx|https://t73f.de/r/sx/]] engine, which interprets symbolic expressions
 | [[00000000000020]] | Zettelstore Box Manager | Contains some statistics about zettel boxes and the index process
 | [[00000000000090]] | Zettelstore Supported Metadata Keys | Contains all supported metadata keys, their [[types|00001006030000]], and more
 | [[00000000000092]] | Zettelstore Supported Parser | Lists all supported values for metadata [[syntax|00001006020000#syntax]] that are recognized by Zettelstore
