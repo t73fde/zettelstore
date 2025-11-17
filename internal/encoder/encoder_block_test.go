@@ -177,6 +177,17 @@ var tcsBlock = []zmkTestCase{
 		},
 	},
 	{
+		descr: "Nested list quotes", // Based on CommonMark example 250
+		zmk:   ">>> foo\n    bar",
+		expect: expectMap{
+			encoderHTML:  `<blockquote><blockquote><blockquote>foo bar</blockquote></blockquote></blockquote>`,
+			encoderSz:    `(BLOCK (QUOTATION () (BLOCK (QUOTATION () (BLOCK (QUOTATION () (BLOCK (PARA (TEXT "foo") (SOFT) (TEXT "bar")))))))))`,
+			encoderSHTML: `((blockquote (@L (blockquote (@L (blockquote (@L "foo" " " "bar")))))))`,
+			encoderText:  "foo bar",
+			encoderZmk:   useZmk,
+		},
+	},
+	{
 		descr: "Simple Quote Block",
 		zmk:   "<<<\nToBeOrNotToBe\n<<< Romeo Julia",
 		expect: expectMap{

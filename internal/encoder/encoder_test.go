@@ -94,7 +94,8 @@ func checkEncodings(t *testing.T, testNum int, node *sx.Pair, isInline bool, des
 				prefix += "\nReason:   " + d
 			}
 			prefix += "\nMode:     " + mode(isInline)
-			t.Errorf("%s\nEncoder:  %s\nExpected: %q\nGot:      %q", prefix, enc, exp, got)
+			t.Errorf("%s\nEncoder:  %s\nNode:     %v\nExpected: %q\nGot:      %q",
+				prefix, enc, node, exp, got)
 		}
 	}
 }

@@ -22,7 +22,6 @@ import (
 	"testing"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
@@ -67,13 +66,13 @@ func TestMarkdownSpec(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		node := createMDBlockSlice(tc.Markdown)
+		node := parseMD(tc.Markdown)
 		testAllEncodings(t, tc, node)
 		testZmkEncoding(t, tc, node)
 	}
 }
 
-func createMDBlockSlice(markdown string) *sx.Pair {
+func parseMD(markdown string) *sx.Pair {
 	return parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, nil)
 }
 
@@ -88,13 +87,7 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 	}
 }
 
-// zmkIgnoreExamples stores all markdown examples that are not representable in zmk
-var zmkIgnoreExamples = set.New(250, 251, 259, 292, 293)
-
 func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
-	if zmkIgnoreExamples.Contains(tc.Example) {
-		return
-	}
 	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
 	var buf bytes.Buffer
 	testID := tc.Example*100 + 1
@@ -120,7 +113,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 		gotThird := buf.String()
 
 		if gotSecond != gotThird {
-			st.Errorf("\ncmd: %q\n1st: %q\n2nd: %q", tc.Markdown, gotSecond, gotThird)
+			st.Errorf("\ncmd: %q\nsz :%v\n1st: %q\n2nd: %q", tc.Markdown, node, gotSecond, gotThird)
 		}
 	})
 }
@@ -135,7 +128,7 @@ func TestAdditionalMarkdown(t *testing.T) {
 	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
 	var sb strings.Builder
 	for i, tc := range testcases {
-		node := createMDBlockSlice(tc.md)
+		node := parseMD(tc.md)
 		sb.Reset()
 		_ = zmkEncoder.WriteSz(&sb, node)
 		if got := sb.String(); got != tc.exp {

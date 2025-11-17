@@ -4,7 +4,7 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 20220113183435
-modified: 20251117105808
+modified: 20251117183134
 url: https://commonmark.org/
 
 [[CommonMark|https://commonmark.org/]] is a Markdown dialect aimed at [[unifying|https://xkcd.com/927/]] the various, often divergent, Markdown dialects by providing an unambiguous syntax specification.
@@ -28,13 +28,6 @@ Most aspects of Sz encoding can be represented in [[Zettelmarkup|00001007000000]
 However, Sz encoding supports HTML content only at the block level through [[literal text|00001007040200#literal-text]] with a [[generic attribute|00001007050000]] set to ``html``
 Therefore, most uses of HTML within a CommonMark zettel are not translated as expected.
 
-Markdown's nested block quotes, e.g. ``> > > foo``{=md} can be represented in Sz encoding, but not in Zettelmarkup.
-Zettelmarkup provides [[quotation blocks|00001007030600]] instead.
-
 As a result, Zettelstore does not fully pass the CommonMark test suite.
 However, with the exception of inline HTML, no CommonMark language element fails to be encoded as HTML.
 In most cases, these differences are not visible to users but can only be identified by comparing the generated HTML output.
-
-Therefore, Zettelstore itself does not pass the CommonMark test suite fully.
-However, no CommonMark language element except inline HTML will fail to be encoded as HTML.
-In most cases, the differences are not visible for a user, but only by comparing the generated HTML code.
