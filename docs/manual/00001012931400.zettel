@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20251007144738
+modified: 20251118151703
 
 === ''PARA''
 :::syntax
@@ -31,12 +31,21 @@ These three symbols are specifying different kinds of lists / enumerations: an o
 Their structure is the same.
 
 :::syntax
-__OrderedList__ **=** ''(ORDERED'' [[__Attributes__|00001012931000#attribute]] [[__Block__|00001012931000#block]] &hellip; '')''.
+__OrderedList__ **=** ''(ORDERED'' [[__Attributes__|00001012931000#attribute]] ListItem &hellip; '')''.
 
-__UnorderedList__ **=** ''(UNORDERED'' [[__Attributes__|00001012931000#attribute]] [[__Block__|00001012931000#block]] &hellip; '')''.
+__UnorderedList__ **=** ''(UNORDERED'' [[__Attributes__|00001012931000#attribute]] ListItem &hellip; '')''.
 
-__QuotationList__ **=** ''(QUOTATION'' [[__Attributes__|00001012931000#attribute]] [[__Block__|00001012931000#block]] &hellip; '')''.
+__QuotationList__ **=** ''(QUOTATION'' [[__Attributes__|00001012931000#attribute]] ListItem &hellip; '')''.
 :::
+where
+:::syntax
+__ListItem__ **=** ''(BLOCK'' ItemElement &hellip; '')''.
+
+__ItemElement__ **=** __OrderedList__ **|** __UnorderedList__ **|** __QuotationList__ **|** __Paragraph__.
+:::
+
+Please note that the elements of the various lists begin with a BLOCK symbol, but they themselves may contain only (nested) lists and paragraphs.
+Other block elements are not permitted.
 
 === ''DESCRIPTION''
 :::syntax
@@ -52,7 +61,12 @@ A description term is just an inline-structured value.
 :::syntax
 __DescriptionValues__ **=** ''(BLOCK'' [[__Block__|00001012931000#block]] &hellip; '')''.
 :::
-Description values are sequences of blocks.
+where
+:::syntax
+__DescriptionBlock__ **=** ''(BLOCK'' Paragraph &hellip; '')''.
+:::
+Description values are sequences of blocks that contain only paragraphs.
+From this restriction it follows that, within a description, only inline elements are allowed. Nested block elements are not allowed.
 
 === ''TABLE''
 :::syntax
