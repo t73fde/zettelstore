@@ -32,17 +32,6 @@ import (
 	"t73f.de/r/zsx/input"
 )
 
-func init() {
-	register(&Info{
-		Name:          meta.ValueSyntaxMarkdown,
-		AltNames:      []string{meta.ValueSyntaxMD},
-		IsASTParser:   true,
-		IsTextFormat:  true,
-		IsImageFormat: false,
-		Parse:         parseMarkdown,
-	})
-}
-
 func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.Pair {
 	source := inp.Src[inp.Pos:]
 	parser := gm.DefaultParser()
@@ -175,7 +164,7 @@ func (p *mdP) acceptItemSlice(node gmAst.Node) *sx.Pair {
 	var result sx.ListBuilder
 	for elem := node.FirstChild(); elem != nil; elem = elem.NextSibling() {
 		if item := p.acceptBlock(elem); item != nil {
-			result.Add((item))
+			result.Add(item)
 		}
 	}
 	return result.List()

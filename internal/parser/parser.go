@@ -17,10 +17,12 @@ package parser
 import (
 	"context"
 	"fmt"
+	"maps"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/sz/zmk"
 	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
 
@@ -44,20 +46,116 @@ type Info struct {
 	Parse func(*input.Input, *meta.Meta, string, *sx.Pair) *sx.Pair
 }
 
-var registry = map[string]*Info{}
+var registry map[string]*Info
 
-// register the parser (info) for later retrieval.
-func register(pi *Info) {
-	if _, ok := registry[pi.Name]; ok {
-		panic(fmt.Sprintf("Parser %q already registered", pi.Name))
+func init() {
+	localRegistry := map[string]*Info{
+		meta.ValueSyntaxCSS: {
+			IsASTParser:   false,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse:         parsePlain,
+		},
+		meta.ValueSyntaxDraw: {
+			IsASTParser:   true,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse:         parseDraw,
+		},
+		meta.ValueSyntaxGif: {
+			IsASTParser:   false,
+			IsTextFormat:  false,
+			IsImageFormat: true,
+			Parse:         parseBlob,
+		},
+		meta.ValueSyntaxHTML: {
+			IsASTParser:   false,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse:         parsePlain,
+		},
+		meta.ValueSyntaxJPEG: {
+			AltNames:      []string{meta.ValueSyntaxJPG},
+			IsASTParser:   false,
+			IsTextFormat:  false,
+			IsImageFormat: true,
+			Parse:         parseBlob,
+		},
+		meta.ValueSyntaxMarkdown: {
+			AltNames:      []string{meta.ValueSyntaxMD},
+			IsASTParser:   true,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse:         parseMarkdown,
+		},
+		meta.ValueSyntaxNone: {
+			IsASTParser:   false,
+			IsTextFormat:  false,
+			IsImageFormat: false,
+			Parse: func(inp *input.Input, _ *meta.Meta, _ string, _ *sx.Pair) *sx.Pair {
+				return sz.ParseNoneBlocks(inp)
+			},
+		},
+		meta.ValueSyntaxPNG: {
+			IsASTParser:   false,
+			IsTextFormat:  false,
+			IsImageFormat: true,
+			Parse:         parseBlob,
+		},
+		meta.ValueSyntaxSVG: {
+			IsASTParser:   false,
+			IsTextFormat:  true,
+			IsImageFormat: true,
+			Parse:         parsePlainSVG,
+		},
+		meta.ValueSyntaxSxn: {
+			IsASTParser:   false,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse:         parsePlainSxn,
+		},
+		meta.ValueSyntaxTxt: {
+			AltNames:      []string{meta.ValueSyntaxPlain, meta.ValueSyntaxText},
+			IsASTParser:   false,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse:         parsePlain,
+		},
+		meta.ValueSyntaxWebp: {
+			IsASTParser:   false,
+			IsTextFormat:  false,
+			IsImageFormat: true,
+			Parse:         parseBlob,
+		},
+		meta.ValueSyntaxZmk: {
+			IsASTParser:   true,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse: func(inp *input.Input, _ *meta.Meta, _ string, _ *sx.Pair) *sx.Pair {
+				var zmkParser zmk.Parser
+				zmkParser.Initialize(inp) // TODO: add alst
+				return zmkParser.Parse()
+			},
+		},
 	}
-	registry[pi.Name] = pi
-	for _, alt := range pi.AltNames {
-		if _, ok := registry[alt]; ok {
-			panic(fmt.Sprintf("Parser %q already registered", alt))
+
+	registry = maps.Clone(localRegistry)
+	for k, i := range localRegistry {
+		i.Name = k
+		for _, alt := range i.AltNames {
+			if other, found := registry[alt]; found && other != i {
+				panic(fmt.Sprintf("Parser %q already registered", alt))
+			}
+			registry[alt] = i
 		}
-		registry[alt] = pi
 	}
+}
+
+func parseBlob(inp *input.Input, m *meta.Meta, syntax string, _ *sx.Pair) *sx.Pair {
+	if p := Get(syntax); p != nil {
+		syntax = p.Name
+	}
+	return zsx.MakeBlock(zsx.MakeBLOB(nil, syntax, inp.Src, ParseDescription(m)))
 }
 
 // GetSyntaxes returns a list of syntaxes implemented by all registered parsers.

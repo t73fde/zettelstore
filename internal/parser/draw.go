@@ -25,17 +25,6 @@ import (
 	"t73f.de/r/zsx/input"
 )
 
-func init() {
-	register(&Info{
-		Name:          meta.ValueSyntaxDraw,
-		AltNames:      []string{},
-		IsASTParser:   true,
-		IsTextFormat:  true,
-		IsImageFormat: false,
-		Parse:         parseDraw,
-	})
-}
-
 const (
 	defaultFont   = ""
 	defaultScaleX = 10

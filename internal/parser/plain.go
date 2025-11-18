@@ -26,49 +26,6 @@ import (
 	"t73f.de/r/zsx/input"
 )
 
-func init() {
-	register(&Info{
-		Name:          meta.ValueSyntaxTxt,
-		AltNames:      []string{meta.ValueSyntaxPlain, meta.ValueSyntaxText},
-		IsASTParser:   false,
-		IsTextFormat:  true,
-		IsImageFormat: false,
-		Parse:         parsePlain,
-	})
-	register(&Info{
-		Name:          meta.ValueSyntaxHTML,
-		AltNames:      []string{},
-		IsASTParser:   false,
-		IsTextFormat:  true,
-		IsImageFormat: false,
-		Parse:         parsePlain,
-	})
-	register(&Info{
-		Name:          meta.ValueSyntaxCSS,
-		AltNames:      []string{},
-		IsASTParser:   false,
-		IsTextFormat:  true,
-		IsImageFormat: false,
-		Parse:         parsePlain,
-	})
-	register(&Info{
-		Name:          meta.ValueSyntaxSVG,
-		AltNames:      []string{},
-		IsASTParser:   false,
-		IsTextFormat:  true,
-		IsImageFormat: true,
-		Parse:         parsePlainSVG,
-	})
-	register(&Info{
-		Name:          meta.ValueSyntaxSxn,
-		AltNames:      []string{},
-		IsASTParser:   false,
-		IsTextFormat:  true,
-		IsImageFormat: false,
-		Parse:         parsePlainSxn,
-	})
-}
-
 func parsePlain(inp *input.Input, _ *meta.Meta, syntax string, alst *sx.Pair) *sx.Pair {
 	result := sz.ParsePlainBlocks(inp, syntax)
 	if syntax == meta.ValueSyntaxHTML && alst.Assoc(SymAllowHTML) == nil {
