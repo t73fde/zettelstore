@@ -1,7 +1,7 @@
 A zettel with the role ""zettel"" is typically used to document your own thoughts.
-Such zettel are the main reason to use the software Zettelstore.
+Such zettel are the main reason for using the software Zettelstore.
 
 The only predefined zettel with the role ""zettel"" is the [[default home zettel|00010000000000]], which contains some welcome information.
 
 You are free to change this.
-In this case you should modify this zettel too, so that it reflects your own use of zettel with the role ""zettel"".
+In this case you should also modify this zettel so that it reflects your own use of zettel with the role ""zettel"".

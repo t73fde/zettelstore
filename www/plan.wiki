@@ -6,7 +6,7 @@ They are planned to be solved.
   *  All zettel must be indexed to enable full query functionality; otherwise,
      some zettel may not be returned.
   *  Quoted attribute values are not yet supported in Zettelmarkup
-     (e.g. <code>{key="value with space"}</code>).
+     (e.g. <code>{key="value with spaces"}</code>).
   *  The horizontal tab character (<tt>U+0009</tt>) is not fully supported by
      the parser.
   *  Citation keys are not yet supported.

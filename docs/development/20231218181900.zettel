@@ -8,9 +8,9 @@ modified: 20231218184500
 The source code contains some tools to assist the development of Zettelstore.
 These are located in the ''tools'' directory.
 
-Most tool support the generic option ``-v``, which log internal activities.
+Most tools support the generic option ``-v``, which logs internal activities.
 
-Some of the tools can be called easier by using ``make``, that reads in a provided ''Makefile''.
+Some of the tools can be called easier by using ``make``, which reads a provided ''Makefile''.
 
 === Check
 The ""check"" tool automates some testing activities.
@@ -22,20 +22,20 @@ There is an additional option ``-r`` to check in advance of a release.
 
 The following checks are executed:
 * Execution of unit tests, like ``go test ./...``
-* Analyze the source code for general problems, as in ``go vet ./...``
-* Tries to find shadowed variable, via ``shadow ./...``
+* Analyzes the source code for general problems, as in ``go vet ./...``
+* Tries to find shadowed variables, via ``shadow ./...``
 * Performs some additional checks on the source code, via ``staticcheck ./...``
-* Checks the usage of function parameters and usage of return values, via ``unparam ./...``.
+* Checks the usage of function parameters and use of return values, via ``unparam ./...``.
   In case the option ''-r'' is set, the check includes exported functions and internal tests.
-* In case option ''-r'' is set, the source code is checked against the vulnerability database, via ``govulncheck ./...``
+* In case the option ''-r'' is set, the source code is checked against the vulnerability database, via ``govulncheck ./...``
 
-Please note, that most of the tools above are not automatically installed in a standard Go distribution.
+Please note that most of the tools above are not automatically installed in a standard Go distribution.
 Use the command ""devtools"" to install them.
 
 === Devtools
 The following command installs all needed tools:
 ```
-# go run tooles/devtools/devtools.go
+# go run tools/devtools/devtools.go
 ```
 It will also automatically update these tools.
 
@@ -44,11 +44,11 @@ The following command will perform some high-level tests:
 ```sh
 # go run tools/testapi/testapi.go
 ```
-Basically, a Zettelstore will be started and then API calls will be made to simulate some typical activities with the Zettelstore.
+Basically, a Zettelstore will be started and then API calls will be made to simulate some typical activities inside the Zettelstore.
 
 If a Zettelstore is already running on port 23123, this Zettelstore will be used instead.
-Even if the API test should clean up later, some zettel might stay created if a test fails.
-This feature is used, if you want to have more control on the running Zettelstore.
+Even if the API test should clean up later, some zettel might remain if a test fails.
+This feature is used if you want more control over the running Zettelstore.
 You should start it with the following command:
 ```sh
 # go run -race cmd/zettelstore/main.go run -c testdata/testbox/19700101000000.zettel
@@ -60,34 +60,34 @@ The following command will check the generated HTML code for validity:
 ```sh
 # go run tools/htmllint/htmllint.go
 ```
-In addition, you might specify the URL od a running Zettelstore.
+In addition, you might specify the URL of a running Zettelstore.
 Otherwise ''http://localhost:23123'' is used.
 
 This command fetches first the list of all zettel.
-This list is used to check the generated HTML code (''ZID'' is the paceholder for the zettel identification):
+This list is used to check the generated HTML code (''ZID'' is the placeholder for the zettel identification):
 
 * Check all zettel HTML encodings, via the path ''/z/ZID?enc=html&part=zettel''
 * Check all zettel web views, via the path ''/h/ZID''
-* The info page of all zettel is checked, via path ''/i/ZID''
+* The info page of all zettel is checked, via the path ''/i/ZID''
 * A subset of max. 100 zettel will be checked for the validity of their edit page, via ''/e/ZID''
 * 10 random zettel are checked for a valid create form, via ''/c/ZID''
 * A maximum of 200 random zettel are checked for a valid delete dialog, via ''/d/ZID''
 
 Depending on the selected Zettelstore, the command might take a long time.
 
-You can shorten the time, if you disable any zettel query in the footer.
+You can shorten the time, if you disable all zettel queries in the footer.
 
 === Build
-The ""build"" tool allows to build the software, either for tests or for a release.
+The ""build"" tool allows you to build the software, either for tests or for a release.
 
 The following command will create a Zettelstore executable for the architecture of the current computer:
 ```sh
-# go tools/build/build.go build
+# go run tools/build/build.go build
 ```
 You will find the executable in the ''bin'' directory.
 
-A full release will be build in the directory ''releases'', containing ZIP files for the computer architectures ""Linux/amd64"", ""Linux/arm"", ""MacOS/arm64"", ""MacOS/amd64"", and ""Windows/amd64"".
-In addition, the manual is also build as a ZIP file:
+A full release will be built in the directory ''releases'', containing ZIP files for the computer architectures ""Android/arm64"", ""Linux/amd64"", ""Linux/arm"", ""MacOS/arm64"", ""MacOS/amd64"", and ""Windows/amd64"".
+In addition, the manual is also built as a ZIP file:
 ```sh
 # go run tools/build/build.go release
 ```
@@ -97,7 +97,7 @@ If you just want the ZIP file with the manual, please use:
 # go run tools/build/build.go manual
 ```
 
-In case you want to check the version of the Zettelstore to be build, use:
+In case you want to check the version of the Zettelstore to be built, use:
 ```sh
 # go run tools/build/build.go version
 ```

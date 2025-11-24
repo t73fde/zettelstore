@@ -1,10 +1,9 @@
 === Thank you for using Zettelstore!
 
 You will find the latest information about Zettelstore at [[https://zettelstore.de/]].
-Check this website regularly for [[updates|https://zettelstore.de/home/doc/trunk/www/download.wiki]] to the latest version.
+Check its website regularly for [[updates|https://zettelstore.de/home/doc/trunk/www/download.wiki]] to the latest version.
 You should consult the [[change log|https://zettelstore.de/home/doc/trunk/www/changes.wiki]] before updating.
 Sometimes, you have to edit some of your Zettelstore-related zettel before updating.
-Since Zettelstore is currently in a development state, every update might fix some of your problems.
 
 If you have problems concerning Zettelstore, do not hesitate to get in [[contact with the main developer|mailto:ds@zettelstore.de]].
 
@@ -15,14 +14,12 @@ If you have encountered an error, please include the content of the following ze
 * [[Zettelstore Startup Configuration|00000000000096]]
 * [[Zettelstore Runtime Configuration|00000000000100]]
 
-Additionally, you have to describe, what you did before that error occurs
-and what you expected instead.
+Additionally, you have to describe, what you did before that error occured and what you expected instead.
 Please do not forget to include the error message, if there is one.
 
-Some of above Zettelstore zettel can only be retrieved if you enabled ""expert mode"".
+Some of the above Zettelstore zettel can only be retrieved if you have enabled ""expert mode"".
 Otherwise, only some zettel are linked.
-To enable expert mode, edit the zettel [[Zettelstore Runtime Configuration|00000000000100]]:
-please set the metadata value of the key ''expert-mode'' to true.
+To enable expert mode, edit the zettel [[Zettelstore Runtime Configuration|00000000000100]]: please set the metadata value of the key ''expert-mode'' to true.
 To do so, enter the string ''expert-mode:true'' inside the edit view of the metadata.
 
 === Information about this zettel
@@ -36,7 +33,7 @@ This allows you to customize your home zettel.
 Alternatively, you can designate another zettel as your home zettel.
 Edit the [[Zettelstore Runtime Configuration|00000000000100]] by adding the metadata key ''home-zettel''.
 Its value is the identifier of the zettel that should act as the new home zettel.
-You will find the identifier of each zettel between their ""Edit"" and the ""Info"" link above.
+You will find the identifier of each zettel between their ""Edit"" and ""Info"" links above.
 The identifier of this zettel is ''00010000000000''.
 If you provide a wrong identifier, this zettel will be shown as the home zettel.
 Take a look inside the manual for further details.

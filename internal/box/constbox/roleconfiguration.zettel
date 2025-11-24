@@ -1,22 +1,22 @@
 Zettel with role ""configuration"" are used within Zettelstore to manage and to show the current configuration of the software.
 
-Typically, there are some public zettel that show the license of this software, its dependencies.
-There is some CSS code to make the default web user interface a litte bit nicer.
-The default image to signal a broken image can be configured too.
+Typically, there are some public zettel that show the license of this software and its dependencies.
+There is some CSS code to make the default web user interface a little bit nicer.
+The default image to signal a broken image can also be configured.
 
-Other zettel are only visible if an user has authenticated itself, or if there is no authentication enabled.
+Other zettel are only visible if a user has authenticated, or if no authentication is enabled.
 In this case, one additional configuration zettel is the zettel containing the version number of this software.
-Other zettel are showing the supported metadata keys and supported syntax values.
-Zettel that allow to configure the menu of template to create new zettel are also using the role ""configuration"".
+Other zettel show the supported metadata keys and supported syntax values.
+Zettel that allow configuring the menu of template to create new zettel also use the role ""configuration"".
 
 Most important is the zettel that contains the runtime configuration.
-You may change its metadata value to change the behaviour of the software.
+You may change its metadata value to modify the behaviour of the software.
 
-One configuration is the ""expert mode"".
+One runtime configuration option is the ""expert mode"".
 If enabled, and if you are authorized to see them, you will discover some more zettel.
-For example, HTML templates to customize the default web user interface, to show the application log, to see statistics about zettel boxes, to show the host name and it operating system, and many more.
+For example, HTML templates to customize the default web user interface, to show the application log, to view statistics about zettel boxes, to show the host name and its operating system, and many more.
 
 You are allowed to add your own configuration zettel, for example if you want to customize the look and feel of zettel by placing relevant data into your own zettel.
 
-By default, user zettel (for authentification) use also the role ""configuration"".
+By default, user zettel (for authentication) use also the role ""configuration"".
 However, you are allowed to change this.

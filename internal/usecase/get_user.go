@@ -69,8 +69,8 @@ func (uc GetUser) Run(ctx context.Context, ident string) (*meta.Meta, error) {
 	return metaList[len(metaList)-1], nil
 }
 
-// Use case: return an user identified by zettel id and assert given ident value.
-// ------------------------------------------------------------------------------
+// Use case: return a user identified by zettel id and assert given ident value.
+// -----------------------------------------------------------------------------
 
 // GetUserByZidPort is the interface used by this use case.
 type GetUserByZidPort interface {

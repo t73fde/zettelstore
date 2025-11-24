@@ -8,7 +8,7 @@ modified: 20250702180238
 # Sync with the official repository:
 #* ``fossil sync -u``
 # Make sure that there is no workspace defined:
-#* ``ls ..`` must not have a file ''go.work'', in no parent folder.
+#* ``ls ..`` must not contain a file ''go.work'', in any parent folder.
 # Make sure that all dependencies are up-to-date:
 #* ``cat go.mod``
 # Ensure clean indirect dependencies:
@@ -39,13 +39,13 @@ modified: 20250702180238
 #* ''changes.wiki''
 #* ''plan.wiki''
 # Set file ''VERSION'' to the new release version.
-  It **must** consists of three numbers: ''MAJOR.MINOR.PATCH'', even if ''PATCH'' is zero.
+  It **must** consist of three numbers: ''MAJOR.MINOR.PATCH'', even if ''PATCH'' is zero.
 # Disable Fossil autosync mode:
 #* ``fossil setting autosync off``
 # Commit the new release version:
 #* ``fossil commit --tag release --tag vVERSION -m "Version VERSION"``
 #* **Important:** the tag must follow the given pattern, e.g. ''v0.0.15''.
-   Otherwise client software will not be able to import ''zettelstore.de/z''.
+   Otherwise the client software will not be able to import ''zettelstore.de/z''.
 # Clean up your Go workspace:
 #* ``go run tools/clean/clean.go`` (alternatively: ``make clean``)
 # Create the release:

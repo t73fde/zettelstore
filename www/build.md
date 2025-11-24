@@ -20,22 +20,22 @@ Most of this is covered by the excellent Fossil
 [documentation](https://fossil-scm.org/home/doc/trunk/www/quickstart.wiki).
 
 1. Create a directory to store your Fossil repositories.
-   Let's assume, you have created `$HOME/fossils`.
+   Let's assume you have created `$HOME/fossils`.
 1. Clone the repository: `fossil clone https://zettelstore.de/ $HOME/fossils/zettelstore.fossil`.
 1. Create a working directory.
-   Let's assume, you have created `$HOME/zettelstore`.
+   Let's assume you have created `$HOME/zettelstore`.
 1. Change into this directory: `cd $HOME/zettelstore`.
 1. Open development: `fossil open $HOME/fossils/zettelstore.fossil`.
 
 ## Tools to build, test, and manage
 In the directory `tools` there are some Go files to automate most aspects of
-building and testing, (hopefully) platform-independent.
+building and testing, which are hopefully platform-independent.
 
 The build script is called as:
 
     go run tools/build/build.go [-v] COMMAND
 
-The flag `-v` enables the verbose mode.
+The flag `-v` enables verbose mode.
 It outputs all commands called by the tool.
 
 Some important `COMMAND`s are:
@@ -46,8 +46,8 @@ Some important `COMMAND`s are:
   release (or commit).
 * `version`: prints the current version information.
 
-Therefore, the easiest way to build your own version of the Zettelstore
-software is to execute the command
+Therefore, the easiest way to build your own version of Zettelstore
+is to execute the command:
 
     go run tools/build/build.go build
 
@@ -59,9 +59,9 @@ Other tools are:
 
 * `go run tools/clean/clean.go` cleans your Go development workspace.
 * `go run tools/check/check.go` executes all linters and unit tests.
-  If you add the option `-r` linters are more strict, to be used for a
-  release version.
-* `go run tools/devtools/devtools.go` install all needed software (see above).
+  If you add the option `-r` linters become stricter, intended for a release
+  version.
+* `go run tools/devtools/devtools.go` installs all needed software (see above).
 * `go run tools/htmllint/htmllint.go [URL]` checks all generated HTML of a
   Zettelstore accessible at the given URL (default: http://localhost:23123).
 * `go run tools/testapi/testapi.go` tests the API against a running
@@ -80,15 +80,15 @@ client](https://t73f.de/r/zsc), [webs](https://t73f.de/r/webs),
 managed by Fossil. Depending on your development setup, some error messages
 might occur.
 
-If the error message mentions an environment variable called `GOVCS` you should
-set it to the value `GOVCS=zettelstore.de:fossil` (alternatively more generous
-to `GOVCS=*:all`). Since the Go build system is coupled with Git and some
-special platforms, you must allow Go to download a Fossil repository from the
-host `zettelstore.de`. The build tool sets `GOVCS` to the right value, but you
-may use other `go` commands that try to download a Fossil repository.
+If the error message mentions an environment variable called `GOVCS` you
+should set it to the value `GOVCS=zettelstore.de:fossil` (alternatively more
+generous to `GOVCS=*:all`). Since the Go build system is coupled with Git on
+some platforms, you must allow Go to download a Fossil repository from the host
+`zettelstore.de`. The build tool sets `GOVCS` to the right value, but you may
+use other `go` commands that try to download a Fossil repository.
 
 On some operating systems, namely Termux on Android, an error message might
-state that an user cannot be determined (`cannot determine user`). In this
+state that a user cannot be determined (`cannot determine user`). In this
 case, Fossil is allowed to download the repository, but cannot associate it
-with an user name. Set the environment variable `USER` to any user name, like:
+with a user name. Set the environment variable `USER` to any user name, like:
 `USER=nobody go run tools/build.go build`.

@@ -2,9 +2,9 @@ A zettel with the role ""role"" describes a specific role.
 The described role must be the title of such a zettel.
 
 This zettel is such a zettel, as it describes the meaning of the role ""role"".
-Therefore it has the title ""role"" too.
+Therefore, it has the title ""role"" too.
 If you like, this zettel is a meta-role.
 
 You are free to create your own role-describing zettel.
-For example, you want to document the intended meaning of the role.
-You might also be interested to describe needed metadata so that some software is enabled to analyse or to process your zettel.
+For example, you might want to document the intended meaning of your specific role.
+You might also be interested in describing needed metadata so that some software is enabled to analyse or process your zettel.
