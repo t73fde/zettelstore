@@ -1,7 +1,10 @@
 <title>Change Log</title>
 
-<a id="0_23"></a>
-<h2>Changes for Version 0.23.0 (pending)</h2>
+<a id="1_1"></a>
+<h2>Changes for Version 1.1.0 (pending)</h2>
+
+<a id="1_0"></a>
+<h2>Changes for Version 1.0.0 (2025-12-05)</h2>
   *  SZ encoding of lists (ordered, unordered, and quotations) has been
      simplified by allowing only block elements. Previously, inline elements
      were also permitted to signal a compact list. However, this behavior is
@@ -17,6 +20,8 @@
      Similarly, the result of an inline transclusion is now wrapped into an
      inline span element.
      (minor: zettelmarkup)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
 
 <a id="0_22"></a>
 <h2>Changes for Version 0.22.0 (2025-07-07)</h2>

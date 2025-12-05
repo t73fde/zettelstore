@@ -44,14 +44,13 @@ modified: 20250702180238
 #* ``fossil setting autosync off``
 # Commit the new release version:
 #* ``fossil commit --tag release --tag vVERSION -m "Version VERSION"``
-#* **Important:** the tag must follow the given pattern, e.g. ''v0.0.15''.
-   Otherwise the client software will not be able to import ''zettelstore.de/z''.
+#* **Important:** the tag must follow the given pattern, e.g. ''v1.2.15''.
 # Clean up your Go workspace:
 #* ``go run tools/clean/clean.go`` (alternatively: ``make clean``)
 # Create the release:
 #* ``go run tools/build/build.go release`` (alternatively: ``make release``)
 # Remove previous executables:
-#* ``fossil uv remove --glob '*-PREVVERSION*'``
+#* ``fossil uv remove --glob '*PREVVERSION*'``
 # Add executables for release:
 #* ``cd releases``
 #* ``fossil uv add *.zip``
