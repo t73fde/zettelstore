@@ -4,7 +4,7 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250702180913
+modified: 20251208185940
 
 Zettelstore is a software application that manages your zettel.
 Since each zettel must be readable without any special tools, most of them are stored as ordinary files within specific directories.
@@ -27,7 +27,7 @@ If you have not explicitly specified the directory, a default directory will be 
 The directory has to be specified at [[startup time|00001004010000]].
 Nested directories are not supported (yet).
 
-Every file in this directory that should be monitored by Zettelstore must have a file name that begins with 14 digits (0-9), the [[zettel identifier|00001006050000]].
+#13
 If you create a new zettel via the [[web user interface|00001014000000]] or via the [[API|00001012053200]], the zettel identifier will be the timestamp of the current date and time (format is ''YYYYMMDDhhmmss'').
 This allows zettel to be sorted naturally by creation time.
 
@@ -43,7 +43,7 @@ Two filename extensions are used by Zettelstore:
 # the empty file extension is used, when the content must be stored in its own file, e.g. image data;
   in this case, the filename contains just the 14 digits of the zettel identifier, and optional characters except the period ''"."''.  
 Other filename extensions are used to determine the ""syntax"" of a zettel.
-This allows to use other content within the Zettelstore, e.g. images or HTML templates.
+This allows the use of other content within the Zettelstore, such as images or HTML templates.
 
 For example, you want to store an important figure in the Zettelstore that is encoded as a ''.png'' file.
 Since each zettel contains some metadata, e.g. the title of the figure, the question arises where these data should be stored.
@@ -62,7 +62,7 @@ To render the built-in [[web user interface|00001014000000]], some templates are
 The icon that visualizes a broken image is a [[predefined GIF image|00000000040001]].
 All of these are visible to the Zettelstore as zettel.
 
-One reason for this is to allow you to modify these zettel to adapt Zettelstore to your needs and visual preferences.
+One reason for this is to allow you to modify these zettel in order to adapt Zettelstore to your needs and visual preferences.
 
 Where are these zettel stored?
 They are stored within the Zettelstore software itself, because one [[design goal|00001002000000]] was to have just one executable file to use Zettelstore.

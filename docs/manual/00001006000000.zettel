@@ -4,21 +4,23 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102190828
+modified: 20251208184243
 
-A zettel consists of two parts: the metadata and the zettel content.
-Metadata gives some information mostly about the zettel content, how it should be interpreted, how it is sorted within Zettelstore.
-The zettel content is, well, the actual content.
-In many cases, the content is in plain text form.
-Plain text is long-lasting.
-However, content in binary format is also possible.
+A zettel is composed of two main parts: **metadata** and **content**.
+
+* Metadata provides information about the zettel itself, such as how it should be interpreted, categorized, and sorted within Zettelstore.
+  It helps the system manage and organize the zettels efficiently.
+* Zettel Content refers to the actual information or notes within the zettel.
+  In most cases, the content is in plain text format, which is ideal for long-term storage and readability.
+  Plain text ensures that your notes remain accessible and usable over time.
+  However, it is also possible to store content in binary format.
 
 Metadata has to conform to a [[special syntax|00001006010000]].
 It is effectively a collection of key/value pairs.
 Some keys have a [[special meaning|00001006020000]] and most of the predefined keys need values of a specific [[type|00001006030000]].
 
 Each zettel is given a unique [[identifier|00001006050000]].
-To some degree, the zettel identifier is part of the metadata..
+To some degree, the zettel identifier is part of the metadata.
 
 The zettel content is your valuable content.
 Zettelstore contains some predefined parsers that interpret the zettel content to the syntax of the zettel.

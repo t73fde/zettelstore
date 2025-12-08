@@ -4,30 +4,27 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250415170240
+modified: 20251208175458
 
 === The curious user
-You just want to check out the Zettelstore software
+You just want to check out the Zettelstore software:
 
 * Grab the appropriate executable and copy it to any directory
 * Start the Zettelstore software, e.g. with a double click[^On Windows and macOS, the operating system tries to protect you from possible malicious software.
   If you encounter a problem, please refer to the [[Troubleshooting|00001018000000]] page.]
-* A sub-directory ""zettel"" will be created in the directory where you put the executable.
-  It will contain your future zettel.
-* Open the URI [[http://localhost:23123/]] with your web browser.
-  A mostly empty Zettelstore is presented.
-  There will be a zettel titled ""[[Home|00010000000000]]"" that contains some helpful information.
-* Please read the instructions for the [[web-based user interface|00001014000000]] and learn about the various ways to write zettel.
-* If you restart your device, please make sure to start your Zettelstore again.
+* A subdirectory named "zettel" will be created in the same directory as the executable.
+  This folder will store your future zettels.
+* Open the URI [[http://localhost:23123/]] in your web browser.
+  You'll be greeted with a mostly empty Zettelstore interface, along with a ""[[Home|00010000000000]]"" zettel that contains some useful information.
+* Please review the instructions for the [web-based user interface|00001014000000]] to familiarize yourself with the different methods for creating and writing zettels.
+* If you restart your device, be sure to launch Zettelstore again.
 
 === The intermediate user
-You have already tried the Zettelstore software and now you want to use it permanently.
-Zettelstore should start automatically when you log into your computer.
+Since you've already tried Zettelstore and now wish to use it permanently, you'll want to set it up to start automatically when you log into your computer.
 
 Please follow [[these instructions|00001003300000]].
 
 === The server administrator
-You want to provide a shared Zettelstore that can be used from your various devices.
-Installing Zettelstore as a Linux service is not that hard.
+To set up a shared Zettelstore that can be accessed from your various devices, installing it as a Linux service is quite simple.
 
 Please follow [[these instructions|00001003600000]].

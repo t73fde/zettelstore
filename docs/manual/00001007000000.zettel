@@ -4,16 +4,18 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627161609
+modified: 20251208182700
 
-Zettelmarkup is a rich plain-text based markup language for writing zettel content.
-Besides the zettel content, Zettelmarkup is also used for specifying the title of a zettel, regardless of the syntax of a zettel.
+Zettelmarkup is a rich, plaintext-based markup language designed for writing zettel content.
 
-Zettelmarkup supports the longevity of stored notes by providing a syntax that any person can easily read, as well as a computer.
-Zettelmarkup can be much easier parsed / consumed by a software compared to other markup languages.
-Writing a parser for [[Markdown|https://daringfireball.net/projects/markdown/syntax]] is quite challenging.
-[[CommonMark|00001008010500]] is an attempt to make it simpler by providing a comprehensive specification, combined with an extra chapter to give hints for the implementation.
-Zettelmarkup follows a few simple principles that anyone familiar with software development should be able to understand and implement.
+One of the key benefits of Zettelmarkup is its focus on longevity.
+It provides a syntax that is easy for both humans and computers to read, ensuring that your notes remain accessible and usable over time.
+Compared to other markup languages, Zettelmarkup is simpler to parse and work with.
+Writing a parser for [[Markdown|https://daringfireball.net/projects/markdown/syntax]], for example, can be quite complex.
+[[CommonMark|00001008010500]] tries to address this by providing a clear, comprehensive specification, but even with that, implementing a parser can still be a challenge.
+
+Zettelmarkup, on the other hand, is built around a few straightforward principles that anyone familiar with software development can easily understand and implement.
+Its simplicity ensures that it remains a practical and long-lasting solution for note-taking and knowledge management.
 
 Zettelmarkup is a markup language on its own.
 This is in contrast to Markdown, which is basically a super-set of HTML: every HTML document is a valid Markdown document.[^To be precise: the content of the ``<body>`` of each HTML document is a valid Markdown document.]

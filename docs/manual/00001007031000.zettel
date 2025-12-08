@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102210107
+modified: 20251208182745
 
 Tables are used to show some data in a two-dimensional fashion.
 In zettelmarkup, tables are not specified explicitly, but by entering __table rows__.
@@ -54,8 +54,8 @@ The alignment of a header cell determines the alignment of every cell in the sam
 The following characters specify the alignment:
 
 * the colon character (""'':''"", U+003A) forces a centered alignment,
-* the less-than sign character (""''<''"", U+0060) specifies an alignment to the left,
-* the greater-than sign character (""''>''"", U+0062) will produce right aligned cells.
+* the less-than sign character (""''<''"", U+003C) specifies an alignment to the left,
+* the greater-than sign character (""''>''"", U+003E) will produce right aligned cells.
 
 If no alignment character is given, a default alignment is used.
 

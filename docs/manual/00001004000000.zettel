@@ -4,19 +4,19 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102181034
+modified: 20251208180106
 
-There are several levels to change the behavior and/or the appearance of Zettelstore.
+There are several ways to customize the behavior and appearance of Zettelstore, ranging from basic to advanced configurations:
 
-# The first level is the way to start Zettelstore services and to manage it via command line (and, in part, via a graphical user interface).
+# The first level allows you to control how Zettelstore services are started and managed, either via the command line or, to some extent, through a graphical user interface.
 #* [[Command line parameters|00001004050000]]
-# As an intermediate user, you usually want to have more control over how Zettelstore is started.
-  This may include the URI under which your Zettelstore is accessible, or the directories in which your Zettel are stored.
-  You may want to permanently store the command line parameters so that you don't have to specify them every time you start Zettelstore.
+# As an intermediate user, you might want more control over how Zettelstore starts.
+  This includes customizing the URI through which Zettelstore is accessible or specifying the directories where your zettels are stored.
+  You may also want to make these settings permanent so that you don't have to manually specify them each time you launch Zettelstore.
 #* [[Zettelstore startup configuration|00001004010000]]
-# The last level is configuring the running Zettelstore.
-  For example, you can configure the default language of your Zettelstore.
+# The final level of customization is for configuring the running instance of Zettelstore.
+  For example, you can set the default language for your Zettelstore.
 #* [[Configure a running Zettelstore|00001004020000]]
 
-If you have enabled the administrator console, either via [[command-line parameters|00001004050000#a]] or via the [[startup configuration file|00001004010000#admin-port]], you can control the inner workings of Zettelstore even further.
+If you have enabled the administrator console, either through [[command-line parameters|00001004050000#a]] or the [[startup configuration file|00001004010000#admin-port]], you can gain even more control over the internal workings of Zettelstore.
 * [[Zettelstore Administrator Console|00001004100000]]

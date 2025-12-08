@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220630194106
+modified: 20251208182853
 
 Attributes allows to modify the way how material is presented.
 Alternatively, they provide additional information to markup elements.
@@ -17,7 +17,7 @@ Of course, more than one attribute can be specified.
 Attributes are separated by a sequence of space characters or by a comma character.
 
 An attribute normally consists of an optional key and an optional value.
-The key is a sequence of letters, digits, a hyphen-minus (""''-''"", U+002D, and a low line / underscore (""''_''"", U+005D).
+The key is a sequence of letters, digits, a hyphen-minus (""''-''"", U+002D), and a low line / underscore (""''_''"", U+005F).
 It can be empty.
 The value is a sequence of any character, except space and the right curly bracket (""''}''"", U+007D).
 If the value must contain a space or the right curly bracket, the value can be specified within two quotation marks (""''"''"", U+0022).
