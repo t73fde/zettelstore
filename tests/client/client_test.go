@@ -121,7 +121,7 @@ func TestListZettel(t *testing.T) {
 func compareZettelList(t *testing.T, pl [][]byte, l []api.ZidMetaRights) {
 	t.Helper()
 	if len(pl) != len(l) {
-		t.Errorf("Different list lenght: Plain=%d, Data=%d", len(pl), len(l))
+		t.Errorf("Different list length: Plain=%d, Data=%d", len(pl), len(l))
 	} else {
 		for i, line := range pl {
 			got, err := id.Parse(string(line[:14]))

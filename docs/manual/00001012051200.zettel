@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250224120441
+modified: 20251209154636
 
 To list all zettel just send a HTTP GET request to the [[endpoint|00001012920000]] ''/z''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 Always use the endpoint ''/z'' to work with a list of zettel.
@@ -23,7 +23,7 @@ Separated by a space character, the title of the zettel follows:
 ...
 ```
 
-The list is **not** sorted, even in the these examples where it appears to be sorted.
+The list is **not** sorted, even in these examples where it appears to be sorted.
 If you want to have it ordered, you must specify it with the help of a [[query expression|00001007700000]] / [[search term|00001007702000]].
 See [[Query the list of all zettel|00001012051400]] how to do it.
 

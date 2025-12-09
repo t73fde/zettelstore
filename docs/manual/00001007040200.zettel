@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250115180425
+modified: 20251209161955
 
 There are some reasons to mark text that should be rendered as uninterpreted:
 * Mark text as literal, sometimes as part of a program.
@@ -48,13 +48,13 @@ Examples:
 Attributes can be specified, the default attribute has the same semantic as for literal text.
 
 === Math mode / $$\TeX$$ input
-This allows to enter text, that is typically interpreted by $$\TeX$$ or similar software.
+This allows one to enter text that is typically interpreted by $$\TeX$$ or similar software.
 The main difference to all other literal-like formatting above is that the backslash character (""''\\''"", U+005C) has no special meaning.
 Therefore it is well suited to enter text with a lot of backslash characters.
 
 Math mode text is delimited with two dollar signs (""''$''"", U+0024) on each side.
 
-You can add some [[attributes|00001007050000]] immediate after the two closing at-sign characters to specify the syntax to use.
+You can add some [[attributes|00001007050000]] immediately after the two closing at-sign characters to specify the syntax to use.
 Either use the attribute key ""syntax"" or use the generic attribute to specify the syntax value.
 If no syntax value is provided, math mode text roughly corresponds to literal text.
 
@@ -64,4 +64,4 @@ However, external software might support specific syntax value, like ""tex"", ""
 Even an empty syntax value might be supported.
 
 Example:
-* ``Happy $$\\TeX$$!``is rendered as ::Happy $$\TeX$$!::{=example}
+* ``Happy $$\\TeX$$!`` is rendered as ::Happy $$\TeX$$!::{=example}

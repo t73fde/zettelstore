@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102180106
+modified: 20251209161155
 
 Region blocks do not directly have a visual representation.
 They just group a range of lines.
@@ -22,7 +22,7 @@ Any other character in this line will be ignored.
 Text following the beginning line will be interpreted, until a line begins with at least the same number of the same characters given at the beginning line.
 This allows to enter a region block within a region block.
 At the ending line, you can enter some [[inline elements|00001007040000]] after the colon characters.
-These will interpreted as some attribution text.
+These will be interpreted as some attribution text.
 
 For example:
 

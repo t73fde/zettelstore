@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20241213121000
+modified: 20251209161114
 
 There are three kinds of lists that can be nested: ordered lists, unordered lists, and quotation lists.
 
@@ -19,7 +19,7 @@ In other words: the inline elements must begin at the same column as it was on t
 
 The resulting sequence of inline elements is merged into a paragraph.
 Appropriately indented paragraphs can be specified after the first one.
-Since each blocks-structured element has to be specified at the first position of a line, none of the nested list items may contain anything else than paragraphs.
+Since each block-structured element has to be specified at the first position of a line, none of the nested list items may contain anything else than paragraphs.
 
 Some examples:
 ```zmk

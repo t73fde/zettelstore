@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102182659
+modified: 20251209162328
 
 Most characters you type are concerned with inline-structured elements.
 The content of a zettel contains in many cases just ordinary text, lightly formatted.
@@ -62,4 +62,4 @@ Since some Unicode characters are used quite often, a special notation is introd
 * Two consecutive hyphen-minus characters result in an __en-dash__ character.
   It is typically used in numeric ranges.
   ``pages 4--7`` will be rendered in HTML as: ::pages 4--7::{=example}.
-  Alternative specifications are: ``&ndash;``, ``&x8211``, and ``&#x2013``.
+  Alternative specifications are: ``&ndash;``, ``&#x8211;``, and ``&#x2013;``.

@@ -4,9 +4,9 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627132222
+modified: 20251209161034
 
-Every markup for blocks-structured elements (""blocks"") begins at the very first position of a line.
+Every markup for block-structured elements (""blocks"") begins at the very first position of a line.
 
 There are five kinds of blocks: lists, one-line blocks, line-range blocks, tables, and paragraphs.
 

@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210713150005
-modified: 20230807170416
+modified: 20251209154602
 
 A zettel is created by adding it to the [[list of zettel|00001012000000]].
 Therefore, the [[endpoint|00001012920000]] to create a new zettel is also ''/z'', but you must send the data of the new zettel via a HTTP POST request.
@@ -20,7 +20,7 @@ This is the same format as used by storing zettel within a [[directory box|00001
 
 The zettel identifier of the created zettel is returned.
 In addition, the HTTP response header contains a key ''Location'' with a relative URL for the new zettel.
-A client must prepend the HTTP protocol scheme, the host name, and (optional, but often needed) the post number to make it an absolute URL.
+A client must prepend the HTTP protocol scheme, the host name, and (optional, but often needed) the port number to make it an absolute URL.
 
 === Data input
 Alternatively, you may encode the zettel as a parseable object / a [[symbolic expression|00001012930500]] by providing the query parameter ''enc=data''.

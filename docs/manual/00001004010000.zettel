@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250828135622
+modified: 20251209154537
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -45,7 +45,7 @@ The following keys are supported:
 ; [!box-uri-x|''box-uri-X''], where __X__ is a number greater or equal to one
 : Specifies a [[box|00001004011200]] where zettel are stored.
   During startup, __X__ is incremented, starting with one, until no key is found.
-  This allows you to configure than one box.
+  This allows you to configure more than one box.
 
   If no ''box-uri-1'' key is given, the overall effect will be the same as if only ''box-uri-1'' was specified with the value ""dir://.zettel"".
   In this case, even a key ''box-uri-2'' will be ignored.

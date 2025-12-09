@@ -309,9 +309,9 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 			logging.LogMandatory(logger, "No configuration file found / used")
 		}
 		if kern.core.GetCurConfig(CoreDebug).(bool) {
-			logger.Info("----------------------------------------")
-			logger.Info("DEBUG MODE, DO NO USE THIS IN PRODUCTION")
-			logger.Info("----------------------------------------")
+			logger.Info("-----------------------------------------")
+			logger.Info("DEBUG MODE, DO NOT USE THIS IN PRODUCTION")
+			logger.Info("-----------------------------------------")
 		}
 		if kern.auth.GetCurConfig(AuthReadonly).(bool) {
 			logger.Info("Read-only mode")

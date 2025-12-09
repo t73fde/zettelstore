@@ -14,8 +14,8 @@ If you have encountered an error, please include the content of the following ze
 * [[Zettelstore Startup Configuration|00000000000096]]
 * [[Zettelstore Runtime Configuration|00000000000100]]
 
-Additionally, you have to describe, what you did before that error occured and what you expected instead.
-Please do not forget to include the error message, if there is one.
+Additionally, you have to describe what you did before that error occurred and what you expected instead.
+Please do not forget to include the error message if there is one.
 
 Some of the above Zettelstore zettel can only be retrieved if you have enabled ""expert mode"".
 Otherwise, only some zettel are linked.

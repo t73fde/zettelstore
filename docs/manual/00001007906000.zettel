@@ -4,9 +4,9 @@ role: manual
 tags: #manual #tutorial #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220811115501
-modified: 20250415165624
+modified: 20251209161541
 
-After you have [[learned|00001007903000]] the basic concepts and markup of Zettelmarkup (paragraphs, emphasized text, and lists), this zettel introduces you into the concepts of links, thematic breaks, and headings.
+After you have [[learned|00001007903000]] the basic concepts and markup of Zettelmarkup (paragraphs, emphasized text, and lists), this zettel introduces you to the concepts of links, thematic breaks, and headings.
 
 === Links
 A Zettelstore is much more useful, if you connect related zettel.
@@ -35,8 +35,8 @@ Again, you probably see a principle.
 [[And now for something completely different|https://en.wikipedia.org/wiki/And_Now_for_Something_Completely_Different]].
 
 Sometimes, you want to insert a thematic break into your text, because two paragraphs do not separate enough.
-In Zettelmarkup is is done by entering three or more hyphen-minus characters at the beginning of a new line.
-You must not include blank lines around this line, but it can be more readable if you want to look at the Zettelmarkup text.
+In Zettelmarkup this is done by entering three or more hyphen-minus characters at the beginning of a new line.
+You must not include blank lines around this line, but it can be more readable, if you want to look at the Zettelmarkup text.
 
 ```zmk
 First paragraph.
@@ -66,7 +66,7 @@ You must not specify a blank line to end a paragraph.
 Any Zettelmarkup that must start at the beginning of a new line will end a previous paragraph.
 Similar, a blank line must not precede a paragraph.
 
-This applies also to lists, as given in the first steps, as well as other [[similar markup|00001007030000]] you will probably later.
+This applies also to lists, as given in the first steps, as well as other [[similar markup|00001007030000]] you will probably use later.
 
 === Headings
 Headings explicitly structure a zettel, similar to thematic breaks, but gives the resulting part a name.
