@@ -121,8 +121,8 @@ func (ws *webService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 		WebProfiling:         false,
 		WebSecureCookie:      true,
 		WebSxMaxNesting:      32 * 1024,
-		WebTokenLifetimeAPI:  1 * time.Hour,
-		WebTokenLifetimeHTML: 10 * time.Minute,
+		WebTokenLifetimeAPI:  10 * time.Minute,
+		WebTokenLifetimeHTML: 60 * time.Minute,
 		WebURLPrefix:         "/",
 	}
 }
