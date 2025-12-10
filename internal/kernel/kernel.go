@@ -425,7 +425,7 @@ func (kern *Kernel) GetLastLogTime() time.Time { return kern.dlogWriter.getLastL
 // LogRecover outputs some information about the previous panic.
 func (kern *Kernel) LogRecover(name string, recoverInfo any) {
 	stack := debug.Stack()
-	kern.logger.Error(name, "recovered_from", recoverInfo, "stack", stack)
+	kern.logger.Error(name, "recovered_from", recoverInfo, "stack", string(stack))
 	kern.core.updateRecoverInfo(name, recoverInfo, stack)
 }
 
