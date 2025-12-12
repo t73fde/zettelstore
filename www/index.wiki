@@ -24,9 +24,7 @@ The software, including the manual, is licensed under the
   *  [https://t73f.de/r/sx|Sx] provides an evaluator for symbolic
      expressions, which is used for HTML templates and more.
 
-[https://mastodon.social/tags/Zettelstore|Stay tuned]&nbsp;&hellip;
-<hr>
-<h3>Latest Release: 1.0.0 (2025-12-05)</h3>
+<h2>Latest Release: 1.0.0 (2025-12-05)</h2>
   *  [./download.wiki|Download]
   *  [./changes.wiki#1_0|Change summary]
   *  [/timeline?p=v1.0.0&bt=v0.22.0&y=ci|Check-ins for version 1.0],
@@ -36,7 +34,6 @@ The software, including the manual, is licensed under the
   *  [./plan.wiki|Limitations and planned improvements]
   *  [/timeline?t=release|Timeline of all past releases]
 
-<hr>
 <h2>Build instructions</h2>
 
 Just install [https://go.dev/dl/|Go] and some Go-based tools. Please read
