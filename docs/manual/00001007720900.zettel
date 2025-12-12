@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230729102142
-modified: 20230729120755
+modified: 20251212134003
 
 The items directive works on zettel that act as a ""table of contents"" for other zettel.
 The [[initial zettel|00001000000000]] of this manual is one example, the [[general API description|00001012000000]] is another.
@@ -18,7 +18,7 @@ If an item contains a valid reference to a zettel, this reference will be interp
 
 This applies only to first level list items (ordered or unordered list), but not to deeper levels.
 Only the first reference to a valid zettel is collected for the table of contents.
-Following references to zettel within such an list item are ignored.
+Following references to zettel within such a list item are ignored.
 
 
 ````

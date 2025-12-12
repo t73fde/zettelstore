@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20250624162823
-modified: 20250626174233
+modified: 20251212133935
 
 A thread directive is similar to the [[context directive|00001007720300]] by calculating zettel associated with a list of zettel identifier.
 There are three thread directives, beginning with the keywords ''FOLGE'', ''SEQUEL'', and ''THREAD''.
@@ -12,7 +12,7 @@ There are three thread directives, beginning with the keywords ''FOLGE'', ''SEQU
 With the help of the ''FOLGE'' directive, you can list all zettel that belong to the same ""train of thought"".
 It is possible to list all folge zettel only or only precursor zettel.
 Additionally, you can specify the maximum number to be listed.
-A ''FOLGE'' directive considers only the metadata keys only metadata keys [[''folge''|00001006020000#folge]] and [[''precursor''|00001006020000#precursor]].
+A ''FOLGE'' directive considers only the metadata keys [[''folge''|00001006020000#folge]] and [[''precursor''|00001006020000#precursor]].
 
 Similarly, the ''SEQUEL'' directive allows you to list all ""branching ideas""
 You can limit the search to only sequel or only prequel zettel, and you can also restrict the result size.

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20230403151127
-modified: 20251117170933
+modified: 20251212134618
 
 === Syntax of lists
 A list always starts with the left parenthesis (""''(''"", U+0028) and ends with a right parenthesis (""'')''"", U+0029).
@@ -17,7 +17,7 @@ The second value references the rest of the list, or is the special value __nil_
 
 However, it is possible to store an atom as the second value of the last cell.
 In this case, before the last element of a list of at least two elements, a full stop character (""''.''"", U+002E) signals such a cell as the last two elements.
-This allows a more space economic storage of data.
+This allows a more space-efficient storage of data.
 
 A __proper__ list, which contains __nil__ as the second value of the last element might be pictured as follows:
 
@@ -48,7 +48,7 @@ An improper list will have a non-__nil__ reference to an atom as the very last e
 +-------+   +-------+    +-------+ +------+
 ~~~
 
-Above improper list will be represented as an symbolic expression as ''(Elem1 Elem2 ... ElemN . Atom)''
+Above improper list will be represented as a symbolic expression as ''(Elem1 Elem2 ... ElemN . Atom)''
 
 
 === Syntax of numbers (atom)

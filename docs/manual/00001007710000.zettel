@@ -1,14 +1,15 @@
-id: 20230707202600
+id: 00001007710000
 title: Query: List of Zettel Identifier
 role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707202652
+modified: 20251212133328
 
-A query may start with a list of [[zettel identifier|00001006050000]], where the identifier are separated by one ore more space characters.
+A query may start with a list of [[zettel identifier|00001006050000]], where the identifier are separated by one or more space characters.
 
-If you specify at least one query directive, this list acts as a input for the first query directive.
-Otherwise, only the zettel of the given list are used to evaluated the search expression or the action list (if no search expression was given).
+If you specify at least one query directive, this list acts as an input for the first query directive.
+Otherwise, only the zettel of the given list are used to evaluate the search expression or the action list (if no search expression was given).
 
 Some examples:
 * [[query:00001007700000 CONTEXT]] returns the context of this zettel.

@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209154636
+modified: 20251212132730
 
 To list all zettel just send a HTTP GET request to the [[endpoint|00001012920000]] ''/z''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 Always use the endpoint ''/z'' to work with a list of zettel.
@@ -71,7 +71,7 @@ This request (and similar others) will always return a list of metadata, provide
 There will never be a HTTP status code 403 (Forbidden), even if [[authentication was enabled|00001010040100]] and you did not provide a valid access token.
 In this case, the resulting list might be quite short (some zettel will have [[public visibility|00001010070200]]) or the list might be empty.
 
-With this call, you cannot differentiate between an empty result list (e.g because your search did not found a zettel with the specified term) and an empty list because of missing authorization (e.g. an invalid access token).
+With this call, you cannot differentiate between an empty result list (e.g because your search did not find a zettel with the specified term) and an empty list because of missing authorization (e.g. an invalid access token).
 
 === HTTP Status codes
 ; ''200''

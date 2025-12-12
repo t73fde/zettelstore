@@ -4,9 +4,9 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20221205155521
-modified: 20250626114354
+modified: 20251212133427
 
-Some metadata of the [[runtime configuration|00001004020000]] may be overwritten in an [[user zettel|00001010040200]].
+Some metadata of the [[runtime configuration|00001004020000]] may be overwritten in a [[user zettel|00001010040200]].
 A subset of those may be overwritten in the zettel that is currently used.
 This allows to specify user specific or zettel specific behavior.
 

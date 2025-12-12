@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #encryption #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251117152142
+modified: 20251212134212
 
 Since Zettelstore does not encrypt the messages it exchanges with its clients, you may need some additional software to enable encryption.
 
@@ -13,7 +13,7 @@ To enable encryption, you probably use some kind of encryption keys.
 In most cases, you need to deploy a ""public-key encryption"" process, where your side publishes a public encryption key that only works with a corresponding private decryption key.
 Technically, this is not trivial.
 Any client who wants to communicate with your Zettelstore must trust the public encryption key.
-Otherwise the client cannot be sure that it is communication with your Zettelstore.
+Otherwise the client cannot be sure that it is communicating with your Zettelstore.
 This problem is solved in part with [[Let's Encrypt|https://letsencrypt.org/]],
 ""a free, automated, and open certificate authority (CA), run for the public’s benefit.
 It is a service provided by the [[Internet Security Research Group|https://www.abetterinternet.org/]]"".
@@ -79,6 +79,6 @@ The protection will work only if the external server forwards certain HTTP reque
 * [[''Origin''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Origin]] is read next, if ''Sec-Fetch-Site'' is either missing or contains other values.
   In this case ''Origin'' should contain the same host name as read via header [[''Host''|https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Host]].
 
-Otherwise, an cross-origin request will be detected.
+Otherwise, a cross-origin request will be detected.
 
 To debug the configuration of the external server, Zettelstore will log the received header values, if Zettelstore is run with the [[''-debug''|00001004051000#debug]] parameter.

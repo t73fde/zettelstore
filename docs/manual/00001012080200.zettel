@@ -4,14 +4,14 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220103224858
-modified: 20241216104549
+modified: 20251212133011
 
 API clients typically want to know, whether [[authentication is enabled|00001010040100]] or not.
 If authentication is enabled, they present some form of user interface to get user name and password for the actual authentication.
 Then they try to [[obtain an access token|00001012050200]].
 If authentication is disabled, these steps are not needed.
 
-To check for enabled authentication, you must send a HTTP POST request to the [[endpoint|00001012920000]] ''/x'' and you must specify the query parameter ''cmd=authenticated''.
+To check for enabled authentication, you must send an HTTP POST request to the [[endpoint|00001012920000]] ''/x'' and you must specify the query parameter ''cmd=authenticated''.
 
 ```sh
 # curl -X POST 'http://127.0.0.1:23123/x?cmd=authenticated'
@@ -21,7 +21,7 @@ If authentication is not enabled, you will get a HTTP status code 200 (OK) with 
 
 Otherwise, authentication is enabled.
 If you provide a valid access token, you will receive a HTTP status code 204 (No Content) with an empty HTTP body.
-If you did not provide a valid access token (with is the typical case), you will get a HTTP status code 401 (Unauthorized), again with an empty HTTP body.
+If you did not provide a valid access token (which is the typical case), you will get a HTTP status code 401 (Unauthorized), again with an empty HTTP body.
 
 === HTTP Status codes
 ; ''200''
@@ -33,4 +33,4 @@ If you did not provide a valid access token (with is the typical case), you will
   There are several reasons for this.
   Most likely, no query parameter ''cmd'' was given, or it did not contain the value ""authenticate"".
 ; ''401''
-: Authentication is enabled and not valid access token was provided.
+: Authentication is enabled and no valid access token was provided.

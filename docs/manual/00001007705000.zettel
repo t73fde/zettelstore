@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20251209145750
+modified: 20251212133402
 
 A search operator specifies how the comparison of a search value and a zettel should be executed.
 Every comparison is done case-insensitive, treating all uppercase letters the same as lowercase letters.
@@ -16,7 +16,7 @@ The following are allowed search operator characters:
 * The left square bracket character (""''[''"", U+005B) matches if there is some prefix (""prefix operator"").
 * The right square bracket character (""'']''"", U+005D) compares a suffix relationship (""suffix operator"").
 * The colon character (""'':''"", U+003A) compares depending on the actual [[key type|00001006030000]] (""has operator"").
-  In most cases, it acts as a equals operator, but for some type it acts as the match operator.
+  In most cases, it acts as an equals operator, but for some type it acts as the match operator.
 * The less-than sign character (""''<''"", U+003C) matches if the search value is somehow less than the metadata value (""less operator"").
 * The greater-than sign character (""''>''"", U+003E) matches if the search value is somehow greater than the metadata value (""greater operator"").
 * The question mark (""''?''"", U+003F) checks for an existing metadata key (""exist operator"").

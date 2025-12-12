@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230316181044
-modified: 20250806192348
+modified: 20251212132037
 
 A zettel representation that is a [[s-expression|00001012930000]], syntactically similar to the [[Sz encoding|00001012920516]], but denotes [[HTML|00001012920510]] semantics.
 It is derived from a XML encoding in s-expressions, called [[SXML|https://en.wikipedia.org/wiki/SXML]].
@@ -29,7 +29,7 @@ A list may contain a possibly empty sequence of elements, i.e. lists and / or at
 Before the last element of a list of at least two elements, a full stop character (""''.''"", U+002E) signal a pair as the last two elements.
 This allows a more space economic storage of data.
 
-An HTML tag like ``< a href="link">Text</a>`` is encoded in SHTML with a list, where the first element is a symbol named a the tag.
+An HTML tag like ``< a href="link">Text</a>`` is encoded in SHTML with a list, where the first element is a symbol named after the tag.
 The second element is an optional encoding of the tag's attributes.
 Further elements are either other tag encodings or a string.
 The above tag is encoded as ``(a ((href . "link")) "Text")``.

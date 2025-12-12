@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220809132350
-modified: 20241213153229
+modified: 20251212134511
 
 A query transclusion is specified by the following sequence, starting at the first position in a line: ''{{{query:query-expression}}}''.
 The line must literally start with the sequence ''{{{query:''.
@@ -30,7 +30,7 @@ In the above example, the action list is empty.
 This leads to the described list of zettel.
 
 The following actions are supported, parameter and aggregate actions:
-; ''N'' (or any word that starts with ""''N''"" (parameter)
+; ''N'' (or any word that starts with ""''N''"") (parameter)
 : The resulting list will be a numbered list.
 ; ''MINn'' (parameter)
 : Emit only those values with at least __n__ aggregated values.
@@ -43,7 +43,7 @@ The following actions are supported, parameter and aggregate actions:
 ; ''REDIRECT'', ''REINDEX'' (aggregate)
 : Will be ignored.
   These actions may have been copied from an existing [[API query call|00001012051400]] (or from a WebUI query), but are here superfluous (and possibly harmful).
-; Any [[metadata key|00001006020000]] of type [[Word|00001006035500]] or of type [[TagSet|00001006034000]] (aggregates)
+; Any [[metadata key|00001006020000]] of type [[Word|00001006035500]] or of type [[TagSet|00001006034000]] (aggregate)
 : Emit an aggregate of the given metadata key.
   The key can be given in any letter case[^Except if the key name collides with one of the above names. In this case use at least one lower case letter.].
 

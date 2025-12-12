@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209154537
+modified: 20251212134836
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -26,7 +26,7 @@ The following keys are supported:
 
   Default: ""0""
 ; [!asset-dir|''asset-dir'']
-: Allows to specify a directory whose files are allowed to be transferred directly with the help of the web server.
+: Allows you to specify a directory whose files are allowed to be transferred directly with the help of the web server.
   The URL prefix for these files is ''/assets/''.
   You can use this if you want to transfer files that are too large for a zettel, such as presentation, PDF, music or video files.
 
@@ -50,7 +50,7 @@ The following keys are supported:
   If no ''box-uri-1'' key is given, the overall effect will be the same as if only ''box-uri-1'' was specified with the value ""dir://.zettel"".
   In this case, even a key ''box-uri-2'' will be ignored.
 ; [!debug-mode|''debug-mode'']
-: If set to [[true|00001006030500]], allows to debug the Zettelstore software (mostly used by Zettelstore developers).
+: If set to [[true|00001006030500]], allows you to debug the Zettelstore software (mostly used by Zettelstore developers).
   Sets [[''log-level''|#log-level]] to ""debug"".
   Enables [[''runtime-profiling''|#runtime-profiling]].
 
@@ -67,7 +67,7 @@ The following keys are supported:
 
   Default: ""false""
 ; [!insecure-html|''insecure-html'']
-: Allows to use HTML, e.g. within supported markup languages, even if this might introduce security-related problems.
+: Allows you to use HTML, e.g. within supported markup languages, even if this might introduce security-related problems.
   However, HTML containing the ``<script>`` or the ``<iframe>`` tag is always ignored.
   But due to ""clever"" ways of combining HTML, CSS, JavaScript, there might be some negative security consequences.
   Please be aware of this!
@@ -128,7 +128,7 @@ The following keys are supported:
 
   Default: ""false""
 ; [!read-only-mode|''read-only-mode'']
-: If set to a [[true value|00001006030500]] the Zettelstore service will beputs into a read-only mode.
+: If set to a [[true value|00001006030500]] the Zettelstore service will be put into a read-only mode.
   No changes are possible.
 
   Default: ""false"".
@@ -166,7 +166,7 @@ The following keys are supported:
 
   Default: ""/"".
 
-  This allows to use a forwarding proxy [[server|00001010090100]] in front of the Zettelstore.
+  This allows you to use a forwarding proxy [[server|00001010090100]] in front of the Zettelstore.
 ; [!verbose-mode|''verbose-mode'']
 : Be more verbose when logging data, if set to a [[true value|00001006030500]].
 
