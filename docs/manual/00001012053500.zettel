@@ -4,11 +4,11 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210726174524
-modified: 20241216104145
+modified: 20251215173203
 
 The [[endpoint|00001012920000]] to work with evaluated metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
-For example, to retrieve some evaluated data about this zettel you are currently viewing in [[Sz encoding|00001012920516]], just send a HTTP GET request to the endpoint ''/z/00001012053500''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header] with the query parameter ''enc=sz''.
+For example, to retrieve some evaluated data about this zettel you are currently viewing in [[Sz encoding|00001012920516]], just send an HTTP GET request to the endpoint ''/z/00001012053500''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header] with the query parameter ''enc=sz''.
 If successful, the output is a symbolic expression value:
 ```sh
 # curl 'http://127.0.0.1:23123/z/00001012053500?enc=sz'

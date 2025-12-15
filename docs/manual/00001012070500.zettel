@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220304164242
-modified: 20230928190516
+modified: 20251215172906
 
 The [[endpoint|00001012920000]] ''/x'' allows you to retrieve some (administrative) data.
 
@@ -22,7 +22,7 @@ Currently, you can only request Zettelstore version data.
 * The second string contains data to identify the version from a developers perspective.
 
 If any of the three digits has the value -1, its semantic value is unknown.
-Similar, the two string might be empty.
+Similar, the two strings might be empty.
 
 === HTTP Status codes
 ; ''200''

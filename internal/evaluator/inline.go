@@ -230,7 +230,7 @@ func firstInlinesToEmbed(blocks *sx.Pair) *sx.Pair {
 }
 
 // firstParagraphInlines returns the inline list of the first paragraph that
-// contains a inline list.
+// contains an inline list.
 func firstParagraphInlines(blocks *sx.Pair) *sx.Pair {
 	for blockObj := range blocks.Values() {
 		if block, isPair := sx.GetPair(blockObj); isPair {

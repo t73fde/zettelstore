@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209162328
+modified: 20251215175057
 
 Most characters you type are concerned with inline-structured elements.
 The content of a zettel contains in many cases just ordinary text, lightly formatted.
@@ -13,7 +13,7 @@ Sometimes, you want to enter characters that have no representation on your keyb
 
 ; Text formatting
 : Every [[text formatting|00001007040100]] element begins with two same characters at the beginning.
-  It lasts until the same two characters occurred the second time.
+  It lasts until the same two characters occur the second time.
   Some of these elements explicitly support [[attributes|00001007050000]].
 
 ; Literal-like formatting

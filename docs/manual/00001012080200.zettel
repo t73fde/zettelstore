@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220103224858
-modified: 20251212133011
+modified: 20251215173338
 
 API clients typically want to know, whether [[authentication is enabled|00001010040100]] or not.
 If authentication is enabled, they present some form of user interface to get user name and password for the actual authentication.
@@ -17,11 +17,11 @@ To check for enabled authentication, you must send an HTTP POST request to the [
 # curl -X POST 'http://127.0.0.1:23123/x?cmd=authenticated'
 ```
 
-If authentication is not enabled, you will get a HTTP status code 200 (OK) with an empty HTTP body.
+If authentication is not enabled, you will get an HTTP status code 200 (OK) with an empty HTTP body.
 
 Otherwise, authentication is enabled.
-If you provide a valid access token, you will receive a HTTP status code 204 (No Content) with an empty HTTP body.
-If you did not provide a valid access token (which is the typical case), you will get a HTTP status code 401 (Unauthorized), again with an empty HTTP body.
+If you provide a valid access token, you will receive an HTTP status code 204 (No Content) with an empty HTTP body.
+If you did not provide a valid access token (which is the typical case), you will get an HTTP status code 401 (Unauthorized), again with an empty HTTP body.
 
 === HTTP Status codes
 ; ''200''

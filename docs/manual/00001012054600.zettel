@@ -4,14 +4,14 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210713150005
-modified: 20221219154608
+modified: 20251215173247
 
 Deleting a zettel within the Zettelstore is executed on the first [[box|00001004011200]] that contains that zettel.
 Zettel with the same identifier, but in subsequent boxes remain.
 If the first box containing the zettel is read-only, deleting that zettel will fail, as well for a Zettelstore in [[read-only mode|00001004010000#read-only-mode]] or if [[authentication is enabled|00001010040100]] and the user has no [[access right|00001010070600]] to do so.
 
 The [[endpoint|00001012920000]] to delete a zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
-You must send a HTTP DELETE request to this endpoint:
+You must send an HTTP DELETE request to this endpoint:
 ```
 # curl -X DELETE http://127.0.0.1:23123/z/00001000000000
 ```

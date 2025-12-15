@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251212134119
+modified: 20251215175603
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -45,7 +45,7 @@ Most keys conform to a [[type|00001006030000]].
 ; [!dead|''dead'']
 : Property that contains all references that does __not__ identify a zettel.
 ; [!expire|''expire'']
-: A user-entered time stamp that document the point in time when the zettel should expire.
+: A user-entered timestamp that records the point in time when the zettel should expire.
   When a zettel expires, Zettelstore does nothing.
   It is up to you to define required actions.
   ''expire'' is just a documentation.
@@ -86,10 +86,10 @@ Most keys conform to a [[type|00001006030000]].
   These are zettel that occurred somehow before the current zettel.
   Basically the inverse of key [[''sequel''|#sequel]].
 ; [!published|''published'']
-: This property contains the timestamp of the last modification / creation of the zettel.
-  If [[''modified''|#modified]] is set with a valid timestamp, it contains the its value.
-  Otherwise, if [[''created''|#created]] is set with a valid timestamp, it contains the its value.
-  Otherwise, if the zettel identifier contains a valid timestamp, the identifier is used.
+: This property contains the timestamp of the last modification or creation of the zettel.
+  If [[''modified''|#modified]] is set to a valid timestamp, it holds that value.
+  Otherwise, if [[''created''|#created]] is set to a valid timestamp, ''published'' contains its value.
+  If neither ''modified'' or ''created'' are set, and the zettel identifier contains a valid timestamp, the identifier is used.
   In all other cases, this property is not set.
 
   It can be used for [[sorting|00001007700000]] zettel based on their publication date.

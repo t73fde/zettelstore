@@ -4,12 +4,12 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20250102210348
+modified: 20251215165424
 
 A search term allows you to specify one search restriction.
 The result [[search expression|00001007700000]], which contains more than one search term, will be the applications of all restrictions.
 
-A search term can be one of the following (the first three term are collectively called __search literals__):
+A search term can be one of the following (the first three terms are collectively called __search literals__):
 * A metadata-based search, by specifying the name of a [[metadata key|00001006010000]], followed by a [[search operator|00001007705000]], followed by an optional [[search value|00001007706000]].
 
   All zettel containing the given metadata key with an allowed value (depending on the search operator) are selected.

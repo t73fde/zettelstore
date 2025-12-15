@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20250415154139
-modified: 20251013185705
+modified: 20251215173137
 
 The [[endpoint|00001012920000]] to retrieve references of a specific zettel is ''/r/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -14,7 +14,7 @@ It may also be referenced within the [[metadata|00001006000000]] of a zettel, wh
 
 To calculate the references of a zettel, its [[parsed|00001006000000]] form is used.
 
-For example, to retrieve references of the zettel about [[CommonMark|00001008010500]], just send a HTTP GET request to the endpoint ''/r/00001008010500''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header]:
+For example, to retrieve references of the zettel about [[CommonMark|00001008010500]], just send an HTTP GET request to the endpoint ''/r/00001008010500''[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header]:
 ```sh
 # curl 'http://127.0.0.1:23123/r/00001008010500'
 https://commonmark.org/

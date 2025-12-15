@@ -4,7 +4,7 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20220114181521
-modified: 20220119124635
+modified: 20251215170515
 
 There are several ways to automatically start Zettelstore.
 
@@ -39,7 +39,7 @@ If you don't want the Zettelstore window, you should try the next method.
 
 === Launch Agent
 
-If you want to execute Zettelstore automatically and less visible, and if you know a little bit about working in the terminal application, then you could try to run Zettelstore under the control of the [[Launchd system|https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html]].
+If you want to run Zettelstore automatically and with less visibility, and you're familiar with working in the terminal, you can try running Zettelstore under the control of the [[Launchd system|https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/Introduction.html]].
 
 First, you have to create a description for ""Launchd"".
 This is a text file named ''zettelstore.plist'' with the following content.

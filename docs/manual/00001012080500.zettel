@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211230230441
-modified: 20250102212703
+modified: 20251215170750
 
 Zettelstore maintains some internal data to allow faster operations.
 
@@ -18,13 +18,13 @@ All these internal data may become stale.
 This should not happen, but when it comes e.g. to file handling, every operating system behaves differently in very subtle ways.
 
 To avoid stopping and re-starting Zettelstore, you can use the API to force Zettelstore to refresh its internal data if you think it is needed.
-To do this, you must send a HTTP POST request to the [[endpoint|00001012920000]] ''/x'' and you must specify the query parameter ''cmd=refresh''.
+To do this, you must send an HTTP POST request to the [[endpoint|00001012920000]] ''/x'' and you must specify the query parameter ''cmd=refresh''.
 
 ```sh
 # curl -X POST 'http://127.0.0.1:23123/x?cmd=refresh'
 ```
 
-If successful, you will get a HTTP status code 204 (No Content) with an empty HTTP body.
+If successful, you will get an HTTP status code 204 (No Content) with an empty HTTP body.
 
 The request will be successful if either:
 * [[Authentication is enabled|00001010040100]] and you [[provide a valid access token|00001012050600]],

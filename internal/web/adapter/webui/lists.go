@@ -34,7 +34,7 @@ import (
 	"zettelstore.de/z/internal/web/adapter"
 )
 
-// MakeListHTMLMetaHandler creates a HTTP handler for rendering the list of zettel as HTML.
+// MakeListHTMLMetaHandler creates an HTTP handler for rendering the list of zettel as HTML.
 func (wui *WebUI) MakeListHTMLMetaHandler(
 	queryMeta *usecase.Query,
 	tagZettel *usecase.TagZettel,

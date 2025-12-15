@@ -153,7 +153,7 @@ func (srv *webServer) Stop()      { srv.httpServer.stop() }
 // Server timeout values
 const shutdownTimeout = 5 * time.Second
 
-// httpServer is a HTTP server.
+// httpServer is an HTTP server.
 type httpServer struct {
 	http.Server
 }

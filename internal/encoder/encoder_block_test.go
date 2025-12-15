@@ -400,7 +400,7 @@ and much more
 		},
 	},
 	{
-		descr: "A paragraph with a inline comment only should be empty in HTML",
+		descr: "A paragraph with an inline comment only should be empty in HTML",
 		zmk:   `%% Comment`,
 		expect: expectMap{
 			// encoderHTML:  ``,

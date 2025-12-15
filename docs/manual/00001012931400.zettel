@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20251118151703
+modified: 20251215165611
 
 === ''PARA''
 :::syntax
@@ -97,9 +97,9 @@ The attribute value ''"right"'' specifies right aligned cell content.
 In all other cases, a default alignment is assumed.
 
 === ''REGION-*''
-The following lists specifies different kinds of regions.
+The following lists specify different kinds of regions.
 A region treat a sequence of block elements to be belonging together in certain ways.
-The have a similar structure.
+They have a similar structure.
 
 :::syntax
 __BlockRegion__ **=** ''(REGION-BLOCK'' [[__Attributes__|00001012931000#attribute]] ''('' [[__BlockElement__|00001012931400]] &hellip; '')'' [[__InlineElement__|00001012931600]] &hellip; '')''.

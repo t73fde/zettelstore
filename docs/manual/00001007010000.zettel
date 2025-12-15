@@ -4,14 +4,14 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250106174703
+modified: 20251215175356
 
 Any document can be thought of as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
 Some of these blocks can contain other blocks, for example lists may contain other lists or paragraphs.
 Other blocks contain [[inline-structured elements|00001007040000]] (""inlines""), such as text, [[links|00001007040310]], emphasized text, and images.
 
 With the exception of lists and tables, the markup for blocks always begins at the first position of a line with three or more identical characters.
-List blocks also begin at the first position of a line, but may need one or more identical character, plus a space character.
+List blocks also begin at the first position of a line, but may need one or more identical characters, plus a space character.
 [[Table blocks|00001007031000]] begin at the first position of a line with the character ""``|``"".
 Non-list blocks are either fully specified on that line or they span multiple lines and are delimited with the same three or more character.
 It depends on the block kind, whether blocks are specified on one line or on at least two lines.
@@ -21,7 +21,7 @@ This paragraph ends when a block element is detected at the beginning of a next 
 Some blocks may also contain inline elements, e.g. a heading.
 
 Inline elements mostly begin with two non-space, often identical characters.
-With some exceptions, two identical non-space characters begins a formatting range that is ended with the same two characters.
+With some exceptions, two identical non-space characters mark the beginning of a formatting range that ends with the same two characters.
 
 Exceptions are: links, images, edits, comments, and both the ""en-dash"" and the ""horizontal ellipsis"".
 A link is given with ``[[...]]``{=zmk}, an image with ``{{...}}``{=zmk}, and an edit formatting with ``((...))``{=zmk}.
@@ -44,7 +44,7 @@ To force the inline element formatting at the beginning of a line, ``**\\ Text**
 
 Many block and inline elements can be refined by additional [[attributes|00001007050000]].
 Attributes resemble roughly HTML attributes and are put near the corresponding elements by using the syntax ``{...}``{=zmk}.
-One example is to make space characters visible inside a inline literal element: ``1 + 2 = 3``{-} was specified by using the default attribute: ``\`\`1 + 2 = 3\`\`{-}``.
+One example is to make space characters visible inside an inline literal element: ``1 + 2 = 3``{-} was specified by using the default attribute: ``\`\`1 + 2 = 3\`\`{-}``.
 
 To summarize:
 

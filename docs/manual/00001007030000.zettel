@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209161034
+modified: 20251215173754
 
 Every markup for block-structured elements (""blocks"") begins at the very first position of a line.
 
@@ -36,7 +36,7 @@ This allows line-range blocks to be nested.
 Additionally, all other block elements are allowed within line-range blocks.
 
 * [[Verbatim blocks|00001007030500]] do not interpret their content,
-* [[Quotation blocks|00001007030600]] specify a block-length quotations,
+* [[Quotation blocks|00001007030600]] specify block-length quotations,
 * [[Verse blocks|00001007030700]] allow to enter poetry, lyrics and similar text, where line endings are important,
 * [[Region blocks|00001007030800]] just mark regions, e.g. for common formatting,
 * [[Comment blocks|00001007030900]] allow you to enter text that will be ignored when rendered.
@@ -52,7 +52,7 @@ A table row itself is a sequence of table cells.
 
 === Paragraphs
 
-Any line that does not conform to another blocks-structured element begins a paragraph.
+Any line that does not conform to another block-structured element begins a paragraph.
 This has the implication that a mistyped syntax element for a block element will be part of the paragraph. For example:
 ```zmk
 = Heading

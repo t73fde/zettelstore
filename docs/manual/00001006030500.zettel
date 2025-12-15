@@ -4,12 +4,12 @@ role: manual
 tags: #manual #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20220304114040
+modified: 20251215165507
 
 On some places, metadata values are interpreted as a truth value.
 
 Every character sequence that begins with a ""0"", ""F"", ""N"", ""f"", or a ""n"" is interpreted as the boolean ""false"" value.
-All values are interpreted as the boolean ""true"" value.
+All other values are interpreted as the boolean ""true"" value.
 
 However, there is no full support for a boolean type.
 Such values are interpreted as a [[string value|00001006033500]], e.g. with respect to comparing and sorting.

@@ -4,10 +4,10 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211119133357
-modified: 20230928190540
+modified: 20251215164537
 
 The value of a personal Zettelstore is determined in part by explicit connections between related zettel.
-If the number of zettel grow, some of these connections are missing.
+If the number of zettel grows, some of these connections are missing.
 There are various reasons for this.
 Maybe, you forgot that a zettel exists.
 Or you add a zettel later, but forgot that previous zettel already mention its title.
