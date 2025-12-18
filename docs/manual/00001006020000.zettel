@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251215175603
+modified: 20251218190051
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -43,7 +43,7 @@ Most keys conform to a [[type|00001006030000]].
 
   It is only used for zettel with a ''role'' value of ""user"".
 ; [!dead|''dead'']
-: Property that contains all references that does __not__ identify a zettel.
+: Property that contains all references that do __not__ identify a zettel.
 ; [!expire|''expire'']
 : A user-entered timestamp that records the point in time when the zettel should expire.
   When a zettel expires, Zettelstore does nothing.
@@ -54,7 +54,7 @@ Most keys conform to a [[type|00001006030000]].
 ; [!folge|''folge'']
 : Is a property that contains identifiers of all zettel that reference this zettel via the [[''precursor''|#precursor]] value.
 
-  It is used to reference __folge zettel__, those that develop the idea of the current zettel a bit further, following a ""train of thought.""
+  It is used to reference __Folgezettel__, those that develop the idea of the current zettel a bit further, following a ""train of thought.""
 ; [!folge-role|''folge-role'']
 : Specifies a suggested [[''role''|#role]] the zettel should use in the future, if zettel currently has a preliminary role.
 ; [!forward|''forward'']
@@ -67,7 +67,7 @@ Most keys conform to a [[type|00001006030000]].
   Mostly used for HTML rendering of the zettel.
 
   If not given, the value ''lang'' from the zettel of the [[current user|00001010040200]] will be used.
-  If that value is also not available, it is read from the [[configuration zettel|00001004020000#lang]] will be used.
+  If that value is also not available, the value from the [[configuration zettel|00001004020000#lang]] will be used.
   Use values according to the language definition of [[RFC-5646|https://datatracker.ietf.org/doc/html/rfc5646]].
 ; [!license|''license'']
 : Defines a license string that will be rendered.
@@ -79,7 +79,7 @@ Most keys conform to a [[type|00001006030000]].
   This is a computed value.
   There is no need to set it via Zettelstore.
 ; [!precursor|''precursor'']
-: References zettel for which this zettel is a ""Folgezettel"" / follow-up zettel.
+: References zettel for which this zettel is a __Folgezettel__ / follow-up zettel.
   Basically the inverse of key [[''folge''|#folge]].
 ; [!prequel|''prequel'']
 : Specifies one or more zettel that are conceptually a prequel zettel.
@@ -101,7 +101,7 @@ Most keys conform to a [[type|00001006030000]].
   This is for future reference.
 ; [!read-only|''read-only'']
 : Marks a zettel as read-only.
-  The interpretation of [[supported values|00001006020400]] for this key depends, whether authentication is [[enabled|00001010040100]] or not.
+  The interpretation of [[supported values|00001006020400]] for this key depends on whether authentication is [[enabled|00001010040100]] or not.
 ; [!role|''role'']
 : Defines the role of the zettel.
   Can be used for selecting zettel.

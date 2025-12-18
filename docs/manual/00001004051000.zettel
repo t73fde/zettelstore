@@ -4,7 +4,7 @@ role: manual
 tags: #command #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250828135353
+modified: 20251218182805
 
 === ``zettelstore run``
 This starts the web service.
@@ -35,7 +35,7 @@ zettelstore run [-a PORT] [-c CONFIGFILE] [-d DIR] [-debug] [-p PORT] [-r] [-v]
   Default: 23123.
 
   Zettelstore listens only on ''127.0.0.1'', e.g. only requests from the current computer will be processed.
-  If you want to listen on network card to process requests from other computer, please use [[''listen-addr''|00001004010000#listen-addr]] of the configuration file as described below.
+  If you want to listen on a specific network interface to process requests from other computers, please use [[''listen-addr''|00001004010000#listen-addr]] of the configuration file.
 ; [!r|''-r'']
 : Puts the Zettelstore in read-only mode.
   No changes are possible via the [[web user interface|00001014000000]] / via the [[API|00001012000000]].

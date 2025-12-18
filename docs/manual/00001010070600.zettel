@@ -4,7 +4,7 @@ role: manual
 tags: #authorization #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20240711183714
+modified: 20251218191805
 
 Whether an operation of the Zettelstore is allowed or rejected, depends on various factors.
 
@@ -25,14 +25,14 @@ In the second step, when [[authentication is enabled|00001010040100]] and the re
    In other words: only the requesting user is allowed to access its own user zettel.
 ** If the ''user-role'' of the user is ""creator"", reject the access.
 ** Otherwise the user is authenticated, no sensitive zettel is requested.
-   Allow to read the zettel.
+   Allow reading the zettel.
 * Create a new zettel
 ** If the user is not authenticated, reject the access.
 ** If the ''user-role'' of the user is ""reader"", reject the access.
 ** If the user tries to create an [[user zettel|00001010040200]], the access is rejected.
 
    Only the owner of the Zettelstore is allowed to create user zettel.
-** In all other cases allow to create the zettel.
+** In all other cases allow creating the zettel.
 * Change an existing zettel
 ** If the user is not allowed to read the zettel (see above), reject the access.
 ** If the user is not authenticated, reject the access.

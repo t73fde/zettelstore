@@ -4,10 +4,10 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707205246
-modified: 20240219161813
+modified: 20251218190815
 
-With a [[list of zettel identifier|00001007710000]], a [[query directives|00001007720000]], or a [[search expression|00001007701000]], a list of zettel is selected.
-__Actions__ allow to modify this list to a certain degree.
+With a [[list of zettel identifiers|00001007710000]], a [[query directives|00001007720000]], or a [[search expression|00001007701000]], a list of zettel is selected.
+__Actions__ allows modifying this list to a certain degree.
 
 Which actions are allowed depends on the context.
 However, actions are further separated into __parameter action__ and __aggregate actions__.

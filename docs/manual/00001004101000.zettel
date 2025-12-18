@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210510141304
-modified: 20250701130043
+modified: 20251218182847
 
 ; [!bye|''bye'']
 : Closes the connection to the administrator console.
@@ -40,7 +40,7 @@ modified: 20250701130043
 
   ``get-config SERVICE KEY`` shows the current configuration data for the given service and key.
 ; [!header|''header'']
-: Toggles the header mode, where each table is shown with a header nor not.
+: Toggles the header mode, where each table is shown with a header or not.
 ; [!log-level|''log-level'']
 : Displays or sets the [[logging level|00001004059700]] for the kernel or a service.
 

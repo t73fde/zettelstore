@@ -4,9 +4,9 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20230419175633
+modified: 20251218183007
 
-Values of this type are just a sequence of character, but not an empty sequence.
+Values of this type are just a sequence of characters, but not an empty sequence.
 
 === Allowed values
 All printable characters are allowed.

@@ -45,7 +45,7 @@ func (o *ownerPolicy) userCanCreate(user, newMeta *meta.Meta) bool {
 
 func (o *ownerPolicy) CanRead(user, m *meta.Meta) bool {
 	// No need to call o.pre.CanRead(user, meta), because it will always return true.
-	// Both the default and the readonly policy allow to read a zettel.
+	// Both the default and the readonly policy allow reading a zettel.
 	vis := o.authConfig.GetVisibility(m)
 	if res, ok := o.checkVisibility(user, vis); ok {
 		return res

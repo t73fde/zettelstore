@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209161155
+modified: 20251218184240
 
 Region blocks do not directly have a visual representation.
 They just group a range of lines.
@@ -63,7 +63,7 @@ Do not copy from the Internet, know your sponsors.
 :::
 ::::
 
-Generic attributes that are result in a special HTML rendering are:
+Generic attributes that result in a special HTML rendering are:
 * example
 * note
 * tip

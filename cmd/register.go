@@ -15,9 +15,9 @@ package cmd
 
 // Mention all needed boxes to have them registered.
 import (
-	_ "zettelstore.de/z/internal/box/compbox"  // Allow to use computed box.
-	_ "zettelstore.de/z/internal/box/constbox" // Allow to use global internal box.
-	_ "zettelstore.de/z/internal/box/dirbox"   // Allow to use directory box.
-	_ "zettelstore.de/z/internal/box/filebox"  // Allow to use file box.
-	_ "zettelstore.de/z/internal/box/membox"   // Allow to use in-memory box.
+	_ "zettelstore.de/z/internal/box/compbox"
+	_ "zettelstore.de/z/internal/box/constbox"
+	_ "zettelstore.de/z/internal/box/dirbox"
+	_ "zettelstore.de/z/internal/box/filebox"
+	_ "zettelstore.de/z/internal/box/membox"
 )

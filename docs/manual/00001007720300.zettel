@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707204706
-modified: 20250626174255
+modified: 20251218184650
 
 A context directive calculates the __context__ of a list of zettel identifier.
 It starts with the keyword ''CONTEXT''.
@@ -12,7 +12,7 @@ It starts with the keyword ''CONTEXT''.
 Optionally you may specify some context details, after the keyword ''CONTEXT'', separated by space characters.
 These are:
 * ''FULL'': additionally search for zettel with the same tags,
-* ''BACKWARD'': search for context only though backward links,
+* ''BACKWARD'': search for context only through backward links,
 * ''FORWARD'': search for context only through forward links,
 * ''DIRECTED'': search for context only in the same direction as the one that led to the current zettel.
   If the zettel is one of the initial zettel, search in both directions.
@@ -44,8 +44,8 @@ The maximum cost is only checked for all zettel that are not directly reachable 
 This ensures that initial zettel that have only a highly used tag, will also produce some context zettel.
 
 Despite its possibly complicated structure, this algorithm ensures in practice that the zettel context is a list of zettel, where the first elements are ""near"" to the specified zettel and the last elements are more ""distant"" to the specified zettel.
-It also penalties zettel that acts as a ""hub"" to other zettel, to make it more likely that only relevant zettel appear on the context list.
+It also penalizes zettel that acts as a ""hub"" to other zettel, to make it more likely that only relevant zettel appear on the context list.
 
 This directive may be specified only once as a query directive.
-A second occurence of ''CONTEXT'' is interpreted as a [[search expression|00001007701000]].
+A second occurrence of ''CONTEXT'' is interpreted as a [[search expression|00001007701000]].
 In most cases it is easier to adjust the maximum cost than to perform another context search, which is relatively expensive in terms of retrieving effort.

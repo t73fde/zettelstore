@@ -4,12 +4,12 @@ role: manual
 tags: #manual #tutorial #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220810182917
-modified: 20231201135849
+modified: 20251218184537
 
 [[Zettelmarkup|00001007000000]] allows you to leave your text as it is, at least in many situations.
 Some characters have a special meaning, but you have to enter them is a defined way to see a visible change.
 Zettelmarkup is designed to be used for zettel, which are relatively short.
-It allows to produce longer texts, but you should probably use a different tool, if you want to produce an scientific paper, to name an example.
+It allows to produce longer texts, but you should probably use a different tool, if you want to produce a scientific paper, to name an example.
 
 === Paragraphs
 The most important concept of Zettelmarkup is the __paragraph__.
@@ -17,7 +17,7 @@ Ordinary text is interpreted as part of a paragraph.
 Paragraphs are typically separated by one or more blank lines.
 
 Therefore, line endings are more or less ignored within one paragraph.
-Zettelmarkup will recognize the end of a line, and sore it as a ""soft break".
+Zettelmarkup will recognize the end of a line, and store it as a ""soft break".
 A soft break is rendered in most cases as a space character.
 
 Within a paragraph you can style your text with [[special markup|00001007040000]].
@@ -26,7 +26,7 @@ Some examples:
 |= Zettelmarkup | Rendered output | Instruction
 | ''An __emphasized__ word'' | An __emphasized__ word | Put two underscore characters before and after the text you want to emphasize
 | ''Someone uses **bold** text'' | Someone uses **bold** text | Put two asterisks before and after the text you want to see bold
-| ''He says: ""I love you!""'' | Her says: ""I love you!"" | Put two quotation mark characters before and after the text you want to quote.
+| ''He says: ""I love you!""'' | He says: ""I love you!"" | Put two quotation mark characters before and after the text you want to quote.
 
 You probably see a principle.
 

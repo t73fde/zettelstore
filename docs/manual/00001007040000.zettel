@@ -4,11 +4,11 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251215175057
+modified: 20251218190602
 
 Most characters you type are concerned with inline-structured elements.
 The content of a zettel contains in many cases just ordinary text, lightly formatted.
-Inline-structured elements allow to format your text and add some helpful links or images.
+Inline-structured elements make it possible to format your text and add some helpful links or images.
 Sometimes, you want to enter characters that have no representation on your keyboard.
 
 ; Text formatting
@@ -22,9 +22,9 @@ Sometimes, you want to enter characters that have no representation on your keyb
 
 ; Reference-like text
 : You can reference other zettel and (external) material within one zettel.
-  This kind of reference may be a link, or an images that is display inline when the zettel is rendered.
+  This kind of reference may be a link or an image, which is displayed inline when the zettel is rendered.
   Footnotes sometimes factor out some useful text that hinders the flow of reading text.
-  Internal marks allow to reference something within a zettel.
+  Internal marks allow you to reference something within a zettel.
   An important aspect of all knowledge work is to reference others work, e.g. with citation keys.
   All these elements can be subsumed under [[reference-like text|00001007040300]].
 

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20221018115601
+modified: 20251218191015
 
 If you are customized to use Markdown as your markup language, you can configure Zettelstore to support your decision.
 Zettelstore supports the [[CommonMark|00001008010500]] dialect of Markdown.
@@ -37,7 +37,7 @@ If you write your own zettel, this is probably not a problem.
 
 However, if you receive zettel from others, you should be careful.
 An attacker might include malicious HTML code in your zettel.
-For example, HTML allows to embed JavaScript, a full-sized programming language that drives many web sites.
+For example, HTML allows embedding JavaScript, a full-featured programming language that drives many websites.
 When a zettel is displayed, JavaScript code might be executed, sometimes with harmful results.
 
 By default, Zettelstore prohibits any HTML content.

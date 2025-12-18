@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211119133357
-modified: 20251215164537
+modified: 20251218190644
 
 The value of a personal Zettelstore is determined in part by explicit connections between related zettel.
 If the number of zettel grows, some of these connections are missing.
@@ -35,7 +35,7 @@ In addition you may add __phrases__ if you do not want to scan for the title of 
 00001010040700 Access token
 ```
 
-This finds all zettel that does contain the phrase ""API"" but does not directly reference the given zettel.
+This finds all zettel that contain the phrase ""API"" but do not directly reference the given zettel.
 
 The directive searches within all zettel whether the title of the specified zettel occurs there.
 The other zettel must not link to the specified zettel.

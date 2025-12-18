@@ -303,7 +303,7 @@ func (*actionPara) calcFontSizes(ccs meta.CountedCategories) map[int]*sx.Pair {
 		return result
 	}
 
-	// Idea: the number of occurences for a specific count is substracted from a budget.
+	// Idea: the number of occurrences for a specific count is subtracted from a budget.
 	total := float64(len(ccs))
 	curSize := 0
 	budget := calcBudget(total, 0.0)

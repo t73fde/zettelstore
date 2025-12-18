@@ -494,7 +494,7 @@ func (wui *WebUI) renderSxnTemplateStatus(ctx context.Context, w http.ResponseWr
 	if _, err = w.Write(sb.Bytes()); err != nil {
 		wui.logger.Error("Unable to write HTML via template", "err", err)
 	}
-	return nil // No error reporting, since we do not know what happended during write to client.
+	return nil // No error reporting, since we do not know what happened during write to client.
 }
 
 func (wui *WebUI) reportError(ctx context.Context, w http.ResponseWriter, err error) {

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220201142439
-modified: 20250627131204
+modified: 20251218185508
 
 An inline-zettel block allows to specify some content with another syntax without creating a new zettel.
 This is useful, for example, if you want to embed some [[Markdown|00001008010500]] content, because you are too lazy to translate Markdown into Zettelmarkup.
@@ -13,7 +13,7 @@ Another example is to specify HTML code to use it for some kind of web front-end
 Like all other [[line-range blocks|00001007030000#line-range-blocks]], an inline-zettel block begins with at least three identical characters, starting at the first position of a line.
 For inline-zettel blocks, the at-sign character (""''@''"", U+0040) is used.
 
-You can add some [[attributes|00001007050000]] to the beginning line of a verbatim block, following the initiating characters.
+You can add some [[attributes|00001007050000]] to the beginning line of an inline-zettel block, following the initiating characters.
 The inline-zettel block uses the attribute key ""syntax"" to specify the [[syntax|00001008000000]] of the inline-zettel.
 Alternatively, you can use the generic attribute to specify the syntax value.
 If no value is provided, ""[[text|00001008000000#text]]"" is assumed.

@@ -56,7 +56,7 @@ type Query struct {
 	preMatch MetaMatchFunc // Match that must be true
 	terms    []conjTerms
 
-	// Allow to create predictable randomness
+	// Create predictable randomness
 	seed int
 
 	pick int // Randomly pick elements, <= 0: no pick

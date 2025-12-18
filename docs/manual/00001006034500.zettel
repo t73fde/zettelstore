@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20231030182858
+modified: 20251218184009
 
 Values of this type denote a point in time.
 
@@ -28,7 +28,7 @@ If the sequence is less than 14 digits, they are expanded with the following rul
 
 === Query comparison
 [[Search values|00001007706000]] with more than 14 characters are truncated to contain exactly 14 characters.
-Then, they are treated as timestamp data, as describe above, if they contain 4, 6, 8, 10, or 12 digits.
+Then, they are treated as timestamp data, as described above, if they contain 4, 6, 8, 10, or 12 digits.
 
 Comparison is done through the string representation.
 In case of the search operators ""less"", ""not less"", ""greater"", and ""not greater"", this is the same as a numerical comparison.

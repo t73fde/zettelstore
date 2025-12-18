@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220809132350
-modified: 20251107193607
+modified: 20251218183758
 
 A zettel transclusion is specified by the following sequence, starting at the first position in a line: ''{{{zettel-identifier}}}''.
 
@@ -14,7 +14,7 @@ When a recursion is detected, expansion does not take place.
 Instead an error message replaces the transclude specification.
 
 An error message is also given, if the zettel cannot be read or if too many transclusions are made.
-The maximum number of transclusion can be controlled by setting the value [[''max-transclusions''|00001004020000#max-transclusions]] of the runtime configuration zettel.
+The maximum number of transclusions can be controlled by setting the value [[''max-transclusions''|00001004020000#max-transclusions]] of the runtime configuration zettel.
 
 If everything goes well, the referenced and expanded zettel will replace the transclusion element after being wrapped in a [[region block|00001007030800]].
 The region block serves two purposes: first, it marks that the content originates from a transclusion; second, it inherits the attributes of the transclusion element.

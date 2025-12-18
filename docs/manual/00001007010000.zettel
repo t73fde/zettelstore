@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251215175356
+modified: 20251218191726
 
 Any document can be thought of as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
 Some of these blocks can contain other blocks, for example lists may contain other lists or paragraphs.
@@ -13,7 +13,7 @@ Other blocks contain [[inline-structured elements|00001007040000]] (""inlines"")
 With the exception of lists and tables, the markup for blocks always begins at the first position of a line with three or more identical characters.
 List blocks also begin at the first position of a line, but may need one or more identical characters, plus a space character.
 [[Table blocks|00001007031000]] begin at the first position of a line with the character ""``|``"".
-Non-list blocks are either fully specified on that line or they span multiple lines and are delimited with the same three or more character.
+Non-list blocks are either fully specified on that line or they span multiple lines and are delimited with the same three or more characters.
 It depends on the block kind, whether blocks are specified on one line or on at least two lines.
 
 If a line does not begin with an explicit block element, the line is treated as a (implicit) paragraph block element that contains inline elements.
@@ -28,8 +28,8 @@ A link is given with ``[[...]]``{=zmk}, an image with ``{{...}}``{=zmk}, and an 
 An inline comment, beginning with the sequence ``%%``{=zmk}, always ends at the end of the line where it begins.
 The ""en-dash"" (""--"") is specified as ``--``{=zmk}, the ""horizontal ellipsis"" (""..."") as ``...``{=zmk}[^If put at the end of non-space text.].
 
-Some inline elements do not follow the rule of two identical character, especially to specify [[footnotes|00001007040330]], [[citation keys|00001007040340]], and local marks.
-These elements begin with one opening square bracket (""``[``""), use a character for specifying the kind of the inline, typically allow to specify some content, and end with one closing square bracket (""``]``"").
+Some inline elements do not follow the rule of two identical characters, especially to specify [[footnotes|00001007040330]], [[citation keys|00001007040340]], and local marks.
+These elements begin with one opening square bracket (""``[``""), use a character for specifying the kind of the inline, typically allows you to specify some content, and end with one closing square bracket (""``]``"").
 
 One inline element that does not begin with two characters is the ""entity"".
 It allows to specify any Unicode character.
@@ -48,7 +48,7 @@ One example is to make space characters visible inside an inline literal element
 
 To summarize:
 
-* With some exceptions, block-structural elements begins at the for position of a line with three identical characters.
+* With some exceptions, block-structural elements begins at the first position of a line with three identical characters.
 * The most important exception to this rule is the specification of lists.
 * If no block element is found, a paragraph with inline elements is assumed.
 * With some exceptions, inline-structural elements begin with two characters, quite often the same two characters.

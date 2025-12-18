@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20250624162823
-modified: 20251212133935
+modified: 20251218183404
 
 A thread directive is similar to the [[context directive|00001007720300]] by calculating zettel associated with a list of zettel identifier.
 There are three thread directives, beginning with the keywords ''FOLGE'', ''SEQUEL'', and ''THREAD''.
@@ -21,7 +21,7 @@ The ''SEQUEL'' directive works exclusively with the metadata keys [[''sequel''|0
 The ''THREAD'' directive combines the functionality of the other two directives.
 It lists all zettel (or a subset) that can be reached via the four metadata keys mentioned.
 
-Optionally yyou may specify additional parameters after the directive keyword, separated by space characters.
+Optionally, you may specify additional parameters after the directive keyword, separated by space characters.
 These include:
 * ''BACKWARD'': Search for zettel only via backward links, i.e. ''precursor'' and/or ''prequel''
 * ''FORWARD'': Search for zettel only via forward links, i.e. ''folge'' and/or ''sequel''
@@ -44,4 +44,4 @@ All following text is then interpreted either as other directives or as a search
 The resulting list is sorted by the relative distance to the originating zettel.
 
 These directives may be specified only once as a query directive.
-A second occurence of ''FOLGE'', ''SEQUEL'' or ''THREAD'' is interpreted as a [[search expression|00001007701000]].
+A second occurrence of ''FOLGE'', ''SEQUEL'' or ''THREAD'' is interpreted as a [[search expression|00001007701000]].

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210810155955
-modified: 20250102210158
+modified: 20251218183621
 
 To some degree, a specification for embedded material is conceptually not too far away from a specification for [[linked material|00001007040310]].
 Both contain a reference specification and optionally some text.
@@ -23,6 +23,6 @@ If the referenced zettel does not exist, or is not readable because of other rea
  
 Example: ``{{00000000000000}}`` will be rendered as ::{{00000000000000}}::{=example}.
 
-There are two kind of content:
+There are two kinds of content:
 # [[image content|00001007040322]],
 # [[textual content|00001007040324]].

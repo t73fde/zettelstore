@@ -16,7 +16,7 @@ package constbox
 
 import (
 	"context"
-	_ "embed" // Allow to embed file content
+	_ "embed"
 	"log/slog"
 	"net/url"
 

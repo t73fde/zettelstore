@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #encryption #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251212134212
+modified: 20251218192243
 
 Since Zettelstore does not encrypt the messages it exchanges with its clients, you may need some additional software to enable encryption.
 
@@ -26,7 +26,7 @@ There are many different alternatives to choose.
 
 First, there are web servers.
 Business-grade web servers must enable encryption.
-Most of them allow to forward a request unencrypted to another web server.
+Most of them allow forwarding requests without encryption to another web server.
 Some examples:
 
 * [[Apache Web Server|https://httpd.apache.org/]]: enable [[mod_proxy|https://httpd.apache.org/docs/current/mod/mod_proxy.html]] and configure a reverse proxy.

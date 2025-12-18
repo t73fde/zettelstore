@@ -4,9 +4,9 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209161625
+modified: 20251218191915
 
-Attributes allow to modify the way how material is presented.
+Attributes allow you to modify the way how material is presented.
 Alternatively, they provide additional information to markup elements.
 To some degree, attributes are similar to [[HTML attributes|https://html.spec.whatwg.org/multipage/dom.html#global-attributes]].
 

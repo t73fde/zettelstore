@@ -126,7 +126,7 @@ type StartStopper interface {
 	Stop(ctx context.Context)
 }
 
-// Refresher allow to refresh their internal data.
+// Refresher allow refreshing their internal data.
 type Refresher interface {
 	// Refresh the box data.
 	Refresh(context.Context)

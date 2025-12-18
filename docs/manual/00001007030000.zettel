@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251215173754
+modified: 20251218191846
 
 Every markup for block-structured elements (""blocks"") begins at the very first position of a line.
 
@@ -37,7 +37,7 @@ Additionally, all other block elements are allowed within line-range blocks.
 
 * [[Verbatim blocks|00001007030500]] do not interpret their content,
 * [[Quotation blocks|00001007030600]] specify block-length quotations,
-* [[Verse blocks|00001007030700]] allow to enter poetry, lyrics and similar text, where line endings are important,
+* [[Verse blocks|00001007030700]] allow entering poetry, lyrics and similar text, where line endings are important,
 * [[Region blocks|00001007030800]] just mark regions, e.g. for common formatting,
 * [[Comment blocks|00001007030900]] allow you to enter text that will be ignored when rendered.
 * [[Evaluation blocks|00001007031300]] specify some content to be evaluated by either Zettelstore or external software.

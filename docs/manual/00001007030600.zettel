@@ -4,11 +4,11 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220218131806
+modified: 20251218184151
 
 A simple way to enter a quotation is to use the [[quotation list|00001007030200]].
 A quotation list loosely follows the convention of quoting text within emails.
-However, if you want to attribute the quotation to someone, a quotation block is more appropriately.
+However, if you want to attribute the quotation to someone, a quotation block is more appropriate.
 
 This kind of line-range block begins with at least three less-than characters (""''<''"", U+003C) at the first position of a line.
 You can add some [[attributes|00001007050000]] on the beginning line of a quotation block, following the initiating characters.

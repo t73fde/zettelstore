@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20250627150916
+modified: 20251218183220
 
 A query expression allows you to search for specific zettel and perform actions on them.
 You may select zettel based on a list of [[identifiers|00001006050000]], a query directive, a full-text search, specific metadata values, or any combination of these.
@@ -27,5 +27,5 @@ A query expression follows a [[formal syntax|00001007780000]].
 ** [[Search value|00001007706000]]
 * [[Action list|00001007770000]]
 
-Here are [[some examples|00001007790000]] thar can be used to manage a Zettelstore:
+Here are [[some examples|00001007790000]] that can be used to manage a Zettelstore:
 {{{00001007790000}}}

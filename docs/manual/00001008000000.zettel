@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20210126175300
-modified: 20251117152320
+modified: 20251218185309
 
 [[Zettelmarkup|00001007000000]] is not the only markup language you can use to define your content.
 Zettelstore is quite agnostic with respect to markup languages.
@@ -49,8 +49,7 @@ The following syntax values are supported:
 ; [!svg|''svg'']
 : [[Scalable Vector Graphics|https://www.w3.org/groups/wg/svg/]].
 ; [!sxn|''sxn'']
-: S-Expressions, as implemented by [[Sx|https://t73f.de/r/sx/]].
-  Often used to specify templates when rendering a zettel as HTML for the [[web user interface|00001014000000]] (with the help of sxhtml]).
+: S-Expressions, as implemented by [[Sx|https://t73f.de/r/sx/]], are often used to specify templates when rendering a zettel as HTML for the [[web user interface|00001014000000]] (with the help of sxhtml).
 ; [!text|''text''], [!plain|''plain''], [!txt|''txt'']
 : Plain text that must not be interpreted further.
 ; [!zmk|''zmk'']
