@@ -136,7 +136,7 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 }
 
 // SearchEqual returns all zettel that contains the given exact word.
-// The word must be normalized through Unicode NKFD, trimmed and not empty.
+// The word must be normalized through Unicode NFKD, trimmed and not empty.
 func (ms *mapStore) SearchEqual(word string) *idset.Set {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
@@ -160,7 +160,7 @@ func (ms *mapStore) SearchEqual(word string) *idset.Set {
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
-// The prefix must be normalized through Unicode NKFD, trimmed and not empty.
+// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
 func (ms *mapStore) SearchPrefix(prefix string) *idset.Set {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
@@ -191,7 +191,7 @@ func (ms *mapStore) SearchPrefix(prefix string) *idset.Set {
 }
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
-// The suffix must be normalized through Unicode NKFD, trimmed and not empty.
+// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
 func (ms *mapStore) SearchSuffix(suffix string) *idset.Set {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
@@ -217,7 +217,7 @@ func (ms *mapStore) SearchSuffix(suffix string) *idset.Set {
 }
 
 // SearchContains returns all zettel that contains the given string.
-// The string must be normalized through Unicode NKFD, trimmed and not empty.
+// The string must be normalized through Unicode NFKD, trimmed and not empty.
 func (ms *mapStore) SearchContains(s string) *idset.Set {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()

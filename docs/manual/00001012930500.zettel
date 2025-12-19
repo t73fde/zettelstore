@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20230403151127
-modified: 20251212134618
+modified: 20251219140943
 
 === Syntax of lists
 A list always starts with the left parenthesis (""''(''"", U+0028) and ends with a right parenthesis (""'')''"", U+0029).
@@ -65,9 +65,9 @@ Symbols are case-sensitive, i.e. ""''ZETTEL''"" and ""''zettel''"" denote differ
 A string starts with a quotation mark (""''"''"", U+0022), contains a possibly empty sequence of Unicode characters, and ends with a quotation mark.
 To allow a string to contain a quotation mark, it must be prefixed by one backslash (""''\\''"", U+005C).
 To allow a string to contain a backslash, it also must be prefixed by one backslash.
-Unicode characters with a code less than U+FF are encoded by the sequence ""''\\xNM''"", where ''NM'' is the hex encoding of the character.
-Unicode characters with a code less than U+FFFF are encoded by the sequence ""''\\uNMOP''"", where ''NMOP'' is the hex encoding of the character.
-Unicode characters with a code less than U+FFFFFF are encoded by the sequence ""''\\UNMOPQR''"", where ''NMOPQR'' is the hex encoding of the character.
+Unicode characters with a code point less than or equal to U+FF are encoded using the sequence ""''\\xNM''"", where ''NM'' is the hexadecimal encoding of the character.
+Unicode characters with a code point up to and including U+FFFF are encoded using the sequence ""''\\uNMOP''"", where ''NMOP'' is the hexadecimal encoding of the character.
+Unicode characters with a code point less than or equal to U+FFFFFF are encoded using the sequence ""''\\UNMOPQR''"", where ''NMOPQR'' is the hexadecimal encoding of the character.
 In addition, the sequence ""''\\t''"" encodes a horizontal tab (U+0009), the sequence ""''\\n''"" encodes a line feed (U+000A).
 
 === See also

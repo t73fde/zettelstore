@@ -28,19 +28,19 @@ import (
 // Searcher is used to select zettel identifier based on search criteria.
 type Searcher interface {
 	// Select all zettel that contains the given exact word.
-	// The word must be normalized through Unicode NKFD, trimmed and not empty.
+	// The word must be normalized through Unicode NFKD, trimmed and not empty.
 	SearchEqual(word string) *idset.Set
 
 	// Select all zettel that have a word with the given prefix.
-	// The prefix must be normalized through Unicode NKFD, trimmed and not empty.
+	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
 	SearchPrefix(prefix string) *idset.Set
 
 	// Select all zettel that have a word with the given suffix.
-	// The suffix must be normalized through Unicode NKFD, trimmed and not empty.
+	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
 	SearchSuffix(suffix string) *idset.Set
 
 	// Select all zettel that contains the given string.
-	// The string must be normalized through Unicode NKFD, trimmed and not empty.
+	// The string must be normalized through Unicode NFKD, trimmed and not empty.
 	SearchContains(s string) *idset.Set
 }
 

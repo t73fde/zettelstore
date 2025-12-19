@@ -4,7 +4,7 @@ role: manual
 tags: #design #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251208184243
+modified: 20251219141318
 
 A zettel is composed of two main parts: **metadata** and **content**.
 
@@ -44,7 +44,7 @@ It can be presented in various [[encodings|00001012920500]].[^The [[zmk encoding
 However, a zettel such as this one you are currently reading, is a ""[[evaluated zettel|00001012053500]]"", also retrieved with the [[endpoint|00001012920000]] ''/z/{ID}'' and specifying an encoding.
 The biggest difference to a parsed zettel is the inclusion of [[block transclusions|00001007031100]] or [[inline transclusions|00001007040324]] for an evaluated zettel.
 It can also be presented in various encoding, including the ""zmk"" encoding.
-Evaluations also applies to metadata of a zettel, when appropriate.
+Evaluations also apply to the metadata of a zettel, when appropriate.
 
 Please note, that searching for content is based on parsed zettel.
 Transcluded content will only be found in transcluded zettel, but not in the zettel that transcluded the content.

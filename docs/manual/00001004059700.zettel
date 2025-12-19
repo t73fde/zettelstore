@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20211204182643
-modified: 20240221134619
+modified: 20251219142107
 
 Zettelstore supports various levels of logging output.
 This allows you to see the inner workings of Zettelstore, or to avoid it.
@@ -21,4 +21,4 @@ A lower number signals more logging output.
 | Disabled | 6 | No messages will be shown
 
 If you set the logging level to a certain value, only messages with the same or higher numerical value will be shown.
-E.g. if you set the logging level to ""error"", no ""trace"", ""debug"", and ""info"" messages are shown, but ""error"" and ""mandatory"" messages.
+For example, if you set the logging level to ""error"", messages with levels ""trace"", ""debug"", and ""info"" messages will not be shown, but ""error"" and ""mandatory"" messages will.

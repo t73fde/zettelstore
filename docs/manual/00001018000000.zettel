@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20251218192108
+modified: 20251219135819
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -20,7 +20,7 @@ This page lists some problems and their solutions that may occur when using your
 === Authentication
 * **Problem:** [[Authentication is enabled|00001010040100]] for a local running Zettelstore and there is a valid [[user zettel|00001010040200]] for the owner.
   But entering user name and password at the [[web user interface|00001014000000]] seems to be ignored, while entering a wrong password will result in an error message.
-** **Explanation:** A local running Zettelstore typically means, that you are accessing the Zettelstore using a URL with schema ''http://'', and not ''https://'', for example ''http://localhost:23123/''.
+** **Explanation:** A local running Zettelstore typically means that you are accessing the Zettelstore using a URL with schema ''http://'', and not ''https://'', for example ''http://localhost:23123/''.
    The difference between these two is the missing encryption of user name / password and for the answer of the Zettelstore if you use the ''http://'' schema.
    To be secure by default, the Zettelstore will not work in an insecure environment.
 ** **Solution 1:** If you are sure that your communication medium is safe, even if you use the ''http:/\/'' schema (for example, you are running the Zettelstore on the same computer you are working on, or if the Zettelstore is running on a computer in your protected local network), then you could add the entry ''insecure-cookie: true'' in your [[startup configuration|00001004010000#insecure-cookie]] file.
@@ -35,7 +35,7 @@ This page lists some problems and their solutions that may occur when using your
   If you access the zettel via Zettelstore, an error is reported.
 ** **Explanation:** Sometimes, the operating system does not tell Zettelstore about the removed zettel.
    This occurs mostly under MacOS.
-** **Solution 1:** If you are running Zettelstore in [[""simple-mode""|00001004051100]] or if you have enabled [[''expert-mode''|00001004020000#expert-mode]], you are allowed to refresh the internal data by selecting ""Refresh"" in the Web User Interface (you can find in the menu ""Lists"").
+** **Solution 1:** If you are running Zettelstore in [[""simple-mode""|00001004051100]] or if you have enabled [[''expert-mode''|00001004020000#expert-mode]], you are allowed to refresh the internal data by selecting ""Refresh"" in the Web User Interface (you can find it in the menu ""Lists"").
 ** **Solution 2:** There is an [[API|00001012080500]] call to make Zettelstore aware of this change.
 ** **Solution 3:** If you have an enabled [[Administrator Console|00001004100000]] you can use the command [[''refresh''|00001004101000#refresh]] to make your changes visible.
 ** **Solution 4:** You configure the zettel box as [[""simple""|00001004011400]].
@@ -61,6 +61,6 @@ This page lists some problems and their solutions that may occur when using your
 
 === Search for specific content
 * **Problem:** If you are searching for zettel with zettel content ""EUPL"", the zettel with Zettelstore's [[License|00000000000004]] is not shown, but it does contain the character sequence ""EUPL"".
-** **Solution:** The content of zettel with a zettel identifier less or equal ''00009999999999'' is not searched.
+** **Solution:** The content of a zettel with a zettel identifier less than or equal ''00009999999999'' is not searched.
    These zettel are predefined zettel, sometimes computed zettel, with some content not related to your research.
    For these zettel, only the metadata can be searched.

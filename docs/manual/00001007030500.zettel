@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220218131500
+modified: 20251219141908
 
 Verbatim blocks are used to enter text that should not be interpreted.
 They begin with at least three grave accent characters (""''`''"", U+0060) at the first position of a line.
@@ -12,7 +12,7 @@ Alternatively, a modifier letter grave accent (""''ˋ''"", U+02CB) is also allow
 
 You can add some [[attributes|00001007050000]] on the beginning line of a verbatim block, following the initiating characters.
 The verbatim block supports the default attribute: when given, all spaces in the text are rendered in HTML as open box characters (U+2423).
-If you want to give only one attribute and this attribute is the generic attribute, you can omit the most of the attribute syntax and just specify the value.
+If you want to provide only the generic attribute, you can omit most of the attribute syntax and specify just the value.
 It will be interpreted as a ([[programming|00001007050200]]) language to support colorizing the text when rendered in HTML.
 
 Any other character in this line will be ignored

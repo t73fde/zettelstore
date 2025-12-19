@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161845
-modified: 20251007144653
+modified: 20251219135933
 
 === ''TEXT''
 :::syntax
@@ -40,7 +40,7 @@ __Embed__ **=** ''(EMBED'' [[__Attributes__|00001012931000#attribute]] [[__Refer
 Specifies an embedded element, in most cases some image content or an inline transclusion.
 A transclusion will only be used, if the zettel content was not evaluated.
 
-__Reference__ denoted the referenced zettel.
+__Reference__ denotes the referenced zettel.
 
 If the string value is empty, it is an inline transclusion.
 Otherwise it contains the syntax of an image.
@@ -69,7 +69,7 @@ __Mark__ **=** ''(MARK'' String,,1,, String,,2,, String,,3,, [[__InlineElement__
 :::
 The first string is the mark string used in the content.
 The second string is the mark string transformed to a slug, i.e. transformed to lower case, remove non-ASCII characters.
-The third string is the slug string, but made unique for the whole zettel.
+The third string is the slug string, but is made unique for the whole zettel.
 Then follows the marked text as a sequence of __InlineElement__s.
 
 === ''ENDNOTE''

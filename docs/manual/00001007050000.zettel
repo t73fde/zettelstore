@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218191915
+modified: 20251219142916
 
 Attributes allow you to modify the way how material is presented.
 Alternatively, they provide additional information to markup elements.
@@ -40,7 +40,7 @@ In these examples, ``key`` must conform to the syntax of attribute keys, even if
 
 If a key is given more than once in an attribute, the values are concatenated (and separated by a space).
 
-* ``{key=value1 key=value2}`` is the same as ``{key"value1 value2"}``.
+* ``{key=value1 key=value2}`` is the same as ``{key="value1 value2"}``.
 * ``{key key}`` is the same as ``{key}``.
 * ``{.class1 .class2}`` is equivalent to ``{class="class1 class2"}``.
 

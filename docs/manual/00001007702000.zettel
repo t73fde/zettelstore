@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20251215165424
+modified: 20251219142650
 
 A search term allows you to specify one search restriction.
 The result [[search expression|00001007700000]], which contains more than one search term, will be the applications of all restrictions.
@@ -23,7 +23,7 @@ A search term can be one of the following (the first three terms are collectivel
   Similar, ""not less"" and ""not greater"" are translated into ""not match"".
   It simply does not make sense to search the content of all zettel for words less than a specific word, for example.
 
-  **Note:** the search value will be normalized according to Unicode NKFD, ignoring everything except letters and numbers.
+  **Note:** the search value will be normalized according to Unicode NFKD, ignoring everything except letters and numbers.
   Therefore, the following search expression are essentially the same: ''"search syntax"'' and ''search syntax''.
   The first is a search expression with one search value, which is normalized to two strings to be searched for.
   The second is a search expression containing two search values, giving two string to be searched for.

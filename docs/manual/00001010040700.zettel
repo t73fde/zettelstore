@@ -4,14 +4,14 @@ role: manual
 tags: #authentication #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102215422
+modified: 20251219140224
 
 If a user is authenticated, an ""access token"" is created that must be sent with every request to prove the identity of the caller.
 Otherwise the user will not be recognized by Zettelstore.
 
 If the user was authenticated via the [[web user interface|00001014000000]], the access token is stored in a [[""session cookie""|https://en.wikipedia.org/wiki/HTTP_cookie#Session_cookie]].
 When the web browser is closed, these cookies are not saved.
-If you want the web browser to store the cookie for the lifetime of that token, the owner must set ''persistent-cookie'' of the [[startup configuration|00001004010000]] to ''true''.
+If you want the web browser to store the cookie for the lifetime of that token, the owner must set the ''persistent-cookie'' option in the [[startup configuration|00001004010000]] to ''true''.
 
 If the web browser remains inactive for a period, the user will be automatically logged off, because each access token has a limited lifetime.
 The maximum length of this period is specified by the ''token-lifetime-html'' value of the startup configuration.

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20251212133402
+modified: 20251219141150
 
 A search operator specifies how the comparison of a search value and a zettel should be executed.
 Every comparison is done case-insensitive, treating all uppercase letters the same as lowercase letters.
@@ -22,9 +22,9 @@ The following are allowed search operator characters:
 * The question mark (""''?''"", U+003F) checks for an existing metadata key (""exist operator"").
   In this case no [[search value|00001007706000]] must be given.
 
-Since the exclamation mark character can be combined with the other, there are 18 possible combinations:
+Since the exclamation mark character can be combined with the other operators, there are 18 possible combinations:
 # ""''!''"": is an abbreviation of the ""''!~''"" operator.
-# ""''~''"": is successful if the search value matched the value to be compared.
+# ""''~''"": is successful if the search value matches the value to be compared.
 # ""''!~''"": is successful if the search value does not match the value to be compared.
 # ""''=''"": is successful if the search value is equal to one word of the value to be compared.
 # ""''!=''"": is successful if the search value is not equal to any word of the value to be compared.
