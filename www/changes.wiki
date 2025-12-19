@@ -4,6 +4,12 @@
 <h2>Changes for Version 1.1.0 (pending)</h2>
 
 <a id="1_0"></a>
+<h2>Changes for Version 1.0.1 (2025-12-19)</h2>
+  *  Fix wrong default values for startup configuration values
+     <code>token-lifetime-api</code> and <code>token-lifetime-html</code>.
+  *  Fix many writing errors, mostly in the manual. The majority of these
+     errors are found by students in one of my courses.
+
 <h2>Changes for Version 1.0.0 (2025-12-05)</h2>
   *  SZ encoding of lists (ordered, unordered, and quotations) has been
      simplified by allowing only block elements. Previously, inline elements
