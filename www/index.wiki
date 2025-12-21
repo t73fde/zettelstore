@@ -22,13 +22,13 @@ The software, including the manual, is licensed under the
      software, which often connects to Zettelstore via its API. Some of the
      software packages may be experimental.
 
-<h2>Latest Release: 1.0.1 (2025-12-19)</h2>
+<h2>Latest Release: 1.0.2 (2025-12-21)</h2>
   *  [./download.wiki|Download]
   *  [./changes.wiki#1_0|Change summary]
-  *  [/timeline?p=v1.0.1&bt=v0.22.0&y=ci|Check-ins for version 1.0],
-     [/vdiff?to=v1.0.1&from=v0.22.0|content diff]
-  *  [/timeline?df=v1.0.1&y=ci|Check-ins derived from the 1.0 release],
-     [/vdiff?from=v1.0.1&to=trunk|content diff]
+  *  [/timeline?p=v1.0.2&bt=v0.22.0&y=ci|Check-ins for version 1.0],
+     [/vdiff?to=v1.0.2&from=v0.22.0|content diff]
+  *  [/timeline?df=v1.0.2&y=ci|Check-ins derived from the 1.0 release],
+     [/vdiff?from=v1.0.2&to=trunk|content diff]
   *  [./plan.wiki|Limitations and planned improvements]
   *  [/timeline?t=release|Timeline of all past releases]
 
