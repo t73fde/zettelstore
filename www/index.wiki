@@ -31,6 +31,7 @@ The software, including the manual, is licensed under the
      [/vdiff?from=v1.0.2&to=trunk|content diff]
   *  [./plan.wiki|Limitations and planned improvements]
   *  [/timeline?t=release|Timeline of all past releases]
+  *  <a href="https://doi.org/10.5281/zenodo.18008616"><img src="https://zenodo.org/badge/329995358.svg" alt="DOI"></a>
 
 <h2>Build instructions</h2>
 
