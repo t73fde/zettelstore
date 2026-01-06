@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2025-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"bytes"
@@ -30,7 +30,7 @@ import (
 
 // MakeGetReferencesHandler creates a new HTTP handler to return various lists
 // of zettel references.
-func (a *API) MakeGetReferencesHandler(
+func (a *WebAPI) MakeGetReferencesHandler(
 	ucParseZettel usecase.ParseZettel,
 	ucGetReferences usecase.GetReferences,
 ) http.Handler {

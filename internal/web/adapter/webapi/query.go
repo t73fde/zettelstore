@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"bytes"
@@ -37,7 +37,7 @@ import (
 )
 
 // MakeQueryHandler creates a new HTTP handler to perform a query.
-func (a *API) MakeQueryHandler(
+func (a *WebAPI) MakeQueryHandler(
 	queryMeta *usecase.Query,
 	tagZettel *usecase.TagZettel,
 	roleZettel *usecase.RoleZettel,
@@ -246,7 +246,7 @@ func (dze *dataZettelEncoder) writeArrangement(w io.Writer, act string, arr meta
 	return err
 }
 
-func (a *API) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel *usecase.TagZettel, vals url.Values) bool {
+func (a *WebAPI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel *usecase.TagZettel, vals url.Values) bool {
 	tag := vals.Get(api.QueryKeyTag)
 	if tag == "" {
 		return false
@@ -271,7 +271,7 @@ func (a *API) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel 
 	return true
 }
 
-func (a *API) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZettel *usecase.RoleZettel, vals url.Values) bool {
+func (a *WebAPI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZettel *usecase.RoleZettel, vals url.Values) bool {
 	role := vals.Get(api.QueryKeyRole)
 	if role == "" {
 		return false
@@ -296,7 +296,7 @@ func (a *API) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZette
 	return true
 }
 
-func (a *API) redirectFound(w http.ResponseWriter, r *http.Request, ub *api.URLBuilder, zid id.Zid) {
+func (a *WebAPI) redirectFound(w http.ResponseWriter, r *http.Request, ub *api.URLBuilder, zid id.Zid) {
 	w.Header().Set(api.HeaderContentType, content.PlainText)
 	http.Redirect(w, r, ub.String(), http.StatusFound)
 	if _, err := io.WriteString(w, zid.String()); err != nil {

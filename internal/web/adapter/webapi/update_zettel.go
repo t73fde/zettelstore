@@ -11,18 +11,21 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"net/http"
 
+	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/usecase"
+	"zettelstore.de/z/internal/web/adapter"
+	"zettelstore.de/z/internal/zettel"
 )
 
-// MakeDeleteZettelHandler creates a new HTTP handler to delete a zettel.
-func (a *API) MakeDeleteZettelHandler(deleteZettel *usecase.DeleteZettel) http.Handler {
+// MakeUpdateZettelHandler creates a new HTTP handler to update a zettel.
+func (a *WebAPI) MakeUpdateZettelHandler(updateZettel *usecase.UpdateZettel) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		zid, err := id.Parse(r.URL.Path[1:])
 		if err != nil {
@@ -30,7 +33,23 @@ func (a *API) MakeDeleteZettelHandler(deleteZettel *usecase.DeleteZettel) http.H
 			return
 		}
 
-		if err = deleteZettel.Run(r.Context(), zid); err != nil {
+		q := r.URL.Query()
+		var zettel zettel.Zettel
+		switch enc, _ := getEncoding(r, q); enc {
+		case api.EncoderPlain:
+			zettel, err = buildZettelFromPlainData(r, zid)
+		case api.EncoderData:
+			zettel, err = buildZettelFromData(r, zid)
+		default:
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		if err != nil {
+			a.reportUsecaseError(w, adapter.NewErrBadRequest(err.Error()))
+			return
+		}
+		if err = updateZettel.Run(r.Context(), zettel, true); err != nil {
 			a.reportUsecaseError(w, err)
 			return
 		}

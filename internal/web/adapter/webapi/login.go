@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"net/http"
@@ -26,7 +26,7 @@ import (
 )
 
 // MakePostLoginHandler creates a new HTTP handler to authenticate the given user via API.
-func (a *API) MakePostLoginHandler(ucAuth *usecase.Authenticate) http.Handler {
+func (a *WebAPI) MakePostLoginHandler(ucAuth *usecase.Authenticate) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !a.withAuth() {
 			if err := a.writeToken(w, "freeaccess", 24*366*10*time.Hour); err != nil {
@@ -66,7 +66,7 @@ func retrieveIdentCred(r *http.Request) (string, string) {
 }
 
 // MakeRenewAuthHandler creates a new HTTP handler to renew the authenticate of a user.
-func (a *API) MakeRenewAuthHandler() http.Handler {
+func (a *WebAPI) MakeRenewAuthHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		if !a.withAuth() {
@@ -102,7 +102,7 @@ func (a *API) MakeRenewAuthHandler() http.Handler {
 	})
 }
 
-func (a *API) writeToken(w http.ResponseWriter, token string, lifetime time.Duration) error {
+func (a *WebAPI) writeToken(w http.ResponseWriter, token string, lifetime time.Duration) error {
 	return a.writeObject(w, id.Invalid, sx.MakeList(
 		sx.MakeString("Bearer"),
 		sx.MakeString(token),

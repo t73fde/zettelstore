@@ -11,8 +11,8 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package api provides api handlers for web requests.
-package api
+// Package webapi provides handlers for web api requests.
+package webapi
 
 import (
 	"bytes"
@@ -31,8 +31,8 @@ import (
 	"zettelstore.de/z/internal/web/server"
 )
 
-// API holds all data and methods for delivering API call results.
-type API struct {
+// WebAPI holds all data and methods for delivering WebAPI call results.
+type WebAPI struct {
 	logger   *slog.Logger
 	b        server.Builder
 	authz    auth.AuthzManager
@@ -45,8 +45,8 @@ type API struct {
 
 // New creates a new API object.
 func New(logger *slog.Logger, b server.Builder, authz auth.AuthzManager, token auth.TokenManager,
-	rtConfig config.Config, pol auth.Policy) *API {
-	a := &API{
+	rtConfig config.Config, pol auth.Policy) *WebAPI {
+	a := &WebAPI{
 		logger:   logger,
 		b:        b,
 		authz:    authz,
@@ -60,17 +60,17 @@ func New(logger *slog.Logger, b server.Builder, authz auth.AuthzManager, token a
 }
 
 // NewURLBuilder creates a new URL builder object with the given key.
-func (a *API) NewURLBuilder(key byte) *api.URLBuilder { return a.b.NewURLBuilder(key) }
+func (a *WebAPI) NewURLBuilder(key byte) *api.URLBuilder { return a.b.NewURLBuilder(key) }
 
-func (a *API) getAuthData(ctx context.Context) *auth.UserData {
+func (a *WebAPI) getAuthData(ctx context.Context) *auth.UserData {
 	return auth.GetAuthData(ctx)
 }
-func (a *API) withAuth() bool { return a.authz.WithAuth() }
-func (a *API) getToken(ident *meta.Meta) ([]byte, error) {
+func (a *WebAPI) withAuth() bool { return a.authz.WithAuth() }
+func (a *WebAPI) getToken(ident *meta.Meta) ([]byte, error) {
 	return a.token.GetToken(ident, a.tokenLifetime, auth.KindAPI)
 }
 
-func (a *API) reportUsecaseError(w http.ResponseWriter, err error) {
+func (a *WebAPI) reportUsecaseError(w http.ResponseWriter, err error) {
 	code, text := adapter.CodeMessageFromError(err)
 	if code == http.StatusInternalServerError {
 		a.logger.Error(text, "err", err)
@@ -85,7 +85,7 @@ func writeBuffer(w http.ResponseWriter, buf *bytes.Buffer, contentType string) e
 	return adapter.WriteData(w, buf.Bytes(), contentType)
 }
 
-func (a *API) getRights(ctx context.Context, m *meta.Meta) (result api.ZettelRights) {
+func (a *WebAPI) getRights(ctx context.Context, m *meta.Meta) (result api.ZettelRights) {
 	pol := a.policy
 	user := auth.GetCurrentUser(ctx)
 	if pol.CanCreate(user, m) {

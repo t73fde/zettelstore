@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ import (
 	"zettelstore.de/z/internal/web/content"
 )
 
-func (a *API) writeObject(w http.ResponseWriter, zid id.Zid, obj sx.Object) error {
+func (a *WebAPI) writeObject(w http.ResponseWriter, zid id.Zid, obj sx.Object) error {
 	var buf bytes.Buffer
 	if _, err := sx.Print(&buf, obj); err != nil {
 		a.logger.Error("Unable to store object in buffer", "err", err, "zid", zid)

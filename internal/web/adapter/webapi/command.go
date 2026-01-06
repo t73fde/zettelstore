@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 )
 
 // MakePostCommandHandler creates a new HTTP handler to execute certain commands.
-func (a *API) MakePostCommandHandler(
+func (a *WebAPI) MakePostCommandHandler(
 	ucIsAuth *usecase.IsAuthenticated,
 	ucRefresh *usecase.Refresh,
 ) http.Handler {

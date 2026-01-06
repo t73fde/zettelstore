@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"bytes"
@@ -34,7 +34,7 @@ import (
 )
 
 // MakeGetZettelHandler creates a new HTTP handler to return a zettel in various encodings.
-func (a *API) MakeGetZettelHandler(
+func (a *WebAPI) MakeGetZettelHandler(
 	getZettel usecase.GetZettel,
 	parseZettel usecase.ParseZettel,
 	evaluate usecase.Evaluate,
@@ -72,7 +72,7 @@ func (a *API) MakeGetZettelHandler(
 	})
 }
 
-func (a *API) writePlainData(ctx context.Context, w http.ResponseWriter, zid id.Zid, part partType, getZettel usecase.GetZettel) {
+func (a *WebAPI) writePlainData(ctx context.Context, w http.ResponseWriter, zid id.Zid, part partType, getZettel usecase.GetZettel) {
 	var buf bytes.Buffer
 	var contentType string
 	var err error
@@ -112,7 +112,7 @@ func (a *API) writePlainData(ctx context.Context, w http.ResponseWriter, zid id.
 	}
 }
 
-func (a *API) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid, part partType, getZettel usecase.GetZettel) {
+func (a *WebAPI) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid, part partType, getZettel usecase.GetZettel) {
 	z, err := getZettel.Run(ctx, zid)
 	if err != nil {
 		a.reportUsecaseError(w, err)
@@ -140,7 +140,7 @@ func (a *API) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid
 	}
 }
 
-func (a *API) writeEncodedZettelPart(
+func (a *WebAPI) writeEncodedZettelPart(
 	ctx context.Context,
 	w http.ResponseWriter, zn *ast.Zettel,
 	enc api.EncodingEnum, encStr string, part partType,

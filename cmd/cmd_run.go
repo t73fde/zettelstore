@@ -25,7 +25,7 @@ import (
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/usecase"
-	"zettelstore.de/z/internal/web/adapter/api"
+	"zettelstore.de/z/internal/web/adapter/webapi"
 	"zettelstore.de/z/internal/web/adapter/webui"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -81,7 +81,7 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	ucReIndex := usecase.NewReIndex(ucLogger, protectedBoxManager)
 	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(string))
 
-	a := api.New(
+	a := webapi.New(
 		webLogger.With("system", "WEBAPI"),
 		webSrv, authManager, authManager, rtConfig, authPolicy)
 	wui := webui.New(

@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2022-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"net/http"
@@ -23,7 +23,7 @@ import (
 )
 
 // MakeGetDataHandler creates a new HTTP handler to return zettelstore data.
-func (a *API) MakeGetDataHandler(ucVersion usecase.Version) http.Handler {
+func (a *WebAPI) MakeGetDataHandler(ucVersion usecase.Version) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		version := ucVersion.Run()
 		err := a.writeObject(w, id.Invalid, sx.MakeList(

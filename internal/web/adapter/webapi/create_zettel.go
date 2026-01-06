@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2021-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package api
+package webapi
 
 import (
 	"net/http"
@@ -28,7 +28,7 @@ import (
 
 // MakePostCreateZettelHandler creates a new HTTP handler to store content of
 // an existing zettel.
-func (a *API) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel) http.Handler {
+func (a *WebAPI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
 		enc, encStr := getEncoding(r, q)
