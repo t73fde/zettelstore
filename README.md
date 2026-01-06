@@ -1,13 +1,26 @@
 # Zettelstore
 
-**Zettelstore** is a software that collects and relates your notes
-(&ldquo;zettel&rdquo;) to represent and enhance your knowledge. It helps with
-many tasks of personal knowledge management by explicitly supporting the
-[Zettelkasten method](https://en.wikipedia.org/wiki/Zettelkasten). The method
-is based on creating many individual notes, each with one idea or piece of
-information, which are related to each other. Since knowledge is typically
-built up gradually, one major focus is the long-term storage of these notes,
-hence the name &ldquo;Zettelstore&rdquo;.
+**Zettelstore** is a software system for collecting and interlinking notes
+(&ldquo;zettel&bdquo;) in order to represent and support knowledge development.
+It facilitates key tasks in personal knowledge management by explicitly
+implementing the [https://en.wikipedia.org/wiki/Zettelkasten|Zettelkasten
+method]. This method is based on the creation of numerous individual notes,
+each capturing a single idea or unit of information, which are systematically
+related to one another. As knowledge is typically accumulated incrementally
+over time, a primary focus of Zettelstore is the long-term preservation of
+these notes, hence the name &ldquo;Zettelstore.&bdquo;
+
+Its design goals include longevity of stored notes, ease of installation and
+operation, security by default, and support for multiple user interfaces. The
+latter is realized through an application programming interface that offers
+a broader range of operations than the standard web-based user interface. In
+this respect, Zettelstore serves as an example of sovereign, long-term-capable
+software that preserves user control over data.
+
+Beyond its practical utility, Zettelstore is internally structured using
+a clean hexagonal architecture. As such, it may also serve as a case study or
+reference implementation in university-level courses on software architecture
+and system design.
 
 To get an initial impression, take a look at the
 [manual](https://zettelstore.de/manual/). It is a live example of the
@@ -22,3 +35,5 @@ experimental.
 The software, including the manual, is licensed
 under the [European Union Public License 1.2 (or
 later)](https://zettelstore.de/home/file?name=LICENSE.txt&ci=trunk).
+It is published as [DOI
+https://doi.org/10.5281/zenodo.18008616|10.5281/zenodo.18008616]
