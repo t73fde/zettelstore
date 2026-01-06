@@ -35,5 +35,5 @@ experimental.
 The software, including the manual, is licensed
 under the [European Union Public License 1.2 (or
 later)](https://zettelstore.de/home/file?name=LICENSE.txt&ci=trunk).
-It is published as [DOI
-https://doi.org/10.5281/zenodo.18008616](10.5281/zenodo.18008616)
+It is published as [DOI 10.5281/zenodo.18008616](
+https://doi.org/10.5281/zenodo.18008616)
