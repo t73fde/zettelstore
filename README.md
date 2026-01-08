@@ -1,14 +1,15 @@
 # Zettelstore
 
-**Zettelstore** is a software system for collecting and interlinking notes
-(&ldquo;zettel&bdquo;) in order to represent and support knowledge development.
-It facilitates key tasks in personal knowledge management by explicitly
-implementing the [https://en.wikipedia.org/wiki/Zettelkasten|Zettelkasten
-method]. This method is based on the creation of numerous individual notes,
-each capturing a single idea or unit of information, which are systematically
-related to one another. As knowledge is typically accumulated incrementally
-over time, a primary focus of Zettelstore is the long-term preservation of
-these notes, hence the name &ldquo;Zettelstore.&bdquo;
+**Zettelstore** is a software system for collecting and interlinking
+notes (&ldquo;zettel&bdquo;) in order to represent and support
+knowledge development. It facilitates key tasks in personal
+knowledge management by explicitly implementing the [Zettelkasten
+method](https://en.wikipedia.org/wiki/Zettelkasten). This method is based
+on the creation of numerous individual notes, each capturing a single idea
+or unit of information, which are systematically related to one another. As
+knowledge is typically accumulated incrementally over time, a primary focus
+of Zettelstore is the long-term preservation of these notes, hence the name
+&ldquo;Zettelstore.&bdquo;
 
 Its design goals include longevity of stored notes, ease of installation and
 operation, security by default, and support for multiple user interfaces. The
