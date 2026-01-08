@@ -20,6 +20,6 @@ They are planned to be solved.
      only by case in your directory boxes or file boxes.
   *  &hellip;
 
-Ideas about future development are documented in its own [../wiki?name=Ideas|wiki page].
+Ideas about future development are documented in its own [../../../wiki?name=Ideas|wiki page].
 
-Planned changes are documented in a [../reportlist|ticket report].
+Planned changes are documented in a [../../../reportlist|ticket report].
