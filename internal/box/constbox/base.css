@@ -248,3 +248,20 @@
       scroll-behavior: auto !important;
     }
   }
+
+
+  div.notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    font-family: sans-serif;
+    font-weight: bold;
+  }
+div.notification.success { background-color: hsl(130, 35%, 85%); }
+div.notification.error { background-color: hsl(0, 35%, 85%); }

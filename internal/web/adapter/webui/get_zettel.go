@@ -55,7 +55,11 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 
 		zettelLang := wui.getConfig(ctx, zn.InhMeta, meta.KeyLang)
 		enc := wui.getSimpleHTMLEncoder(zettelLang)
-		metaObj := enc.MetaSxn(zn.InhMeta)
+		metaObj := enc.metaSxn(zn.InhMeta)
+		metaHeader := metaObj.Cons(sx.MakeList(symScript,
+			sx.MakeList(
+				sx.Cons(symSrc, sx.MakeString(wui.jsBaseURL)),
+				sx.Cons(symDefer, sx.Nil()))))
 		content, endnotes, err := enc.BlocksSxn(zn.Blocks)
 		if err != nil {
 			wui.reportError(ctx, w, err)
@@ -67,7 +71,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 
 		title := sz.NormalizedSpacedText(zn.InhMeta.GetTitle())
 		env, rb := wui.createRenderEnvironment(ctx, "zettel", zettelLang, title, user)
-		rb.bindSymbol(symMetaHeader, metaObj)
+		rb.bindSymbol(symMetaHeader, metaHeader)
 		rb.bindString("heading", sx.MakeString(title))
 		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
 			rb.bindString(
@@ -97,7 +101,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 				rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-EXTRA-"+part)
 			}
 		}
-		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
+		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, title, &zn.Content)
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidZettelTemplate, env)
 		} else {

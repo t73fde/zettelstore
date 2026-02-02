@@ -59,6 +59,7 @@ type WebUI struct {
 	tokenLifetime time.Duration
 	cssBaseURL    string
 	cssUserURL    string
+	jsBaseURL     string
 	homeURL       string
 	refreshURL    string
 	withAuth      bool
@@ -108,6 +109,7 @@ func New(logger *slog.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rt
 		tokenLifetime: kernel.Main.GetConfig(kernel.WebService, kernel.WebTokenLifetimeHTML).(time.Duration),
 		cssBaseURL:    ab.NewURLBuilder('z').SetZid(id.ZidBaseCSS).String(),
 		cssUserURL:    ab.NewURLBuilder('z').SetZid(id.ZidUserCSS).String(),
+		jsBaseURL:     ab.NewURLBuilder('z').SetZid(id.ZidBaseJS).String(),
 		homeURL:       ab.NewURLBuilder('/').String(),
 		refreshURL:    ab.NewURLBuilder('g').AppendKVQuery("_c", "r").String(),
 		withAuth:      authz.WithAuth(),
@@ -136,6 +138,9 @@ func (wui *WebUI) getUserLang(ctx context.Context) string {
 var (
 	symDetail     = sx.MakeSymbol("DETAIL")
 	symMetaHeader = sx.MakeSymbol("META-HEADER")
+	symDefer      = sxhtml.MakeSymbol("defer")
+	symScript     = sxhtml.MakeSymbol("script")
+	symSrc        = sxhtml.MakeSymbol("src")
 )
 
 func (wui *WebUI) observe(ci box.UpdateInfo) {

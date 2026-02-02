@@ -24,6 +24,9 @@
 ;; wui-href builds an HTML link
 (defun wui-href (url text . attrs) `(a ((href ,url) ,@attrs) ,text))
 
+;; wui-copy-ref builds a link to copy a reference into the clipboard.
+(defun wui-copy-ref (ref) `(a ((href . "#") (id . "zsCopyReference") (data-ref ,ref)) "Ref"))
+
 ;; wui-local-link translates a local link into HTML.
 (defun wui-local-link (l) `(li ,(wui-href l l)))
 

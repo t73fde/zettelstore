@@ -269,6 +269,15 @@ var constZettelMap = map[id.Zid]constZettel{
 			meta.KeyVisibility: meta.ValueVisibilityPublic,
 		},
 		zettel.NewContent([]byte("/* User-defined CSS */"))},
+	id.ZidBaseJS: {
+		constHeader{
+			meta.KeyTitle:      "Zettelstore Base JavaScript",
+			meta.KeyRole:       meta.ValueRoleConfiguration,
+			meta.KeySyntax:     meta.ValueSyntaxJS,
+			meta.KeyCreated:    "20260202123100",
+			meta.KeyVisibility: meta.ValueVisibilityPublic,
+		},
+		zettel.NewContent(contentBaseJS)},
 	id.ZidEmoji: {
 		constHeader{
 			meta.KeyTitle:      "Zettelstore Generic Emoji",
@@ -448,6 +457,9 @@ var contentBaseCodeSxn []byte
 
 //go:embed base.css
 var contentBaseCSS []byte
+
+//go:embed base.js
+var contentBaseJS []byte
 
 //go:embed emoji_spin.gif
 var contentEmoji []byte

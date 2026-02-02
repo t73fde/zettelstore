@@ -104,7 +104,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		rb.bindString("enc-eval", wui.infoAPIMatrix(zid, false, encTexts))
 		rb.bindString("enc-parsed", wui.infoAPIMatrixParsed(zid, encTexts))
 		rb.bindString("shadow-links", shadowLinks)
-		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, &zn.Content)
+		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, title, &zn.Content)
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidInfoTemplate, env)
 		} else {

@@ -81,6 +81,12 @@ func init() {
 			IsImageFormat: true,
 			Parse:         parseBlob,
 		},
+		meta.ValueSyntaxJS: {
+			IsASTParser:   false,
+			IsTextFormat:  true,
+			IsImageFormat: false,
+			Parse:         parsePlain,
+		},
 		meta.ValueSyntaxMarkdown: {
 			AltNames:      []string{meta.ValueSyntaxMD},
 			IsASTParser:   true,

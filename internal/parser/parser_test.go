@@ -34,6 +34,7 @@ func TestParserType(t *testing.T) {
 		{meta.ValueSyntaxGif, false, true},
 		{meta.ValueSyntaxJPEG, false, true},
 		{meta.ValueSyntaxJPG, false, true},
+		{meta.ValueSyntaxJS, false, false},
 		{meta.ValueSyntaxMarkdown, true, false},
 		{meta.ValueSyntaxMD, true, false},
 		{meta.ValueSyntaxNone, false, false},

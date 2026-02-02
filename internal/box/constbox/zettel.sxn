@@ -17,6 +17,7 @@
     (div ((class "zs-meta"))
       ,@(if (symbol-bound? 'edit-url) `(,(wui-href edit-url "Edit") (@H " &#183; ")))
       ,zid (@H " &#183; ")
+      ,(wui-copy-ref data-ref) (@H " &#183; ")
       ,(wui-href info-url "Info") (@H " &#183; ")
       "(" ,@(if (symbol-bound? 'role-url) `(,(wui-href role-url meta-role)))
           ,@(if (and (symbol-bound? 'folge-role-url) (symbol-bound? 'meta-folge-role))

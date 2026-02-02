@@ -59,7 +59,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 			rb.bindString("shadowed-box", nil)
 			rb.bindString("incoming", wui.encodeIncoming(m, wui.makeGetTextTitle(ctx, getZettel)))
 		}
-		wui.bindCommonZettelData(ctx, &rb, user, m, nil)
+		wui.bindCommonZettelData(ctx, &rb, user, m, "", nil)
 
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidDeleteTemplate, env)

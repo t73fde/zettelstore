@@ -187,7 +187,7 @@ var mapMetaKey = map[string]string{
 	meta.KeyLicense:   "license",
 }
 
-func (g *htmlGenerator) MetaSxn(m *meta.Meta) *sx.Pair {
+func (g *htmlGenerator) metaSxn(m *meta.Meta) *sx.Pair {
 	tm := ast.GetMetaSz(m)
 	env := shtml.MakeEnvironment(g.lang)
 	hm, err := g.th.Evaluate(tm, &env)

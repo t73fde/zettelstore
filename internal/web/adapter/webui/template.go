@@ -283,7 +283,7 @@ func (rb *renderBinder) rebindResolved(key, extraKey string) {
 	}
 }
 
-func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, user, m *meta.Meta, content *zettel.Content) {
+func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, user, m *meta.Meta, title string, content *zettel.Content) {
 	zid := m.Zid
 	strZid := zid.String()
 	newURLBuilder := wui.NewURLBuilder
@@ -292,6 +292,9 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	rb.bindString("web-url", sx.MakeString(newURLBuilder('h').SetZid(zid).String()))
 	if content != nil && wui.canWrite(ctx, user, m, *content) {
 		rb.bindString("edit-url", sx.MakeString(newURLBuilder('e').SetZid(zid).String()))
+	}
+	if title != "" {
+		rb.bindString("data-ref", sx.MakeString("[["+title+"|"+strZid+"]]"))
 	}
 	rb.bindString("info-url", sx.MakeString(newURLBuilder('i').SetZid(zid).String()))
 	if wui.canCreate(ctx, user) {
