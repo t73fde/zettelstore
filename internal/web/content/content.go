@@ -30,6 +30,7 @@ const (
 	mimeGIF      = "image/gif"
 	mimeHTML     = "text/html; charset=utf-8"
 	mimeJPEG     = "image/jpeg"
+	mimeJS       = "text/javascript; charset=utf-8"
 	mimeMarkdown = "text/markdown; charset=utf-8"
 	PlainText    = "text/plain; charset=utf-8"
 	mimePNG      = "image/png"
@@ -61,6 +62,7 @@ var syntax2mime = map[string]string{
 	meta.ValueSyntaxHTML:     mimeHTML,
 	meta.ValueSyntaxJPEG:     mimeJPEG,
 	meta.ValueSyntaxJPG:      mimeJPEG,
+	meta.ValueSyntaxJS:       mimeJS,
 	meta.ValueSyntaxMarkdown: mimeMarkdown,
 	meta.ValueSyntaxMD:       mimeMarkdown,
 	meta.ValueSyntaxNone:     "",
@@ -74,7 +76,6 @@ var syntax2mime = map[string]string{
 	meta.ValueSyntaxZmk:      "text/x-zmk; charset=utf-8",
 
 	// Additional syntaxes that are parsed as plain text.
-	"js":  "text/javascript; charset=utf-8",
 	"pdf": "application/pdf",
 	"xml": "text/xml; charset=utf-8",
 }
@@ -90,6 +91,7 @@ func MIMEFromSyntax(syntax string) string {
 var mime2syntax = map[string]string{
 	mimeGIF:         meta.ValueSyntaxGif,
 	mimeJPEG:        meta.ValueSyntaxJPEG,
+	mimeJS:          meta.ValueSyntaxJS,
 	mimePNG:         meta.ValueSyntaxPNG,
 	mimeWEBP:        meta.ValueSyntaxWebp,
 	"text/html":     meta.ValueSyntaxHTML,

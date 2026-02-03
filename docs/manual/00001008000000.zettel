@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20210126175300
-modified: 20251218185309
+modified: 20260203154803
 
 [[Zettelmarkup|00001007000000]] is not the only markup language you can use to define your content.
 Zettelstore is quite agnostic with respect to markup languages.
@@ -30,13 +30,16 @@ The following syntax values are supported:
   Typically the data is stored in a separate file and the syntax is given in the meta-file, which has the same name as the zettel identifier and has no file extension.[^Before version 0.2, the meta-file had the file extension ''.meta'']
 ; [!html|''html'']
 : Hypertext Markup Language, will not be parsed further.
-  Instead, it is treated as [[text|#text]], but will be encoded differently for [[HTML format|00001012920510]] (same for the [[web user interface|00001014000000]]).
+  Instead, it is treated as [[''text''|#text]], but will be encoded differently for [[HTML format|00001012920510]] (same for the [[web user interface|00001014000000]]).
 
   Since HTML from unknown sources may contain security-related problems, zettel with this syntax are treated as an empty zettel, unless the startup configuration value for [[''insecure-html''|00001004010000#insecure-html]] is set to at least the value ""html"".
 
   For security reasons, equivocal elements will not be encoded in the HTML format / web user interface.
   The ``< script ...>`` tag is an example.
   See [[security aspects of Markdown|00001008010000#security-aspects]] for some details.
+; [!js|''js'']
+: JavaScript, will not be parsed further.
+  It is treated as plain [[''text''|#text]], except for a different ""Content-Type"" when retrieved via the API.
 ; [!markdown|''markdown''], [!md|''md'']
 : For those who desperately need [[Markdown|https://daringfireball.net/projects/markdown/]].
   Since the world of Markdown is so diverse, a [[CommonMark|00001008010500]] parser is used.

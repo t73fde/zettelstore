@@ -138,9 +138,7 @@ func (wui *WebUI) getUserLang(ctx context.Context) string {
 var (
 	symDetail     = sx.MakeSymbol("DETAIL")
 	symMetaHeader = sx.MakeSymbol("META-HEADER")
-	symDefer      = sxhtml.MakeSymbol("defer")
-	symScript     = sxhtml.MakeSymbol("script")
-	symSrc        = sxhtml.MakeSymbol("src")
+	symJSScripts  = sx.MakeSymbol("JS-SCRIPTS")
 )
 
 func (wui *WebUI) observe(ci box.UpdateInfo) {

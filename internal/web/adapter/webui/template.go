@@ -32,6 +32,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/sz/zmk"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
@@ -196,6 +197,7 @@ func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title
 	rb.bindString("FOOTER", wui.calculateFooterSxn(ctx)) // TODO: use real footer
 	rb.bindString("debug-mode", sx.MakeBoolean(wui.debug))
 	rb.bindSymbol(symMetaHeader, sx.Nil())
+	rb.bindSymbol(symJSScripts, sx.Nil())
 	rb.bindSymbol(symDetail, sx.Nil())
 
 	nestH := sxeval.MakeNestingLimitHandler(wui.sxMaxNesting, sxeval.DefaultHandler{})
@@ -294,7 +296,7 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 		rb.bindString("edit-url", sx.MakeString(newURLBuilder('e').SetZid(zid).String()))
 	}
 	if title != "" {
-		rb.bindString("data-ref", sx.MakeString("[["+title+"|"+strZid+"]]"))
+		rb.bindString("data-ref", sx.MakeString("[["+zmk.EscapeZmkSyntax(title)+"|"+strZid+"]]"))
 	}
 	rb.bindString("info-url", sx.MakeString(newURLBuilder('i').SetZid(zid).String()))
 	if wui.canCreate(ctx, user) {

@@ -19,6 +19,7 @@
   (meta ((name "generator") (content "Zettelstore")))
   (meta ((name "format-detection") (content "telephone=no")))
   ,@META-HEADER
+  ,@(map wui-js-script JS-SCRIPTS)
   (link ((rel "stylesheet") (href ,css-base-url)))
   (link ((rel "stylesheet") (href ,css-user-url)))
   ,@(ROLE-DEFAULT-meta (current-frame))

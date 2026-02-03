@@ -13,6 +13,9 @@
 
 ;; Contains WebUI specific code, but not related to a specific template.
 
+;; wui-js-script transforms an URI in script tag
+(defun wui-js-script (url) `(script ((src . ,url) (defer))))
+
 ;; wui-list-item returns the argument as a HTML list item.
 (defun wui-item (s) `(li ,s))
 

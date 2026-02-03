@@ -2,6 +2,9 @@
 
 <a id="1_1"></a>
 <h2>Changes for Version 1.1.0 (pending)</h2>
+  *  Add action link on zettel and info page to generate a reference to the
+     current zettel and copy it into the system clipboard.
+     (minor: webui)
 
 <a id="1_0"></a>
 <h2>Changes for Version 1.0.2 (2025-12-21)</h2>

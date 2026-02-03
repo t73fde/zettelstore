@@ -46,7 +46,7 @@ function zsShowNotification(message, success) {
         if (notification.parentNode) {
             document.body.removeChild(notification);
         }
-    }, 3000);
+    }, 1732);
 }
 
 document.getElementById('zsCopyReference').addEventListener('click', function(event) {

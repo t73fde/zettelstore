@@ -15,6 +15,7 @@
   (header (h1 "Information for Zettel " ,zid)
     (p
       ,(wui-href web-url "Web")
+      (@H " &#183; ") ,(wui-copy-ref data-ref)
       ,@(if (symbol-bound? 'edit-url) `((@H " &#183; ") ,(wui-href edit-url "Edit")))
       (@H " &#183; ") ,(wui-href context-full-url "Full Context")
       ,@(if (symbol-bound? 'thread-query-url)
