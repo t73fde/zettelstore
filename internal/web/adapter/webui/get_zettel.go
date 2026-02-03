@@ -93,11 +93,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinates, config.KeyShowSubordinateLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
-		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
-			for _, part := range []string{"meta", "actions", "heading"} {
-				rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-EXTRA-"+part)
-			}
-		}
+		rb.bindRoleSpecific(zn.InhMeta)
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, title, &zn.Content)
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidZettelTemplate, env)

@@ -285,6 +285,14 @@ func (rb *renderBinder) rebindResolved(key, extraKey string) {
 	}
 }
 
+func (rb *renderBinder) bindRoleSpecific(m *meta.Meta) {
+	if role, found := m.Get(meta.KeyRole); found && role != "" {
+		for _, part := range []string{"meta", "actions", "heading"} {
+			rb.rebindResolved("ROLE-"+string(role)+"-"+part, "ROLE-EXTRA-"+part)
+		}
+	}
+}
+
 func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, user, m *meta.Meta, title string, content *zettel.Content) {
 	zid := m.Zid
 	strZid := zid.String()
