@@ -15,17 +15,17 @@
   (header
     (h1 ,heading)
     (div ((class "zs-meta"))
-      ,@(if (symbol-bound? 'edit-url) `(,(wui-href edit-url "Edit") (@H " &#183; ")))
-      ,zid (@H " &#183; ")
-      ,(wui-copy-ref data-ref) (@H " &#183; ")
-      ,(wui-href info-url "Info") (@H " &#183; ")
+      ,@(if (symbol-bound? 'edit-url) `(,(wui-href edit-url "Edit") ,ACTION-SEPARATOR))
+      ,zid ,ACTION-SEPARATOR
+      ,(wui-copy-ref data-ref) ,ACTION-SEPARATOR
+      ,(wui-href info-url "Info") ,ACTION-SEPARATOR
       "(" ,@(if (symbol-bound? 'role-url) `(,(wui-href role-url meta-role)))
           ,@(if (and (symbol-bound? 'folge-role-url) (symbol-bound? 'meta-folge-role))
                 `((@H " &rarr; ") ,(wui-href folge-role-url meta-folge-role)))
       ")"
-      ,@(if tag-refs `((@H " &#183; ") ,@tag-refs))
-      (@H " &#183; ") ,(wui-href context-url "Context")
-      ,@(if (symbol-bound? 'thread-query-url) `((@H " &#183; ") ,(wui-href thread-query-url "Thread")))
+      ,@(if tag-refs `(,ACTION-SEPARATOR ,@tag-refs))
+      ,ACTION-SEPARATOR ,(wui-href context-url "Context")
+      ,@(if (symbol-bound? 'thread-query-url) `(,ACTION-SEPARATOR ,(wui-href thread-query-url "Thread")))
       ,@(ROLE-DEFAULT-actions (current-frame))
       ,@(let* ((frame (current-frame))(rea (resolve-symbol 'ROLE-EXTRA-actions frame))) (if (defined? rea) (rea frame)))
       ,@(if superior-refs `((br) "Superior: " ,superior-refs))

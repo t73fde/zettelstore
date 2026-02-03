@@ -105,11 +105,11 @@
 ;; ROLE-DEFAULT-actions returns the default text for actions.
 (defun ROLE-DEFAULT-actions (frame)
     `(,@(let ((copy-url (resolve-symbol 'copy-url frame)))
-             (if (defined? copy-url) `((@H " &#183; ") ,(wui-href copy-url "Copy"))))
+             (if (defined? copy-url) `(,ACTION-SEPARATOR ,(wui-href copy-url "Copy"))))
       ,@(let ((sequel-url (resolve-symbol 'sequel-url frame)))
-             (if (defined? sequel-url) `((@H " &#183; ") ,(wui-href sequel-url "Sequel"))))
+             (if (defined? sequel-url) `(,ACTION-SEPARATOR ,(wui-href sequel-url "Sequel"))))
       ,@(let ((folge-url (resolve-symbol 'folge-url frame)))
-             (if (defined? folge-url) `((@H " &#183; ") ,(wui-href folge-url "Folge"))))
+             (if (defined? folge-url) `(,ACTION-SEPARATOR ,(wui-href folge-url "Folge"))))
     )
 )
 
