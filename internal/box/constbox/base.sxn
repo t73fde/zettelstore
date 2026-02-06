@@ -19,7 +19,7 @@
   (meta ((name "generator") (content "Zettelstore")))
   (meta ((name "format-detection") (content "telephone=no")))
   ,@META-HEADER
-  ,@(map wui-js-script JS-SCRIPTS)
+  ,@(map wui-js-script-async JS-SCRIPTS-ASYNC)
   (link ((rel "stylesheet") (href ,css-base-url)))
   (link ((rel "stylesheet") (href ,css-user-url)))
   ,@(ROLE-DEFAULT-meta (current-frame))
@@ -60,4 +60,5 @@
   (main ((class "content")) ,DETAIL)
   ,@(if FOOTER `((footer (hr) ,@FOOTER)))
   ,@(if debug-mode '((div (b "WARNING: Debug mode is enabled. DO NOT USE IN PRODUCTION!"))))
+  ,@(map wui-js-script JS-SCRIPTS)
 )))

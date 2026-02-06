@@ -13,7 +13,10 @@
 
 ;; Contains WebUI specific code, but not related to a specific template.
 
-;; wui-js-script transforms an URI in script tag
+;; wui-js-script-async transforms an URI in script tag that loads async
+(defun wui-js-script-async (url) `(script ((src . ,url) (async))))
+
+;; wui-js-script transforms an URI in script tag that loads deferred
 (defun wui-js-script (url) `(script ((src . ,url) (defer))))
 
 ;; wui-list-item returns the argument as a HTML list item.

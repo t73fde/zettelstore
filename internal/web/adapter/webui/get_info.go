@@ -94,7 +94,8 @@ func (wui *WebUI) MakeGetInfoHandler(
 
 		user := auth.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnvironment(ctx, "info", wui.getUserLang(ctx), title, user)
-		rb.bindSymbol(symJSScripts, sx.MakeList(sx.MakeString(wui.jsBaseURL)))
+		rb.bindSymbol(symJSScriptsAsync, sx.MakeList(sx.MakeString(wui.jsBaseURL)))
+		rb.bindSymbol(symJSScripts, sx.MakeList(sx.MakeString(wui.jsCopyRefURL)))
 		rb.bindString("metadata", lbMetadata.List())
 		rb.bindString("local-links", locLinks)
 		rb.bindString("query-links", queryLinks)

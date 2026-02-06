@@ -197,8 +197,9 @@ func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title
 	rb.bindString("FOOTER", wui.calculateFooterSxn(ctx)) // TODO: use real footer
 	rb.bindString("debug-mode", sx.MakeBoolean(wui.debug))
 	rb.bindSymbol(symMetaHeader, sx.Nil())
-	rb.bindSymbol(symJSScripts, sx.Nil())
+	rb.bindSymbol(symJSScriptsAsync, sx.Nil())
 	rb.bindSymbol(symDetail, sx.Nil())
+	rb.bindSymbol(symJSScripts, sx.Nil())
 
 	nestH := sxeval.MakeNestingLimitHandler(wui.sxMaxNesting, sxeval.DefaultHandler{})
 	var handler sxeval.ComputeHandler = nestH

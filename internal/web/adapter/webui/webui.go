@@ -60,6 +60,7 @@ type WebUI struct {
 	cssBaseURL    string
 	cssUserURL    string
 	jsBaseURL     string
+	jsCopyRefURL  string
 	homeURL       string
 	refreshURL    string
 	withAuth      bool
@@ -110,6 +111,7 @@ func New(logger *slog.Logger, ab server.AuthBuilder, authz auth.AuthzManager, rt
 		cssBaseURL:    ab.NewURLBuilder('z').SetZid(id.ZidBaseCSS).String(),
 		cssUserURL:    ab.NewURLBuilder('z').SetZid(id.ZidUserCSS).String(),
 		jsBaseURL:     ab.NewURLBuilder('z').SetZid(id.ZidBaseJS).String(),
+		jsCopyRefURL:  ab.NewURLBuilder('z').SetZid(id.ZidCopyRefJS).String(),
 		homeURL:       ab.NewURLBuilder('/').String(),
 		refreshURL:    ab.NewURLBuilder('g').AppendKVQuery("_c", "r").String(),
 		withAuth:      authz.WithAuth(),
@@ -136,9 +138,10 @@ func (wui *WebUI) getUserLang(ctx context.Context) string {
 }
 
 var (
-	symDetail     = sx.MakeSymbol("DETAIL")
-	symMetaHeader = sx.MakeSymbol("META-HEADER")
-	symJSScripts  = sx.MakeSymbol("JS-SCRIPTS")
+	symDetail         = sx.MakeSymbol("DETAIL")
+	symMetaHeader     = sx.MakeSymbol("META-HEADER")
+	symJSScripts      = sx.MakeSymbol("JS-SCRIPTS")
+	symJSScriptsAsync = sx.MakeSymbol("JS-SCRIPTS-ASYNC")
 )
 
 func (wui *WebUI) observe(ci box.UpdateInfo) {

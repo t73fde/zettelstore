@@ -35,29 +35,3 @@
         };
     }
 })();
-
-function zsShowNotification(message, success) {
-    var notification = document.createElement('div');
-    notification.classList.add('notification');
-    notification.classList.add(success ? 'success' : 'error');
-    notification.textContent = message;
-    document.body.appendChild(notification);
-    setTimeout(function() {
-        if (notification.parentNode) {
-            document.body.removeChild(notification);
-        }
-    }, 1732);
-}
-
-document.getElementById('zsCopyReference').addEventListener('click', function(event) {
-    event.preventDefault();
-    var reference = this.getAttribute('data-ref');
-    navigator.clipboard.writeText(reference)
-        .then(function() {
-            zsShowNotification("Reference copied to clipboard.", true);
-        })
-        .catch(function(error) {
-            console.error("Error copying text: ", error);
-            zsShowNotification("Failed to copy reference. Please try again.", false);
-        });
-  });

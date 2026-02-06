@@ -275,10 +275,19 @@ var constZettelMap = map[id.Zid]constZettel{
 			meta.KeyRole:       meta.ValueRoleConfiguration,
 			meta.KeySyntax:     meta.ValueSyntaxJS,
 			meta.KeyCreated:    "20260202123100",
-			meta.KeyModified:   "20260203155500",
+			meta.KeyModified:   "20260206134600",
 			meta.KeyVisibility: meta.ValueVisibilityPublic,
 		},
 		zettel.NewContent(contentBaseJS)},
+	id.ZidCopyRefJS: {
+		constHeader{
+			meta.KeyTitle:      "Zettelstore Copy Reference JavaScript",
+			meta.KeyRole:       meta.ValueRoleConfiguration,
+			meta.KeySyntax:     meta.ValueSyntaxJS,
+			meta.KeyCreated:    "20260206134600",
+			meta.KeyVisibility: meta.ValueVisibilityPublic,
+		},
+		zettel.NewContent(contentCopyRefJS)},
 	id.ZidEmoji: {
 		constHeader{
 			meta.KeyTitle:      "Zettelstore Generic Emoji",
@@ -461,6 +470,9 @@ var contentBaseCSS []byte
 
 //go:embed base.js
 var contentBaseJS []byte
+
+//go:embed copyref.js
+var contentCopyRefJS []byte
 
 //go:embed emoji_spin.gif
 var contentEmoji []byte

@@ -68,7 +68,8 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		title := sz.NormalizedSpacedText(zn.InhMeta.GetTitle())
 		env, rb := wui.createRenderEnvironment(ctx, "zettel", zettelLang, title, user)
 		rb.bindSymbol(symMetaHeader, metaHeader)
-		rb.bindSymbol(symJSScripts, sx.MakeList(sx.MakeString(wui.jsBaseURL)))
+		rb.bindSymbol(symJSScriptsAsync, sx.MakeList(sx.MakeString(wui.jsBaseURL)))
+		rb.bindSymbol(symJSScripts, sx.MakeList(sx.MakeString(wui.jsCopyRefURL)))
 		rb.bindString("heading", sx.MakeString(title))
 		if role, found := zn.InhMeta.Get(meta.KeyRole); found && role != "" {
 			rb.bindString(

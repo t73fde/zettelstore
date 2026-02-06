@@ -50,12 +50,12 @@ func TestNextZid(t *testing.T) {
 
 func TestListZettel(t *testing.T) {
 	const (
-		ownerZettel      = 59
-		configRoleZettel = 37
+		ownerZettel      = 60
+		configRoleZettel = 38
 		writerZettel     = ownerZettel - 24
 		readerZettel     = ownerZettel - 24
-		creatorZettel    = 12
-		publicZettel     = 7
+		creatorZettel    = 13
+		publicZettel     = 8
 	)
 
 	testdata := []struct {
