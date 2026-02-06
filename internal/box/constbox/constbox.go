@@ -230,13 +230,13 @@ var constZettelMap = map[id.Zid]constZettel{
 		zettel.NewContent(contentErrorSxn)},
 	id.ZidSxnStart: {
 		constHeader{
-			meta.KeyTitle:      "Zettelstore Sxn Start Code",
-			meta.KeyRole:       meta.ValueRoleConfiguration,
-			meta.KeySyntax:     meta.ValueSyntaxSxn,
-			meta.KeyCreated:    "20230824160700",
-			meta.KeyModified:   "20240219145200",
-			meta.KeyVisibility: meta.ValueVisibilityExpert,
-			meta.KeyPrecursor:  id.ZidSxnBase.String(),
+			meta.KeyTitle:       "Zettelstore Sxn Start Code",
+			meta.KeyRole:        meta.ValueRoleConfiguration,
+			meta.KeySyntax:      meta.ValueSyntaxSxn,
+			meta.KeyCreated:     "20230824160700",
+			meta.KeyModified:    "20240219145200",
+			meta.KeyVisibility:  meta.ValueVisibilityExpert,
+			meta.KeyPredecessor: id.ZidSxnBase.String(),
 		},
 		zettel.NewContent(contentStartCodeSxn)},
 	id.ZidSxnBase: {

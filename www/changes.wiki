@@ -7,6 +7,10 @@
      (breaking)
   *  Remove runtime configuration <code>show-subordinate-links</code>
      (breaking: webui)
+  *  Use <code>successor</code> / <code>predecessor</code> relation to specify
+     load dependency between sxn zettel. Remove <code>precursor</code> /
+     <code>folge</code> dependency between some predefined zettel.
+     (breaking)
   *  Add action link on zettel and info page to generate a reference to the
      current zettel and copy it into the system clipboard.
      (minor: webui)
@@ -22,8 +26,7 @@
 <h2>Changes for Version 1.0.1 (2025-12-19)</h2>
   *  Fix wrong default values for startup configuration values
      <code>token-lifetime-api</code> and <code>token-lifetime-html</code>.
-  *  Fix many writing errors, mostly in the manual. The majority of these
-     errors are found by students in one of my courses.
+  *  Fix many writing errors, mostly in the manual.
 
 <h2>Changes for Version 1.0.0 (2025-12-05)</h2>
   *  SZ encoding of lists (ordered, unordered, and quotations) has been

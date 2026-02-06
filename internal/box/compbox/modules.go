@@ -26,7 +26,6 @@ import (
 func genModulesM(zid id.Zid) *meta.Meta {
 	m := getTitledMeta(zid, "Zettelstore Modules")
 	m.Set(meta.KeyVisibility, meta.ValueVisibilityLogin)
-	m.Set(meta.KeyPrecursor, meta.Value(id.ZidDependencies.String()))
 	return m
 }
 
