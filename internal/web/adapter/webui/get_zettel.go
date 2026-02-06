@@ -20,11 +20,11 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
@@ -75,13 +75,13 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 			rb.bindString(
 				"role-url",
 				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(
-					meta.KeyRole+api.SearchOperatorHas+string(role)).String()))
+					meta.KeyRole+webapi.SearchOperatorHas+string(role)).String()))
 		}
 		if folgeRole, found := zn.InhMeta.Get(meta.KeyFolgeRole); found && folgeRole != "" {
 			rb.bindString(
 				"folge-role-url",
 				sx.MakeString(wui.NewURLBuilder('h').AppendQuery(
-					meta.KeyRole+api.SearchOperatorHas+string(folgeRole)).String()))
+					meta.KeyRole+webapi.SearchOperatorHas+string(folgeRole)).String()))
 		}
 		rb.bindString("tag-refs", wui.transformTagSet(meta.KeyTags, zn.InhMeta.GetDefault(meta.KeyTags, "").AsSlice()))
 		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrecursor, getTextTitle))

@@ -13,7 +13,7 @@
 
 package query
 
-import "t73f.de/r/zsc/api"
+import "t73f.de/r/zsc/webapi"
 
 type directionSpec struct {
 	isDirected bool
@@ -32,15 +32,15 @@ func (ds *directionSpec) cleanupAfterParse() {
 func (ds directionSpec) print(pe *PrintEnv) {
 	if ds.isDirected {
 		pe.printSpace()
-		pe.writeString(api.DirectedDirective)
+		pe.writeString(webapi.DirectedDirective)
 	} else if ds.isForward {
 		if !ds.isBackward {
 			pe.printSpace()
-			pe.writeString(api.ForwardDirective)
+			pe.writeString(webapi.ForwardDirective)
 		}
 	} else if ds.isBackward {
 		pe.printSpace()
-		pe.writeString(api.BackwardDirective)
+		pe.writeString(webapi.BackwardDirective)
 	} else {
 		panic("neither forward, backward, nor directed")
 	}

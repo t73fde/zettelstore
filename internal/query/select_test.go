@@ -17,16 +17,16 @@ import (
 	"context"
 	"testing"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/query"
 )
 
 func TestMatchZidNegate(t *testing.T) {
-	q := query.Parse(meta.KeyID + api.SearchOperatorHasNot + id.ZidVersion.String() + " " +
-		meta.KeyID + api.SearchOperatorHasNot + id.ZidLicense.String())
+	q := query.Parse(meta.KeyID + webapi.SearchOperatorHasNot + id.ZidVersion.String() + " " +
+		meta.KeyID + webapi.SearchOperatorHasNot + id.ZidLicense.String())
 	compiled := q.RetrieveAndCompile(context.Background(), nil, nil)
 
 	testCases := []struct {

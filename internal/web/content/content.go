@@ -19,8 +19,8 @@ import (
 	"mime"
 	"net/http"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -38,17 +38,17 @@ const (
 	mimeWEBP     = "image/webp"
 )
 
-var encoding2mime = map[api.EncodingEnum]string{
-	api.EncoderHTML:  mimeHTML,
-	api.EncoderMD:    mimeMarkdown,
-	api.EncoderSz:    SXPF,
-	api.EncoderSHTML: SXPF,
-	api.EncoderText:  PlainText,
-	api.EncoderZmk:   PlainText,
+var encoding2mime = map[webapi.EncodingEnum]string{
+	webapi.EncoderHTML:  mimeHTML,
+	webapi.EncoderMD:    mimeMarkdown,
+	webapi.EncoderSz:    SXPF,
+	webapi.EncoderSHTML: SXPF,
+	webapi.EncoderText:  PlainText,
+	webapi.EncoderZmk:   PlainText,
 }
 
 // MIMEFromEncoding returns the MIME encoding for a given zettel encoding
-func MIMEFromEncoding(enc api.EncodingEnum) string {
+func MIMEFromEncoding(enc webapi.EncodingEnum) string {
 	if m, found := encoding2mime[enc]; found {
 		return m
 	}

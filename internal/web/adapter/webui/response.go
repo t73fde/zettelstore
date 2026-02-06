@@ -16,10 +16,10 @@ package webui
 import (
 	"net/http"
 
-	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/webapi"
 )
 
-func (wui *WebUI) redirectFound(w http.ResponseWriter, r *http.Request, ub *api.URLBuilder) {
+func (wui *WebUI) redirectFound(w http.ResponseWriter, r *http.Request, ub *webapi.URLBuilder) {
 	us := ub.String()
 	wui.logger.Debug("redirect", "uri", us)
 	http.Redirect(w, r, us, http.StatusFound)

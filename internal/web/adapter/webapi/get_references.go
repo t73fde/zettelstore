@@ -20,8 +20,8 @@ import (
 
 	"t73f.de/r/sx"
 	zeroiter "t73f.de/r/zero/iter"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/usecase"
@@ -62,7 +62,7 @@ func (a *WebAPI) MakeGetReferencesHandler(
 		}
 
 		enc, _ := getEncoding(r, q)
-		if enc == api.EncoderData {
+		if enc == webapi.EncoderData {
 			var lb sx.ListBuilder
 			lb.Collect(zeroiter.MapSeq(seq, func(s string) sx.Object { return sx.MakeString(s) }))
 			if err = a.writeObject(w, zid, lb.List()); err != nil {

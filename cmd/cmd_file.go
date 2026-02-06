@@ -20,9 +20,9 @@ import (
 	"io"
 	"os"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/encoder"
@@ -49,7 +49,7 @@ func cmdFile(fs *flag.FlagSet) (int, error) {
 	)
 	parser.Clean(z.Blocks)
 	encdr := encoder.Create(
-		api.Encoder(enc),
+		webapi.Encoder(enc),
 		&encoder.CreateParameter{Lang: string(m.GetDefault(meta.KeyLang, meta.ValueLangEN))})
 	if encdr == nil {
 		fmt.Fprintf(os.Stderr, "Unknown format %q\n", enc)

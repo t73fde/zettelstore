@@ -19,9 +19,9 @@ import (
 	"net/http"
 	"time"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 )
 
 // UserRetriever allows to retrieve user data based on a given zettel identifier.
@@ -52,8 +52,8 @@ type Router interface {
 
 // Builder allows to build new URLs for the web service.
 type Builder interface {
-	NewURLBuilder(key byte) *api.URLBuilder
-	NewURLBuilderAbs(key byte) *api.URLBuilder
+	NewURLBuilder(key byte) *webapi.URLBuilder
+	NewURLBuilderAbs(key byte) *webapi.URLBuilder
 }
 
 // Auth is the authencation interface.

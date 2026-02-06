@@ -26,9 +26,9 @@ import (
 	"slices"
 	"strings"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 	"zettelstore.de/z/tools"
 )
 
@@ -77,7 +77,7 @@ func cmdValidateHTML(args []string) error {
 	return nil
 }
 
-func calculateZids(metaList []api.ZidMetaRights) ([]id.Zid, []int) {
+func calculateZids(metaList []webapi.ZidMetaRights) ([]id.Zid, []int) {
 	zids := make([]id.Zid, len(metaList))
 	for i, m := range metaList {
 		zids[i] = m.ID
@@ -114,18 +114,18 @@ var keyDescr = []struct {
 	{createJustKey('d'), "zettel delete dialog", 200},
 }
 
-type urlCreator func(*client.Client, id.Zid) *api.URLBuilder
+type urlCreator func(*client.Client, id.Zid) *webapi.URLBuilder
 
 func createJustKey(key byte) urlCreator {
-	return func(c *client.Client, zid id.Zid) *api.URLBuilder {
+	return func(c *client.Client, zid id.Zid) *webapi.URLBuilder {
 		return c.NewURLBuilder(key).SetZid(zid)
 	}
 }
 
-func getHTMLZettel(client *client.Client, zid id.Zid) *api.URLBuilder {
+func getHTMLZettel(client *client.Client, zid id.Zid) *webapi.URLBuilder {
 	return client.NewURLBuilder('z').SetZid(zid).
-		AppendKVQuery(api.QueryKeyEncoding, api.EncodingHTML).
-		AppendKVQuery(api.QueryKeyPart, api.PartZettel)
+		AppendKVQuery(webapi.QueryKeyEncoding, webapi.EncodingHTML).
+		AppendKVQuery(webapi.QueryKeyPart, webapi.PartZettel)
 }
 
 func validateHTML(client *client.Client, uc urlCreator, zid id.Zid) (int, error) {

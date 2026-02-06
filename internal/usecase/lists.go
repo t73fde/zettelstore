@@ -16,8 +16,8 @@ package usecase
 import (
 	"context"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/parser"
@@ -43,7 +43,7 @@ func NewListSyntax(port ListSyntaxPort) ListSyntax {
 
 // Run executes the use case.
 func (uc ListSyntax) Run(ctx context.Context) (meta.Arrangement, error) {
-	q := query.Parse(meta.KeySyntax + api.ExistOperator) // We look for all metadata with a syntax key
+	q := query.Parse(meta.KeySyntax + webapi.ExistOperator) // We look for all metadata with a syntax key
 	metas, err := uc.port.SelectMeta(box.NoEnrichContext(ctx), nil, q)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func NewListRoles(port ListRolesPort) ListRoles {
 
 // Run executes the use case.
 func (uc ListRoles) Run(ctx context.Context) (meta.Arrangement, error) {
-	q := query.Parse(meta.KeyRole + api.ExistOperator) // We look for all metadata with an existing role key
+	q := query.Parse(meta.KeyRole + webapi.ExistOperator) // We look for all metadata with an existing role key
 	metas, err := uc.port.SelectMeta(box.NoEnrichContext(ctx), nil, q)
 	if err != nil {
 		return nil, err

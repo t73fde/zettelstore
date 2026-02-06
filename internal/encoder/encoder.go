@@ -19,9 +19,9 @@ import (
 	"io"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/ast"
 )
@@ -39,31 +39,31 @@ type Encoder interface {
 }
 
 // Create builds a new encoder with the given options.
-func Create(enc api.EncodingEnum, params *CreateParameter) Encoder {
+func Create(enc webapi.EncodingEnum, params *CreateParameter) Encoder {
 	switch enc {
-	case api.EncoderHTML:
+	case webapi.EncoderHTML:
 		// We need a new transformer every time, because tx.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &htmlEncoder{
 			th:   shtml.NewEvaluator(1),
 			lang: params.Lang,
 		}
-	case api.EncoderMD:
+	case webapi.EncoderMD:
 		return &mdEncoder{lang: params.Lang}
-	case api.EncoderSHTML:
+	case webapi.EncoderSHTML:
 		// We need a new transformer every time, because tx.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &shtmlEncoder{
 			th:   shtml.NewEvaluator(1),
 			lang: params.Lang,
 		}
-	case api.EncoderSz:
+	case webapi.EncoderSz:
 		// We need a new transformer every time, because trans.inVerse must be unique.
 		// If we can refactor it out, the transformer can be created only once.
 		return &szEncoder{}
-	case api.EncoderText:
+	case webapi.EncoderText:
 		return (*TextEncoder)(nil)
-	case api.EncoderZmk:
+	case webapi.EncoderZmk:
 		return (*zmkEncoder)(nil)
 	}
 	return nil
@@ -75,6 +75,9 @@ type CreateParameter struct {
 }
 
 // GetEncodings returns all registered encodings, ordered by encoding value.
-func GetEncodings() []api.EncodingEnum {
-	return []api.EncodingEnum{api.EncoderHTML, api.EncoderMD, api.EncoderSHTML, api.EncoderSz, api.EncoderText, api.EncoderZmk}
+func GetEncodings() []webapi.EncodingEnum {
+	return []webapi.EncodingEnum{
+		webapi.EncoderHTML, webapi.EncoderMD, webapi.EncoderSHTML,
+		webapi.EncoderSz, webapi.EncoderText, webapi.EncoderZmk,
+	}
 }

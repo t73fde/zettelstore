@@ -20,10 +20,10 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
@@ -174,7 +174,7 @@ func (wui *WebUI) MakeGetZettelFromListHandler(
 		}
 		entries, _ := evaluator.QueryAction(ctx, q, metaSeq)
 		blocks := evaluate.RunBlockNode(ctx, entries)
-		enc := encoder.Create(api.EncoderZmk, nil)
+		enc := encoder.Create(webapi.EncoderZmk, nil)
 		var zmkContent bytes.Buffer
 		if err = enc.WriteSz(&zmkContent, blocks); err != nil {
 			wui.reportError(ctx, w, err)

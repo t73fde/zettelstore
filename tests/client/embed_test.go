@@ -18,8 +18,8 @@ import (
 	"strings"
 	"testing"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 )
 
 const (
@@ -35,7 +35,7 @@ func TestZettelTransclusion(t *testing.T) {
 	c := getClient()
 	c.SetAuth("owner", "owner")
 
-	content, err := c.GetZettel(context.Background(), abcZid, api.PartContent)
+	content, err := c.GetZettel(context.Background(), abcZid, webapi.PartContent)
 	if err != nil {
 		t.Error(err)
 		return
@@ -43,7 +43,7 @@ func TestZettelTransclusion(t *testing.T) {
 	expect := string(content)
 	for count, zid := range []id.Zid{abc10Zid, abc100Zid, abc1000Zid} {
 		expect = strings.Repeat("<span>"+expect+"</span>", 10)
-		content, err = c.GetEvaluatedZettel(context.Background(), zid, api.EncoderHTML)
+		content, err = c.GetEvaluatedZettel(context.Background(), zid, webapi.EncoderHTML)
 		if err != nil {
 			t.Error(err)
 			continue
@@ -64,7 +64,7 @@ func TestZettelTransclusion(t *testing.T) {
 		}
 	}
 
-	content, err = c.GetEvaluatedZettel(context.Background(), abc10000Zid, api.EncoderHTML)
+	content, err = c.GetEvaluatedZettel(context.Background(), abc10000Zid, webapi.EncoderHTML)
 	if err != nil {
 		t.Error(err)
 		return
@@ -87,7 +87,7 @@ func TestZettelTransclusionNoPrivilegeEscalation(t *testing.T) {
 		t.Errorf("Zettel %q: encoding %q expected, but got %q", abcZid, expectedEnc, got)
 	}
 
-	content, err := c.GetEvaluatedZettel(context.Background(), abc10Zid, api.EncoderHTML)
+	content, err := c.GetEvaluatedZettel(context.Background(), abc10Zid, webapi.EncoderHTML)
 	if err != nil {
 		t.Error(err)
 		return
@@ -129,7 +129,7 @@ func TestRecursiveTransclusion(t *testing.T) {
 		indirectRecursive2Zid: indirectRecursive1Zid,
 	}
 	for zid, errZid := range recursiveZettel {
-		content, err := c.GetEvaluatedZettel(context.Background(), zid, api.EncoderHTML)
+		content, err := c.GetEvaluatedZettel(context.Background(), zid, webapi.EncoderHTML)
 		if err != nil {
 			t.Error(err)
 			continue
@@ -148,7 +148,7 @@ func TestNothingToTransclude(t *testing.T) {
 		transZid = id.Zid(20211020184342)
 		emptyZid = id.Zid(20211020184300)
 	)
-	content, err := c.GetEvaluatedZettel(context.Background(), transZid, api.EncoderHTML)
+	content, err := c.GetEvaluatedZettel(context.Background(), transZid, webapi.EncoderHTML)
 	if err != nil {
 		t.Error(err)
 		return
@@ -164,7 +164,7 @@ func TestSelfEmbedRef(t *testing.T) {
 	c.SetAuth("owner", "owner")
 
 	const selfEmbedZid = id.Zid(20211020185400)
-	content, err := c.GetEvaluatedZettel(context.Background(), selfEmbedZid, api.EncoderHTML)
+	content, err := c.GetEvaluatedZettel(context.Background(), selfEmbedZid, webapi.EncoderHTML)
 	if err != nil {
 		t.Error(err)
 		return

@@ -19,28 +19,28 @@ import (
 	"net/url"
 
 	"t73f.de/r/sx/sxreader"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sexp"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/zettel"
 )
 
 // getEncoding returns the data encoding selected by the caller.
-func getEncoding(r *http.Request, q url.Values) (api.EncodingEnum, string) {
-	encoding := q.Get(api.QueryKeyEncoding)
+func getEncoding(r *http.Request, q url.Values) (webapi.EncodingEnum, string) {
+	encoding := q.Get(webapi.QueryKeyEncoding)
 	if encoding != "" {
-		return api.Encoder(encoding), encoding
+		return webapi.Encoder(encoding), encoding
 	}
-	if enc, ok := getOneEncoding(r, api.HeaderAccept); ok {
-		return api.Encoder(enc), enc
+	if enc, ok := getOneEncoding(r, webapi.HeaderAccept); ok {
+		return webapi.Encoder(enc), enc
 	}
-	if enc, ok := getOneEncoding(r, api.HeaderContentType); ok {
-		return api.Encoder(enc), enc
+	if enc, ok := getOneEncoding(r, webapi.HeaderContentType); ok {
+		return webapi.Encoder(enc), enc
 	}
-	return api.EncoderPlain, api.EncoderPlain.String()
+	return webapi.EncoderPlain, webapi.EncoderPlain.String()
 }
 
 func getOneEncoding(r *http.Request, key string) (string, bool) {
@@ -55,7 +55,7 @@ func getOneEncoding(r *http.Request, key string) (string, bool) {
 }
 
 var mapCT2encoding = map[string]string{
-	"text/html": api.EncodingHTML,
+	"text/html": webapi.EncodingHTML,
 }
 
 func contentType2encoding(contentType string) (string, bool) {
@@ -74,13 +74,13 @@ const (
 )
 
 var partMap = map[string]partType{
-	api.PartMeta:    partMeta,
-	api.PartContent: partContent,
-	api.PartZettel:  partZettel,
+	webapi.PartMeta:    partMeta,
+	webapi.PartContent: partContent,
+	webapi.PartZettel:  partZettel,
 }
 
 func getPart(q url.Values, defPart partType) partType {
-	if part, ok := partMap[q.Get(api.QueryKeyPart)]; ok {
+	if part, ok := partMap[q.Get(webapi.QueryKeyPart)]; ok {
 		return part
 	}
 	return defPart

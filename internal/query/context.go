@@ -20,10 +20,10 @@ import (
 	"math"
 	"slices"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 )
 
 // ContextSpec contains all specification values for calculating a context.
@@ -44,15 +44,15 @@ type ContextPort interface {
 // Print the spec on the given print environment.
 func (spec *ContextSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
-	pe.writeString(api.ContextDirective)
+	pe.writeString(webapi.ContextDirective)
 	if spec.full {
 		pe.printSpace()
-		pe.writeString(api.FullDirective)
+		pe.writeString(webapi.FullDirective)
 	}
 	spec.directionSpec.print(pe)
-	pe.printPosInt(api.CostDirective, spec.maxCost)
-	pe.printPosInt(api.MaxDirective, spec.maxCount)
-	pe.printPosInt(api.MinDirective, spec.minCount)
+	pe.printPosInt(webapi.CostDirective, spec.maxCost)
+	pe.printPosInt(webapi.MaxDirective, spec.maxCount)
+	pe.printPosInt(webapi.MinDirective, spec.minCount)
 }
 
 // Execute the specification.
@@ -286,7 +286,7 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Set
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}
-	q := Parse(meta.KeyTags + api.SearchOperatorHas + tag + " ORDER REVERSE " + meta.KeyID)
+	q := Parse(meta.KeyTags + webapi.SearchOperatorHas + tag + " ORDER REVERSE " + meta.KeyID)
 	ml, err := ct.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		ml = nil

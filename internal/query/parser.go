@@ -16,10 +16,10 @@ package query
 import (
 	"strconv"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
 )
 
@@ -108,25 +108,25 @@ func (ps *parserState) parse(q *Query) *Query {
 			break
 		}
 		pos := inp.Pos
-		if !hasContext && ps.acceptSingleKw(api.ContextDirective) {
+		if !hasContext && ps.acceptSingleKw(webapi.ContextDirective) {
 			q = ps.parseContext(q)
 			hasContext = true
 			continue
 		}
 		inp.SetPos(pos)
-		if !hasThread && ps.acceptSingleKw(api.FolgeDirective) {
+		if !hasThread && ps.acceptSingleKw(webapi.FolgeDirective) {
 			q = ps.parseThread(q, true, false)
 			hasThread = true
 			continue
 		}
 		inp.SetPos(pos)
-		if !hasThread && ps.acceptSingleKw(api.SequelDirective) {
+		if !hasThread && ps.acceptSingleKw(webapi.SequelDirective) {
 			q = ps.parseThread(q, false, true)
 			hasThread = true
 			continue
 		}
 		inp.SetPos(pos)
-		if !hasThread && ps.acceptSingleKw(api.ThreadDirective) {
+		if !hasThread && ps.acceptSingleKw(webapi.ThreadDirective) {
 			q = ps.parseThread(q, true, true)
 			hasThread = true
 			continue
@@ -135,17 +135,17 @@ func (ps *parserState) parse(q *Query) *Query {
 		if q == nil || len(q.zids) == 0 {
 			break
 		}
-		if ps.acceptSingleKw(api.IdentDirective) {
+		if ps.acceptSingleKw(webapi.IdentDirective) {
 			q.directives = append(q.directives, &IdentSpec{})
 			continue
 		}
 		inp.SetPos(pos)
-		if ps.acceptSingleKw(api.ItemsDirective) {
+		if ps.acceptSingleKw(webapi.ItemsDirective) {
 			q.directives = append(q.directives, &ItemsSpec{})
 			continue
 		}
 		inp.SetPos(pos)
-		if ps.acceptSingleKw(api.UnlinkedDirective) {
+		if ps.acceptSingleKw(webapi.UnlinkedDirective) {
 			q = ps.parseUnlinked(q)
 			continue
 		}
@@ -163,7 +163,7 @@ func (ps *parserState) parse(q *Query) *Query {
 			break
 		}
 		pos := inp.Pos
-		if ps.acceptSingleKw(api.OrDirective) {
+		if ps.acceptSingleKw(webapi.OrDirective) {
 			q = createIfNeeded(q)
 			if !q.terms[len(q.terms)-1].isEmpty() {
 				q.terms = append(q.terms, conjTerms{})
@@ -171,7 +171,7 @@ func (ps *parserState) parse(q *Query) *Query {
 			continue
 		}
 		inp.SetPos(pos)
-		if ps.acceptSingleKw(api.RandomDirective) {
+		if ps.acceptSingleKw(webapi.RandomDirective) {
 			q = createIfNeeded(q)
 			if len(q.order) == 0 {
 				q.order = []sortOrder{{"", false}}
@@ -179,28 +179,28 @@ func (ps *parserState) parse(q *Query) *Query {
 			continue
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.PickDirective) {
+		if ps.acceptKwArgs(webapi.PickDirective) {
 			if s, ok := ps.parsePick(q); ok {
 				q = s
 				continue
 			}
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.OrderDirective) {
+		if ps.acceptKwArgs(webapi.OrderDirective) {
 			if s, ok := ps.parseOrder(q); ok {
 				q = s
 				continue
 			}
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.OffsetDirective) {
+		if ps.acceptKwArgs(webapi.OffsetDirective) {
 			if s, ok := ps.parseOffset(q); ok {
 				q = s
 				continue
 			}
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.LimitDirective) {
+		if ps.acceptKwArgs(webapi.LimitDirective) {
 			if s, ok := ps.parseLimit(q); ok {
 				q = s
 				continue
@@ -225,7 +225,7 @@ func (ps *parserState) parseContext(q *Query) *Query {
 			break
 		}
 		pos := inp.Pos
-		if ps.acceptSingleKw(api.FullDirective) {
+		if ps.acceptSingleKw(webapi.FullDirective) {
 			spec.full = true
 			continue
 		}
@@ -234,13 +234,13 @@ func (ps *parserState) parseContext(q *Query) *Query {
 			continue
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.CostDirective) {
+		if ps.acceptKwArgs(webapi.CostDirective) {
 			if ps.parseCost(spec) {
 				continue
 			}
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.MaxDirective) {
+		if ps.acceptKwArgs(webapi.MaxDirective) {
 			if num, ok := ps.scanPosInt(); ok {
 				if spec.maxCount == 0 || spec.maxCount >= num {
 					spec.maxCount = num
@@ -249,7 +249,7 @@ func (ps *parserState) parseContext(q *Query) *Query {
 			}
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.MinDirective) {
+		if ps.acceptKwArgs(webapi.MinDirective) {
 			if ps.parseMinCount(spec) {
 				continue
 			}
@@ -299,7 +299,7 @@ func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) *Query {
 			continue
 		}
 		inp.SetPos(pos)
-		if ps.acceptKwArgs(api.MaxDirective) {
+		if ps.acceptKwArgs(webapi.MaxDirective) {
 			if num, ok := ps.scanPosInt(); ok {
 				if spec.maxCount == 0 || spec.maxCount >= num {
 					spec.maxCount = num
@@ -321,17 +321,17 @@ func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) *Query {
 func (ps *parserState) parseDirection(ds *directionSpec) bool {
 	inp := ps.inp
 	pos := inp.Pos
-	if !ds.isBackward && !ds.isForward && ps.acceptSingleKw(api.DirectedDirective) {
+	if !ds.isBackward && !ds.isForward && ps.acceptSingleKw(webapi.DirectedDirective) {
 		ds.isDirected = true
 		return true
 	}
 	inp.SetPos(pos)
-	if !ds.isDirected && !ds.isBackward && ps.acceptSingleKw(api.BackwardDirective) {
+	if !ds.isDirected && !ds.isBackward && ps.acceptSingleKw(webapi.BackwardDirective) {
 		ds.isBackward = true
 		return true
 	}
 	inp.SetPos(pos)
-	if !ds.isDirected && !ds.isForward && ps.acceptSingleKw(api.ForwardDirective) {
+	if !ds.isDirected && !ds.isForward && ps.acceptSingleKw(webapi.ForwardDirective) {
 		ds.isForward = true
 		return true
 	}
@@ -348,7 +348,7 @@ func (ps *parserState) parseUnlinked(q *Query) *Query {
 			break
 		}
 		pos := inp.Pos
-		if ps.acceptKwArgs(api.PhraseDirective) {
+		if ps.acceptKwArgs(webapi.PhraseDirective) {
 			if word := ps.scanWord(); len(word) > 0 {
 				spec.words = append(spec.words, string(word))
 				continue
@@ -376,7 +376,7 @@ func (ps *parserState) parsePick(q *Query) (*Query, bool) {
 
 func (ps *parserState) parseOrder(q *Query) (*Query, bool) {
 	reverse := false
-	if ps.acceptKwArgs(api.ReverseDirective) {
+	if ps.acceptKwArgs(webapi.ReverseDirective) {
 		reverse = true
 	}
 	word := ps.scanWord()

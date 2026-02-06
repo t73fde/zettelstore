@@ -16,8 +16,8 @@ package webapi
 import (
 	"net/http"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
@@ -36,9 +36,9 @@ func (a *WebAPI) MakeUpdateZettelHandler(updateZettel *usecase.UpdateZettel) htt
 		q := r.URL.Query()
 		var zettel zettel.Zettel
 		switch enc, _ := getEncoding(r, q); enc {
-		case api.EncoderPlain:
+		case webapi.EncoderPlain:
 			zettel, err = buildZettelFromPlainData(r, zid)
-		case api.EncoderData:
+		case webapi.EncoderData:
 			zettel, err = buildZettelFromData(r, zid)
 		default:
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)

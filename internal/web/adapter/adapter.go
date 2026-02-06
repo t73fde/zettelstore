@@ -17,8 +17,8 @@ package adapter
 import (
 	"context"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/usecase"
 )
@@ -29,7 +29,7 @@ func TryReIndex(ctx context.Context, actions []string, metaSeq []*meta.Meta, reI
 		tempActions := make([]string, 0, lenActions)
 		hasReIndex := false
 		for _, act := range actions {
-			if !hasReIndex && act == api.ReIndexAction {
+			if !hasReIndex && act == webapi.ReIndexAction {
 				hasReIndex = true
 				var errAction error
 				for _, m := range metaSeq {

@@ -19,7 +19,7 @@ import (
 	"strconv"
 	"strings"
 
-	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/query"
@@ -43,10 +43,10 @@ func GetCredentialsViaForm(r *http.Request) (ident, cred string, ok bool) {
 
 // GetQuery retrieves the specified options from a query.
 func GetQuery(vals url.Values) (result *query.Query) {
-	if exprs, found := vals[api.QueryKeyQuery]; found {
+	if exprs, found := vals[webapi.QueryKeyQuery]; found {
 		result = query.Parse(strings.Join(exprs, " "))
 	}
-	if seeds, found := vals[api.QueryKeySeed]; found {
+	if seeds, found := vals[webapi.QueryKeySeed]; found {
 		for _, seed := range seeds {
 			if si, err := strconv.ParseInt(seed, 10, 31); err == nil {
 				result = result.SetSeed(int(si))

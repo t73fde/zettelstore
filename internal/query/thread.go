@@ -17,10 +17,10 @@ import (
 	"container/heap"
 	"context"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 )
 
 // ThreadSpec contains all information for a thread directive.
@@ -36,17 +36,17 @@ func (spec *ThreadSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
 	if spec.isFolge {
 		if spec.isSequel {
-			pe.writeString(api.ThreadDirective)
+			pe.writeString(webapi.ThreadDirective)
 		} else {
-			pe.writeString(api.FolgeDirective)
+			pe.writeString(webapi.FolgeDirective)
 		}
 	} else if spec.isSequel {
-		pe.writeString(api.SequelDirective)
+		pe.writeString(webapi.SequelDirective)
 	} else {
 		panic("neither folge nor sequel")
 	}
 	spec.directionSpec.print(pe)
-	pe.printPosInt(api.MaxDirective, spec.maxCount)
+	pe.printPosInt(webapi.MaxDirective, spec.maxCount)
 }
 
 // ThreadPort is the collection of box methods needed by this directive.

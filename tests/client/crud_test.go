@@ -18,10 +18,10 @@ import (
 	"strings"
 	"testing"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 )
 
 // ---------------------------------------------------------------------------
@@ -43,7 +43,7 @@ Example content.`
 		t.Error("Invalid zettel ID", zid)
 		return
 	}
-	data, err := c.GetZettel(context.Background(), zid, api.PartZettel)
+	data, err := c.GetZettel(context.Background(), zid, webapi.PartZettel)
 	if err != nil {
 		t.Error("Cannot read zettel", zid, err)
 		return
@@ -62,7 +62,7 @@ func TestCreateGetDeleteZettelDataCreator(t *testing.T) {
 	// Is not to be allowed to run in parallel with other tests.
 	c := getClient()
 	c.SetAuth("creator", "creator")
-	zid, err := c.CreateZettelData(context.Background(), api.ZettelData{
+	zid, err := c.CreateZettelData(context.Background(), webapi.ZettelData{
 		Meta:     nil,
 		Encoding: "",
 		Content:  "Example",
@@ -85,8 +85,8 @@ func TestCreateGetDeleteZettelData(t *testing.T) {
 	c := getClient()
 	c.SetAuth("owner", "owner")
 	wrongModified := "19691231115959"
-	zid, err := c.CreateZettelData(context.Background(), api.ZettelData{
-		Meta: api.ZettelMeta{
+	zid, err := c.CreateZettelData(context.Background(), webapi.ZettelData{
+		Meta: webapi.ZettelMeta{
 			meta.KeyTitle:    "A\nTitle", // \n must be converted into a space
 			meta.KeyModified: wrongModified,
 		},
@@ -113,7 +113,7 @@ func TestCreateGetDeleteZettelData(t *testing.T) {
 func TestUpdateZettel(t *testing.T) {
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	z, err := c.GetZettel(context.Background(), id.ZidDefaultHome, api.PartZettel)
+	z, err := c.GetZettel(context.Background(), id.ZidDefaultHome, webapi.PartZettel)
 	if err != nil {
 		t.Error(err)
 		return
@@ -132,7 +132,7 @@ Empty`
 		t.Error(err)
 		return
 	}
-	zt, err := c.GetZettel(context.Background(), id.ZidDefaultHome, api.PartZettel)
+	zt, err := c.GetZettel(context.Background(), id.ZidDefaultHome, webapi.PartZettel)
 	if err != nil {
 		t.Error(err)
 		return

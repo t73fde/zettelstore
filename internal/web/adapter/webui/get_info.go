@@ -21,10 +21,10 @@ import (
 
 	"t73f.de/r/sx"
 	zerostrings "t73f.de/r/zero/strings"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/auth"
@@ -71,7 +71,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		locLinks, extLinks, queryLinks := wui.getLocalExtQueryLinks(ucGetReferences, zn.Blocks)
 
 		title := sz.NormalizedSpacedText(zn.InhMeta.GetTitle())
-		phrase := q.Get(api.QueryKeyPhrase)
+		phrase := q.Get(webapi.QueryKeyPhrase)
 		if phrase == "" {
 			phrase = title
 		}
@@ -102,7 +102,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 		rb.bindString("ext-links", extLinks)
 		rb.bindString("unlinked-content", unlinkedContent)
 		rb.bindString("phrase", sx.MakeString(phrase))
-		rb.bindString("query-key-phrase", sx.MakeString(api.QueryKeyPhrase))
+		rb.bindString("query-key-phrase", sx.MakeString(webapi.QueryKeyPhrase))
 		rb.bindString("enc-eval", wui.infoAPIMatrix(zid, false, encTexts))
 		rb.bindString("enc-parsed", wui.infoAPIMatrixParsed(zid, encTexts))
 		rb.bindString("shadow-links", shadowLinks)
@@ -144,15 +144,15 @@ func createUnlinkedQuery(zid id.Zid, phrase string) *query.Query {
 	var sb strings.Builder
 	sb.Write(zid.Bytes())
 	sb.WriteByte(' ')
-	sb.WriteString(api.UnlinkedDirective)
+	sb.WriteString(webapi.UnlinkedDirective)
 	for word := range zerostrings.SplitWordSeq(phrase) {
 		sb.WriteByte(' ')
-		sb.WriteString(api.PhraseDirective)
+		sb.WriteString(webapi.PhraseDirective)
 		sb.WriteByte(' ')
 		sb.WriteString(word)
 	}
 	sb.WriteByte(' ')
-	sb.WriteString(api.OrderDirective)
+	sb.WriteString(webapi.OrderDirective)
 	sb.WriteByte(' ')
 	sb.WriteString(meta.KeyID)
 	return query.Parse(sb.String())
@@ -168,7 +168,7 @@ func encodingTexts() []string {
 	return encTexts
 }
 
-var apiParts = []string{api.PartZettel, api.PartMeta, api.PartContent}
+var apiParts = []string{webapi.PartZettel, webapi.PartMeta, webapi.PartContent}
 
 func (wui *WebUI) infoAPIMatrix(zid id.Zid, parseOnly bool, encTexts []string) *sx.Pair {
 	matrix := sx.Nil()
@@ -179,10 +179,10 @@ func (wui *WebUI) infoAPIMatrix(zid id.Zid, parseOnly bool, encTexts []string) *
 		for je := len(encTexts) - 1; je >= 0; je-- {
 			enc := encTexts[je]
 			if parseOnly {
-				u.AppendKVQuery(api.QueryKeyParseOnly, "")
+				u.AppendKVQuery(webapi.QueryKeyParseOnly, "")
 			}
-			u.AppendKVQuery(api.QueryKeyPart, part)
-			u.AppendKVQuery(api.QueryKeyEncoding, enc)
+			u.AppendKVQuery(webapi.QueryKeyPart, part)
+			u.AppendKVQuery(webapi.QueryKeyEncoding, enc)
 			row = row.Cons(sx.Cons(sx.MakeString(enc), sx.MakeString(u.String())))
 			u.ClearQuery()
 		}
@@ -202,12 +202,12 @@ func (wui *WebUI) infoAPIMatrixParsed(zid id.Zid, encTexts []string) *sx.Pair {
 		}
 		last := line.LastPair()
 		part := apiParts[i]
-		u.AppendKVQuery(api.QueryKeyPart, part)
+		u.AppendKVQuery(webapi.QueryKeyPart, part)
 		last = last.AppendBang(sx.Cons(sx.MakeString("plain"), sx.MakeString(u.String())))
 		u.ClearQuery()
 		if i < 2 {
-			u.AppendKVQuery(api.QueryKeyEncoding, api.EncodingData)
-			u.AppendKVQuery(api.QueryKeyPart, part)
+			u.AppendKVQuery(webapi.QueryKeyEncoding, webapi.EncodingData)
+			u.AppendKVQuery(webapi.QueryKeyPart, part)
 			last.AppendBang(sx.Cons(sx.MakeString("data"), sx.MakeString(u.String())))
 			u.ClearQuery()
 		}

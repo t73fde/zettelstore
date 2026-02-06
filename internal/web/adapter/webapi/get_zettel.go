@@ -20,10 +20,10 @@ import (
 	"net/http"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sexp"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
@@ -50,15 +50,15 @@ func (a *WebAPI) MakeGetZettelHandler(
 		part := getPart(q, partContent)
 		ctx := r.Context()
 		switch enc, encStr := getEncoding(r, q); enc {
-		case api.EncoderPlain:
+		case webapi.EncoderPlain:
 			a.writePlainData(ctx, w, zid, part, getZettel)
 
-		case api.EncoderData:
+		case webapi.EncoderData:
 			a.writeSzData(ctx, w, zid, part, getZettel)
 
 		default:
 			var zn *ast.Zettel
-			if q.Has(api.QueryKeyParseOnly) {
+			if q.Has(webapi.QueryKeyParseOnly) {
 				zn, err = parseZettel.Run(ctx, zid, q.Get(meta.KeySyntax))
 			} else {
 				zn, err = evaluate.Run(ctx, zid, q.Get(meta.KeySyntax))
@@ -122,7 +122,7 @@ func (a *WebAPI) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.
 	switch part {
 	case partZettel:
 		zContent, zEncoding := z.Content.Encode()
-		obj = sexp.EncodeZettel(api.ZettelData{
+		obj = sexp.EncodeZettel(webapi.ZettelData{
 			Meta:     z.Meta.Map(),
 			Rights:   a.getRights(ctx, z.Meta),
 			Encoding: zEncoding,
@@ -130,7 +130,7 @@ func (a *WebAPI) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.
 		})
 
 	case partMeta:
-		obj = sexp.EncodeMetaRights(api.MetaRights{
+		obj = sexp.EncodeMetaRights(webapi.MetaRights{
 			Meta:   z.Meta.Map(),
 			Rights: a.getRights(ctx, z.Meta),
 		})
@@ -143,7 +143,7 @@ func (a *WebAPI) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.
 func (a *WebAPI) writeEncodedZettelPart(
 	ctx context.Context,
 	w http.ResponseWriter, zn *ast.Zettel,
-	enc api.EncodingEnum, encStr string, part partType,
+	enc webapi.EncodingEnum, encStr string, part partType,
 ) {
 	encdr := encoder.Create(
 		enc,

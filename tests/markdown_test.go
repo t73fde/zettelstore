@@ -22,8 +22,8 @@ import (
 	"testing"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/encoder"
@@ -88,7 +88,7 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 }
 
 func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
-	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
+	zmkEncoder := encoder.Create(webapi.EncoderZmk, nil)
 	var buf bytes.Buffer
 	testID := tc.Example*100 + 1
 	t.Run(fmt.Sprintf("Encode zmk %14d", testID), func(st *testing.T) {
@@ -125,7 +125,7 @@ func TestAdditionalMarkdown(t *testing.T) {
 	}{
 		{`abc<br>def`, "abc``<br>``{=\"html\"}def"},
 	}
-	zmkEncoder := encoder.Create(api.EncoderZmk, nil)
+	zmkEncoder := encoder.Create(webapi.EncoderZmk, nil)
 	var sb strings.Builder
 	for i, tc := range testcases {
 		node := parseMD(tc.md)

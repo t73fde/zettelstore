@@ -17,7 +17,7 @@ import (
 	"context"
 	"net/http"
 
-	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/usecase"
 )
@@ -29,11 +29,11 @@ func (a *WebAPI) MakePostCommandHandler(
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		switch api.Command(r.URL.Query().Get(api.QueryKeyCommand)) {
-		case api.CommandAuthenticated:
+		switch webapi.Command(r.URL.Query().Get(webapi.QueryKeyCommand)) {
+		case webapi.CommandAuthenticated:
 			handleIsAuthenticated(ctx, w, ucIsAuth)
 			return
-		case api.CommandRefresh:
+		case webapi.CommandRefresh:
 			err := ucRefresh.Run(ctx)
 			if err != nil {
 				a.reportUsecaseError(w, err)

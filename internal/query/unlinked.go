@@ -15,8 +15,8 @@ package query
 
 import (
 	"t73f.de/r/zero/strings"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 )
 
 // UnlinkedSpec contains all specification values to calculate unlinked references.
@@ -27,9 +27,9 @@ type UnlinkedSpec struct {
 // Print the spec on the given print environment.
 func (spec *UnlinkedSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
-	pe.writeString(api.UnlinkedDirective)
+	pe.writeString(webapi.UnlinkedDirective)
 	for _, word := range spec.words {
-		pe.writeStrings(" ", api.PhraseDirective, " ", word)
+		pe.writeStrings(" ", webapi.PhraseDirective, " ", word)
 	}
 }
 

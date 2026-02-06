@@ -25,10 +25,10 @@ import (
 	"slices"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sexp"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/usecase"
@@ -64,7 +64,7 @@ func (a *WebAPI) MakeQueryHandler(
 		}
 		if len(actions) > 0 {
 			if len(metaSeq) > 0 {
-				if slices.Contains(actions, api.RedirectAction) {
+				if slices.Contains(actions, webapi.RedirectAction) {
 					zid := metaSeq[0].Zid
 					ub := a.NewURLBuilder('z').SetZid(zid)
 					a.redirectFound(w, r, ub, zid)
@@ -76,14 +76,14 @@ func (a *WebAPI) MakeQueryHandler(
 		var encoder zettelEncoder
 		var contentType string
 		switch enc, _ := getEncoding(r, urlQuery); enc {
-		case api.EncoderPlain:
+		case webapi.EncoderPlain:
 			encoder = &plainZettelEncoder{}
 			contentType = content.PlainText
 
-		case api.EncoderData:
+		case webapi.EncoderData:
 			encoder = &dataZettelEncoder{
 				sq:        sq,
-				getRights: func(m *meta.Meta) api.ZettelRights { return a.getRights(ctx, m) },
+				getRights: func(m *meta.Meta) webapi.ZettelRights { return a.getRights(ctx, m) },
 			}
 			contentType = content.SXPF
 
@@ -109,13 +109,13 @@ func queryAction(w io.Writer, enc zettelEncoder, ml []*meta.Meta, actions []stri
 	if len(actions) > 0 {
 		acts := make([]string, 0, len(actions))
 		for _, act := range actions {
-			if strings.HasPrefix(act, api.MinAction) {
+			if strings.HasPrefix(act, webapi.MinAction) {
 				if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
 					minVal = num
 					continue
 				}
 			}
-			if strings.HasPrefix(act, api.MaxAction) {
+			if strings.HasPrefix(act, webapi.MaxAction) {
 				if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
 					maxVal = num
 					continue
@@ -124,7 +124,7 @@ func queryAction(w io.Writer, enc zettelEncoder, ml []*meta.Meta, actions []stri
 			acts = append(acts, act)
 		}
 		for _, act := range acts {
-			if act == api.KeysAction {
+			if act == webapi.KeysAction {
 				return encodeKeysArrangement(w, enc, ml, act)
 			}
 			switch key := strings.ToLower(act); meta.Type(key) {
@@ -204,7 +204,7 @@ func (*plainZettelEncoder) writeArrangement(w io.Writer, _ string, arr meta.Arra
 
 type dataZettelEncoder struct {
 	sq        *query.Query
-	getRights func(*meta.Meta) api.ZettelRights
+	getRights func(*meta.Meta) webapi.ZettelRights
 }
 
 func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error {
@@ -216,7 +216,7 @@ func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error 
 	)
 	symID, symZettel := sx.MakeSymbol("id"), sx.MakeSymbol("zettel")
 	for _, m := range ml {
-		msz := sexp.EncodeMetaRights(api.MetaRights{
+		msz := sexp.EncodeMetaRights(webapi.MetaRights{
 			Meta:   m.Map(),
 			Rights: dze.getRights(m),
 		})
@@ -247,7 +247,7 @@ func (dze *dataZettelEncoder) writeArrangement(w io.Writer, act string, arr meta
 }
 
 func (a *WebAPI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel *usecase.TagZettel, vals url.Values) bool {
-	tag := vals.Get(api.QueryKeyTag)
+	tag := vals.Get(webapi.QueryKeyTag)
 	if tag == "" {
 		return false
 	}
@@ -260,7 +260,7 @@ func (a *WebAPI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZett
 	zid := z.Meta.Zid
 	newURL := a.NewURLBuilder('z').SetZid(zid)
 	for key, slVals := range vals {
-		if key == api.QueryKeyTag {
+		if key == webapi.QueryKeyTag {
 			continue
 		}
 		for _, val := range slVals {
@@ -272,7 +272,7 @@ func (a *WebAPI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZett
 }
 
 func (a *WebAPI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZettel *usecase.RoleZettel, vals url.Values) bool {
-	role := vals.Get(api.QueryKeyRole)
+	role := vals.Get(webapi.QueryKeyRole)
 	if role == "" {
 		return false
 	}
@@ -285,7 +285,7 @@ func (a *WebAPI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZe
 	zid := z.Meta.Zid
 	newURL := a.NewURLBuilder('z').SetZid(zid)
 	for key, slVals := range vals {
-		if key == api.QueryKeyRole {
+		if key == webapi.QueryKeyRole {
 			continue
 		}
 		for _, val := range slVals {
@@ -296,8 +296,8 @@ func (a *WebAPI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZe
 	return true
 }
 
-func (a *WebAPI) redirectFound(w http.ResponseWriter, r *http.Request, ub *api.URLBuilder, zid id.Zid) {
-	w.Header().Set(api.HeaderContentType, content.PlainText)
+func (a *WebAPI) redirectFound(w http.ResponseWriter, r *http.Request, ub *webapi.URLBuilder, zid id.Zid) {
+	w.Header().Set(webapi.HeaderContentType, content.PlainText)
 	http.Redirect(w, r, ub.String(), http.StatusFound)
 	if _, err := io.WriteString(w, zid.String()); err != nil {
 		a.logger.Error("redirect body", "err", err)

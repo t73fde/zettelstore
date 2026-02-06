@@ -26,9 +26,9 @@ import (
 	"t73f.de/r/sx/sxeval"
 	"t73f.de/r/sxwebs/sxhtml"
 	"t73f.de/r/zero/graph"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
@@ -200,7 +200,7 @@ func (wui *WebUI) getSimpleHTMLEncoder(lang string) *htmlGenerator {
 }
 
 // NewURLBuilder creates a new URL builder object with the given key.
-func (wui *WebUI) NewURLBuilder(key byte) *api.URLBuilder { return wui.ab.NewURLBuilder(key) }
+func (wui *WebUI) NewURLBuilder(key byte) *webapi.URLBuilder { return wui.ab.NewURLBuilder(key) }
 
 func (wui *WebUI) clearToken(ctx context.Context, w http.ResponseWriter) context.Context {
 	return wui.ab.ClearToken(ctx, w)

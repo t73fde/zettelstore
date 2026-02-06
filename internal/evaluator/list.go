@@ -22,9 +22,9 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/query"
@@ -47,23 +47,23 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (*sx.Pair
 
 	acts := make([]string, 0, len(actions))
 	for _, act := range actions {
-		if strings.HasPrefix(act, api.NumberedAction[0:1]) {
+		if strings.HasPrefix(act, webapi.NumberedAction[0:1]) {
 			ap.kind = zsx.SymListOrdered
 			continue
 		}
-		if strings.HasPrefix(act, api.MinAction) {
+		if strings.HasPrefix(act, webapi.MinAction) {
 			if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
 				ap.minVal = num
 				continue
 			}
 		}
-		if strings.HasPrefix(act, api.MaxAction) {
+		if strings.HasPrefix(act, webapi.MaxAction) {
 			if num, err := strconv.Atoi(act[3:]); err == nil && num > 0 {
 				ap.maxVal = num
 				continue
 			}
 		}
-		if act == api.ReIndexAction {
+		if act == webapi.ReIndexAction {
 			continue
 		}
 		acts = append(acts, act)
@@ -71,7 +71,7 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (*sx.Pair
 	var firstUnknowAct string
 	for _, act := range acts {
 		switch act {
-		case api.KeysAction:
+		case webapi.KeysAction:
 			return ap.createBlockNodeMetaKeys()
 		}
 		key := strings.ToLower(act)
@@ -198,10 +198,10 @@ func (ap *actionPara) createBlockNodeMetaKeys() (*sx.Pair, int) {
 	count := 0
 	for _, cat := range ccs {
 		buf.WriteString(string(cat.Name))
-		buf.WriteString(api.ExistOperator)
+		buf.WriteString(webapi.ExistOperator)
 		q1 := buf.String()
 		buf.Truncate(bufLen)
-		buf.WriteString(api.ActionSeparator)
+		buf.WriteString(webapi.ActionSeparator)
 		buf.WriteString(string(cat.Name))
 		q2 := buf.String()
 		buf.Truncate(bufLen)
@@ -255,7 +255,7 @@ func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.Coun
 
 	ap.prepareSimpleQuery(buf)
 	buf.WriteString(key)
-	buf.WriteString(api.SearchOperatorHas)
+	buf.WriteString(webapi.SearchOperatorHas)
 	bufLen := buf.Len()
 
 	return ccs, bufLen
@@ -264,9 +264,9 @@ func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.Coun
 func (ap *actionPara) prepareSimpleQuery(buf *bytes.Buffer) int {
 	sea := ap.q.Clone()
 	sea.RemoveActions()
-	buf.WriteString(api.QueryPrefix)
+	buf.WriteString(webapi.QueryPrefix)
 	sea.Print(buf)
-	if buf.Len() > len(api.QueryPrefix) {
+	if buf.Len() > len(webapi.QueryPrefix) {
 		buf.WriteByte(' ')
 	}
 	return buf.Len()

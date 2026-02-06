@@ -24,8 +24,8 @@ import (
 	"strings"
 	"testing"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
@@ -39,10 +39,10 @@ import (
 	_ "zettelstore.de/z/internal/box/dirbox"
 )
 
-var encodings = []api.EncodingEnum{
-	api.EncoderHTML,
-	api.EncoderSz,
-	api.EncoderText,
+var encodings = []webapi.EncodingEnum{
+	webapi.EncoderHTML,
+	webapi.EncoderSz,
+	webapi.EncoderText,
 }
 
 func getFileBoxes(wd, kind string) (root string, boxes []box.ManagedBox) {
@@ -125,7 +125,7 @@ func getBoxName(p box.ManagedBox, root string) string {
 	return u.Path[len(root):]
 }
 
-func checkMetaFile(t *testing.T, resultName string, zn *ast.Zettel, enc api.EncodingEnum) {
+func checkMetaFile(t *testing.T, resultName string, zn *ast.Zettel, enc webapi.EncodingEnum) {
 	t.Helper()
 
 	if enc := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN}); enc != nil {

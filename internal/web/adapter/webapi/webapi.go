@@ -21,8 +21,8 @@ import (
 	"net/http"
 	"time"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/config"
@@ -60,7 +60,7 @@ func New(logger *slog.Logger, b server.Builder, authz auth.AuthzManager, token a
 }
 
 // NewURLBuilder creates a new URL builder object with the given key.
-func (a *WebAPI) NewURLBuilder(key byte) *api.URLBuilder { return a.b.NewURLBuilder(key) }
+func (a *WebAPI) NewURLBuilder(key byte) *webapi.URLBuilder { return a.b.NewURLBuilder(key) }
 
 func (a *WebAPI) getAuthData(ctx context.Context) *auth.UserData {
 	return auth.GetAuthData(ctx)
@@ -85,23 +85,23 @@ func writeBuffer(w http.ResponseWriter, buf *bytes.Buffer, contentType string) e
 	return adapter.WriteData(w, buf.Bytes(), contentType)
 }
 
-func (a *WebAPI) getRights(ctx context.Context, m *meta.Meta) (result api.ZettelRights) {
+func (a *WebAPI) getRights(ctx context.Context, m *meta.Meta) (result webapi.ZettelRights) {
 	pol := a.policy
 	user := auth.GetCurrentUser(ctx)
 	if pol.CanCreate(user, m) {
-		result |= api.ZettelCanCreate
+		result |= webapi.ZettelCanCreate
 	}
 	if pol.CanRead(user, m) {
-		result |= api.ZettelCanRead
+		result |= webapi.ZettelCanRead
 	}
 	if pol.CanWrite(user, m, m) {
-		result |= api.ZettelCanWrite
+		result |= webapi.ZettelCanWrite
 	}
 	if pol.CanDelete(user, m) {
-		result |= api.ZettelCanDelete
+		result |= webapi.ZettelCanDelete
 	}
 	if result == 0 {
-		return api.ZettelCanNone
+		return webapi.ZettelCanNone
 	}
 	return result
 }

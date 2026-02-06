@@ -17,8 +17,8 @@ import (
 	"net/http"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
@@ -35,9 +35,9 @@ func (a *WebAPI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel)
 		var zettel zettel.Zettel
 		var err error
 		switch enc {
-		case api.EncoderPlain:
+		case webapi.EncoderPlain:
 			zettel, err = buildZettelFromPlainData(r, id.Invalid)
-		case api.EncoderData:
+		case webapi.EncoderData:
 			zettel, err = buildZettelFromData(r, id.Invalid)
 		default:
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -59,10 +59,10 @@ func (a *WebAPI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel)
 		var contentType string
 		location := a.NewURLBuilder('z').SetZid(newZid)
 		switch enc {
-		case api.EncoderPlain:
+		case webapi.EncoderPlain:
 			result = newZid.Bytes()
 			contentType = content.PlainText
-		case api.EncoderData:
+		case webapi.EncoderData:
 			result = []byte(sx.Int64(newZid).String())
 			contentType = content.SXPF
 		default:
@@ -70,7 +70,7 @@ func (a *WebAPI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel)
 		}
 
 		h := adapter.PrepareHeader(w, contentType)
-		h.Set(api.HeaderLocation, location.String())
+		h.Set(webapi.HeaderLocation, location.String())
 		w.WriteHeader(http.StatusCreated)
 		if _, err = w.Write(result); err != nil {
 			a.logger.Error("Create zettel", "err", err, "zid", newZid)

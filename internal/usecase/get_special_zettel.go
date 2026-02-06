@@ -16,9 +16,9 @@ package usecase
 import (
 	"context"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
@@ -48,8 +48,8 @@ func NewTagZettel(port GetZettelPort, query *Query) TagZettel {
 // Run executes the use case.
 func (uc TagZettel) Run(ctx context.Context, tag meta.Value) (zettel.Zettel, error) {
 	tag = tag.NormalizeTag()
-	const qFindTag = " " + meta.KeyRole + api.SearchOperatorEqual + meta.ValueRoleTag
-	q := query.Parse(meta.KeyTitle + api.SearchOperatorEqual + string(tag) + qFindTag)
+	const qFindTag = " " + meta.KeyRole + webapi.SearchOperatorEqual + meta.ValueRoleTag
+	q := query.Parse(meta.KeyTitle + webapi.SearchOperatorEqual + string(tag) + qFindTag)
 	ml, err := uc.query.Run(ctx, q)
 	if err != nil {
 		return zettel.Zettel{}, err
@@ -91,8 +91,8 @@ func NewRoleZettel(port GetZettelPort, query *Query) RoleZettel {
 
 // Run executes the use case.
 func (uc RoleZettel) Run(ctx context.Context, role meta.Value) (zettel.Zettel, error) {
-	const qFindRole = " " + meta.KeyRole + api.SearchOperatorEqual + meta.ValueRoleRole
-	q := query.Parse(meta.KeyTitle + api.SearchOperatorEqual + string(role) + qFindRole)
+	const qFindRole = " " + meta.KeyRole + webapi.SearchOperatorEqual + meta.ValueRoleRole
+	q := query.Parse(meta.KeyTitle + webapi.SearchOperatorEqual + string(role) + qFindRole)
 	ml, err := uc.query.Run(ctx, q)
 	if err != nil {
 		return zettel.Zettel{}, err

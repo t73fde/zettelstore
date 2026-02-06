@@ -19,7 +19,7 @@ import (
 	"net/http"
 	"strings"
 
-	"t73f.de/r/zsc/api"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/usecase"
@@ -41,7 +41,7 @@ func WriteData(w http.ResponseWriter, data []byte, contentType string) error {
 func PrepareHeader(w http.ResponseWriter, contentType string) http.Header {
 	h := w.Header()
 	if contentType != "" {
-		h.Set(api.HeaderContentType, contentType)
+		h.Set(webapi.HeaderContentType, contentType)
 	}
 	return h
 }

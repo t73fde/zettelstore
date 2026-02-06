@@ -23,8 +23,8 @@ import (
 	"t73f.de/r/webs/middleware"
 	"t73f.de/r/webs/middleware/logging"
 	"t73f.de/r/webs/middleware/reqid"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/auth"
 )
@@ -106,11 +106,11 @@ func (srv *webServer) SetUserRetriever(ur UserRetriever) {
 	srv.router.ur = ur
 }
 
-func (srv *webServer) NewURLBuilder(key byte) *api.URLBuilder {
-	return api.NewURLBuilder(srv.router.urlPrefix, key)
+func (srv *webServer) NewURLBuilder(key byte) *webapi.URLBuilder {
+	return webapi.NewURLBuilder(srv.router.urlPrefix, key)
 }
-func (srv *webServer) NewURLBuilderAbs(key byte) *api.URLBuilder {
-	return api.NewURLBuilder(srv.baseURL, key)
+func (srv *webServer) NewURLBuilderAbs(key byte) *webapi.URLBuilder {
+	return webapi.NewURLBuilder(srv.baseURL, key)
 }
 
 const sessionName = "zsession"

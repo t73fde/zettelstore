@@ -20,11 +20,11 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/sxwebs/sxhtml"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/usecase"
@@ -128,19 +128,19 @@ func (wui *WebUI) transformTagSet(key string, tags []string) *sx.Pair {
 }
 
 func (wui *WebUI) transformKeyValueText(key string, value meta.Value, text string) *sx.Pair {
-	ub := wui.NewURLBuilder('h').AppendQuery(key + api.SearchOperatorHas + string(value))
+	ub := wui.NewURLBuilder('h').AppendQuery(key + webapi.SearchOperatorHas + string(value))
 	return buildHref(ub, text)
 }
 
 func (wui *WebUI) transformKeyValuesText(key string, values []string, text string) *sx.Pair {
 	ub := wui.NewURLBuilder('h')
 	for _, val := range values {
-		ub = ub.AppendQuery(key + api.SearchOperatorHas + val)
+		ub = ub.AppendQuery(key + webapi.SearchOperatorHas + val)
 	}
 	return buildHref(ub, text)
 }
 
-func buildHref(ub *api.URLBuilder, text string) *sx.Pair {
+func buildHref(ub *webapi.URLBuilder, text string) *sx.Pair {
 	return sx.MakeList(
 		shtml.SymA,
 		sx.MakeList(sx.Cons(shtml.SymAttrHref, sx.MakeString(ub.String()))),

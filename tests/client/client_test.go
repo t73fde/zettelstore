@@ -25,10 +25,10 @@ import (
 	"strconv"
 	"testing"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/client"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 	"zettelstore.de/z/internal/kernel"
 )
 
@@ -91,7 +91,7 @@ func TestListZettel(t *testing.T) {
 			}
 		})
 	}
-	search := meta.KeyRole + api.SearchOperatorHas + meta.ValueRoleConfiguration + " ORDER id"
+	search := meta.KeyRole + webapi.SearchOperatorHas + meta.ValueRoleConfiguration + " ORDER id"
 	q, h, l, err := c.QueryZettelData(context.Background(), search)
 	if err != nil {
 		t.Error(err)
@@ -118,7 +118,7 @@ func TestListZettel(t *testing.T) {
 	compareZettelList(t, pl, l)
 }
 
-func compareZettelList(t *testing.T, pl [][]byte, l []api.ZidMetaRights) {
+func compareZettelList(t *testing.T, pl [][]byte, l []webapi.ZidMetaRights) {
 	t.Helper()
 	if len(pl) != len(l) {
 		t.Errorf("Different list length: Plain=%d, Data=%d", len(pl), len(l))
@@ -153,7 +153,7 @@ func TestGetZettelData(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if mr.Rights == api.ZettelCanNone {
+	if mr.Rights == webapi.ZettelCanNone {
 		t.Error("rights must be greater zero")
 	}
 	if len(mr.Meta) != len(z.Meta) {
@@ -176,10 +176,10 @@ func TestGetParsedEvaluatedZettel(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	encodings := []api.EncodingEnum{
-		api.EncoderHTML,
-		api.EncoderSz,
-		api.EncoderText,
+	encodings := []webapi.EncodingEnum{
+		webapi.EncoderHTML,
+		webapi.EncoderSz,
+		webapi.EncoderText,
 	}
 	for _, enc := range encodings {
 		content, err := c.GetParsedZettel(context.Background(), id.ZidDefaultHome, enc)
@@ -201,7 +201,7 @@ func TestGetParsedEvaluatedZettel(t *testing.T) {
 	}
 }
 
-func checkListZid(t *testing.T, l []api.ZidMetaRights, pos int, expected id.Zid) {
+func checkListZid(t *testing.T, l []webapi.ZidMetaRights, pos int, expected id.Zid) {
 	t.Helper()
 	if got := l[pos].ID; got != expected {
 		t.Errorf("Expected result[%d]=%v, but got %v", pos, expected, got)
@@ -212,7 +212,7 @@ func TestGetZettelOrder(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	_, _, metaSeq, err := c.QueryZettelData(context.Background(), id.ZidTOCNewTemplate.String()+" "+api.ItemsDirective)
+	_, _, metaSeq, err := c.QueryZettelData(context.Background(), id.ZidTOCNewTemplate.String()+" "+webapi.ItemsDirective)
 	if err != nil {
 		t.Error(err)
 		return
@@ -271,7 +271,7 @@ func TestGetUnlinkedReferences(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	_, _, metaSeq, err := c.QueryZettelData(context.Background(), id.ZidDefaultHome.String()+" "+api.UnlinkedDirective)
+	_, _, metaSeq, err := c.QueryZettelData(context.Background(), id.ZidDefaultHome.String()+" "+webapi.UnlinkedDirective)
 	if err != nil {
 		t.Error(err)
 		return
@@ -304,19 +304,19 @@ func TestGetReferences(t *testing.T) {
 
 func TestExecuteCommand(t *testing.T) {
 	c := getClient()
-	err := c.ExecuteCommand(context.Background(), api.Command("xyz"))
+	err := c.ExecuteCommand(context.Background(), webapi.Command("xyz"))
 	failNoErrorOrNoCode(t, err, http.StatusBadRequest)
-	err = c.ExecuteCommand(context.Background(), api.CommandAuthenticated)
+	err = c.ExecuteCommand(context.Background(), webapi.CommandAuthenticated)
 	failNoErrorOrNoCode(t, err, http.StatusUnauthorized)
-	err = c.ExecuteCommand(context.Background(), api.CommandRefresh)
+	err = c.ExecuteCommand(context.Background(), webapi.CommandRefresh)
 	failNoErrorOrNoCode(t, err, http.StatusForbidden)
 
 	c.SetAuth("owner", "owner")
-	err = c.ExecuteCommand(context.Background(), api.CommandAuthenticated)
+	err = c.ExecuteCommand(context.Background(), webapi.CommandAuthenticated)
 	if err != nil {
 		t.Error(err)
 	}
-	err = c.ExecuteCommand(context.Background(), api.CommandRefresh)
+	err = c.ExecuteCommand(context.Background(), webapi.CommandRefresh)
 	if err != nil {
 		t.Error(err)
 	}
@@ -340,7 +340,7 @@ func TestListTags(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	agg, err := c.QueryAggregate(context.Background(), api.ActionSeparator+meta.KeyTags)
+	agg, err := c.QueryAggregate(context.Background(), webapi.ActionSeparator+meta.KeyTags)
 	if err != nil {
 		t.Error(err)
 		return
@@ -395,7 +395,7 @@ func TestListRoles(t *testing.T) {
 	t.Parallel()
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	agg, err := c.QueryAggregate(context.Background(), api.ActionSeparator+meta.KeyRole)
+	agg, err := c.QueryAggregate(context.Background(), webapi.ActionSeparator+meta.KeyRole)
 	if err != nil {
 		t.Error(err)
 		return
@@ -435,7 +435,7 @@ func TestRoleZettel(t *testing.T) {
 func TestRedirect(t *testing.T) {
 	t.Parallel()
 	c := getClient()
-	search := "emoji" + api.ActionSeparator + api.RedirectAction
+	search := "emoji" + webapi.ActionSeparator + webapi.RedirectAction
 	ub := c.NewURLBuilder('z').AppendQuery(search)
 	respRedirect, err := http.Get(ub.String())
 	if err != nil {

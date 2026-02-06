@@ -19,8 +19,8 @@ import (
 	"testing"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/encoder"
@@ -36,16 +36,16 @@ type zmkTestCase struct {
 	expect    expectMap
 }
 
-type expectMap map[api.EncodingEnum]string
+type expectMap map[webapi.EncodingEnum]string
 
 const useZmk = "\000"
 const (
-	encoderHTML  = api.EncoderHTML
-	encoderMD    = api.EncoderMD
-	encoderSz    = api.EncoderSz
-	encoderSHTML = api.EncoderSHTML
-	encoderText  = api.EncoderText
-	encoderZmk   = api.EncoderZmk
+	encoderHTML  = webapi.EncoderHTML
+	encoderMD    = webapi.EncoderMD
+	encoderSz    = webapi.EncoderSz
+	encoderSHTML = webapi.EncoderSHTML
+	encoderText  = webapi.EncoderText
+	encoderZmk   = webapi.EncoderZmk
 )
 
 func TestEncoder(t *testing.T) {
@@ -85,7 +85,7 @@ func checkEncodings(t *testing.T, testNum int, node *sx.Pair, isInline bool, des
 			t.Errorf("%s\nEncoder:  %s\nError:    %v", prefix, enc, err)
 			continue
 		}
-		if enc == api.EncoderZmk && exp == useZmk {
+		if enc == encoderZmk && exp == useZmk {
 			exp = zmkDefault
 		}
 		if got != exp {

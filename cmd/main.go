@@ -27,9 +27,9 @@ import (
 	"strings"
 	"time"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/auth"
@@ -83,7 +83,7 @@ func init() {
 		Name: "file",
 		Func: cmdFile,
 		SetFlags: func(fs *flag.FlagSet) {
-			fs.String("t", api.EncoderHTML.String(), "target output encoding")
+			fs.String("t", webapi.EncoderHTML.String(), "target output encoding")
 		},
 	})
 	RegisterCommand(Command{

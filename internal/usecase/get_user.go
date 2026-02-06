@@ -16,9 +16,9 @@ package usecase
 import (
 	"context"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
@@ -58,7 +58,7 @@ func (uc GetUser) Run(ctx context.Context, ident string) (*meta.Meta, error) {
 		return identZettel.Meta, nil
 	}
 	// Owner was not found or has another ident. Try via list search.
-	q := query.Parse(meta.KeyUserID + api.SearchOperatorHas + ident + " " + api.SearchOperatorHas + ident)
+	q := query.Parse(meta.KeyUserID + webapi.SearchOperatorHas + ident + " " + webapi.SearchOperatorHas + ident)
 	metaList, err := uc.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		return nil, err

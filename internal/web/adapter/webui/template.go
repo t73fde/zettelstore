@@ -27,12 +27,12 @@ import (
 	"t73f.de/r/sx/sxeval"
 	"t73f.de/r/sx/sxreader"
 	"t73f.de/r/sxwebs/sxhtml"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsc/sz/zmk"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
@@ -192,8 +192,8 @@ func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title
 	}
 	rb.bindString("new-zettel-links", wui.fetchNewTemplatesSxn(ctx, user))
 	rb.bindString("search-url", sx.MakeString(wui.searchURL))
-	rb.bindString("query-key-query", sx.MakeString(api.QueryKeyQuery))
-	rb.bindString("query-key-seed", sx.MakeString(api.QueryKeySeed))
+	rb.bindString("query-key-query", sx.MakeString(webapi.QueryKeyQuery))
+	rb.bindString("query-key-seed", sx.MakeString(webapi.QueryKeySeed))
 	rb.bindString("FOOTER", wui.calculateFooterSxn(ctx)) // TODO: use real footer
 	rb.bindString("debug-mode", sx.MakeBoolean(wui.debug))
 	rb.bindSymbol(symMetaHeader, sx.Nil())
@@ -321,23 +321,23 @@ func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, us
 	if val, found := m.Get(meta.KeyUselessFiles); found {
 		rb.bindString("useless", sx.Cons(sx.MakeString(string(val)), nil))
 	}
-	wui.bindQueryURL(rb, strZid, "context-url", api.ContextDirective)
-	wui.bindQueryURL(rb, strZid, "context-full-url", api.ContextDirective+" "+api.FullDirective)
+	wui.bindQueryURL(rb, strZid, "context-url", webapi.ContextDirective)
+	wui.bindQueryURL(rb, strZid, "context-full-url", webapi.ContextDirective+" "+webapi.FullDirective)
 	canFolgeQuery := m.Has(meta.KeyPrecursor) || m.Has(meta.KeyFolge)
 	canSequelQuery := m.Has(meta.KeyPrequel) || m.Has(meta.KeySequel)
 	if canFolgeQuery || canSequelQuery {
-		wui.bindQueryURL(rb, strZid, "thread-query-url", api.ThreadDirective)
+		wui.bindQueryURL(rb, strZid, "thread-query-url", webapi.ThreadDirective)
 		if canFolgeQuery {
-			wui.bindQueryURL(rb, strZid, "folge-query-url", api.FolgeDirective)
+			wui.bindQueryURL(rb, strZid, "folge-query-url", webapi.FolgeDirective)
 		}
 		if canSequelQuery {
-			wui.bindQueryURL(rb, strZid, "sequel-query-url", api.SequelDirective)
+			wui.bindQueryURL(rb, strZid, "sequel-query-url", webapi.SequelDirective)
 		}
 	}
 
 	if wui.canRefresh(user) {
 		rb.bindString("reindex-url", sx.MakeString(newURLBuilder('h').AppendQuery(
-			strZid+" "+api.IdentDirective+api.ActionSeparator+api.ReIndexAction).String()))
+			strZid+" "+webapi.IdentDirective+webapi.ActionSeparator+webapi.ReIndexAction).String()))
 	}
 
 	// Ensure to have title, role, tags, and syntax included as "meta-*"
@@ -358,7 +358,7 @@ func (wui *WebUI) bindCreateURL(rb *renderBinder, zid id.Zid, symName, actionNam
 }
 func (wui *WebUI) bindQueryURL(rb *renderBinder, strZid, symName, directive string) {
 	rb.bindString(symName,
-		sx.MakeString(wui.NewURLBuilder('h').AppendQuery(strZid+" "+directive+" "+api.DirectedDirective).String()))
+		sx.MakeString(wui.NewURLBuilder('h').AppendQuery(strZid+" "+directive+" "+webapi.DirectedDirective).String()))
 }
 
 func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {

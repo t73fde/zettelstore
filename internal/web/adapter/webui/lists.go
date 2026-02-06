@@ -22,10 +22,10 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/auth"
@@ -60,7 +60,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			return
 		}
 		if len(metaSeq) > 0 {
-			if slices.Contains(actions, api.RedirectAction) {
+			if slices.Contains(actions, webapi.RedirectAction) {
 				ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid)
 				wui.redirectFound(w, r, ub)
 				return
@@ -117,13 +117,13 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		apiURL := wui.NewURLBuilder('z').AppendQuery(q.String())
 		seed, found := q.GetSeed()
 		if found {
-			apiURL = apiURL.AppendKVQuery(api.QueryKeySeed, strconv.Itoa(seed))
+			apiURL = apiURL.AppendKVQuery(webapi.QueryKeySeed, strconv.Itoa(seed))
 		} else {
 			seed = 0
 		}
 		if len(metaSeq) > 0 {
 			rb.bindString("plain-url", sx.MakeString(apiURL.String()))
-			rb.bindString("data-url", sx.MakeString(apiURL.AppendKVQuery(api.QueryKeyEncoding, api.EncodingData).String()))
+			rb.bindString("data-url", sx.MakeString(apiURL.AppendKVQuery(webapi.QueryKeyEncoding, webapi.EncodingData).String()))
 			if wui.canCreate(ctx, user) {
 				rb.bindString("create-url", sx.MakeString(wui.createNewURL))
 				rb.bindString("seed", sx.Int64(seed))
@@ -145,7 +145,7 @@ func (wui *WebUI) transformTagZettelList(ctx context.Context, tagZettel *usecase
 	for _, tag := range tags {
 		tag = tag.NormalizeTag()
 		if _, err := tagZettel.Run(ctx, tag); err == nil {
-			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyTag, string(tag))
+			u := wui.NewURLBuilder('h').AppendKVQuery(webapi.QueryKeyTag, string(tag))
 			withZettel = wui.prependZettelLink(withZettel, string(tag), u)
 		} else {
 			u := wui.NewURLBuilder('c').SetZid(id.ZidTemplateNewTag).AppendKVQuery(
@@ -160,7 +160,7 @@ func (wui *WebUI) transformRoleZettelList(ctx context.Context, roleZettel *useca
 	slices.Reverse(roles)
 	for _, role := range roles {
 		if _, err := roleZettel.Run(ctx, role); err == nil {
-			u := wui.NewURLBuilder('h').AppendKVQuery(api.QueryKeyRole, string(role))
+			u := wui.NewURLBuilder('h').AppendKVQuery(webapi.QueryKeyRole, string(role))
 			withZettel = wui.prependZettelLink(withZettel, string(role), u)
 		} else {
 			u := wui.NewURLBuilder('c').SetZid(id.ZidTemplateNewRole).AppendKVQuery(
@@ -171,7 +171,7 @@ func (wui *WebUI) transformRoleZettelList(ctx context.Context, roleZettel *useca
 	return withZettel, withoutZettel
 }
 
-func (wui *WebUI) prependZettelLink(sxZtl *sx.Pair, name string, u *api.URLBuilder) *sx.Pair {
+func (wui *WebUI) prependZettelLink(sxZtl *sx.Pair, name string, u *webapi.URLBuilder) *sx.Pair {
 	link := sx.MakeList(
 		shtml.SymA,
 		sx.MakeList(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String()))),
@@ -184,7 +184,7 @@ func (wui *WebUI) prependZettelLink(sxZtl *sx.Pair, name string, u *api.URLBuild
 }
 
 func (wui *WebUI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZettel *usecase.TagZettel, vals url.Values) bool {
-	tag := vals.Get(api.QueryKeyTag)
+	tag := vals.Get(webapi.QueryKeyTag)
 	if tag == "" {
 		return false
 	}
@@ -199,7 +199,7 @@ func (wui *WebUI) handleTagZettel(w http.ResponseWriter, r *http.Request, tagZet
 }
 
 func (wui *WebUI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZettel *usecase.RoleZettel, vals url.Values) bool {
-	role := vals.Get(api.QueryKeyRole)
+	role := vals.Get(webapi.QueryKeyRole)
 	if role == "" {
 		return false
 	}

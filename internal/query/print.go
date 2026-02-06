@@ -20,27 +20,27 @@ import (
 	"strconv"
 	"strings"
 
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 )
 
 var op2string = map[compareOp]string{
-	cmpExist:     api.ExistOperator,
-	cmpNotExist:  api.ExistNotOperator,
-	cmpEqual:     api.SearchOperatorEqual,
-	cmpNotEqual:  api.SearchOperatorNotEqual,
-	cmpHas:       api.SearchOperatorHas,
-	cmpHasNot:    api.SearchOperatorHasNot,
-	cmpPrefix:    api.SearchOperatorPrefix,
-	cmpNoPrefix:  api.SearchOperatorNoPrefix,
-	cmpSuffix:    api.SearchOperatorSuffix,
-	cmpNoSuffix:  api.SearchOperatorNoSuffix,
-	cmpMatch:     api.SearchOperatorMatch,
-	cmpNoMatch:   api.SearchOperatorNoMatch,
-	cmpLess:      api.SearchOperatorLess,
-	cmpNoLess:    api.SearchOperatorNotLess,
-	cmpGreater:   api.SearchOperatorGreater,
-	cmpNoGreater: api.SearchOperatorNotGreater,
+	cmpExist:     webapi.ExistOperator,
+	cmpNotExist:  webapi.ExistNotOperator,
+	cmpEqual:     webapi.SearchOperatorEqual,
+	cmpNotEqual:  webapi.SearchOperatorNotEqual,
+	cmpHas:       webapi.SearchOperatorHas,
+	cmpHasNot:    webapi.SearchOperatorHasNot,
+	cmpPrefix:    webapi.SearchOperatorPrefix,
+	cmpNoPrefix:  webapi.SearchOperatorNoPrefix,
+	cmpSuffix:    webapi.SearchOperatorSuffix,
+	cmpNoSuffix:  webapi.SearchOperatorNoSuffix,
+	cmpMatch:     webapi.SearchOperatorMatch,
+	cmpNoMatch:   webapi.SearchOperatorNoMatch,
+	cmpLess:      webapi.SearchOperatorLess,
+	cmpNoLess:    webapi.SearchOperatorNotLess,
+	cmpGreater:   webapi.SearchOperatorGreater,
+	cmpNoGreater: webapi.SearchOperatorNotGreater,
 }
 
 func (q *Query) String() string {
@@ -69,7 +69,7 @@ func (q *Query) Print(w io.Writer) {
 			if op := term.keys[name]; op == cmpExist || op == cmpNotExist {
 				env.writeString(op2string[op])
 			} else {
-				env.writeStrings(api.ExistOperator, " ", name, api.ExistNotOperator)
+				env.writeStrings(webapi.ExistOperator, " ", name, webapi.ExistNotOperator)
 			}
 		}
 		for _, name := range slices.Sorted(maps.Keys(term.mvals)) {
@@ -79,10 +79,10 @@ func (q *Query) Print(w io.Writer) {
 			env.printExprValues("", term.search)
 		}
 	}
-	env.printPosInt(api.PickDirective, q.pick)
+	env.printPosInt(webapi.PickDirective, q.pick)
 	env.printOrder(q.order)
-	env.printPosInt(api.OffsetDirective, q.offset)
-	env.printPosInt(api.LimitDirective, q.limit)
+	env.printPosInt(webapi.OffsetDirective, q.offset)
+	env.printPosInt(webapi.LimitDirective, q.limit)
 	env.printActions(q.actions)
 }
 
@@ -127,15 +127,15 @@ func (pe *PrintEnv) printExprValues(key string, values []expValue) {
 			// An empty key signals a full-text search. Since "~" is the default op in this case,
 			// it can be ignored. Therefore, print only "~" if there is a key.
 			if key != "" {
-				pe.writeString(api.SearchOperatorMatch)
+				pe.writeString(webapi.SearchOperatorMatch)
 			}
 		case cmpNoMatch:
 			// An empty key signals a full-text search. Since "!" is the shortcut for "!~",
 			// it can be ignored. Therefore, print only "!~" if there is a key.
 			if key == "" {
-				pe.writeString(api.SearchOperatorNot)
+				pe.writeString(webapi.SearchOperatorNot)
 			} else {
-				pe.writeString(api.SearchOperatorNoMatch)
+				pe.writeString(webapi.SearchOperatorNoMatch)
 			}
 		default:
 			if s, found := op2string[op]; found {
@@ -205,10 +205,10 @@ func (q *Query) PrintHuman(w io.Writer) {
 		}
 	}
 
-	env.printPosInt(api.PickDirective, q.pick)
+	env.printPosInt(webapi.PickDirective, q.pick)
 	env.printOrder(q.order)
-	env.printPosInt(api.OffsetDirective, q.offset)
-	env.printPosInt(api.LimitDirective, q.limit)
+	env.printPosInt(webapi.OffsetDirective, q.offset)
+	env.printPosInt(webapi.LimitDirective, q.limit)
 	env.printActions(q.actions)
 }
 
@@ -266,14 +266,14 @@ func (pe *PrintEnv) printOrder(order []sortOrder) {
 	for _, o := range order {
 		if o.isRandom() {
 			pe.printSpace()
-			pe.writeString(api.RandomDirective)
+			pe.writeString(webapi.RandomDirective)
 			continue
 		}
 		pe.printSpace()
-		pe.writeString(api.OrderDirective)
+		pe.writeString(webapi.OrderDirective)
 		if o.descending {
 			pe.printSpace()
-			pe.writeString(api.ReverseDirective)
+			pe.writeString(webapi.ReverseDirective)
 		}
 		pe.printSpace()
 		pe.writeString(o.key)

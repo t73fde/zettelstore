@@ -21,11 +21,11 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/set"
-	"t73f.de/r/zsc/api"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/ast"
@@ -33,7 +33,7 @@ import (
 
 // Builder allows to build new URLs for the web service.
 type urlBuilder interface {
-	NewURLBuilder(key byte) *api.URLBuilder
+	NewURLBuilder(key byte) *webapi.URLBuilder
 }
 
 type htmlGenerator struct {
@@ -103,11 +103,11 @@ func (wui *WebUI) createGenerator(builder urlBuilder, lang string) *htmlGenerato
 				return obj
 			}
 			urlQuery := ur.Query()
-			if !urlQuery.Has(api.QueryKeyQuery) {
+			if !urlQuery.Has(webapi.QueryKeyQuery) {
 				return obj
 			}
 			u := builder.NewURLBuilder('h')
-			if q := urlQuery.Get(api.QueryKeyQuery); q != "" {
+			if q := urlQuery.Get(webapi.QueryKeyQuery); q != "" {
 				u = u.AppendQuery(q)
 			}
 			assoc = assoc.Cons(sx.Cons(shtml.SymAttrHref, sx.MakeString(u.String())))
