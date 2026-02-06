@@ -85,14 +85,16 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		}
 		rb.bindString("tag-refs", wui.transformTagSet(meta.KeyTags, zn.InhMeta.GetDefault(meta.KeyTags, "").AsSlice()))
 		rb.bindString("precursor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrecursor, getTextTitle))
+		rb.bindString("predecessor-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPredecessor, getTextTitle))
 		rb.bindString("prequel-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeyPrequel, getTextTitle))
-		rb.bindString("superior-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeySuperior, getTextTitle))
+		rb.bindString("superordinate-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeySuperordinate, getTextTitle))
 		rb.bindString("urls", metaURLAssoc(zn.InhMeta))
 		rb.bindString("content", content)
 		rb.bindString("endnotes", endnotes)
 		wui.bindLinks(ctx, &rb, "folge", zn.InhMeta, meta.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinates, config.KeyShowSubordinateLinks, getTextTitle)
+		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinate, "", getTextTitle)
+		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, meta.KeySuccessor, "", getTextTitle)
 		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
 		rb.bindRoleSpecific(zn.InhMeta)
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, title, &zn.Content)
@@ -125,14 +127,15 @@ func metaURLAssoc(m *meta.Meta) *sx.Pair {
 
 func (wui *WebUI) bindLinks(ctx context.Context, rb *renderBinder, varPrefix string, m *meta.Meta, key, configKey string, getTextTitle getTextTitleFunc) {
 	varLinks := varPrefix + "-links"
-	var symOpen *sx.Symbol
-	switch wui.getConfig(ctx, m, configKey) {
-	case "false":
-		rb.bindString(varLinks, sx.Nil())
-		return
-	case "close":
-	default:
-		symOpen = shtml.SymAttrOpen
+	var symOpen sx.Object = shtml.SymAttrOpen
+	if configKey != "" {
+		switch wui.getConfig(ctx, m, configKey) {
+		case "false":
+			rb.bindString(varLinks, sx.Nil())
+			return
+		case "close":
+			symOpen = sx.Nil()
+		}
 	}
 	lstLinks := wui.zettelLinksSxn(m, key, getTextTitle)
 	rb.bindString(varLinks, lstLinks)

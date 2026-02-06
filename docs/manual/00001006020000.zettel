@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218190051
+modified: 20260206155829
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -81,6 +81,9 @@ Most keys conform to a [[type|00001006030000]].
 ; [!precursor|''precursor'']
 : References zettel for which this zettel is a __Folgezettel__ / follow-up zettel.
   Basically the inverse of key [[''folge''|#folge]].
+; [!predecessor|''predecessor'']
+: References zettel for which this zettel is a follow-up zettel.
+  Basically the inverse of key [[''successor''|#successor]].
 ; [!prequel|''prequel'']
 : Specifies one or more zettel that are conceptually a prequel zettel.
   These are zettel that occurred somehow before the current zettel.
@@ -111,12 +114,16 @@ Most keys conform to a [[type|00001006030000]].
 : Is a property that contains identifier of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
 
   A __sequel zettel__ acts as a branching thought of the current zettel.
-; [!subordinates|''subordinates'']
-: Is a property that contains identifier of all zettel that reference this zettel through the [[''superior''|#superior]] value.
+; [!subordinate|''subordinate'']
+: Is a property that contains identifier of all zettel that reference this zettel through the [[''superordinate''|#superordinate]] value.
+; [!successor|''successor'']
+: Is a property that contains identifiers of all zettel that reference this zettel via the [[''predecessor''|#predecessor]] value.
+
+  It is used to reference zettel that are somehow a follow-up zettel, but cannot / should not be referenced in the zettel content.
 ; [!summary|''summary'']
 : Summarizes the content of the zettel using plain text.
-; [!superior|''superior'']
-: Specifies a zettel that is conceptually a superior zettel.
+; [!superordinate|''superordinate'']
+: Specifies a zettel that is conceptually a superordinate zettel.
   This might be a more abstract zettel, or a zettel that should be higher in a hierarchy.
 ; [!syntax|''syntax'']
 : Specifies the syntax that should be used for interpreting the zettel.

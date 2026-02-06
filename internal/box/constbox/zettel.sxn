@@ -28,16 +28,17 @@
       ,@(if (symbol-bound? 'thread-query-url) `(,ACTION-SEPARATOR ,(wui-href thread-query-url "Thread")))
       ,@(ROLE-DEFAULT-actions (current-frame))
       ,@(let* ((frame (current-frame))(rea (resolve-symbol 'ROLE-EXTRA-actions frame))) (if (defined? rea) (rea frame)))
-      ,@(if superior-refs `((br) "Superior: " ,superior-refs))
+      ,@(if superordinate-refs `((br) "Superordinate: " ,superordinate-refs))
       ,@(if prequel-refs `((br) ,(wui-optional-link "Prequel" 'sequel-query-url) ": " ,prequel-refs))
       ,@(if precursor-refs `((br) ,(wui-optional-link "Precursor" 'folge-query-url) ": " ,precursor-refs))
+      ,@(if predecessor-refs `((br) "Predecessor: " ,predecessor-refs))
       ,@(ROLE-DEFAULT-heading (current-frame))
       ,@(let* ((frame (current-frame))(reh (resolve-symbol 'ROLE-EXTRA-heading frame))) (if (defined? reh) (reh frame)))
     )
   )
   ,@content
   ,endnotes
-  ,@(if (or folge-links sequel-links back-links subordinate-links)
+  ,@(if (or folge-links sequel-links back-links subordinate-links successor-links)
     `((nav
       ,@(if folge-links
             `((details ((,folge-open))
@@ -47,7 +48,8 @@
             `((details ((,sequel-open))
                        (summary ,(wui-optional-link "Sequel" 'sequel-query-url))
                        (ul ,@(map wui-item-link sequel-links)))))
-      ,@(if subordinate-links `((details ((,subordinate-open)) (summary "Subordinates") (ul ,@(map wui-item-link subordinate-links)))))
+      ,@(if subordinate-links `((details ((,subordinate-open)) (summary "Subordinate") (ul ,@(map wui-item-link subordinate-links)))))
+      ,@(if successor-links `((details ((,successor-open)) (summary "Successor") (ul ,@(map wui-item-link successor-links)))))
       ,@(if back-links `((details ((,back-open)) (summary "Incoming") (ul ,@(map wui-item-link back-links)))))
      ))
   )

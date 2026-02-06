@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250701130707
+modified: 20260206162141
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -68,9 +68,9 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   This is used to avoid an exploding ""transclusion bomb"", a form of a [[billion laughs attack|https://en.wikipedia.org/wiki/Billion_laughs_attack]].
 
   Default: ""1024"".
-; [!show-back-links|''show-back-links''], [!show-folge-links|''show-folge-links''], [!show-sequel-links|''show-sequel-links''],  [!show-subordinate-links|''show-subordinate-links'']
+; [!show-back-links|''show-back-links''], [!show-folge-links|''show-folge-links''], [!show-sequel-links|''show-sequel-links'']
 : When displaying a zettel in the web user interface, references to other zettel are normally shown below the content of the zettel.
-  This affects the metadata keys [[''back''|00001006020000#back]], [[''folge''|00001006020000#folge]], [[''sequel''|00001006020000#sequel]], and [[''subordinates''|00001006020000#subordinates]].
+  This affects the metadata keys [[''back''|00001006020000#back]], [[''folge''|00001006020000#folge]], and [[''sequel''|00001006020000#sequel]].
 
   These configuration keys may be used to show, not to show, or to close the list of referenced zettel.
 

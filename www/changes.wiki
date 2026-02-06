@@ -1,10 +1,19 @@
 <title>Change Log</title>
 
-<a id="1_1"></a>
-<h2>Changes for Version 1.1.0 (pending)</h2>
+<a id="2_0"></a>
+<h2>Changes for Version 2.0.0 (pending)</h2>
+  *  Rename metadata keys: <code>superior</code> to <code>superordinate</code>
+     and <code>subordinates</code> to <code>subordinate</code>.
+     (breaking)
+  *  Remove runtime configuration <code>show-subordinate-links</code>
+     (breaking: webui)
   *  Add action link on zettel and info page to generate a reference to the
      current zettel and copy it into the system clipboard.
      (minor: webui)
+  *  Add support for metadata keys <code>successor</code> and
+     <code>predecessor</code>. These can be used to indicate some order between
+     zettel where <code>folge</code> / <code>precursor</code> are not suitable.
+     (minor)
 
 <a id="1_0"></a>
 <h2>Changes for Version 1.0.2 (2025-12-21)</h2>
