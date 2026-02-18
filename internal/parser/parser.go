@@ -26,8 +26,8 @@ import (
 	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -226,7 +226,7 @@ func ParseDescription(m *meta.Meta) *sx.Pair {
 }
 
 // ParseZettel parses the zettel based on the syntax.
-func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtConfig config.Config) *ast.Zettel {
+func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtConfig config.Config) *domain.Zettel {
 	m := zettel.Meta
 	inhMeta := m
 	if rtConfig != nil {
@@ -246,7 +246,7 @@ func ParseZettel(ctx context.Context, zettel zettel.Zettel, syntax string, rtCon
 	}
 
 	rootNode := Parse(input.NewInput(zettel.Content.AsBytes()), parseMeta, syntax, alst)
-	return &ast.Zettel{
+	return &domain.Zettel{
 		Meta:    m,
 		Content: zettel.Content,
 		Zid:     m.Zid,

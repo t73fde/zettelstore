@@ -11,8 +11,8 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package ast provides the abstract syntax tree for parsed zettel content.
-package ast
+// Package domain provides some zettel domain specific definitions.
+package domain
 
 import (
 	"fmt"

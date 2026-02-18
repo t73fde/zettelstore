@@ -28,7 +28,7 @@ import (
 	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/domain"
 )
 
 // Builder allows to build new URLs for the web service.
@@ -188,7 +188,7 @@ var mapMetaKey = map[string]string{
 }
 
 func (g *htmlGenerator) metaSxn(m *meta.Meta) *sx.Pair {
-	tm := ast.GetMetaSz(m)
+	tm := domain.GetMetaSz(m)
 	env := shtml.MakeEnvironment(g.lang)
 	hm, err := g.th.Evaluate(tm, &env)
 	if err != nil {

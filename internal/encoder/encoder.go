@@ -23,13 +23,13 @@ import (
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/webapi"
 
-	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/domain"
 )
 
 // Encoder is an interface that allows to encode different parts of a zettel.
 type Encoder interface {
 	// WriteZettel encodes a whole zettel and writes it to the Writer.
-	WriteZettel(io.Writer, *ast.Zettel) error
+	WriteZettel(io.Writer, *domain.Zettel) error
 
 	// WriteMeta encodes just the metadata.
 	WriteMeta(io.Writer, *meta.Meta) error

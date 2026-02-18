@@ -27,10 +27,10 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/parser"
@@ -125,7 +125,7 @@ func getBoxName(p box.ManagedBox, root string) string {
 	return u.Path[len(root):]
 }
 
-func checkMetaFile(t *testing.T, resultName string, zn *ast.Zettel, enc webapi.EncodingEnum) {
+func checkMetaFile(t *testing.T, resultName string, zn *domain.Zettel, enc webapi.EncodingEnum) {
 	t.Helper()
 
 	if enc := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN}); enc != nil {

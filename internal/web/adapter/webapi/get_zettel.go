@@ -25,8 +25,8 @@ import (
 	"t73f.de/r/zsc/sexp"
 	"t73f.de/r/zsc/webapi"
 
-	"zettelstore.de/z/internal/ast"
 	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/usecase"
 	"zettelstore.de/z/internal/web/adapter"
@@ -57,7 +57,7 @@ func (a *WebAPI) MakeGetZettelHandler(
 			a.writeSzData(ctx, w, zid, part, getZettel)
 
 		default:
-			var zn *ast.Zettel
+			var zn *domain.Zettel
 			if q.Has(webapi.QueryKeyParseOnly) {
 				zn, err = parseZettel.Run(ctx, zid, q.Get(meta.KeySyntax))
 			} else {
@@ -142,7 +142,7 @@ func (a *WebAPI) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.
 
 func (a *WebAPI) writeEncodedZettelPart(
 	ctx context.Context,
-	w http.ResponseWriter, zn *ast.Zettel,
+	w http.ResponseWriter, zn *domain.Zettel,
 	enc webapi.EncodingEnum, encStr string, part partType,
 ) {
 	encdr := encoder.Create(

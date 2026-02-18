@@ -22,7 +22,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 
-	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/domain"
 )
 
 // shtmlEncoder contains all data needed for encoding.
@@ -32,9 +32,9 @@ type shtmlEncoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
+func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *domain.Zettel) error {
 	env := shtml.MakeEnvironment(enc.lang)
-	metaSHTML, err := enc.th.Evaluate(ast.GetMetaSz(zn.InhMeta), &env)
+	metaSHTML, err := enc.th.Evaluate(domain.GetMetaSz(zn.InhMeta), &env)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (enc *shtmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 // WriteMeta encodes meta data as s-expression.
 func (enc *shtmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	env := shtml.MakeEnvironment(enc.lang)
-	metaSHTML, err := enc.th.Evaluate(ast.GetMetaSz(m), &env)
+	metaSHTML, err := enc.th.Evaluate(domain.GetMetaSz(m), &env)
 	if err != nil {
 		return err
 	}

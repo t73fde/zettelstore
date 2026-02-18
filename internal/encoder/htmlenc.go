@@ -26,7 +26,7 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/ast"
+	"zettelstore.de/z/internal/domain"
 )
 
 // htmlEncoder contains all data needed for encoding.
@@ -37,9 +37,9 @@ type htmlEncoder struct {
 }
 
 // WriteZettel encodes a full zettel as HTML5.
-func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
+func (he *htmlEncoder) WriteZettel(w io.Writer, zn *domain.Zettel) error {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(ast.GetMetaSz(zn.InhMeta), &env)
+	hm, err := he.th.Evaluate(domain.GetMetaSz(zn.InhMeta), &env)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *ast.Zettel) error {
 // WriteMeta encodes meta data as HTML5.
 func (he *htmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(ast.GetMetaSz(m), &env)
+	hm, err := he.th.Evaluate(domain.GetMetaSz(m), &env)
 	if err != nil {
 		return err
 	}
