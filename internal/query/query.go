@@ -88,9 +88,7 @@ func (q *Query) GetDirectives() []Directive {
 	if q == nil || len(q.directives) == 0 {
 		return nil
 	}
-	result := make([]Directive, len(q.directives))
-	copy(result, q.directives)
-	return result
+	return slices.Clone(q.directives)
 }
 
 type keyExistMap map[string]compareOp
@@ -141,23 +139,18 @@ func (q *Query) Clone() *Query {
 	if q == nil {
 		return nil
 	}
-	c := new(Query)
+	c := new(*q)
 	c.zids = q.GetZids()
 	c.directives = q.GetDirectives()
 
-	c.preMatch = q.preMatch
 	c.terms = make([]conjTerms, len(q.terms))
 	for i, term := range q.terms {
 		c.terms[i].keys = maps.Clone(term.keys)
 		c.terms[i].mvals = maps.Clone(term.mvals)
 		c.terms[i].search = slices.Clone(term.search)
 	}
-	c.seed = q.seed
-	c.pick = q.pick
 	c.order = slices.Clone(q.order)
-	c.offset = q.offset
-	c.limit = q.limit
-	c.actions = q.actions
+	c.actions = slices.Clone(q.actions)
 	return c
 }
 
