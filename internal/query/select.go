@@ -375,7 +375,7 @@ func createNumberCompareFunc(cmpVal int64, cmpOp compareOp) stringPredicate {
 	case cmpNoGreater:
 		cmpFunc = func(iMetaVal int64) bool { return iMetaVal <= cmpVal }
 	default:
-		panic(fmt.Sprintf("Unknown compare operation %d with value %q", cmpOp, cmpVal))
+		panic(fmt.Sprintf("Unknown compare operation %d with value %d", cmpOp, cmpVal))
 	}
 	return func(metaVal meta.Value) bool {
 		iMetaVal, err := strconv.ParseInt(string(metaVal), 10, 64)
