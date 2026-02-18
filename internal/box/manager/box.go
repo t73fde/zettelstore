@@ -89,8 +89,8 @@ func (mgr *Manager) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, e
 }
 func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
 	for i, p := range mgr.boxes {
-		var errZNF box.ErrZettelNotFound
-		if z, err := p.GetZettel(ctx, zid); !errors.As(err, &errZNF) {
+		z, err := p.GetZettel(ctx, zid)
+		if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr {
 			if err == nil {
 				mgr.Enrich(ctx, z.Meta, i+1)
 			}
@@ -291,8 +291,7 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 				mgr.idxDeleteZettel(ctx, zid)
 				return err
 			}
-			var errZNF box.ErrZettelNotFound
-			if !errors.As(err, &errZNF) && !errors.Is(err, box.ErrReadOnly) {
+			if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr && !errors.Is(err, box.ErrReadOnly) {
 				return err
 			}
 		}

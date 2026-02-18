@@ -58,29 +58,23 @@ func (err ErrBadRequest) Error() string { return err.Text }
 
 // CodeMessageFromError returns an appropriate HTTP status code and text from a given error.
 func CodeMessageFromError(err error) (int, string) {
-	var eznf box.ErrZettelNotFound
-	if errors.As(err, &eznf) {
+	if eznf, isErr := errors.AsType[box.ErrZettelNotFound](err); isErr {
 		return http.StatusNotFound, "Zettel not found: " + eznf.Zid.String()
 	}
-	var ena *box.ErrNotAllowed
-	if errors.As(err, &ena) {
+	if ena, isErr := errors.AsType[*box.ErrNotAllowed](err); isErr {
 		msg := ena.Error()
 		return http.StatusForbidden, strings.ToUpper(msg[:1]) + msg[1:]
 	}
-	var eiz box.ErrInvalidZid
-	if errors.As(err, &eiz) {
+	if eiz, isErr := errors.AsType[box.ErrInvalidZid](err); isErr {
 		return http.StatusBadRequest, fmt.Sprintf("Zettel-ID %q not appropriate in this context", eiz.Zid)
 	}
-	var etznf usecase.ErrTagZettelNotFound
-	if errors.As(err, &etznf) {
+	if etznf, isErr := errors.AsType[usecase.ErrTagZettelNotFound](err); isErr {
 		return http.StatusNotFound, "Tag zettel not found: " + string(etznf.Tag)
 	}
-	var erznf usecase.ErrRoleZettelNotFound
-	if errors.As(err, &erznf) {
+	if erznf, isErr := errors.AsType[usecase.ErrRoleZettelNotFound](err); isErr {
 		return http.StatusNotFound, "Role zettel not found: " + string(erznf.Role)
 	}
-	var ebr ErrBadRequest
-	if errors.As(err, &ebr) {
+	if ebr, isErr := errors.AsType[ErrBadRequest](err); isErr {
 		return http.StatusBadRequest, ebr.Text
 	}
 	if errors.Is(err, box.ErrStopped) {
@@ -92,8 +86,7 @@ func CodeMessageFromError(err error) (int, string) {
 	if errors.Is(err, box.ErrCapacity) {
 		return http.StatusInsufficientStorage, "Zettelstore reached one of its storage limits"
 	}
-	var ernf ErrResourceNotFound
-	if errors.As(err, &ernf) {
+	if ernf, isErr := errors.AsType[ErrResourceNotFound](err); isErr {
 		return http.StatusNotFound, "Resource not found: " + ernf.Path
 	}
 	return http.StatusInternalServerError, err.Error()
