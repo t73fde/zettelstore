@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707205246
-modified: 20251218190815
+modified: 20260226180655
 
 With a [[list of zettel identifiers|00001007710000]], a [[query directives|00001007720000]], or a [[search expression|00001007701000]], a list of zettel is selected.
 __Actions__ allows modifying this list to a certain degree.
@@ -19,3 +19,34 @@ In most contexts, valid actions include the name of metadata keys, at least of t
 
 To allow some kind of backward compatibility, an action written in uppercase letters that leads to an empty result list, will be ignored.
 In this case the list of selected zettel is returned.
+
+An empty action sequence is treated as if no vertical bar character (""''|''"", U+007C) was specified.
+
+=== Aggregate actions
+
+; ''KEYS''
+: Returns a list of all metadata keys of the given list of zettel.
+: [[''\| KEYS''|query:| KEYS]] returns the list of all metadata keys managed by this Zettelstore.
+; ''REDIRECT''
+: Redirects to the first zettel of the given list of zettel identifiers.
+: [[''PICK 1 \| REDIRECT''|query:PICK 1 | REDIRECT]] will show a random zettel.
+; ''REINDEX''
+: Updates the internal search index for the selected zettel identifier. It allows to specify a second aggregate action.
+: ''20260226163200 IDENT | REINDEX'' updates the internal search index for a zettel with the identifier ''20260226163200''.
+; __Word__
+: If __Word__ is a metadata key of type [[Word|00001006035500]] or [[TagSet|00001006034000]], return an aggregate of the given metadata key.
+: [[''\| role''|query:| role]] returns a list of all used role values.
+: [[''\| tags''|query:| tags]] returns a list of all tags specified in this zettelstore.
+
+=== Parameter actions
+
+; ''MAXn''
+: Returns only those values with at most __n__ aggregated values. __n__ must be a positive integer.
+: [[''\| MAX13 tags''|query:| MAX13 tags]] returns only those tags that are used at most in 13 zettel.
+; ''MINn''
+: Returns only those values with at least __n__ aggregated values. __n__ must be a positive integer.
+: [[''\| MIN3 tags''|query:| MIN3 tags]] returns only those tags that are used at least in 3 zettel.
+; ''N''
+: Returns a numbered list of zettel in the Web User Interface, instead of an unnumbered list.
+  Ignored when specified for an API call.
+: [[''\| N''|query:| N]] returns a numbered list of all zettel in the Web User Interface.
