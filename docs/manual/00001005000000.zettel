@@ -41,7 +41,7 @@ These are ignored by Zettelstore.
 Two filename extensions are used by Zettelstore:
 # ''.zettel'' is a format that stores metadata and content together in one file,
 # the empty file extension is used, when the content must be stored in its own file, e.g. image data;
-  in this case, the filename contains just the 14 digits of the zettel identifier, and optional characters except the period ''"."''.  
+  in this case, the filename contains just the 14 digits of the zettel identifier, and optional characters except the period ''"."''.
 Other filename extensions are used to determine the ""syntax"" of a zettel.
 This allows the use of other content within the Zettelstore, such as images or HTML templates.
 

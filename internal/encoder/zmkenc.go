@@ -479,7 +479,7 @@ func (v *zmkVisitor) writeText(text string) {
 }
 func (v *zmkVisitor) writeBreak(isHard bool) {
 	if isHard {
-		v.b.WriteString("\\\n")
+		v.b.WriteString("%%\n")
 	} else {
 		v.b.WriteLn()
 	}

@@ -40,7 +40,7 @@ The following keys are supported:
 : Sets the absolute base URL for the service.
 
   Note: [[''url-prefix''|#url-prefix]] must be the suffix of ''base-url'', otherwise the web service will not start.
-  
+
   Default: ""http://127.0.0.1:23123/"".
 ; [!box-uri-x|''box-uri-X''], where __X__ is a number greater or equal to one
 : Specifies a [[box|00001004011200]] where zettel are stored.
@@ -110,7 +110,7 @@ The following keys are supported:
 : It limits the maximum byte size of a web request body to prevent clients from accidentally or maliciously sending a large request and wasting server resources.
   The minimum value is 1024.
 
-  Default: 16777216 (16 MiB). 
+  Default: 16777216 (16 MiB).
 ; [!owner|''owner'']
 : [[Identifier|00001006050000]] of a zettel that contains data about the owner of the Zettelstore.
   The owner has full authorization for the Zettelstore.

@@ -81,7 +81,7 @@ If you print the result a little bit nicer, you will see its structure:
 : Request was valid, but there is no data to be returned.
   Most likely, you specified the query parameter ''part=content'', but the zettel does not contain any content.
 ; ''400''
-: Request was not valid. 
+: Request was not valid.
   There are several reasons for this.
   Maybe the [[zettel identifier|00001006050000]] did not consists of exactly 14 digits.
 ; ''403''

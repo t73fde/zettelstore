@@ -62,7 +62,7 @@
         `((datalist ((id ,id)) ,@(map wui-option-value lst)))))
 
 ;; wui-pair-desc-item takes a pair '(term . text) and returns a list with
-;; a HTML description term and a HTML description data. 
+;; a HTML description term and a HTML description data.
 (defun wui-pair-desc-item (p) `((dt ,(car p)) (dd ,(cdr p))))
 
 ;; wui-meta-desc returns a HTML description list made from the list of pairs

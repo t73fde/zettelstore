@@ -34,7 +34,7 @@ The request will be successful if either:
 ; ''204''
 : Operation was successful, the body is empty.
 ; ''400''
-: Request was not valid. 
+: Request was not valid.
   There are several reasons for this.
   Most likely, no query parameter ''cmd'' was given, or it did not contain the value ""refresh"".
 ; ''403''

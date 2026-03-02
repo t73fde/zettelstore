@@ -137,6 +137,6 @@ In this case the list of selected zettel is returned.
 ; ''302''
 : Query was successful, redirect to first zettel in list.
 ; ''400''
-: Request was not valid. 
+: Request was not valid.
   There are several reasons for this.
   Maybe the access bearer token was not valid, or you forgot to specify a valid query.

@@ -9,7 +9,7 @@ modified: 20250102214350
 A zettel representation that is a [[s-expression|00001012930000]] (also known as symbolic expression).
 
 It is (relatively) easy to parse and contains all relevant information of metadata, content or the whole zettel.
-For example, take a look at the Sz encoding of this page, which is available on the ""Info"" sub-page of this zettel: 
+For example, take a look at the Sz encoding of this page, which is available on the ""Info"" sub-page of this zettel:
 
 * [[//z/00001012920516?enc=sz&part=zettel]],
 * [[//z/00001012920516?enc=sz&part=meta]],

@@ -32,7 +32,7 @@
   (h2 "Interpreted Metadata")
   (table ,@(map wui-info-meta-table-row metadata))
   (h2 "References")
-  ,@(if local-links `((h3 "Local")    (ul ,@(map wui-local-link local-links)))) 
+  ,@(if local-links `((h3 "Local")    (ul ,@(map wui-local-link local-links))))
   ,@(if query-links `((h3 "Queries")  (ul ,@(map wui-item-link query-links))))
   ,@(if ext-links   `((h3 "External") (ul ,@(map wui-item-popup-link ext-links))))
   (h3 "Unlinked")

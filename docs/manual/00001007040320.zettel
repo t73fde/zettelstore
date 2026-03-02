@@ -20,7 +20,7 @@ One difference to a link: if the text is not given, an empty string is assumed.
 The reference must point to some content, either zettel content or URL-referenced content.
 If the current user is not allowed to read the referenced zettel, the inline transclusion / embedding is ignored.
 If the referenced zettel does not exist, or is not readable because of other reasons, a [[spinning emoji|00000000040001]] is presented as a visual hint:
- 
+
 Example: ``{{00000000000000}}`` will be rendered as ::{{00000000000000}}::{=example}.
 
 There are two kinds of content:

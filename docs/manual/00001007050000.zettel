@@ -34,7 +34,7 @@ Some examples:
 * ``{=key}`` sets the __generic attribute__ to the given value.
   It is mostly used for modifying behavior according to a programming language.
 * ``{.key}`` sets the __class attribute__ to the given value.
-  It is equivalent to ``{class=key}``. 
+  It is equivalent to ``{class=key}``.
 
 In these examples, ``key`` must conform to the syntax of attribute keys, even if it is used as a value.
 

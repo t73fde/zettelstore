@@ -2,6 +2,11 @@
 
 <a id="2_0"></a>
 <h2>Changes for Version 2.0.0 (pending)</h2>
+  *  The syntax to signal a hard line break is changed to an empty comment at
+     the end of a line. Previously, it was a space character or a backslash
+     character at the end of a line. An empty comment might contain whitespace
+     characters.
+     (breaking: zmk)
   *  Rename metadata keys: <code>superior</code> to <code>superordinate</code>
      and <code>subordinates</code> to <code>subordinate</code>.
      (breaking)

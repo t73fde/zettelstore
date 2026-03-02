@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218190602
+modified: 20260302155410
 
 Most characters you type are concerned with inline-structured elements.
 The content of a zettel contains in many cases just ordinary text, lightly formatted.
@@ -33,10 +33,12 @@ Sometimes, you want to enter characters that have no representation on your keyb
 A comment begins with two consecutive percent sign characters (""''%''"", U+0025).
 It ends at the end of the line where it begins.
 
+If a line ends with an empty comment, the line break is converted from a __soft break__ into a __hard break__.
+An empty comment either contains no text at all or only whitespace characters.
+
 ==== Backslash
 The backslash character (""''\\''"", U+005C) gives the next character another meaning.
 * If a space character follows, it is converted into a non-breaking space (U+00A0).
-* If a line ending follows the backslash character, the line break is converted from a __soft break__ into a __hard break__.
 * Every other character is taken as itself, but without the interpretation of a Zettelmarkup element.
   For example, if you want to enter a ""'']''"" into a [[footnote text|00001007040330]], you should escape it with a backslash.
 

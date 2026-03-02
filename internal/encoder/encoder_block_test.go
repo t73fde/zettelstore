@@ -228,7 +228,7 @@ Paragraph
 			encoderSz:    "(BLOCK (REGION-VERSE () ((PARA (TEXT \"A\u00a0line\") (HARD) (TEXT \"\u00a0\u00a0another\u00a0line\") (HARD) (TEXT \"Back\")) (PARA (TEXT \"Paragraph\")) (PARA (TEXT \"\u00a0\u00a0\u00a0\u00a0Spacy\u00a0\u00a0Para\"))) (TEXT \"Author\")))",
 			encoderSHTML: "((div (p \"A\u00a0line\" (br) \"\u00a0\u00a0another\u00a0line\" (br) \"Back\") (p \"Paragraph\") (p \"\u00a0\u00a0\u00a0\u00a0Spacy\u00a0\u00a0Para\") (cite \"Author\")))",
 			encoderText:  "A line\n another line\nBack\nParagraph\n Spacy Para\nAuthor",
-			encoderZmk:   "\"\"\"\nA\u00a0line\\\n\u00a0\u00a0another\u00a0line\\\nBack\nParagraph\n\u00a0\u00a0\u00a0\u00a0Spacy\u00a0\u00a0Para\n\"\"\" Author",
+			encoderZmk:   "\"\"\"\nA\u00a0line%%\n\u00a0\u00a0another\u00a0line%%\nBack\nParagraph\n\u00a0\u00a0\u00a0\u00a0Spacy\u00a0\u00a0Para\n\"\"\" Author",
 		},
 	},
 	{

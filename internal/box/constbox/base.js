@@ -24,7 +24,7 @@
                     tempInput.select();
                     var success = document.execCommand('copy');
                     document.body.removeChild(tempInput);
-                    
+
                     if (success) {
                         resolve();
                     } else {

@@ -6,7 +6,7 @@ syntax: zmk
 created: 20210126175322
 modified: 20250102221859
 
-All data used for authenticating a user is stored in a special zettel called ""user zettel"". 
+All data used for authenticating a user is stored in a special zettel called ""user zettel"".
 A user zettel must have set the following two metadata fields:
 
 ; ''user-id'' (""user identification"")

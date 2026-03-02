@@ -52,7 +52,7 @@ var tcsInline = []zmkTestCase{
 	},
 	{
 		descr: "Hard Break",
-		zmk:   "hard\\\nbreak",
+		zmk:   "hard%%\nbreak",
 		expect: expectMap{
 			encoderHTML:  "<p>hard<br>break</p>",
 			encoderMD:    "hard\\\nbreak",

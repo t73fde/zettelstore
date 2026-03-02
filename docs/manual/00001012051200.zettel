@@ -77,6 +77,6 @@ With this call, you cannot differentiate between an empty result list (e.g becau
 ; ''200''
 : Retrieval was successful, the body contains an appropriate data value.
 ; ''400''
-: Request was not valid. 
+: Request was not valid.
   There are several reasons for this.
   Maybe the access bearer token was not valid.

@@ -52,7 +52,7 @@ Pretty-printed, this results in:
 ; ''200''
 : Retrieval was successful, the body contains an appropriate data value.
 ; ''400''
-: Request was not valid. 
+: Request was not valid.
   There are several reasons for this.
   Maybe the zettel identifier did not consist of exactly 14 digits.
 ; ''403''

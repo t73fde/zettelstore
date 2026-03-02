@@ -32,7 +32,7 @@ Most keys conform to a [[type|00001006030000]].
 
   This is a computed value.
   There is no need to set it via Zettelstore.
-  
+
   If it is not stored within a zettel, it will be computed based on the value of the [[Zettel Identifier|00001006050000]]: if it contains a value >= 19700101000000, it will be coerced to a date/time; otherwise the version time of the running software will be used.
 
   Please note that the value of ''created'' will be different (in most cases) to the value of [[''id''|#id]] / the zettel identifier, because it is exact up to the second.

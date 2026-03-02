@@ -33,7 +33,7 @@ You may encode computed or property [[metadata keys|00001006020000]], but these 
 ; ''201''
 : Zettel creation was successful, the body contains its [[zettel identifier|00001006050000]] (data value or plain text).
 ; ''400''
-: Request was not valid. 
+: Request was not valid.
   There are several reasons for this.
   Most likely, the symbolic expression was not formed according to above rules.
 ; ''403''

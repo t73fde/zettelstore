@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209161114
+modified: 20260302155506
 
 There are three kinds of lists that can be nested: ordered lists, unordered lists, and quotation lists.
 
@@ -103,7 +103,7 @@ You could also use a [[mark element|00001007040350]] or a hard line break to sep
 ---
 # Eins
 # Zwei
-\
+%%
 # Une
 # Deux
 ```
@@ -117,7 +117,7 @@ is rendered in HTML as
 ---
 # Eins
 # Zwei
-\
+%%
 # Une
 # Deux
 :::

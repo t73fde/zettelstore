@@ -29,7 +29,7 @@ If you did not provide a valid access token (which is the typical case), you wil
 ; ''204''
 : Authentication is enabled and a valid access token was provided.
 ; ''400''
-: Request was not valid. 
+: Request was not valid.
   There are several reasons for this.
   Most likely, no query parameter ''cmd'' was given, or it did not contain the value ""authenticate"".
 ; ''401''

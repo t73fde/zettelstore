@@ -11,7 +11,7 @@ It is derived from a XML encoding in s-expressions, called [[SXML|https://en.wik
 
 It is (relatively) easy to parse and contains everything to transform it into real HTML.
 In contrast to HTML, SHTML is easier to parse and to manipulate.
-For example, take a look at the SHTML encoding of this page, which is available via the ""Info"" sub-page of this zettel: 
+For example, take a look at the SHTML encoding of this page, which is available via the ""Info"" sub-page of this zettel:
 
 * [[//z/00001012920525?enc=shtml&part=zettel]],
 * [[//z/00001012920525?enc=shtml&part=meta]],
