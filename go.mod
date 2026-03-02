@@ -5,8 +5,8 @@ go 1.26
 require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/yuin/goldmark v1.7.16
-	golang.org/x/crypto v0.47.0
-	golang.org/x/term v0.39.0
+	golang.org/x/crypto v0.48.0
+	golang.org/x/term v0.40.0
 	t73f.de/r/sx v0.0.0-20251210171019-40f5836d1e9e
 	t73f.de/r/sxwebs v0.0.0-20251210171136-877da262b102
 	t73f.de/r/webs v0.0.0-20260227170045-f2123cb24790
@@ -16,6 +16,6 @@ require (
 )
 
 require (
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 )
