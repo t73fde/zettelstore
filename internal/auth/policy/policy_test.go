@@ -30,28 +30,45 @@ func TestPolicies(t *testing.T) {
 		withAuth bool
 		expert   bool
 		simple   bool
+		refresh  bool
 	}{
-		{true, true, true, true},
-		{true, true, true, false},
-		{true, true, false, true},
-		{true, true, false, false},
-		{true, false, true, true},
-		{true, false, true, false},
-		{true, false, false, true},
-		{true, false, false, false},
-		{false, true, true, true},
-		{false, true, true, false},
-		{false, true, false, true},
-		{false, true, false, false},
-		{false, false, true, true},
-		{false, false, true, false},
-		{false, false, false, true},
-		{false, false, false, false},
+		{true, true, true, true, true},
+		{true, true, true, true, false},
+		{true, true, true, false, true},
+		{true, true, true, false, false},
+		{true, true, false, true, true},
+		{true, true, false, true, false},
+		{true, true, false, false, true},
+		{true, true, false, false, false},
+		{true, false, true, true, true},
+		{true, false, true, true, false},
+		{true, false, true, false, true},
+		{true, false, true, false, false},
+		{true, false, false, true, true},
+		{true, false, false, true, false},
+		{true, false, false, false, true},
+		{true, false, false, false, false},
+		{false, true, true, true, true},
+		{false, true, true, true, false},
+		{false, true, true, false, true},
+		{false, true, true, false, false},
+		{false, true, false, true, true},
+		{false, true, false, true, false},
+		{false, true, false, false, true},
+		{false, true, false, false, false},
+		{false, false, true, true, true},
+		{false, false, true, true, false},
+		{false, false, true, false, true},
+		{false, false, true, false, false},
+		{false, false, false, true, true},
+		{false, false, false, true, false},
+		{false, false, false, false, true},
+		{false, false, false, false, false},
 	}
 	for _, ts := range testScene {
 		pol := newPolicy(
 			&testAuthzManager{readOnly: ts.readonly, withAuth: ts.withAuth},
-			&authConfig{simple: ts.simple, expert: ts.expert},
+			&authConfig{simple: ts.simple, expert: ts.expert, refresh: ts.refresh},
 		)
 		name := fmt.Sprintf("readonly=%v/withauth=%v/expert=%v/simple=%v",
 			ts.readonly, ts.withAuth, ts.expert, ts.simple)
@@ -60,7 +77,7 @@ func TestPolicies(t *testing.T) {
 			testRead(tt, pol, ts.withAuth, ts.expert)
 			testWrite(tt, pol, ts.withAuth, ts.readonly, ts.expert)
 			testDelete(tt, pol, ts.withAuth, ts.readonly, ts.expert)
-			testRefresh(tt, pol, ts.withAuth, ts.expert, ts.simple)
+			testRefresh(tt, pol, ts.withAuth, ts.expert, ts.simple, ts.refresh)
 		})
 	}
 }
@@ -94,10 +111,11 @@ func (a *testAuthzManager) GetUserRole(user *meta.Meta) meta.UserRole {
 	return meta.UserRoleReader
 }
 
-type authConfig struct{ simple, expert bool }
+type authConfig struct{ simple, expert, refresh bool }
 
-func (ac *authConfig) IsSimpleMode() bool { return ac.simple }
-func (ac *authConfig) IsExpertMode() bool { return ac.expert }
+func (ac *authConfig) IsSimpleMode() bool  { return ac.simple }
+func (ac *authConfig) IsExpertMode() bool  { return ac.expert }
+func (ac *authConfig) IsRefreshMode() bool { return ac.refresh }
 
 func (*authConfig) GetVisibility(m *meta.Meta) meta.Visibility {
 	if val, ok := m.Get(meta.KeyVisibility); ok {
@@ -488,7 +506,7 @@ func testDelete(t *testing.T, pol auth.Policy, withAuth, readonly, expert bool) 
 	}
 }
 
-func testRefresh(t *testing.T, pol auth.Policy, withAuth, expert, simple bool) {
+func testRefresh(t *testing.T, pol auth.Policy, withAuth, expert, simple, _ /* refresh */ bool) {
 	t.Helper()
 	testCases := []struct {
 		user *meta.Meta
