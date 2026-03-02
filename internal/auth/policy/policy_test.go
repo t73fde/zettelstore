@@ -96,8 +96,8 @@ func (a *testAuthzManager) GetUserRole(user *meta.Meta) meta.UserRole {
 
 type authConfig struct{ simple, expert bool }
 
-func (ac *authConfig) GetSimpleMode() bool { return ac.simple }
-func (ac *authConfig) GetExpertMode() bool { return ac.expert }
+func (ac *authConfig) IsSimpleMode() bool { return ac.simple }
+func (ac *authConfig) IsExpertMode() bool { return ac.expert }
 
 func (*authConfig) GetVisibility(m *meta.Meta) meta.Visibility {
 	if val, ok := m.Get(meta.KeyVisibility); ok {

@@ -176,8 +176,8 @@ func (*myConfig) GetSiteName() string                      { return "" }
 func (*myConfig) GetYAMLHeader() bool                      { return false }
 func (*myConfig) GetZettelFileSyntax() []meta.Value        { return nil }
 
-func (*myConfig) GetSimpleMode() bool                      { return false }
-func (*myConfig) GetExpertMode() bool                      { return false }
+func (*myConfig) IsSimpleMode() bool                       { return false }
+func (*myConfig) IsExpertMode() bool                       { return false }
 func (*myConfig) GetVisibility(*meta.Meta) meta.Visibility { return meta.VisibilityPublic }
 func (*myConfig) GetMaxTransclusions() int                 { return 1024 }
 

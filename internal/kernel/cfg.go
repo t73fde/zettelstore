@@ -311,11 +311,11 @@ func (cs *configService) GetZettelFileSyntax() []meta.Value {
 
 // --- config.AuthConfig
 
-// GetSimpleMode returns true if system tuns in simple-mode.
-func (cs *configService) GetSimpleMode() bool { return cs.GetCurConfig(ConfigSimpleMode).(bool) }
+// IsSimpleMode returns true if system tuns in simple-mode.
+func (cs *configService) IsSimpleMode() bool { return cs.GetCurConfig(ConfigSimpleMode).(bool) }
 
-// GetExpertMode returns the current value of the "expert-mode" key.
-func (cs *configService) GetExpertMode() bool { return cs.GetCurConfig(keyExpertMode).(bool) }
+// IsExpertMode returns the current value of the "expert-mode" key.
+func (cs *configService) IsExpertMode() bool { return cs.GetCurConfig(keyExpertMode).(bool) }
 
 // GetVisibility returns the visibility value, or "login" if none is given.
 func (cs *configService) GetVisibility(m *meta.Meta) meta.Visibility {

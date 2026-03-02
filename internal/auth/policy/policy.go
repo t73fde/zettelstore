@@ -27,10 +27,10 @@ func newPolicy(manager auth.AuthzManager, authConfig config.AuthConfig) auth.Pol
 	if manager.IsReadonly() {
 		pol = &roPolicy{}
 	} else {
-		pol = &defaultPolicy{manager}
+		pol = &crudPolicy{manager}
 	}
 	if manager.WithAuth() {
-		pol = &ownerPolicy{
+		pol = &authPolicy{
 			manager:    manager,
 			authConfig: authConfig,
 			pre:        pol,

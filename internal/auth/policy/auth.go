@@ -13,6 +13,9 @@
 
 package policy
 
+// Implementation of access policy, if authentication is enabled. An anonymous
+// user will have a nil value for the "user" metadata.
+
 import (
 	"t73f.de/r/zsc/domain/meta"
 
@@ -20,20 +23,20 @@ import (
 	"zettelstore.de/z/internal/config"
 )
 
-type ownerPolicy struct {
+type authPolicy struct {
 	manager    auth.AuthzManager
 	authConfig config.AuthConfig
 	pre        auth.Policy
 }
 
-func (o *ownerPolicy) CanCreate(user, newMeta *meta.Meta) bool {
+func (o *authPolicy) CanCreate(user, newMeta *meta.Meta) bool {
 	if user == nil || !o.pre.CanCreate(user, newMeta) {
 		return false
 	}
 	return o.userIsOwner(user) || o.userCanCreate(user, newMeta)
 }
 
-func (o *ownerPolicy) userCanCreate(user, newMeta *meta.Meta) bool {
+func (o *authPolicy) userCanCreate(user, newMeta *meta.Meta) bool {
 	if o.manager.GetUserRole(user) == meta.UserRoleReader {
 		return false
 	}
@@ -43,7 +46,7 @@ func (o *ownerPolicy) userCanCreate(user, newMeta *meta.Meta) bool {
 	return true
 }
 
-func (o *ownerPolicy) CanRead(user, m *meta.Meta) bool {
+func (o *authPolicy) CanRead(user, m *meta.Meta) bool {
 	// No need to call o.pre.CanRead(user, meta), because it will always return true.
 	// Both the default and the readonly policy allow reading a zettel.
 	vis := o.authConfig.GetVisibility(m)
@@ -53,7 +56,7 @@ func (o *ownerPolicy) CanRead(user, m *meta.Meta) bool {
 	return o.userIsOwner(user) || o.userCanRead(user, m, vis)
 }
 
-func (o *ownerPolicy) userCanRead(user, m *meta.Meta, vis meta.Visibility) bool {
+func (o *authPolicy) userCanRead(user, m *meta.Meta, vis meta.Visibility) bool {
 	switch vis {
 	case meta.VisibilityOwner, meta.VisibilityExpert:
 		return false
@@ -84,7 +87,7 @@ var noChangeUser = []string{
 	meta.KeyUserRole,
 }
 
-func (o *ownerPolicy) CanWrite(user, oldMeta, newMeta *meta.Meta) bool {
+func (o *authPolicy) CanWrite(user, oldMeta, newMeta *meta.Meta) bool {
 	if user == nil || !o.pre.CanWrite(user, oldMeta, newMeta) {
 		return false
 	}
@@ -115,7 +118,7 @@ func (o *ownerPolicy) CanWrite(user, oldMeta, newMeta *meta.Meta) bool {
 	return o.userCanCreate(user, newMeta)
 }
 
-func (o *ownerPolicy) CanDelete(user, m *meta.Meta) bool {
+func (o *authPolicy) CanDelete(user, m *meta.Meta) bool {
 	if user == nil || !o.pre.CanDelete(user, m) {
 		return false
 	}
@@ -125,24 +128,24 @@ func (o *ownerPolicy) CanDelete(user, m *meta.Meta) bool {
 	return o.userIsOwner(user)
 }
 
-func (o *ownerPolicy) CanRefresh(user *meta.Meta) bool {
+func (o *authPolicy) CanRefresh(user *meta.Meta) bool {
 	switch userRole := o.manager.GetUserRole(user); userRole {
 	case meta.UserRoleUnknown:
-		return o.authConfig.GetSimpleMode()
+		return o.authConfig.IsSimpleMode()
 	case meta.UserRoleCreator:
-		return o.authConfig.GetExpertMode() || o.authConfig.GetSimpleMode()
+		return o.authConfig.IsExpertMode() || o.authConfig.IsSimpleMode()
 	}
 	return true
 }
 
-func (o *ownerPolicy) checkVisibility(user *meta.Meta, vis meta.Visibility) (bool, bool) {
+func (o *authPolicy) checkVisibility(user *meta.Meta, vis meta.Visibility) (bool, bool) {
 	if vis == meta.VisibilityExpert {
-		return o.userIsOwner(user) && o.authConfig.GetExpertMode(), true
+		return o.userIsOwner(user) && o.authConfig.IsExpertMode(), true
 	}
 	return false, false
 }
 
-func (o *ownerPolicy) userIsOwner(user *meta.Meta) bool {
+func (o *authPolicy) userIsOwner(user *meta.Meta) bool {
 	if user == nil {
 		return false
 	}

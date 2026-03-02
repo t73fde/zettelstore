@@ -13,32 +13,46 @@
 
 package policy
 
+// Implements the default behaviour of the access policy.
+
 import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
 )
 
-type defaultPolicy struct {
+// Policy if read-only mode is enabled.
+
+type roPolicy struct{}
+
+func (*roPolicy) CanCreate(_, _ *meta.Meta) bool   { return false }
+func (*roPolicy) CanRead(_, _ *meta.Meta) bool     { return true }
+func (*roPolicy) CanWrite(_, _, _ *meta.Meta) bool { return false }
+func (*roPolicy) CanDelete(_, _ *meta.Meta) bool   { return false }
+func (*roPolicy) CanRefresh(user *meta.Meta) bool  { return user != nil }
+
+// Policy in use when zettel can be read, created, and written.
+
+type crudPolicy struct {
 	manager auth.AuthzManager
 }
 
-func (*defaultPolicy) CanCreate(_, _ *meta.Meta) bool { return true }
-func (*defaultPolicy) CanRead(_, _ *meta.Meta) bool   { return true }
-func (d *defaultPolicy) CanWrite(user, oldMeta, _ *meta.Meta) bool {
+func (*crudPolicy) CanCreate(_, _ *meta.Meta) bool { return true }
+func (*crudPolicy) CanRead(_, _ *meta.Meta) bool   { return true }
+func (d *crudPolicy) CanWrite(user, oldMeta, _ *meta.Meta) bool {
 	return d.canChange(user, oldMeta)
 }
-func (d *defaultPolicy) CanDelete(user, m *meta.Meta) bool { return d.canChange(user, m) }
+func (d *crudPolicy) CanDelete(user, m *meta.Meta) bool { return d.canChange(user, m) }
 
-func (*defaultPolicy) CanRefresh(user *meta.Meta) bool { return user != nil }
+func (*crudPolicy) CanRefresh(user *meta.Meta) bool { return user != nil }
 
-func (d *defaultPolicy) canChange(user, m *meta.Meta) bool {
+func (d *crudPolicy) canChange(user, m *meta.Meta) bool {
 	metaRo, ok := m.Get(meta.KeyReadOnly)
 	if !ok {
 		return true
 	}
 	if user == nil {
-		// If we are here, there is no authentication.
+		// If we are here, there is no authenticated user.
 		// See owner.go:CanWrite.
 
 		// No authentication: check for owner-like restriction, because the user

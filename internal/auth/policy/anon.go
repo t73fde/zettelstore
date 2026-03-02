@@ -13,6 +13,8 @@
 
 package policy
 
+// Implement the policy of access if authentication is not enabled.
+
 import (
 	"t73f.de/r/zsc/domain/meta"
 
@@ -42,7 +44,7 @@ func (ap *anonPolicy) CanDelete(user, m *meta.Meta) bool {
 }
 
 func (ap *anonPolicy) CanRefresh(user *meta.Meta) bool {
-	if ap.authConfig.GetExpertMode() || ap.authConfig.GetSimpleMode() {
+	if ap.authConfig.IsExpertMode() || ap.authConfig.IsSimpleMode() {
 		return true
 	}
 	return ap.pre.CanRefresh(user)
@@ -50,7 +52,7 @@ func (ap *anonPolicy) CanRefresh(user *meta.Meta) bool {
 
 func (ap *anonPolicy) checkVisibility(m *meta.Meta) bool {
 	if ap.authConfig.GetVisibility(m) == meta.VisibilityExpert {
-		return ap.authConfig.GetExpertMode()
+		return ap.authConfig.IsExpertMode()
 	}
 	return true
 }
