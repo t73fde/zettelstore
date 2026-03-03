@@ -2,9 +2,9 @@
 
 <a id="2_0"></a>
 <h2>Changes for Version 2.0.0 (pending)</h2>
-  *  The syntax to signal a hard line break is changed to an empty comment at
+  *  The syntax for signaling a hard line break changes to an empty comment at
      the end of a line. Previously, it was a space character or a backslash
-     character at the end of a line. An empty comment might contain whitespace
+     character at the end of a line. An empty comment may contain whitespace
      characters.
      (breaking: zmk)
   *  Rename metadata keys: <code>superior</code> to <code>superordinate</code>
@@ -13,11 +13,17 @@
   *  Remove runtime configuration <code>show-subordinate-links</code>
      (breaking: webui)
   *  Use <code>successor</code> / <code>predecessor</code> relation to specify
-     load dependency between sxn zettel. Remove <code>precursor</code> /
-     <code>folge</code> dependency between some predefined zettel.
+     load dependencies between sxn zettel. Remove <code>precursor</code> /
+     <code>folge</code> dependencies between some predefined zettel.
      (breaking)
-  *  Add action link on zettel and info page to generate a reference to the
-     current zettel and copy it into the system clipboard.
+  *  Introduce startup configuration <code>refresh-mode</code> to allow users
+     to trigger a refresh of the search index or parts of it. Previously,
+     <code>expert-mode</code> controlled this, but this overloads its original
+     meaning. <code>expert-mode</code> now only controls the visibility of
+     zettel. See the manual for details.
+     (breaking)
+  *  Add an action link on the zettel and info pages to generate a Zettelmarkup
+     reference to the current zettel and copy it into the system clipboard.
      (minor: webui)
   *  Add support for metadata keys <code>successor</code> and
      <code>predecessor</code>. These can be used to indicate some order between

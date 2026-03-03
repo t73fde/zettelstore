@@ -73,6 +73,9 @@ type AuthzManager interface {
 	// Returns true if authentication is enabled.
 	WithAuth() bool
 
+	// IsRefreshMode returns the value of startup configuration "refresh-mode".
+	IsRefreshMode() bool
+
 	// GetUserRole role returns the user role of the given user zettel.
 	GetUserRole(user *meta.Meta) meta.UserRole
 }

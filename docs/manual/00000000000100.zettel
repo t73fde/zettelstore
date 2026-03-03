@@ -6,9 +6,10 @@ created: 20210126175322
 default-copyright: (c) 2020-present by Detlef Stern <ds@zettelstore.de>
 default-license: EUPL-1.2-or-later
 default-visibility: public
+expert-mode: false
 footer-zettel: 00001000000100
 home-zettel: 00001000000000
-modified: 20221205173642
+modified: 20260303120350
 site-name: Zettelstore Manual
 visibility: owner
 

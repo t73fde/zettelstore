@@ -184,8 +184,9 @@ const (
 
 // Constants for authentication service keys.
 const (
-	AuthOwner    = "owner"
-	AuthReadonly = "readonly"
+	AuthOwner       = "owner"
+	AuthReadonly    = "readonly"
+	AuthRefreshMode = "refresh-mode"
 )
 
 // Constants for box service keys.
@@ -241,7 +242,7 @@ type LogEntry struct {
 }
 
 // CreateAuthManagerFunc is called to create a new auth manager.
-type CreateAuthManagerFunc func(readonly bool, owner id.Zid) (auth.Manager, error)
+type CreateAuthManagerFunc func(readonly bool, owner id.Zid, refresh bool) (auth.Manager, error)
 
 // CreateBoxManagerFunc is called to create a new box manager.
 type CreateBoxManagerFunc func(

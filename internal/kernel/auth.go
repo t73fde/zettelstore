@@ -60,10 +60,12 @@ func (as *authService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) 
 			},
 			true,
 		},
+		AuthRefreshMode: {"Refresh mode", parseBool, true},
 	}
 	as.next = interfaceMap{
-		AuthOwner:    id.Invalid,
-		AuthReadonly: false,
+		AuthOwner:       id.Invalid,
+		AuthReadonly:    false,
+		AuthRefreshMode: false,
 	}
 }
 
@@ -76,7 +78,8 @@ func (as *authService) Start(*Kernel) error {
 	defer as.mxService.Unlock()
 	readonlyMode := as.GetNextConfig(AuthReadonly).(bool)
 	owner := as.GetNextConfig(AuthOwner).(id.Zid)
-	authMgr, err := as.createManager(readonlyMode, owner)
+	refreshMode := as.GetNextConfig(AuthRefreshMode).(bool)
+	authMgr, err := as.createManager(readonlyMode, owner, refreshMode)
 	if err != nil {
 		as.logger.Error("Unable to create manager", "err", err)
 		return err

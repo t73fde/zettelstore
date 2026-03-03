@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251212134836
+modified: 20260303120233
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -128,8 +128,11 @@ The following keys are supported:
 
   Default: ""false""
 ; [!read-only-mode|''read-only-mode'']
-: If set to a [[true value|00001006030500]] the Zettelstore service will be put into a read-only mode.
-  No changes are possible.
+: If set to a [[true value|00001006030500]], the Zettelstore service will enter read-only mode, and no changes will be allowed.
+
+  Default: ""false"".
+; [!refresh-mode|''refresh-mode'']
+: If set to a [[true value|00001006030500]], users are allowed to refresh the internal search index, even if the Zettelstore service is not running in [[""simple-mode""|00001004051100]] or the user lacks sufficient privileges.
 
   Default: ""false"".
 ; [!runtime-profiling|''runtime-profiling'']

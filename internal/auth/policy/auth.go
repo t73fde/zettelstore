@@ -133,7 +133,7 @@ func (o *authPolicy) CanRefresh(user *meta.Meta) bool {
 	case meta.UserRoleUnknown:
 		return o.authConfig.IsSimpleMode()
 	case meta.UserRoleCreator:
-		return o.authConfig.IsExpertMode() || o.authConfig.IsSimpleMode()
+		return o.manager.IsRefreshMode() || o.authConfig.IsSimpleMode()
 	}
 	return true
 }

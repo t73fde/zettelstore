@@ -33,17 +33,19 @@ import (
 )
 
 type myAuth struct {
-	readonly bool
 	owner    id.Zid
 	secret   []byte
+	readonly bool
+	refresh  bool
 }
 
 // New creates a new auth object.
-func New(readonly bool, owner id.Zid, extSecret string) auth.Manager {
+func New(readonly bool, owner id.Zid, extSecret string, refresh bool) auth.Manager {
 	return &myAuth{
-		readonly: readonly,
 		owner:    owner,
 		secret:   calcSecret(extSecret),
+		readonly: readonly,
+		refresh:  refresh,
 	}
 }
 
@@ -154,7 +156,8 @@ func (a *myAuth) IsOwner(zid id.Zid) bool {
 	return zid.IsValid() && zid == a.owner
 }
 
-func (a *myAuth) WithAuth() bool { return a.owner != id.Invalid }
+func (a *myAuth) WithAuth() bool      { return a.owner != id.Invalid }
+func (a *myAuth) IsRefreshMode() bool { return a.refresh }
 
 // GetUserRole role returns the user role of the given user zettel.
 func (a *myAuth) GetUserRole(user *meta.Meta) meta.UserRole {

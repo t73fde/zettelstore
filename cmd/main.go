@@ -176,6 +176,7 @@ const (
 	keyOwner             = "owner"
 	keyPersistentCookie  = "persistent-cookie"
 	keyReadOnly          = "read-only-mode"
+	keyRefreshMode       = "refresh-mode"
 	keyRuntimeProfiling  = "runtime-profiling"
 	keySxNesting         = "sx-max-nesting"
 	keyTokenLifetimeHTML = "token-lifetime-html"
@@ -200,6 +201,7 @@ func setServiceConfig(cfg *meta.Meta) bool {
 
 	err = setConfigValue(err, kernel.AuthService, kernel.AuthOwner, cfg.GetDefault(keyOwner, ""))
 	err = setConfigValue(err, kernel.AuthService, kernel.AuthReadonly, cfg.GetBool(keyReadOnly))
+	err = setConfigValue(err, kernel.AuthService, kernel.AuthRefreshMode, cfg.GetBool(keyRefreshMode))
 
 	err = setConfigValue(
 		err, kernel.BoxService, kernel.BoxDefaultDirType,
@@ -293,8 +295,8 @@ func executeCommand(name string, args ...string) int {
 	secretHash := fmt.Sprintf("%x", sha256.Sum256([]byte(string(secret))))
 
 	kern.SetCreators(
-		func(readonly bool, owner id.Zid) (auth.Manager, error) {
-			return impl.New(readonly, owner, secretHash), nil
+		func(readonly bool, owner id.Zid, refresh bool) (auth.Manager, error) {
+			return impl.New(readonly, owner, secretHash, refresh), nil
 		},
 		createManager,
 		func(srv server.Server, plMgr box.Manager, authMgr auth.Manager, rtConfig config.Config) error {

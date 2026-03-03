@@ -23,6 +23,7 @@ import (
 )
 
 type anonPolicy struct {
+	manager    auth.AuthzManager
 	authConfig config.AuthConfig
 	pre        auth.Policy
 }
@@ -44,7 +45,7 @@ func (ap *anonPolicy) CanDelete(user, m *meta.Meta) bool {
 }
 
 func (ap *anonPolicy) CanRefresh(user *meta.Meta) bool {
-	if ap.authConfig.IsExpertMode() || ap.authConfig.IsSimpleMode() {
+	if ap.manager.IsRefreshMode() || ap.authConfig.IsSimpleMode() {
 		return true
 	}
 	return ap.pre.CanRefresh(user)

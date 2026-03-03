@@ -37,6 +37,7 @@ func newPolicy(manager auth.AuthzManager, authConfig config.AuthConfig) auth.Pol
 		}
 	} else {
 		pol = &anonPolicy{
+			manager:    manager,
 			authConfig: authConfig,
 			pre:        pol,
 		}

@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211230230441
-modified: 20251215170750
+modified: 20260303122105
 
 Zettelstore maintains some internal data to allow faster operations.
 
@@ -27,8 +27,9 @@ To do this, you must send an HTTP POST request to the [[endpoint|00001012920000]
 If successful, you will get an HTTP status code 204 (No Content) with an empty HTTP body.
 
 The request will be successful if either:
-* [[Authentication is enabled|00001010040100]] and you [[provide a valid access token|00001012050600]],
-* Authentication is not enabled and you started Zettelstore with the [[run-simple|00001004051100]] command or [[expert-mode|00001004020000#expert-mode]] is set to ""true"".
+* Authentication is not enabled, and either Zettelstore was started with the [[run-simple|00001004051100]] command or [[refresh-mode|00001004010000#refresh-mode]] is set to ""true"",
+* [[Authentication is enabled|00001010040100]], you [[provide a valid access token|00001012050600]], and your [[user role|00001010070300]] is not ""creator"",
+* Authentication is enabled, you are either an anonymous user or your user role is ""creator"", and either Zettelstore was started with the run-simple command or refresh-mode is set to ""true"".
 
 === HTTP Status codes
 ; ''204''

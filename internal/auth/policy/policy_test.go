@@ -38,8 +38,8 @@ func TestPolicies(t *testing.T) {
 		refresh := x%2 != 0
 		x >>= 1
 		pol := newPolicy(
-			&testAuthzManager{readOnly: readonly, withAuth: withAuth},
-			&authConfig{simple: simple, expert: expert, refresh: refresh},
+			&testAuthzManager{readOnly: readonly, withAuth: withAuth, refresh: refresh},
+			&authConfig{simple: simple, expert: expert},
 		)
 		name := fmt.Sprintf("readonly=%v/withauth=%v/expert=%v/simple=%v/refresh=%v",
 			readonly, withAuth, expert, simple, refresh)
@@ -48,7 +48,7 @@ func TestPolicies(t *testing.T) {
 			testRead(tt, pol, withAuth, expert)
 			testWrite(tt, pol, withAuth, readonly, expert)
 			testDelete(tt, pol, withAuth, readonly, expert)
-			testRefresh(tt, pol, withAuth, expert, simple, refresh)
+			testRefresh(tt, pol, withAuth, simple, refresh)
 		})
 	}
 }
@@ -56,13 +56,15 @@ func TestPolicies(t *testing.T) {
 type testAuthzManager struct {
 	readOnly bool
 	withAuth bool
+	refresh  bool
 }
 
 func (a *testAuthzManager) IsReadonly() bool      { return a.readOnly }
 func (*testAuthzManager) Owner() id.Zid           { return ownerZid }
 func (*testAuthzManager) IsOwner(zid id.Zid) bool { return zid == ownerZid }
 
-func (a *testAuthzManager) WithAuth() bool { return a.withAuth }
+func (a *testAuthzManager) WithAuth() bool      { return a.withAuth }
+func (a *testAuthzManager) IsRefreshMode() bool { return a.refresh }
 
 func (a *testAuthzManager) GetUserRole(user *meta.Meta) meta.UserRole {
 	if user == nil {
@@ -82,11 +84,10 @@ func (a *testAuthzManager) GetUserRole(user *meta.Meta) meta.UserRole {
 	return meta.UserRoleReader
 }
 
-type authConfig struct{ simple, expert, refresh bool }
+type authConfig struct{ simple, expert bool }
 
-func (ac *authConfig) IsSimpleMode() bool  { return ac.simple }
-func (ac *authConfig) IsExpertMode() bool  { return ac.expert }
-func (ac *authConfig) IsRefreshMode() bool { return ac.refresh }
+func (ac *authConfig) IsSimpleMode() bool { return ac.simple }
+func (ac *authConfig) IsExpertMode() bool { return ac.expert }
 
 func (*authConfig) GetVisibility(m *meta.Meta) meta.Visibility {
 	if val, ok := m.Get(meta.KeyVisibility); ok {
@@ -477,14 +478,14 @@ func testDelete(t *testing.T, pol auth.Policy, withAuth, readonly, expert bool) 
 	}
 }
 
-func testRefresh(t *testing.T, pol auth.Policy, withAuth, expert, simple, _ /* refresh */ bool) {
+func testRefresh(t *testing.T, pol auth.Policy, withAuth, simple, refresh bool) {
 	t.Helper()
 	testCases := []struct {
 		user *meta.Meta
 		exp  bool
 	}{
-		{newAnon(), (!withAuth && expert) || simple},
-		{newCreator(), !withAuth || expert || simple},
+		{newAnon(), (!withAuth && refresh) || simple},
+		{newCreator(), !withAuth || refresh || simple},
 		{newReader(), true},
 		{newWriter(), true},
 		{newOwner(), true},
