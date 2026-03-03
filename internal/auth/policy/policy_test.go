@@ -25,59 +25,30 @@ import (
 
 func TestPolicies(t *testing.T) {
 	t.Parallel()
-	testScene := []struct {
-		readonly bool
-		withAuth bool
-		expert   bool
-		simple   bool
-		refresh  bool
-	}{
-		{true, true, true, true, true},
-		{true, true, true, true, false},
-		{true, true, true, false, true},
-		{true, true, true, false, false},
-		{true, true, false, true, true},
-		{true, true, false, true, false},
-		{true, true, false, false, true},
-		{true, true, false, false, false},
-		{true, false, true, true, true},
-		{true, false, true, true, false},
-		{true, false, true, false, true},
-		{true, false, true, false, false},
-		{true, false, false, true, true},
-		{true, false, false, true, false},
-		{true, false, false, false, true},
-		{true, false, false, false, false},
-		{false, true, true, true, true},
-		{false, true, true, true, false},
-		{false, true, true, false, true},
-		{false, true, true, false, false},
-		{false, true, false, true, true},
-		{false, true, false, true, false},
-		{false, true, false, false, true},
-		{false, true, false, false, false},
-		{false, false, true, true, true},
-		{false, false, true, true, false},
-		{false, false, true, false, true},
-		{false, false, true, false, false},
-		{false, false, false, true, true},
-		{false, false, false, true, false},
-		{false, false, false, false, true},
-		{false, false, false, false, false},
-	}
-	for _, ts := range testScene {
+	for i := range 1 << 5 {
+		x := i
+		readonly := x%2 != 0
+		x >>= 1
+		withAuth := x%2 != 0
+		x >>= 1
+		expert := x%2 != 0
+		x >>= 1
+		simple := x%2 != 0
+		x >>= 1
+		refresh := x%2 != 0
+		x >>= 1
 		pol := newPolicy(
-			&testAuthzManager{readOnly: ts.readonly, withAuth: ts.withAuth},
-			&authConfig{simple: ts.simple, expert: ts.expert, refresh: ts.refresh},
+			&testAuthzManager{readOnly: readonly, withAuth: withAuth},
+			&authConfig{simple: simple, expert: expert, refresh: refresh},
 		)
-		name := fmt.Sprintf("readonly=%v/withauth=%v/expert=%v/simple=%v",
-			ts.readonly, ts.withAuth, ts.expert, ts.simple)
+		name := fmt.Sprintf("readonly=%v/withauth=%v/expert=%v/simple=%v/refresh=%v",
+			readonly, withAuth, expert, simple, refresh)
 		t.Run(name, func(tt *testing.T) {
-			testCreate(tt, pol, ts.withAuth, ts.readonly)
-			testRead(tt, pol, ts.withAuth, ts.expert)
-			testWrite(tt, pol, ts.withAuth, ts.readonly, ts.expert)
-			testDelete(tt, pol, ts.withAuth, ts.readonly, ts.expert)
-			testRefresh(tt, pol, ts.withAuth, ts.expert, ts.simple, ts.refresh)
+			testCreate(tt, pol, withAuth, readonly)
+			testRead(tt, pol, withAuth, expert)
+			testWrite(tt, pol, withAuth, readonly, expert)
+			testDelete(tt, pol, withAuth, readonly, expert)
+			testRefresh(tt, pol, withAuth, expert, simple, refresh)
 		})
 	}
 }
