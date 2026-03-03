@@ -1,0 +1,26 @@
+id: 00001012920531
+title: Plain Encoding
+role: manual
+tags: #api #manual #reference #zettelstore
+syntax: zmk
+created: 20260303142555
+modified: 20260303145928
+
+The ""plain"" encoding represents a zettel the same way it is stored in a file with an extension [[''.zettel''|00001005000000]].
+
+Zettel with a [[syntax|00001006020000#syntax]] value [[""zmk""|00001008000000#zmk]] are typically stored in a file with the extension ''.zettel''.
+Storing zettel with other syntax values in a ''.zettel'' file is also possible, but not recommended.
+In those cases, the zettel is stored in two files: one file (without a filename extension) contains the metadata, and the other stores the zettel content.
+
+These two cases are mirrored by specifying the required [[part|00001012920800]] of a zettel:
+
+* If part has the value ""zettel"", the full zettel, both metadata and content, is encoded.
+  This corresponds to storing a zettel in a single file with the extension ''.zettel''.
+* A part value of ""meta"" encodes only the metadata of a zettel.
+* A part value of ""content"" (the default) encodes the raw content of a zettel.
+
+If transferred via HTTP, the content type depends on the selected part:
+
+* If part has the value ""zettel"", the content type is either ''application/octet-stream'' (for binary content) or a value derived from the ''syntax'' metadata.
+* A part value of ""content"" results in a content type is derived from the ''syntax'' metadata.
+* A part value of ""meta"" results in a content type ''text/plain; charset=utf-8''.

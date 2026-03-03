@@ -1,0 +1,64 @@
+id: 00001012920528
+title: Data Encoding
+role: manual
+tags: #api #manual #reference #zettelstore
+syntax: zmk
+created: 20260303142542
+modified: 20260303163611
+
+The data encoding represents the zettel as a special [[symbolic expression|00001012930000]].
+In contrast to the similar-looking [[sz encoding|00001012920516]], a much simpler structure is used.
+
+If transferred via HTTP, the content type will be ''text/plain; charset=utf-8''.
+
+A full zettel, both metadata and content, is encoded by the list
+
+:::syntax
+''(zettel'' [[__Metadata__|#metadata]] [[__Access rights__|#access-rights]] [[__Content encoding__|#content-encoding]] [[__Content__|#content]] '')''.
+:::
+
+If you only want to encode the metadata of a zettel, the following format will be used:
+
+:::syntax
+''(list'' [[__Metadata__|#metadata]] [[__Access rights__|#access-rights]] '')''.
+:::
+
+=== Metadata
+Metadata is basically a sequence of key / value pairs:
+
+:::syntax
+__Metadata__ **=** ''(meta'' ''('' __Key__ __Value__ '')'' &hellip; '')''.
+
+__Key__ **=** Symbol.
+
+__Value__ **=** String. 
+:::
+
+Each __Key__ is a symbol, derivied from the metadata key.
+The __Value__ is a string containing the value of the corresponding metadata entry.
+
+=== Access rights
+This element encodes [[access rights|00001012921200]] of a zettel:
+
+:::syntax
+__Access rights__ **=** ''(rights'' Number '')''.
+:::
+
+=== Content encoding
+The content encoding specifies, how the zettel content is encoded.
+Currently, two values are supported: the empty string and the string ''"base64"''.
+
+:::syntax
+__Content encoding__ **=** ''(encoding "")'' **|** ''(encoding "base64")''. 
+:::
+
+The empty string indicates that the content is not encoded and can be used as is.
+''"base64"'' indicates that the content string is Base64-encoded (typically used for binary content).
+
+=== Content
+The content of a zettel is always encoded as a readable string.
+For binary content, it is first encoded using Base64.
+
+:::syntax
+__Content__ **=** ''(content'' String '')''.
+:::

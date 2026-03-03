@@ -4,10 +4,10 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20230403123653
+modified: 20260303163720
 
 A zettel representation can be encoded in various formats for further processing.
-These will be retrieved via the [[API|00001012000000]].
+These formats can be retrieved via the [[API|00001012000000]]:
 
 * [[html|00001012920510]]
 * [[md|00001012920513]]
@@ -15,3 +15,8 @@ These will be retrieved via the [[API|00001012000000]].
 * [[sz|00001012920516]]
 * [[text|00001012920519]]
 * [[zmk|00001012920522]]
+
+The following encodings are only meaningful for [[parsed|00001012053600]] zettel, but not for [[evaluated|00001012053500]] zettel:
+
+* [[data|00001012920528]]
+* [[plain|00001012920531]]
