@@ -89,8 +89,9 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			true,
 		},
 		meta.KeyLang:        {"Language", parseString, true},
-		keyMaxTransclusions: {"Maximum transclusions", parseInt, true},
+		keyMaxTransclusions: {"Maximum number of transclusions", parseInt, true},
 		keySiteName:         {"Site name", parseString, true},
+		ConfigSxMaxNesting:  {"Maximum nesting of Sx calls", parseInt, true},
 		keyYAMLHeader:       {"YAML header", parseBool, true},
 		keyZettelFileSyntax: {
 			"Zettel file syntax",
@@ -113,6 +114,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		meta.KeyLang:              meta.ValueLangEN,
 		keyMaxTransclusions:       1024,
 		keySiteName:               "Zettelstore",
+		ConfigSxMaxNesting:        32 * 1024,
 		keyYAMLHeader:             false,
 		keyZettelFileSyntax:       nil,
 		config.KeyListsMenuZettel: id.ZidTOCListsMenu,

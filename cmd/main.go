@@ -219,6 +219,9 @@ func setServiceConfig(cfg *meta.Meta, command Command) bool {
 
 	err = setConfigValue(
 		err, kernel.ConfigService, kernel.ConfigInsecureHTML, cfg.GetDefault(keyInsecureHTML, kernel.ConfigSecureHTML))
+	if val, found := cfg.Get(keySxNesting); found {
+		err = setConfigValue(err, kernel.ConfigService, kernel.ConfigSxMaxNesting, val)
+	}
 
 	err = setConfigValue(
 		err, kernel.WebService, kernel.WebListenAddress, cfg.GetDefault(keyListenAddr, "127.0.0.1:23123"))
@@ -242,9 +245,6 @@ func setServiceConfig(cfg *meta.Meta, command Command) bool {
 	err = setConfigValue(err, kernel.WebService, kernel.WebProfiling, debugMode || cfg.GetBool(keyRuntimeProfiling))
 	if val, found := cfg.Get(keyAssetDir); found {
 		err = setConfigValue(err, kernel.WebService, kernel.WebAssetDir, val)
-	}
-	if val, found := cfg.Get(keySxNesting); found {
-		err = setConfigValue(err, kernel.WebService, kernel.WebSxMaxNesting, val)
 	}
 	return err == nil
 }

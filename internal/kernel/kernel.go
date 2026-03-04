@@ -180,6 +180,7 @@ const (
 // Constants for config service keys.
 const (
 	ConfigInsecureHTML = "insecure-html"
+	ConfigSxMaxNesting = "sx-max-nesting"
 )
 
 // Constants for authentication service keys.
@@ -220,7 +221,6 @@ const (
 	WebProfiling         = "profiling"
 	WebMaxRequestSize    = "max-request-size"
 	WebSecureCookie      = "secure"
-	WebSxMaxNesting      = "sx-max-nesting"
 	WebTokenLifetimeAPI  = "api-lifetime"
 	WebTokenLifetimeHTML = "html-lifetime"
 	WebURLPrefix         = "prefix"

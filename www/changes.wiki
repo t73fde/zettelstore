@@ -23,7 +23,8 @@
      zettel. See the manual for details.
      (breaking)
   *  Move key <code>simple-mode</code> from service &ldquo;config&rdquo; to
-     service &ldquo;core&rdquo;.
+     service &ldquo;core&rdquo;. Move key <code>sx-max-nesting</code> from
+     service &ldquo;web&rdquo; to service &ldquo;config&rdquo;.
      (breaking: console)
   *  Add an action link on the zettel and info pages to generate a Zettelmarkup
      reference to the current zettel and copy it into the system clipboard.
