@@ -97,7 +97,6 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			func(val string) (any, error) { return strings.Fields(val), nil },
 			true,
 		},
-		ConfigSimpleMode:          {"Simple mode", cs.noFrozen(parseBool), true},
 		config.KeyListsMenuZettel: {"Lists menu", parseZid, true},
 		config.KeyShowBackLinks:   {"Show back links", parseString, true},
 		config.KeyShowFolgeLinks:  {"Show folge links", parseString, true},
@@ -116,7 +115,6 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keySiteName:               "Zettelstore",
 		keyYAMLHeader:             false,
 		keyZettelFileSyntax:       nil,
-		ConfigSimpleMode:          false,
 		config.KeyListsMenuZettel: id.ZidTOCListsMenu,
 		config.KeyShowBackLinks:   "",
 		config.KeyShowFolgeLinks:  "",
@@ -311,8 +309,8 @@ func (cs *configService) GetZettelFileSyntax() []meta.Value {
 
 // --- config.AuthConfig
 
-// IsSimpleMode returns true if system tuns in simple-mode.
-func (cs *configService) IsSimpleMode() bool { return cs.GetCurConfig(ConfigSimpleMode).(bool) }
+// IsSimpleMode returns true if system runs in simple-mode.
+func (*configService) IsSimpleMode() bool { return Main.core.GetCurConfig(CoreSimpleMode).(bool) }
 
 // IsExpertMode returns the current value of the "expert-mode" key.
 func (cs *configService) IsExpertMode() bool { return cs.GetCurConfig(keyExpertMode).(bool) }

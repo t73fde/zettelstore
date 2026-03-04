@@ -63,9 +63,10 @@ func (cs *coreService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) 
 			}),
 			true,
 		},
-		CoreProgname: {"Program name", nil, false},
-		CoreStarted:  {"Start time", nil, false},
-		CoreVerbose:  {"Verbose output", parseBool, true},
+		CoreProgname:   {"Program name", nil, false},
+		CoreSimpleMode: {"Simple mode", cs.noFrozen(parseBool), true},
+		CoreStarted:    {"Start time", nil, false},
+		CoreVerbose:    {"Verbose output", parseBool, true},
 		CoreVersion: {
 			"Version",
 			cs.noFrozen(func(val string) (any, error) {
@@ -79,14 +80,15 @@ func (cs *coreService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) 
 		CoreVTime: {"Version time", nil, false},
 	}
 	cs.next = interfaceMap{
-		CoreDebug:     false,
-		CoreGoArch:    runtime.GOARCH,
-		CoreGoOS:      runtime.GOOS,
-		CoreGoVersion: runtime.Version(),
-		CoreHostname:  "*unknown host*",
-		CorePort:      0,
-		CoreStarted:   time.Now().Local().Format(id.TimestampLayout),
-		CoreVerbose:   false,
+		CoreDebug:      false,
+		CoreGoArch:     runtime.GOARCH,
+		CoreGoOS:       runtime.GOOS,
+		CoreGoVersion:  runtime.Version(),
+		CoreHostname:   "*unknown host*",
+		CorePort:       0,
+		CoreStarted:    time.Now().Local().Format(id.TimestampLayout),
+		CoreSimpleMode: false,
+		CoreVerbose:    false,
 	}
 	if hn, err := os.Hostname(); err == nil {
 		cs.next[CoreHostname] = hn

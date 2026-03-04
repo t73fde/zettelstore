@@ -22,6 +22,9 @@
      meaning. <code>expert-mode</code> now only controls the visibility of
      zettel. See the manual for details.
      (breaking)
+  *  Move key <code>simple-mode</code> from service &ldquo;config&rdquo; to
+     service &ldquo;core&rdquo;.
+     (breaking: console)
   *  Add an action link on the zettel and info pages to generate a Zettelmarkup
      reference to the current zettel and copy it into the system clipboard.
      (minor: webui)

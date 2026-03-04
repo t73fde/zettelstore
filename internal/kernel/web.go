@@ -197,7 +197,7 @@ func (ws *webService) Start(kern *Kernel) error {
 	ws.srvw = srvw
 	ws.mxService.Unlock()
 
-	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
+	if kern.core.GetCurConfig(CoreSimpleMode).(bool) {
 		listenAddr := ws.GetNextConfig(WebListenAddress).(string)
 		if idx := strings.LastIndexByte(listenAddr, ':'); idx >= 0 {
 			logging.LogMandatory(ws.logger, strings.Repeat("--------------------", 3))

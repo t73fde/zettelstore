@@ -158,17 +158,18 @@ const (
 
 // Constants for core service system keys.
 const (
-	CoreDebug     = "debug"
-	CoreGoArch    = "go-arch"
-	CoreGoOS      = "go-os"
-	CoreGoVersion = "go-version"
-	CoreHostname  = "hostname"
-	CorePort      = "port"
-	CoreProgname  = "progname"
-	CoreStarted   = "started"
-	CoreVerbose   = "verbose"
-	CoreVersion   = "version"
-	CoreVTime     = "vtime"
+	CoreDebug      = "debug"
+	CoreGoArch     = "go-arch"
+	CoreGoOS       = "go-os"
+	CoreGoVersion  = "go-version"
+	CoreHostname   = "hostname"
+	CorePort       = "port"
+	CoreProgname   = "progname"
+	CoreStarted    = "started"
+	CoreSimpleMode = "simple-mode"
+	CoreVerbose    = "verbose"
+	CoreVersion    = "version"
+	CoreVTime      = "vtime"
 )
 
 // Defined values for core service.
@@ -178,7 +179,6 @@ const (
 
 // Constants for config service keys.
 const (
-	ConfigSimpleMode   = "simple-mode"
 	ConfigInsecureHTML = "insecure-html"
 )
 
@@ -277,7 +277,7 @@ func (kern *Kernel) Start(headline, lineServer bool, configFilename string) {
 	for _, srvD := range kern.srvs {
 		srvD.srv.Freeze()
 	}
-	if kern.cfg.GetCurConfig(ConfigSimpleMode).(bool) {
+	if kern.core.GetCurConfig(CoreSimpleMode).(bool) {
 		kern.logLevelVar.Set(defaultSimpleLogLevel)
 	}
 	kern.wg.Add(1)

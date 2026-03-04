@@ -185,7 +185,7 @@ const (
 	keyVerbose           = "verbose-mode"
 )
 
-func setServiceConfig(cfg *meta.Meta) bool {
+func setServiceConfig(cfg *meta.Meta, command Command) bool {
 	debugMode := cfg.GetBool(keyDebug)
 	if debugMode && kernel.Main.GetKernelLogLevel() > slog.LevelDebug {
 		kernel.Main.SetLogLevel(logging.LevelString(slog.LevelDebug))
@@ -198,6 +198,7 @@ func setServiceConfig(cfg *meta.Meta) bool {
 	if val, found := cfg.Get(keyAdminPort); found {
 		err = setConfigValue(err, kernel.CoreService, kernel.CorePort, val)
 	}
+	err = setConfigValue(err, kernel.CoreService, kernel.CoreSimpleMode, command.Simple)
 
 	err = setConfigValue(err, kernel.AuthService, kernel.AuthOwner, cfg.GetDefault(keyOwner, ""))
 	err = setConfigValue(err, kernel.AuthService, kernel.AuthReadonly, cfg.GetBool(keyReadOnly))
@@ -270,7 +271,7 @@ func executeCommand(name string, args ...string) int {
 		return 1
 	}
 	filename, cfg := getConfig(fs)
-	if !setServiceConfig(cfg) {
+	if !setServiceConfig(cfg, command) {
 		fs.Usage()
 		return 2
 	}
@@ -305,12 +306,6 @@ func executeCommand(name string, args ...string) int {
 		},
 	)
 
-	if command.Simple {
-		if err := kern.SetConfig(kernel.ConfigService, kernel.ConfigSimpleMode, "true"); err != nil {
-			kern.GetKernelLogger().Error("unable to set simple-mode", "err", err)
-			return 1
-		}
-	}
 	kern.Start(command.Header, command.LineServer, filename)
 	exitCode, err := command.Func(fs)
 	if err != nil {
