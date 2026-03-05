@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package policy
+package impl
 
 // Implement the policy of access if authentication is not enabled.
 

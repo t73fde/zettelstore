@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package policy
+package impl
 
 // Implementation of access policy, if authentication is enabled. An anonymous
 // user will have a nil value for the "user" metadata.

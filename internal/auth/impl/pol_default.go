@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package policy
+package impl
 
 // Implements the default behaviour of the access policy.
 

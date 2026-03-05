@@ -26,7 +26,6 @@ import (
 	"t73f.de/r/zsc/sexp"
 
 	"zettelstore.de/z/internal/auth"
-	"zettelstore.de/z/internal/auth/policy"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/kernel"
@@ -179,5 +178,6 @@ func (a *myAuth) GetUserRole(user *meta.Meta) meta.UserRole {
 }
 
 func (a *myAuth) BoxWithPolicy(unprotectedBox box.Box, rtConfig config.Config) (box.Box, auth.Policy) {
-	return policy.BoxWithPolicy(a, unprotectedBox, rtConfig)
+	pol := newPolicy(a, rtConfig)
+	return newBox(unprotectedBox, pol), pol
 }

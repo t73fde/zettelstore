@@ -11,8 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-// Package policy provides some interfaces and implementation for authorizsation policies.
-package policy
+package impl
 
 import (
 	"t73f.de/r/zsc/domain/meta"
