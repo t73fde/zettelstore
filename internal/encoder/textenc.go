@@ -24,14 +24,14 @@ import (
 	"t73f.de/r/zsx"
 	"t73f.de/r/zsx/input"
 
-	"zettelstore.de/z/internal/domain"
+	"zettelstore.de/z/internal/zettel"
 )
 
 // TextEncoder encodes just the text and ignores any formatting.
 type TextEncoder struct{}
 
 // WriteZettel writes metadata and content.
-func (te *TextEncoder) WriteZettel(w io.Writer, zn *domain.Zettel) error {
+func (te *TextEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
 	v := newTextVisitor(w)
 	_ = te.WriteMeta(&v.b, zn.InhMeta)
 	v.walk(zn.Blocks, nil)

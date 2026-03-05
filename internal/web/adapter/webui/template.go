@@ -39,7 +39,6 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/web/adapter"
@@ -362,7 +361,7 @@ func (wui *WebUI) bindQueryURL(rb *renderBinder, strZid, symName, directive stri
 }
 
 func (wui *WebUI) buildListsMenuSxn(ctx context.Context, lang string) *sx.Pair {
-	var zn *domain.Zettel
+	var zn *zettel.ParsedZettel
 	if menuZid, err := id.Parse(wui.getConfig(ctx, nil, config.KeyListsMenuZettel)); err == nil {
 		if zn, err = wui.evalZettel.Run(ctx, menuZid, ""); err != nil {
 			zn = nil

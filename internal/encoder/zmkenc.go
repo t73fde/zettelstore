@@ -25,14 +25,14 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/domain"
+	"zettelstore.de/z/internal/zettel"
 )
 
 // zmkEncoder contains all data needed for encoding.
 type zmkEncoder struct{}
 
 // WriteZettel writes the encoded zettel to the writer.
-func (ze *zmkEncoder) WriteZettel(w io.Writer, zn *domain.Zettel) error {
+func (ze *zmkEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
 	v := newZmkVisitor(w)
 	v.b.WriteMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {

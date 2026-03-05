@@ -19,8 +19,8 @@ import (
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/parser"
+	"zettelstore.de/z/internal/zettel"
 )
 
 // ParseZettel is the data for this use case.
@@ -35,7 +35,7 @@ func NewParseZettel(rtConfig config.Config, getZettel GetZettel) ParseZettel {
 }
 
 // Run executes the use case.
-func (uc ParseZettel) Run(ctx context.Context, zid id.Zid, syntax string) (*domain.Zettel, error) {
+func (uc ParseZettel) Run(ctx context.Context, zid id.Zid, syntax string) (*zettel.ParsedZettel, error) {
 	zettel, err := uc.getZettel.Run(ctx, zid, false)
 	if err != nil {
 		return nil, err

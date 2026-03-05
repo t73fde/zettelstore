@@ -25,7 +25,7 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/domain"
+	"zettelstore.de/z/internal/zettel"
 )
 
 // mdEncoder contains all data needed for encoding.
@@ -34,7 +34,7 @@ type mdEncoder struct {
 }
 
 // WriteZettel writes the encoded zettel to the writer.
-func (me *mdEncoder) WriteZettel(w io.Writer, zn *domain.Zettel) error {
+func (me *mdEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
 	v := newMDVisitor(w, me.lang)
 	v.b.WriteMeta(zn.InhMeta)
 	if zn.InhMeta.YamlSep {

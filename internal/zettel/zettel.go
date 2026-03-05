@@ -14,7 +14,11 @@
 // Package zettel provides specific types, constants, and functions for zettel.
 package zettel
 
-import "t73f.de/r/zsc/domain/meta"
+import (
+	"t73f.de/r/sx"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
+)
 
 // Zettel is the main data object of a zettelstore.
 type Zettel struct {
@@ -29,4 +33,14 @@ func (z Zettel) ByteSize() int { return z.Meta.ByteSize() + z.Content.Length() }
 // Equal compares two zettel for equality.
 func (z Zettel) Equal(o Zettel, allowComputed bool) bool {
 	return z.Meta.Equal(o.Meta, allowComputed) && z.Content.Equal(&o.Content)
+}
+
+// ParsedZettel is the root node of the abstract syntax tree.
+type ParsedZettel struct {
+	Meta    *meta.Meta // Original metadata
+	Content Content    // Original content
+	Zid     id.Zid     // Zettel identification.
+	InhMeta *meta.Meta // Metadata of the zettel, with inherited values.
+	Blocks  *sx.Pair   // Syntax tree, encodes as an sx.Object.
+	Syntax  string     // Syntax / parser that produced the Ast
 }

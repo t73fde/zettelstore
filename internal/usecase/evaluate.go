@@ -22,7 +22,6 @@ import (
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/evaluator"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
@@ -46,7 +45,7 @@ func NewEvaluate(rtConfig config.Config, ucGetZettel *GetZettel, ucQuery *Query)
 }
 
 // Run executes the use case.
-func (uc *Evaluate) Run(ctx context.Context, zid id.Zid, syntax string) (*domain.Zettel, error) {
+func (uc *Evaluate) Run(ctx context.Context, zid id.Zid, syntax string) (*zettel.ParsedZettel, error) {
 	zettel, err := uc.ucGetZettel.Run(ctx, zid, true)
 	if err != nil {
 		return nil, err
@@ -55,7 +54,7 @@ func (uc *Evaluate) Run(ctx context.Context, zid id.Zid, syntax string) (*domain
 }
 
 // RunZettel executes the use case for a given zettel.
-func (uc *Evaluate) RunZettel(ctx context.Context, zettel zettel.Zettel, syntax string) *domain.Zettel {
+func (uc *Evaluate) RunZettel(ctx context.Context, zettel zettel.Zettel, syntax string) *zettel.ParsedZettel {
 	zn := parser.ParseZettel(ctx, zettel, syntax, uc.rtConfig)
 	evaluator.EvaluateZettel(ctx, uc, uc.rtConfig, zn)
 	parser.Clean(zn.Blocks)

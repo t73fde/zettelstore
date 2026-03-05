@@ -27,7 +27,6 @@ import (
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/config"
-	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
@@ -41,7 +40,7 @@ type Port interface {
 
 // EvaluateZettel evaluates the given zettel in the given context, with the
 // given ports, and the given environment.
-func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *domain.Zettel) {
+func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *zettel.ParsedZettel) {
 	switch zn.Syntax {
 	case meta.ValueSyntaxNone:
 		// AST is empty, evaluate to a description list of metadata.
@@ -64,7 +63,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block
 		transcludeCount: 0,
 		costMap:         map[id.Zid]transcludeCost{},
 		embedMap:        map[string]*sx.Pair{},
-		marker:          &domain.Zettel{},
+		marker:          &zettel.ParsedZettel{},
 	}
 	return mustPair(zsx.Walk(&e, block, nil))
 }
@@ -76,12 +75,12 @@ type evaluator struct {
 	transcludeMax   int
 	transcludeCount int
 	costMap         map[id.Zid]transcludeCost
-	marker          *domain.Zettel
+	marker          *zettel.ParsedZettel
 	embedMap        map[string]*sx.Pair
 }
 
 type transcludeCost struct {
-	zn *domain.Zettel
+	zn *zettel.ParsedZettel
 	ec int
 }
 
@@ -106,7 +105,7 @@ func (e *evaluator) VisitAfter(node *sx.Pair, _ *sx.Pair) sx.Object {
 	return node
 }
 
-func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *domain.Zettel {
+func (e *evaluator) evaluateEmbeddedZettel(zettel zettel.Zettel) *zettel.ParsedZettel {
 	zn := parser.ParseZettel(e.ctx, zettel, string(zettel.Meta.GetDefault(meta.KeySyntax, meta.DefaultSyntax)), e.rtConfig)
 	parser.Clean(zn.Blocks)
 	zn.Blocks = mustPair(zsx.Walk(e, zn.Blocks, nil))
