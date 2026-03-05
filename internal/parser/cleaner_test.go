@@ -19,6 +19,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/sx/sxreader"
+
 	"zettelstore.de/z/internal/parser"
 )
 
