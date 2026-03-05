@@ -28,7 +28,6 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/notify"
 	"zettelstore.de/z/internal/logging"
-	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -90,14 +89,14 @@ func (zb *zipBox) Stop(context.Context) {
 	zb.dirSrv = nil
 }
 
-func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	entry := zb.dirSrv.GetDirEntry(zid)
 	if !entry.IsValid() {
-		return zettel.Zettel{}, box.ErrZettelNotFound{Zid: zid}
+		return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 	}
 	reader, err := zip.OpenReader(zb.name)
 	if err != nil {
-		return zettel.Zettel{}, err
+		return box.Zettel{}, err
 	}
 	defer func() { _ = reader.Close() }()
 
@@ -109,11 +108,11 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error
 	if metaName := entry.MetaName; metaName == "" {
 		if contentName == "" {
 			err = fmt.Errorf("no meta, no content in getZettel, zid=%v", zid)
-			return zettel.Zettel{}, err
+			return box.Zettel{}, err
 		}
 		src, err = readZipFileContent(reader, entry.ContentName)
 		if err != nil {
-			return zettel.Zettel{}, err
+			return box.Zettel{}, err
 		}
 		if entry.HasMetaInContent() {
 			inp := input.NewInput(src)
@@ -125,27 +124,27 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error
 	} else {
 		m, err = readZipMetaFile(reader, zid, metaName)
 		if err != nil {
-			return zettel.Zettel{}, err
+			return box.Zettel{}, err
 		}
 		inMeta = true
 		if contentName != "" {
 			src, err = readZipFileContent(reader, entry.ContentName)
 			if err != nil {
-				return zettel.Zettel{}, err
+				return box.Zettel{}, err
 			}
 		}
 	}
 
 	CleanupMeta(m, zid, entry.ContentExt, inMeta, entry.UselessFiles)
 	logging.LogTrace(zb.logger, "GetZettel", "zid", zid)
-	return zettel.Zettel{Meta: m, Content: zettel.NewContent(src)}, nil
+	return box.Zettel{Meta: m, Content: zettel.NewContent(src)}, nil
 }
 
 func (zb *zipBox) HasZettel(_ context.Context, zid id.Zid) bool {
 	return zb.dirSrv.GetDirEntry(zid).IsValid()
 }
 
-func (zb *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
+func (zb *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	entries := zb.dirSrv.GetDirEntries(constraint)
 	logging.LogTrace(zb.logger, "ApplyZid", "entries", len(entries))
 	for _, entry := range entries {
@@ -154,7 +153,7 @@ func (zb *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint que
 	return nil
 }
 
-func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
+func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
 	reader, err := zip.OpenReader(zb.name)
 	if err != nil {
 		return err

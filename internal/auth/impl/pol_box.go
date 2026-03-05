@@ -22,8 +22,6 @@ import (
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/query"
-	"zettelstore.de/z/internal/zettel"
 )
 
 // polBox implements a policy box.
@@ -48,7 +46,7 @@ func (pp *polBox) CanCreateZettel(ctx context.Context) bool {
 	return pp.box.CanCreateZettel(ctx)
 }
 
-func (pp *polBox) CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zid, error) {
+func (pp *polBox) CreateZettel(ctx context.Context, zettel box.Zettel) (id.Zid, error) {
 	user := auth.GetCurrentUser(ctx)
 	if pp.policy.CanCreate(user, zettel.Meta) {
 		return pp.box.CreateZettel(ctx, zettel)
@@ -56,19 +54,19 @@ func (pp *polBox) CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zi
 	return id.Invalid, box.NewErrNotAllowed("Create", user, id.Invalid)
 }
 
-func (pp *polBox) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (pp *polBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
 	z, err := pp.box.GetZettel(ctx, zid)
 	if err != nil {
-		return zettel.Zettel{}, err
+		return box.Zettel{}, err
 	}
 	user := auth.GetCurrentUser(ctx)
 	if pp.policy.CanRead(user, z.Meta) {
 		return z, nil
 	}
-	return zettel.Zettel{}, box.NewErrNotAllowed("GetZettel", user, zid)
+	return box.Zettel{}, box.NewErrNotAllowed("GetZettel", user, zid)
 }
 
-func (pp *polBox) GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zettel, error) {
+func (pp *polBox) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel, error) {
 	return pp.box.GetAllZettel(ctx, zid)
 }
 
@@ -88,18 +86,18 @@ func (pp *polBox) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
 	return nil, box.NewErrNotAllowed("GetMeta", user, zid)
 }
 
-func (pp *polBox) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error) {
+func (pp *polBox) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box.Query) ([]*meta.Meta, error) {
 	user := auth.GetCurrentUser(ctx)
 	canRead := pp.policy.CanRead
 	q = q.SetPreMatch(func(m *meta.Meta) bool { return canRead(user, m) })
 	return pp.box.SelectMeta(ctx, metaSeq, q)
 }
 
-func (pp *polBox) CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) bool {
+func (pp *polBox) CanUpdateZettel(ctx context.Context, zettel box.Zettel) bool {
 	return pp.box.CanUpdateZettel(ctx, zettel)
 }
 
-func (pp *polBox) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error {
+func (pp *polBox) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
 	zid := zettel.Meta.Zid
 	user := auth.GetCurrentUser(ctx)
 	if !zid.IsValid() {

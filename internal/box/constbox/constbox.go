@@ -27,7 +27,6 @@ import (
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
-	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -60,14 +59,14 @@ type constBox struct {
 
 func (*constBox) Location() string { return "const:" }
 
-func (cb *constBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (cb *constBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	if z, ok := cb.zettel[zid]; ok {
 		logging.LogTrace(cb.logger, "GetZettel")
-		return zettel.Zettel{Meta: meta.NewWithData(zid, z.header), Content: z.content}, nil
+		return box.Zettel{Meta: meta.NewWithData(zid, z.header), Content: z.content}, nil
 	}
 	err := box.ErrZettelNotFound{Zid: zid}
 	logging.LogTrace(cb.logger, "GetZettel/Err", "err", err)
-	return zettel.Zettel{}, err
+	return box.Zettel{}, err
 }
 
 func (cb *constBox) HasZettel(_ context.Context, zid id.Zid) bool {
@@ -75,7 +74,7 @@ func (cb *constBox) HasZettel(_ context.Context, zid id.Zid) bool {
 	return found
 }
 
-func (cb *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
+func (cb *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	logging.LogTrace(cb.logger, "ApplyZid", "entries", len(cb.zettel))
 	for zid := range cb.zettel {
 		if constraint(zid) {
@@ -85,7 +84,7 @@ func (cb *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint q
 	return nil
 }
 
-func (cb *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
+func (cb *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
 	logging.LogTrace(cb.logger, "ApplyMeta", "entries", len(cb.zettel))
 	for zid, zettel := range cb.zettel {
 		if constraint(zid) {

@@ -26,8 +26,6 @@ import (
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
-	"zettelstore.de/z/internal/query"
-	"zettelstore.de/z/internal/zettel"
 )
 
 func init() {
@@ -51,7 +49,7 @@ type memBox struct {
 	maxZettel int
 	maxBytes  int
 	mx        sync.RWMutex // Protects the following fields
-	zettel    map[id.Zid]zettel.Zettel
+	zettel    map[id.Zid]box.Zettel
 	curBytes  int
 }
 
@@ -76,7 +74,7 @@ func (mb *memBox) State() box.StartState {
 
 func (mb *memBox) Start(context.Context) error {
 	mb.mx.Lock()
-	mb.zettel = make(map[id.Zid]zettel.Zettel)
+	mb.zettel = make(map[id.Zid]box.Zettel)
 	mb.curBytes = 0
 	mb.mx.Unlock()
 	logging.LogTrace(mb.logger, "Start box", "max-zettel", mb.maxZettel, "max-bytes", mb.maxBytes)
@@ -95,7 +93,7 @@ func (mb *memBox) CanCreateZettel(context.Context) bool {
 	return len(mb.zettel) < mb.maxZettel
 }
 
-func (mb *memBox) CreateZettel(_ context.Context, zettel zettel.Zettel) (id.Zid, error) {
+func (mb *memBox) CreateZettel(_ context.Context, zettel box.Zettel) (id.Zid, error) {
 	mb.mx.Lock()
 	newBytes := mb.curBytes + zettel.ByteSize()
 	if mb.maxZettel <= len(mb.zettel) || mb.maxBytes < newBytes {
@@ -122,12 +120,12 @@ func (mb *memBox) CreateZettel(_ context.Context, zettel zettel.Zettel) (id.Zid,
 	return zid, nil
 }
 
-func (mb *memBox) GetZettel(_ context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (mb *memBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	mb.mx.RLock()
 	z, ok := mb.zettel[zid]
 	mb.mx.RUnlock()
 	if !ok {
-		return zettel.Zettel{}, box.ErrZettelNotFound{Zid: zid}
+		return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 	}
 	z.Meta = z.Meta.Clone()
 	logging.LogTrace(mb.logger, "GetZettel")
@@ -141,7 +139,7 @@ func (mb *memBox) HasZettel(_ context.Context, zid id.Zid) bool {
 	return found
 }
 
-func (mb *memBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
+func (mb *memBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	mb.mx.RLock()
 	defer mb.mx.RUnlock()
 	logging.LogTrace(mb.logger, "ApplyZid", "entries", len(mb.zettel))
@@ -153,7 +151,7 @@ func (mb *memBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint que
 	return nil
 }
 
-func (mb *memBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
+func (mb *memBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
 	mb.mx.RLock()
 	defer mb.mx.RUnlock()
 	logging.LogTrace(mb.logger, "ApplyMeta", "entries", len(mb.zettel))
@@ -167,7 +165,7 @@ func (mb *memBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 	return nil
 }
 
-func (mb *memBox) CanUpdateZettel(_ context.Context, zettel zettel.Zettel) bool {
+func (mb *memBox) CanUpdateZettel(_ context.Context, zettel box.Zettel) bool {
 	mb.mx.RLock()
 	defer mb.mx.RUnlock()
 	zid := zettel.Meta.Zid
@@ -182,7 +180,7 @@ func (mb *memBox) CanUpdateZettel(_ context.Context, zettel zettel.Zettel) bool 
 	return newBytes < mb.maxBytes
 }
 
-func (mb *memBox) UpdateZettel(_ context.Context, zettel zettel.Zettel) error {
+func (mb *memBox) UpdateZettel(_ context.Context, zettel box.Zettel) error {
 	m := zettel.Meta.Clone()
 	if !m.Zid.IsValid() {
 		return box.ErrInvalidZid{Zid: m.Zid.String()}

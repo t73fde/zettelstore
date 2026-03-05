@@ -26,7 +26,6 @@ import (
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
-	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -82,24 +81,24 @@ func Setup(cfg *meta.Meta) { myConfig = cfg.Clone() }
 
 func (*compBox) Location() string { return "" }
 
-func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
 	if gen, ok := myZettel[zid]; ok && gen.meta != nil {
 		if m := gen.meta(zid); m != nil {
 			updateMeta(m)
 			if genContent := gen.content; genContent != nil {
 				logging.LogTrace(cb.logger, "GetZettel/Content")
-				return zettel.Zettel{
+				return box.Zettel{
 					Meta:    m,
 					Content: zettel.NewContent(genContent(ctx, cb)),
 				}, nil
 			}
 			logging.LogTrace(cb.logger, "GetZettel/NoContent")
-			return zettel.Zettel{Meta: m}, nil
+			return box.Zettel{Meta: m}, nil
 		}
 	}
 	err := box.ErrZettelNotFound{Zid: zid}
 	logging.LogTrace(cb.logger, "GetZettel/Err", "err", err)
-	return zettel.Zettel{}, err
+	return box.Zettel{}, err
 }
 
 func (*compBox) HasZettel(_ context.Context, zid id.Zid) bool {
@@ -107,7 +106,7 @@ func (*compBox) HasZettel(_ context.Context, zid id.Zid) bool {
 	return found
 }
 
-func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
+func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	logging.LogTrace(cb.logger, "ApplyZid", "entries", len(myZettel))
 	for zid, gen := range myZettel {
 		if !constraint(zid) {
@@ -122,7 +121,7 @@ func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint qu
 	return nil
 }
 
-func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
+func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
 	logging.LogTrace(cb.logger, "ApplyMeta", "entries", len(myZettel))
 	for zid, gen := range myZettel {
 		if !constraint(zid) {

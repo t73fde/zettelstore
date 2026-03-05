@@ -31,7 +31,6 @@ import (
 	"zettelstore.de/z/internal/box/notify"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
-	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -228,7 +227,7 @@ func (dp *dirBox) CanCreateZettel(_ context.Context) bool {
 	return !dp.readonly
 }
 
-func (dp *dirBox) CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zid, error) {
+func (dp *dirBox) CreateZettel(ctx context.Context, zettel box.Zettel) (id.Zid, error) {
 	if dp.readonly {
 		return id.Invalid, box.ErrReadOnly
 	}
@@ -251,16 +250,16 @@ func (dp *dirBox) CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zi
 	return meta.Zid, err
 }
 
-func (dp *dirBox) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (dp *dirBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
 	entry := dp.dirSrv.GetDirEntry(zid)
 	if !entry.IsValid() {
-		return zettel.Zettel{}, box.ErrZettelNotFound{Zid: zid}
+		return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 	}
 	m, c, err := dp.srvGetMetaContent(ctx, entry, zid)
 	if err != nil {
-		return zettel.Zettel{}, err
+		return box.Zettel{}, err
 	}
-	zettel := zettel.Zettel{Meta: m, Content: zettel.NewContent(c)}
+	zettel := box.Zettel{Meta: m, Content: zettel.NewContent(c)}
 	logging.LogTrace(dp.logger, "GetZettel", "zid", zid)
 	return zettel, nil
 }
@@ -269,7 +268,7 @@ func (dp *dirBox) HasZettel(_ context.Context, zid id.Zid) bool {
 	return dp.dirSrv.GetDirEntry(zid).IsValid()
 }
 
-func (dp *dirBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint query.RetrievePredicate) error {
+func (dp *dirBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	entries := dp.dirSrv.GetDirEntries(constraint)
 	logging.LogTrace(dp.logger, "ApplyZid", "entries", len(entries))
 	for _, entry := range entries {
@@ -278,7 +277,7 @@ func (dp *dirBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint que
 	return nil
 }
 
-func (dp *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint query.RetrievePredicate) error {
+func (dp *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
 	entries := dp.dirSrv.GetDirEntries(constraint)
 	logging.LogTrace(dp.logger, "ApplyMeta", "entries", len(entries))
 
@@ -295,11 +294,11 @@ func (dp *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 	return nil
 }
 
-func (dp *dirBox) CanUpdateZettel(context.Context, zettel.Zettel) bool {
+func (dp *dirBox) CanUpdateZettel(context.Context, box.Zettel) bool {
 	return !dp.readonly
 }
 
-func (dp *dirBox) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error {
+func (dp *dirBox) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
 	if dp.readonly {
 		return box.ErrReadOnly
 	}

@@ -28,7 +28,6 @@ import (
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
-	"zettelstore.de/z/internal/zettel"
 )
 
 // SearchEqual returns all zettel that contains the given exact word.
@@ -148,7 +147,7 @@ func (mgr *Manager) idxSleepService(timer *time.Timer, timerDuration time.Durati
 	return true
 }
 
-func (mgr *Manager) idxUpdateZettel(ctx context.Context, zettel zettel.Zettel) {
+func (mgr *Manager) idxUpdateZettel(ctx context.Context, zettel box.Zettel) {
 	var cData collectData
 	cData.initialize()
 	if mustIndexZettel(zettel.Meta) {

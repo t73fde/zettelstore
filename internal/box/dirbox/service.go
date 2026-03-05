@@ -27,10 +27,10 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsx/input"
 
+	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/filebox"
 	"zettelstore.de/z/internal/box/notify"
 	"zettelstore.de/z/internal/kernel"
-	"zettelstore.de/z/internal/zettel"
 )
 
 func fileService(i uint32, logger *slog.Logger, dirPath string, cmds <-chan fileCmd) {
@@ -172,7 +172,7 @@ func (cmd *fileGetMetaContent) run(dirPath string) {
 //
 // Writes a new or exsting zettel.
 
-func (dp *dirBox) srvSetZettel(ctx context.Context, entry *notify.DirEntry, zettel zettel.Zettel) error {
+func (dp *dirBox) srvSetZettel(ctx context.Context, entry *notify.DirEntry, zettel box.Zettel) error {
 	rc := make(chan resSetZettel, 1)
 	dp.getFileChan(zettel.Meta.Zid) <- &fileSetZettel{entry, zettel, rc}
 	ctx, cancel := context.WithTimeout(ctx, serviceTimeout)
@@ -187,7 +187,7 @@ func (dp *dirBox) srvSetZettel(ctx context.Context, entry *notify.DirEntry, zett
 
 type fileSetZettel struct {
 	entry  *notify.DirEntry
-	zettel zettel.Zettel
+	zettel box.Zettel
 	rc     chan<- resSetZettel
 }
 type resSetZettel = error

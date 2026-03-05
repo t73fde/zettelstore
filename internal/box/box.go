@@ -29,6 +29,18 @@ import (
 	"zettelstore.de/z/internal/zettel"
 )
 
+// Some re-exports
+type (
+	// Zettel is the main data structure of a zettelstore and so of a box
+	Zettel = zettel.Zettel
+
+	// Query is a mechanism to select zettel
+	Query = query.Query
+
+	// RetrievePredicate is a bool function that show if a zettel is contained in a Query.
+	RetrievePredicate = query.RetrievePredicate
+)
+
 // BaseBox is implemented by all Zettel boxes.
 type BaseBox interface {
 	// Location returns some information where the box is located.
@@ -36,7 +48,7 @@ type BaseBox interface {
 	Location() string
 
 	// GetZettel retrieves a specific zettel.
-	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)
+	GetZettel(ctx context.Context, zid id.Zid) (Zettel, error)
 }
 
 // CreateBox is a box that can create zettel content.
@@ -46,16 +58,16 @@ type CreateBox interface {
 
 	// CreateZettel creates a new zettel.
 	// Returns the new zettel id (and an error indication).
-	CreateZettel(ctx context.Context, zettel zettel.Zettel) (id.Zid, error)
+	CreateZettel(ctx context.Context, zettel Zettel) (id.Zid, error)
 }
 
 // UpdateBox is a box that can update zettel content.
 type UpdateBox interface {
 	// CanUpdateZettel returns true, if box could possibly update the given zettel.
-	CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) bool
+	CanUpdateZettel(ctx context.Context, zettel Zettel) bool
 
 	// UpdateZettel updates an existing zettel.
-	UpdateZettel(ctx context.Context, zettel zettel.Zettel) error
+	UpdateZettel(ctx context.Context, zettel Zettel) error
 }
 
 // DeleteBox is a box that can delete zettel content.
@@ -81,10 +93,10 @@ type ManagedBox interface {
 	HasZettel(context.Context, id.Zid) bool
 
 	// Apply identifier of every zettel to the given function, if predicate returns true.
-	ApplyZid(context.Context, ZidFunc, query.RetrievePredicate) error
+	ApplyZid(context.Context, ZidFunc, RetrievePredicate) error
 
 	// Apply metadata of every zettel to the given function, if predicate returns true.
-	ApplyMeta(context.Context, MetaFunc, query.RetrievePredicate) error
+	ApplyMeta(context.Context, MetaFunc, RetrievePredicate) error
 
 	// ReadStats populates st with box statistics
 	ReadStats(st *ManagedBoxStats)
@@ -148,10 +160,10 @@ type Box interface {
 
 	// SelectMeta returns a list of metadata that comply to the given selection criteria.
 	// If `metaSeq` is `nil`, the box assumes metadata of all available zettel.
-	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error)
+	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *Query) ([]*meta.Meta, error)
 
 	// GetAllZettel retrieves a specific zettel from all managed boxes.
-	GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zettel, error)
+	GetAllZettel(ctx context.Context, zid id.Zid) ([]Zettel, error)
 
 	// Refresh the data from the box and from its managed sub-boxes.
 	Refresh(context.Context) error
@@ -262,7 +274,7 @@ func DoEnrich(ctx context.Context) bool {
 }
 
 // NoEnrichQuery provides a context that signals not to enrich, if the query does not need this.
-func NoEnrichQuery(ctx context.Context, q *query.Query) context.Context {
+func NoEnrichQuery(ctx context.Context, q *Query) context.Context {
 	if q.EnrichNeeded() {
 		return ctx
 	}

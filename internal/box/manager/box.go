@@ -25,7 +25,6 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/query"
-	"zettelstore.de/z/internal/zettel"
 )
 
 // Contains all box.Box related functions
@@ -59,7 +58,7 @@ func (mgr *Manager) CanCreateZettel(ctx context.Context) bool {
 }
 
 // CreateZettel creates a new zettel.
-func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid, error) {
+func (mgr *Manager) CreateZettel(ctx context.Context, ztl box.Zettel) (id.Zid, error) {
 	mgr.mgrLogger.Debug("CreateZettel")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return id.Invalid, err
@@ -78,16 +77,16 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl zettel.Zettel) (id.Zid
 }
 
 // GetZettel retrieves a specific zettel.
-func (mgr *Manager) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (mgr *Manager) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
 	mgr.mgrLogger.Debug("GetZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
-		return zettel.Zettel{}, err
+		return box.Zettel{}, err
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	return mgr.getZettel(ctx, zid)
 }
-func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
 	for i, p := range mgr.boxes {
 		z, err := p.GetZettel(ctx, zid)
 		if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr {
@@ -97,18 +96,18 @@ func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, e
 			return z, err
 		}
 	}
-	return zettel.Zettel{}, box.ErrZettelNotFound{Zid: zid}
+	return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 }
 
 // GetAllZettel retrieves a specific zettel from all managed boxes.
-func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]zettel.Zettel, error) {
+func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel, error) {
 	mgr.mgrLogger.Debug("GetAllZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
-	var result []zettel.Zettel
+	var result []box.Zettel
 	for i, p := range mgr.boxes {
 		if z, err := p.GetZettel(ctx, zid); err == nil {
 			mgr.Enrich(ctx, z.Meta, i+1)
@@ -178,7 +177,7 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 
 // SelectMeta returns all zettel meta data that match the selection
 // criteria. The result is ordered by descending zettel id.
-func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error) {
+func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box.Query) ([]*meta.Meta, error) {
 	mgr.mgrLogger.Debug("SelectMeta", "query", q)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
@@ -228,7 +227,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *que
 }
 
 // CanUpdateZettel returns true, if box could possibly update the given zettel.
-func (mgr *Manager) CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) bool {
+func (mgr *Manager) CanUpdateZettel(ctx context.Context, zettel box.Zettel) bool {
 	if err := mgr.checkContinue(ctx); err != nil {
 		return false
 	}
@@ -242,14 +241,14 @@ func (mgr *Manager) CanUpdateZettel(ctx context.Context, zettel zettel.Zettel) b
 }
 
 // UpdateZettel updates an existing zettel.
-func (mgr *Manager) UpdateZettel(ctx context.Context, zettel zettel.Zettel) error {
+func (mgr *Manager) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
 	mgr.mgrLogger.Debug("UpdateZettel", "zid", zettel.Meta.Zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return err
 	}
 	return mgr.updateZettel(ctx, zettel)
 }
-func (mgr *Manager) updateZettel(ctx context.Context, zettel zettel.Zettel) error {
+func (mgr *Manager) updateZettel(ctx context.Context, zettel box.Zettel) error {
 	if updateBox, isUpdateBox := mgr.boxes[0].(box.UpdateBox); isUpdateBox {
 		zettel.Meta = mgr.cleanMetaProperties(zettel.Meta)
 		if err := updateBox.UpdateZettel(ctx, zettel); err != nil {

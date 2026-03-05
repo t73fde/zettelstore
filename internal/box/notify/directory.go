@@ -28,7 +28,6 @@ import (
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
-	"zettelstore.de/z/internal/query"
 )
 
 type entrySet map[id.Zid]*DirEntry
@@ -126,7 +125,7 @@ func (ds *DirService) NumDirEntries() int {
 }
 
 // GetDirEntries returns a list of directory entries, which satisfy the given constraint.
-func (ds *DirService) GetDirEntries(constraint query.RetrievePredicate) []*DirEntry {
+func (ds *DirService) GetDirEntries(constraint box.RetrievePredicate) []*DirEntry {
 	ds.mx.RLock()
 	defer ds.mx.RUnlock()
 	if ds.entries == nil {
