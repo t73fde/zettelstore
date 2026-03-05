@@ -18,6 +18,7 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
+	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/zettel"
 )
 
@@ -38,6 +39,9 @@ func NewGetZettel(port GetZettelPort) GetZettel {
 }
 
 // Run executes the use case.
-func (uc GetZettel) Run(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
+func (uc GetZettel) Run(ctx context.Context, zid id.Zid, enrich bool) (zettel.Zettel, error) {
+	if !enrich {
+		ctx = box.NoEnrichContext(ctx)
+	}
 	return uc.port.GetZettel(ctx, zid)
 }

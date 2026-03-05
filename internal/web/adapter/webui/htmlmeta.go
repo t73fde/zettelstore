@@ -152,7 +152,7 @@ type getTextTitleFunc func(id.Zid) (string, int)
 
 func (wui *WebUI) makeGetTextTitle(ctx context.Context, getZettel usecase.GetZettel) getTextTitleFunc {
 	return func(zid id.Zid) (string, int) {
-		z, err := getZettel.Run(box.NoEnrichContext(ctx), zid)
+		z, err := getZettel.Run(ctx, zid, false)
 		if err != nil {
 			if errors.Is(err, &box.ErrNotAllowed{}) {
 				return "", -1

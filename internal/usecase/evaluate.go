@@ -47,7 +47,7 @@ func NewEvaluate(rtConfig config.Config, ucGetZettel *GetZettel, ucQuery *Query)
 
 // Run executes the use case.
 func (uc *Evaluate) Run(ctx context.Context, zid id.Zid, syntax string) (*domain.Zettel, error) {
-	zettel, err := uc.ucGetZettel.Run(ctx, zid)
+	zettel, err := uc.ucGetZettel.Run(ctx, zid, true)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (uc *Evaluate) RunBlockNode(ctx context.Context, block *sx.Pair) *sx.Pair {
 
 // GetZettel retrieves the full zettel of a given zettel identifier.
 func (uc *Evaluate) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error) {
-	return uc.ucGetZettel.Run(ctx, zid)
+	return uc.ucGetZettel.Run(ctx, zid, true)
 }
 
 // QueryMeta returns a list of metadata that comply to the given selection criteria.

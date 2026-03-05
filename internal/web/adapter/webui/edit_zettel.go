@@ -39,7 +39,7 @@ func (wui *WebUI) MakeEditGetZettelHandler(
 			return
 		}
 
-		zettel, err := getZettel.Run(box.NoEnrichContext(ctx), zid)
+		zettel, err := getZettel.Run(ctx, zid, false)
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return

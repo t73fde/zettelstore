@@ -25,7 +25,6 @@ import (
 	"t73f.de/r/zsc/sexp"
 	"t73f.de/r/zsc/webapi"
 
-	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/domain"
 	"zettelstore.de/z/internal/encoder"
 	"zettelstore.de/z/internal/usecase"
@@ -77,7 +76,7 @@ func (a *WebAPI) writePlainData(ctx context.Context, w http.ResponseWriter, zid 
 	var contentType string
 	var err error
 
-	z, err := getZettel.Run(box.NoEnrichContext(ctx), zid)
+	z, err := getZettel.Run(ctx, zid, false)
 	if err != nil {
 		a.reportUsecaseError(w, err)
 		return
@@ -113,7 +112,7 @@ func (a *WebAPI) writePlainData(ctx context.Context, w http.ResponseWriter, zid 
 }
 
 func (a *WebAPI) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.Zid, part partType, getZettel usecase.GetZettel) {
-	z, err := getZettel.Run(ctx, zid)
+	z, err := getZettel.Run(ctx, zid, false)
 	if err != nil {
 		a.reportUsecaseError(w, err)
 		return

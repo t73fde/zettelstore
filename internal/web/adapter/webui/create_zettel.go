@@ -52,7 +52,7 @@ func (wui *WebUI) MakeGetCreateZettelHandler(
 			wui.reportError(ctx, w, box.ErrInvalidZid{Zid: path})
 			return
 		}
-		origZettel, err := getZettel.Run(box.NoEnrichContext(ctx), zid)
+		origZettel, err := getZettel.Run(ctx, zid, false)
 		if err != nil {
 			wui.reportError(ctx, w, box.ErrZettelNotFound{Zid: zid})
 			return
