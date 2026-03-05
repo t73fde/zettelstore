@@ -11,7 +11,7 @@
 // SPDX-FileCopyrightText: 2020-present Detlef Stern
 //-----------------------------------------------------------------------------
 
-package auth
+package impl
 
 import (
 	"bytes"

@@ -23,7 +23,7 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/auth/impl"
 )
 
 // ---------- Subcommand: password -------------------------------------------
@@ -59,7 +59,7 @@ func cmdPassword(fs *flag.FlagSet) (int, error) {
 	}
 
 	ident := fs.Arg(0)
-	hashedPassword, err := auth.HashCredential(zid, ident, password)
+	hashedPassword, err := impl.HashCredential(zid, ident, password)
 	if err != nil {
 		return 2, err
 	}
