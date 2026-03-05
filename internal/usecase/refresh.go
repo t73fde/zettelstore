@@ -17,8 +17,12 @@ import (
 	"context"
 	"log/slog"
 
+	"t73f.de/r/zsc/domain/id"
+
 	"zettelstore.de/z/internal/logging"
 )
+
+// ----- Refresh all zettel ----------
 
 // RefreshPort is the interface used by this use case.
 type RefreshPort interface {
@@ -40,5 +44,30 @@ func NewRefresh(logger *slog.Logger, port RefreshPort) Refresh {
 func (uc *Refresh) Run(ctx context.Context) error {
 	err := uc.port.Refresh(ctx)
 	uc.logger.Info("Refresh internal data", logging.User(ctx), logging.Err(err))
+	return err
+}
+
+// ReIndex = refresh of one specific zettel ----------
+
+// ReIndexPort is the interface used by this use case.
+type ReIndexPort interface {
+	ReIndex(context.Context, id.Zid) error
+}
+
+// ReIndex is the data for this use case.
+type ReIndex struct {
+	logger *slog.Logger
+	port   ReIndexPort
+}
+
+// NewReIndex creates a new use case.
+func NewReIndex(logger *slog.Logger, port ReIndexPort) ReIndex {
+	return ReIndex{logger: logger, port: port}
+}
+
+// Run executes the use case.
+func (uc *ReIndex) Run(ctx context.Context, zid id.Zid) error {
+	err := uc.port.ReIndex(ctx, zid)
+	uc.logger.Info("ReIndex zettel", "zid", zid, logging.User(ctx), logging.Err(err))
 	return err
 }
