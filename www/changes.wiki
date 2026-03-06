@@ -1,7 +1,10 @@
 <title>Change Log</title>
 
+<a id="2_1"></a>
+<h2>Changes for Version 2.1.0 (pending)</h2>
+
 <a id="2_0"></a>
-<h2>Changes for Version 2.0.0 (pending)</h2>
+<h2>Changes for Version 2.0.0 (2026-03-06)</h2>
   *  The syntax for signaling a hard line break changes to an empty comment at
      the end of a line. Previously, it was a space character or a backslash
      character at the end of a line. An empty comment may contain whitespace
@@ -33,6 +36,8 @@
      <code>predecessor</code>. These can be used to indicate some order between
      zettel where <code>folge</code> / <code>precursor</code> are not suitable.
      (minor)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
 
 <a id="1_0"></a>
 <h2>Changes for Version 1.0.2 (2025-12-21)</h2>

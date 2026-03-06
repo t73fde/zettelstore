@@ -35,21 +35,21 @@ The software, including the manual, is licensed under the
      software, which often connects to Zettelstore via its API. Some of the
      software packages may be experimental.
 
-<h2>Latest Release: 1.0.2 (2025-12-21)</h2>
+<h2>Latest Release: 2.0.0 (2026-03-06)</h2>
   *  [./download.wiki|Download]
-  *  [./changes.wiki#1_0|Change summary]
-  *  [/timeline?p=v1.0.2&bt=v0.22.0&y=ci|Check-ins for version 1.0],
-     [/vdiff?to=v1.0.2&from=v0.22.0|content diff]
-  *  [/timeline?df=v1.0.2&y=ci|Check-ins derived from the 1.0 release],
-     [/vdiff?from=v1.0.2&to=trunk|content diff]
+  *  [./changes.wiki#2_0|Change summary]
+  *  [/timeline?p=v2.0.2&bt=v1.0.0&y=ci|Check-ins for version 2.0],
+     [/vdiff?to=v2.0&from=v1.0|content diff]
+  *  [/timeline?df=v2.0&y=ci|Check-ins derived from the 2.0 release],
+     [/vdiff?from=v2.0&to=trunk|content diff]
   *  [./plan.wiki|Limitations and planned improvements]
   *  [/timeline?t=release|Timeline of all past releases]
   *  Published as [https://doi.org/10.5281/zenodo.18008616|DOI 10.5281/zenodo.18008616]
 
 <h2>Build instructions</h2>
 
-Just install [https://go.dev/dl/|Go] and some Go-based tools. Please read
-the [./build.md|instructions] for details.
+Install [https://fossil-scm.org/|Fossil], [https://go.dev/dl/|Go] and some
+Go-based tools. Please read the [./build.md|instructions] for details.
 
   *  [/dir?ci=trunk|Source code]
   *  [/download|Download the source code] as a tarball or a ZIP file
