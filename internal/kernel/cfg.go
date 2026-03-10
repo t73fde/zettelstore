@@ -116,7 +116,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keySiteName:               "Zettelstore",
 		ConfigSxMaxNesting:        32 * 1024,
 		keyYAMLHeader:             false,
-		keyZettelFileSyntax:       nil,
+		keyZettelFileSyntax:       []string{},
 		config.KeyListsMenuZettel: id.ZidTOCListsMenu,
 		config.KeyShowBackLinks:   "",
 		config.KeyShowFolgeLinks:  "",
