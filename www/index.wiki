@@ -38,8 +38,8 @@ The software, including the manual, is licensed under the
 <h2>Latest Release: 2.0.0 (2026-03-06)</h2>
   *  [./download.wiki|Download]
   *  [./changes.wiki#2_0|Change summary]
-  *  [/timeline?p=v2.0.0&bt=v1.0.0&y=ci|Check-ins for version 2.0],
-     [/vdiff?to=v2.0.0&from=v1.0.0|content diff]
+  *  [/timeline?p=v2.0.0&bt=v1.0.2&y=ci|Check-ins for version 2.0],
+     [/vdiff?to=v2.0.0&from=v1.0.2|content diff]
   *  [/timeline?df=v2.0.0&y=ci|Check-ins derived from the 2.0 release],
      [/vdiff?from=v2.0.0&to=trunk|content diff]
   *  [./plan.wiki|Limitations and planned improvements]
