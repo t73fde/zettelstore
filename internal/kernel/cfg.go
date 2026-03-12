@@ -22,6 +22,7 @@ import (
 	"strings"
 	"sync"
 
+	"t73f.de/r/zero/set"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -49,6 +50,12 @@ const (
 	keySiteName          = "site-name"
 	keyYAMLHeader        = "yaml-header"
 	keyZettelFileSyntax  = "zettel-file-syntax"
+)
+
+const (
+	defaultHTMLInsecurity   = config.NoHTML
+	defaultMaxTransclusions = 1024
+	defaultSiteName         = "Zettelstore"
 )
 
 var errUnknownVisibility = errors.New("unknown visibility")
@@ -95,7 +102,9 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keyYAMLHeader:       {"YAML header", parseBool, true},
 		keyZettelFileSyntax: {
 			"Zettel file syntax",
-			func(val string) (any, error) { return strings.Fields(val), nil },
+			func(val string) (any, error) {
+				return set.New(strings.Fields(val)...), nil
+			},
 			true,
 		},
 		config.KeyListsMenuZettel: {"Lists menu", parseZid, true},
@@ -110,13 +119,13 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keyExpertMode:             false,
 		config.KeyFooterZettel:    id.Invalid,
 		config.KeyHomeZettel:      id.ZidDefaultHome,
-		ConfigInsecureHTML:        config.NoHTML,
+		ConfigInsecureHTML:        defaultHTMLInsecurity,
 		meta.KeyLang:              meta.ValueLangEN,
-		keyMaxTransclusions:       1024,
-		keySiteName:               "Zettelstore",
+		keyMaxTransclusions:       defaultMaxTransclusions,
+		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
 		keyYAMLHeader:             false,
-		keyZettelFileSyntax:       []string{},
+		keyZettelFileSyntax:       set.New[string](),
 		config.KeyListsMenuZettel: id.ZidTOCListsMenu,
 		config.KeyShowBackLinks:   "",
 		config.KeyShowFolgeLinks:  "",
@@ -154,9 +163,7 @@ func (cs *configService) Stop(*Kernel) {
 	cs.mxService.Unlock()
 }
 
-func (*configService) GetStatistics() []KeyValue {
-	return nil
-}
+func (*configService) GetStatistics() []KeyValue { return nil }
 
 func (cs *configService) setBox(mgr box.Manager) {
 	cs.mxService.Lock()
@@ -282,40 +289,60 @@ func updateMeta(result, m *meta.Meta, key string, val string) *meta.Meta {
 }
 
 func (cs *configService) GetHTMLInsecurity() config.HTMLInsecurity {
-	return cs.GetCurConfig(ConfigInsecureHTML).(config.HTMLInsecurity)
+	if htmlInSec, ok := cs.GetCurConfig(ConfigInsecureHTML).(config.HTMLInsecurity); ok {
+		return htmlInSec
+	}
+	return defaultHTMLInsecurity
 }
 
 // GetSiteName returns the current value of the "site-name" key.
-func (cs *configService) GetSiteName() string { return cs.GetCurConfig(keySiteName).(string) }
+func (cs *configService) GetSiteName() string {
+	if siteName, ok := cs.GetCurConfig(keySiteName).(string); ok {
+		return siteName
+	}
+	return defaultSiteName
+}
 
 // GetMaxTransclusions return the maximum number of indirect transclusions.
 func (cs *configService) GetMaxTransclusions() int {
-	return int(cs.GetCurConfig(keyMaxTransclusions).(int))
+	if mt, ok := cs.GetCurConfig(keyMaxTransclusions).(int); ok {
+		return mt
+	}
+	return defaultMaxTransclusions
 }
 
 // GetYAMLHeader returns the current value of the "yaml-header" key.
-func (cs *configService) GetYAMLHeader() bool { return cs.GetCurConfig(keyYAMLHeader).(bool) }
+func (cs *configService) GetYAMLHeader() bool {
+	yh, ok := cs.GetCurConfig(keyYAMLHeader).(bool)
+	return ok && yh
+}
 
-// GetZettelFileSyntax returns the current value of the "zettel-file-syntax" key.
-func (cs *configService) GetZettelFileSyntax() []meta.Value {
-	if zfs := cs.GetCurConfig(keyZettelFileSyntax); zfs != nil {
-		zfsAS := zfs.([]string)
-		result := make([]meta.Value, len(zfsAS))
-		for i, fs := range zfsAS {
-			result[i] = meta.Value(fs)
-		}
-		return result
+// IsZettelFileSyntax returns true, if zettel with given syntax should be stored in a .zettel file.
+func (cs *configService) IsZettelFileSyntax(syntax string) bool {
+	if syntax == "*" {
+		return true
 	}
-	return nil
+	if zfs := cs.GetCurConfig(keyZettelFileSyntax); zfs != nil {
+		if syntaxSet, ok := zfs.(*set.Set[string]); ok {
+			return syntaxSet.Contains(syntax)
+		}
+	}
+	return false
 }
 
 // --- config.AuthConfig
 
 // IsSimpleMode returns true if system runs in simple-mode.
-func (*configService) IsSimpleMode() bool { return Main.core.GetCurConfig(CoreSimpleMode).(bool) }
+func (*configService) IsSimpleMode() bool {
+	isSimple, ok := Main.core.GetCurConfig(CoreSimpleMode).(bool)
+	return !ok || isSimple
+}
 
 // IsExpertMode returns the current value of the "expert-mode" key.
-func (cs *configService) IsExpertMode() bool { return cs.GetCurConfig(keyExpertMode).(bool) }
+func (cs *configService) IsExpertMode() bool {
+	isExpert, ok := cs.GetCurConfig(keyExpertMode).(bool)
+	return ok && isExpert
+}
 
 // GetVisibility returns the visibility value, or "login" if none is given.
 func (cs *configService) GetVisibility(m *meta.Meta) meta.Visibility {

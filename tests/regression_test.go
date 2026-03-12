@@ -174,7 +174,7 @@ func (*myConfig) GetHTMLInsecurity() config.HTMLInsecurity { return config.NoHTM
 func (*myConfig) GetListPageSize() int                     { return 0 }
 func (*myConfig) GetSiteName() string                      { return "" }
 func (*myConfig) GetYAMLHeader() bool                      { return false }
-func (*myConfig) GetZettelFileSyntax() []meta.Value        { return nil }
+func (*myConfig) IsZettelFileSyntax(string) bool           { return false }
 
 func (*myConfig) IsSimpleMode() bool                       { return false }
 func (*myConfig) IsExpertMode() bool                       { return false }

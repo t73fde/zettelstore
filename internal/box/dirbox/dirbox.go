@@ -327,7 +327,7 @@ func (dp *dirBox) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
 }
 
 func (dp *dirBox) updateEntryFromMetaContent(entry *notify.DirEntry, m *meta.Meta, content zettel.Content) {
-	entry.SetupFromMetaContent(m, content, dp.cdata.Config.GetZettelFileSyntax)
+	entry.SetupFromMetaContent(m, content, dp.cdata.Config.IsZettelFileSyntax)
 }
 
 func (dp *dirBox) CanDeleteZettel(_ context.Context, zid id.Zid) bool {

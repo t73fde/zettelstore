@@ -3,6 +3,19 @@
 <a id="2_1"></a>
 <h2>Changes for Version 2.1.0 (pending)</h2>
 
+Main goal of this version: Improve Markdown support. Users will be able to use
+Markdown instead of Zettelmarkup. However, Markdown has known limitations
+compared to Zettelmarkup, such as the lack of transclusions, fewer text
+formatting options, no support for tables, and no footnotes. Additionally, if
+HTML elements are included in the Markdown text, Zettelstore may ignore or hide
+them, depending on configuration settings (for security reasons).
+
+  *  Allow wildcard value &ldquo;*&rdquo; for runtime config
+     <code>zettel-file-syntax</code>.
+     (minor)
+  *  Allow to set value <code>zettel-file-syntax</code> via runtime config.
+     (bug)
+
 <a id="2_0"></a>
 <h2>Changes for Version 2.0.0 (2026-03-06)</h2>
   *  The syntax for signaling a hard line break changes to an empty comment at

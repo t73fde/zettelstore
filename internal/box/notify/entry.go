@@ -16,8 +16,6 @@ package notify
 import (
 	"path/filepath"
 
-	"slices"
-
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -53,7 +51,7 @@ func (e *DirEntry) HasMetaInContent() bool {
 }
 
 // SetupFromMetaContent fills entry data based on metadata and zettel content.
-func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, getZettelFileSyntax func() []meta.Value) {
+func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, isZettelFileSyntax func(string) bool) {
 	if e.Zid != m.Zid {
 		panic("Zid differ")
 	}
@@ -65,7 +63,7 @@ func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, ge
 	}
 
 	syntax := m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)
-	ext := calcContentExt(syntax, m.YamlSep, getZettelFileSyntax)
+	ext := calcContentExt(syntax, m.YamlSep, isZettelFileSyntax)
 	metaName := e.MetaName
 	eimc := extIsMetaAndContent(ext)
 	if eimc {
@@ -99,7 +97,7 @@ func contentExtWithMeta(syntax meta.Value, content zettel.Content) string {
 	return string(syntax)
 }
 
-func calcContentExt(syntax meta.Value, yamlSep bool, getZettelFileSyntax func() []meta.Value) string {
+func calcContentExt(syntax meta.Value, yamlSep bool, isZettelFileSyntax func(string) bool) string {
 	if yamlSep {
 		return extZettel
 	}
@@ -107,7 +105,7 @@ func calcContentExt(syntax meta.Value, yamlSep bool, getZettelFileSyntax func() 
 	case meta.ValueSyntaxNone, meta.ValueSyntaxZmk:
 		return extZettel
 	}
-	if slices.Contains(getZettelFileSyntax(), syntax) {
+	if isZettelFileSyntax(string(syntax)) {
 		return extZettel
 	}
 	return string(syntax)
