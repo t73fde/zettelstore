@@ -83,6 +83,8 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 		return p.acceptList(n)
 	case *gmAst.HTMLBlock:
 		return p.acceptHTMLBlock(n)
+	case *gmAst.LinkReferenceDefinition:
+		return nil
 	}
 	panic(fmt.Sprintf("Unhandled block node of kind %v", node.Kind()))
 }
