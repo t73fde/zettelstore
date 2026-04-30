@@ -301,18 +301,18 @@ func (err *ErrNotAllowed) Error() string {
 	if err.User == nil {
 		if err.Zid.IsValid() {
 			return fmt.Sprintf(
-				"operation %q on zettel %v not allowed for not authorized user",
+				"operation %q on zettel %v is not allowed for unauthenticated user",
 				err.Op, err.Zid)
 		}
-		return fmt.Sprintf("operation %q not allowed for not authorized user", err.Op)
+		return fmt.Sprintf("operation %q is not allowed for unauthenticated user", err.Op)
 	}
 	if err.Zid.IsValid() {
 		return fmt.Sprintf(
-			"operation %q on zettel %v not allowed for user %v/%v",
+			"operation %q on zettel %v is not allowed for user %v/%v",
 			err.Op, err.Zid, err.User.GetDefault(meta.KeyUserID, "?"), err.User.Zid)
 	}
 	return fmt.Sprintf(
-		"operation %q not allowed for user %v/%v",
+		"operation %q is not allowed for user %v/%v",
 		err.Op, err.User.GetDefault(meta.KeyUserID, "?"), err.User.Zid)
 }
 
