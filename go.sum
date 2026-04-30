@@ -1,5 +1,5 @@
-github.com/fsnotify/fsnotify v1.9.0 h1:2Ml+OJNzbYCTzsxtv8vKSFD9PbJjmhYF14k/jKC7S9k=
-github.com/fsnotify/fsnotify v1.9.0/go.mod h1:8jBTzvmWwFyi3Pb8djgCCO5IBqzKJ/Jwo8TRcHyHii0=
+github.com/fsnotify/fsnotify v1.10.0 h1:Xx/5Ydg9CeBDX/wi4VJqStNtohYjitZhhlHt4h3St1M=
+github.com/fsnotify/fsnotify v1.10.0/go.mod h1:TLheqan6HD6GBK6PrDWyDPBaEV8LspOxvPSjC+bVfgo=
 github.com/yuin/goldmark v1.8.2 h1:kEGpgqJXdgbkhcOgBxkC0X0PmoPG1ZyoZ117rDVp4zE=
 github.com/yuin/goldmark v1.8.2/go.mod h1:ip/1k0VRfGynBgxOz0yCqHrbZXhcjxyuS66Brc7iBKg=
 golang.org/x/crypto v0.50.0 h1:zO47/JPrL6vsNkINmLoo/PH1gcxpls50DNogFvB5ZGI=
@@ -14,10 +14,10 @@ t73f.de/r/sx v0.0.0-20260306080443-ab609803ae73 h1:j4WuUmnm0jqgZv7ZFqfmF//+L6wj0
 t73f.de/r/sx v0.0.0-20260306080443-ab609803ae73/go.mod h1:WCICEsA//Zvt21fT2c9V34C2MlRzayLbAIo4hnO+zFU=
 t73f.de/r/sxwebs v0.0.0-20260306080905-ae08a5a25a24 h1:hl3H+CQ9Ggb64qqTwnPYbk0s0K7nWM+vK1jw+V7ZaBo=
 t73f.de/r/sxwebs v0.0.0-20260306080905-ae08a5a25a24/go.mod h1:O21yBsH3y4xan1oruvyRmRi6RD00lFAPaX2OoGFADm8=
-t73f.de/r/webs v0.0.0-20260306080620-a6c44b6362ea h1:m5Cre2Guc0EOg5PqNwrLO3n5Mo9fgnpmBiTjmP6GRI4=
-t73f.de/r/webs v0.0.0-20260306080620-a6c44b6362ea/go.mod h1:3o9eSWw7yHW7WERgyKTmb6IjgyFE3eAFb8/WOBtNNrw=
-t73f.de/r/zero v0.0.0-20260331153507-036c20b809b3 h1:+GTz82IQ0ChRYzsLl1pQiVGY5a/kiCsOCsLAZwSjUlo=
-t73f.de/r/zero v0.0.0-20260331153507-036c20b809b3/go.mod h1:KE6aqsi8tNfhUDERONkRjy3tV46gIXNHYOgd5I8OMt4=
+t73f.de/r/webs v0.0.0-20260423145035-8b5236e98057 h1:hjPHRYhqviHezyyrZVV81Gj23RoGSMsQLaAmGOfMycI=
+t73f.de/r/webs v0.0.0-20260423145035-8b5236e98057/go.mod h1:BuDLY6LV6r/jpu9nMVX4VbOtzvmulWnef9cJvF12oJg=
+t73f.de/r/zero v0.0.0-20260423144457-bdfecd175594 h1:8lL8KSVS6L2cKPx8LYIkurzBZv517lZcwVzuRArgr+A=
+t73f.de/r/zero v0.0.0-20260423144457-bdfecd175594/go.mod h1:KE6aqsi8tNfhUDERONkRjy3tV46gIXNHYOgd5I8OMt4=
 t73f.de/r/zsc v0.0.0-20260306132809-ce478cefaaae h1:X9rOti9BmLdxcn/arCDvrlYqUSyApZua1LxrvDpdwK0=
 t73f.de/r/zsc v0.0.0-20260306132809-ce478cefaaae/go.mod h1:uKI5Svs19ktJlWg1P8RrLhAnwZsTO/PZz5OdIaHxLvE=
 t73f.de/r/zsx v0.0.0-20260306081015-97bc251a7ddd h1:SGEl+tfll1WuW4JvXBtLtYEnFy1pDu/xNpeGMSJFjdM=
