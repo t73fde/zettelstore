@@ -13,6 +13,8 @@ them, depending on configuration settings (for security reasons).
   *  Allow wildcard value &ldquo;*&rdquo; for runtime config
      <code>zettel-file-syntax</code>.
      (minor)
+  *  Remove leading / trailing space characters in table cells.
+     (minor: zmk)
   *  Allow to set value <code>zettel-file-syntax</code> via runtime config.
      (bug)
 
