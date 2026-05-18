@@ -17,7 +17,6 @@ package parser
 
 import (
 	"bytes"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -48,7 +47,7 @@ type mdP struct {
 
 func (p *mdP) acceptBlockChildren(docNode gmAst.Node) *sx.Pair {
 	if docNode.Type() != gmAst.TypeDocument {
-		panic(fmt.Sprintf("Expected document, but got node type %v", docNode.Type()))
+		return buildErrorText(false, "expected document, but got node type '"+docNode.Kind().String()+"'.")
 	}
 	var result sx.ListBuilder
 	result.Add(zsx.SymBlock)
@@ -62,7 +61,7 @@ func (p *mdP) acceptBlockChildren(docNode gmAst.Node) *sx.Pair {
 
 func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 	if node.Type() != gmAst.TypeBlock {
-		panic(fmt.Sprintf("Expected block node, but got node type %v", node.Type()))
+		return buildErrorText(false, "expected block node, but got node type '"+strconv.Itoa((int)(node.Type()))+"'.")
 	}
 	switch n := node.(type) {
 	case *gmAst.Paragraph:
@@ -70,15 +69,16 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 	case *gmAst.TextBlock:
 		return p.acceptTextBlock(n)
 	case *gmAst.Heading:
-		return p.acceptHeading(n)
+		level := min(n.Level, 5)
+		return zsx.MakeHeading(level, nil, p.acceptInlineChildren(n), "", "")
 	case *gmAst.ThematicBreak:
-		return p.acceptThematicBreak()
+		return zsx.MakeThematic(nil /*TODO*/)
 	case *gmAst.CodeBlock:
-		return p.acceptCodeBlock(n)
+		return zsx.MakeVerbatim(zsx.SymVerbatimCode, nil /*TODO*/, string(p.acceptRawText(n)))
 	case *gmAst.FencedCodeBlock:
 		return p.acceptFencedCodeBlock(n)
 	case *gmAst.Blockquote:
-		return p.acceptBlockquote(n)
+		return zsx.MakeList(zsx.SymListQuote, nil, p.acceptItemSlice(n))
 	case *gmAst.List:
 		return p.acceptList(n)
 	case *gmAst.HTMLBlock:
@@ -86,7 +86,7 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 	case *gmAst.LinkReferenceDefinition:
 		return nil
 	}
-	panic(fmt.Sprintf("Unhandled block node of kind %v", node.Kind()))
+	return buildErrorText(false, "unhandled block node of kind '"+node.Kind().String()+"'.")
 }
 
 func (p *mdP) acceptParagraph(node *gmAst.Paragraph) *sx.Pair {
@@ -94,19 +94,6 @@ func (p *mdP) acceptParagraph(node *gmAst.Paragraph) *sx.Pair {
 		return zsx.MakeParaList(is)
 	}
 	return nil
-}
-
-func (p *mdP) acceptHeading(node *gmAst.Heading) *sx.Pair {
-	level := min(node.Level, 5)
-	return zsx.MakeHeading(level, nil, p.acceptInlineChildren(node), "", "")
-}
-
-func (*mdP) acceptThematicBreak() *sx.Pair {
-	return zsx.MakeThematic(nil /*TODO*/)
-}
-
-func (p *mdP) acceptCodeBlock(node *gmAst.CodeBlock) *sx.Pair {
-	return zsx.MakeVerbatim(zsx.SymVerbatimCode, nil /*TODO*/, string(p.acceptRawText(node)))
 }
 
 func (p *mdP) acceptFencedCodeBlock(node *gmAst.FencedCodeBlock) *sx.Pair {
@@ -138,10 +125,6 @@ func (p *mdP) acceptRawText(node gmAst.Node) []byte {
 	return result
 }
 
-func (p *mdP) acceptBlockquote(node *gmAst.Blockquote) *sx.Pair {
-	return zsx.MakeList(zsx.SymListQuote, nil, p.acceptItemSlice(node))
-}
-
 func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
 	kind := zsx.SymListUnordered
 	var a sx.ListBuilder
@@ -155,7 +138,7 @@ func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
 	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
 		item, ok := child.(*gmAst.ListItem)
 		if !ok {
-			panic(fmt.Sprintf("Expected list item node, but got %v", child.Kind()))
+			return buildErrorText(false, "expected list item node, but got '"+child.Kind().String()+"'.")
 		}
 		items.Add(zsx.MakeBlockList(p.acceptItemSlice(item)))
 	}
@@ -213,7 +196,7 @@ func (p *mdP) acceptInlineChildren(node gmAst.Node) *sx.Pair {
 
 func (p *mdP) acceptInline(node gmAst.Node) (*sx.Pair, *sx.Pair) {
 	if node.Type() != gmAst.TypeInline {
-		panic(fmt.Sprintf("Expected inline node, but got %v", node.Type()))
+		return buildErrorText(true, "expected inline node, but got '"+strconv.Itoa((int)(node.Type()))+"'."), nil
 	}
 	switch n := node.(type) {
 	case *gmAst.Text:
@@ -231,7 +214,20 @@ func (p *mdP) acceptInline(node gmAst.Node) (*sx.Pair, *sx.Pair) {
 	case *gmAst.RawHTML:
 		return p.acceptRawHTML(n)
 	}
-	panic(fmt.Sprintf("Unhandled inline node %v", node.Kind()))
+	return buildErrorText(true, "unhandled inline node '"+node.Kind().String()+"'."), nil
+}
+
+func buildErrorText(inline bool, msg string) *sx.Pair {
+	result := zsx.MakeFormat(zsx.SymFormatMark, nil,
+		sx.MakeList(
+			zsx.MakeFormat(zsx.SymFormatStrong, nil,
+				sx.Cons(zsx.MakeText("Error parsing markdown: "), nil)),
+			zsx.MakeText(msg),
+		))
+	if inline {
+		return result
+	}
+	return zsx.MakePara(result)
 }
 
 func (p *mdP) acceptText(node *gmAst.Text) (*sx.Pair, *sx.Pair) {

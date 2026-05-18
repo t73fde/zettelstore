@@ -66,14 +66,28 @@ func TestMarkdownSpec(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		node := parseMD(tc.Markdown)
+		node, text := parseMD(tc.Markdown)
+		if node == nil {
+			t.Errorf("error parsing example #%d\n%q\n%q", tc.Example, tc.Markdown, text)
+			continue
+		}
 		testAllEncodings(t, tc, node)
 		testZmkEncoding(t, tc, node)
 	}
 }
 
-func parseMD(markdown string) *sx.Pair {
-	return parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, nil)
+func parseMD(markdown string) (*sx.Pair, string) {
+	result := parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, nil)
+	enc := encoder.Create(webapi.EncoderText, nil)
+	var sb strings.Builder
+	if err := enc.WriteSz(&sb, result); err != nil {
+		panic(err)
+	}
+	s := sb.String()
+	if strings.Contains(sb.String(), "Markdown: ") {
+		return nil, s
+	}
+	return result, ""
 }
 
 func testAllEncodings(t *testing.T, tc markdownTestCase, node *sx.Pair) {
@@ -128,7 +142,11 @@ func TestAdditionalMarkdown(t *testing.T) {
 	zmkEncoder := encoder.Create(webapi.EncoderZmk, nil)
 	var sb strings.Builder
 	for i, tc := range testcases {
-		node := parseMD(tc.md)
+		node, text := parseMD(tc.md)
+		if node == nil {
+			t.Errorf("error parsing %q\n%q", tc.md, text)
+			continue
+		}
 		sb.Reset()
 		_ = zmkEncoder.WriteSz(&sb, node)
 		if got := sb.String(); got != tc.exp {
