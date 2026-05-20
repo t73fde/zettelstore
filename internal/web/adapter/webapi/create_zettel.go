@@ -31,7 +31,7 @@ import (
 func (a *WebAPI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		enc, encStr := getEncoding(r, q)
+		enc, _ := getEncoding(r, q)
 		var zettel zettel.Zettel
 		var err error
 		switch enc {
@@ -65,8 +65,6 @@ func (a *WebAPI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel)
 		case webapi.EncoderData:
 			result = []byte(sx.Int64(newZid).String())
 			contentType = content.SXPF
-		default:
-			panic(encStr)
 		}
 
 		h := adapter.PrepareHeader(w, contentType)

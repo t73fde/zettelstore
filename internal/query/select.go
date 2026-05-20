@@ -14,7 +14,6 @@
 package query
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -261,6 +260,8 @@ func preprocessSet(set []expValue) [][]expValue {
 
 type stringPredicate func(meta.Value) bool
 
+func falseStringPredicate(meta.Value) bool { return false }
+
 func valuesToIDPredicates(values []expValue, addSearch addSearchFunc) []stringPredicate {
 	result := make([]stringPredicate, len(values))
 	for i, v := range values {
@@ -375,7 +376,7 @@ func createNumberCompareFunc(cmpVal int64, cmpOp compareOp) stringPredicate {
 	case cmpNoGreater:
 		cmpFunc = func(iMetaVal int64) bool { return iMetaVal <= cmpVal }
 	default:
-		panic(fmt.Sprintf("Unknown compare operation %d with value %d", cmpOp, cmpVal))
+		return falseStringPredicate
 	}
 	return func(metaVal meta.Value) bool {
 		iMetaVal, err := strconv.ParseInt(string(metaVal), 10, 64)
@@ -463,13 +464,15 @@ func createWordCompareFunc(cmpVal meta.Value, cmpOp compareOp) stringPredicate {
 	case cmpNoGreater:
 		return func(metaVal meta.Value) bool { return metaVal <= cmpVal }
 	case cmpHas, cmpHasNot:
-		panic(fmt.Sprintf("operator %d not disambiguated with value %q", cmpOp, cmpVal))
+		return falseStringPredicate
 	default:
-		panic(fmt.Sprintf("Unknown compare operation %d with value %q", cmpOp, cmpVal))
+		return falseStringPredicate
 	}
 }
 
 type stringSetPredicate func(value []string) bool
+
+func falseStringSetPredicate([]string) bool { return false }
 
 func valuesToSetPredicates(values [][]expValue, addSearch addSearchFunc) [][]stringSetPredicate {
 	result := make([][]stringSetPredicate, len(values))
@@ -503,9 +506,9 @@ func valuesToSetPredicates(values [][]expValue, addSearch addSearchFunc) [][]str
 			case cmpGreater, cmpNoGreater:
 				elemPreds[j] = makeStringSetPredicate(opVal, stringGreater, op == cmpGreater)
 			case cmpHas, cmpHasNot:
-				panic(fmt.Sprintf("operator %d not disambiguated with value %q", op, opVal))
+				elemPreds[j] = falseStringSetPredicate
 			default:
-				panic(fmt.Sprintf("Unknown compare operation %d with value %q", op, opVal))
+				elemPreds[j] = falseStringSetPredicate
 			}
 		}
 		result[i] = elemPreds

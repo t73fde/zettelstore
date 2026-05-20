@@ -16,7 +16,6 @@ package query
 // This file contains helper functions to search within the index.
 
 import (
-	"fmt"
 	"strings"
 
 	zerostrings "t73f.de/r/zero/strings"
@@ -162,6 +161,8 @@ func getSearchFunc(searcher Searcher, op compareOp) searchFunc {
 	case cmpMatch, cmpHas, cmpLess, cmpGreater: // for index search we assume string semantics
 		return searcher.SearchContains
 	default:
-		panic(fmt.Sprintf("Unexpected value of comparison operation: %v", op))
+		return nilSearchFunc
 	}
 }
+
+func nilSearchFunc(string) *idset.Set { return nil }

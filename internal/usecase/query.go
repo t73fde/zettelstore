@@ -16,7 +16,6 @@ package usecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"slices"
 	"strings"
 
@@ -111,7 +110,7 @@ func (uc *Query) processDirectives(ctx context.Context, metaSeq []*meta.Meta, di
 		case *query.UnlinkedSpec:
 			metaSeq = uc.processUnlinkedDirective(ctx, ds, metaSeq)
 		default:
-			panic(fmt.Sprintf("Unknown directive %T", ds))
+			// Assume IDENT directive, it will not hurt
 		}
 	}
 	if len(metaSeq) == 0 {

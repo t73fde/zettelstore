@@ -41,7 +41,5 @@ func (ds directionSpec) print(pe *PrintEnv) {
 	} else if ds.isBackward {
 		pe.printSpace()
 		pe.writeString(webapi.BackwardDirective)
-	} else {
-		panic("neither forward, backward, nor directed")
 	}
 }

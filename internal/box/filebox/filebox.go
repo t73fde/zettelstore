@@ -78,15 +78,10 @@ func CalcDefaultMeta(zid id.Zid, ext string) *meta.Meta {
 }
 
 // CleanupMeta enhances the given metadata.
-func CleanupMeta(m *meta.Meta, zid id.Zid, ext string, inMeta bool, uselessFiles []string) {
+func CleanupMeta(m *meta.Meta, ext string, inMeta bool, uselessFiles []string) {
 	if inMeta {
 		if syntax, ok := m.Get(meta.KeySyntax); !ok || syntax == "" {
-			dm := CalcDefaultMeta(zid, ext)
-			syntax, ok = dm.Get(meta.KeySyntax)
-			if !ok {
-				panic("Default meta must contain syntax")
-			}
-			m.Set(meta.KeySyntax, syntax)
+			m.Set(meta.KeySyntax, calculateSyntax(ext))
 		}
 	}
 

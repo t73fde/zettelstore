@@ -75,9 +75,6 @@ func (ar *anteroomQueue) EnqueueZettel(zid id.Zid) {
 }
 
 func (ar *anteroomQueue) makeAnteroom(zid id.Zid) *anteroom {
-	if zid == id.Invalid {
-		panic(zid)
-	}
 	waiting := idset.NewCap(max(ar.maxLoad, 100), zid)
 	return &anteroom{next: nil, waiting: waiting, curLoad: 1, reload: false}
 }

@@ -135,7 +135,7 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 		}
 	}
 
-	CleanupMeta(m, zid, entry.ContentExt, inMeta, entry.UselessFiles)
+	CleanupMeta(m, entry.ContentExt, inMeta, entry.UselessFiles)
 	logging.LogTrace(zb.logger, "GetZettel", "zid", zid)
 	return box.Zettel{Meta: m, Content: zettel.NewContent(src)}, nil
 }
@@ -196,7 +196,7 @@ func (zb *zipBox) readZipMeta(reader *zip.ReadCloser, zid id.Zid, entry *notify.
 		m, err = readZipMetaFile(reader, zid, metaName)
 	}
 	if err == nil {
-		CleanupMeta(m, zid, entry.ContentExt, inMeta, entry.UselessFiles)
+		CleanupMeta(m, entry.ContentExt, inMeta, entry.UselessFiles)
 	}
 	return m, err
 }

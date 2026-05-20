@@ -253,9 +253,9 @@ func (q *Query) GetMetaValues(key string, withMissing bool) (vals []meta.Value) 
 // SetPreMatch sets the pre-selection predicate.
 func (q *Query) SetPreMatch(preMatch MetaMatchFunc) *Query {
 	q = createIfNeeded(q)
-	if q.preMatch != nil {
-		panic("search PreMatch already set")
-	}
+	// if q.preMatch != nil {
+	// 	panic("search PreMatch already set")
+	// }
 	q.preMatch = preMatch
 	return q
 }

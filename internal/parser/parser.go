@@ -47,6 +47,14 @@ type Info struct {
 
 var registry map[string]*Info
 
+var plainParser = Info{
+	AltNames:      []string{meta.ValueSyntaxPlain, meta.ValueSyntaxText},
+	IsASTParser:   false,
+	IsTextFormat:  true,
+	IsImageFormat: false,
+	Parse:         parsePlain,
+}
+
 func init() {
 	localRegistry := map[string]*Info{
 		meta.ValueSyntaxCSS: {
@@ -119,13 +127,7 @@ func init() {
 			IsImageFormat: false,
 			Parse:         parsePlainSxn,
 		},
-		meta.ValueSyntaxTxt: {
-			AltNames:      []string{meta.ValueSyntaxPlain, meta.ValueSyntaxText},
-			IsASTParser:   false,
-			IsTextFormat:  true,
-			IsImageFormat: false,
-			Parse:         parsePlain,
-		},
+		meta.ValueSyntaxTxt: &plainParser,
 		meta.ValueSyntaxWebp: {
 			IsASTParser:   false,
 			IsTextFormat:  false,
@@ -177,10 +179,7 @@ func Get(name string) *Info {
 	if pi := registry[name]; pi != nil {
 		return pi
 	}
-	if pi := registry["plain"]; pi != nil {
-		return pi
-	}
-	panic(fmt.Sprintf("No parser for %q found", name))
+	return &plainParser
 }
 
 // IsASTParser returns whether the given syntax parses text into an AST or not.

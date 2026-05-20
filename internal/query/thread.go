@@ -42,8 +42,6 @@ func (spec *ThreadSpec) Print(pe *PrintEnv) {
 		}
 	} else if spec.isSequel {
 		pe.writeString(webapi.SequelDirective)
-	} else {
-		panic("neither folge nor sequel")
 	}
 	spec.directionSpec.print(pe)
 	pe.printPosInt(webapi.MaxDirective, spec.maxCount)
