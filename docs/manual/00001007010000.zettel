@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218191726
+modified: 20260603154410
 
 Any document can be thought of as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
 Some of these blocks can contain other blocks, for example lists may contain other lists or paragraphs.
@@ -23,8 +23,8 @@ Some blocks may also contain inline elements, e.g. a heading.
 Inline elements mostly begin with two non-space, often identical characters.
 With some exceptions, two identical non-space characters mark the beginning of a formatting range that ends with the same two characters.
 
-Exceptions are: links, images, edits, comments, and both the ""en-dash"" and the ""horizontal ellipsis"".
-A link is given with ``[[...]]``{=zmk}, an image with ``{{...}}``{=zmk}, and an edit formatting with ``((...))``{=zmk}.
+Exceptions are: links, images / inline transclusions, comments, and both the ""en-dash"" and the ""horizontal ellipsis"".
+A link is given with ``[[...]]``{=zmk}, and an image / inline transclusions with ``{{...}}``{=zmk}.
 An inline comment, beginning with the sequence ``%%``{=zmk}, always ends at the end of the line where it begins.
 The ""en-dash"" (""--"") is specified as ``--``{=zmk}, the ""horizontal ellipsis"" (""..."") as ``...``{=zmk}[^If put at the end of non-space text.].
 
