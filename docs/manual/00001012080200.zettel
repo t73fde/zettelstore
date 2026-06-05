@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220103224858
-modified: 20251215173338
+modified: 20260605144247
 
 API clients typically want to know, whether [[authentication is enabled|00001010040100]] or not.
 If authentication is enabled, they present some form of user interface to get user name and password for the actual authentication.
@@ -31,6 +31,6 @@ If you did not provide a valid access token (which is the typical case), you wil
 ; ''400''
 : Request was not valid.
   There are several reasons for this.
-  Most likely, no query parameter ''cmd'' was given, or it did not contain the value ""authenticate"".
+  Most likely, no query parameter ''cmd'' was given, or it did not contain the value ""authenticated"".
 ; ''401''
 : Authentication is enabled and no valid access token was provided.

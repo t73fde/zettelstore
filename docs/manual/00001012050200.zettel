@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218191625
+modified: 20260605165326
 
 Authentication for future API calls is done by sending a [[user identification|00001010040200]] and a password to the Zettelstore to obtain an [[access token|00001010040700]].
 This token has to be used for other API calls.
@@ -54,5 +54,3 @@ Other status codes possibly sent by the Zettelstore:
 ; ''401''
 : Authentication failed.
   Either the user identification is invalid or you provided the wrong password.
-; ''403''
-: Authentication is not active.

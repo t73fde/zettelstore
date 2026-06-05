@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20220201173115
-modified: 20250602181802
+modified: 20260605150128
 
 Various API calls return a symbolic expression list ''(rights N)'', with ''N'' as a number, that encodes the access rights the user currently has.
 ''N'' is an integer number between 0 and 62.[^Not all values in this range are used.]
@@ -24,7 +24,7 @@ Values ""2"" to ""62"" are binary encoded values, where each bit signals a speci
 | 5 | 32 | User is allowed to delete the zettel
 
 The algorithm to calculate the actual access rights from the value is relatively simple:
-# Search for the biggest bit value that is less than the rights value.
+# Search for the biggest bit value that is less or equal to the rights value.
   This is an access right for the current user.
 # Subtract the bit value from the rights value.
   Remember the difference as the new rights value.

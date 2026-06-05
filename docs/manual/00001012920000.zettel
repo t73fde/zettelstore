@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250627125818
+modified: 20260605142323
 
 All API endpoints conform to the pattern ''[PREFIX]LETTER[/ZETTEL-ID]'', where:
 ; ''PREFIX''
@@ -26,7 +26,7 @@ The following letters are currently in use:
 |       | POST: [[create new zettel|00001012053200]] | PUT: [[update zettel|00001012054200]]
 |       |  | DELETE: [[delete zettel|00001012054600]]
 
-The full URL will contain either the ""http"" oder ""https"" scheme, a host name, and an optional port number.
+The full URL will contain either the ""http"" or ""https"" scheme, a host name, and an optional port number.
 
 The API examples will assume the ""http"" schema, the local host ""127.0.0.1"", the default port ""23123"", and the default empty ''PREFIX'' ""/"".
 Therefore, all URLs in the API documentation will begin with ""http://127.0.0.1:23123/"".

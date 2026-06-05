@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250701134823
+modified: 20260605144534
 
 If the [[authentication process|00001012050200]] was successful, an access token with some additional data is returned.
 The same is true, if the access token was [[renewed|00001012050400]].
@@ -21,3 +21,4 @@ The response is structured as a [[symbolic expression|00001012930000]] list, wit
   The symbolic expression is encoded via ""base64"".
   Based on this encoding, a checksum is calculated, also encoded via ""base64"".
   Both encoded values are concatenated, with a period (''"."'') as a delimiter.
+# The remaining lifetime of the token in seconds.

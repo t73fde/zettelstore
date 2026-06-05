@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210726174524
-modified: 20251215173203
+modified: 20260605140944
 
 The [[endpoint|00001012920000]] to work with evaluated metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -12,7 +12,7 @@ For example, to retrieve some evaluated data about this zettel you are currently
 If successful, the output is a symbolic expression value:
 ```sh
 # curl 'http://127.0.0.1:23123/z/00001012053500?enc=sz'
-(BLOCK (PARA (TEXT "The ") (LINK-ZETTEL () "00001012920000" (TEXT "endpoint")) (TEXT " to work with parsed metadata and content of a specific zettel is ") (LITERAL-INPUT () "/z/{ID}") (TEXT ", where ") (LITERAL-INPUT () "{ID}") (TEXT " is a placeholder for the ") ...
+(BLOCK (PARA (TEXT "The ") (LINK-ZETTEL () "00001012920000" (TEXT "endpoint")) (TEXT " to work with evaluated metadata and content of a specific zettel is ") (LITERAL-INPUT () "/z/{ID}") (TEXT ", where ") (LITERAL-INPUT () "{ID}") (TEXT " is a placeholder for the ") ...
 ```
 
 To select another encoding, you must provide the query parameter ''enc=ENCODING''.

@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251219141410
+modified: 20260605142246
 
 Your zettel may contain sensitive content.
 You probably want to ensure that only authorized persons can read and/or modify them.
@@ -23,7 +23,7 @@ Since zettel are stored as ordinary files, this task could be done in various wa
 You can start the Zettelstore in a read-only mode.
 Nobody, not even you as the owner of the Zettelstore, can change something via its interfaces[^However, as an owner, you have access to the files that store the zettel. If you modify the files, these changes will be reflected via its interfaces.].
 
-You enable read-only mode through the key ''readonly'' in the [[startup configuration zettel|00001004010000#readonly]] or with the ''-r'' option of the ``zettelstore run`` sub-command.
+You enable read-only mode through the key ''read-only-mode'' in the [[startup configuration zettel|00001004010000#read-only-mode]] or with the ''-r'' option of the ``zettelstore run`` sub-command.
 
 === Authentication
 The Zettelstore can be configured that users must authenticate themselves to gain access to the content.

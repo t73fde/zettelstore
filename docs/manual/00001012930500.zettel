@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelstore
 syntax: zmk
 created: 20230403151127
-modified: 20251219140943
+modified: 20260605151317
 
 === Syntax of lists
 A list always starts with the left parenthesis (""''(''"", U+0028) and ends with a right parenthesis (""'')''"", U+0029).
@@ -69,6 +69,8 @@ Unicode characters with a code point less than or equal to U+FF are encoded usin
 Unicode characters with a code point up to and including U+FFFF are encoded using the sequence ""''\\uNMOP''"", where ''NMOP'' is the hexadecimal encoding of the character.
 Unicode characters with a code point less than or equal to U+FFFFFF are encoded using the sequence ""''\\UNMOPQR''"", where ''NMOPQR'' is the hexadecimal encoding of the character.
 In addition, the sequence ""''\\t''"" encodes a horizontal tab (U+0009), the sequence ""''\\n''"" encodes a line feed (U+000A).
+
+%% There is currently no Unicode value of U+FFFFFF, only U+10FFFF
 
 === See also
 * Currently, Zettelstore uses [[Sx|https://t73f.de/r/sx/]] (""Symbolic eXpression framework"") to implement symbolic expressions.

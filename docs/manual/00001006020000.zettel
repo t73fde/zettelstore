@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260206155829
+modified: 20260605142126
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -111,11 +111,11 @@ Most keys conform to a [[type|00001006030000]].
   See [[supported zettel roles|00001006020100]].
   If not given, it is ignored.
 ; [!sequel|''sequel'']
-: Is a property that contains identifier of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
+: Is a property that contains identifiers of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
 
   A __sequel zettel__ acts as a branching thought of the current zettel.
 ; [!subordinate|''subordinate'']
-: Is a property that contains identifier of all zettel that reference this zettel through the [[''superordinate''|#superordinate]] value.
+: Is a property that contains identifiers of all zettel that reference this zettel through the [[''superordinate''|#superordinate]] value.
 ; [!successor|''successor'']
 : Is a property that contains identifiers of all zettel that reference this zettel via the [[''predecessor''|#predecessor]] value.
 
