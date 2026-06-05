@@ -355,10 +355,7 @@ and much more
 			encoderSz:    `(BLOCK (TABLE () ((CELL ((align . "right")) (TEXT "h1")) (CELL () (TEXT "h2")) (CELL ((align . "center")) (TEXT "h3"))) ((CELL ((align . "left")) (TEXT "c1")) (CELL () (TEXT "c2")) (CELL ((align . "center")) (TEXT "c3"))) ((CELL ((align . "right")) (TEXT "f1")) (CELL () (TEXT "f2")) (CELL ((align . "center")) (TEXT "=f3")))))`,
 			encoderSHTML: `((table (thead (tr (th ((class . "right")) "h1") (th "h2") (th ((class . "center")) "h3"))) (tbody (tr (td ((class . "left")) "c1") (td "c2") (td ((class . "center")) "c3")) (tr (td ((class . "right")) "f1") (td "f2") (td ((class . "center")) "=f3")))))`,
 			encoderText:  "h1 h2 h3\nc1 c2 c3\nf1 f2 =f3",
-			encoderZmk: /*`|=h1>|=h2|=h3:
-			|<c1|c2|c3
-			|f1|f2|=f3`,*/
-			`|=>h1|=h2|=:h3
+			encoderZmk: `|=>h1|=h2|=:h3
 |<c1|c2|:c3
 |>f1|f2|:=f3`,
 		},
