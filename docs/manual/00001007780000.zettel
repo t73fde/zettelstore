@@ -4,12 +4,12 @@ role: manual
 tags: #manual #reference #search #zettelstore
 syntax: zmk
 created: 20220810144539
-modified: 20260605164807
+modified: 20260608170542
 
 ```
-QueryExpression   := ZettelList? QueryDirective* SearchExpression ActionExpression?
+QueryExpression   := ZettelList? QueryDirective* SearchExpression? ActionExpression?
 ZettelList        := (ZID (SPACE+ ZID)*)?.
-ZID               := '0'+ ('1' .. '9'') DIGIT*
+ZID               := '0'+ ('1' .. '9') DIGIT*
                    | ('1' .. '9') DIGIT*.
 QueryDirective    := ContextDirective
                    | ThreadDirective
@@ -59,4 +59,5 @@ Action            := Word
                    | 'REDIRECT'
                    | 'REINDEX'.
 Word              := NO-SPACE+
+MetadataKey       := (LETTER | DIGIT) (LETTER | '-' | DIGIT)*.
 ```

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260603154410
+modified: 20260608184246
 
 Any document can be thought of as a sequence of paragraphs and other [[block-structured elements|00001007030000]] (""blocks""), such as [[headings|00001007030300]], [[lists|00001007030200]], quotations, and code blocks.
 Some of these blocks can contain other blocks, for example lists may contain other lists or paragraphs.
@@ -34,7 +34,7 @@ These elements begin with one opening square bracket (""``[``""), use a characte
 One inline element that does not begin with two characters is the ""entity"".
 It allows to specify any Unicode character.
 The specification of that character is put between an ampersand character and a semicolon: ``&...;``{=zmk}.
-For example, an ""n-dash"" could also be specified as ``&ndash;``{==zmk}.
+For example, an ""en-dash"" could also be specified as ``&ndash;``{==zmk}.
 
 The backslash character (""``\\``"") possibly gives the next character a special meaning.
 This allows to resolve some left ambiguities.

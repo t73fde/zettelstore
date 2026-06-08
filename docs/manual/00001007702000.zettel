@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20251219142650
+modified: 20260608144935
 
 A search term allows you to specify one search restriction.
 The result [[search expression|00001007700000]], which contains more than one search term, will be the applications of all restrictions.
@@ -66,14 +66,14 @@ A search term can be one of the following (the first three terms are collectivel
   A random order specification will be ignored, if there is an explicit ordering given.
 
   Example: ''RANDOM ORDER published'' will be interpreted as ''ORDER published''.
-* The string ''OFFSET'', followed by a non-empty sequence of spaces and a number greater zero (called ""N"").
+* The string ''OFFSET'', followed by a non-empty sequence of spaces and a non-negative number (called ""N"").
 
   This will ignore the first N elements of the result list, based on the specified sort order.
   A zero value of N will produce the same result as if nothing was specified.
   If specified multiple times, the higher value takes precedence.
 
   Example: ''OFFSET 4 OFFSET 8'' will be interpreted as ''OFFSET 8''.
-* The string ''LIMIT'', followed by a non-empty sequence of spaces and a number greater zero (called ""N"").
+* The string ''LIMIT'', followed by a non-empty sequence of spaces and a non-negative number (called ""N"").
 
   This will limit the result list to the first N elements, based on the specified sort order.
   A zero value of N will produce the same result as if nothing was specified.

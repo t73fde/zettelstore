@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20210126175300
-modified: 20260203154803
+modified: 20260608145108
 
 [[Zettelmarkup|00001007000000]] is not the only markup language you can use to define your content.
 Zettelstore is quite agnostic with respect to markup languages.
@@ -13,7 +13,7 @@ However, with the exception of zettel titles, you can use any (markup) language 
 
 * CSS
 * HTML template data
-* Image formats: GIF, PNG, JPEG, SVG
+* Image formats: GIF, PNG, JPEG, SVG, WEBP
 * Markdown
 * Plain text, not further interpreted
 

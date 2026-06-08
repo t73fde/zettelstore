@@ -59,25 +59,28 @@ func (a *WebAPI) MakeGetReferencesHandler(
 			seq = ucGetReferences.RunByMeta(zn.InhMeta)
 		case partContent:
 			seq = getExternalURLs(zn.Blocks, ucGetReferences)
+
 		}
 
-		enc, _ := getEncoding(r, q)
-		if enc == webapi.EncoderData {
+		switch enc, encStr := getEncoding(r, q); enc {
+		case webapi.EncoderData:
 			var lb sx.ListBuilder
 			lb.Collect(zeroiter.MapSeq(seq, func(s string) sx.Object { return sx.MakeString(s) }))
 			if err = a.writeObject(w, zid, lb.List()); err != nil {
 				a.logger.Error("write sx data", "err", err, "zid", zid)
 			}
 			return
-		}
-
-		var buf bytes.Buffer
-		for s := range seq {
-			buf.WriteString(s)
-			buf.WriteByte('\n')
-		}
-		if err = writeBuffer(w, &buf, content.PlainText); err != nil {
-			a.logger.Error("write plain data", "err", err, "zid", zid)
+		case webapi.EncoderPlain:
+			var buf bytes.Buffer
+			for s := range seq {
+				buf.WriteString(s)
+				buf.WriteByte('\n')
+			}
+			if err = writeBuffer(w, &buf, content.PlainText); err != nil {
+				a.logger.Error("write plain data", "err", err, "zid", zid)
+			}
+		default:
+			invalidEncoding(w, zn.Meta.Zid, encStr)
 		}
 	})
 }

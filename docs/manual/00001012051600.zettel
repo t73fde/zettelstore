@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20230928183339
-modified: 20230929114937
+modified: 20260608165654
 
 The [[endpoint|00001012920000]] ''/z'' also allows you to determine a ""tag zettel"", i.e. a zettel that documents a given tag.
 
@@ -62,7 +62,7 @@ Content-Length: 29
 Tag zettel not found: #notag
 ```
 
-To fulfill this service, Zettelstore will evaluate internally the query ''role:tag title=TAG'', there ''TAG'' is the actual tag.
+To fulfill this service, Zettelstore will evaluate internally the query ''role:tag title=TAG'', where ''TAG'' is the actual tag.
 
 Of course, if you are interested in the URL of the tag zettel, you can make use of the HTTP ''HEAD'' method:
 

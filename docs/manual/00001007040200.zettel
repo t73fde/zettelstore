@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251209161955
+modified: 20260608151527
 
 There are some reasons to mark text that should be rendered as uninterpreted:
 * Mark text as literal, sometimes as part of a program.
@@ -54,7 +54,7 @@ Therefore it is well suited to enter text with a lot of backslash characters.
 
 Math mode text is delimited with two dollar signs (""''$''"", U+0024) on each side.
 
-You can add some [[attributes|00001007050000]] immediately after the two closing at-sign characters to specify the syntax to use.
+You can add some [[attributes|00001007050000]] immediately after the two closing dollar sign characters to specify the syntax to use.
 Either use the attribute key ""syntax"" or use the generic attribute to specify the syntax value.
 If no syntax value is provided, math mode text roughly corresponds to literal text.
 

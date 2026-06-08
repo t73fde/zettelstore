@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20250415154139
-modified: 20251215173137
+modified: 20260608151014
 
 The [[endpoint|00001012920000]] to retrieve references of a specific zettel is ''/r/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -66,7 +66,7 @@ Of course, you can combine the different query parameters, e.g. to retrieve an S
 ; ''400''
 : Request was not valid.
   There are several reasons for this.
-  Maybe the zettel identifier did not consist of exactly 14 digits or ''enc'' / ''part'' contained illegal values.
+  Maybe the zettel identifier did not consist of exactly 14 digits or ''enc'' contained an illegal value.
 ; ''403''
 : You are not allowed to retrieve data of the given zettel.
 ; ''404''

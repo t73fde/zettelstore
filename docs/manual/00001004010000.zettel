@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260303120233
+modified: 20260608165224
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -114,7 +114,7 @@ The following keys are supported:
 ; [!owner|''owner'']
 : [[Identifier|00001006050000]] of a zettel that contains data about the owner of the Zettelstore.
   The owner has full authorization for the Zettelstore.
-  Only if set to some value, user [[authentication|00001010000000]] is enabled.
+  Only if set to a valid value, user [[authentication|00001010000000]] is enabled.
 
   Ensure that the key [[''secret''|#secret]] is set to a value of at least 16 bytes, otherwise the Zettelstore will not start for security reasons.
 ; [!persistent-cookie|''persistent-cookie'']

@@ -150,7 +150,7 @@ func (a *WebAPI) writeEncodedZettelPart(
 			Lang: a.rtConfig.Get(ctx, zn.InhMeta, meta.KeyLang),
 		})
 	if encdr == nil {
-		adapter.BadRequest(w, fmt.Sprintf("Zettel %q not available in encoding %q", zn.Meta.Zid, encStr))
+		invalidEncoding(w, zn.Meta.Zid, encStr)
 		return
 	}
 	var err error
@@ -176,4 +176,8 @@ func (a *WebAPI) writeEncodedZettelPart(
 	if err = writeBuffer(w, &buf, content.MIMEFromEncoding(enc)); err != nil {
 		a.logger.Error("Write encoded zettel", "err", err, "zid", zn.Zid)
 	}
+}
+
+func invalidEncoding(w http.ResponseWriter, zid id.Zid, encStr string) {
+	adapter.BadRequest(w, fmt.Sprintf("Zettel %q not available in encoding %q", zid, encStr))
 }

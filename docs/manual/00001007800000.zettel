@@ -4,7 +4,7 @@ role: manual
 tags: #manual #reference #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250115180517
+modified: 20260608183326
 
 The following table gives an overview about the use of all characters that begin a markup element.
 
@@ -12,7 +12,7 @@ The following table gives an overview about the use of all characters that begin
 | ''!''  | (free) | (free)
 | ''"''  | [[Verse block|00001007030700]] | [[Short inline quote|00001007040100]]
 | ''#''  | [[Ordered list|00001007030200]] | [[marked / highlighted text|00001007040100]]
-| ''$''  | (reserved) | (reserved)
+| ''$''  | [[Math-mode|00001007031400]] | [[Inline math|00001007040200]]
 | ''%''  | [[Comment block|00001007030900]] | [[Comment|00001007040000]]
 | ''&''  | (free) | [[Entity|00001007040000]]
 | ''\'''  | (free)  | [[Computer input|00001007040200]]

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707205043
-modified: 20250102210324
+modified: 20260608154359
 
 In its simplest form, a search expression just contains a string to be searched for with the help of a full-text search.
 For example, the string ''syntax'' will search for all zettel containing the word ""syntax"".
@@ -16,10 +16,10 @@ The colon character (""'':''"") is a [[search operator|00001007705000]], in this
 
 A search expression may contain more than one search term, such as ''title:syntax''.
 Search terms must be separated by one or more space characters, for example ''title:syntax title:search''.
-All terms of a select expression must be true so that a zettel is selected.
+All terms of a search expression must be true so that a zettel is selected.
 
 Above sequence of search expressions may be combined by specifying the keyword ''OR''.
-At most one of those sequences must be true so that a zettel is selected.
+At least one of those sequences must be true so that a zettel is selected.
 
 * [[Search term|00001007702000]]
 * [[Search operator|00001007705000]]

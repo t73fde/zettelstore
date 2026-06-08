@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20260303120834
+modified: 20260608152522
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -20,11 +20,11 @@ This page lists some problems and their solutions that may occur when using your
 === Authentication
 * **Problem:** [[Authentication is enabled|00001010040100]] for a local running Zettelstore and there is a valid [[user zettel|00001010040200]] for the owner.
   But entering user name and password at the [[web user interface|00001014000000]] seems to be ignored, while entering a wrong password will result in an error message.
-** **Explanation:** A local running Zettelstore typically means that you are accessing the Zettelstore using a URL with schema ''http://'', and not ''https://'', for example ''http://localhost:23123/''.
-   The difference between these two is the missing encryption of user name / password and for the answer of the Zettelstore if you use the ''http://'' schema.
+** **Explanation:** A local running Zettelstore typically means that you are accessing the Zettelstore using a URL with scheme ''http://'', and not ''https://'', for example ''http://localhost:23123/''.
+   The difference between these two is the missing encryption of user name / password and for the answer of the Zettelstore if you use the ''http://'' scheme.
    To be secure by default, the Zettelstore will not work in an insecure environment.
-** **Solution 1:** If you are sure that your communication medium is safe, even if you use the ''http:/\/'' schema (for example, you are running the Zettelstore on the same computer you are working on, or if the Zettelstore is running on a computer in your protected local network), then you could add the entry ''insecure-cookie: true'' in your [[startup configuration|00001004010000#insecure-cookie]] file.
-** **Solution 2:** If you are not sure about the security of your communication medium (for example, if unknown persons might use your local network), then you should run an [[external server|00001010090100]] in front of your Zettelstore to enable the use of the ''https://'' schema.
+** **Solution 1:** If you are sure that your communication medium is safe, even if you use the ''http:/\/'' scheme (for example, you are running the Zettelstore on the same computer you are working on, or if the Zettelstore is running on a computer in your protected local network), then you could add the entry ''insecure-cookie: true'' in your [[startup configuration|00001004010000#insecure-cookie]] file.
+** **Solution 2:** If you are not sure about the security of your communication medium (for example, if unknown persons might use your local network), then you should run an [[external server|00001010090100]] in front of your Zettelstore to enable the use of the ''https://'' scheme.
 * **Problem:** [[Authentication is enabled|00001010040100]] for a Zettelstore running behind an external server (e.g. for encryption).
   Entering user name and password produces an error message, stating that a ""cross-origin request"" was detected.
 ** **Explanation:** The external web server does not transfer needed HTTP header data to your Zettelstore.

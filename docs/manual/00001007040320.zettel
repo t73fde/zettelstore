@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210810155955
-modified: 20251218183621
+modified: 20260608151634
 
 To some degree, a specification for embedded material is conceptually not too far away from a specification for [[linked material|00001007040310]].
 Both contain a reference specification and optionally some text.
@@ -12,7 +12,7 @@ In contrast to a link, the specification of embedded material must currently res
 This content replaces the embed specification.
 
 An embed specification begins with two consecutive left curly bracket characters (""''{''"", U+007B) and ends with two consecutive right curly bracket characters (""''}''"", U+007D).
-The curly brackets delimits either a reference specification or some text, a vertical bar character and the link specification, similar to a link.
+The curly brackets delimit either a reference specification or some text, a vertical bar character and the link specification, similar to a link.
 If the content starts with more than two left curly bracket characters, all but the last two will be treated as text.
 
 One difference to a link: if the text is not given, an empty string is assumed.

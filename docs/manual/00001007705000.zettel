@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20251219141150
+modified: 20260608152220
 
 A search operator specifies how the comparison of a search value and a zettel should be executed.
 Every comparison is done case-insensitive, treating all uppercase letters the same as lowercase letters.
@@ -32,8 +32,8 @@ Since the exclamation mark character can be combined with the other operators, t
 # ""''![''"": is successful if the search value is not a prefix of the value to be compared.
 # ""'']''"": is successful if the search value is a suffix of the value to be compared.
 # ""''!]''"": is successful if the search value is not a suffix of the value to be compared.
-# ""'':''"": is successful if the search value is has/match one word of the value to be compared.
-# ""''!:''"": is successful if the search value is not match/has to any word of the value to be compared.
+# ""'':''"": is successful if the search value is has/matches one word of the value to be compared.
+# ""''!:''"": is successful if the search value does not match/has to any word of the value to be compared.
 # ""''<''"": is successful if the search value is less than the value to be compared.
 # ""''!<''"": is successful if the search value is not less than, e.g. greater or equal than the value to be compared.
 # ""''>''"": is successful if the search value is greater than the value to be compared.

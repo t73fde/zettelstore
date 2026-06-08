@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20231128183917
-modified: 20231128184701
+modified: 20260608165713
 
 The [[endpoint|00001012920000]] ''/z'' also allows you to determine a ""role zettel"", i.e. a zettel that documents a given role.
 
@@ -51,7 +51,7 @@ Content-Length: 30
 Role zettel not found: norole
 ```
 
-To fulfill this service, Zettelstore will evaluate internally the query ''role:role title=ROLE'', there ''ROLE'' is the actual role.
+To fulfill this service, Zettelstore will evaluate internally the query ''role:role title=ROLE'', where ''ROLE'' is the actual role.
 
 Of course, if you are only interested in the URL of the role zettel, you can make use of the HTTP ''HEAD'' method:
 

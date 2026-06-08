@@ -4,11 +4,11 @@ role: manual
 tags: #authentication #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102222012
+modified: 20260608165119
 
 When someone tries to authenticate itself with a user identifier / ""user name"" and a password, the following process is executed:
 
-# If meta key ''owner'' of the configuration zettel does not have a valid [[zettel identifier|00001006050000]] as value, authentication fails.
+# If meta key [[''owner''|00001004010000#owner]] of the startup configuration does not have a valid [[zettel identifier|00001006050000]] as value, authentication fails.
 # Retrieve all zettel, where the meta key ''user-id'' has the same value as the given user identification. If the list is empty, authentication fails.
 # From above list, the zettel with the numerically smallest identifier is selected.
   Or in other words: the oldest zettel is selected[^This is done to prevent an attacker from creating a new note with the same user identification].

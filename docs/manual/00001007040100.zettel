@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251108162610
+modified: 20260608151356
 
 Text formatting is the way to make your text visually different.
 Every text formatting element begins with two identical characters.
@@ -17,7 +17,7 @@ The following characters begin a text formatting:
 
 * The low line character (""''_''"", U+005F) emphasizes its text.
 ** Example: ``abc __def__ ghi`` is rendered in HTML as: ::abc __def__ ghi::{=example}.
-* The asterisk character (""''*''"", U+002A) strongly emphasized its enclosed text.
+* The asterisk character (""''*''"", U+002A) strongly emphasizes its enclosed text.
 ** Example: ``abc **def** ghi`` is rendered in HTML as: ::abc **def** ghi::{=example}.
 * The greater-than sign character (""''>''"", U+003E) marks text as inserted.
 ** Example: ``abc >>def>> ghi`` is rendered in HTML as: ::abc >>def>> ghi::{=example}.

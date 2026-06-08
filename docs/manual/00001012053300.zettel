@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211004093206
-modified: 20251215173023
+modified: 20260608152033
 
 The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -83,7 +83,7 @@ If you print the result a little bit nicer, you will see its structure:
 ; ''400''
 : Request was not valid.
   There are several reasons for this.
-  Maybe the [[zettel identifier|00001006050000]] did not consists of exactly 14 digits.
+  Maybe the [[zettel identifier|00001006050000]] did not consist of exactly 14 digits.
 ; ''403''
 : You are not allowed to retrieve data of the given zettel.
 ; ''404''
