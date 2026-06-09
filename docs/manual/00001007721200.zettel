@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211119133357
-modified: 20251218190644
+modified: 20260609121514
 
 The value of a personal Zettelstore is determined in part by explicit connections between related zettel.
 If the number of zettel grows, some of these connections are missing.
@@ -21,7 +21,7 @@ To retrieve unlinked references to an existing zettel, use the query ''{ID} UNLI
 00001012921200 API: Encoding of Zettel Access Rights
 ````
 
-This returns all zettel (in this case: only one) that references the title of the given Zettel, but does not references it directly.
+This returns all zettel (in this case: only one) that references the title of the given Zettel, but does not reference it directly.
 
 In addition you may add __phrases__ if you do not want to scan for the title of the given zettel.
 

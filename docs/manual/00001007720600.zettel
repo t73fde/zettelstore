@@ -4,9 +4,9 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230724153018
-modified: 20230724154015
+modified: 20260609122419
 
-An ident directive is needed if you want to specify just a list of zettel identifier.
-It starts with / consists of the keyword ''IDENT''.
+An ident directive is needed if you want to specify just a list of zettel identifiers.
+It starts with the keyword ''IDENT''.
 
 When not using the ident directive, zettel identifier are interpreted as a [[search expression|00001007701000]].

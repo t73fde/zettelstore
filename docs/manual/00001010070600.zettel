@@ -4,7 +4,7 @@ role: manual
 tags: #authorization #configuration #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218191805
+modified: 20260609121426
 
 Whether an operation of the Zettelstore is allowed or rejected, depends on various factors.
 
@@ -20,7 +20,7 @@ In the second step, when [[authentication is enabled|00001010040100]] and the re
 ** If the visibility is ""public"", the access is granted.
 ** If the visibility is ""owner"", the access is rejected.
 ** If the user is not authenticated, access is rejected.
-** If the zettel requested is an [[user zettel|00001010040200]], reject the access if the users identification is not the same as of the ''user-id'' metadata value in the zettel.
+** If the zettel requested is an [[user zettel|00001010040200]], reject the access if the user's identification is not the same as the ''user-id'' metadata value in the zettel.
 
    In other words: only the requesting user is allowed to access its own user zettel.
 ** If the ''user-role'' of the user is ""creator"", reject the access.

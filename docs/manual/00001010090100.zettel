@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #encryption #manual #security #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218192243
+modified: 20260609122353
 
 Since Zettelstore does not encrypt the messages it exchanges with its clients, you may need some additional software to enable encryption.
 
@@ -42,7 +42,7 @@ Some examples:
 
 === Example configuration for Caddy
 For the inexperienced owner of a Zettelstore, [[Caddy|https://caddyserver.com/]] is a good option[^In fact, the [[server-based installation procedure|00001003000000]] of Zettelstore was inspired by Caddy.].
-Caddy has the capability to automatically fetch appropriately encryption key from Let's Encrypt, without any further configuration.
+Caddy has the capability to automatically fetch an appropriate encryption key from Let's Encrypt, without any further configuration.
 The only requirement of doing this is that the server must be publicly accessible.
 
 Here is the base configuration for the main site for Zettelstore at [[https://zettelstore.de/]]:

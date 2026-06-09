@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210726174524
-modified: 20260605140944
+modified: 20260609123237
 
 The [[endpoint|00001012920000]] to work with evaluated metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -20,29 +20,29 @@ Others are ""[[html|00001012920510]]"", ""[[text|00001012920519]]"", and some [[
 In addition, you may provide a query parameter ''part=PART'' to select the relevant [[part|00001012920800]] of a zettel.
 ```sh
 # curl 'http://127.0.0.1:23123/z/00001012053500?enc=html&part=zettel'
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
+<meta content="API: Retrieve evaluated metadata and content of an existing zettel in various encodings" name="title">
+<meta content="manual" name="role">
+<meta content="#api #manual #zettelstore" name="tags">
+<meta content="zmk" name="syntax">
+<meta content="00001006000000 00001012000000 00001012053600" name="back">
+<meta content="00001006000000 00001012000000 00001012053600 00001012920500" name="backward">
+<meta content="1" name="box-number">
+<meta content="(c) 2020-present by Detlef Stern &lt;ds@zettelstore.de&gt;" name="copyright">
+<meta content="20210726174524" name="created">
+<meta content="00001006050000 00001010040100 00001012050200 00001012920000 00001012920500 00001012920510 00001012920516 00001012920519 00001012920800" name="forward">
+<meta content="en" name="lang">
+<meta content="EUPL-1.2-or-later" name="license">
+<meta content="20260605140944" name="modified">
+<meta content="20260605140944" name="published">
+<meta content="public" name="visibility">
 <title>API: Retrieve evaluated metadata and content of an existing zettel in various encodings</title>
-<meta name="zs-title" content="API: Retrieve evaluated metadata and content of an existing zettel in various encodings">
-<meta name="zs-role" content="manual">
-<meta name="zs-tags" content="#api #manual #zettelstore">
-<meta name="zs-syntax" content="zmk">
-<meta name="zs-back" content="00001006000000 00001012000000 00001012053600">
-<meta name="zs-backward" content="00001006000000 00001012000000 00001012053600 00001012920000">
-<meta name="zs-box-number" content="1">
-<meta name="zs-copyright" content="(c) 2020-present by Detlef Stern <ds@zettelstore.de>">
-<meta name="zs-created" content="20210726174524">
-<meta name="zs-forward" content="00001006050000 00001010040100 00001012050200 00001012920000 00001012920500 00001012920503 00001012920510 00001012920519 00001012920800">
-<meta name="zs-lang" content="en">
-<meta name="zs-license" content="EUPL-1.2-or-later">
-<meta name="zs-modified" content="20221219161621">
-<meta name="zs-published" content="20221219161621">
-<meta name="zs-visibility" content="public">
 </head>
-<body>
-<h1>API: Retrieve evaluated metadata and content of an existing zettel in various encodings</h1>
-<p>The <a href="00001012920000">endpoint</a> to work with evaluated metadata and content of a specific zettel is <kbd>/z/{ID}</kbd>,
+<body><h1>API: Retrieve evaluated metadata and content of an existing zettel in various encodings</h1>
+<p>The <a href="00001012920000">endpoint</a> to work with evaluated metadata and content of a specific zettel is <kbd>/z/{ID}</kbd>, where <kbd>{ID}</kbd> is a
 ...
 ```
 

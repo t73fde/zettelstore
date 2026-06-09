@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260605142126
+modified: 20260609121817
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -15,10 +15,10 @@ Most keys conform to a [[type|00001006030000]].
 : A string value describing the author of a zettel.
   If given, it will be shown in the [[web user interface|00001014000000]] for the zettel.
 ; [!back|''back'']
-: Is a property that contains the identifier of all zettel that reference the zettel of this metadata, that are not referenced by this zettel.
+: Is a property that contains the identifiers of all zettel that reference the zettel of this metadata, that are not referenced by this zettel.
   Basically, it is the value of [[''backward''|#backward]], but without any zettel identifier that is contained in [[''forward''|#forward]].
 ; [!backward|''backward'']
-: Is a property that contains the identifier of all zettel that reference the zettel of this metadata.
+: Is a property that contains the identifiers of all zettel that reference the zettel of this metadata.
   References within invertible values are not included here, e.g. [[''precursor''|#precursor]].
 ; [!box-number|''box-number'']
 : Is a computed value and contains the number of the box where the zettel was found.
@@ -92,7 +92,7 @@ Most keys conform to a [[type|00001006030000]].
 : This property contains the timestamp of the last modification or creation of the zettel.
   If [[''modified''|#modified]] is set to a valid timestamp, it holds that value.
   Otherwise, if [[''created''|#created]] is set to a valid timestamp, ''published'' contains its value.
-  If neither ''modified'' or ''created'' are set, and the zettel identifier contains a valid timestamp, the identifier is used.
+  If neither ''modified'' nor ''created'' are set, and the zettel identifier contains a valid timestamp, the identifier is used.
   In all other cases, this property is not set.
 
   It can be used for [[sorting|00001007700000]] zettel based on their publication date.
