@@ -177,7 +177,7 @@ func (mb *memBox) CanUpdateZettel(_ context.Context, zettel box.Zettel) bool {
 	if prevZettel, found := mb.zettel[zid]; found {
 		newBytes -= prevZettel.ByteSize()
 	}
-	return newBytes < mb.maxBytes
+	return newBytes <= mb.maxBytes
 }
 
 func (mb *memBox) UpdateZettel(_ context.Context, zettel box.Zettel) error {

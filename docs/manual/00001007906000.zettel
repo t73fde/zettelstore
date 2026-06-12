@@ -4,7 +4,7 @@ role: manual
 tags: #manual #tutorial #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220811115501
-modified: 20251209161541
+modified: 20260612170354
 
 After you have [[learned|00001007903000]] the basic concepts and markup of Zettelmarkup (paragraphs, emphasized text, and lists), this zettel introduces you to the concepts of links, thematic breaks, and headings.
 
@@ -72,7 +72,7 @@ This applies also to lists, as given in the first steps, as well as other [[simi
 Headings explicitly structure a zettel, similar to thematic breaks, but gives the resulting part a name.
 
 To specify a heading in Zettelmarkup, you must enter at least three equal signs, followed by a space, followed by the text of the heading.
-Everything must be one the same line.
+Everything must be on the same line.
 
 The number of equal signs determines the importance of the heading: less equal signs means more important.
 Therefore, three equal signs treat a heading as most important.

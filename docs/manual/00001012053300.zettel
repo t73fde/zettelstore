@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211004093206
-modified: 20260608152033
+modified: 20260612184240
 
 The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -71,7 +71,7 @@ If you print the result a little bit nicer, you will see its structure:
 * ''rights'' specifies the [[access rights|00001012921200]] the user has for this zettel.
 * ''"encoding"'' states how the content is encoded.
   Currently, only two values are allowed: the empty string (''""'') that specifies an empty encoding, and the string ''"base64"'' that specifies the [[standard Base64 encoding|https://www.rfc-editor.org/rfc/rfc4648.txt]].
-* The zettel contents is stored as a value of the key ''content''.
+* The zettel content is stored as a value of the key ''content''.
   Typically, text content is not encoded, and binary content is encoded via Base64.
 
 === HTTP Status codes

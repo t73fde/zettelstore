@@ -4,7 +4,7 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 20220113183435
-modified: 20251117183134
+modified: 20260612184800
 url: https://commonmark.org/
 
 [[CommonMark|https://commonmark.org/]] is a Markdown dialect aimed at [[unifying|https://xkcd.com/927/]] the various, often divergent, Markdown dialects by providing an unambiguous syntax specification.
@@ -20,7 +20,7 @@ Additionally, some implementations are based on older versions of the CommonMark
 Zettelstore supports the latest CommonMark [[specification version 0.31.2 (2024-01-28)|https://spec.commonmark.org/0.31.2/]].
 If possible, Zettelstore will adapt to newer versions as they become available.
 
-To provide CommonMark support, Zettelstore uses currently the [[Goldmark|https://github.com/yuin/goldmark]] implementation, which passes all CommonMark validation tests.
+To provide CommonMark support, Zettelstore currently uses the [[Goldmark|https://github.com/yuin/goldmark]] implementation, which passes all CommonMark validation tests.
 Effectively, both Markdown and CommonMark can be considered superset languages of HTML.
 
 Internally, CommonMark is translated into [[Sz Encoding|00001012920516]].

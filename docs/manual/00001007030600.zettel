@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260608153443
+modified: 20260612165430
 
 A simple way to enter a quotation is to use the [[quotation list|00001007030200]].
 A quotation list loosely follows the convention of quoting text within emails.
@@ -14,7 +14,8 @@ This kind of line-range block begins with at least three less-than characters ("
 You can add some [[attributes|00001007050000]] on the beginning line of a quotation block, following the initiating characters.
 The quotation does not support the default attribute, nor the generic attribute.
 Attributes are interpreted on HTML rendering.
-Any other character in this line will be ignored
+
+Any other character in this line will be ignored.
 
 Text following the beginning line will be interpreted, until a line begins with at least the same number of the same characters given at the beginning line.
 This allows to enter a quotation block within a quotation block.

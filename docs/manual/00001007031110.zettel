@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220809132350
-modified: 20251218183758
+modified: 20260612162811
 
 A zettel transclusion is specified by the following sequence, starting at the first position in a line: ''{{{zettel-identifier}}}''.
 
@@ -18,7 +18,7 @@ The maximum number of transclusions can be controlled by setting the value [[''m
 
 If everything goes well, the referenced and expanded zettel will replace the transclusion element after being wrapped in a [[region block|00001007030800]].
 The region block serves two purposes: first, it marks that the content originates from a transclusion; second, it inherits the attributes of the transclusion element.
-However, if the element has an attribute with the key ''width'', this attribute is converted into a ''style'' attributes in the form ''style="width: VAL;"'', where ''VAL'' is the value of the original ''width'' attribute.
+However, if the element has an attribute with the key ''width'', this attribute is converted into a ''style'' attribute in the form ''style="width: VAL;"'', where ''VAL'' is the value of the original ''width'' attribute.
 
 For example, to include the text of the Zettel titled ""Zettel identifier"", just specify its identifier [[''00001006050000''|00001006050000]] in the transclusion element:
 ```zmk

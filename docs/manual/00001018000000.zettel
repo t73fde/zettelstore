@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211027105921
-modified: 20260608152522
+modified: 20260612162152
 
 This page lists some problems and their solutions that may occur when using your Zettelstore.
 
@@ -61,6 +61,6 @@ This page lists some problems and their solutions that may occur when using your
 
 === Search for specific content
 * **Problem:** If you are searching for zettel with zettel content ""EUPL"", the zettel with Zettelstore's [[License|00000000000004]] is not shown, but it does contain the character sequence ""EUPL"".
-** **Solution:** The content of a zettel with a zettel identifier less than or equal ''00009999999999'' is not searched.
+** **Solution:** The content of a zettel with a zettel identifier less than or equal ''00000999999900'' is not searched.
    These zettel are predefined zettel, sometimes computed zettel, with some content not related to your research.
    For these zettel, only the metadata can be searched.

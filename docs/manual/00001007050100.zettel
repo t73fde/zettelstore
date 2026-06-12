@@ -4,21 +4,21 @@ role: manual
 tags: #manual #reference #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250701130735
+modified: 20260612164205
 
 With an [[attribute|00001007050000]] it is possible to specify the natural language of a text region.
 This is important, if you want to render your markup into an environment, where this is significant.
 HTML is such an environment.
 
 To specify the language within an attribute, you must use the key ''lang''.
-The language itself is specified according to the language definition of [[RFC-5646|https://datatracker.ietf.org/doc/html/rfc5646]].
+The language itself is specified according to the language definition in [[RFC-5646|https://datatracker.ietf.org/doc/html/rfc5646]].
 
 Examples:
-* ``{lang=en}`` for the english language
-* ``{lang=en-us}`` for the english dialect spoken in the United States of America
-* ``{lang=de}`` for the german language
-* ``{lang=de-at}`` for the german language dialect spoken in Austria
-* ``{lang=de-de}`` for the german language dialect spoken in Germany
+* ``{lang=en}`` for the English language
+* ``{lang=en-us}`` for the dialect of English spoken in the United States of America
+* ``{lang=de}`` for the German language
+* ``{lang=de-at}`` for the dialect of German language spoken in Austria
+* ``{lang=de-de}`` for the dialect of German language spoken in Germany
 
 The actual [[typographic quotations marks|00001007040100]] (``""...""``) are derived from the current language.
 The language of a zettel (meta key ''lang'') can be overwritten by an attribute: ``""...""{lang=fr}``{=zmk}.

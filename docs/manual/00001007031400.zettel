@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220311173226
-modified: 20260608154118
+modified: 20260612165516
 
 Math-mode blocks are used to enter mathematical formulas / equations in a display style mode.
 Similar to [[evaluation blocks|00001007031300]], the block content will be interpreted by either Zettelstore or an external software.
@@ -18,7 +18,7 @@ Alternatively, you could provide an attribute with the key ""syntax"" and use th
 Not all syntax values are supported by Zettelstore.[^Currently: none.]
 External software might support several values via the [[sz encoding|00001012920516]].
 
-Any other character in this line will be ignored
+Any other character in this line will be ignored.
 
 Text following the beginning line will not be interpreted, until a line begins with at least the same number of the same characters given at the beginning line.
 This allows to enter some dollar-sign characters in the text that should not be interpreted.

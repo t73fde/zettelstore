@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20260303142542
-modified: 20260303163611
+modified: 20260612162702
 
 The data encoding represents the zettel as a special [[symbolic expression|00001012930000]].
 In contrast to the similar-looking [[sz encoding|00001012920516]], a much simpler structure is used.
@@ -34,7 +34,7 @@ __Key__ **=** Symbol.
 __Value__ **=** String. 
 :::
 
-Each __Key__ is a symbol, derivied from the metadata key.
+Each __Key__ is a symbol, derived from the metadata key.
 The __Value__ is a string containing the value of the corresponding metadata entry.
 
 === Access rights

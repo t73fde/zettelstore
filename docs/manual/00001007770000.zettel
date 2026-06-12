@@ -4,13 +4,13 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20230707205246
-modified: 20260226180655
+modified: 20260612163651
 
-With a [[list of zettel identifiers|00001007710000]], a [[query directives|00001007720000]], or a [[search expression|00001007701000]], a list of zettel is selected.
-__Actions__ allows modifying this list to a certain degree.
+With a [[list of zettel identifiers|00001007710000]], a [[query directive|00001007720000]], or a [[search expression|00001007701000]], a list of zettel is selected.
+__Actions__ allow modifying this list to a certain degree.
 
 Which actions are allowed depends on the context.
-However, actions are further separated into __parameter action__ and __aggregate actions__.
+However, actions are further separated into __parameter actions__ and __aggregate actions__.
 A parameter action just sets a parameter for an aggregate action.
 An aggregate action transforms the list of selected zettel into a different, aggregate form.
 Only the first aggregate form is executed, following aggregate actions are ignored.
@@ -31,7 +31,8 @@ An empty action sequence is treated as if no vertical bar character (""''|''"", 
 : Redirects to the first zettel of the given list of zettel identifiers.
 : [[''PICK 1 \| REDIRECT''|query:PICK 1 | REDIRECT]] will show a random zettel.
 ; ''REINDEX''
-: Updates the internal search index for the selected zettel identifier. It allows to specify a second aggregate action.
+: Updates the internal search index for the selected zettel identifier.
+  It allows to specify a second aggregate action.
 : ''20260226163200 IDENT | REINDEX'' updates the internal search index for a zettel with the identifier ''20260226163200''.
 ; __Word__
 : If __Word__ is a metadata key of type [[Word|00001006035500]] or [[TagSet|00001006034000]], return an aggregate of the given metadata key.

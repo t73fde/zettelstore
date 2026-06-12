@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20220218132432
+modified: 20260612162234
 
 Sometimes, you want to enter text with significant space characters at the beginning of each line and with significant line endings.
 Poetry is one typical example.
@@ -20,7 +20,7 @@ Any other character in this line will be ignored.
 Text following the beginning line will be interpreted, until a line begins with at least the same number of the same characters given at the beginning line.
 This allows to enter a verse block within a verse block.
 At the ending line, you can enter some [[inline elements|00001007040000]] after the quotation mark characters.
-These will interpreted as some attribution text.
+These will be interpreted as some attribution text.
 
 For example:
 

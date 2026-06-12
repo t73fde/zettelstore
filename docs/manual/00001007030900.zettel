@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102222357
+modified: 20260612165444
 
 Comment blocks are quite similar to [[verbatim blocks|00001007030500]]: both are used to enter text that should not be interpreted.
 While the text entered inside a verbatim block will be processed somehow, text inside a comment block will be ignored[^Well, not completely ignored: text is read, but it will typically not rendered visible.].
@@ -16,7 +16,7 @@ The comment block supports the default attribute: when given, the text will be r
 When rendered to a symbolic expression, the comment block will not be ignored but it will output some text.
 Same for other renderer.
 
-Any other character in this line will be ignored
+Any other character in this line will be ignored.
 
 Text following the beginning line will not be interpreted, until a line begins with at least the same number of the same characters given at the beginning line.
 This allows to enter some percent sign characters in the text that should not be interpreted.

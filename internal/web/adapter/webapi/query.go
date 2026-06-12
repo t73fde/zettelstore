@@ -229,7 +229,7 @@ func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error 
 func (dze *dataZettelEncoder) writeArrangement(w io.Writer, act string, arr meta.Arrangement) error {
 	var lb sx.ListBuilder
 	lb.AddN(
-		sx.MakeSymbol("meta-list"),
+		sx.MakeSymbol("aggregate"),
 		sx.MakeString(act),
 		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
 		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),

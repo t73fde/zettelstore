@@ -4,10 +4,10 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20210726193034
+modified: 20260612184204
 
 A zettel representation in HTML.
-This representation is different form the [[web user interface|00001014000000]] as it contains the zettel representation only and no additional data such as the menu bar.
+This representation is different from the [[web user interface|00001014000000]] as it contains the zettel representation only and no additional data such as the menu bar.
 
 It is intended to be used by external clients.
 

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20211119133357
-modified: 20260609121514
+modified: 20260612183835
 
 The value of a personal Zettelstore is determined in part by explicit connections between related zettel.
 If the number of zettel grows, some of these connections are missing.
@@ -19,20 +19,26 @@ To retrieve unlinked references to an existing zettel, use the query ''{ID} UNLI
 ````
 # curl 'http://127.0.0.1:23123/z?q=00001012000000+UNLINKED'
 00001012921200 API: Encoding of Zettel Access Rights
+00001012921000 API: Structure of an access token
+00001007721200 Query: Unlinked Directive
+00001007770000 Query: Action List
+00001008000000 Other Markup Languages
 ````
 
-This returns all zettel (in this case: only one) that references the title of the given Zettel, but does not reference it directly.
+This returns all zettel that references the title of the given Zettel, but does not reference it directly.
+Please note that the result is typically not sorted by zettel identifier.
 
 In addition you may add __phrases__ if you do not want to scan for the title of the given zettel.
 
 ```
-# curl 'http://localhost:23123/z?q=00001012054400+UNLINKED+PHRASE+API'
+# curl 'http://localhost:23123/z?q=00001012054200+UNLINKED+PHRASE+API'
 00001012050600 API: Provide an access token
 00001012921200 API: Encoding of Zettel Access Rights
 00001012080200 API: Check for authentication
 00001012080500 API: Refresh internal data
 00001012050200 API: Authenticate a client
 00001010040700 Access token
+...
 ```
 
 This finds all zettel that contain the phrase ""API"" but do not directly reference the given zettel.

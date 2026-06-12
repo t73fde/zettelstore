@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260609115847
+modified: 20260612162446
 
 Every Zettelmarkup content consists of a sequence of Unicode code-points.
 Unicode code-points are called in the following as **character**s.
@@ -15,7 +15,7 @@ Characters are encoded with UTF-8.
 : A __line__ is a sequence of characters, except newline (U+000A) and carriage return (U+000D), followed by a line ending sequence or the end of content.
 ; Line ending
 : A __line ending__ is either a newline not followed by a carriage return, a carriage return followed by a newline, or a carriage return.
-  Different line can be finalized by different line endings.
+  Different lines can be finalized by different line endings.
 ; Empty line
 : An __empty line__ is an empty sequence of characters, followed by a line ending or the end of content.
 ; Space character

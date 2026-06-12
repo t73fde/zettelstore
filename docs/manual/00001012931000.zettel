@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403153903
-modified: 20251021190931
+modified: 20260612185204
 
 Zettel in a [[Sz encoding|00001012920516]] are represented as a [[symbolic expression|00001012930000]].
 To process these symbolic expressions, you need to know, how a specific part of a zettel is represented by a symbolic expression.
@@ -15,7 +15,7 @@ The meaning / semantic of all other elements depend on that symbol.
 
 === Zettel
 A full zettel is represented by a list of two elements.
-The first elements represents the metadata, the second element represents the zettel content.
+The first element represents the metadata, the second element represents the zettel content.
 
 :::syntax
 __Zettel__ **=** ''('' [[__Metadata__|#metadata]] [[__Content__|#content]] '')''.
@@ -87,5 +87,5 @@ It signals that some processing routine intends to return more than one object i
 The elements of such a list should be ""spliced"" into the parent list.
 
 ==== NIL (or ''()'')
-Analogous to a splice node, which signal that more than one values is about to be returned, a ""NIL"" value (denoted as ""''()''"") signals that no object should be returned.
+Analogous to a splice node, which signals that more than one values is about to be returned, a ""NIL"" value (denoted as ""''()''"") signals that no object should be returned.
 Therefore, a [[__BlockElement__|00001012931400]] or an [[__InlineElement__|00001012931600]] may be ""NIL"".

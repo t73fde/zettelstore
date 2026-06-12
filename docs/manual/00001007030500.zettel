@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251219141908
+modified: 20260612165401
 
 Verbatim blocks are used to enter text that should not be interpreted.
 They begin with at least three grave accent characters (""''`''"", U+0060) at the first position of a line.
@@ -15,7 +15,7 @@ The verbatim block supports the default attribute: when given, all spaces in the
 If you want to provide only the generic attribute, you can omit most of the attribute syntax and specify just the value.
 It will be interpreted as a ([[programming|00001007050200]]) language to support colorizing the text when rendered in HTML.
 
-Any other character in this line will be ignored
+Any other character in this line will be ignored.
 
 Text following the beginning line will not be interpreted, until a line begins with at least the same number of the same characters given at the beginning line.
 This allows to enter some grave accent characters in the text that should not be interpreted.

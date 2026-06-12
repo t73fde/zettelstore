@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20220310184916
-modified: 20260608151749
+modified: 20260612165501
 
 Evaluation blocks are used to enter text that could be evaluated by either Zettelstore or external software.
 They begin with at least three tilde characters (""''~''"", U+007E) at the first position of a line.
@@ -16,7 +16,7 @@ It will be interpreted as a [[syntax|00001008000000]] value to evaluate its cont
 Not all syntax values are supported by Zettelstore.[^Currently just ""[[draw|00001008050000]]"".]
 The main reason for an evaluation block is to be used with external software via the [[sz encoding|00001012920516]].
 
-Any other character in this line will be ignored
+Any other character in this line will be ignored.
 
 Text following the beginning line will not be interpreted, until a line begins with at least the same number of the same characters given at the beginning line.
 This allows to enter some tilde characters in the text that should not be interpreted.
