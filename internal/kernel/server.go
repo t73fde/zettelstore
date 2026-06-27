@@ -71,5 +71,8 @@ func handleLineConnection(conn net.Conn, kern *Kernel) {
 			break
 		}
 	}
+	if err := s.Err(); err != nil {
+		cmds.println("Console input error:", err.Error())
+	}
 	_ = conn.Close()
 }
