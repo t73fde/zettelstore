@@ -25,10 +25,17 @@ const (
 	KeyFooterZettel    = "footer-zettel"
 	KeyHomeZettel      = "home-zettel"
 	KeyListsMenuZettel = "lists-menu-zettel"
+	KeyMarkdownMode    = "markdown-mode"
 	KeyShowBackLinks   = "show-back-links"
 	KeyShowFolgeLinks  = "show-folge-links"
 	KeyShowSequelLinks = "show-sequel-links"
 	// api.KeyLang
+)
+
+// Allowed values for KeyMarkdownMode.
+const (
+	MarkdownModeCMark = "cmark"
+	MarkdownModeEMark = "emark"
 )
 
 // Config allows to retrieve all defined configuration values that can be changed during runtime.

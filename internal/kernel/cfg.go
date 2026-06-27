@@ -59,6 +59,7 @@ const (
 )
 
 var errUnknownVisibility = errors.New("unknown visibility")
+var errUnknownMarkdownMode = errors.New("unknown markdown-mode")
 
 func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 	cs.logLevelVar = levelVar
@@ -95,7 +96,19 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			}),
 			true,
 		},
-		meta.KeyLang:        {"Language", parseString, true},
+		meta.KeyLang: {"Language", parseString, true},
+		config.KeyMarkdownMode: {
+			"Default markdown parsing mode",
+			func(val string) (any, error) {
+				switch strings.TrimSpace(val) {
+				case config.MarkdownModeCMark, "commonmark":
+					return config.MarkdownModeCMark, nil
+				case config.MarkdownModeEMark:
+					return val, nil
+				}
+				return "", errUnknownMarkdownMode
+			}, true,
+		},
 		keyMaxTransclusions: {"Maximum number of transclusions", parseInt, true},
 		keySiteName:         {"Site name", parseString, true},
 		ConfigSxMaxNesting:  {"Maximum nesting of Sx calls", parseInt, true},
@@ -121,6 +134,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		config.KeyHomeZettel:      id.ZidDefaultHome,
 		ConfigInsecureHTML:        defaultHTMLInsecurity,
 		meta.KeyLang:              meta.ValueLangEN,
+		config.KeyMarkdownMode:    config.MarkdownModeCMark,
 		keyMaxTransclusions:       defaultMaxTransclusions,
 		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
