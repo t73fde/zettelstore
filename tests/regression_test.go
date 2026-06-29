@@ -170,17 +170,17 @@ func (*myConfig) Get(context.Context, *meta.Meta, string) string { return "" }
 func (*myConfig) AddDefaultValues(_ context.Context, m *meta.Meta) *meta.Meta {
 	return m
 }
-func (*myConfig) GetHTMLInsecurity() config.HTMLInsecurity { return config.NoHTML }
-func (*myConfig) GetListPageSize() int                     { return 0 }
-func (*myConfig) GetSiteName() string                      { return "" }
-func (*myConfig) GetYAMLHeader() bool                      { return false }
-func (*myConfig) IsZettelFileSyntax(string) bool           { return false }
-func (*myConfig) MarkdownMode() string                     { return config.MarkdownModeCMark }
+func (*myConfig) HTMLInsecurity() config.HTMLInsecurity { return config.NoHTML }
+func (*myConfig) GetListPageSize() int                  { return 0 }
+func (*myConfig) SiteName() string                      { return "" }
+func (*myConfig) UseYAMLHeader() bool                   { return false }
+func (*myConfig) IsZettelFileSyntax(string) bool        { return false }
+func (*myConfig) MarkdownMode() string                  { return config.MarkdownModeCMark }
 
 func (*myConfig) IsSimpleMode() bool                       { return false }
 func (*myConfig) IsExpertMode() bool                       { return false }
 func (*myConfig) GetVisibility(*meta.Meta) meta.Visibility { return meta.VisibilityPublic }
-func (*myConfig) GetMaxTransclusions() int                 { return 1024 }
+func (*myConfig) MaxTransclusions() int                    { return 1024 }
 
 var testConfig = &myConfig{}
 

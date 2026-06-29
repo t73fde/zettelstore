@@ -81,7 +81,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			numEntries = cnt
 		}
 
-		siteName := wui.rtConfig.GetSiteName()
+		siteName := wui.rtConfig.SiteName()
 		user := auth.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnvironment(ctx, "list", userLang, siteName, user)
 		if q == nil {

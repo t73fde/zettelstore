@@ -303,31 +303,31 @@ func updateMeta(result, m *meta.Meta, key string, val string) *meta.Meta {
 	return result
 }
 
-func (cs *configService) GetHTMLInsecurity() config.HTMLInsecurity {
+func (cs *configService) HTMLInsecurity() config.HTMLInsecurity {
 	if htmlInSec, ok := cs.GetCurConfig(ConfigInsecureHTML).(config.HTMLInsecurity); ok {
 		return htmlInSec
 	}
 	return defaultHTMLInsecurity
 }
 
-// GetSiteName returns the current value of the "site-name" key.
-func (cs *configService) GetSiteName() string {
+// SiteName returns the current value of the "site-name" key.
+func (cs *configService) SiteName() string {
 	if siteName, ok := cs.GetCurConfig(keySiteName).(string); ok {
 		return siteName
 	}
 	return defaultSiteName
 }
 
-// GetMaxTransclusions return the maximum number of indirect transclusions.
-func (cs *configService) GetMaxTransclusions() int {
+// MaxTransclusions return the maximum number of indirect transclusions.
+func (cs *configService) MaxTransclusions() int {
 	if mt, ok := cs.GetCurConfig(keyMaxTransclusions).(int); ok {
 		return mt
 	}
 	return defaultMaxTransclusions
 }
 
-// GetYAMLHeader returns the current value of the "yaml-header" key.
-func (cs *configService) GetYAMLHeader() bool {
+// UseYAMLHeader returns the current value of the "yaml-header" key.
+func (cs *configService) UseYAMLHeader() bool {
 	yh, ok := cs.GetCurConfig(keyYAMLHeader).(bool)
 	return ok && yh
 }

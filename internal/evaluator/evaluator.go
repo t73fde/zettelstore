@@ -59,7 +59,7 @@ func EvaluateBlock(ctx context.Context, port Port, rtConfig config.Config, block
 		ctx:             ctx,
 		port:            port,
 		rtConfig:        rtConfig,
-		transcludeMax:   rtConfig.GetMaxTransclusions(),
+		transcludeMax:   rtConfig.MaxTransclusions(),
 		transcludeCount: 0,
 		costMap:         map[id.Zid]transcludeCost{},
 		embedMap:        map[string]*sx.Pair{},

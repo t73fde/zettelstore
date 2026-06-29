@@ -48,17 +48,17 @@ type Config interface {
 	// AddDefaultValues enriches the given meta data with its default values.
 	AddDefaultValues(context.Context, *meta.Meta) *meta.Meta
 
-	// GetSiteName returns the current value of the "site-name" key.
-	GetSiteName() string
+	// SiteName returns the current value of the "site-name" key.
+	SiteName() string
 
-	// GetHTMLInsecurity returns the current
-	GetHTMLInsecurity() HTMLInsecurity
+	// HTMLInsecurity returns the current
+	HTMLInsecurity() HTMLInsecurity
 
-	// GetMaxTransclusions returns the maximum number of indirect transclusions.
-	GetMaxTransclusions() int
+	// MaxTransclusions returns the maximum number of indirect transclusions.
+	MaxTransclusions() int
 
-	// GetYAMLHeader returns the current value of the "yaml-header" key.
-	GetYAMLHeader() bool
+	// UseYAMLHeader returns the current value of the "yaml-header" key.
+	UseYAMLHeader() bool
 
 	// IsZettelFileSyntax checks if zettel with given syntax should be stored
 	// in a single .zettel file.

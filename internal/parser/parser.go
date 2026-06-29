@@ -234,7 +234,7 @@ func ParseZettel(ctx context.Context, ztl zettel.Zettel, syntax string, rtConfig
 		syntax = string(inhMeta.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 	}
 	var alst *sx.Pair
-	if rtConfig != nil && rtConfig.GetHTMLInsecurity().AllowHTML(syntax) {
+	if rtConfig != nil && rtConfig.HTMLInsecurity().AllowHTML(syntax) {
 		alst = alst.Cons(sx.Cons(SymAllowHTML, nil))
 	}
 

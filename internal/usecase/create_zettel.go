@@ -139,7 +139,7 @@ func (uc *CreateZettel) Run(ctx context.Context, zettel zettel.Zettel) (id.Zid, 
 
 	m.Set(meta.KeyCreated, meta.Value(time.Now().Local().Format(id.TimestampLayout)))
 	m.Delete(meta.KeyModified)
-	m.YamlSep = uc.rtConfig.GetYAMLHeader()
+	m.YamlSep = uc.rtConfig.UseYAMLHeader()
 
 	zettel.Content.TrimSpace()
 	zid, err := uc.port.CreateZettel(ctx, zettel)
