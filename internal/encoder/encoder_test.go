@@ -66,7 +66,8 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 		if tc.allowHTML {
 			alst = alst.Cons(sx.Cons(parser.SymAllowHTML, nil))
 		}
-		node := parser.Parse(inp, nil, syntax, alst)
+		pinfo := parser.Get(syntax)
+		node := pinfo.Parse(inp, nil, syntax, alst)
 		parser.Clean(node)
 		checkEncodings(t, testNum, node, tc.inline, tc.descr, tc.expect, tc.zmk)
 	}

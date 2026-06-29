@@ -76,7 +76,8 @@ func TestParsePlain(t *testing.T) {
 			if tc.allowHTML {
 				alst = alst.Cons(sx.Cons(parser.SymAllowHTML, nil))
 			}
-			node := parser.Parse(inp, nil, tc.syntax, alst)
+			pinfo := parser.Get(tc.syntax)
+			node := pinfo.Parse(inp, nil, tc.syntax, alst)
 			if got := node.String(); tc.exp != got {
 				t.Errorf("\nexp: %q\ngot: %q", tc.exp, got)
 			}

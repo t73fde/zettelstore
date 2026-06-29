@@ -31,12 +31,6 @@ const (
 	// api.KeyLang
 )
 
-// Allowed values for KeyMarkdownMode.
-const (
-	MarkdownModeCMark = "cmark"
-	MarkdownModeEMark = "emark"
-)
-
 // Config allows to retrieve all defined configuration values that can be changed during runtime.
 type Config interface {
 	AuthConfig

@@ -57,8 +57,10 @@ func MIMEFromEncoding(enc webapi.EncodingEnum) string {
 }
 
 var syntax2mime = map[string]string{
+	meta.ValueSyntaxCMark:    mimeMarkdown,
 	meta.ValueSyntaxCSS:      "text/css; charset=utf-8",
 	meta.ValueSyntaxDraw:     PlainText,
+	meta.ValueSyntaxEMark:    mimeMarkdown,
 	meta.ValueSyntaxGif:      mimeGIF,
 	meta.ValueSyntaxHTML:     mimeHTML,
 	meta.ValueSyntaxJPEG:     mimeJPEG,

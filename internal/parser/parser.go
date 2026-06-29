@@ -54,9 +54,22 @@ var plainParser = Info{
 	IsImageFormat: false,
 	Parse:         parsePlain,
 }
+var markdownParser = Info{
+	AltNames:      []string{meta.ValueSyntaxMD},
+	IsASTParser:   true,
+	IsTextFormat:  true,
+	IsImageFormat: false,
+	Parse:         parseCommonMark,
+}
 
 func init() {
 	localRegistry := map[string]*Info{
+		meta.ValueSyntaxCMark: {
+			IsASTParser:   markdownParser.IsASTParser,
+			IsTextFormat:  markdownParser.IsTextFormat,
+			IsImageFormat: markdownParser.IsImageFormat,
+			Parse:         parseCommonMark,
+		},
 		meta.ValueSyntaxCSS: {
 			IsASTParser:   false,
 			IsTextFormat:  true,
@@ -68,6 +81,12 @@ func init() {
 			IsTextFormat:  true,
 			IsImageFormat: false,
 			Parse:         parseDraw,
+		},
+		meta.ValueSyntaxEMark: {
+			IsASTParser:   markdownParser.IsASTParser,
+			IsTextFormat:  markdownParser.IsTextFormat,
+			IsImageFormat: markdownParser.IsImageFormat,
+			Parse:         parseExtendedMark,
 		},
 		meta.ValueSyntaxGif: {
 			IsASTParser:   false,
@@ -94,13 +113,7 @@ func init() {
 			IsImageFormat: false,
 			Parse:         parsePlain,
 		},
-		meta.ValueSyntaxMarkdown: {
-			AltNames:      []string{meta.ValueSyntaxMD},
-			IsASTParser:   true,
-			IsTextFormat:  true,
-			IsImageFormat: false,
-			Parse:         parseMarkdown,
-		},
+		meta.ValueSyntaxMarkdown: &markdownParser,
 		meta.ValueSyntaxNone: {
 			IsASTParser:   false,
 			IsTextFormat:  false,
@@ -182,6 +195,20 @@ func Get(name string) *Info {
 	return &plainParser
 }
 
+// Preferences describe pre-configured descisions about syntax names.
+type Preferences interface {
+	MarkdownMode() string
+}
+
+// Resolve the parser name w.r.t. user Preferences.
+func Resolve(name string, p Preferences) *Info {
+	pi := Get(name)
+	if pi == &markdownParser && p != nil {
+		return Get(p.MarkdownMode())
+	}
+	return pi
+}
+
 // IsASTParser returns whether the given syntax parses text into an AST or not.
 func IsASTParser(syntax string) bool {
 	pi, ok := registry[syntax]
@@ -201,8 +228,8 @@ func IsImageFormat(syntax string) bool {
 }
 
 // Parse parses some input and returns both a Sx.Object and a slice of block nodes.
-func Parse(inp *input.Input, m *meta.Meta, syntax string, alst *sx.Pair) *sx.Pair {
-	return Get(syntax).Parse(inp, m, syntax, alst)
+func Parse(inp *input.Input, m *meta.Meta, syntax string, rtConfig config.Config, alst *sx.Pair) *sx.Pair {
+	return Resolve(syntax, rtConfig).Parse(inp, m, syntax, alst)
 }
 
 // SymAllowHTML signals a parser to allow HTML content during parsing.
@@ -243,7 +270,7 @@ func ParseZettel(ctx context.Context, ztl zettel.Zettel, syntax string, rtConfig
 		parseMeta = m
 	}
 
-	rootNode := Parse(input.NewInput(ztl.Content.AsBytes()), parseMeta, syntax, alst)
+	rootNode := Parse(input.NewInput(ztl.Content.AsBytes()), parseMeta, syntax, rtConfig, alst)
 	return &zettel.ParsedZettel{
 		Meta:    m,
 		Content: ztl.Content,

@@ -36,7 +36,8 @@ func TestMarkdown(t *testing.T) {
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
 			inp := input.NewInput([]byte(tc.src))
-			node := parser.Parse(inp, nil, meta.ValueSyntaxMD, nil)
+			pinfo := parser.Get(meta.ValueSyntaxMD)
+			node := pinfo.Parse(inp, nil, pinfo.Name, nil)
 			if got := node.String(); got != tc.exp {
 				t.Errorf("\nExp: %s\nGot: %s", tc.exp, got)
 			}

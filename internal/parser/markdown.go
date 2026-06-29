@@ -22,6 +22,8 @@ import (
 
 	gm "github.com/yuin/goldmark"
 	gmAst "github.com/yuin/goldmark/ast"
+	gmExtension "github.com/yuin/goldmark/extension"
+	gmParser "github.com/yuin/goldmark/parser"
 	gmText "github.com/yuin/goldmark/text"
 
 	"t73f.de/r/sx"
@@ -31,9 +33,23 @@ import (
 	"t73f.de/r/zsx/input"
 )
 
-func parseMarkdown(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.Pair {
-	source := inp.Src[inp.Pos:]
+func parseCommonMark(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.Pair {
 	parser := gm.DefaultParser()
+	return parseMarkdown(parser, inp, alst)
+}
+func parseExtendedMark(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.Pair {
+	md := gm.New(
+		gm.WithExtensions(
+			gmExtension.Table,
+			gmExtension.Strikethrough,
+			gmExtension.Footnote,
+			gmExtension.DefinitionList,
+		),
+	)
+	return parseMarkdown(md.Parser(), inp, alst)
+}
+func parseMarkdown(parser gmParser.Parser, inp *input.Input, alst *sx.Pair) *sx.Pair {
+	source := inp.Src[inp.Pos:]
 	node := parser.Parse(gmText.NewReader(source))
 	p := mdP{source: source, docNode: node, allowHTML: alst.Assoc(SymAllowHTML) != nil}
 	return p.acceptBlockChildren(p.docNode)

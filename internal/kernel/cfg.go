@@ -102,9 +102,9 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			"Default markdown parsing mode",
 			func(val string) (any, error) {
 				switch strings.TrimSpace(val) {
-				case config.MarkdownModeCMark, "commonmark":
-					return config.MarkdownModeCMark, nil
-				case config.MarkdownModeEMark:
+				case meta.ValueSyntaxCMark, "commonmark":
+					return meta.ValueSyntaxCMark, nil
+				case meta.ValueSyntaxEMark:
 					return val, nil
 				}
 				return "", errUnknownMarkdownMode
@@ -135,7 +135,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		config.KeyHomeZettel:      id.ZidDefaultHome,
 		ConfigInsecureHTML:        defaultHTMLInsecurity,
 		meta.KeyLang:              meta.ValueLangEN,
-		keyMarkdownMode:           config.MarkdownModeCMark,
+		keyMarkdownMode:           meta.ValueSyntaxCMark,
 		keyMaxTransclusions:       defaultMaxTransclusions,
 		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
@@ -350,7 +350,7 @@ func (cs *configService) MarkdownMode() string {
 	if mode, ok := cs.GetCurConfig(keyMarkdownMode).(string); ok {
 		return mode
 	}
-	return config.MarkdownModeCMark
+	return meta.ValueSyntaxCMark
 }
 
 // --- config.AuthConfig

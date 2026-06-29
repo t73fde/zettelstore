@@ -23,9 +23,10 @@ import (
 )
 
 func FuzzParseDraw(f *testing.F) {
+	pinfo := parser.Get(meta.ValueSyntaxDraw)
 	f.Fuzz(func(t *testing.T, src []byte) {
 		t.Parallel()
 		inp := input.NewInput(src)
-		parser.Parse(inp, nil, meta.ValueSyntaxDraw, nil)
+		pinfo.Parse(inp, nil, meta.ValueSyntaxDraw, nil)
 	})
 }

@@ -77,7 +77,8 @@ func TestMarkdownSpec(t *testing.T) {
 }
 
 func parseMD(markdown string) (*sx.Pair, string) {
-	result := parser.Parse(input.NewInput([]byte(markdown)), nil, meta.ValueSyntaxMarkdown, nil)
+	pinfo := parser.Get(meta.ValueSyntaxMarkdown)
+	result := pinfo.Parse(input.NewInput([]byte(markdown)), nil, pinfo.Name, nil)
 	enc := encoder.Create(webapi.EncoderText, nil)
 	var sb strings.Builder
 	if err := enc.WriteSz(&sb, result); err != nil {
@@ -102,6 +103,7 @@ func testAllEncodings(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 }
 
 func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
+	zmkInfo := parser.Get(meta.ValueSyntaxZmk)
 	zmkEncoder := encoder.Create(webapi.EncoderZmk, nil)
 	var buf bytes.Buffer
 	testID := tc.Example*100 + 1
@@ -111,7 +113,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 		// gotFirst := buf.String()
 
 		testID = tc.Example*100 + 2
-		secondNode := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, nil)
+		secondNode := zmkInfo.Parse(input.NewInput(buf.Bytes()), nil, zmkInfo.Name, nil)
 		buf.Reset()
 		_ = zmkEncoder.WriteSz(&buf, secondNode)
 		gotSecond := buf.String()
@@ -121,7 +123,7 @@ func testZmkEncoding(t *testing.T, tc markdownTestCase, node *sx.Pair) {
 		// }
 
 		testID = tc.Example*100 + 3
-		thirdNode := parser.Parse(input.NewInput(buf.Bytes()), nil, meta.ValueSyntaxZmk, nil)
+		thirdNode := zmkInfo.Parse(input.NewInput(buf.Bytes()), nil, zmkInfo.Name, nil)
 		buf.Reset()
 		_ = zmkEncoder.WriteSz(&buf, thirdNode)
 		gotThird := buf.String()
