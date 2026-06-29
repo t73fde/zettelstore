@@ -46,6 +46,7 @@ const (
 	keyDefaultLicense    = "default-license"
 	keyDefaultVisibility = "default-visibility"
 	keyExpertMode        = "expert-mode"
+	keyMarkdownMode      = "markdown-mode"
 	keyMaxTransclusions  = "max-transclusions"
 	keySiteName          = "site-name"
 	keyYAMLHeader        = "yaml-header"
@@ -97,7 +98,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			true,
 		},
 		meta.KeyLang: {"Language", parseString, true},
-		config.KeyMarkdownMode: {
+		keyMarkdownMode: {
 			"Default markdown parsing mode",
 			func(val string) (any, error) {
 				switch strings.TrimSpace(val) {
@@ -134,7 +135,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		config.KeyHomeZettel:      id.ZidDefaultHome,
 		ConfigInsecureHTML:        defaultHTMLInsecurity,
 		meta.KeyLang:              meta.ValueLangEN,
-		config.KeyMarkdownMode:    config.MarkdownModeCMark,
+		keyMarkdownMode:           config.MarkdownModeCMark,
 		keyMaxTransclusions:       defaultMaxTransclusions,
 		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
@@ -342,6 +343,14 @@ func (cs *configService) IsZettelFileSyntax(syntax string) bool {
 		}
 	}
 	return false
+}
+
+// MarkdownMode returns the default markdown dialect to be used for syntax "md" and "markdown".
+func (cs *configService) MarkdownMode() string {
+	if mode, ok := cs.GetCurConfig(keyMarkdownMode).(string); ok {
+		return mode
+	}
+	return config.MarkdownModeCMark
 }
 
 // --- config.AuthConfig

@@ -175,6 +175,7 @@ func (*myConfig) GetListPageSize() int                     { return 0 }
 func (*myConfig) GetSiteName() string                      { return "" }
 func (*myConfig) GetYAMLHeader() bool                      { return false }
 func (*myConfig) IsZettelFileSyntax(string) bool           { return false }
+func (*myConfig) MarkdownMode() string                     { return config.MarkdownModeCMark }
 
 func (*myConfig) IsSimpleMode() bool                       { return false }
 func (*myConfig) IsExpertMode() bool                       { return false }

@@ -25,7 +25,6 @@ const (
 	KeyFooterZettel    = "footer-zettel"
 	KeyHomeZettel      = "home-zettel"
 	KeyListsMenuZettel = "lists-menu-zettel"
-	KeyMarkdownMode    = "markdown-mode"
 	KeyShowBackLinks   = "show-back-links"
 	KeyShowFolgeLinks  = "show-folge-links"
 	KeyShowSequelLinks = "show-sequel-links"
@@ -64,6 +63,9 @@ type Config interface {
 	// IsZettelFileSyntax checks if zettel with given syntax should be stored
 	// in a single .zettel file.
 	IsZettelFileSyntax(string) bool
+
+	// MarkdownMode returns the default markdown dialect to be used for syntax "md" and "markdown".
+	MarkdownMode() string
 }
 
 // AuthConfig are relevant configuration values for authentication.
