@@ -59,16 +59,17 @@ var markdownParser = Info{
 	IsASTParser:   true,
 	IsTextFormat:  true,
 	IsImageFormat: false,
-	Parse:         parseCommonMark,
+	Parse:         parseMarkdown,
 }
 
 func init() {
 	localRegistry := map[string]*Info{
-		meta.ValueSyntaxCMark: {
+		meta.ValueSyntaxCommonMark: {
+			AltNames:      []string{meta.ValueSyntaxCMark},
 			IsASTParser:   markdownParser.IsASTParser,
 			IsTextFormat:  markdownParser.IsTextFormat,
 			IsImageFormat: markdownParser.IsImageFormat,
-			Parse:         parseCommonMark,
+			Parse:         parseMarkdown,
 		},
 		meta.ValueSyntaxCSS: {
 			IsASTParser:   false,
@@ -86,7 +87,7 @@ func init() {
 			IsASTParser:   markdownParser.IsASTParser,
 			IsTextFormat:  markdownParser.IsTextFormat,
 			IsImageFormat: markdownParser.IsImageFormat,
-			Parse:         parseExtendedMark,
+			Parse:         parseMarkdown,
 		},
 		meta.ValueSyntaxGif: {
 			IsASTParser:   false,
@@ -218,7 +219,6 @@ func Parse(inp *input.Input, m *meta.Meta, syntax string, rtConfig config.Config
 	pinfo := Get(syntax)
 	if pinfo == &markdownParser && rtConfig != nil {
 		syntax = rtConfig.MarkdownDialect()
-		pinfo = Get(syntax)
 	}
 	return pinfo.Parse(inp, m, syntax, alst)
 }

@@ -38,6 +38,7 @@ func TestParserType(t *testing.T) {
 		{meta.ValueSyntaxJS, false, false},
 		{meta.ValueSyntaxMarkdown, true, false},
 		{meta.ValueSyntaxMD, true, false},
+		{meta.ValueSyntaxCommonMark, true, false},
 		{meta.ValueSyntaxCMark, true, false},
 		{meta.ValueSyntaxEMark, true, false},
 		{meta.ValueSyntaxNone, false, false},

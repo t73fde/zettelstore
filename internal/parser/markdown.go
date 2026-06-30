@@ -34,24 +34,24 @@ import (
 	"t73f.de/r/zsx/input"
 )
 
-func parseCommonMark(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.Pair {
-	parser := gm.DefaultParser()
-	return parseMarkdown(parser, inp, alst)
-}
-func parseExtendedMark(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) *sx.Pair {
-	md := gm.New(
-		gm.WithExtensions(
-			gmExtension.Table,
-			gmExtension.Strikethrough,
-		),
-	)
-	return parseMarkdown(md.Parser(), inp, alst)
-}
-func parseMarkdown(parser gmParser.Parser, inp *input.Input, alst *sx.Pair) *sx.Pair {
+func parseMarkdown(inp *input.Input, _ *meta.Meta, syntax string, alst *sx.Pair) *sx.Pair {
+	parser := mdParserFromSyntax(syntax)
 	source := inp.Src[inp.Pos:]
 	node := parser.Parse(gmText.NewReader(source))
 	p := mdP{source: source, docNode: node, allowHTML: alst.Assoc(SymAllowHTML) != nil}
 	return p.acceptBlockChildren(p.docNode)
+}
+func mdParserFromSyntax(syntax string) gmParser.Parser {
+	if syntax == meta.ValueSyntaxEMark {
+		md := gm.New(
+			gm.WithExtensions(
+				gmExtension.Table,
+				gmExtension.Strikethrough,
+			),
+		)
+		return md.Parser()
+	}
+	return gm.DefaultParser()
 }
 
 type mdP struct {
