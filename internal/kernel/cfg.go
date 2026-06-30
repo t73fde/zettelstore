@@ -46,7 +46,7 @@ const (
 	keyDefaultLicense    = "default-license"
 	keyDefaultVisibility = "default-visibility"
 	keyExpertMode        = "expert-mode"
-	keyMarkdownMode      = "markdown-mode"
+	keyMarkdownDialect   = "markdown-dialect"
 	keyMaxTransclusions  = "max-transclusions"
 	keySiteName          = "site-name"
 	keyYAMLHeader        = "yaml-header"
@@ -60,7 +60,6 @@ const (
 )
 
 var errUnknownVisibility = errors.New("unknown visibility")
-var errUnknownMarkdownMode = errors.New("unknown markdown-mode")
 
 func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 	cs.logLevelVar = levelVar
@@ -98,16 +97,14 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			true,
 		},
 		meta.KeyLang: {"Language", parseString, true},
-		keyMarkdownMode: {
-			"Default markdown parsing mode",
+		keyMarkdownDialect: {
+			"Default markdown dialect",
 			func(val string) (any, error) {
 				switch strings.TrimSpace(val) {
-				case meta.ValueSyntaxCMark, "commonmark":
-					return meta.ValueSyntaxCMark, nil
 				case meta.ValueSyntaxEMark:
 					return val, nil
 				}
-				return "", errUnknownMarkdownMode
+				return meta.ValueSyntaxCMark, nil
 			}, true,
 		},
 		keyMaxTransclusions: {"Maximum number of transclusions", parseInt, true},
@@ -135,7 +132,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		config.KeyHomeZettel:      id.ZidDefaultHome,
 		ConfigInsecureHTML:        defaultHTMLInsecurity,
 		meta.KeyLang:              meta.ValueLangEN,
-		keyMarkdownMode:           meta.ValueSyntaxCMark,
+		keyMarkdownDialect:        meta.ValueSyntaxCMark,
 		keyMaxTransclusions:       defaultMaxTransclusions,
 		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
@@ -345,9 +342,9 @@ func (cs *configService) IsZettelFileSyntax(syntax string) bool {
 	return false
 }
 
-// MarkdownMode returns the default markdown dialect to be used for syntax "md" and "markdown".
-func (cs *configService) MarkdownMode() string {
-	if mode, ok := cs.GetCurConfig(keyMarkdownMode).(string); ok {
+// MarkdownDialect returns the default markdown dialect to be used for syntax "md" and "markdown".
+func (cs *configService) MarkdownDialect() string {
+	if mode, ok := cs.GetCurConfig(keyMarkdownDialect).(string); ok {
 		return mode
 	}
 	return meta.ValueSyntaxCMark

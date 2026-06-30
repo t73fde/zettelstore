@@ -197,14 +197,14 @@ func Get(name string) *Info {
 
 // Preferences describe pre-configured descisions about syntax names.
 type Preferences interface {
-	MarkdownMode() string
+	MarkdownDialect() string
 }
 
 // Resolve the parser name w.r.t. user Preferences.
 func Resolve(name string, p Preferences) *Info {
 	pi := Get(name)
 	if pi == &markdownParser && p != nil {
-		return Get(p.MarkdownMode())
+		return Get(p.MarkdownDialect())
 	}
 	return pi
 }

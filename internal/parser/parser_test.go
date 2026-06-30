@@ -81,4 +81,4 @@ func TestMarkdownDialect(t *testing.T) {
 
 type testPreference string
 
-func (tp testPreference) MarkdownMode() string { return string(tp) }
+func (tp testPreference) MarkdownDialect() string { return string(tp) }

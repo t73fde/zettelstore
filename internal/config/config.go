@@ -58,8 +58,8 @@ type Config interface {
 	// in a single .zettel file.
 	IsZettelFileSyntax(string) bool
 
-	// MarkdownMode returns the default markdown dialect to be used for syntax "md" and "markdown".
-	MarkdownMode() string
+	// MarkdownDialect returns the default markdown dialect to be used for syntax "md" and "markdown".
+	MarkdownDialect() string
 }
 
 // AuthConfig are relevant configuration values for authentication.
