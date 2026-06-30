@@ -35,13 +35,13 @@ import (
 )
 
 func parseMarkdown(inp *input.Input, _ *meta.Meta, syntax string, alst *sx.Pair) *sx.Pair {
-	parser := mdParserFromSyntax(syntax)
+	parser, extended := mdParserFromSyntax(syntax)
 	source := inp.Src[inp.Pos:]
 	node := parser.Parse(gmText.NewReader(source))
-	p := mdP{source: source, docNode: node, allowHTML: alst.Assoc(SymAllowHTML) != nil}
+	p := mdP{source: source, extended: extended, docNode: node, allowHTML: alst.Assoc(SymAllowHTML) != nil}
 	return p.acceptBlockChildren(p.docNode)
 }
-func mdParserFromSyntax(syntax string) gmParser.Parser {
+func mdParserFromSyntax(syntax string) (gmParser.Parser, bool) {
 	if syntax == meta.ValueSyntaxEMark {
 		md := gm.New(
 			gm.WithExtensions(
@@ -49,14 +49,15 @@ func mdParserFromSyntax(syntax string) gmParser.Parser {
 				gmExtension.Strikethrough,
 			),
 		)
-		return md.Parser()
+		return md.Parser(), true
 	}
-	return gm.DefaultParser()
+	return gm.DefaultParser(), false
 }
 
 type mdP struct {
 	source    []byte
 	docNode   gmAst.Node
+	extended  bool
 	allowHTML bool
 }
 
@@ -100,6 +101,12 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 		return p.acceptHTMLBlock(n)
 	case *gmAst.LinkReferenceDefinition:
 		return nil
+	}
+	if p.extended {
+		switch n := node.(type) {
+		case *gmExtAst.Table:
+			return p.acceptTable(n)
+		}
 	}
 	return buildErrorText(false, "unhandled block node of kind '"+node.Kind().String()+"'.")
 }
@@ -195,6 +202,11 @@ func (p *mdP) acceptHTMLBlock(node *gmAst.HTMLBlock) *sx.Pair {
 	return zsx.MakeVerbatim(zsx.SymVerbatimCode, makeAttrHTML(), string(content))
 }
 
+func (p *mdP) acceptTable(node *gmExtAst.Table) *sx.Pair {
+	_ = node.Alignments
+	return sx.Nil()
+}
+
 func (p *mdP) acceptInlineChildren(node gmAst.Node) *sx.Pair {
 	var result sx.ListBuilder
 	for child := node.FirstChild(); child != nil; child = child.NextSibling() {
@@ -220,8 +232,6 @@ func (p *mdP) acceptInline(node gmAst.Node) (*sx.Pair, *sx.Pair) {
 		return p.acceptCodeSpan(n)
 	case *gmAst.Emphasis:
 		return p.acceptEmphasis(n)
-	case *gmExtAst.Strikethrough:
-		return p.acceptStrikethrough(n)
 	case *gmAst.Link:
 		return p.acceptLink(n)
 	case *gmAst.Image:
@@ -231,6 +241,13 @@ func (p *mdP) acceptInline(node gmAst.Node) (*sx.Pair, *sx.Pair) {
 	case *gmAst.RawHTML:
 		return p.acceptRawHTML(n)
 	}
+	if p.extended {
+		switch n := node.(type) {
+		case *gmExtAst.Strikethrough:
+			return p.acceptStrikethrough(n)
+		}
+	}
+
 	return buildErrorText(true, "unhandled inline node '"+node.Kind().String()+"'."), nil
 }
 
