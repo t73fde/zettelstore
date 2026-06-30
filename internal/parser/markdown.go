@@ -23,6 +23,7 @@ import (
 	gm "github.com/yuin/goldmark"
 	gmAst "github.com/yuin/goldmark/ast"
 	gmExtension "github.com/yuin/goldmark/extension"
+	gmExtAst "github.com/yuin/goldmark/extension/ast"
 	gmParser "github.com/yuin/goldmark/parser"
 	gmText "github.com/yuin/goldmark/text"
 
@@ -42,8 +43,6 @@ func parseExtendedMark(inp *input.Input, _ *meta.Meta, _ string, alst *sx.Pair) 
 		gm.WithExtensions(
 			gmExtension.Table,
 			gmExtension.Strikethrough,
-			gmExtension.Footnote,
-			gmExtension.DefinitionList,
 		),
 	)
 	return parseMarkdown(md.Parser(), inp, alst)
@@ -221,6 +220,8 @@ func (p *mdP) acceptInline(node gmAst.Node) (*sx.Pair, *sx.Pair) {
 		return p.acceptCodeSpan(n)
 	case *gmAst.Emphasis:
 		return p.acceptEmphasis(n)
+	case *gmExtAst.Strikethrough:
+		return p.acceptStrikethrough(n)
 	case *gmAst.Link:
 		return p.acceptLink(n)
 	case *gmAst.Image:
@@ -336,6 +337,10 @@ func (p *mdP) acceptEmphasis(node *gmAst.Emphasis) (*sx.Pair, *sx.Pair) {
 		sym = zsx.SymFormatStrong
 	}
 	return zsx.MakeFormat(sym, nil /* TODO */, p.acceptInlineChildren(node)), nil
+}
+
+func (p *mdP) acceptStrikethrough(node *gmExtAst.Strikethrough) (*sx.Pair, *sx.Pair) {
+	return zsx.MakeFormat(zsx.SymFormatDelete, nil /* TODO */, p.acceptInlineChildren(node)), nil
 }
 
 func (p *mdP) acceptLink(node *gmAst.Link) (*sx.Pair, *sx.Pair) {
