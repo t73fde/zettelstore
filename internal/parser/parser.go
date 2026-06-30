@@ -195,20 +195,6 @@ func Get(name string) *Info {
 	return &plainParser
 }
 
-// Preferences describe pre-configured descisions about syntax names.
-type Preferences interface {
-	MarkdownDialect() string
-}
-
-// Resolve the parser name w.r.t. user Preferences.
-func Resolve(name string, p Preferences) *Info {
-	pi := Get(name)
-	if pi == &markdownParser && p != nil {
-		return Get(p.MarkdownDialect())
-	}
-	return pi
-}
-
 // IsASTParser returns whether the given syntax parses text into an AST or not.
 func IsASTParser(syntax string) bool {
 	pi, ok := registry[syntax]
@@ -229,7 +215,12 @@ func IsImageFormat(syntax string) bool {
 
 // Parse parses some input and returns both a Sx.Object and a slice of block nodes.
 func Parse(inp *input.Input, m *meta.Meta, syntax string, rtConfig config.Config, alst *sx.Pair) *sx.Pair {
-	return Resolve(syntax, rtConfig).Parse(inp, m, syntax, alst)
+	pinfo := Get(syntax)
+	if pinfo == &markdownParser && rtConfig != nil {
+		syntax = rtConfig.MarkdownDialect()
+		pinfo = Get(syntax)
+	}
+	return pinfo.Parse(inp, m, syntax, alst)
 }
 
 // SymAllowHTML signals a parser to allow HTML content during parsing.

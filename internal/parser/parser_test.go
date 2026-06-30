@@ -63,22 +63,3 @@ func TestParserType(t *testing.T) {
 		t.Errorf("Forgot to test syntax %q", syntax)
 	}
 }
-
-func TestMarkdownDialect(t *testing.T) {
-	got := parser.Resolve(meta.ValueSyntaxMD, testPreference(meta.ValueSyntaxCMark))
-	if n := got.Name; n != meta.ValueSyntaxCMark {
-		t.Errorf("expected %q, but got %q", meta.ValueSyntaxCMark, n)
-	}
-	got = parser.Resolve(meta.ValueSyntaxMD, testPreference(meta.ValueSyntaxEMark))
-	if n := got.Name; n != meta.ValueSyntaxEMark {
-		t.Errorf("expected %q, but got %q", meta.ValueSyntaxEMark, n)
-	}
-	got = parser.Resolve(meta.ValueSyntaxMD, testPreference(""))
-	if n := got.Name; n != meta.ValueSyntaxTxt {
-		t.Errorf("expected %q, but got %q", meta.ValueSyntaxTxt, n)
-	}
-}
-
-type testPreference string
-
-func (tp testPreference) MarkdownDialect() string { return string(tp) }
