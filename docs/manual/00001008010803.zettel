@@ -1,0 +1,12 @@
+id: 00001008010803
+title: Table example (alignment and more)
+role: material
+syntax: emark
+created: 00010101000000
+modified: 20260630184716
+
+| foo     | bar  | baz | bim |
+| ------- | :--- | :-: | --: |
+| default | left | center | rightright |
+| one     | twotwo  | three  |
+| alpha   | beta | gamma  | delta | epsilon |

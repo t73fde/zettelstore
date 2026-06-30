@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260312173700
+modified: 20260630172315
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -63,6 +63,13 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   May be [[overwritten|00001004020200]] in a user zettel.
 
   Default: ""00000000080001"".
+; [!markdown-dialect|''markdown-dialect'']
+: Specifies which Markdown dialect should be used, when one of the Markdown generic [[''syntax''|00001006020000#syntax]] values are given (""markdown"" or ""md"").
+
+  Allowed values are [[""cmark""|00001008010500]] and [[""emark""|00001008010800]].
+  Any given value except ""emark"" is interpreted as ""cmark"".
+
+  Default: ""cmark""
 ; [!max-transclusions|''max-transclusions'']
 : Maximum number of indirect transclusion.
   This is used to avoid an exploding ""transclusion bomb"", a form of a [[billion laughs attack|https://en.wikipedia.org/wiki/Billion_laughs_attack]].

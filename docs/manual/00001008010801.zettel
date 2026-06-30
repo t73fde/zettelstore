@@ -1,0 +1,8 @@
+id: 00001008010801
+title: Strikethrough example
+role: material
+syntax: emark
+created: 00010101000000
+modified: 20260630182213
+
+abc ~~def~~ ghi

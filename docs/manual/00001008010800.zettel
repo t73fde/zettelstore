@@ -1,0 +1,67 @@
+id: 00001008010800
+title: Extended CommonMark
+role: manual
+tags: #manual #markdown #zettelstore
+syntax: zmk
+created: 00010101000000
+modified: 20260630185030
+predecessor: 00001008010500
+
+While [[CommonMark|00001008010500]] is a well-specified Markdown dialect, some useful elements are missing.
+To be precise, these elements are also missing from the original Markdown proposal.
+
+Therefore, Zettelstore allows its users to make a trade-off and provides a choice: use CommonMark for a Markdown syntax that will be useful in other Markdown-processing software, or use Extended CommonMark to make use of elements found in proprietary Markdown-processing software.
+The first choice focuses on the [[longevity|00001002000000]] of stored zettel, together with better compatibility with other tools.
+The second choice trades longevity for additional features beyond CommonMark.
+
+Extended CommonMark is a strict superset of CommonMark.
+Every element of CommonMark is also supported in Extended CommonMark.
+Currently, Extended CommonMark extends CommonMark with strikethrough and tables.
+
+=== Strikethrough
+
+The tilde character (""''~''"", U+007E) marks deleted text.
+For example, ``abc ~~def~~ ghi`` is rendered in HTML as: ::{{00001008010801}}::{=example}.
+
+As with regular CommonMark emphasis delimiters, a new paragraph causes strikethrough parsing to cease.
+Three or more tildes do not create a strikethrough.
+
+=== Tables
+
+A table consists of a single header row, a delimiter row separating the header from the data, and zero or more data rows.
+
+Each row consists of cells containing arbitrary text in which inline elements are parsed, separated by vertical bar characters (""''|''"", U+007C).
+A leading and trailing vertical bar character is also recommended for clarity.
+Spaces between vertical bar characters and cell content are trimmed.
+
+The delimiter row consists of cells whose only content is hyphen-minus characters (""''-''"", U+002D), optionally preceded or followed by a colon character (""'':''"", U+003A), or both, to indicate left, right, or center column alignment.
+
+For example:
+
+```emark
+| foo | bar |
+| --- | --- |
+| baz | bim |
+```
+
+will be rendered in HTML as:
+
+:::example
+{{{00001008010802}}}
+:::
+
+To show the effect of an alignment specification:
+
+```emark
+| foo     | bar  | baz | bim |
+| ------- | :--- | :-: | --: |
+| default | left | center | rightright |
+| one     | twotwo  | three  |
+| alpha   | beta | gamma  | delta | epsilon |
+```
+
+will be rendered in HTML as:
+
+:::example
+{{{00001008010803}}}
+:::

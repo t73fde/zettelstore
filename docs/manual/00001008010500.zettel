@@ -4,11 +4,11 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 20220113183435
-modified: 20260612184800
+modified: 20260630175514
 url: https://commonmark.org/
 
-[[CommonMark|https://commonmark.org/]] is a Markdown dialect aimed at [[unifying|https://xkcd.com/927/]] the various, often divergent, Markdown dialects by providing an unambiguous syntax specification.
-It also includes a suite of comprehensive tests to validate implementations.
+[[CommonMark|https://commonmark.org/]] is a Markdown dialect aimed at [[unifying|https://xkcd.com/927/]] the various, often divergent Markdown dialects by providing an unambiguous syntax specification.
+It also includes a comprehensive suite of test cases to validate implementations.
 
 Time will tell whether this attempt is ultimately successful.
 
@@ -25,7 +25,7 @@ Effectively, both Markdown and CommonMark can be considered superset languages o
 
 Internally, CommonMark is translated into [[Sz Encoding|00001012920516]].
 Most aspects of Sz encoding can be represented in [[Zettelmarkup|00001007000000]].
-However, Sz encoding supports HTML content only at the block level through [[literal text|00001007040200#literal-text]] with a [[generic attribute|00001007050000]] set to ``html``
+However, Sz encoding supports HTML content only at the block level through [[literal text|00001007040200#literal-text]] with a [[generic attribute|00001007050000]] set to ``html``.
 Therefore, most uses of HTML within a CommonMark zettel are not translated as expected.
 
 As a result, Zettelstore does not fully pass the CommonMark test suite.

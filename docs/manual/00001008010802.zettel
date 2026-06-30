@@ -1,0 +1,10 @@
+id: 00001008010802
+title: Table example (simple)
+role: material
+syntax: emark
+created: 00010101000000
+modified: 20260630183849
+
+| foo | bar |
+| --- | --- |
+| baz | bim |
