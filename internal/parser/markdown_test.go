@@ -62,7 +62,7 @@ func TestMarkdown(t *testing.T) {
 		{name: "table-align-199",
 			src:    "| abc | defghi |\n:-: | -----------:\nbar | baz",
 			syntax: emark,
-			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "abc")) (CELL () (TEXT "defghi"))) ((CELL ((align . "center")) (TEXT "bar")) (CELL ((align . "right")) (TEXT "baz")))))`},
+			exp:    `(BLOCK (TABLE () ((CELL ((align . "center")) (TEXT "abc")) (CELL ((align . "right")) (TEXT "defghi"))) ((CELL ((align . "center")) (TEXT "bar")) (CELL ((align . "right")) (TEXT "baz")))))`},
 		{name: "table-escape-pipe-200",
 			src:    "| f\\|oo  |\n| ------ |\n| b `\\|` az |\n| b **\\|** im |",
 			syntax: emark,

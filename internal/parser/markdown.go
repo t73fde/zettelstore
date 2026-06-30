@@ -230,25 +230,19 @@ func (p *mdP) acceptCells(parent gmAst.Node, rowAligns, tabAligns []gmExtAst.Ali
 	return lb.List()
 }
 func (*mdP) buildAlignment(rowAligns, tabAligns []gmExtAst.Alignment, pos int) *sx.Pair {
-	if pos < len(rowAligns) {
-		switch rowAligns[pos] {
+	aligns := tabAligns
+	if pos < len(rowAligns) && rowAligns[pos] != gmExtAst.AlignNone {
+		aligns = rowAligns
+	}
+
+	if pos < len(aligns) {
+		switch aligns[pos] {
 		case gmExtAst.AlignLeft:
 			return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignLeft))
 		case gmExtAst.AlignCenter:
 			return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignCenter))
 		case gmExtAst.AlignRight:
 			return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignRight))
-		case gmExtAst.AlignNone:
-			if pos < len(tabAligns) {
-				switch tabAligns[pos] {
-				case gmExtAst.AlignLeft:
-					return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignLeft))
-				case gmExtAst.AlignCenter:
-					return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignCenter))
-				case gmExtAst.AlignRight:
-					return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignRight))
-				}
-			}
 		}
 	}
 	return sx.Nil()
