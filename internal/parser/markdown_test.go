@@ -23,7 +23,7 @@ import (
 )
 
 func TestMarkdown(t *testing.T) {
-	cmark := meta.ValueSyntaxEMark
+	cmark := meta.ValueSyntaxCMark
 	emark := meta.ValueSyntaxEMark
 	testcases := []struct {
 		name   string
@@ -35,7 +35,11 @@ func TestMarkdown(t *testing.T) {
 		{name: "simple-list",
 			src: "*   T1\n*   T2",
 			exp: `(BLOCK (UNORDERED () (BLOCK (PARA (TEXT "T1"))) (BLOCK (PARA (TEXT "T2")))))`},
-		{name: "strikethroug-simple-491",
+		{name: "strikethrough-simple-no-cmark",
+			src:    "~~Hi~~ Hello, ~there~ world!",
+			syntax: cmark,
+			exp:    `(BLOCK (PARA (TEXT "~~Hi~~ Hello, ~there~ world") (TEXT "!")))`},
+		{name: "strikethrough-simple-491",
 			src:    "~~Hi~~ Hello, ~there~ world!",
 			syntax: emark,
 			exp:    `(BLOCK (PARA (FORMAT-DELETE () (TEXT "Hi")) (TEXT " Hello, ") (FORMAT-DELETE () (TEXT "there")) (TEXT " world") (TEXT "!")))`},
@@ -47,6 +51,42 @@ func TestMarkdown(t *testing.T) {
 			src:    "This will ~~~not~~~ strike.",
 			syntax: emark,
 			exp:    `(BLOCK (PARA (TEXT "This will ~~~not~~") (TEXT "~ strike.")))`},
+		{name: "table-simple-no-cmark",
+			src:    "| foo | bar |\n| --- | --- |\n| baz | bim |",
+			syntax: cmark,
+			exp:    `(BLOCK (PARA (TEXT "| foo | bar |") (SOFT) (TEXT "| --- | --- |") (SOFT) (TEXT "| baz | bim |")))`},
+		{name: "table-simple-198",
+			src:    "| foo | bar |\n| --- | --- |\n| baz | bim |",
+			syntax: emark,
+			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "foo")) (CELL () (TEXT "bar"))) ((CELL () (TEXT "baz")) (CELL () (TEXT "bim")))))`},
+		{name: "table-align-199",
+			src:    "| abc | defghi |\n:-: | -----------:\nbar | baz",
+			syntax: emark,
+			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "abc")) (CELL () (TEXT "defghi"))) ((CELL ((align . "center")) (TEXT "bar")) (CELL ((align . "right")) (TEXT "baz")))))`},
+		{name: "table-escape-pipe-200",
+			src:    "| f\\|oo  |\n| ------ |\n| b `\\|` az |\n| b **\\|** im |",
+			syntax: emark,
+			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "f|oo"))) ((CELL () (TEXT "b ") (LITERAL-CODE () "|") (TEXT " az"))) ((CELL () (TEXT "b ") (FORMAT-STRONG () (TEXT "|")) (TEXT " im")))))`},
+		{name: "table-broken-block-201",
+			src:    "| abc | def |\n| --- | --- |\n| bar | baz |\n> bar",
+			syntax: emark,
+			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "abc")) (CELL () (TEXT "def"))) ((CELL () (TEXT "bar")) (CELL () (TEXT "baz")))) (QUOTATION () (PARA (TEXT "bar"))))`},
+		{name: "table-broken-para-202",
+			src:    "| abc | def |\n| --- | --- |\n| bar | baz |\nbar\n\nbar",
+			syntax: emark,
+			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "abc")) (CELL () (TEXT "def"))) ((CELL () (TEXT "bar")) (CELL () (TEXT "baz"))) ((CELL () (TEXT "bar")) (CELL ()))) (PARA (TEXT "bar")))`},
+		{name: "table-header-nomatch-delim-203",
+			src:    "| abc | def |\n| --- |\n| bar |",
+			syntax: emark,
+			exp:    `(BLOCK (PARA (TEXT "| abc | def |") (SOFT) (TEXT "| --- |") (SOFT) (TEXT "| bar |")))`},
+		{name: "table-ignore-delim-excess-204",
+			src:    "| abc | def |\n| --- | --- |\n| bar |\n| bar | baz | boo |",
+			syntax: emark,
+			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "abc")) (CELL () (TEXT "def"))) ((CELL () (TEXT "bar")) (CELL ())) ((CELL () (TEXT "bar")) (CELL () (TEXT "baz")))))`},
+		{name: "table-nobody-205",
+			src:    "| abc | def |\n| --- | --- |",
+			syntax: emark,
+			exp:    `(BLOCK (TABLE () ((CELL () (TEXT "abc")) (CELL () (TEXT "def")))))`},
 	}
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {

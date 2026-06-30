@@ -202,8 +202,55 @@ func (p *mdP) acceptHTMLBlock(node *gmAst.HTMLBlock) *sx.Pair {
 	return zsx.MakeVerbatim(zsx.SymVerbatimCode, makeAttrHTML(), string(content))
 }
 
-func (p *mdP) acceptTable(node *gmExtAst.Table) *sx.Pair {
-	_ = node.Alignments
+func (p *mdP) acceptTable(table *gmExtAst.Table) *sx.Pair {
+	var lb sx.ListBuilder
+	child := table.FirstChild()
+	if child == nil {
+		return sx.Nil()
+	}
+	header, isHeader := child.(*gmExtAst.TableHeader)
+	if !isHeader {
+		return sx.Nil()
+	}
+	lb.AddN(zsx.SymTable, sx.Nil(), p.acceptCells(header, header.Alignments, table.Alignments))
+	for child = child.NextSibling(); child != nil; child = child.NextSibling() {
+		if row, isRow := child.(*gmExtAst.TableRow); isRow {
+			lb.Add(p.acceptCells(row, row.Alignments, table.Alignments))
+		}
+	}
+	return lb.List()
+}
+func (p *mdP) acceptCells(parent gmAst.Node, rowAligns, tabAligns []gmExtAst.Alignment) *sx.Pair {
+	var lb sx.ListBuilder
+	pos := 0
+	for cell := parent.FirstChild(); cell != nil; cell = cell.NextSibling() {
+		lb.Add(zsx.MakeCell(p.buildAlignment(rowAligns, tabAligns, pos), p.acceptInlineChildren(cell)))
+		pos++
+	}
+	return lb.List()
+}
+func (*mdP) buildAlignment(rowAligns, tabAligns []gmExtAst.Alignment, pos int) *sx.Pair {
+	if pos < len(rowAligns) {
+		switch rowAligns[pos] {
+		case gmExtAst.AlignLeft:
+			return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignLeft))
+		case gmExtAst.AlignCenter:
+			return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignCenter))
+		case gmExtAst.AlignRight:
+			return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignRight))
+		case gmExtAst.AlignNone:
+			if pos < len(tabAligns) {
+				switch tabAligns[pos] {
+				case gmExtAst.AlignLeft:
+					return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignLeft))
+				case gmExtAst.AlignCenter:
+					return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignCenter))
+				case gmExtAst.AlignRight:
+					return sx.MakeList(sx.Cons(zsx.SymAttrAlign, zsx.AttrAlignRight))
+				}
+			}
+		}
+	}
 	return sx.Nil()
 }
 
