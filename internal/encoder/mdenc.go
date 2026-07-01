@@ -161,6 +161,9 @@ func (v *mdVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 				v.visitListQuote(node, alst)
 			}
 
+		case zsx.SymTable:
+			v.visitTable(node, alst)
+
 		case zsx.SymVerbatimCode:
 			v.visitVerbatim(node)
 
@@ -169,7 +172,7 @@ func (v *mdVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 
 		case zsx.SymRegionBlock, zsx.SymRegionVerse,
 			zsx.SymVerbatimComment, zsx.SymVerbatimEval, zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel,
-			zsx.SymDescription, zsx.SymTable, zsx.SymEndnote,
+			zsx.SymDescription, zsx.SymEndnote,
 			zsx.SymLiteralComment:
 			// Do nothing, ignore it.
 
@@ -326,6 +329,129 @@ func (v *mdVisitor) visitListQuote(node *sx.Pair, alst *sx.Pair) {
 	}
 	v.listPrefix = oldPrefix
 	v.listInfo = nil
+}
+
+func (v *mdVisitor) visitTable(table *sx.Pair, alst *sx.Pair) {
+	alignments := v.getAlignments(table)
+	_, headerRow, rows := zsx.GetTable(table)
+	if headerRow == nil {
+		for range alignments {
+			v.b.WriteString("|     ")
+		}
+		_ = v.b.WriteByte('|')
+	} else {
+		v.writeRow(headerRow, alst)
+	}
+
+	// Write delimiter
+	v.b.WriteLn()
+	for _, align := range alignments {
+		v.b.WriteString("| ")
+		switch align {
+		case leftAlignment:
+			v.b.WriteString(":-- ")
+		case centerAlignment:
+			v.b.WriteString(":-: ")
+		case rightAlignment:
+			v.b.WriteString("--: ")
+		default:
+			v.b.WriteString("--- ")
+		}
+	}
+	_ = v.b.WriteByte('|')
+
+	for rowPair := range rows.Pairs() {
+		v.b.WriteLn()
+		v.writeRow(rowPair.Head(), alst)
+	}
+}
+func (v *mdVisitor) writeRow(row *sx.Pair, alst *sx.Pair) {
+	for cell := range row.Pairs() {
+		v.b.WriteString("| ")
+		_, inline := zsx.GetCell(cell.Head())
+		v.walkList(inline, alst)
+		_ = v.b.WriteByte(' ')
+	}
+	_ = v.b.WriteByte('|')
+}
+func (v *mdVisitor) getAlignments(table *sx.Pair) rowAlignment {
+	var tabAlign tableAlignment
+	numColumns := 0
+	_, headerRow, rows := zsx.GetTable(table)
+	if headerRow != nil {
+		rowAlignments := v.getRowAlignments(headerRow)
+		numColumns = max(numColumns, len(rowAlignments))
+		tabAlign = tableAlignment{rowAlignments}
+	} else {
+		tabAlign = tableAlignment{rowAlignment{}}
+	}
+	for row := range rows.Pairs() {
+		rowAlignments := v.getRowAlignments(row.Head())
+		numColumns = max(numColumns, len(rowAlignments))
+		tabAlign = append(tabAlign, rowAlignments)
+	}
+	if numColumns == 0 {
+		return nil
+	}
+	for i, row := range tabAlign {
+		for len(row) < numColumns {
+			row = append(row, extraAlignment)
+		}
+		tabAlign[i] = row
+	}
+	result := make(rowAlignment, numColumns)
+	for col := range numColumns {
+		result[col] = tabAlign.calcColAlignment(col)
+	}
+	return result
+}
+func (*mdVisitor) getRowAlignments(row *sx.Pair) rowAlignment {
+	var result rowAlignment
+	for cell := range row.Pairs() {
+		attrs, _ := zsx.GetCell(cell.Head())
+		align := noneAlignment
+		if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
+			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
+				align = centerAlignment
+			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
+				align = leftAlignment
+			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
+				align = rightAlignment
+			}
+		}
+		result = append(result, align)
+	}
+	return result
+}
+
+type cellAlignment uint8
+
+const (
+	noneAlignment cellAlignment = iota
+	leftAlignment
+	centerAlignment
+	rightAlignment
+	extraAlignment // like noneAlignment, but added later
+)
+
+type rowAlignment []cellAlignment
+type tableAlignment []rowAlignment
+
+func (ta tableAlignment) calcColAlignment(col int) cellAlignment {
+	var freq [extraAlignment]int
+	for _, row := range ta {
+		if align := row[col]; align < extraAlignment {
+			freq[align]++
+		}
+	}
+	val, maxCount := noneAlignment, 0
+	for i, c := range freq {
+		if c > maxCount {
+			val = cellAlignment(i)
+			maxCount = c
+		}
+	}
+	return val
 }
 
 func (v *mdVisitor) visitVerbatim(node *sx.Pair) {
