@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #markdown #reference #zettelstore
 syntax: zmk
 created: 20221107183011
-modified: 20260701172228
+modified: 20260701174230
 
 A zettel representation that attempts to recreate the zettel as [[Markdown|00001008010800]].
 This is useful for converting [[other markup languages|00001008000000]] (e.g. [[Zettelmarkup|00001007000000]]) to Markdown.
@@ -18,7 +18,6 @@ Examples include:
 * [[Comment blocks|00001007030900]] (and inline comments)
 * [[Evaluation blocks|00001007031300]]
 * [[Math-mode blocks|00001007031400]]
-* Most [[text formatting|00001007040100]] elements (except emphasis, deletion, and quotation)
 * Most [[literal-like formatting|00001007040200]] (except literal text and code spans)
 
 Some elements are subject to additional restrictions.
@@ -26,6 +25,8 @@ For example:
 * [[Quotation lists|00001007030200]] are only supported as top-level elements.
 * All cells in a [[table|00001007031000]] column must use the same alignment.
 * [[Region block|00001007030800]] attributes and the optional attribution are omitted.
+* Attributes of all [[text formatting|00001007040100]] elements are omitted.
+  For all elements other than emphasis, deletion, quotation, and inline span, the corresponding HTML elements are used for encoding.
 
 Restricted and unsupported elements are omitted from the output.
 

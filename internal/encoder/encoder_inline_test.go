@@ -91,7 +91,7 @@ var tcsInline = []zmkTestCase{
 		zmk:   ">>insert>>",
 		expect: expectMap{
 			encoderHTML:  "<p><ins>insert</ins></p>",
-			encoderMD:    "insert",
+			encoderMD:    "<ins>insert</ins>",
 			encoderSz:    `(BLOCK (PARA (FORMAT-INSERT () (TEXT "insert"))))`,
 			encoderSHTML: `((p (ins "insert")))`,
 			encoderText:  "insert",
@@ -115,7 +115,7 @@ var tcsInline = []zmkTestCase{
 		zmk:   "~~old~~>>new>>",
 		expect: expectMap{
 			encoderHTML:  "<p><del>old</del><ins>new</ins></p>",
-			encoderMD:    "~~old~~new",
+			encoderMD:    "~~old~~<ins>new</ins>",
 			encoderSz:    `(BLOCK (PARA (FORMAT-DELETE () (TEXT "old")) (FORMAT-INSERT () (TEXT "new"))))`,
 			encoderSHTML: `((p (del "old") (ins "new")))`,
 			encoderText:  "oldnew",
@@ -127,7 +127,7 @@ var tcsInline = []zmkTestCase{
 		zmk:   "^^superscript^^",
 		expect: expectMap{
 			encoderHTML:  `<p><sup>superscript</sup></p>`,
-			encoderMD:    "superscript",
+			encoderMD:    "<sup>superscript</sup>",
 			encoderSz:    `(BLOCK (PARA (FORMAT-SUPER () (TEXT "superscript"))))`,
 			encoderSHTML: `((p (sup "superscript")))`,
 			encoderText:  `superscript`,
@@ -139,7 +139,7 @@ var tcsInline = []zmkTestCase{
 		zmk:   ",,subscript,,",
 		expect: expectMap{
 			encoderHTML:  `<p><sub>subscript</sub></p>`,
-			encoderMD:    "subscript",
+			encoderMD:    "<sub>subscript</sub>",
 			encoderSz:    `(BLOCK (PARA (FORMAT-SUB () (TEXT "subscript"))))`,
 			encoderSHTML: `((p (sub "subscript")))`,
 			encoderText:  `subscript`,
@@ -331,7 +331,7 @@ var tcsInline = []zmkTestCase{
 		zmk:   `>>""abc"">>{lang=fr}`,
 		expect: expectMap{
 			encoderHTML:  `<p><ins lang="fr">&laquo;&nbsp;abc&nbsp;&raquo;</ins></p>`,
-			encoderMD:    "&laquo;&nbsp;abc&nbsp;&raquo;",
+			encoderMD:    "<ins>&laquo;&nbsp;abc&nbsp;&raquo;</ins>",
 			encoderSz:    `(BLOCK (PARA (FORMAT-INSERT (("lang" . "fr")) (FORMAT-QUOTE () (TEXT "abc")))))`,
 			encoderSHTML: `((p (ins ((lang . "fr")) (@L (@H "&laquo;" "&nbsp;") "abc" (@H "&nbsp;" "&raquo;")))))`,
 			encoderText:  `abc`,

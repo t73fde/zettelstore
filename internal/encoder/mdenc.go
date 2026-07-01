@@ -133,8 +133,14 @@ func (v *mdVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 			v.visitQuote(node, alst)
 		case zsx.SymFormatMark:
 			v.visitFormat(node, alst, "<mark>", "</mark>")
-		case zsx.SymFormatSpan, zsx.SymFormatInsert, zsx.SymFormatSub, zsx.SymFormatSuper:
+		case zsx.SymFormatSpan:
 			v.visitFormat(node, alst, "", "")
+		case zsx.SymFormatInsert:
+			v.visitFormat(node, alst, "<ins>", "</ins>")
+		case zsx.SymFormatSub:
+			v.visitFormat(node, alst, "<sub>", "</sub>")
+		case zsx.SymFormatSuper:
+			v.visitFormat(node, alst, "<sup>", "</sup>")
 
 		case zsx.SymLiteralCode, zsx.SymLiteralInput, zsx.SymLiteralOutput:
 			_, _, content := zsx.GetLiteral(node)
