@@ -127,6 +127,8 @@ func (v *mdVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 			v.visitFormat(node, alst, "*", "*")
 		case zsx.SymFormatStrong:
 			v.visitFormat(node, alst, "__", "__")
+		case zsx.SymFormatDelete:
+			v.visitFormat(node, alst, "~~", "~~")
 		case zsx.SymFormatQuote:
 			v.visitQuote(node, alst)
 		case zsx.SymFormatMark:

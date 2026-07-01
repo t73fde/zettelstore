@@ -103,7 +103,7 @@ var tcsInline = []zmkTestCase{
 		zmk:   "~~delete~~",
 		expect: expectMap{
 			encoderHTML:  "<p><del>delete</del></p>",
-			encoderMD:    "delete",
+			encoderMD:    "~~delete~~",
 			encoderSz:    `(BLOCK (PARA (FORMAT-DELETE () (TEXT "delete"))))`,
 			encoderSHTML: `((p (del "delete")))`,
 			encoderText:  "delete",
@@ -115,7 +115,7 @@ var tcsInline = []zmkTestCase{
 		zmk:   "~~old~~>>new>>",
 		expect: expectMap{
 			encoderHTML:  "<p><del>old</del><ins>new</ins></p>",
-			encoderMD:    "oldnew",
+			encoderMD:    "~~old~~new",
 			encoderSz:    `(BLOCK (PARA (FORMAT-DELETE () (TEXT "old")) (FORMAT-INSERT () (TEXT "new"))))`,
 			encoderSHTML: `((p (del "old") (ins "new")))`,
 			encoderText:  "oldnew",

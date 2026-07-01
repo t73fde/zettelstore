@@ -3,6 +3,6 @@ title: Strikethrough example
 role: material
 syntax: emark
 created: 00010101000000
-modified: 20260630182213
+modified: 20260701135512
 
-abc ~~def~~ ghi
+abc ~~def~~ ghi ~jkl~

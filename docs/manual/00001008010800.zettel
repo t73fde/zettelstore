@@ -4,7 +4,7 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 00010101000000
-modified: 20260630185030
+modified: 20260701135717
 predecessor: 00001008010500
 
 While [[CommonMark|00001008010500]] is a well-specified Markdown dialect, some useful elements are missing.
@@ -20,10 +20,10 @@ Currently, Extended CommonMark extends CommonMark with strikethrough and tables.
 
 === Strikethrough
 
-The tilde character (""''~''"", U+007E) marks deleted text.
-For example, ``abc ~~def~~ ghi`` is rendered in HTML as: ::{{00001008010801}}::{=example}.
+One or two tilde characters (""''~''"", U+007E) mark deleted text.
+For example, ``abc ~~def~~ ghi ~jkl~`` is rendered in HTML as: ::{{00001008010801}}::{=example}.
 
-As with regular CommonMark emphasis delimiters, a new paragraph causes strikethrough parsing to cease.
+As with regular CommonMark emphasis delimiters, a new paragraph causes strikethrough parsing to stop.
 Three or more tildes do not create a strikethrough.
 
 === Tables
