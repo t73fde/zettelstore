@@ -170,7 +170,11 @@ func (v *mdVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 		case zsx.SymRegionQuote:
 			v.visitRegion(node, alst)
 
-		case zsx.SymRegionBlock, zsx.SymRegionVerse,
+		case zsx.SymRegionBlock:
+			_, _, blocks, _ := zsx.GetRegion(node)
+			v.walkList(blocks, alst)
+
+		case zsx.SymRegionVerse,
 			zsx.SymVerbatimComment, zsx.SymVerbatimEval, zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel,
 			zsx.SymDescription, zsx.SymEndnote,
 			zsx.SymLiteralComment:

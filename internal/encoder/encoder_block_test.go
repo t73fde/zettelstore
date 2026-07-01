@@ -240,7 +240,7 @@ and much more
 :::`,
 		expect: expectMap{
 			encoderHTML:  "<div><p>A simple    span and much more</p></div>",
-			encoderMD:    "",
+			encoderMD:    "A simple\n   span\nand much more",
 			encoderSz:    `(BLOCK (REGION-BLOCK () ((PARA (TEXT "A simple") (SOFT) (TEXT "   span") (SOFT) (TEXT "and much more")))))`,
 			encoderSHTML: `((div (p "A simple" " " "   span" " " "and much more")))`,
 			encoderText:  `A simple  span and much more`,
