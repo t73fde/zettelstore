@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20210126175300
-modified: 20260630173857
+modified: 20260701175706
 
 [[Zettelmarkup|00001007000000]] is not the only markup language you can use to define your content.
 Zettelstore is quite agnostic with respect to markup languages.
@@ -46,7 +46,7 @@ The following syntax values are supported:
 ; [!none|""none""]
 : Only the metadata of a zettel is used.
   Useful for displaying the full metadata.
-  Forexample, the [[runtime configuration zettel|00000000000100]] uses this syntax.
+  For example, the [[runtime configuration zettel|00000000000100]] uses this syntax.
   The zettel content is ignored.
 ; [!svg|""svg""]
 : [[Scalable Vector Graphics|https://www.w3.org/groups/wg/svg/]].
