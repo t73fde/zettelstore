@@ -4,32 +4,31 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211230230441
-modified: 20260303122105
+modified: 20260702143501
 
-Zettelstore maintains some internal data to allow faster operations.
+Zettelstore maintains internal data to make operations faster.
+This allows it, for example, to quickly [[find occurrences of a word|00001012051400]] without checking every zettel individually.
+It also avoids repeatedly scanning [[ZIP files|00001004011200]] containing zettel by remembering their metadata.
 
-One example is the [[content search|00001012051400]] for a term: Zettelstore does not need to scan all zettel to find all occurrences for the term.
-Instead, all words are stored internally, with a list of zettel where they occur.
+In rare cases, this internal data may become outdated.
+This should not happen, but differences in file systems and operating systems can occasionally lead to inconsistencies.
+It may also happen if certain [[system configuration settings|00001004020000]] have been changed.
 
-Another example is the way to determine which zettel are stored in a [[ZIP file|00001004011200]].
-Scanning a ZIP file is a lengthy operation, therefore Zettelstore maintains a directory of zettel for each ZIP file.
+To resolve such issues without restarting Zettelstore, you can trigger a refresh of the internal data.
+During a refresh, all zettel are read and processed again, and the internal data is updated accordingly.
 
-All these internal data may become stale.
-This should not happen, but when it comes e.g. to file handling, every operating system behaves differently in very subtle ways.
-
-To avoid stopping and re-starting Zettelstore, you can use the API to force Zettelstore to refresh its internal data if you think it is needed.
-To do this, you must send an HTTP POST request to the [[endpoint|00001012920000]] ''/x'' and you must specify the query parameter ''cmd=refresh''.
+To trigger a refresh, send an HTTP POST request to the ''/x'' [[endpoint|00001012920000]] with the query parameter ''cmd=refresh'':
 
 ```sh
 # curl -X POST 'http://127.0.0.1:23123/x?cmd=refresh'
 ```
 
-If successful, you will get an HTTP status code 204 (No Content) with an empty HTTP body.
+If successful, the request returns HTTP status code 204 (No Content) with an empty body.
 
-The request will be successful if either:
-* Authentication is not enabled, and either Zettelstore was started with the [[run-simple|00001004051100]] command or [[refresh-mode|00001004010000#refresh-mode]] is set to ""true"",
-* [[Authentication is enabled|00001010040100]], you [[provide a valid access token|00001012050600]], and your [[user role|00001010070300]] is not ""creator"",
-* Authentication is enabled, you are either an anonymous user or your user role is ""creator"", and either Zettelstore was started with the run-simple command or refresh-mode is set to ""true"".
+The request succeeds if one of the following conditions is met:
+* Authentication is not enabled, and Zettelstore was started with the [[''run-simple''|00001004051100]] command or [[''refresh-mode''|00001004010000#refresh-mode]] is set to ""true""
+* [[Authentication is enabled|00001010040100]], and you [[provide a valid access token|00001012050600]], while your [[user role|00001010070300]] is not ""creator""
+* Authentication is enabled, you are either an anonymous user or your user role is ""creator"", and Zettelstore was started with the ''run-simple'' command or ''refresh-mode'' is set to ""true"".
 
 === HTTP Status codes
 ; ''204''

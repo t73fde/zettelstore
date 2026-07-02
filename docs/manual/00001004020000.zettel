@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260630172315
+modified: 20260702130200
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -33,9 +33,9 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
 
   Default: ""False"".
 ; [!footer-zettel|''footer-zettel'']
-: Identifier of a zettel that is rendered as HTML and will be placed as the footer of every zettel in the [[web user interface|00001014000000]].
-  Zettel content, delivered via the [[API|00001012000000]] as symbolic expressions, etc. is not affected.
-  If the zettel identifier is invalid or references a zettel that could not be read (possibly because of a limited [[visibility setting|00001010070200]]), nothing is written as the footer.
+: Identifier of a zettel that is rendered as HTML and will be used as the footer of every zettel in the [[web user interface|00001014000000]].
+  Zettel content, delivered via the [[API|00001012000000]] as symbolic expressions, etc., is not affected.
+  If the zettel identifier is invalid or references a zettel that cannot be read (possibly because of a limited [[visibility setting|00001010070200]]), nothing is written as the footer.
 
   May be [[overwritten|00001004020200]] in a user zettel.
 
@@ -64,10 +64,13 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
 
   Default: ""00000000080001"".
 ; [!markdown-dialect|''markdown-dialect'']
-: Specifies which Markdown dialect should be used, when one of the Markdown generic [[''syntax''|00001006020000#syntax]] values are given (""markdown"" or ""md"").
+: Specifies which Markdown dialect is used when one of the generic Markdown [[''syntax''|00001006020000#syntax]] values (""markdown"" or ""md"") is given.
 
   Allowed values are [[""cmark""|00001008010500]] and [[""emark""|00001008010800]].
-  Any given value except ""emark"" is interpreted as ""cmark"".
+  Any value other than ""emark"" is interpreted as ""cmark"".
+
+  If you change the dialect, you should consider refreshing the Zettelstore index because each dialect uses different parsing rules.
+  Parsing rules affect how Zettelstore detects indexable content.
 
   Default: ""cmark""
 ; [!max-transclusions|''max-transclusions'']
