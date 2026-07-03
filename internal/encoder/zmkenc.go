@@ -155,8 +155,6 @@ func (v *zmkVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 			v.visitDescription(node, alst)
 		case zsx.SymTable:
 			v.visitTable(node, alst)
-		case zsx.SymCell:
-			v.visitCell(node, alst)
 
 		case zsx.SymVerbatimCode:
 			v.visitVerbatim(node, "```")
@@ -370,9 +368,10 @@ func (v *zmkVisitor) visitDescription(node *sx.Pair, alst *sx.Pair) {
 }
 
 func (v *zmkVisitor) visitTable(node *sx.Pair, alst *sx.Pair) {
+	alignments := getTableAlignments(node, true)
 	_, headerRow, rows := zsx.GetTable(node)
 	if headerRow != nil {
-		v.writeRow(headerRow, alst, "|=")
+		v.writeHeaderRow(headerRow, alignments, alst)
 		v.b.WriteLn()
 	}
 	first := true
@@ -382,30 +381,48 @@ func (v *zmkVisitor) visitTable(node *sx.Pair, alst *sx.Pair) {
 		} else {
 			v.b.WriteLn()
 		}
-		v.writeRow(row.Head(), alst, "|")
+		v.writeRow(row.Head(), alignments, alst)
 	}
 }
-func (v *zmkVisitor) writeRow(row *sx.Pair, alst *sx.Pair, delim string) {
-	for n := range row.Pairs() {
+func (v *zmkVisitor) writeHeaderRow(row *sx.Pair, alignments columnAlignment, alst *sx.Pair) {
+	delim, col := "|=", 0
+	for cell := range row.Pairs() {
 		v.b.WriteString(delim)
-		v.walk(n.Head(), alst)
+		delim = "|"
+		_, inline := zsx.GetCell(cell.Head())
+		v.walkList(inline, alst)
+		v.b.WriteString(zmkAligns[alignments[col]])
+		col++
+	}
+	for ; col < len(alignments); col++ {
+		v.b.WriteString("|=")
+		v.b.WriteString(zmkAligns[alignments[col]])
 	}
 }
-func (v *zmkVisitor) visitCell(node *sx.Pair, alst *sx.Pair) {
-	attrs, inlines := zsx.GetCell(node)
-	align := ""
-	if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
-		if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
-			align = ":"
-		} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
-			align = "<"
-		} else if zsx.AttrAlignRight.IsEqual(alignValue) {
-			align = ">"
+func (v *zmkVisitor) writeRow(row *sx.Pair, alignments columnAlignment, alst *sx.Pair) {
+	col := 0
+	for cell := range row.Pairs() {
+		v.b.WriteString("|")
+		attrs, inline := zsx.GetCell(cell.Head())
+		align := ""
+		if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
+			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
+				align = ":"
+			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
+				align = "<"
+			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
+				align = ">"
+			}
 		}
+		if align != zmkAligns[alignments[col]] {
+			v.b.WriteString(align)
+		}
+		v.walkList(inline, alst)
+		col++
 	}
-	v.b.WriteString(align)
-	v.walkList(inlines, alst)
 }
+
+var zmkAligns = [extraAlignment]string{"", "<", ":", ">"}
 
 func (v *zmkVisitor) visitVerbatim(node *sx.Pair, delim string) {
 	sym, attrs, content := zsx.GetVerbatim(node)
