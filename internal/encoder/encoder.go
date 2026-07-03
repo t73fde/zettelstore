@@ -24,6 +24,7 @@ import (
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsc/webapi"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/zettel"
 )
@@ -120,4 +121,98 @@ func GetMetaSz(m *meta.Meta) *sx.Pair {
 		lb.Add(sx.MakeList(symType, sx.MakeSymbol(key), obj))
 	}
 	return lb.List()
+}
+
+// Function / Data types to retrieve table information, esp. proposed column alignment.
+
+// getTableAlignments returns an alignment value for each column.
+//
+// If nodeHasPrio is true, a single noneAlignment will be stored, when there is at least
+// one noneAlignment in the column. This is useful for zettelmarkup tables.
+// Otherwise, the alignment value which is used the most, is stored in the
+// column alignments.
+func getTableAlignments(table *sx.Pair, noneHasPrio bool) columnAlignment {
+	var tabAlign tableAlignment
+	numColumns := 0
+	_, headerRow, rows := zsx.GetTable(table)
+	if headerRow != nil {
+		rowAlignments := getRowAlignments(headerRow)
+		numColumns = max(numColumns, len(rowAlignments))
+		tabAlign = tableAlignment{rowAlignments}
+	} else {
+		tabAlign = tableAlignment{rowAlignment{}}
+	}
+	for row := range rows.Pairs() {
+		rowAlignments := getRowAlignments(row.Head())
+		numColumns = max(numColumns, len(rowAlignments))
+		tabAlign = append(tabAlign, rowAlignments)
+	}
+	if numColumns == 0 {
+		return nil
+	}
+	for i, row := range tabAlign {
+		for len(row) < numColumns {
+			row = append(row, extraAlignment)
+		}
+		tabAlign[i] = row
+	}
+	result := make(columnAlignment, numColumns)
+	for col := range numColumns {
+		align, countNone := tabAlign.calcColAlignment(col)
+		if noneHasPrio && countNone > 0 {
+			result[col] = noneAlignment
+		} else {
+			result[col] = align
+		}
+	}
+	return result
+}
+func getRowAlignments(row *sx.Pair) rowAlignment {
+	var result rowAlignment
+	for cell := range row.Pairs() {
+		attrs, _ := zsx.GetCell(cell.Head())
+		align := noneAlignment
+		if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
+			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
+				align = centerAlignment
+			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
+				align = leftAlignment
+			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
+				align = rightAlignment
+			}
+		}
+		result = append(result, align)
+	}
+	return result
+}
+
+type cellAlignment uint8
+
+const (
+	noneAlignment cellAlignment = iota
+	leftAlignment
+	centerAlignment
+	rightAlignment
+	extraAlignment // like noneAlignment, but added later
+)
+
+type rowAlignment []cellAlignment
+type columnAlignment []cellAlignment
+type tableAlignment []rowAlignment
+
+func (ta tableAlignment) calcColAlignment(col int) (cellAlignment, int) {
+	var freq [extraAlignment]int
+	for _, row := range ta {
+		if align := row[col]; align < extraAlignment {
+			freq[align]++
+		}
+	}
+	val, maxCount := noneAlignment, 0
+	for i, c := range freq {
+		if c > maxCount {
+			val = cellAlignment(i)
+			maxCount = c
+		}
+	}
+	return val, freq[noneAlignment]
 }

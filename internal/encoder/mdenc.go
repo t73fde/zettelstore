@@ -342,7 +342,7 @@ func (v *mdVisitor) visitListQuote(node *sx.Pair, alst *sx.Pair) {
 }
 
 func (v *mdVisitor) visitTable(table *sx.Pair, alst *sx.Pair) {
-	alignments := v.getAlignments(table)
+	alignments := getTableAlignments(table, false)
 	_, headerRow, rows := zsx.GetTable(table)
 	if headerRow == nil {
 		for range alignments {
@@ -383,85 +383,6 @@ func (v *mdVisitor) writeRow(row *sx.Pair, alst *sx.Pair) {
 		_ = v.b.WriteByte(' ')
 	}
 	_ = v.b.WriteByte('|')
-}
-func (v *mdVisitor) getAlignments(table *sx.Pair) rowAlignment {
-	var tabAlign tableAlignment
-	numColumns := 0
-	_, headerRow, rows := zsx.GetTable(table)
-	if headerRow != nil {
-		rowAlignments := v.getRowAlignments(headerRow)
-		numColumns = max(numColumns, len(rowAlignments))
-		tabAlign = tableAlignment{rowAlignments}
-	} else {
-		tabAlign = tableAlignment{rowAlignment{}}
-	}
-	for row := range rows.Pairs() {
-		rowAlignments := v.getRowAlignments(row.Head())
-		numColumns = max(numColumns, len(rowAlignments))
-		tabAlign = append(tabAlign, rowAlignments)
-	}
-	if numColumns == 0 {
-		return nil
-	}
-	for i, row := range tabAlign {
-		for len(row) < numColumns {
-			row = append(row, extraAlignment)
-		}
-		tabAlign[i] = row
-	}
-	result := make(rowAlignment, numColumns)
-	for col := range numColumns {
-		result[col] = tabAlign.calcColAlignment(col)
-	}
-	return result
-}
-func (*mdVisitor) getRowAlignments(row *sx.Pair) rowAlignment {
-	var result rowAlignment
-	for cell := range row.Pairs() {
-		attrs, _ := zsx.GetCell(cell.Head())
-		align := noneAlignment
-		if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
-			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
-				align = centerAlignment
-			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
-				align = leftAlignment
-			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
-				align = rightAlignment
-			}
-		}
-		result = append(result, align)
-	}
-	return result
-}
-
-type cellAlignment uint8
-
-const (
-	noneAlignment cellAlignment = iota
-	leftAlignment
-	centerAlignment
-	rightAlignment
-	extraAlignment // like noneAlignment, but added later
-)
-
-type rowAlignment []cellAlignment
-type tableAlignment []rowAlignment
-
-func (ta tableAlignment) calcColAlignment(col int) cellAlignment {
-	var freq [extraAlignment]int
-	for _, row := range ta {
-		if align := row[col]; align < extraAlignment {
-			freq[align]++
-		}
-	}
-	val, maxCount := noneAlignment, 0
-	for i, c := range freq {
-		if c > maxCount {
-			val = cellAlignment(i)
-			maxCount = c
-		}
-	}
-	return val
 }
 
 func (v *mdVisitor) visitVerbatim(node *sx.Pair) {
