@@ -171,19 +171,21 @@ func getRowAlignments(row *sx.Pair) rowAlignment {
 	var result rowAlignment
 	for cell := range row.Pairs() {
 		attrs, _ := zsx.GetCell(cell.Head())
-		align := noneAlignment
-		if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
-			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
-				align = centerAlignment
-			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
-				align = leftAlignment
-			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
-				align = rightAlignment
-			}
-		}
-		result = append(result, align)
+		result = append(result, getCellAlignment(attrs))
 	}
 	return result
+}
+func getCellAlignment(attrs *sx.Pair) cellAlignment {
+	if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
+		if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
+			return centerAlignment
+		} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
+			return leftAlignment
+		} else if zsx.AttrAlignRight.IsEqual(alignValue) {
+			return rightAlignment
+		}
+	}
+	return noneAlignment
 }
 
 type cellAlignment uint8

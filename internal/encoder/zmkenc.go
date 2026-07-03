@@ -404,18 +404,8 @@ func (v *zmkVisitor) writeRow(row *sx.Pair, alignments columnAlignment, alst *sx
 	for cell := range row.Pairs() {
 		v.b.WriteString("|")
 		attrs, inline := zsx.GetCell(cell.Head())
-		align := ""
-		if alignPair := attrs.Assoc(zsx.SymAttrAlign); alignPair != nil {
-			if alignValue := alignPair.Cdr(); zsx.AttrAlignCenter.IsEqual(alignValue) {
-				align = ":"
-			} else if zsx.AttrAlignLeft.IsEqual(alignValue) {
-				align = "<"
-			} else if zsx.AttrAlignRight.IsEqual(alignValue) {
-				align = ">"
-			}
-		}
-		if align != zmkAligns[alignments[col]] {
-			v.b.WriteString(align)
+		if align := getCellAlignment(attrs); align != alignments[col] {
+			v.b.WriteString(zmkAligns[align])
 		}
 		v.walkList(inline, alst)
 		col++
