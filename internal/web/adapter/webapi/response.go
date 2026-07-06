@@ -30,5 +30,5 @@ func (a *WebAPI) writeObject(w http.ResponseWriter, zid id.Zid, obj sx.Object) e
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return nil
 	}
-	return writeBuffer(w, &buf, content.SXPF)
+	return writeBuffer(w, &buf, content.SXPFUTF8)
 }

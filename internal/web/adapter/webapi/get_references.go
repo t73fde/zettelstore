@@ -76,7 +76,7 @@ func (a *WebAPI) MakeGetReferencesHandler(
 				buf.WriteString(s)
 				buf.WriteByte('\n')
 			}
-			if err = writeBuffer(w, &buf, content.PlainText); err != nil {
+			if err = writeBuffer(w, &buf, content.PlainTextUTF8); err != nil {
 				a.logger.Error("write plain data", "err", err, "zid", zid)
 			}
 		default:

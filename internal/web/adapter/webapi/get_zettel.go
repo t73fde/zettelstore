@@ -93,7 +93,7 @@ func (a *WebAPI) writePlainData(ctx context.Context, w http.ResponseWriter, zid 
 		}
 
 	case partMeta:
-		contentType = content.PlainText
+		contentType = content.PlainTextUTF8
 		_, err = z.Meta.Write(&buf)
 
 	case partContent:

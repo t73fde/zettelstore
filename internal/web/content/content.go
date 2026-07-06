@@ -27,25 +27,33 @@ import (
 
 // Some MIME encoding values.
 const (
-	UnknownMIME  = "application/octet-stream"
-	mimeGIF      = "image/gif"
-	mimeHTML     = "text/html; charset=utf-8"
-	mimeJPEG     = "image/jpeg"
-	mimeJS       = "text/javascript; charset=utf-8"
-	mimeMarkdown = "text/markdown; charset=utf-8"
-	PlainText    = "text/plain; charset=utf-8"
-	mimePNG      = "image/png"
-	SXPF         = PlainText
-	mimeWEBP     = "image/webp"
+	UnknownMIME      = "application/octet-stream"
+	charsetUTF8      = "; charset=utf-8"
+	mimeCSS          = "text/css"
+	mimeCSSUTF8      = mimeCSS + charsetUTF8
+	mimeGIF          = "image/gif"
+	mimeHTML         = "text/html"
+	mimeHTMLUTF8     = mimeHTML + charsetUTF8
+	mimeJPEG         = "image/jpeg"
+	mimeJS           = "text/javascript"
+	mimeJSUTF8       = mimeJS + charsetUTF8
+	mimeMarkdown     = "text/markdown"
+	mimeMarkdownUTF8 = mimeMarkdown + charsetUTF8
+	mimePlain        = "text/plain"
+	PlainTextUTF8    = mimePlain + charsetUTF8
+	mimePNG          = "image/png"
+	mimeSVG          = "image/svg+xml"
+	SXPFUTF8         = PlainTextUTF8
+	mimeWEBP         = "image/webp"
 )
 
 var encoding2mime = map[webapi.EncodingEnum]string{
-	webapi.EncoderHTML:  mimeHTML,
-	webapi.EncoderMD:    mimeMarkdown,
-	webapi.EncoderSz:    SXPF,
-	webapi.EncoderSHTML: SXPF,
-	webapi.EncoderText:  PlainText,
-	webapi.EncoderZmk:   PlainText,
+	webapi.EncoderHTML:  mimeHTMLUTF8,
+	webapi.EncoderMD:    mimeMarkdownUTF8,
+	webapi.EncoderSz:    SXPFUTF8,
+	webapi.EncoderSHTML: SXPFUTF8,
+	webapi.EncoderText:  PlainTextUTF8,
+	webapi.EncoderZmk:   PlainTextUTF8,
 }
 
 // MIMEFromEncoding returns the MIME encoding for a given zettel encoding
@@ -57,25 +65,25 @@ func MIMEFromEncoding(enc webapi.EncodingEnum) string {
 }
 
 var syntax2mime = map[string]string{
-	meta.ValueSyntaxCommonMark: mimeMarkdown,
-	meta.ValueSyntaxCMark:      mimeMarkdown,
-	meta.ValueSyntaxCSS:        "text/css; charset=utf-8",
-	meta.ValueSyntaxDraw:       PlainText,
-	meta.ValueSyntaxEMark:      mimeMarkdown,
+	meta.ValueSyntaxCommonMark: mimeMarkdownUTF8,
+	meta.ValueSyntaxCMark:      mimeMarkdownUTF8,
+	meta.ValueSyntaxCSS:        mimeCSSUTF8,
+	meta.ValueSyntaxDraw:       PlainTextUTF8,
+	meta.ValueSyntaxEMark:      mimeMarkdownUTF8,
 	meta.ValueSyntaxGif:        mimeGIF,
-	meta.ValueSyntaxHTML:       mimeHTML,
+	meta.ValueSyntaxHTML:       mimeHTMLUTF8,
 	meta.ValueSyntaxJPEG:       mimeJPEG,
 	meta.ValueSyntaxJPG:        mimeJPEG,
-	meta.ValueSyntaxJS:         mimeJS,
-	meta.ValueSyntaxMarkdown:   mimeMarkdown,
-	meta.ValueSyntaxMD:         mimeMarkdown,
+	meta.ValueSyntaxJS:         mimeJSUTF8,
+	meta.ValueSyntaxMarkdown:   mimeMarkdownUTF8,
+	meta.ValueSyntaxMD:         mimeMarkdownUTF8,
 	meta.ValueSyntaxNone:       "",
-	meta.ValueSyntaxPlain:      PlainText,
+	meta.ValueSyntaxPlain:      PlainTextUTF8,
 	meta.ValueSyntaxPNG:        mimePNG,
-	meta.ValueSyntaxSVG:        "image/svg+xml",
-	meta.ValueSyntaxSxn:        SXPF,
-	meta.ValueSyntaxText:       PlainText,
-	meta.ValueSyntaxTxt:        PlainText,
+	meta.ValueSyntaxSVG:        mimeSVG,
+	meta.ValueSyntaxSxn:        SXPFUTF8,
+	meta.ValueSyntaxText:       PlainTextUTF8,
+	meta.ValueSyntaxTxt:        PlainTextUTF8,
 	meta.ValueSyntaxWebp:       mimeWEBP,
 	meta.ValueSyntaxZmk:        "text/x-zmk; charset=utf-8",
 
@@ -93,18 +101,21 @@ func MIMEFromSyntax(syntax string) string {
 }
 
 var mime2syntax = map[string]string{
-	mimeGIF:         meta.ValueSyntaxGif,
-	mimeJPEG:        meta.ValueSyntaxJPEG,
-	mimeJS:          meta.ValueSyntaxJS,
-	mimePNG:         meta.ValueSyntaxPNG,
-	mimeWEBP:        meta.ValueSyntaxWebp,
-	"text/html":     meta.ValueSyntaxHTML,
-	"text/markdown": meta.ValueSyntaxMarkdown,
-	"text/plain":    meta.ValueSyntaxText,
+	mimeGIF:      meta.ValueSyntaxGif,
+	mimeJPEG:     meta.ValueSyntaxJPEG,
+	mimeJS:       meta.ValueSyntaxJS,
+	mimePNG:      meta.ValueSyntaxPNG,
+	mimeWEBP:     meta.ValueSyntaxWebp,
+	mimeCSS:      meta.ValueSyntaxCSS,
+	mimeHTML:     meta.ValueSyntaxHTML,
+	mimeMarkdown: meta.ValueSyntaxMarkdown,
+	mimePlain:    meta.ValueSyntaxText,
+	mimeSVG:      meta.ValueSyntaxSVG,
 
 	// Additional syntaxes
-	"application/pdf": "pdf",
-	"text/javascript": "js",
+	"application/pdf":          "pdf",
+	"application/x-javascript": meta.ValueSyntaxJS,
+	"text/xml":                 "xml",
 }
 
 // SyntaxFromMIME returns the syntax for a zettel based on MIME encoding value

@@ -78,14 +78,14 @@ func (a *WebAPI) MakeQueryHandler(
 		switch enc, _ := getEncoding(r, urlQuery); enc {
 		case webapi.EncoderPlain:
 			encoder = &plainZettelEncoder{}
-			contentType = content.PlainText
+			contentType = content.PlainTextUTF8
 
 		case webapi.EncoderData:
 			encoder = &dataZettelEncoder{
 				sq:        sq,
 				getRights: func(m *meta.Meta) webapi.ZettelRights { return a.getRights(ctx, m) },
 			}
-			contentType = content.SXPF
+			contentType = content.SXPFUTF8
 
 		default:
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
@@ -297,7 +297,7 @@ func (a *WebAPI) handleRoleZettel(w http.ResponseWriter, r *http.Request, roleZe
 }
 
 func (a *WebAPI) redirectFound(w http.ResponseWriter, r *http.Request, ub *webapi.URLBuilder, zid id.Zid) {
-	w.Header().Set(webapi.HeaderContentType, content.PlainText)
+	w.Header().Set(webapi.HeaderContentType, content.PlainTextUTF8)
 	http.Redirect(w, r, ub.String(), http.StatusFound)
 	if _, err := io.WriteString(w, zid.String()); err != nil {
 		a.logger.Error("redirect body", "err", err)

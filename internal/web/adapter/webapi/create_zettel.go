@@ -61,10 +61,10 @@ func (a *WebAPI) MakePostCreateZettelHandler(createZettel *usecase.CreateZettel)
 		switch enc {
 		case webapi.EncoderPlain:
 			result = newZid.Bytes()
-			contentType = content.PlainText
+			contentType = content.PlainTextUTF8
 		case webapi.EncoderData:
 			result = []byte(sx.Int64(newZid).String())
-			contentType = content.SXPF
+			contentType = content.SXPFUTF8
 		}
 
 		h := adapter.PrepareHeader(w, contentType)
