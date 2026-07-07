@@ -1,23 +1,46 @@
 <title>Change Log</title>
 
+<a id="3_0"></a>
+<h2>Changes for Version 3.0.0 (pending)</h2>
+
+This will be a breaking release. For example, the representation of version
+numbers may change. The sx- / sz-based encodings of zettel will change. Zettel
+IDs will always be encoded as strings; the numeric encoding will be removed.
+The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
+
 <a id="2_1"></a>
-<h2>Changes for Version 2.1.0 (pending)</h2>
+<h2>Changes for Version 2.1.0 (2026-07-07)</h2>
 
-Main goal of this version: improve Markdown support. Users will be able to use
-Markdown instead of Zettelmarkup. However, Markdown has known limitations
-compared to Zettelmarkup, such as the lack of transclusions, fewer text
-formatting options, no support for tables, and no footnotes. Additionally, if
-HTML elements are included in the Markdown text, Zettelstore may ignore or hide
-them, depending on configuration settings (for security reasons).
+The main goal of this release is to improve Markdown support. Users will be
+able to use Markdown instead of Zettelmarkup. However, Markdown has some
+limitations compared to Zettelmarkup, including the lack of transclusions and
+fewer text formatting options. In addition, if Markdown documents contain HTML
+elements, Zettelstore may ignore or hide them, depending on the configuration,
+for security reasons.
 
-  *  File upload for zettel recognizes more file types.
+  *  Add a second Markdown dialect: emark (Extended CommonMark). It supports
+     simple GFM-style tables and strikethrough formatting. Additional language
+     elements, such as endnotes and description lists, may be added in the
+     future.
+     (major: markdown)
+  *  Update the Markdown encoder to generate Extended CommonMark output.
+     (major: markdown)
+  *  Add the runtime config key <code>markdown-dialect</code> to specify which
+     dialect should be used for the generic syntax values &ldquo;md&rdquo; and
+     &ldquo;markdown&rdquo;. The value &ldquo;cmark&rdquo; selects the default
+     CommonMark dialect explicitly.
+     (minor: markdown)
+  *  Extend file uploads to support additional file types.
      (minor: webui)
-  *  Allow wildcard value &ldquo;*&rdquo; for runtime config
-     <code>zettel-file-syntax</code>.
+  *  Allow the wildcard value &ldquo;*&rdquo; for the
+     <code>zettel-file-syntax</code> runtime configuration.
      (minor)
-  *  Remove leading / trailing space characters in table cells.
+  *  Allow empty table rows by using only &rdquo;|&ldquo; at the beginning of
+     a line.
      (minor: zmk)
-  *  Allow to set value <code>zettel-file-syntax</code> via runtime config.
+  *  Trim leading and trailing spaces in table cells.
+     (minor: zmk)
+  *  Allow <code>zettel-file-syntax</code> to be configured at runtime.
      (bug)
 
 <a id="2_0"></a>
