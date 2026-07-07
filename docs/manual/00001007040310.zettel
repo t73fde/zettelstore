@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210810155955
-modified: 20250701130556
+modified: 20260707141326
 
 There are two kinds of links, regardless of links to (internal) other zettel or to (external) material.
 Both kinds begin with two consecutive left square bracket characters (""''[''"", U+005B) and end with two consecutive right square bracket characters (""'']''"", U+005D).
@@ -39,3 +39,11 @@ If the link references another zettel, and this zettel is not readable for the c
 
 A zettel reference to a non-existing zettel, i.e. using a legal zettel identifier that does not identify an existing zettel, the link text will be shown strikethrough.
 For example, ''[[Missing zettel|99999999999999]]'' will be rendered in HTML as ::[[Missing zettel|99999999999999]]::{=example}.
+
+If the link text looks like a [[query expression|00001007700000]], it may be parsed differently than expected.
+For example, ``[[query:role:zettel|00000000000001]]`` might appear to be a link with text ""query:role:zettel"" and the zettel reference [[00000000000001]].
+However, ''role:zettel|00000000000001'' is itself a valid query expression that filters only zettel with metadata key ''role'' equal to ""zettel"" and then applies the [[aggregate action|00001007770000]] named ""00000000000001"" (a valid word).
+Therefore, ``[[query:role:zettel|00000000000001]]`` is interpreted as a ``[[linkspecification]]``, with no link text.
+
+If you really want to have the link text ""query:role:zettel"" and the zettel reference ""00000000000001"", you should change ""query:..."" to something like ""query\\:..."".
+Because ``query\\:`` is no longer recognized as the ``query:`` prefix, everything before ``|`` is treated as the link text: ``[[query\\:role:zettel|00000000000001]]``.
