@@ -4,27 +4,27 @@ role: manual
 tags: #installation #manual #zettelstore
 syntax: zmk
 created: 20220114181521
-modified: 20260303165524
+modified: 20260707162000
 
-Since there is no such thing as the one Linux, there are too many different ways to automatically start Zettelstore.
+Because there is no single way Linux systems are configured, there are many ways to start Zettelstore automatically.
 
-* One way is to interpret your Linux desktop system as a server and use the [[recipe to install Zettelstore on a server|00001003600000]].
-** See below for a lighter alternative.
-* If you are using the [[Gnome Desktop|https://www.gnome.org/]], you could use the tool [[GNOME Tweaks|https://gitlab.gnome.org/GNOME/gnome-tweaks]].
-  It allows you to specify applications that should run on startup / login.
+* One option is to treat your Linux desktop system as a server and use the [[recipe to install Zettelstore on a server|00001003600000]].
+** A lightweight alternative is described below.
+* If you are using the [[GNOME Desktop|https://www.gnome.org/]], you can use [[GNOME Tweaks|https://gitlab.gnome.org/GNOME/gnome-tweaks]].
+  It allows you to specify applications that should run automatically when you log in.
 * [[KDE|https://kde.org/]] provides a system setting to [[autostart|https://docs.kde.org/stable_kf6/en/plasma-workspace/kcontrol/autostart/]] applications.
-* [[Xfce|https://xfce.org/]] allows to specify [[autostart applications|https://docs.xfce.org/xfce/xfce4-session/preferences#application_autostart]].
-* [[LXDE|https://www.lxde.org/]] uses ""LXSession Edit"" to allow users to specify autostart applications.
+* [[Xfce|https://xfce.org/]] lets you specify [[autostart applications|https://docs.xfce.org/xfce/xfce4-session/preferences#application_autostart]].
 
 If you're using a different desktop environment, try searching for its name together with the word ""autostart"".
 
-Yet another way is to make use of the middleware that is provided.
-Many Linux distributions make use of [[systemd|https://systemd.io/]], which allows starting processes on behalf of a user.
-On the command line, adapt the following script to your own needs and execute it:
+Alternatively, if your system uses [[systemd|https://systemd.io/]], you can configure it to start Zettelstore as a user service.
+Many Linux distributions use systemd as their init system and service manager.
+Adapt the following commands to your needs, then run them from a terminal:
+
 ```
-# mkdir -p "$HOME/.config/systemd/user"
-# cd "$HOME/.config/systemd/user"
-# cat <<__EOF__ > zettelstore.service
+$ mkdir -p "$HOME/.config/systemd/user"
+$ cd "$HOME/.config/systemd/user"
+$ cat <<__EOF__ > zettelstore.service
 [Unit]
 Description=Zettelstore
 After=network.target home.mount
@@ -35,9 +35,9 @@ ExecStart=/usr/local/bin/zettelstore run -d zettel
 [Install]
 WantedBy=default.target
 __EOF__
-# systemctl --user daemon-reload
-# systemctl --user enable zettelstore.service
-# systemctl --user start zettelstore.service
-# systemctl --user status zettelstore.service
+$ systemctl --user daemon-reload
+$ systemctl --user enable zettelstore.service
+$ systemctl --user start zettelstore.service
+$ systemctl --user status zettelstore.service
 ```
-The last command should output some lines to indicate success.
+The last command should show that the service is active and running.
