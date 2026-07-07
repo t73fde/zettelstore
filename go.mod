@@ -11,11 +11,11 @@ require (
 	t73f.de/r/sxwebs v0.0.0-20260306080905-ae08a5a25a24
 	t73f.de/r/webs v0.0.0-20260423145035-8b5236e98057
 	t73f.de/r/zero v0.0.0-20260617163612-a5a367a772ea
-	t73f.de/r/zsc v0.0.0-20260706174653-f2618f927072
+	t73f.de/r/zsc v0.0.0-20260707092004-abc671e5c45b
 	t73f.de/r/zsx v0.0.0-20260306081015-97bc251a7ddd
 )
 
 require (
 	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
+	golang.org/x/text v0.39.0 // indirect
 )
