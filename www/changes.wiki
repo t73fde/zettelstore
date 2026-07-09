@@ -8,6 +8,12 @@ numbers may change. The sx- / sz-based encodings of zettel will change. Zettel
 IDs will always be encoded as strings; the numeric encoding will be removed.
 The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
 
+  * Change data encoding of zettel list queries. Zettel identifiers are encoded
+    as a string value (was: numeric value). Make encoding of zettel list
+    simpler by changing <code>(zettel (id ZID) ...</code> to <code>(zettel
+    "ZID" ...</code>.
+    (breaking: api)
+
 <a id="2_1"></a>
 <h2>Changes for Version 2.1.0 (2026-07-07)</h2>
 

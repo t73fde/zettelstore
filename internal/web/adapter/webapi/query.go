@@ -207,20 +207,27 @@ type dataZettelEncoder struct {
 	getRights func(*meta.Meta) webapi.ZettelRights
 }
 
+var (
+	symAggregate = sx.MakeSymbol("aggregate")
+	symHuman     = sx.MakeSymbol("human")
+	symMetaList  = sx.MakeSymbol("meta-list")
+	symQuery     = sx.MakeSymbol("query")
+	symZettel    = sx.MakeSymbol("zettel")
+)
+
 func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error {
 	var lb sx.ListBuilder
 	lb.AddN(
-		sx.MakeSymbol("meta-list"),
-		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
-		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),
+		symMetaList,
+		sx.MakeList(symQuery, sx.MakeString(dze.sq.String())),
+		sx.MakeList(symHuman, sx.MakeString(dze.sq.Human())),
 	)
-	symID, symZettel := sx.MakeSymbol("id"), sx.MakeSymbol("zettel")
 	for _, m := range ml {
 		msz := sexp.EncodeMetaRights(webapi.MetaRights{
 			Meta:   m.Map(),
 			Rights: dze.getRights(m),
 		})
-		msz = sx.Cons(sx.MakeList(symID, sx.Int64(m.Zid)), msz.Cdr()).Cons(symZettel)
+		msz = sx.Cons(sx.MakeString(m.Zid.String()), msz.Cdr()).Cons(symZettel)
 		lb.Add(msz)
 	}
 	_, err := sx.Print(w, lb.List())
@@ -229,16 +236,16 @@ func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error 
 func (dze *dataZettelEncoder) writeArrangement(w io.Writer, act string, arr meta.Arrangement) error {
 	var lb sx.ListBuilder
 	lb.AddN(
-		sx.MakeSymbol("aggregate"),
+		symAggregate,
 		sx.MakeString(act),
-		sx.MakeList(sx.MakeSymbol("query"), sx.MakeString(dze.sq.String())),
-		sx.MakeList(sx.MakeSymbol("human"), sx.MakeString(dze.sq.Human())),
+		sx.MakeList(symQuery, sx.MakeString(dze.sq.String())),
+		sx.MakeList(symHuman, sx.MakeString(dze.sq.Human())),
 	)
 	for aggKey, metaList := range arr {
 		var lbMeta sx.ListBuilder
 		lbMeta.Add(sx.MakeString(aggKey))
 		for _, m := range metaList {
-			lbMeta.Add(sx.Int64(m.Zid))
+			lbMeta.Add(sx.MakeString(m.Zid.String()))
 		}
 		lb.Add(lbMeta.List())
 	}
