@@ -41,13 +41,9 @@ type Port interface {
 // EvaluateZettel evaluates the given zettel in the given context, with the
 // given ports, and the given environment.
 func EvaluateZettel(ctx context.Context, port Port, rtConfig config.Config, zn *zettel.ParsedZettel) {
-	switch zn.Syntax {
-	case meta.ValueSyntaxNone:
-		// AST is empty, evaluate to a description list of metadata.
-		zn.Blocks = evaluateMetadata(zn.Meta)
-	case meta.ValueSyntaxSxn:
+	if zn.Syntax == meta.ValueSyntaxSxn {
 		zn.Blocks = evaluateSxn(zn.Blocks)
-	default:
+	} else {
 		zn.Blocks = EvaluateBlock(ctx, port, rtConfig, zn.Blocks)
 	}
 }

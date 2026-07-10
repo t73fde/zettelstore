@@ -20,11 +20,13 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
+	zeroiter "t73f.de/r/zero/iter"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsc/webapi"
+	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
@@ -51,6 +53,9 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return
+		}
+		if zn.Syntax == meta.ValueSyntaxNone {
+			zn.Blocks = contentFromMetadata(zn.Meta)
 		}
 
 		zettelLang := wui.getConfig(ctx, zn.InhMeta, meta.KeyLang)
@@ -169,4 +174,38 @@ func (wui *WebUI) zidLinksSxn(values []string, getTextTitle getTextTitleFunc) *s
 		}
 	}
 	return lb.List()
+}
+
+func contentFromMetadata(m *meta.Meta) *sx.Pair {
+	var lbDescription sx.ListBuilder
+	lbDescription.AddN(zsx.SymDescription, nil)
+	for key, val := range m.All() {
+		dt := meta.Type(key)
+
+		seq := zeroiter.OneSeq(string(val))
+		if dt.IsSet {
+			seq = val.Fields()
+		}
+		makeLink := dt == meta.TypeID || dt == meta.TypeIDSet
+
+		var lb sx.ListBuilder
+		first := true
+		for s := range seq {
+			if first {
+				first = false
+			} else {
+				lb.Add(zsx.MakeText(" "))
+			}
+			tn := zsx.MakeText(s)
+			if makeLink {
+				lb.Add(zsx.MakeLink(nil, sz.ScanReference(s), sx.MakeList(tn)))
+			} else {
+				lb.Add(tn)
+			}
+		}
+
+		lbDescription.Add(sx.MakeList(zsx.MakeText(key)))
+		lbDescription.Add(zsx.MakeBlock(zsx.MakeBlock(zsx.MakeParaList(lb.List()))))
+	}
+	return zsx.MakeBlock(lbDescription.List())
 }

@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20210126175300
-modified: 20260701175706
+modified: 20260710173618
 
 [[Zettelmarkup|00001007000000]] is not the only markup language you can use to define your content.
 Zettelstore is quite agnostic with respect to markup languages.
@@ -25,7 +25,7 @@ The following syntax values are supported:
 : A [[Cascading Style Sheet|https://www.w3.org/Style/CSS/]], to be used when rendering a zettel as HTML.
 ; [!draw|""draw""]
 : A [[language|00001008050000]] to ""draw"" a graphic by using some simple Unicode characters.
-; [!gif|""gif""]; [!jpeg|""jpeg""]; [!jpg|""jpg""]; [!png|""png""]; [!webp|""webp""]
+; [!gif|""gif""], [!jpeg|""jpeg""], [!jpg|""jpg""], [!png|""png""], [!webp|""webp""]
 : The formats for pixel graphics.
   Typically the data is stored in a separate file and the syntax is given in the meta-file, which has the same name as the zettel identifier and has no file extension.[^Before version 0.2, the meta-file had the file extension ''.meta'']
 ; [!html|""html""]
@@ -44,14 +44,14 @@ The following syntax values are supported:
 : For those who desperately need [[Markdown|https://daringfireball.net/projects/markdown/]], Zettelstore supports multiple Markdown dialects, including [[CommonMark|00001008010500]].
   See [[Use Markdown within Zettelstore|00001008010000]] for details.
 ; [!none|""none""]
-: Only the metadata of a zettel is used.
-  Useful for displaying the full metadata.
+: Only the metadata is used.
   For example, the [[runtime configuration zettel|00000000000100]] uses this syntax.
   The zettel content is ignored.
+  In the [[Web user interface|00001014000000]], the metadata is displayed as a [[description list|00001007030100]] in place of the content.
 ; [!svg|""svg""]
 : [[Scalable Vector Graphics|https://www.w3.org/groups/wg/svg/]].
 ; [!sxn|""sxn""]
-: S-Expressions, as implemented by [[Sx|https://t73f.de/r/sx/]], are often used to specify templates when rendering a zettel as HTML for the [[web user interface|00001014000000]] (with the help of sxhtml).
+: S-Expressions, as implemented by [[Sx|https://t73f.de/r/sx/]], are often used to specify templates when rendering a zettel as HTML for the [[web user interface|00001014000000]] (with the help of [[sxhtml|https://r.t73f.de/sxwebs/dir?ci=tip&name=sxhtml]]).
 ; [!text|""text""], [!plain|""plain""], [!txt|""txt""]
 : Plain text that must not be interpreted further.
 ; [!zmk|""zmk""]

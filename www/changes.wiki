@@ -17,6 +17,10 @@ The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
     into one list. Now it is: <code>(content "" "Change data encoding
     ...")</code>.
     (breaking: api)
+  * Content of zettel with syntax &ldquo;none&rdquo; is treated as empty in the
+    API. Previously, it was evaluated to a description list of the zettel's
+    metadata. This is now done only in the WebUI.
+    (breaking: api)
   * Allow to retrieve zettel content via data encoding.
     (minor: api)
 
