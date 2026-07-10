@@ -134,9 +134,11 @@ func compareZettelList(t *testing.T, pl [][]byte, l []webapi.ZidMetaRights) {
 
 func TestGetZettelData(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
+	zid := id.ZidDefaultHome
 	c := getClient()
 	c.SetAuth("owner", "owner")
-	z, err := c.GetZettelData(context.Background(), id.ZidDefaultHome)
+	z, err := c.GetZettelData(ctx, zid)
 	if err != nil {
 		t.Error(err)
 		return
@@ -148,7 +150,19 @@ func TestGetZettelData(t *testing.T) {
 		t.Errorf("Expect non-empty content, but empty encoding (got %q)", z.Encoding)
 	}
 
-	mr, err := c.GetMetaData(context.Background(), id.ZidDefaultHome)
+	content, encoding, err := c.GetContentData(ctx, zid)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	if encoding != z.Encoding {
+		t.Errorf("encoding differ: %q vs %q", z.Encoding, encoding)
+	}
+	if content != z.Content {
+		t.Errorf("content differ: %q vs %q", z.Content, content)
+	}
+
+	mr, err := c.GetMetaData(ctx, zid)
 	if err != nil {
 		t.Error(err)
 		return

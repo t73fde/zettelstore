@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211004093206
-modified: 20260710141313
+modified: 20260710143436
 
 The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -73,9 +73,12 @@ If you print the result a little bit nicer, you will see its structure:
 ** ''""'': the content is stored as plain text.
 ** ''"base64"'': the content is encoded using the [[standard Base64 encoding|https://www.rfc-editor.org/rfc/rfc4648.txt]].
 
-If you provide the value ""content"" for the query parameter ''part=PART'', or if you omit this parameter, no content representation is returned.
-Instead, an empty list is returned.
-Useful values for [[''PART''|00001012920800]] are only ""zettel"" and ""[[meta|00001012053400]]"".
+If you omit the query parameter ''part'', or set it to ''content'', the response contains only the ''content'' list:
+
+```
+# curl 'http://127.0.0.1:23123/z/00001012053300?enc=data&part=content'
+(content "" "The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].\n\nFor example, ...
+```
 
 === HTTP Status codes
 ; ''200''

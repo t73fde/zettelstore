@@ -13,6 +13,12 @@ The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
     simpler by changing <code>(zettel (id ZID) ...</code> to <code>(zettel
     "ZID" ...</code>.
     (breaking: api)
+  * Change data encoding for zettel retrieval: merge encoding/content encoding
+    into one list. Now it is: <code>(content "" "Change data encoding
+    ...")</code>.
+    (breaking: api)
+  * Allow to retrieve zettel content via data encoding.
+    (minor: api)
 
 <a id="2_1"></a>
 <h2>Changes for Version 2.1.0 (2026-07-07)</h2>

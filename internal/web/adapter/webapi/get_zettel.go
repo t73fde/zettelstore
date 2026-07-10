@@ -133,6 +133,10 @@ func (a *WebAPI) writeSzData(ctx context.Context, w http.ResponseWriter, zid id.
 			Meta:   z.Meta.Map(),
 			Rights: a.getRights(ctx, z.Meta),
 		})
+
+	case partContent:
+		zContent, zEncoding := z.Content.Encode()
+		obj = sexp.EncodeContent(zContent, zEncoding)
 	}
 	if err = a.writeObject(w, zid, obj); err != nil {
 		a.logger.Error("write sx data", "err", err, "zid", zid)
