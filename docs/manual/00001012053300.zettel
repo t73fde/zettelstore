@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20211004093206
-modified: 20260701183755
+modified: 20260710141313
 
 The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -44,7 +44,7 @@ Alternatively, you may retrieve the zettel as a parseable object / a [[symbolic 
 
 ```sh
 # curl 'http://127.0.0.1:23123/z/00001012053300?enc=data&part=zettel'
-(zettel (meta (back "00001006000000 00001012000000 00001012053200 00001012054400") (backward "00001006000000 00001012000000 00001012053200 00001012054400 00001012920000") (box-number "1") (created "20211004093206") (forward "00001006020000 00001006050000 00001010040100 00001012050200 00001012053400 00001012920000 00001012920800 00001012921200 00001012930500") (modified "20230703174152") (published "20230703174152") (role "manual") (syntax "zmk") (tags "#api #manual #zettelstore") (title "API: Retrieve metadata and content of an existing zettel")) (rights 62) (encoding "") (content "The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].\n\nFor example, ...
+(zettel (meta (back "00001006000000 00001012000000 00001012053200 00001012054400") (backward "00001006000000 00001012000000 00001012053200 00001012054400 00001012920000") (box-number "1") (created "20211004093206") (forward "00001006020000 00001006050000 00001010040100 00001012050200 00001012053400 00001012920000 00001012920800 00001012921200 00001012930500") (modified "20230703174152") (published "20230703174152") (role "manual") (syntax "zmk") (tags "#api #manual #zettelstore") (title "API: Retrieve metadata and content of an existing zettel")) (rights 62) (content "" "The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].\n\nFor example, ...
 ```
 
 If you print the result a little bit nicer, you will see its structure:
@@ -61,18 +61,17 @@ If you print the result a little bit nicer, you will see its structure:
               (tags "#api #manual #zettelstore")
               (title "API: Retrieve metadata and content of an existing zettel"))
         (rights 62)
-        (encoding "")
-        (content "The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].\n\nFor example, ...
+        (content "" "The [[endpoint|00001012920000]] to work with metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].\n\nFor example, ...
 ```
 
-* The result is a list, starting with the symbol ''zettel''.
-* Then, some key/value pairs are following, also nested.
-* Nested in ''meta'' are the metadata, each as a key/value pair.
-* ''rights'' specifies the [[access rights|00001012921200]] the user has for this zettel.
-* ''"encoding"'' states how the content is encoded.
-  Currently, only two values are allowed: the empty string (''""'') that specifies an empty encoding, and the string ''"base64"'' that specifies the [[standard Base64 encoding|https://www.rfc-editor.org/rfc/rfc4648.txt]].
-* The zettel content is stored as a value of the key ''content''.
-  Typically, text content is not encoded, and binary content is encoded via Base64.
+* The result is a list whose first element is the symbol ''zettel''.
+* The remaining elements are nested key/value pairs.
+* The ''meta'' list contains the metadata as key/value pairs.
+* ''rights'' specifies the user's [[access rights|00001012921200]] for this zettel.
+* The symbol ''content'' is followed by two string values: the encoding and the zettel content.
+  The encoding may be one of:
+** ''""'': the content is stored as plain text.
+** ''"base64"'': the content is encoded using the [[standard Base64 encoding|https://www.rfc-editor.org/rfc/rfc4648.txt]].
 
 If you provide the value ""content"" for the query parameter ''part=PART'', or if you omit this parameter, no content representation is returned.
 Instead, an empty list is returned.

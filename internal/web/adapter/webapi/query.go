@@ -212,7 +212,6 @@ var (
 	symHuman     = sx.MakeSymbol("human")
 	symMetaList  = sx.MakeSymbol("meta-list")
 	symQuery     = sx.MakeSymbol("query")
-	symZettel    = sx.MakeSymbol("zettel")
 )
 
 func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error {
@@ -227,7 +226,7 @@ func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error 
 			Meta:   m.Map(),
 			Rights: dze.getRights(m),
 		})
-		msz = sx.Cons(sx.MakeString(m.Zid.String()), msz.Cdr()).Cons(symZettel)
+		msz = sx.Cons(sx.MakeString(m.Zid.String()), msz.Cdr()).Cons(sexp.SymZettel)
 		lb.Add(msz)
 	}
 	_, err := sx.Print(w, lb.List())
