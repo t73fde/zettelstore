@@ -150,7 +150,7 @@ func (v *mdVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 			v.b.WriteString(content)
 
 		case zsx.SymHeading:
-			level, attrs, text, _, _ := zsx.GetHeading(node)
+			attrs, level, text, _, _ := zsx.GetHeading(node)
 			const headingSigns = "###### "
 			v.b.WriteString(headingSigns[len(headingSigns)-level-1:])
 			v.walkList(text, v.setLanguage(alst, attrs))

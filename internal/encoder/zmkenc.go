@@ -272,7 +272,7 @@ func (v *zmkVisitor) visitBlock(node *sx.Pair, alst *sx.Pair) {
 }
 
 func (v *zmkVisitor) visitHeading(node *sx.Pair, alst *sx.Pair) {
-	level, attrs, inlines, _, _ := zsx.GetHeading(node)
+	attrs, level, inlines, _, _ := zsx.GetHeading(node)
 	const headingSigns = "========= "
 	v.b.WriteString(headingSigns[len(headingSigns)-level-3:])
 	v.walkList(inlines, alst)
