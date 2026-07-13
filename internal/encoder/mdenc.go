@@ -293,7 +293,8 @@ func (v *mdVisitor) visitNestedList(node *sx.Pair, alst *sx.Pair, enum string) {
 		v.writeSpaces(regIndent)
 		v.b.WriteString(enum)
 		first := true
-		for item := range blk.Head().Tail().Pairs() {
+		_, elements := zsx.GetListItem(blk.Head())
+		for item := range elements.Pairs() {
 			in := item.Head()
 			if first {
 				first = false
@@ -324,7 +325,8 @@ func (v *mdVisitor) visitListQuote(node *sx.Pair, alst *sx.Pair) {
 		}
 		v.b.WriteString(v.listPrefix)
 		first := true
-		for item := range blk.Head().Tail().Pairs() {
+		_, elements := zsx.GetListItem(blk.Head())
+		for item := range elements.Pairs() {
 			in := item.Head()
 			if first {
 				first = false

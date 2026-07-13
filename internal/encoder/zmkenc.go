@@ -291,7 +291,7 @@ func (v *zmkVisitor) visitNestedList(node *sx.Pair, alst *sx.Pair, code byte) {
 		} else {
 			v.b.WriteLn()
 		}
-		item := zsx.GetBlock(itm.Head())
+		_, item := zsx.GetListItem(itm.Head())
 		if sym, isSymbol := sx.GetSymbol(item.Head().Car()); isSymbol &&
 			!zsx.SymListOrdered.IsEqualSymbol(sym) &&
 			!zsx.SymListUnordered.IsEqualSymbol(sym) &&

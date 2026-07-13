@@ -149,6 +149,18 @@ func (v *textVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 				v.walk(n.Head(), alst)
 			}
 
+		case zsx.SymListItem:
+			_, elements := zsx.GetListItem(node)
+			first := true
+			for n := range elements.Pairs() {
+				if first {
+					first = false
+				} else {
+					v.b.WriteLn()
+				}
+				v.walk(n.Head(), alst)
+			}
+
 		case zsx.SymTable:
 			_, header, rowList := zsx.GetTable(node)
 			firstRow := true

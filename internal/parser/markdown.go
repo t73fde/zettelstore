@@ -94,7 +94,7 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 	case *gmAst.FencedCodeBlock:
 		return p.acceptFencedCodeBlock(n)
 	case *gmAst.Blockquote:
-		return zsx.MakeList(zsx.SymListQuote, nil, p.acceptItemSlice(n))
+		return zsx.MakeList(zsx.SymListQuote, nil, sx.MakeList(zsx.MakeListItem(nil, p.acceptItemSlice(n))))
 	case *gmAst.List:
 		return p.acceptList(n)
 	case *gmAst.HTMLBlock:
@@ -162,7 +162,7 @@ func (p *mdP) acceptList(node *gmAst.List) *sx.Pair {
 		if !ok {
 			return buildErrorText(false, "expected list item node, but got '"+child.Kind().String()+"'.")
 		}
-		items.Add(zsx.MakeBlockList(p.acceptItemSlice(item)))
+		items.Add(zsx.MakeListItem(nil, p.acceptItemSlice(item)))
 	}
 	return zsx.MakeList(kind, a.List(), items.List())
 }
