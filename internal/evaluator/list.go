@@ -114,11 +114,11 @@ func (ap *actionPara) createBlockNodeWord(key string) (*sx.Pair, int) {
 	count := 0
 	for _, cat := range ccs {
 		buf.WriteString(string(cat.Name))
-		items.Add(zsx.MakeBlock(zsx.MakePara(
+		items.Add(zsx.MakeListItem(nil, sx.MakeList(zsx.MakePara(
 			zsx.MakeLink(nil,
 				sz.ScanReference(buf.String()),
 				sx.MakeList(zsx.MakeText(string(cat.Name)))),
-		)))
+		))))
 		count++
 		buf.Truncate(bufLen)
 	}
@@ -206,7 +206,7 @@ func (ap *actionPara) createBlockNodeMetaKeys() (*sx.Pair, int) {
 		q2 := buf.String()
 		buf.Truncate(bufLen)
 
-		items.Add(zsx.MakeBlock(zsx.MakePara(
+		items.Add(zsx.MakeListItem(nil, sx.MakeList(zsx.MakePara(
 			zsx.MakeLink(nil,
 				sz.ScanReference(q1),
 				sx.MakeList(zsx.MakeText(string(cat.Name)))),
@@ -216,7 +216,7 @@ func (ap *actionPara) createBlockNodeMetaKeys() (*sx.Pair, int) {
 				sz.ScanReference(q2),
 				sx.MakeList(zsx.MakeText("values"))),
 			zsx.MakeText(")"),
-		)))
+		))))
 		count++
 	}
 	return zsx.MakeList(ap.kind, nil, items.List()), count
@@ -234,11 +234,11 @@ func (ap *actionPara) createBlockNodeMeta(key string) (*sx.Pair, int) {
 				continue
 			}
 		}
-		items.Add(zsx.MakeBlock(zsx.MakePara(
+		items.Add(zsx.MakeListItem(nil, sx.MakeList(zsx.MakePara(
 			zsx.MakeLink(nil,
 				sz.ScanReference(m.Zid.String()),
 				sx.MakeList(zsx.MakeText(sz.NormalizedSpacedText(m.GetTitle())))),
-		)))
+		))))
 		count++
 	}
 	return zsx.MakeList(ap.kind, nil, items.List()), count
