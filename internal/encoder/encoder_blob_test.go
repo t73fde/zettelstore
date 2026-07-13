@@ -18,7 +18,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-	"t73f.de/r/zsx/input"
 
 	"zettelstore.de/z/internal/parser"
 )
@@ -53,11 +52,17 @@ var pngTestCases = []blobTestCase{
 
 func TestBlob(t *testing.T) {
 	m := meta.New(id.Invalid)
-	for testNum, tc := range pngTestCases {
+	for testNum, btc := range pngTestCases {
+		tc := zmkTestCase{
+			descr:     btc.descr,
+			src:       string(btc.blob),
+			syntax:    btc.syntax,
+			allowHTML: false,
+			inline:    false,
+			expect:    btc.expect,
+		}
 		m.Set(meta.KeyTitle, meta.Value(tc.descr))
-		inp := input.NewInput(tc.blob)
 		pinfo := parser.Get(tc.syntax)
-		node := pinfo.Parse(inp, m, tc.syntax, nil)
-		checkEncodings(t, testNum, node, false, tc.descr, tc.expect, "???")
+		checkEncodings(t, testNum, tc, pinfo, m, tc.syntax, nil)
 	}
 }

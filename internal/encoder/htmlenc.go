@@ -39,7 +39,7 @@ type htmlEncoder struct {
 // WriteZettel encodes a full zettel as HTML5.
 func (he *htmlEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(GetMetaSz(zn.InhMeta), &env)
+	hm, err := he.th.EvaluateMetadata(zn.InhMeta, &env)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (he *htmlEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
 // WriteMeta encodes meta data as HTML5.
 func (he *htmlEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	env := shtml.MakeEnvironment(he.lang)
-	hm, err := he.th.Evaluate(GetMetaSz(m), &env)
+	hm, err := he.th.EvaluateMetadata(m, &env)
 	if err != nil {
 		return err
 	}

@@ -47,7 +47,6 @@ func cmdFile(fs *flag.FlagSet) (int, error) {
 		string(m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)),
 		nil,
 	)
-	parser.Clean(z.Blocks)
 	encdr := encoder.Create(
 		webapi.Encoder(enc),
 		&encoder.CreateParameter{Lang: string(m.GetDefault(meta.KeyLang, meta.ValueLangEN))})

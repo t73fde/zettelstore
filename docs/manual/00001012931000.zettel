@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403153903
-modified: 20260612185204
+modified: 20260713150939
 
 Zettel in a [[Sz encoding|00001012920516]] are represented as a [[symbolic expression|00001012930000]].
 To process these symbolic expressions, you need to know, how a specific part of a zettel is represented by a symbolic expression.
@@ -64,28 +64,22 @@ __Attribute__ **=** ''('' **[** [[__AttributeKeyValue__|00001012931800]] &hellip
 
 Either, there are no attributes.
 These are specified by the empty list ''()''.
-Or there are attributes.
-In this case, the first element of the list must be the symbol ''quote'': ''(quote'' ''('' A,,1,, A,,2,, &hellip; A,,n,, '')'''')''.
+Or there is a list of key / value pairs.
 
 === Other
-==== ''UNKNOWN''
-A list with ''UNKNOWN'' as its first element signals an internal error during transforming a zettel into the Sz encoding.
-It may be ignored or may result in an error.
+==== ''*ZSX-NOT-FOUND:xyz*''
+Any symbol with the pattern ''*ZSX-NOT-FOUND:xyz**'', where ""''xyz''"" is any string, signals an internal error.
 
-:::syntax
-__Unknown__ **=** ''(UNKNOWN'' Object &hellip; '')''.
-:::
-
-The list may only contain the symbol ''UNKNOWN'', or, in addition, an unlimited amount of other objects.
-
-==== ''**xyz:NOT-FOUND**''
-Any symbol with the pattern ''**xyz:NOT-FOUND**'', where ""''xyz''"" is any string, signals an internal error.
-
-==== ''*SPLICE-NODES*''
-A list with ''*SPLICE-NODES*'' as its first element may occur during internal processing.
+==== ''*ZSX-SPLICE-NODES*''
+A list with ''*ZSX-SPLICE-NODES*'' as its first element may occur during internal processing.
 It signals that some processing routine intends to return more than one object instead of just one [[__BlockElement__|00001012931400]] or one [[__InlineElement__|00001012931600]].
 The elements of such a list should be ""spliced"" into the parent list.
 
 ==== NIL (or ''()'')
 Analogous to a splice node, which signals that more than one values is about to be returned, a ""NIL"" value (denoted as ""''()''"") signals that no object should be returned.
 Therefore, a [[__BlockElement__|00001012931400]] or an [[__InlineElement__|00001012931600]] may be ""NIL"".
+
+==== ''*ZSX-ID*''
+The symbol ''*ZSX-ID*'' is a special [[__Attributes__|00001012931000#attribute]] key.
+It denotes an unique identifier.
+For example, used for [[heading|00001012931400#heading]] or [[mark|00001012931600#mark]] elements, when needed by encoding the zettel.

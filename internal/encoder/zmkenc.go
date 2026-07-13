@@ -241,13 +241,14 @@ func (v *zmkVisitor) visitCite(node *sx.Pair, alst *sx.Pair) {
 }
 
 func (v *zmkVisitor) visitMark(node *sx.Pair, alst *sx.Pair) {
-	mark, _, _, inlines := zsx.GetMark(node)
+	attrs, mark, inlines := zsx.GetMark(node)
 	v.b.WriteStrings("[!", mark)
 	if inlines != nil {
 		_ = v.b.WriteByte('|')
 		v.walkList(inlines, alst)
 	}
 	_ = v.b.WriteByte(']')
+	v.writeAttributes(attrs)
 }
 
 func (v *zmkVisitor) visitBlock(node *sx.Pair, alst *sx.Pair) {
@@ -272,7 +273,7 @@ func (v *zmkVisitor) visitBlock(node *sx.Pair, alst *sx.Pair) {
 }
 
 func (v *zmkVisitor) visitHeading(node *sx.Pair, alst *sx.Pair) {
-	attrs, level, inlines, _, _ := zsx.GetHeading(node)
+	attrs, level, inlines := zsx.GetHeading(node)
 	const headingSigns = "========= "
 	v.b.WriteString(headingSigns[len(headingSigns)-level-3:])
 	v.walkList(inlines, alst)
@@ -495,6 +496,7 @@ func (v *zmkVisitor) writeBreak(isHard bool) {
 
 func (v *zmkVisitor) writeAttributes(attrs *sx.Pair) {
 	a := zsx.GetAttributes(attrs)
+	a.CleanSpecial()
 	if a.IsEmpty() {
 		return
 	}

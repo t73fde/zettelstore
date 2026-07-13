@@ -86,7 +86,7 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 		return p.acceptTextBlock(n)
 	case *gmAst.Heading:
 		level := min(n.Level, 5)
-		return zsx.MakeHeading(nil, level, p.acceptInlineChildren(n), "", "")
+		return zsx.MakeHeading(nil, level, p.acceptInlineChildren(n))
 	case *gmAst.ThematicBreak:
 		return zsx.MakeThematic(nil /*TODO*/)
 	case *gmAst.CodeBlock:

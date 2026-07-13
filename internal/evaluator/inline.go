@@ -177,37 +177,40 @@ func (fs *fragmentSearcher) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
 		switch sym {
 		case zsx.SymHeading:
-			_, _, _, _, frag := zsx.GetHeading(node)
-			if frag == fs.fragment {
-				bn := zsx.GetWalkList(alst)
-				fs.result = firstInlinesToEmbed(bn.Tail())
-				return true
+			attrs, _, _ := zsx.GetHeading(node)
+			if p := attrs.Assoc(zsx.SymSpecialID); p != nil {
+				if frag, isString := sx.GetString(p.Cdr()); isString && frag.GetValue() == fs.fragment {
+					bn := zsx.GetWalkList(alst)
+					fs.result = firstInlinesToEmbed(bn.Tail())
+					return true
+				}
 			}
 
 		case zsx.SymMark:
-			_, _, frag, inlines := zsx.GetMark(node)
-			if frag == fs.fragment {
-				next := zsx.GetWalkList(alst).Tail()
-				for ; next != nil; next = next.Tail() {
-					car := next.Head().Car()
-					if !zsx.SymSoft.IsEqual(car) && !zsx.SymHard.IsEqual(car) {
-						break
+			attrs, _, inlines := zsx.GetMark(node)
+			if p := attrs.Assoc(zsx.SymSpecialID); p != nil {
+				if frag, isString := sx.GetString(p.Cdr()); isString && frag.GetValue() == fs.fragment {
+					next := zsx.GetWalkList(alst).Tail()
+					for ; next != nil; next = next.Tail() {
+						car := next.Head().Car()
+						if !zsx.SymSoft.IsEqual(car) && !zsx.SymHard.IsEqual(car) {
+							break
+						}
 					}
-				}
-				if next == nil { // Mark is last in inline list
-					fs.result = inlines
+					if next == nil { // Mark is last in inline list
+						fs.result = inlines
+						return true
+					}
+
+					var lb sx.ListBuilder
+					if inlines != nil {
+						lb.Collect(inlines.Values())
+					}
+					lb.Collect(next.Values())
+					fs.result = lb.List()
 					return true
 				}
-
-				var lb sx.ListBuilder
-				if inlines != nil {
-					lb.Collect(inlines.Values())
-				}
-				lb.Collect(next.Values())
-				fs.result = lb.List()
-				return true
 			}
-
 		}
 	}
 	return false

@@ -20,6 +20,7 @@ import (
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 
 	"zettelstore.de/z/internal/zettel"
 )
@@ -29,14 +30,14 @@ type szEncoder struct{}
 
 // WriteZettel writes the encoded zettel to the writer.
 func (enc *szEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
-	meta := GetMetaSz(zn.InhMeta)
+	meta := sz.GetMetaSz(zn.InhMeta)
 	_, err := sx.MakeList(meta, zn.Blocks).Print(w)
 	return err
 }
 
 // WriteMeta encodes meta data as s-expression.
 func (enc *szEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
-	_, err := GetMetaSz(m).Print(w)
+	_, err := sz.GetMetaSz(m).Print(w)
 	return err
 }
 

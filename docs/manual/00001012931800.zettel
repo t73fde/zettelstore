@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161923
-modified: 20240122115245
+modified: 20260713151300
 
 An attribute is represented by a single cell.
 The first element of the cell references the attribute key, the second value the corresponding value.
@@ -13,7 +13,8 @@ The first element of the cell references the attribute key, the second value the
 __AttributeKeyValue__ **=** ''('' __AttributeKey__ ''.'' __AttributeValue__ '')''.
 :::
 
-__AttributeKey__ and __AttributeValue__ are [[string values|00001012930500]].
+__AttributeKey__ and __AttributeValue__ are [[string values|00001012930500]], except when used internally.
+In this case, the attribute key may be a symbol, e.g. ''*ZSX-ID*''.
 
 An empty key denotes the generic attribute.
 

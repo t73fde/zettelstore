@@ -29,7 +29,7 @@ import (
 
 type zmkTestCase struct {
 	descr     string
-	zmk       string
+	src       string
 	syntax    string
 	allowHTML bool
 	inline    bool
@@ -57,7 +57,6 @@ func TestEncoder(t *testing.T) {
 
 func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 	for testNum, tc := range testCases {
-		inp := input.NewInput([]byte(tc.zmk))
 		syntax := tc.syntax
 		if syntax == "" {
 			syntax = meta.ValueSyntaxZmk
@@ -67,34 +66,35 @@ func executeTestCases(t *testing.T, testCases []zmkTestCase) {
 			alst = alst.Cons(sx.Cons(parser.SymAllowHTML, nil))
 		}
 		pinfo := parser.Get(syntax)
-		node := pinfo.Parse(inp, nil, syntax, alst)
-		parser.Clean(node)
-		checkEncodings(t, testNum, node, tc.inline, tc.descr, tc.expect, tc.zmk)
+		checkEncodings(t, testNum, tc, pinfo, nil, syntax, alst)
 	}
 }
 
-func checkEncodings(t *testing.T, testNum int, node *sx.Pair, isInline bool, descr string, expected expectMap, zmkDefault string) {
-	for enc, exp := range expected {
+func checkEncodings(t *testing.T, testNum int, tc zmkTestCase, pinfo *parser.Info, m *meta.Meta, syntax string, alst *sx.Pair) {
+	for enc, exp := range tc.expect {
+		inp := input.NewInput([]byte(tc.src))
+		node := pinfo.Parse(inp, m, syntax, alst)
+
 		encdr := encoder.Create(enc, &encoder.CreateParameter{Lang: meta.ValueLangEN})
 		got, err := encode(encdr, node)
 		if err != nil {
 			prefix := fmt.Sprintf("Test #%d", testNum)
-			if d := descr; d != "" {
+			if d := tc.descr; d != "" {
 				prefix += "\nReason:   " + d
 			}
-			prefix += "\nMode:     " + mode(isInline)
+			prefix += "\nMode:     " + mode(tc.inline)
 			t.Errorf("%s\nEncoder:  %s\nError:    %v", prefix, enc, err)
 			continue
 		}
 		if enc == encoderZmk && exp == useZmk {
-			exp = zmkDefault
+			exp = tc.src
 		}
 		if got != exp {
 			prefix := fmt.Sprintf("Test #%d", testNum)
-			if d := descr; d != "" {
+			if d := tc.descr; d != "" {
 				prefix += "\nReason:   " + d
 			}
-			prefix += "\nMode:     " + mode(isInline)
+			prefix += "\nMode:     " + mode(tc.inline)
 			t.Errorf("%s\nEncoder:  %s\nNode:     %v\nExpected: %q\nGot:      %q",
 				prefix, enc, node, exp, got)
 		}

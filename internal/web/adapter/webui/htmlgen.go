@@ -27,8 +27,6 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
-
-	"zettelstore.de/z/internal/encoder"
 )
 
 // Builder allows to build new URLs for the web service.
@@ -188,9 +186,8 @@ var mapMetaKey = map[string]string{
 }
 
 func (g *htmlGenerator) metaSxn(m *meta.Meta) *sx.Pair {
-	tm := encoder.GetMetaSz(m)
 	env := shtml.MakeEnvironment(g.lang)
-	hm, err := g.th.Evaluate(tm, &env)
+	hm, err := g.th.EvaluateMetadata(m, &env)
 	if err != nil {
 		return nil
 	}
@@ -235,7 +232,7 @@ func (g *htmlGenerator) metaSxn(m *meta.Meta) *sx.Pair {
 			continue
 		}
 		a = a.Set("name", newName)
-		metaMap[newName] = g.th.EvaluateMeta(a)
+		metaMap[newName] = g.th.EvaluateAttributesMeta(a)
 	}
 	var lb sx.ListBuilder
 	for _, key := range slices.Sorted(maps.Keys(metaMap)) {
@@ -258,7 +255,7 @@ func (g *htmlGenerator) transformMetaTags(tags meta.Value) *sx.Pair {
 	if len(metaTags) == 0 {
 		return nil
 	}
-	return g.th.EvaluateMeta(zsx.Attributes{"name": "keywords", "content": metaTags})
+	return g.th.EvaluateAttributesMeta(zsx.Attributes{"name": "keywords", "content": metaTags})
 }
 
 func (g *htmlGenerator) BlocksSxn(block *sx.Pair) (content, endnotes *sx.Pair, _ error) {

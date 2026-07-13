@@ -42,6 +42,5 @@ func (uc ParseZettel) Run(ctx context.Context, zid id.Zid, syntax string) (*zett
 	}
 
 	z := parser.ParseZettel(ctx, zettel, syntax, uc.rtConfig)
-	parser.Clean(z.Blocks)
 	return z, nil
 }

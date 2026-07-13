@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161845
-modified: 20251219135933
+modified: 20260713150854
 
 === ''TEXT''
 :::syntax
@@ -65,12 +65,11 @@ The string contains the citation key.
 
 === ''MARK''
 :::syntax
-__Mark__ **=** ''(MARK'' String,,1,, String,,2,, String,,3,, [[__InlineElement__|00001012931600]] &hellip; '')''.
+__Mark__ **=** ''(MARK'' [[__Attributes__|00001012931000#attribute]] String [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
-The first string is the mark string used in the content.
-The second string is the mark string transformed to a slug, i.e. transformed to lower case, remove non-ASCII characters.
-The third string is the slug string, but is made unique for the whole zettel.
-Then follows the marked text as a sequence of __InlineElement__s.
+The mark elements marks the text with an user-defined identifier.
+The string is the identifier.
+The remaining elements are the marked content, represented as a sequence of __InlineElement__s.
 
 === ''ENDNOTE''
 :::syntax

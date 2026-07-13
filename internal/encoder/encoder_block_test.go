@@ -22,7 +22,7 @@ import "t73f.de/r/zsc/domain/meta"
 var tcsBlock = []zmkTestCase{
 	{
 		descr: "Empty Zettelmarkup should produce near nothing",
-		zmk:   "",
+		src:   "",
 		expect: expectMap{
 			encoderHTML:  "",
 			encoderMD:    "",
@@ -34,7 +34,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Simple text: Hello, world",
-		zmk:   "Hello, world",
+		src:   "Hello, world",
 		expect: expectMap{
 			encoderHTML:  "<p>Hello, world</p>",
 			encoderMD:    "Hello, world",
@@ -46,7 +46,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Simple block comment",
-		zmk:   "%%%\nNo\nrender\n%%%",
+		src:   "%%%\nNo\nrender\n%%%",
 		expect: expectMap{
 			encoderHTML:  ``,
 			encoderMD:    "",
@@ -58,7 +58,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Rendered block comment",
-		zmk:   "%%%{-}\nRender\n%%%",
+		src:   "%%%{-}\nRender\n%%%",
 		expect: expectMap{
 			encoderHTML:  "<!--\nRender\n-->\n",
 			encoderMD:    "",
@@ -70,11 +70,11 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Simple Heading",
-		zmk:   `=== Top Job`,
+		src:   `=== Top Job`,
 		expect: expectMap{
 			encoderHTML:  "<h2 id=\"top-job\">Top Job</h2>",
 			encoderMD:    "# Top Job",
-			encoderSz:    `(BLOCK (HEADING () 1 "top-job" "top-job" (TEXT "Top Job")))`,
+			encoderSz:    `(BLOCK (HEADING () 1 (TEXT "Top Job")))`,
 			encoderSHTML: `((h2 ((id . "top-job")) "Top Job"))`,
 			encoderText:  `Top Job`,
 			encoderZmk:   useZmk,
@@ -82,7 +82,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Simple List",
-		zmk:   "* A\n* B\n* C",
+		src:   "* A\n* B\n* C",
 		expect: expectMap{
 			encoderHTML:  "<ul><li>A</li><li>B</li><li>C</li></ul>",
 			encoderMD:    "* A\n* B\n* C",
@@ -94,7 +94,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Nested List",
-		zmk:   "* T1\n*# T2\n* T3\n** T4\n** T5\n* T6",
+		src:   "* T1\n*# T2\n* T3\n** T4\n** T5\n* T6",
 		expect: expectMap{
 			encoderHTML:  `<ul><li><p>T1</p><ol><li>T2</li></ol></li><li><p>T3</p><ul><li>T4</li><li>T5</li></ul></li><li><p>T6</p></li></ul>`,
 			encoderMD:    "* T1\n    1. T2\n* T3\n    * T4\n    * T5\n* T6",
@@ -106,7 +106,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Sequence of two lists",
-		zmk:   "* Item1.1\n* Item1.2\n* Item1.3\n\n* Item2.1\n* Item2.2",
+		src:   "* Item1.1\n* Item1.2\n* Item1.3\n\n* Item2.1\n* Item2.2",
 		expect: expectMap{
 			encoderHTML:  "<ul><li>Item1.1</li><li>Item1.2</li><li>Item1.3</li><li>Item2.1</li><li>Item2.2</li></ul>",
 			encoderMD:    "* Item1.1\n* Item1.2\n* Item1.3\n* Item2.1\n* Item2.2",
@@ -118,7 +118,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Simple horizontal rule",
-		zmk:   `---`,
+		src:   `---`,
 		expect: expectMap{
 			encoderHTML:  "<hr>",
 			encoderMD:    "---",
@@ -130,7 +130,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Thematic break with attribute",
-		zmk:   `---{lang="zmk"}`,
+		src:   `---{lang="zmk"}`,
 		expect: expectMap{
 			encoderHTML:  `<hr lang="zmk">`,
 			encoderMD:    "---",
@@ -142,7 +142,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "No list after paragraph",
-		zmk:   "Text\n*abc",
+		src:   "Text\n*abc",
 		expect: expectMap{
 			encoderHTML:  "<p>Text *abc</p>",
 			encoderMD:    "Text\n*abc",
@@ -154,7 +154,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "A list after paragraph",
-		zmk:   "Text\n# abc",
+		src:   "Text\n# abc",
 		expect: expectMap{
 			encoderHTML:  "<p>Text</p><ol><li>abc</li></ol>",
 			encoderMD:    "Text\n\n1. abc",
@@ -166,7 +166,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Simple List Quote",
-		zmk:   "> ToBeOrNotToBe",
+		src:   "> ToBeOrNotToBe",
 		expect: expectMap{
 			encoderHTML:  "<blockquote>ToBeOrNotToBe</blockquote>",
 			encoderMD:    "> ToBeOrNotToBe",
@@ -178,7 +178,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Nested list quotes", // Based on CommonMark example 250
-		zmk:   ">>> foo\n    bar",
+		src:   ">>> foo\n    bar",
 		expect: expectMap{
 			encoderHTML:  `<blockquote><blockquote><blockquote>foo bar</blockquote></blockquote></blockquote>`,
 			encoderSz:    `(BLOCK (QUOTATION () (BLOCK (QUOTATION () (BLOCK (QUOTATION () (BLOCK (PARA (TEXT "foo") (SOFT) (TEXT "bar")))))))))`,
@@ -189,7 +189,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Simple Quote Block",
-		zmk:   "<<<\nToBeOrNotToBe\n<<< Romeo Julia",
+		src:   "<<<\nToBeOrNotToBe\n<<< Romeo Julia",
 		expect: expectMap{
 			encoderHTML:  "<blockquote><p>ToBeOrNotToBe</p><cite>Romeo Julia</cite></blockquote>",
 			encoderMD:    "> ToBeOrNotToBe",
@@ -201,7 +201,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Quote Block with multiple paragraphs",
-		zmk:   "<<<\nToBeOr\n\nNotToBe\n<<< Romeo",
+		src:   "<<<\nToBeOr\n\nNotToBe\n<<< Romeo",
 		expect: expectMap{
 			encoderHTML:  "<blockquote><p>ToBeOr</p><p>NotToBe</p><cite>Romeo</cite></blockquote>",
 			encoderMD:    "> ToBeOr\n>\n> NotToBe",
@@ -213,7 +213,7 @@ var tcsBlock = []zmkTestCase{
 	},
 	{
 		descr: "Verse block",
-		zmk: `"""
+		src: `"""
 A line
   another line
 Back
@@ -233,7 +233,7 @@ Paragraph
 	},
 	{
 		descr: "Span Block",
-		zmk: `:::
+		src: `:::
 A simple
    span
 and much more
@@ -249,7 +249,7 @@ and much more
 	},
 	{
 		descr: "Simple Verbatim Code",
-		zmk:   "```\nHello\nWorld\n```",
+		src:   "```\nHello\nWorld\n```",
 		expect: expectMap{
 			encoderHTML:  "<pre><code>Hello\nWorld</code></pre>",
 			encoderMD:    "    Hello\n    World",
@@ -261,7 +261,7 @@ and much more
 	},
 	{
 		descr: "Simple Verbatim Code with visible spaces",
-		zmk:   "```{-}\nHello World\n```",
+		src:   "```{-}\nHello World\n```",
 		expect: expectMap{
 			encoderHTML:  "<pre><code>Hello\u2423World</code></pre>",
 			encoderMD:    "    Hello World",
@@ -273,7 +273,7 @@ and much more
 	},
 	{
 		descr: "Simple Verbatim Eval",
-		zmk:   "~~~\nHello\nWorld\n~~~",
+		src:   "~~~\nHello\nWorld\n~~~",
 		expect: expectMap{
 			encoderHTML:  "<pre><code class=\"zs-eval\">Hello\nWorld</code></pre>",
 			encoderMD:    "",
@@ -285,7 +285,7 @@ and much more
 	},
 	{
 		descr: "Simple Verbatim Math",
-		zmk:   "$$$\nHello\n\\LaTeX\n$$$",
+		src:   "$$$\nHello\n\\LaTeX\n$$$",
 		expect: expectMap{
 			encoderHTML:  "<pre><code class=\"zs-math\">Hello\n\\LaTeX</code></pre>",
 			encoderMD:    "",
@@ -297,7 +297,7 @@ and much more
 	},
 	{
 		descr: "Simple Description List",
-		zmk:   "; Zettel\n: Paper\n: Note\n; Zettelkasten\n: Slip box",
+		src:   "; Zettel\n: Paper\n: Note\n; Zettelkasten\n: Slip box",
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>Zettel</dt><dd><p>Paper</p></dd><dd><p>Note</p></dd><dt>Zettelkasten</dt><dd><p>Slip box</p></dd></dl>",
 			encoderMD:    "",
@@ -309,7 +309,7 @@ and much more
 	},
 	{
 		descr: "Description List with paragraphs as item",
-		zmk:   "; Zettel\n: Paper\n\n  Note\n; Zettelkasten\n: Slip box",
+		src:   "; Zettel\n: Paper\n\n  Note\n; Zettelkasten\n: Slip box",
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>Zettel</dt><dd><p>Paper</p><p>Note</p></dd><dt>Zettelkasten</dt><dd><p>Slip box</p></dd></dl>",
 			encoderMD:    "",
@@ -321,7 +321,7 @@ and much more
 	},
 	{
 		descr: "Description List with keys, but no descriptions",
-		zmk:   "; K1\n: D11\n: D12\n; K2\n; K3\n: D31",
+		src:   "; K1\n: D11\n: D12\n; K2\n; K3\n: D31",
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>K1</dt><dd><p>D11</p></dd><dd><p>D12</p></dd><dt>K2</dt><dt>K3</dt><dd><p>D31</p></dd></dl>",
 			encoderMD:    "",
@@ -333,7 +333,7 @@ and much more
 	},
 	{
 		descr: "Simple Table",
-		zmk:   "|c1|c2|c3\n|d1||d3",
+		src:   "|c1|c2|c3\n|d1||d3",
 		expect: expectMap{
 			encoderHTML:  `<table><tbody><tr><td>c1</td><td>c2</td><td>c3</td></tr><tr><td>d1</td><td></td><td>d3</td></tr></tbody></table>`,
 			encoderMD:    "|     |     |     |\n| --- | --- | --- |\n| c1 | c2 | c3 |\n| d1 |  | d3 |",
@@ -345,7 +345,7 @@ and much more
 	},
 	{
 		descr: "Table with alignment and comment",
-		zmk: `|h1>|=h2|h3:|
+		src: `|h1>|=h2|h3:|
 |%--+---+---+
 |<c1|c2|:c3|
 |f1|>f2|=f3`,
@@ -362,7 +362,7 @@ and much more
 	},
 	{
 		descr: "Simple Endnote",
-		zmk:   `Text[^Endnote]`,
+		src:   `Text[^Endnote]`,
 		expect: expectMap{
 			encoderHTML:  "<p>Text<sup id=\"fnref:1\"><a class=\"zs-noteref\" href=\"#fn:1\" role=\"doc-noteref\">1</a></sup></p><ol class=\"zs-endnotes\"><li class=\"zs-endnote\" id=\"fn:1\" role=\"doc-endnote\" value=\"1\">Endnote <a class=\"zs-endnote-backref\" href=\"#fnref:1\" role=\"doc-backlink\">\u21a9\ufe0e</a></li></ol>",
 			encoderMD:    "Text",
@@ -374,7 +374,7 @@ and much more
 	},
 	{
 		descr: "Nested Endnotes",
-		zmk:   `Text[^Endnote[^Nested]]`,
+		src:   `Text[^Endnote[^Nested]]`,
 		expect: expectMap{
 			encoderHTML:  "<p>Text<sup id=\"fnref:1\"><a class=\"zs-noteref\" href=\"#fn:1\" role=\"doc-noteref\">1</a></sup></p><ol class=\"zs-endnotes\"><li class=\"zs-endnote\" id=\"fn:1\" role=\"doc-endnote\" value=\"1\">Endnote<sup id=\"fnref:2\"><a class=\"zs-noteref\" href=\"#fn:2\" role=\"doc-noteref\">2</a></sup> <a class=\"zs-endnote-backref\" href=\"#fnref:1\" role=\"doc-backlink\">\u21a9\ufe0e</a></li><li class=\"zs-endnote\" id=\"fn:2\" role=\"doc-endnote\" value=\"2\">Nested <a class=\"zs-endnote-backref\" href=\"#fnref:2\" role=\"doc-backlink\">\u21a9\ufe0e</a></li></ol>",
 			encoderMD:    "Text",
@@ -386,7 +386,7 @@ and much more
 	},
 	{
 		descr: "Transclusion",
-		zmk:   `{{{http://example.com/image}}}{width="100px"}`,
+		src:   `{{{http://example.com/image}}}{width="100px"}`,
 		expect: expectMap{
 			encoderHTML:  `<p><img class="external" src="http://example.com/image" width="100px"></p>`,
 			encoderMD:    "",
@@ -398,7 +398,7 @@ and much more
 	},
 	{
 		descr: "A paragraph with an inline comment only should be empty in HTML",
-		zmk:   `%% Comment`,
+		src:   `%% Comment`,
 		expect: expectMap{
 			// encoderHTML:  ``,
 			encoderSz: `(BLOCK (PARA (LITERAL-COMMENT () "Comment")))`,
@@ -409,7 +409,7 @@ and much more
 	},
 	{
 		descr:  "Zettel with disallowed syntax HTML",
-		zmk:    "<h1>Hello</h1>\nWorld\n",
+		src:    "<h1>Hello</h1>\nWorld\n",
 		syntax: meta.ValueSyntaxHTML,
 		expect: expectMap{
 			encoderHTML:  "<pre><code class=\"language-html\">&lt;h1&gt;Hello&lt;/h1&gt;\nWorld</code></pre>",
@@ -421,7 +421,7 @@ and much more
 	},
 	{
 		descr:     "Zettel with allowed syntax HTML",
-		zmk:       "<h1>Hello</h1>\nWorld\n",
+		src:       "<h1>Hello</h1>\nWorld\n",
 		syntax:    meta.ValueSyntaxHTML,
 		allowHTML: true,
 		expect: expectMap{
@@ -434,7 +434,7 @@ and much more
 	},
 	{
 		descr: "",
-		zmk:   ``,
+		src:   ``,
 		expect: expectMap{
 			encoderHTML:  ``,
 			encoderSz:    `(BLOCK)`,

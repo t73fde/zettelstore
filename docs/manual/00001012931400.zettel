@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20260712164556
+modified: 20260713115117
 
 === ''PARA''
 :::syntax
@@ -14,11 +14,9 @@ A paragraph is just a list of inline elements.
 
 === ''HEADING''
 :::syntax
-__Heading__ **=** ''(HEADING'' [[__Attributes__|00001012931000#attribute]] Number String,,1,, String,,2,, [[__InlineElement__|00001012931600]] &hellip; '')''.
+__Heading__ **=** ''(HEADING'' [[__Attributes__|00001012931000#attribute]] Number [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 A heading starts with a possibly empty list of attributes and a number specifying the heading level (1--5).
-The first string is a ""slug"" derived from the heading text by transforming it to lower case, replacing each space character with a hyphen, and applying other normalization steps.
-The second string is a version of that slug that is unique within the zettel.
 The heading text follows as a sequence of inline elements.
 
 === ''THEMATIC''
