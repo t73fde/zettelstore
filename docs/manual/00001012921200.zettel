@@ -4,43 +4,22 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20220201173115
-modified: 20260605150128
+modified: 20260714200809
 
-Various API calls return a symbolic expression list ''(rights N)'', with ''N'' as a number, that encodes the access rights the user currently has.
-''N'' is an integer number between 0 and 62.[^Not all values in this range are used.]
+Various API calls return a symbolic expression ''(rights ...)'', where ''...'' is a sequence of zero or more symbols.
+These symbols encode the access rights the user currently has.
 
-The value ""0"" signals that something went wrong internally while determining the access rights.
+Valid symbols are: ''create'', ''read'', ''update'', and ''delete''.
 
-A value of ""1"" says, that the current user has no access right for the given zettel.
-In most cases, this value will not occur, because only zettel are presented, which are at least readable by the current user.
+|=Symbol|Meaning for user
+|''create''| May create a new zettel
+|''read''  | May read the zettel
+|''update''| May update the zettel
+|''delete''| May delete the zettel
 
-Values ""2"" to ""62"" are binary encoded values, where each bit signals a special right.
+In practice, not all combinations of rights occur.
+A Zettelstore in [[read-only mode|00001010000000#read-only]] always returns the symbol ''read''.
+A Zettelstore started by [[double-clicking|00001003000000]] returns either the expression ''(rights read update)'' or the expression ''(rights create read update delete)'' (all operations are allowed).
 
-|=Bit number:|Bit value:|Meaning
-| 1 |  2 | User is allowed to create a new zettel
-| 2 |  4 | User is allowed to read the zettel
-| 3 |  8 | User is allowed to update the zettel
-| 4 | 16 | (not in use; was assigned to an operation)
-| 5 | 32 | User is allowed to delete the zettel
-
-The algorithm to calculate the actual access rights from the value is relatively simple:
-# Search for the biggest bit value that is less or equal to the rights value.
-  This is an access right for the current user.
-# Subtract the bit value from the rights value.
-  Remember the difference as the new rights value.
-# If it is greater than zero, move to step 1.
-
-As an example, let's assume a rights value of 42:
-# The first right is the right to delete a zettel.
-  The new value of the rights value is now 10 (42-32).
-# The next right is the right to update a zettel (16 > 10, but 8 < 10).
-  The new value of the rights value is now 2 (10-8).
-# The last right is the right to create a new zettel.
-  The rights value is now zero, the algorithm ends.
-
-In practice, not every rights value will occur.
-A Zettelstore in [[read-only mode|00001010000000#read-only]] will always return the value 4.
-Similarly, a Zettelstore that you started with a [[double-click|00001003000000]] will return either the value ""6"" (read and update) or the value ""62"" (all operations are allowed).
-
-If you have added an additional [[user|00001010040200]] to your Zettelstore, this might change.
-The access rights are calculated depending on [[enabled authentication|00001010040100]], on the [[user role|00001010070300]] of the current user, on [[visibility rules|00001010070200]] for a given zettel and on the [[read-only status|00001006020400]] for the zettel.
+If you have added an additional [[user|00001010040200]] to your Zettelstore, the returned rights may differ.
+The access rights are determined by the [[enabled authentication|00001010040100]] settings, the [[user role|00001010070300]] of the current user, the [[visibility rules|00001010070200]] for a given zettel, and the [[read-only status|00001006020400]] for the zettel.

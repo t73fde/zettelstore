@@ -17,6 +17,9 @@ The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
     into one list. Now it is: <code>(content "" "Change data encoding
     ...")</code>.
     (breaking: api)
+  * Data encoding of access rights changed from numeric scheme to a symbol
+    based scheme: <code>(rights create read update delete)</code>.
+    (breaking: api)
   * Change sz representation of content for headings and inline marks. Node
     identifiers are only generated when needed, e.g. for HTML encoding.
     (breaking: api)
