@@ -69,116 +69,113 @@ func (v *zmkVisitor) walk(node, alst *sx.Pair)    { zsx.WalkIt(v, node, alst) }
 func (v *zmkVisitor) walkList(lst, alst *sx.Pair) { zsx.WalkItList(v, lst, 0, alst) }
 
 func (v *zmkVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		case zsx.SymText:
-			v.writeText(zsx.GetText(node))
-		case zsx.SymSoft:
-			v.writeBreak(false)
-		case zsx.SymHard:
-			v.writeBreak(true)
+	switch sym := zsx.NodeSymbol(node); sym {
+	case zsx.SymText:
+		v.writeText(zsx.GetText(node))
+	case zsx.SymSoft:
+		v.writeBreak(false)
+	case zsx.SymHard:
+		v.writeBreak(true)
 
-		case zsx.SymFormatEmph:
-			v.visitFormat(node, alst, "__")
-		case zsx.SymFormatStrong:
-			v.visitFormat(node, alst, "**")
-		case zsx.SymFormatInsert:
-			v.visitFormat(node, alst, ">>")
-		case zsx.SymFormatDelete:
-			v.visitFormat(node, alst, "~~")
-		case zsx.SymFormatSuper:
-			v.visitFormat(node, alst, "^^")
-		case zsx.SymFormatSub:
-			v.visitFormat(node, alst, ",,")
-		case zsx.SymFormatQuote:
-			v.visitFormat(node, alst, `""`)
-		case zsx.SymFormatMark:
-			v.visitFormat(node, alst, "##")
-		case zsx.SymFormatSpan:
-			v.visitFormat(node, alst, "::")
+	case zsx.SymFormatEmph:
+		v.visitFormat(node, alst, "__")
+	case zsx.SymFormatStrong:
+		v.visitFormat(node, alst, "**")
+	case zsx.SymFormatInsert:
+		v.visitFormat(node, alst, ">>")
+	case zsx.SymFormatDelete:
+		v.visitFormat(node, alst, "~~")
+	case zsx.SymFormatSuper:
+		v.visitFormat(node, alst, "^^")
+	case zsx.SymFormatSub:
+		v.visitFormat(node, alst, ",,")
+	case zsx.SymFormatQuote:
+		v.visitFormat(node, alst, `""`)
+	case zsx.SymFormatMark:
+		v.visitFormat(node, alst, "##")
+	case zsx.SymFormatSpan:
+		v.visitFormat(node, alst, "::")
 
-		case zsx.SymLiteralCode:
-			_, attrs, content := zsx.GetLiteral(node)
-			v.writeLiteral('`', attrs, content)
-		case zsx.SymLiteralMath:
-			_, attrs, content := zsx.GetLiteral(node)
-			v.b.WriteStrings("$$", content, "$$")
-			v.writeAttributes(attrs)
-		case zsx.SymLiteralInput:
-			_, attrs, content := zsx.GetLiteral(node)
-			v.writeLiteral('\'', attrs, content)
-		case zsx.SymLiteralOutput:
-			_, attrs, content := zsx.GetLiteral(node)
-			v.writeLiteral('=', attrs, content)
-		case zsx.SymLiteralComment:
-			_, attrs, content := zsx.GetLiteral(node)
-			v.b.WriteString("%%")
-			v.writeAttributes(attrs)
-			v.b.WriteSpace()
-			v.b.WriteString(content)
+	case zsx.SymLiteralCode:
+		_, attrs, content := zsx.GetLiteral(node)
+		v.writeLiteral('`', attrs, content)
+	case zsx.SymLiteralMath:
+		_, attrs, content := zsx.GetLiteral(node)
+		v.b.WriteStrings("$$", content, "$$")
+		v.writeAttributes(attrs)
+	case zsx.SymLiteralInput:
+		_, attrs, content := zsx.GetLiteral(node)
+		v.writeLiteral('\'', attrs, content)
+	case zsx.SymLiteralOutput:
+		_, attrs, content := zsx.GetLiteral(node)
+		v.writeLiteral('=', attrs, content)
+	case zsx.SymLiteralComment:
+		_, attrs, content := zsx.GetLiteral(node)
+		v.b.WriteString("%%")
+		v.writeAttributes(attrs)
+		v.b.WriteSpace()
+		v.b.WriteString(content)
 
-		case zsx.SymLink:
-			v.visitLink(node, alst)
-		case zsx.SymEmbed:
-			v.visitEmbedRef(node, alst)
-		case zsx.SymEndnote:
-			v.visitEndnote(node, alst)
-		case zsx.SymCite:
-			v.visitCite(node, alst)
-		case zsx.SymMark:
-			v.visitMark(node, alst)
+	case zsx.SymLink:
+		v.visitLink(node, alst)
+	case zsx.SymEmbed:
+		v.visitEmbedRef(node, alst)
+	case zsx.SymEndnote:
+		v.visitEndnote(node, alst)
+	case zsx.SymCite:
+		v.visitCite(node, alst)
+	case zsx.SymMark:
+		v.visitMark(node, alst)
 
-		case zsx.SymBlock:
-			v.visitBlock(node, alst)
-		case zsx.SymHeading:
-			v.visitHeading(node, alst)
-		case zsx.SymThematic:
-			attrs := zsx.GetThematic(node)
-			v.b.WriteString("---")
-			v.writeAttributes(attrs)
+	case zsx.SymBlock:
+		v.visitBlock(node, alst)
+	case zsx.SymHeading:
+		v.visitHeading(node, alst)
+	case zsx.SymThematic:
+		attrs := zsx.GetThematic(node)
+		v.b.WriteString("---")
+		v.writeAttributes(attrs)
 
-		case zsx.SymListOrdered:
-			v.visitNestedList(node, alst, '#')
-		case zsx.SymListQuote:
-			v.visitNestedList(node, alst, '>')
-		case zsx.SymListUnordered:
-			v.visitNestedList(node, alst, '*')
+	case zsx.SymListOrdered:
+		v.visitNestedList(node, alst, '#')
+	case zsx.SymListQuote:
+		v.visitNestedList(node, alst, '>')
+	case zsx.SymListUnordered:
+		v.visitNestedList(node, alst, '*')
 
-		case zsx.SymRegionBlock:
-			v.visitRegion(node, alst, ":::")
-		case zsx.SymRegionQuote:
-			v.visitRegion(node, alst, "<<<")
-		case zsx.SymRegionVerse:
-			v.visitRegion(node, alst, "\"\"\"")
+	case zsx.SymRegionBlock:
+		v.visitRegion(node, alst, ":::")
+	case zsx.SymRegionQuote:
+		v.visitRegion(node, alst, "<<<")
+	case zsx.SymRegionVerse:
+		v.visitRegion(node, alst, "\"\"\"")
 
-		case zsx.SymDescription:
-			v.visitDescription(node, alst)
-		case zsx.SymTable:
-			v.visitTable(node, alst)
+	case zsx.SymDescription:
+		v.visitDescription(node, alst)
+	case zsx.SymTable:
+		v.visitTable(node, alst)
 
-		case zsx.SymVerbatimCode:
-			v.visitVerbatim(node, "```")
-		case zsx.SymVerbatimComment:
-			v.visitVerbatim(node, "%%%")
-		case zsx.SymVerbatimEval:
-			v.visitVerbatim(node, "~~~")
-		case zsx.SymVerbatimHTML:
-			v.visitVerbatim(node, "@@@")
-		case zsx.SymVerbatimMath:
-			v.visitVerbatim(node, "$$$")
-		case zsx.SymVerbatimZettel:
-			v.visitVerbatim(node, "@@@")
+	case zsx.SymVerbatimCode:
+		v.visitVerbatim(node, "```")
+	case zsx.SymVerbatimComment:
+		v.visitVerbatim(node, "%%%")
+	case zsx.SymVerbatimEval:
+		v.visitVerbatim(node, "~~~")
+	case zsx.SymVerbatimHTML:
+		v.visitVerbatim(node, "@@@")
+	case zsx.SymVerbatimMath:
+		v.visitVerbatim(node, "$$$")
+	case zsx.SymVerbatimZettel:
+		v.visitVerbatim(node, "@@@")
 
-		case zsx.SymBLOB:
-			v.visitBLOB(node)
-		case zsx.SymTransclude:
-			v.visitTransclude(node, alst)
-		default:
-			return false
-		}
-		return true
+	case zsx.SymBLOB:
+		v.visitBLOB(node)
+	case zsx.SymTransclude:
+		v.visitTransclude(node, alst)
+	default:
+		return false
 	}
-	return false
+	return true
 }
 func (v *zmkVisitor) VisitItAfter(*sx.Pair, *sx.Pair) {}
 
@@ -292,7 +289,7 @@ func (v *zmkVisitor) visitNestedList(node *sx.Pair, alst *sx.Pair, code byte) {
 			v.b.WriteLn()
 		}
 		_, item := zsx.GetListItem(itm.Head())
-		if sym, isSymbol := sx.GetSymbol(item.Head().Car()); isSymbol &&
+		if sym := zsx.NodeSymbol(item.Head()); sym != nil &&
 			!zsx.SymListOrdered.IsEqualSymbol(sym) &&
 			!zsx.SymListUnordered.IsEqualSymbol(sym) &&
 			!zsx.SymListQuote.IsEqualSymbol(sym) {

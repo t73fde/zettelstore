@@ -43,31 +43,29 @@ func collectZettelIndexData(blocks *sx.Pair, data *collectData) {
 }
 
 func (data *collectData) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		case zsx.SymText:
-			data.addText(zsx.GetText(node))
-		case zsx.SymVerbatimCode, zsx.SymVerbatimComment, zsx.SymVerbatimEval,
-			zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:
-			_, _, s := zsx.GetVerbatim(node)
-			data.addText(s)
-		case zsx.SymLiteralCode, zsx.SymLiteralComment, zsx.SymLiteralInput,
-			zsx.SymLiteralMath, zsx.SymLiteralOutput:
-			_, _, s := zsx.GetLiteral(node)
-			data.addText(s)
-		case zsx.SymLink:
-			_, ref, _ := zsx.GetLink(node)
-			data.addRef(ref)
-		case zsx.SymEmbed:
-			_, ref, _, _ := zsx.GetEmbed(node)
-			data.addRef(ref)
-		case zsx.SymTransclude:
-			_, ref, _ := zsx.GetTransclusion(node)
-			data.addRef(ref)
-		case zsx.SymCite:
-			_, key, _ := zsx.GetCite(node)
-			data.addText(key)
-		}
+	switch sym := zsx.NodeSymbol(node); sym {
+	case zsx.SymText:
+		data.addText(zsx.GetText(node))
+	case zsx.SymVerbatimCode, zsx.SymVerbatimComment, zsx.SymVerbatimEval,
+		zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:
+		_, _, s := zsx.GetVerbatim(node)
+		data.addText(s)
+	case zsx.SymLiteralCode, zsx.SymLiteralComment, zsx.SymLiteralInput,
+		zsx.SymLiteralMath, zsx.SymLiteralOutput:
+		_, _, s := zsx.GetLiteral(node)
+		data.addText(s)
+	case zsx.SymLink:
+		_, ref, _ := zsx.GetLink(node)
+		data.addRef(ref)
+	case zsx.SymEmbed:
+		_, ref, _, _ := zsx.GetEmbed(node)
+		data.addRef(ref)
+	case zsx.SymTransclude:
+		_, ref, _ := zsx.GetTransclusion(node)
+		data.addRef(ref)
+	case zsx.SymCite:
+		_, key, _ := zsx.GetCite(node)
+		data.addText(key)
 	}
 	return false
 }

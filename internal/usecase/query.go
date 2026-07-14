@@ -231,21 +231,19 @@ func (v *unlinkedVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	if v.found {
 		return true
 	}
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		case zsx.SymHeading,
-			zsx.SymLink, zsx.SymEmbed, zsx.SymEmbedBLOB, zsx.SymCite:
-			// No further search.
-			return true
-		case zsx.SymText:
-			// TODO: this is way too simple. For example, two text nodes may
-			// be separated by a SOFT or HARD node.
-			textWords := zerostrings.SplitWords(zsx.GetText(node))
-			for i := 0; i+len(v.words) <= len(textWords); i++ {
-				if slices.Equal(v.words, textWords[i:i+len(v.words)]) {
-					v.found = true
-					return true
-				}
+	switch sym := zsx.NodeSymbol(node); sym {
+	case zsx.SymHeading,
+		zsx.SymLink, zsx.SymEmbed, zsx.SymEmbedBLOB, zsx.SymCite:
+		// No further search.
+		return true
+	case zsx.SymText:
+		// TODO: this is way too simple. For example, two text nodes may
+		// be separated by a SOFT or HARD node.
+		textWords := zerostrings.SplitWords(zsx.GetText(node))
+		for i := 0; i+len(v.words) <= len(textWords); i++ {
+			if slices.Equal(v.words, textWords[i:i+len(v.words)]) {
+				v.found = true
+				return true
 			}
 		}
 	}

@@ -84,19 +84,17 @@ func (e *evaluator) VisitBefore(_ *sx.Pair, _ *sx.Pair) (sx.Object, bool) {
 	return sx.Nil(), false
 }
 func (e *evaluator) VisitAfter(node *sx.Pair, _ *sx.Pair) sx.Object {
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		case zsx.SymLink:
-			return e.evalLink(node)
-		case zsx.SymEmbed:
-			return e.evalEmbed(node)
-		case zsx.SymVerbatimEval:
-			return e.evalVerbatimEval(node)
-		case zsx.SymTransclude:
-			return e.evalTransclusion(node)
-		case zsx.SymVerbatimZettel:
-			return e.evalVerbatimZettel(node)
-		}
+	switch sym := zsx.NodeSymbol(node); sym {
+	case zsx.SymLink:
+		return e.evalLink(node)
+	case zsx.SymEmbed:
+		return e.evalEmbed(node)
+	case zsx.SymVerbatimEval:
+		return e.evalVerbatimEval(node)
+	case zsx.SymTransclude:
+		return e.evalTransclusion(node)
+	case zsx.SymVerbatimZettel:
+		return e.evalVerbatimZettel(node)
 	}
 	return node
 }

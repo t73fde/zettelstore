@@ -40,24 +40,19 @@ func (y *refYielder) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	if y.stop {
 		return true
 	}
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		case zsx.SymLink:
-			_, ref, _ := zsx.GetLink(node)
-			y.stop = !y.yield(ref)
+	switch sym := zsx.NodeSymbol(node); sym {
+	case zsx.SymLink:
+		_, ref, _ := zsx.GetLink(node)
+		y.stop = !y.yield(ref)
 
-		case zsx.SymEmbed:
-			_, ref, _, _ := zsx.GetEmbed(node)
-			y.stop = !y.yield(ref)
+	case zsx.SymEmbed:
+		_, ref, _, _ := zsx.GetEmbed(node)
+		y.stop = !y.yield(ref)
 
-		case zsx.SymTransclude:
-			_, ref, _ := zsx.GetTransclusion(node)
-			y.stop = !y.yield(ref)
-		}
-		if y.stop {
-			return true
-		}
+	case zsx.SymTransclude:
+		_, ref, _ := zsx.GetTransclusion(node)
+		y.stop = !y.yield(ref)
 	}
-	return false
+	return y.stop
 }
 func (*refYielder) VisitItAfter(*sx.Pair, *sx.Pair) {}

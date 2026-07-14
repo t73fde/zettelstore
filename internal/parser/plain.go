@@ -37,7 +37,7 @@ func parsePlain(inp *input.Input, _ *meta.Meta, syntax string, alst *sx.Pair) *s
 type removeHTMLVisitor struct{}
 
 func (removeHTMLVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol && zsx.SymVerbatimHTML.IsEqualSymbol(sym) {
+	if sym := zsx.NodeSymbol(node); zsx.SymVerbatimHTML.IsEqualSymbol(sym) {
 		node.SetCar(zsx.SymVerbatimCode)
 		return true
 	}

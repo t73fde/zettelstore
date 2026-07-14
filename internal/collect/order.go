@@ -25,13 +25,12 @@ func Order(block *sx.Pair) *sx.Pair {
 	blocks := zsx.GetBlock(block)
 	for bn := range blocks.Pairs() {
 		blk := bn.Head()
-		if sym, isSymbol := sx.GetSymbol(blk.Car()); isSymbol {
-			if zsx.SymListUnordered.IsEqualSymbol(sym) || zsx.SymListOrdered.IsEqualSymbol(sym) {
-				_, _, items := zsx.GetList(blk)
-				for item := range items.Pairs() {
-					if ln := firstItemZettelLink(item.Head()); ln != nil {
-						lb.Add(ln)
-					}
+		sym := zsx.NodeSymbol(blk)
+		if zsx.SymListUnordered.IsEqualSymbol(sym) || zsx.SymListOrdered.IsEqualSymbol(sym) {
+			_, _, items := zsx.GetList(blk)
+			for item := range items.Pairs() {
+				if ln := firstItemZettelLink(item.Head()); ln != nil {
+					lb.Add(ln)
 				}
 			}
 		}
@@ -43,7 +42,7 @@ func firstItemZettelLink(item *sx.Pair) *sx.Pair {
 	blocks := zsx.GetBlock(item)
 	for bn := range blocks.Pairs() {
 		blk := bn.Head()
-		if sym, isSymbol := sx.GetSymbol(blk.Car()); isSymbol && zsx.SymPara.IsEqualSymbol(sym) {
+		if sym := zsx.NodeSymbol(blk); zsx.SymPara.IsEqualSymbol(sym) {
 			inlines := zsx.GetPara(blk)
 			if ln := firstInlineZettelLink(inlines); ln != nil {
 				return ln
@@ -56,28 +55,26 @@ func firstItemZettelLink(item *sx.Pair) *sx.Pair {
 func firstInlineZettelLink(inlines *sx.Pair) (result *sx.Pair) {
 	for inode := range inlines.Pairs() {
 		inl := inode.Head()
-		if sym, isSymbol := sx.GetSymbol(inl.Car()); isSymbol {
-			switch sym {
-			case zsx.SymLink:
-				return inl
-			case zsx.SymFormatDelete, zsx.SymFormatEmph, zsx.SymFormatInsert, zsx.SymFormatMark,
-				zsx.SymFormatQuote, zsx.SymFormatSpan, zsx.SymFormatStrong, zsx.SymFormatSub,
-				zsx.SymFormatSuper:
-				_, _, finlines := zsx.GetFormat(inl)
-				result = firstInlineZettelLink(finlines)
-			case zsx.SymCite:
-				_, _, cinlines := zsx.GetCite(inl)
-				result = firstInlineZettelLink(cinlines)
-			case zsx.SymEmbed:
-				_, _, _, einlines := zsx.GetEmbed(inl)
-				result = firstInlineZettelLink(einlines)
-			case zsx.SymEmbedBLOB:
-				_, _, _, binlines := zsx.GetEmbedBLOBuncode(inl)
-				result = firstInlineZettelLink(binlines)
-			}
-			if result != nil {
-				return result
-			}
+		switch sym := zsx.NodeSymbol(inl); sym {
+		case zsx.SymLink:
+			return inl
+		case zsx.SymFormatDelete, zsx.SymFormatEmph, zsx.SymFormatInsert, zsx.SymFormatMark,
+			zsx.SymFormatQuote, zsx.SymFormatSpan, zsx.SymFormatStrong, zsx.SymFormatSub,
+			zsx.SymFormatSuper:
+			_, _, finlines := zsx.GetFormat(inl)
+			result = firstInlineZettelLink(finlines)
+		case zsx.SymCite:
+			_, _, cinlines := zsx.GetCite(inl)
+			result = firstInlineZettelLink(cinlines)
+		case zsx.SymEmbed:
+			_, _, _, einlines := zsx.GetEmbed(inl)
+			result = firstInlineZettelLink(einlines)
+		case zsx.SymEmbedBLOB:
+			_, _, _, binlines := zsx.GetEmbedBLOBuncode(inl)
+			result = firstInlineZettelLink(binlines)
+		}
+		if result != nil {
+			return result
 		}
 	}
 	return nil

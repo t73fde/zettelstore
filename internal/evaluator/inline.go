@@ -174,42 +174,40 @@ func (fs *fragmentSearcher) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 	if fs.result != nil {
 		return true
 	}
-	if sym, isSymbol := sx.GetSymbol(node.Car()); isSymbol {
-		switch sym {
-		case zsx.SymHeading:
-			attrs, _, _ := zsx.GetHeading(node)
-			if p := attrs.Assoc(zsx.SymSpecialID); p != nil {
-				if frag, isString := sx.GetString(p.Cdr()); isString && frag.GetValue() == fs.fragment {
-					bn := zsx.GetWalkList(alst)
-					fs.result = firstInlinesToEmbed(bn.Tail())
-					return true
-				}
+	switch sym := zsx.NodeSymbol(node); sym {
+	case zsx.SymHeading:
+		attrs, _, _ := zsx.GetHeading(node)
+		if p := attrs.Assoc(zsx.SymSpecialID); p != nil {
+			if frag, isString := sx.GetString(p.Cdr()); isString && frag.GetValue() == fs.fragment {
+				bn := zsx.GetWalkList(alst)
+				fs.result = firstInlinesToEmbed(bn.Tail())
+				return true
 			}
+		}
 
-		case zsx.SymMark:
-			attrs, _, inlines := zsx.GetMark(node)
-			if p := attrs.Assoc(zsx.SymSpecialID); p != nil {
-				if frag, isString := sx.GetString(p.Cdr()); isString && frag.GetValue() == fs.fragment {
-					next := zsx.GetWalkList(alst).Tail()
-					for ; next != nil; next = next.Tail() {
-						car := next.Head().Car()
-						if !zsx.SymSoft.IsEqual(car) && !zsx.SymHard.IsEqual(car) {
-							break
-						}
+	case zsx.SymMark:
+		attrs, _, inlines := zsx.GetMark(node)
+		if p := attrs.Assoc(zsx.SymSpecialID); p != nil {
+			if frag, isString := sx.GetString(p.Cdr()); isString && frag.GetValue() == fs.fragment {
+				next := zsx.GetWalkList(alst).Tail()
+				for ; next != nil; next = next.Tail() {
+					car := next.Head().Car()
+					if !zsx.SymSoft.IsEqual(car) && !zsx.SymHard.IsEqual(car) {
+						break
 					}
-					if next == nil { // Mark is last in inline list
-						fs.result = inlines
-						return true
-					}
-
-					var lb sx.ListBuilder
-					if inlines != nil {
-						lb.Collect(inlines.Values())
-					}
-					lb.Collect(next.Values())
-					fs.result = lb.List()
+				}
+				if next == nil { // Mark is last in inline list
+					fs.result = inlines
 					return true
 				}
+
+				var lb sx.ListBuilder
+				if inlines != nil {
+					lb.Collect(inlines.Values())
+				}
+				lb.Collect(next.Values())
+				fs.result = lb.List()
+				return true
 			}
 		}
 	}
@@ -224,7 +222,7 @@ func firstInlinesToEmbed(blocks *sx.Pair) *sx.Pair {
 		}
 
 		blk := blocks.Head()
-		if sym, isSymbol := sx.GetSymbol(blk.Car()); isSymbol && zsx.SymBLOB.IsEqualSymbol(sym) {
+		if sym := zsx.NodeSymbol(blk); zsx.SymBLOB.IsEqualSymbol(sym) {
 			attrs, syntax, content, inlines := zsx.GetBLOBuncode(blk)
 			return sx.MakeList(zsx.MakeEmbedBLOBuncode(attrs, syntax, content, inlines))
 		}
@@ -237,7 +235,7 @@ func firstInlinesToEmbed(blocks *sx.Pair) *sx.Pair {
 func firstParagraphInlines(blocks *sx.Pair) *sx.Pair {
 	for blockObj := range blocks.Values() {
 		if block, isPair := sx.GetPair(blockObj); isPair {
-			if sym, isSymbol := sx.GetSymbol(block.Car()); isSymbol && zsx.SymPara.IsEqualSymbol(sym) {
+			if sym := zsx.NodeSymbol(block); zsx.SymPara.IsEqualSymbol(sym) {
 				if inlines := zsx.GetPara(block); inlines != nil {
 					return inlines
 				}

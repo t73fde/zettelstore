@@ -26,7 +26,7 @@ import (
 func evaluateSxn(block *sx.Pair) *sx.Pair {
 	if blocks := zsx.GetBlock(block); blocks != nil {
 		blk := blocks.Head()
-		if sym, isSymbol := sx.GetSymbol(blk.Car()); isSymbol && zsx.SymVerbatimCode.IsEqualSymbol(sym) {
+		if sym := zsx.NodeSymbol(blk); zsx.SymVerbatimCode.IsEqualSymbol(sym) {
 			_, attrs, content := zsx.GetVerbatim(blk)
 			if classAttr, hasClass := zsx.GetAttributes(attrs).Get(""); hasClass && classAttr == meta.ValueSyntaxSxn {
 				rd := sxreader.MakeReader(strings.NewReader(content))
