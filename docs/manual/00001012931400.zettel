@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20260713115117
+modified: 20260714114403
 
 === ''PARA''
 :::syntax
@@ -37,13 +37,10 @@ __QuotationList__ **=** ''(QUOTATION'' [[__Attributes__|00001012931000#attribute
 :::
 where
 :::syntax
-__ListItem__ **=** ''(BLOCK'' ItemElement &hellip; '')''.
+__ListItem__ **=** ''(ITEM'' [[__Attributes__|00001012931000#attribute]] ItemElement &hellip; '')''.
 
 __ItemElement__ **=** __OrderedList__ **|** __UnorderedList__ **|** __QuotationList__ **|** __Paragraph__.
 :::
-
-Please note that the elements of the various lists begin with a BLOCK symbol, but they themselves may contain only (nested) lists and paragraphs.
-Other block elements are not permitted.
 
 === ''DESCRIPTION''
 :::syntax
