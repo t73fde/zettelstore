@@ -212,10 +212,10 @@ func (p *mdP) acceptTable(table *gmExtAst.Table) *sx.Pair {
 	if !isHeader {
 		return sx.Nil()
 	}
-	lb.AddN(zsx.SymTable, sx.Nil(), p.acceptCells(header, header.Alignments, table.Alignments))
+	lb.AddN(zsx.SymTable, sx.Nil(), zsx.MakeRow(nil, p.acceptCells(header, header.Alignments, table.Alignments)))
 	for child = child.NextSibling(); child != nil; child = child.NextSibling() {
 		if row, isRow := child.(*gmExtAst.TableRow); isRow {
-			lb.Add(p.acceptCells(row, row.Alignments, table.Alignments))
+			lb.Add(zsx.MakeRow(nil, p.acceptCells(row, row.Alignments, table.Alignments)))
 		}
 	}
 	return lb.List()

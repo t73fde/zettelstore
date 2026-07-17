@@ -375,7 +375,8 @@ func (v *mdVisitor) visitTable(table *sx.Pair, alst *sx.Pair) {
 	}
 }
 func (v *mdVisitor) writeRow(row *sx.Pair, alst *sx.Pair) {
-	for cell := range row.Pairs() {
+	_, cells := zsx.GetRow(row)
+	for cell := range cells.Pairs() {
 		v.b.WriteString("| ")
 		_, inline := zsx.GetCell(cell.Head())
 		v.walkList(inline, alst)

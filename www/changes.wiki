@@ -26,6 +26,9 @@ The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
   *  List items are now <code>(ITEM attr ...)</code> instead of <code>(BLOCK
      ...)</code>.
      (breaking: api)
+  *  A table row now starts with the symbol <code>ROW</code>, followed by
+     attributes, and then the list of table cells.
+     (breaking: api)
   *  Content of zettel with syntax &ldquo;none&rdquo; is treated as empty in
      the API. Previously, it was evaluated to a description list of the
      zettel's metadata. This is now done only in the WebUI.

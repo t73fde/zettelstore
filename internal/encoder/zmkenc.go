@@ -383,8 +383,9 @@ func (v *zmkVisitor) visitTable(node *sx.Pair, alst *sx.Pair) {
 	}
 }
 func (v *zmkVisitor) writeHeaderRow(row *sx.Pair, alignments columnAlignment, alst *sx.Pair) {
+	_, cells := zsx.GetRow(row)
 	delim, col := "|=", 0
-	for cell := range row.Pairs() {
+	for cell := range cells.Pairs() {
 		v.b.WriteString(delim)
 		delim = "|"
 		_, inline := zsx.GetCell(cell.Head())
@@ -398,8 +399,9 @@ func (v *zmkVisitor) writeHeaderRow(row *sx.Pair, alignments columnAlignment, al
 	}
 }
 func (v *zmkVisitor) writeRow(row *sx.Pair, alignments columnAlignment, alst *sx.Pair) {
+	_, cells := zsx.GetRow(row)
 	col := 0
-	for cell := range row.Pairs() {
+	for cell := range cells.Pairs() {
 		v.b.WriteString("|")
 		attrs, inline := zsx.GetCell(cell.Head())
 		if align := getCellAlignment(attrs); align != alignments[col] {

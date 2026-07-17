@@ -127,9 +127,9 @@ func getTableAlignments(table *sx.Pair, noneHasPrio bool) columnAlignment {
 	}
 	return result
 }
-func getRowAlignments(row *sx.Pair) rowAlignment {
-	var result rowAlignment
-	for cell := range row.Pairs() {
+func getRowAlignments(row *sx.Pair) (result rowAlignment) {
+	_, cells := zsx.GetRow(row)
+	for cell := range cells.Pairs() {
 		attrs, _ := zsx.GetCell(cell.Head())
 		result = append(result, getCellAlignment(attrs))
 	}

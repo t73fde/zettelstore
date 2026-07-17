@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20260714184026
+modified: 20260717214952
 
 === ''PARA''
 :::syntax
@@ -71,14 +71,14 @@ __Table__ **=** ''(TABLE'' [[__Attributes__|00001012931000#attribute]] __TableHe
 A table is a table header and a sequence of table rows.
 
 :::syntax
-__TableHeader__ **=** ''()'' **|** ''('' __TableCell__ &hellip; '')''.
+__TableHeader__ **=** ''()'' **|** __TableRow__.
 :::
-A table header is either the empty list or a list of table cells.
+A table header is either the empty list or a table row.
 
 :::syntax
-__TableRow__ **=** ''('' __TableCell__ &hellip; '')''.
+__TableRow__ **=** ''(ROW'' [[__Attributes__|00001012931000#attribute]] __TableCell__ &hellip; '')''.
 :::
-A table row is a list of table cells.
+A table row contains optional attributes, plus a list of table cells.
 
 === ''CELL''
 :::syntax

@@ -173,8 +173,9 @@ func (v *textVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 			} else {
 				v.b.WriteLn()
 			}
+			_, cells := zsx.GetRow(row)
 			firstCell := true
-			for elem := range row.Pairs() {
+			for elem := range cells.Pairs() {
 				if firstCell {
 					firstCell = false
 				} else {
