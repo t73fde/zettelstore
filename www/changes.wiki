@@ -8,30 +8,30 @@ numbers may change. The sx- / sz-based encodings of zettel will change. Zettel
 IDs will always be encoded as strings; the numeric encoding will be removed.
 The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
 
-  * Change data encoding of zettel list queries. Zettel identifiers are encoded
-    as a string value (was: numeric value). Make encoding of zettel list
-    simpler by changing <code>(zettel (id ZID) ...</code> to <code>(zettel
-    "ZID" ...</code>.
+  *  Change data encoding of zettel list queries. Zettel identifiers are
+     encoded as a string value (was: numeric value). Make encoding of zettel
+     list simpler by changing <code>(zettel (id ZID) ...</code> to
+     <code>(zettel "ZID" ...</code>.
     (breaking: api)
-  * Change data encoding for zettel retrieval: merge encoding/content encoding
-    into one list. Now it is: <code>(content "" "Change data encoding
-    ...")</code>.
-    (breaking: api)
-  * Data encoding of access rights changed from numeric scheme to a symbol
-    based scheme: <code>(rights create read update delete)</code>.
-    (breaking: api)
-  * Change sz representation of content for headings and inline marks. Node
-    identifiers are only generated when needed, e.g. for HTML encoding.
-    (breaking: api)
-  * List items are now <code>(ITEM attr ...)</code> instead of <code>(BLOCK
-    ...)</code>.
-    (breaking: api)
-  * Content of zettel with syntax &ldquo;none&rdquo; is treated as empty in the
-    API. Previously, it was evaluated to a description list of the zettel's
-    metadata. This is now done only in the WebUI.
-    (breaking: api)
-  * Allow to retrieve zettel content via data encoding.
-    (minor: api)
+  *  Change data encoding for zettel retrieval: merge encoding/content encoding
+     into one list. Now it is: <code>(content "" "Change data encoding
+     ...")</code>.
+     (breaking: api)
+  *  Data encoding of access rights changed from numeric scheme to a symbol
+     based scheme: <code>(rights create read update delete)</code>.
+     (breaking: api)
+  *  Change sz representation of content for headings and inline marks. Node
+     identifiers are only generated when needed, e.g. for HTML encoding.
+     (breaking: api)
+  *  List items are now <code>(ITEM attr ...)</code> instead of <code>(BLOCK
+     ...)</code>.
+     (breaking: api)
+  *  Content of zettel with syntax &ldquo;none&rdquo; is treated as empty in
+     the API. Previously, it was evaluated to a description list of the
+     zettel's metadata. This is now done only in the WebUI.
+     (breaking: api)
+  *  Allow to retrieve zettel content via data encoding.
+     (minor: api)
 
 <a id="2_1"></a>
 <h2>Changes for Version 2.1.0 (2026-07-07)</h2>
