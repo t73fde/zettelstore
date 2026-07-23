@@ -30,10 +30,11 @@ import (
 
 func init() {
 	manager.Register(
-		"mem",
+		box.SchemeMemoryBox,
 		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return &memBox{
-				logger:    kernel.Main.GetLogger(kernel.BoxService).With("box", "mem", "boxnum", cdata.Number),
+				logger: kernel.Main.GetLogger(kernel.BoxService).With(
+					"box", box.SchemeMemoryBox, "boxnum", cdata.Number),
 				u:         u,
 				cdata:     *cdata,
 				maxZettel: box.GetQueryInt(u, "max-zettel", 0, 127, 65535),

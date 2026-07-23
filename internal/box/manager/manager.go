@@ -158,12 +158,12 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 			cdata.Number++
 		}
 	}
-	constbox, err := registry[" const"](nil, &cdata)
+	constbox, err := registry[box.SchemeConstBox](nil, &cdata)
 	if err != nil {
 		return nil, err
 	}
 	cdata.Number++
-	compbox, err := registry[" comp"](nil, &cdata)
+	compbox, err := registry[box.SchemeCompBox](nil, &cdata)
 	if err != nil {
 		return nil, err
 	}

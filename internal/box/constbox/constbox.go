@@ -32,7 +32,7 @@ import (
 
 func init() {
 	manager.Register(
-		" const",
+		box.SchemeConstBox,
 		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return &constBox{
 				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "const", "boxnum", cdata.Number),

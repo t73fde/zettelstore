@@ -344,3 +344,12 @@ var ErrCapacity = errors.New("capacity exceeded")
 type ErrInvalidZid struct{ Zid string }
 
 func (err ErrInvalidZid) Error() string { return "invalid Zettel id: " + err.Zid }
+
+// Scheme values
+const (
+	SchemeCompBox   = " comp"
+	SchemeConstBox  = " const"
+	SchemeDirBox    = "dir"
+	SchemeFileBox   = "file"
+	SchemeMemoryBox = "mem"
+)

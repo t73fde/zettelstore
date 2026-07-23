@@ -29,20 +29,22 @@ import (
 )
 
 func init() {
-	manager.Register("file", func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
-		path := getFilepathFromURL(u)
-		ext := strings.ToLower(filepath.Ext(path))
-		if ext != ".zip" {
-			return nil, errors.New("unknown extension '" + ext + "' in box URL: " + u.String())
-		}
-		return &zipBox{
-			logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "zip", "boxnum", cdata.Number),
-			number:   cdata.Number,
-			name:     path,
-			enricher: cdata.Enricher,
-			notify:   cdata.Notify,
-		}, nil
-	})
+	manager.Register(
+		box.SchemeFileBox,
+		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
+			path := getFilepathFromURL(u)
+			ext := strings.ToLower(filepath.Ext(path))
+			if ext != ".zip" {
+				return nil, errors.New("unknown extension '" + ext + "' in box URL: " + u.String())
+			}
+			return &zipBox{
+				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "zip", "boxnum", cdata.Number),
+				number:   cdata.Number,
+				name:     path,
+				enricher: cdata.Enricher,
+				notify:   cdata.Notify,
+			}, nil
+		})
 }
 
 func getFilepathFromURL(u *url.URL) string {

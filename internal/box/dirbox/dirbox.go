@@ -35,27 +35,30 @@ import (
 )
 
 func init() {
-	manager.Register("dir", func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
-		var logger *slog.Logger
-		if krnl := kernel.Main; krnl != nil {
-			logger = krnl.GetLogger(kernel.BoxService).With("box", "dir", "boxnum", cdata.Number)
-		}
-		path := getDirPath(u)
-		if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-			return nil, err
-		}
-		dp := dirBox{
-			logger:     logger,
-			number:     cdata.Number,
-			location:   u.String(),
-			readonly:   box.GetQueryBool(u, "readonly"),
-			cdata:      *cdata,
-			dir:        path,
-			notifySpec: getDirSrvInfo(logger, u.Query().Get("type")),
-			fSrvs:      makePrime(uint32(box.GetQueryInt(u, "worker", 1, 7, 1499))),
-		}
-		return &dp, nil
-	})
+	manager.Register(
+		box.SchemeDirBox,
+		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
+			var logger *slog.Logger
+			if krnl := kernel.Main; krnl != nil {
+				logger = krnl.GetLogger(kernel.BoxService).With(
+					"box", box.SchemeDirBox, "boxnum", cdata.Number)
+			}
+			path := getDirPath(u)
+			if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+				return nil, err
+			}
+			dp := dirBox{
+				logger:     logger,
+				number:     cdata.Number,
+				location:   u.String(),
+				readonly:   box.GetQueryBool(u, "readonly"),
+				cdata:      *cdata,
+				dir:        path,
+				notifySpec: getDirSrvInfo(logger, u.Query().Get("type")),
+				fSrvs:      makePrime(uint32(box.GetQueryInt(u, "worker", 1, 7, 1499))),
+			}
+			return &dp, nil
+		})
 }
 
 func makePrime(n uint32) uint32 {

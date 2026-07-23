@@ -58,7 +58,7 @@ func (ps *boxService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 					return nil, err
 				}
 				if uVal.Scheme == "" {
-					uVal.Scheme = "dir"
+					uVal.Scheme = box.SchemeDirBox
 				}
 				return uVal, nil
 			},
