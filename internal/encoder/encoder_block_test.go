@@ -301,7 +301,7 @@ and much more
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>Zettel</dt><dd><p>Paper</p></dd><dd><p>Note</p></dd><dt>Zettelkasten</dt><dd><p>Slip box</p></dd></dl>",
 			encoderMD:    "",
-			encoderSz:    `(BLOCK (DESCRIPTION () ((TEXT "Zettel")) (BLOCK (BLOCK (PARA (TEXT "Paper"))) (BLOCK (PARA (TEXT "Note")))) ((TEXT "Zettelkasten")) (BLOCK (BLOCK (PARA (TEXT "Slip box"))))))`,
+			encoderSz:    `(BLOCK (DESCRIPTION () (TERM () (TEXT "Zettel")) (DETAIL (ENTRY () (PARA (TEXT "Paper"))) (ENTRY () (PARA (TEXT "Note")))) (TERM () (TEXT "Zettelkasten")) (DETAIL (ENTRY () (PARA (TEXT "Slip box"))))))`,
 			encoderSHTML: `((dl (dt "Zettel") (dd (p "Paper")) (dd (p "Note")) (dt "Zettelkasten") (dd (p "Slip box"))))`,
 			encoderText:  "Zettel\nPaper\nNote\nZettelkasten\nSlip box",
 			encoderZmk:   useZmk,
@@ -313,7 +313,7 @@ and much more
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>Zettel</dt><dd><p>Paper</p><p>Note</p></dd><dt>Zettelkasten</dt><dd><p>Slip box</p></dd></dl>",
 			encoderMD:    "",
-			encoderSz:    `(BLOCK (DESCRIPTION () ((TEXT "Zettel")) (BLOCK (BLOCK (PARA (TEXT "Paper")) (PARA (TEXT "Note")))) ((TEXT "Zettelkasten")) (BLOCK (BLOCK (PARA (TEXT "Slip box"))))))`,
+			encoderSz:    `(BLOCK (DESCRIPTION () (TERM () (TEXT "Zettel")) (DETAIL (ENTRY () (PARA (TEXT "Paper")) (PARA (TEXT "Note")))) (TERM () (TEXT "Zettelkasten")) (DETAIL (ENTRY () (PARA (TEXT "Slip box"))))))`,
 			encoderSHTML: `((dl (dt "Zettel") (dd (p "Paper") (p "Note")) (dt "Zettelkasten") (dd (p "Slip box"))))`,
 			encoderText:  "Zettel\nPaper\nNote\nZettelkasten\nSlip box",
 			encoderZmk:   useZmk,
@@ -325,7 +325,7 @@ and much more
 		expect: expectMap{
 			encoderHTML:  "<dl><dt>K1</dt><dd><p>D11</p></dd><dd><p>D12</p></dd><dt>K2</dt><dt>K3</dt><dd><p>D31</p></dd></dl>",
 			encoderMD:    "",
-			encoderSz:    `(BLOCK (DESCRIPTION () ((TEXT "K1")) (BLOCK (BLOCK (PARA (TEXT "D11"))) (BLOCK (PARA (TEXT "D12")))) ((TEXT "K2")) (BLOCK) ((TEXT "K3")) (BLOCK (BLOCK (PARA (TEXT "D31"))))))`,
+			encoderSz:    `(BLOCK (DESCRIPTION () (TERM () (TEXT "K1")) (DETAIL (ENTRY () (PARA (TEXT "D11"))) (ENTRY () (PARA (TEXT "D12")))) (TERM () (TEXT "K2")) (DETAIL) (TERM () (TEXT "K3")) (DETAIL (ENTRY () (PARA (TEXT "D31"))))))`,
 			encoderSHTML: `((dl (dt "K1") (dd (p "D11")) (dd (p "D12")) (dt "K2") (dt "K3") (dd (p "D31"))))`,
 			encoderText:  "K1\nD11\nD12\nK2\nK3\nD31",
 			encoderZmk:   useZmk,

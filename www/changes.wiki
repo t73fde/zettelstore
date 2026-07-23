@@ -26,6 +26,10 @@ The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
   *  List items are now <code>(ITEM attr ...)</code> instead of <code>(BLOCK
      ...)</code>.
      (breaking: api)
+  *  Descriptions get a cleaner internal structure: <code>TERM</code>,
+     <code>DETAIL</code>, and <code>ENTRY</code> (instead of nothing (for terms)
+     and <code>BLOCK</code> (for detail and entry)).
+     (breaking: api)
   *  A table row now starts with the symbol <code>ROW</code>, followed by
      attributes, and then the list of table cells.
      (breaking: api)

@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #reference #zettelstore
 syntax: zmk
 created: 20230403161803
-modified: 20260717214952
+modified: 20260723141805
 
 === ''PARA''
 :::syntax
@@ -44,25 +44,27 @@ __ItemElement__ **=** __OrderedList__ **|** __UnorderedList__ **|** __QuotationL
 
 === ''DESCRIPTION''
 :::syntax
-__Description__ **=** ''(DESCRIPTION'' [[__Attributes__|00001012931000#attribute]] __DescriptionTerm__ __DescriptionDetails__ __DescriptionTerm__ __DescriptionDetails__ &hellip; '')''.
+__Description__ **=** ''(DESCRIPTION'' [[__Attributes__|00001012931000#attribute]] __DescriptionTerm__ __DescriptionDetail__ __DescriptionTerm__ __DescriptionDetail__ &hellip; '')''.
 :::
-A description is a sequence of one or more terms and values.
+A description is a sequence of one or more terms and details.
 
 :::syntax
-__DescriptionTerm__ **=** ''('' [[__InlineElement__|00001012931600]] &hellip; '')''.
+__DescriptionTerm__ **=** ''(TERM''  [[__Attributes__|00001012931000#attribute]] [[__InlineElement__|00001012931600]] &hellip; '')''.
 :::
 A description term is just an inline-structured value.
 
 :::syntax
-__DescriptionDetails__ **=** ''(BLOCK'' __DescriptionBlock__ &hellip; '')''.
+__DescriptionDetail__ **=** ''(DETAIL'' __DescriptionEntry__ &hellip; '')''.
 :::
 where
 :::syntax
-__DescriptionBlock__ **=** ''(BLOCK'' Paragraph &hellip; '')''.
+__DescriptionEntry__ **=** ''(ENTRY''  [[__Attributes__|00001012931000#attribute]] __Paragraph__ &hellip; '')''.
 :::
 
-Description details are sequences of blocks that contain only paragraphs.
-From this restriction it follows that, within a description, only inline elements are allowed. Nested block elements are not allowed.
+Description details are sequences of entries that contain only paragraphs.
+
+From this restriction it follows that, within a description, only inline elements are allowed for content.
+Nested block elements are forbidden.
 
 === ''TABLE''
 :::syntax

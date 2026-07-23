@@ -178,3 +178,5 @@ func (ta tableAlignment) calcColAlignment(col int) (cellAlignment, int) {
 	}
 	return val, freq[noneAlignment]
 }
+
+var symTermWriteLn = sx.MakeSymbol("term-writeln")

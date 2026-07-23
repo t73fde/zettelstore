@@ -152,6 +152,12 @@ func (v *zmkVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 
 	case zsx.SymDescription:
 		v.visitDescription(node, alst)
+	case zsx.SymTerm:
+		v.visitTerm(node, alst)
+	case zsx.SymDetail:
+		v.visitDetail(node, alst)
+	case zsx.SymEntry:
+		v.visitEntry(node, alst)
 	case zsx.SymTable:
 		v.visitTable(node, alst)
 
@@ -335,33 +341,36 @@ func (v *zmkVisitor) visitRegion(node *sx.Pair, alst *sx.Pair, delim string) {
 
 func (v *zmkVisitor) visitDescription(node *sx.Pair, alst *sx.Pair) {
 	_, termVals := zsx.GetDescription(node)
-	first := true
+	blst := alst.Cons(sx.Cons(symTermWriteLn, nil))
 	for n := termVals; n != nil; n = n.Tail() {
+		v.walk(n.Head(), alst)
+		alst = blst
+	}
+}
+func (v *zmkVisitor) visitTerm(node *sx.Pair, alst *sx.Pair) {
+	_, inlines := zsx.GetTerm(node)
+	if alst.Assoc(symTermWriteLn) != nil {
+		v.b.WriteLn()
+	}
+	v.b.WriteString("; ")
+	v.walkList(inlines, alst)
+}
+func (v *zmkVisitor) visitDetail(node *sx.Pair, alst *sx.Pair) {
+	for entry := range zsx.GetDetail(node).Pairs() {
+		v.b.WriteString("\n: ")
+		v.walk(entry.Head(), alst)
+	}
+}
+func (v *zmkVisitor) visitEntry(node *sx.Pair, alst *sx.Pair) {
+	first := true
+	_, paras := zsx.GetEntry(node)
+	for pn := range paras.Pairs() {
 		if first {
 			first = false
 		} else {
-			v.b.WriteLn()
+			v.b.WriteString("\n\n  ")
 		}
-		v.b.WriteString("; ")
-		if term := n.Head(); term != nil {
-			v.walkList(term, alst)
-		}
-		n = n.Tail()
-		if n == nil {
-			break
-		}
-		for bns := range zsx.GetBlock(n.Head()).Pairs() {
-			v.b.WriteString("\n: ")
-			second := false
-			for pn := range zsx.GetBlock(bns.Head()).Pairs() {
-				if second {
-					v.b.WriteString("\n\n  ")
-				} else {
-					second = true
-				}
-				v.walk(pn.Head(), alst)
-			}
-		}
+		v.walk(pn.Head(), alst)
 	}
 }
 

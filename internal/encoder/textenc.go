@@ -187,25 +187,25 @@ func (v *textVisitor) VisitItBefore(node *sx.Pair, alst *sx.Pair) bool {
 
 	case zsx.SymDescription:
 		_, termsVals := zsx.GetDescription(node)
-		first := true
+		blst := alst.Cons(sx.Cons(symTermWriteLn, nil))
 		for n := termsVals; n != nil; n = n.Tail() {
-			if first {
-				first = false
-			} else {
-				v.b.WriteLn()
-			}
-			v.walkList(n.Head(), alst)
-			n = n.Tail()
-			if n == nil {
-				break
-			}
-			dvals := n.Head()
-			if zsx.SymBlock.IsEqual(dvals.Car()) {
-				for val := range dvals.Tail().Pairs() {
-					v.b.WriteLn()
-					v.walk(val.Head(), alst)
-				}
-			}
+			v.walk(n.Head(), alst)
+			alst = blst
+		}
+	case zsx.SymTerm:
+		_, inlines := zsx.GetTerm(node)
+		if alst.Assoc(symTermWriteLn) != nil {
+			v.b.WriteLn()
+		}
+		v.walkList(inlines, alst)
+	case zsx.SymDetail:
+		entries := zsx.GetDetail(node)
+		v.walkList(entries, alst)
+	case zsx.SymEntry:
+		_, paras := zsx.GetEntry(node)
+		for para := range paras.Pairs() {
+			v.b.WriteLn()
+			v.walk(para.Head(), alst)
 		}
 
 	case zsx.SymRegionBlock, zsx.SymRegionQuote, zsx.SymRegionVerse:
