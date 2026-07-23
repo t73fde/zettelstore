@@ -4,21 +4,20 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250102180137
+modified: 20260723170654
 
-A description list is a sequence of terms to be described together with the descriptions of each term.
-Every term can be described in multiple ways.
+A description list consists of alternating terms and descriptions (short: __details__).
+Each detail contains one or more __entries__, allowing a term to be described in multiple ways.
 
-A description term (short: __term__) is specified with one semicolon (""'';''"", U+003B) at the first position, followed by a space character and the described term, specified as a sequence of line elements.
-If the following lines should also be part of the term, exactly two spaces must be given at the beginning of each following line.
+A description term (short: __term__) begins with a single semicolon (""'';''"", U+003B) at the beginning of the line, followed by a space character and the term itself, which consists of a sequence of line elements.
+If subsequent lines should also be part of the term, two spaces must be given at the beginning of each line.
 
-The description of a term is given with one colon (""'':''"", U+003A) at the first position, followed by a space character and the description itself, specified as a sequence of [[inline elements|00001007040000]].
-Similar to terms, following lines can also be part of the actual description, if they begin at each line with exactly two space characters.
+Each entry of a detail begins with a single colon (""'':''"", U+003A) at the beginning of the line, followed by a space character and the entry text, which consists of a sequence of [[inline elements|00001007040000]].
+As with terms, subsequent lines may also be part of the description if they begin with two space characters.
 
-In contrast to terms, the actual descriptions are merged into a paragraph.
-This is because, an actual description can contain more than one paragraph.
-As usual, paragraphs are separated by an empty line.
-Every following paragraph of an actual description must be indented by two space characters.
+In contrast to terms, the content of an entry is merged into paragraphs: consecutive lines are combined into a single paragraph, while empty lines start new paragraphs.
+An entry may contain more than one paragraph.
+Every additional paragraph of an entry must be indented by two space characters.
 
 Example:
 ```zmk
@@ -28,7 +27,7 @@ Example:
 
   Zettel can be linked together.
 ; Zettelstore
-: A software that manages zettel.
+: A piece of software that manages zettel.
 : The name of the Go implementation.
 ```
 
@@ -40,8 +39,8 @@ is rendered as:
 
   Zettel can be linked together.
 ; Zettelstore
-: A software that manages zettel.
+: A piece of software that manages zettel.
 : The name of the Go implementation.
 :::
 
-If you look at the HTML code, you will see that ""Zettel"" has only one description with two paragraphs, while ""Zettelstore"" has two descriptions, each with one paragraph.
+If you look at the HTML code, you will see that the term ""Zettel"" has only one entry with two paragraphs, whereas ""Zettelstore"" has two entries, each containing a single paragraph.[^An entry is mapped to HTML's ``<dd>`` tag]

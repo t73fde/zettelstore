@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251218191846
+modified: 20260723162258
 
 Every markup for block-structured elements (""blocks"") begins at the very first position of a line.
 
@@ -12,13 +12,13 @@ There are five kinds of blocks: lists, one-line blocks, line-range blocks, table
 
 === Lists
 
-In Zettelmarkup, lists themselves are not specified, but list items.
-A sequence of list items is considered as a list.
+In Zettelmarkup, lists themselves are not specified; only list items are.
+A sequence of list items constitutes a list.
 
-[[Description lists|00001007030100]] contain two different item types: the term to be described and the description itself.
-These cannot be combined with other lists.
+[[Description lists|00001007030100]] contain two item types: the term being described and its description.
+Description lists cannot be combined with other list types.
 
-Ordered lists, unordered lists, and quotation lists can be combined into [[nested lists|00001007030200]].
+Ordered, unordered, and quotation list items can be combined to form [[nested lists|00001007030200]].
 
 === One-line blocks
 
