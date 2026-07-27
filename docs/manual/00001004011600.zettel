@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20220307112918
-modified: 20260727115002
+modified: 20260727185359
 
 Most applications should configure the memory box explicitly.
 Configure the memory box by appending query parameters to the base box URI ''mem:''.
@@ -15,6 +15,7 @@ The following parameters are supported:
 |max-bytes|Maximum storage size of the box (in bytes)|65535|1073741824 (1 GiB)
 |max-zettel|Maximum number of zettel|127|65535
 |readonly|Allow only read operations|false|n/a
+|name|Unique name of the box|n/a|n/a
 
 The default values provide reasonable limits for many applications.
 

@@ -35,16 +35,18 @@ type zipBox struct {
 	logger   *slog.Logger
 	number   int
 	name     string
+	path     string
 	enricher box.Enricher
 	notify   box.UpdateNotifier
 	dirSrv   *notify.DirService
 }
 
+func (zb *zipBox) Name() string { return zb.name }
 func (zb *zipBox) Location() string {
-	if strings.HasPrefix(zb.name, "/") {
-		return "file://" + zb.name
+	if strings.HasPrefix(zb.path, "/") {
+		return "file://" + zb.path
 	}
-	return "file:" + zb.name
+	return "file:" + zb.path
 }
 
 func (zb *zipBox) State() box.StartState {
@@ -66,14 +68,14 @@ func (zb *zipBox) State() box.StartState {
 }
 
 func (zb *zipBox) Start(context.Context) error {
-	reader, err := zip.OpenReader(zb.name)
+	reader, err := zip.OpenReader(zb.path)
 	if err != nil {
 		return err
 	}
 	if err = reader.Close(); err != nil {
 		return err
 	}
-	zipNotifier := notify.NewSimpleZipNotifier(zb.logger, zb.name)
+	zipNotifier := notify.NewSimpleZipNotifier(zb.logger, zb.path)
 	zb.dirSrv = notify.NewDirService(zb, zb.logger, zipNotifier, zb.notify)
 	zb.dirSrv.Start()
 	return nil
@@ -94,7 +96,7 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	if !entry.IsValid() {
 		return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 	}
-	reader, err := zip.OpenReader(zb.name)
+	reader, err := zip.OpenReader(zb.path)
 	if err != nil {
 		return box.Zettel{}, err
 	}
@@ -154,7 +156,7 @@ func (zb *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box
 }
 
 func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
-	reader, err := zip.OpenReader(zb.name)
+	reader, err := zip.OpenReader(zb.path)
 	if err != nil {
 		return err
 	}
@@ -168,7 +170,7 @@ func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 		if err2 != nil {
 			continue
 		}
-		zb.enricher.Enrich(ctx, m, zb.number)
+		zb.enricher.Enrich(ctx, m, zb.number, zb.name)
 		handle(m)
 	}
 	return reader.Close()

@@ -24,7 +24,7 @@ import (
 )
 
 // Enrich computes additional properties and updates the given metadata.
-func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int) {
+func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int, boxName string) {
 	// Calculate computed, but stored values.
 	if _, hasCreated := m.Get(meta.KeyCreated); !hasCreated {
 		m.Set(meta.KeyCreated, computeCreated(m.Zid))
@@ -34,6 +34,9 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int) {
 		computePublished(m)
 		if boxNumber > 0 {
 			m.Set(meta.KeyBoxNumber, meta.Value(strconv.Itoa(boxNumber)))
+		}
+		if boxName != "" {
+			m.Set(meta.KeyBoxName, meta.Value(boxName))
 		}
 		mgr.idxStore.Enrich(ctx, m)
 	}

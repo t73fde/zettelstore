@@ -4,44 +4,50 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260605142449
+modified: 20260727185211
 
-A Zettelstore must store its zettel somehow and somewhere.
+Zettelstore must store its zettel somewhere.
 In most cases you want to store your zettel as files in a directory.
 Under certain circumstances you may want to store your zettel elsewhere.
 
-An example is the [[predefined zettel|00001005090000]] that come with a Zettelstore.
+An example is the [[predefined zettel|00001005090000]] that come with Zettelstore.
 They are stored within the software itself.
-In another situation you may want to store your zettel volatile, e.g. if you want to provide a sandbox for experimenting.
+In another situation you may want to store your zettel in volatile memory, e.g. if you want to provide a sandbox for experimenting.
 
 To cope with these (and more) situations, you configure Zettelstore to use one or more __boxes__.
-This is done via the ''box-uri-X'' keys of the [[startup configuration|00001004010000#box-uri-X]] (X is a number).
-Boxes are specified using special [[URIs|https://en.wikipedia.org/wiki/Uniform_Resource_Identifier]], somehow similar to web addresses.
+This is done using the ''box-uri-X'' keys of the [[startup configuration|00001004010000#box-uri-X]] (X is a number).
+Boxes are specified using special [[URIs|https://en.wikipedia.org/wiki/Uniform_Resource_Identifier]], similar to web addresses.
 
 The following box URIs are supported:
 
 ; [!dir|''dir://DIR'']
 : Specifies a directory where zettel files are stored.
-  ''DIR'' is the file path.
-  Although it is possible to use relative file paths, such as ''./zettel'' (&rarr; URI is ''dir://.zettel''), it is preferable to use absolute file paths, e.g. ''/home/user/zettel''.
+  ''DIR'' specifies the path to the directory.
+  You can use a relative file path, such as ''./zettel'' (&rarr; URI is ''dir://./zettel''), but in most cases an absolute file path is recommended, e.g. ''/home/user/zettel''.
 
-  The directory must exist before starting the Zettelstore[^There is one exception: when Zettelstore is [[started without any parameter|00001004050000]], e.g. via double-clicking its icon, a directory called ''./zettel'' will be created.].
+  The directory must exist before starting Zettelstore[^There is one exception: when Zettelstore is [[started without any parameter|00001004050000]], e.g. via double-clicking its icon, a directory called ''./zettel'' will be created.].
 
   It is possible to [[configure|00001004011400]] a directory box.
 ; [!file|''file:FILE.zip'' or ''file:///path/to/file.zip'']
-: Specifies a ZIP file which contains files that store zettel.
+: Specifies a ZIP file that contains files that store zettel.
   You can create such a ZIP file, if you zip a directory full of zettel files.
 
   This box is always read-only.
 ; [!mem|''mem:'']
-: Stores all its zettel in volatile memory.
-  If you stop the Zettelstore, all changes are lost.
-  To limit usage of volatile memory, you should [[configure|00001004011600]] this type of box, although the default values might be valid for your use case.
+: Stores zettel in volatile memory.
+  If you stop Zettelstore, all changes are lost.
+  To limit usage of volatile memory, you should [[configure|00001004011600]] this type of box, although the default values might be appropriate for your use case.
 
 All boxes that you configure via the ''box-uri-X'' keys form a chain of boxes.
-If a zettel should be retrieved, a search starts in the box specified with the ''box-uri-1'' key, then ''box-uri-2'' and so on.
+When Zettelstore retrieves a zettel, a search starts in the box specified with the ''box-uri-1'' key, then ''box-uri-2'' and so on.
 If a zettel is created or changed, it is always stored in the box specified with the ''box-uri-1'' key.
-This allows to overwrite zettel from other boxes, e.g. the predefined zettel.
+This allows you to overwrite zettel from other boxes, e.g. the predefined zettel.
+
+Every box has a unique ""name"".
+The name of a box can be assigned if you set the URI query parameter ''name'' to its desired value.
+It is an error if you give the same name twice.
+If no query parameter ''name'' is given, Zettelstore checks whether the URI scheme can be used as a unique name.
+As a last resort, a name is calculated by the URI position, and optionally made unique by adding the value of another counter.
 
 If you use the ''mem:'' box, where zettel are stored in volatile memory, it only makes sense if you configure it as ''box-uri-1''.
 Such a box will be empty when Zettelstore starts, and only the first box will receive updates.

@@ -47,14 +47,16 @@ func init() {
 			if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 				return nil, err
 			}
+			q := u.Query()
 			dp := dirBox{
 				logger:     logger,
 				number:     cdata.Number,
+				name:       q.Get(manager.QueryName),
 				location:   u.String(),
-				readonly:   box.GetQueryBool(u, "readonly"),
+				readonly:   box.GetQueryBool(u, manager.QueryReadOnly),
 				cdata:      *cdata,
 				dir:        path,
-				notifySpec: getDirSrvInfo(logger, u.Query().Get("type")),
+				notifySpec: getDirSrvInfo(logger, q.Get("type")),
 				fSrvs:      makePrime(uint32(box.GetQueryInt(u, "worker", 1, 7, 1499))),
 			}
 			return &dp, nil
@@ -121,6 +123,7 @@ func getDirPath(u *url.URL) string {
 type dirBox struct {
 	logger     *slog.Logger
 	number     int
+	name       string
 	location   string
 	readonly   bool
 	cdata      manager.ConnectData
@@ -132,9 +135,8 @@ type dirBox struct {
 	mxCmds     sync.RWMutex
 }
 
-func (dp *dirBox) Location() string {
-	return dp.location
-}
+func (dp *dirBox) Name() string     { return dp.name }
+func (dp *dirBox) Location() string { return dp.location }
 
 func (dp *dirBox) State() box.StartState {
 	if ds := dp.dirSrv; ds != nil {
@@ -291,7 +293,7 @@ func (dp *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 			logging.LogTrace(dp.logger, "ApplyMeta/getMeta", "err", err)
 			return err
 		}
-		dp.cdata.Enricher.Enrich(ctx, m, dp.number)
+		dp.cdata.Enricher.Enrich(ctx, m, dp.number, dp.name)
 		handle(m)
 	}
 	return nil

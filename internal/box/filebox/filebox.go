@@ -40,7 +40,8 @@ func init() {
 			return &zipBox{
 				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "zip", "boxnum", cdata.Number),
 				number:   cdata.Number,
-				name:     path,
+				name:     u.Query().Get(manager.QueryName),
+				path:     path,
 				enricher: cdata.Enricher,
 				notify:   cdata.Notify,
 			}, nil

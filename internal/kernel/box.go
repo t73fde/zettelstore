@@ -33,8 +33,6 @@ type boxService struct {
 	createManager CreateBoxManagerFunc
 }
 
-var errInvalidDirType = errors.New("invalid directory type")
-
 func (ps *boxService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 	ps.logLevelVar = levelVar
 	ps.logger = logger
@@ -46,7 +44,7 @@ func (ps *boxService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 				case BoxDirTypeNotify, BoxDirTypeSimple:
 					return val, nil
 				}
-				return nil, errInvalidDirType
+				return nil, errors.New("invalid directory type")
 			}),
 			true,
 		},
@@ -57,8 +55,16 @@ func (ps *boxService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) {
 				if err != nil {
 					return nil, err
 				}
-				if uVal.Scheme == "" {
+				switch uVal.Scheme {
+				case "":
 					uVal.Scheme = box.SchemeDirBox
+				case box.SchemeCompBox, box.SchemeConstBox:
+					return nil, fmt.Errorf("box scheme %q not allowed here", uVal.Scheme)
+
+				case box.SchemeDirBox, box.SchemeFileBox, box.SchemeMemoryBox:
+					// Very valid schemes here
+				default:
+					return nil, fmt.Errorf("unknown box scheme: %s", uVal.Scheme)
 				}
 				return uVal, nil
 			},

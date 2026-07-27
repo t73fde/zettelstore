@@ -57,7 +57,8 @@ type constBox struct {
 	enricher box.Enricher
 }
 
-func (*constBox) Location() string { return "const:" }
+func (*constBox) Name() string     { return box.SchemeConstBox }
+func (*constBox) Location() string { return box.SchemeConstBox + ":" }
 
 func (cb *constBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	if z, ok := cb.zettel[zid]; ok {
@@ -89,7 +90,7 @@ func (cb *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrai
 	for zid, zettel := range cb.zettel {
 		if constraint(zid) {
 			m := meta.NewWithData(zid, zettel.header)
-			cb.enricher.Enrich(ctx, m, cb.number)
+			cb.enricher.Enrich(ctx, m, cb.number, box.SchemeConstBox)
 			handle(m)
 		}
 	}

@@ -43,6 +43,9 @@ type (
 
 // BaseBox is implemented by all Zettel boxes.
 type BaseBox interface {
+	// Name returns a configured box name.
+	Name() string
+
 	// Location returns some information where the box is located.
 	// Format is dependent of the box.
 	Location() string
@@ -255,7 +258,7 @@ type Subject interface {
 type Enricher interface {
 	// Enrich computes additional properties and updates the given metadata.
 	// It is typically called by zettel reading methods.
-	Enrich(ctx context.Context, m *meta.Meta, boxNumber int)
+	Enrich(ctx context.Context, m *meta.Meta, boxNumber int, boxName string)
 }
 
 // NoEnrichContext will signal an enricher that nothing has to be done.
@@ -345,10 +348,10 @@ type ErrInvalidZid struct{ Zid string }
 
 func (err ErrInvalidZid) Error() string { return "invalid Zettel id: " + err.Zid }
 
-// Scheme values
+// Scheme values for boxes.
 const (
-	SchemeCompBox   = " comp"
-	SchemeConstBox  = " const"
+	SchemeCompBox   = "comp"
+	SchemeConstBox  = "const"
 	SchemeDirBox    = "dir"
 	SchemeFileBox   = "file"
 	SchemeMemoryBox = "mem"

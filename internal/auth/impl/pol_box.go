@@ -38,9 +38,8 @@ func newBox(box box.Box, policy auth.Policy) box.Box {
 	}
 }
 
-func (pp *polBox) Location() string {
-	return pp.box.Location()
-}
+func (pp *polBox) Name() string     { return pp.box.Name() }
+func (pp *polBox) Location() string { return pp.box.Location() }
 
 func (pp *polBox) CanCreateZettel(ctx context.Context) bool {
 	return pp.box.CanCreateZettel(ctx)

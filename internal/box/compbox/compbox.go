@@ -79,7 +79,8 @@ func getCompBox(boxNumber int, mf box.Enricher) *compBox {
 // Setup remembers important values.
 func Setup(cfg *meta.Meta) { myConfig = cfg.Clone() }
 
-func (*compBox) Location() string { return "" }
+func (*compBox) Name() string     { return box.SchemeCompBox }
+func (*compBox) Location() string { return box.SchemeCompBox + ":" }
 
 func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
 	if gen, ok := myZettel[zid]; ok && gen.meta != nil {
@@ -130,7 +131,7 @@ func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrain
 		if genMeta := gen.meta; genMeta != nil {
 			if m := genMeta(zid); m != nil {
 				updateMeta(m)
-				cb.enricher.Enrich(ctx, m, cb.number)
+				cb.enricher.Enrich(ctx, m, cb.number, box.SchemeCompBox)
 				handle(m)
 			}
 		}

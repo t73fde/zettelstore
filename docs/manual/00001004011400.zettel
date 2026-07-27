@@ -4,17 +4,18 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20250701135923
+modified: 20260727185330
 
 Under certain circumstances, it is preferable to further configure a file directory box.
 This is done by appending query parameters after the base box URI ''dir:\//DIR''.
 
 The following parameters are supported:
 
-|= Parameter:|Description|Default value:|
+|= Parameter|Description|Default value>|
 |type|(Sub-) Type of the directory service|(value of ""[[default-dir-box-type|00001004010000#default-dir-box-type]]"")
 |worker|Number of workers that can access the directory in parallel|7
 |readonly|Allow only operations that do not create or change zettel|n/a
+|name|Unique name of the box|n/a
 
 === Type
 On some operating systems, Zettelstore tries to detect changes to zettel files outside of Zettelstore's control[^This includes Linux, Windows, and macOS.].

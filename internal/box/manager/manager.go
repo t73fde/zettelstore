@@ -16,13 +16,17 @@ package manager
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/url"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
 	"t73f.de/r/zero/set"
+	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -42,6 +46,12 @@ type ConnectData struct {
 	Enricher box.Enricher
 	Notify   box.UpdateNotifier
 }
+
+// Constants for query parameter
+const (
+	QueryName     = "name"
+	QueryReadOnly = "readonly"
+)
 
 // Connect returns a handle to the specified box.
 func Connect(u *url.URL, cdata *ConnectData) (box.ManagedBox, error) {
@@ -131,15 +141,12 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 		idxReady:  make(chan struct{}, 1),
 	}
 
+	if err := setupBoxURIs(boxURIs, authManager.IsReadonly()); err != nil {
+		return nil, err
+	}
 	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)
-	isReadonly := authManager.IsReadonly()
 	for _, uri := range boxURIs {
-		if isReadonly {
-			q := uri.Query()
-			q.Set("readonly", "")
-			uri.RawQuery = q.Encode()
-		}
 		b, err := Connect(uri, &cdata)
 		if err != nil {
 			return nil, err
@@ -163,10 +170,61 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	mgr.boxes = boxes
 	return mgr, nil
 }
+func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
+	boxNames := set.NewCap(len(boxURIs), box.SchemeCompBox, box.SchemeConstBox)
+	for _, u := range boxURIs {
+		q := u.Query()
+		if name := q.Get(QueryName); name != "" {
+			if s := strings.Join(zerostrings.NormalizeWords(name), ""); s != "" {
+				if boxNames.Contains(s) {
+					return fmt.Errorf("name %q (%q) in URI %v already used", name, s, u)
+				}
+				boxNames.Add(s)
+			} else {
+				q.Del(QueryName)
+				u.RawQuery = q.Encode()
+			}
+		}
+		if isReadonly {
+			q.Set(QueryReadOnly, "")
+			u.RawQuery = q.Encode()
+		}
+	}
 
-func createIdxStore(_ config.Config) store.Store {
-	return mapstore.New()
+	// If every box URI has a name, we've finished
+	if len(boxURIs)+2 == boxNames.Length() {
+		return nil
+	}
+
+	for i, u := range boxURIs {
+		q := u.Query()
+		if name := q.Get(QueryName); name != "" {
+			continue
+		}
+		if scheme := u.Scheme; !boxNames.Contains(scheme) {
+			boxNames.Add(scheme)
+			q.Set(QueryName, scheme)
+			u.RawQuery = q.Encode()
+			continue
+		}
+		baseName := strconv.Itoa(i + 1)
+		for cnt := 0; ; cnt++ {
+			name := baseName
+			if cnt > 0 {
+				name = baseName + "b" + strconv.Itoa(cnt)
+			}
+			if !boxNames.Contains(name) {
+				boxNames.Add(name)
+				q.Set(QueryName, name)
+				u.RawQuery = q.Encode()
+				break
+			}
+		}
+	}
+	return nil
 }
+
+func createIdxStore(_ config.Config) store.Store { return mapstore.New() }
 
 // RegisterObserver registers an observer that will be notified
 // if a zettel was found to be changed.

@@ -37,6 +37,9 @@ The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
      the API. Previously, it was evaluated to a description list of the
      zettel's metadata. This is now done only in the WebUI.
      (breaking: api)
+  *  Add metadata key <code>box-name</code> that will replace
+     <code>box-number</code>.
+     (minor: api, box)
   *  Allow to retrieve zettel content via data encoding.
      (minor: api)
 

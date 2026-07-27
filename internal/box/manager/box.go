@@ -29,6 +29,9 @@ import (
 
 // Contains all box.Box related functions
 
+// Name returns the managers name.
+func (*Manager) Name() string { return "" }
+
 // Location returns some information where the box is located.
 func (mgr *Manager) Location() string {
 	if len(mgr.boxes) <= 2 {
@@ -91,7 +94,7 @@ func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (box.Zettel, erro
 		z, err := p.GetZettel(ctx, zid)
 		if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr {
 			if err == nil {
-				mgr.Enrich(ctx, z.Meta, i+1)
+				mgr.Enrich(ctx, z.Meta, i+1, p.Name())
 			}
 			return z, err
 		}
@@ -110,7 +113,7 @@ func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel,
 	var result []box.Zettel
 	for i, p := range mgr.boxes {
 		if z, err := p.GetZettel(ctx, zid); err == nil {
-			mgr.Enrich(ctx, z.Meta, i+1)
+			mgr.Enrich(ctx, z.Meta, i+1, p.Name())
 			result = append(result, z)
 		}
 	}
@@ -171,7 +174,7 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
 		return nil, err
 	}
-	mgr.Enrich(ctx, m, 0)
+	mgr.Enrich(ctx, m, 0, "")
 	return m, nil
 }
 

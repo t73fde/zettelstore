@@ -37,9 +37,10 @@ func init() {
 					"box", box.SchemeMemoryBox, "boxnum", cdata.Number),
 				u:         u,
 				cdata:     *cdata,
+				name:      u.Query().Get(manager.QueryName),
 				maxZettel: box.GetQueryInt(u, "max-zettel", 0, 127, 65535),
 				maxBytes:  box.GetQueryInt(u, "max-bytes", 0, 65535, (1024*1024*1024)-1),
-				readonly:  box.GetQueryBool(u, "readonly"),
+				readonly:  box.GetQueryBool(u, manager.QueryReadOnly),
 			}, nil
 		})
 }
@@ -48,6 +49,7 @@ type memBox struct {
 	logger    *slog.Logger
 	u         *url.URL
 	cdata     manager.ConnectData
+	name      string
 	maxZettel int
 	maxBytes  int
 	mx        sync.RWMutex // Protects the following fields
@@ -62,9 +64,8 @@ func (mb *memBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
 	}
 }
 
-func (mb *memBox) Location() string {
-	return mb.u.String()
-}
+func (mb *memBox) Name() string     { return mb.name }
+func (mb *memBox) Location() string { return mb.u.String() }
 
 func (mb *memBox) State() box.StartState {
 	mb.mx.RLock()
@@ -164,7 +165,7 @@ func (mb *memBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 	for zid, zettel := range mb.zettel {
 		if constraint(zid) {
 			m := zettel.Meta.Clone()
-			mb.cdata.Enricher.Enrich(ctx, m, mb.cdata.Number)
+			mb.cdata.Enricher.Enrich(ctx, m, mb.cdata.Number, mb.name)
 			handle(m)
 		}
 	}

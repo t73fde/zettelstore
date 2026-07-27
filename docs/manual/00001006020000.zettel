@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260630165649
+modified: 20260727190432
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -23,6 +23,8 @@ Most keys conform to a [[type|00001006030000]].
 ; [!box-number|''box-number'']
 : Is a computed value and contains the number of the box where the zettel was found.
   For all but the [[predefined zettel|00001005090000]], this number is equal to the number __X__ specified in startup configuration key [[''box-uri-__X__''|00001004010000#box-uri-x]].
+; [!box-name|''box-name'']
+: A word that names the [[box|00001004011200]] from which the zettel was retrieved.
 ; [!copyright|''copyright'']
 : Defines a copyright string that will be encoded.
   If not given, the value ''default-copyright'' from the  [[configuration zettel|00001004020000#default-copyright]] will be used.
