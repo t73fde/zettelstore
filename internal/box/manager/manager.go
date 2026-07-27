@@ -397,16 +397,17 @@ func (mgr *Manager) ReadStats(st *box.Stats) {
 	for i, p := range mgr.boxes {
 		p.ReadStats(&subStats[i])
 	}
+	st.NumManagedBoxes = len(mgr.boxes)
 
 	st.ReadOnly = true
+	if len(subStats) > 0 {
+		st.ReadOnly = subStats[0].ReadOnly
+	}
+
 	sumZettel := 0
 	for _, sst := range subStats {
-		if !sst.ReadOnly {
-			st.ReadOnly = false
-		}
 		sumZettel += sst.Zettel
 	}
-	st.NumManagedBoxes = len(mgr.boxes)
 	st.ZettelTotal = sumZettel
 
 	var storeSt store.Stats
