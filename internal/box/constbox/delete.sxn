@@ -17,7 +17,7 @@
   ,@(if shadowed-box
     `((div ((class "zs-info"))
       (h2 "Information")
-      (p "If you delete this zettel, the previously shadowed zettel from overlayed box " ,shadowed-box " becomes available.")
+      (p "If you delete this zettel, the previously shadowed zettel from overlayed box \"" ,shadowed-box "\" becomes available.")
     ))
   )
   ,@(if incoming

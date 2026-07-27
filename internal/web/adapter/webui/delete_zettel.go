@@ -53,7 +53,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		env, rb := wui.createRenderEnvironment(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
 		if len(zs) > 1 {
-			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxNumber, "???"))))
+			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxName, "???"))))
 			rb.bindString("incoming", nil)
 		} else {
 			rb.bindString("shadowed-box", nil)
