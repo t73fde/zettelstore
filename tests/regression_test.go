@@ -64,7 +64,7 @@ func getFileBoxes(wd, kind string) (root string, boxes []box.ManagedBox) {
 			if err2 != nil {
 				panic(err2)
 			}
-			box, err2 := manager.Connect(u, &noAuth{}, &cdata)
+			box, err2 := manager.Connect(u, &cdata)
 			if err2 != nil {
 				panic(err2)
 			}
@@ -78,10 +78,6 @@ type noEnrich struct{}
 
 func (*noEnrich) Enrich(context.Context, *meta.Meta, int) {}
 func (*noEnrich) Remove(context.Context, *meta.Meta)      {}
-
-type noAuth struct{}
-
-func (*noAuth) IsReadonly() bool { return false }
 
 func trimLastEOL(s string) string {
 	if lastPos := len(s) - 1; lastPos >= 0 && s[lastPos] == '\n' {

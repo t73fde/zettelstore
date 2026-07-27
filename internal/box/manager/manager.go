@@ -44,22 +44,7 @@ type ConnectData struct {
 }
 
 // Connect returns a handle to the specified box.
-func Connect(u *url.URL, authManager auth.BaseManager, cdata *ConnectData) (box.ManagedBox, error) {
-	if authManager.IsReadonly() {
-		rawURL := u.String()
-		// TODO: the following is wrong under some circumstances:
-		// 1. fragment is set
-		if q := u.Query(); len(q) == 0 {
-			rawURL += "?readonly"
-		} else if _, ok := q["readonly"]; !ok {
-			rawURL += "&readonly"
-		}
-		var err error
-		if u, err = url.Parse(rawURL); err != nil {
-			return nil, err
-		}
-	}
-
+func Connect(u *url.URL, cdata *ConnectData) (box.ManagedBox, error) {
 	if create, ok := registry[u.Scheme]; ok {
 		return create(u, cdata)
 	}
@@ -148,13 +133,19 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 
 	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)
+	isReadonly := authManager.IsReadonly()
 	for _, uri := range boxURIs {
-		p, err := Connect(uri, authManager, &cdata)
+		if isReadonly {
+			q := uri.Query()
+			q.Set("readonly", "")
+			uri.RawQuery = q.Encode()
+		}
+		b, err := Connect(uri, &cdata)
 		if err != nil {
 			return nil, err
 		}
-		if p != nil {
-			boxes = append(boxes, p)
+		if b != nil {
+			boxes = append(boxes, b)
 			cdata.Number++
 		}
 	}
