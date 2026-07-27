@@ -39,6 +39,7 @@ func init() {
 				cdata:     *cdata,
 				maxZettel: box.GetQueryInt(u, "max-zettel", 0, 127, 65535),
 				maxBytes:  box.GetQueryInt(u, "max-bytes", 0, 65535, (1024*1024*1024)-1),
+				readonly:  box.GetQueryBool(u, "readonly"),
 			}, nil
 		})
 }
@@ -52,6 +53,7 @@ type memBox struct {
 	mx        sync.RWMutex // Protects the following fields
 	zettel    map[id.Zid]box.Zettel
 	curBytes  int
+	readonly  bool
 }
 
 func (mb *memBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
@@ -91,10 +93,13 @@ func (mb *memBox) Stop(context.Context) {
 func (mb *memBox) CanCreateZettel(context.Context) bool {
 	mb.mx.RLock()
 	defer mb.mx.RUnlock()
-	return len(mb.zettel) < mb.maxZettel
+	return len(mb.zettel) < mb.maxZettel && !mb.readonly
 }
 
 func (mb *memBox) CreateZettel(_ context.Context, zettel box.Zettel) (id.Zid, error) {
+	if mb.readonly {
+		return id.Invalid, box.ErrReadOnly
+	}
 	mb.mx.Lock()
 	newBytes := mb.curBytes + zettel.ByteSize()
 	if mb.maxZettel <= len(mb.zettel) || mb.maxBytes < newBytes {
@@ -183,10 +188,13 @@ func (mb *memBox) CanUpdateZettel(_ context.Context, zettel box.Zettel) bool {
 			return false
 		}
 	}
-	return newBytes <= mb.maxBytes
+	return newBytes <= mb.maxBytes && !mb.readonly
 }
 
 func (mb *memBox) UpdateZettel(_ context.Context, zettel box.Zettel) error {
+	if mb.readonly {
+		return box.ErrReadOnly
+	}
 	m := zettel.Meta.Clone()
 	if !m.Zid.IsValid() {
 		return box.ErrInvalidZid{Zid: m.Zid.String()}
@@ -221,10 +229,13 @@ func (mb *memBox) CanDeleteZettel(_ context.Context, zid id.Zid) bool {
 	mb.mx.RLock()
 	_, ok := mb.zettel[zid]
 	mb.mx.RUnlock()
-	return ok
+	return ok && !mb.readonly
 }
 
 func (mb *memBox) DeleteZettel(_ context.Context, zid id.Zid) error {
+	if mb.readonly {
+		return box.ErrReadOnly
+	}
 	mb.mx.Lock()
 	oldZettel, found := mb.zettel[zid]
 	if !found {
@@ -240,7 +251,7 @@ func (mb *memBox) DeleteZettel(_ context.Context, zid id.Zid) error {
 }
 
 func (mb *memBox) ReadStats(st *box.ManagedBoxStats) {
-	st.ReadOnly = false
+	st.ReadOnly = mb.readonly
 	mb.mx.RLock()
 	st.Zettel = len(mb.zettel)
 	mb.mx.RUnlock()
