@@ -147,8 +147,8 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	}
 	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)
-	for _, uri := range boxURIs {
-		b, err := Connect(uri, &cdata)
+	for _, u := range boxURIs {
+		b, err := Connect(u, &cdata)
 		if err != nil {
 			return nil, err
 		}

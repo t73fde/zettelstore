@@ -35,9 +35,9 @@ func init() {
 			return &memBox{
 				logger: kernel.Main.GetLogger(kernel.BoxService).With(
 					"box", box.SchemeMemoryBox, "boxnum", cdata.Number),
-				u:         u,
 				cdata:     *cdata,
 				name:      u.Query().Get(manager.QueryName),
+				location:  u.String(),
 				maxZettel: box.GetQueryInt(u, "max-zettel", 0, 127, 65535),
 				maxBytes:  box.GetQueryInt(u, "max-bytes", 0, 65535, (1024*1024*1024)-1),
 				readonly:  box.GetQueryBool(u, manager.QueryReadOnly),
@@ -47,9 +47,9 @@ func init() {
 
 type memBox struct {
 	logger    *slog.Logger
-	u         *url.URL
 	cdata     manager.ConnectData
 	name      string
+	location  string
 	maxZettel int
 	maxBytes  int
 	mx        sync.RWMutex // Protects the following fields
@@ -65,7 +65,7 @@ func (mb *memBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
 }
 
 func (mb *memBox) Name() string     { return mb.name }
-func (mb *memBox) Location() string { return mb.u.String() }
+func (mb *memBox) Location() string { return mb.location }
 
 func (mb *memBox) State() box.StartState {
 	mb.mx.RLock()
