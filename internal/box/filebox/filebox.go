@@ -41,6 +41,7 @@ func init() {
 				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "zip", "boxnum", cdata.Number),
 				number:   cdata.Number,
 				name:     u.Query().Get(manager.QueryName),
+				location: u.String(),
 				path:     path,
 				enricher: cdata.Enricher,
 				notify:   cdata.Notify,

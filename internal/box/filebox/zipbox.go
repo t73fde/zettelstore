@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"strings"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -35,19 +34,15 @@ type zipBox struct {
 	logger   *slog.Logger
 	number   int
 	name     string
+	location string
 	path     string
 	enricher box.Enricher
 	notify   box.UpdateNotifier
 	dirSrv   *notify.DirService
 }
 
-func (zb *zipBox) Name() string { return zb.name }
-func (zb *zipBox) Location() string {
-	if strings.HasPrefix(zb.path, "/") {
-		return "file://" + zb.path
-	}
-	return "file:" + zb.path
-}
+func (zb *zipBox) Name() string     { return zb.name }
+func (zb *zipBox) Location() string { return zb.location }
 
 func (zb *zipBox) State() box.StartState {
 	if ds := zb.dirSrv; ds != nil {

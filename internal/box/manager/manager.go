@@ -20,6 +20,7 @@ import (
 	"io"
 	"log/slog"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -172,11 +173,15 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 }
 func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 	boxNames := set.NewCap(len(boxURIs), box.SchemeCompBox, box.SchemeConstBox)
-	for _, u := range boxURIs {
+	hasName := make([]bool, len(boxURIs))
+	for i, u := range boxURIs {
 		q := u.Query()
 		if name := q.Get(QueryName); name != "" {
 			if s := strings.Join(zerostrings.NormalizeWords(name), ""); s != "" {
 				if boxNames.Contains(s) {
+					if name == s {
+						return fmt.Errorf("name %q in URI %v already used", s, u)
+					}
 					return fmt.Errorf("name %q (%q) in URI %v already used", name, s, u)
 				}
 				boxNames.Add(s)
@@ -184,6 +189,7 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 				q.Del(QueryName)
 				u.RawQuery = q.Encode()
 			}
+			hasName[i] = true
 		}
 		if isReadonly {
 			q.Set(QueryReadOnly, "")
@@ -191,20 +197,26 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 		}
 	}
 
-	// If every box URI has a name, we've finished
-	if len(boxURIs)+2 == boxNames.Length() {
-		return nil
+	newName := make([]string, len(boxURIs))
+	addedName := func(name string, pos int) bool {
+		if !boxNames.Contains(name) {
+			boxNames.Add(name)
+			newName[pos] = name
+			return true
+		}
+		return false
 	}
-
 	for i, u := range boxURIs {
-		q := u.Query()
-		if name := q.Get(QueryName); name != "" {
+		if hasName[i] {
 			continue
 		}
-		if scheme := u.Scheme; !boxNames.Contains(scheme) {
-			boxNames.Add(scheme)
-			q.Set(QueryName, scheme)
-			u.RawQuery = q.Encode()
+		if name := nameFromPath(u.Path); name != "" && addedName(name, i) {
+			continue
+		}
+		if name := nameFromPath(u.Opaque); name != "" && addedName(name, i) {
+			continue
+		}
+		if scheme := u.Scheme; addedName(scheme, i) {
 			continue
 		}
 		baseName := strconv.Itoa(i + 1)
@@ -213,15 +225,30 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 			if cnt > 0 {
 				name = baseName + "b" + strconv.Itoa(cnt)
 			}
-			if !boxNames.Contains(name) {
-				boxNames.Add(name)
-				q.Set(QueryName, name)
-				u.RawQuery = q.Encode()
+			if addedName(name, i) {
 				break
 			}
 		}
 	}
+	for i, u := range boxURIs {
+		if hasName[i] || newName[i] == "" {
+			continue
+		}
+		q := u.Query()
+		q.Set(QueryName, newName[i])
+		u.RawQuery = q.Encode()
+	}
 	return nil
+}
+func nameFromPath(path string) string {
+	name := filepath.Base(path)
+	if name[0] == '.' || name[0] == '/' {
+		return ""
+	}
+	if ext := filepath.Ext(name); ext != "" {
+		name = name[0 : len(name)-len(ext)]
+	}
+	return strings.Join(zerostrings.NormalizeWords(name), "")
 }
 
 func createIdxStore(_ config.Config) store.Store { return mapstore.New() }
