@@ -93,12 +93,12 @@ func (ps *boxService) Start(kern *Kernel) error {
 	defer ps.mxService.Unlock()
 	mgr, err := ps.createManager(boxURIs, kern.auth.manager, &kern.cfg)
 	if err != nil {
-		ps.logger.Error("Unable to create manager", "err", err)
+		ps.logger.Error("Unable to create manager")
 		return err
 	}
 	ps.logger.Info("Start Manager", "location", mgr.Location())
 	if err = mgr.Start(context.Background()); err != nil {
-		ps.logger.Error("Unable to start manager", "err", err)
+		ps.logger.Error("Unable to start manager")
 		return err
 	}
 	kern.cfg.setBox(mgr)

@@ -554,8 +554,12 @@ func (kern *Kernel) StartService(srvnum Service) error {
 	return kern.doStartService(srvnum)
 }
 func (kern *Kernel) doStartService(srvnum Service) error {
-	for _, srv := range kern.sortDependency(srvnum, kern.depStart, true) {
+	services := kern.sortDependency(srvnum, kern.depStart, true)
+	for i, srv := range services {
 		if err := srv.Start(kern); err != nil {
+			for j := i - 1; j > 0; j-- {
+				services[j].Stop(kern)
+			}
 			return err
 		}
 		srv.SwitchNextToCur()

@@ -43,12 +43,13 @@ func flgRun(fs *flag.FlagSet) {
 }
 
 func runFunc(*flag.FlagSet) (int, error) {
-	var exitCode int
-	err := kernel.Main.StartService(kernel.WebService)
+	exitCode, k := 0, kernel.Main
+	err := k.StartService(kernel.WebService)
 	if err != nil {
+		k.Shutdown(false)
 		exitCode = 1
 	}
-	kernel.Main.WaitForShutdown()
+	k.WaitForShutdown()
 	return exitCode, err
 }
 

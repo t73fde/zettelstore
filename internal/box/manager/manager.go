@@ -180,9 +180,9 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 			if s := strings.Join(zerostrings.NormalizeWords(name), ""); s != "" {
 				if boxNames.Contains(s) {
 					if name == s {
-						return fmt.Errorf("name %q in URI %v already used", s, u)
+						return fmt.Errorf("name %q in box-uri-%d %v already used", s, i+1, u)
 					}
-					return fmt.Errorf("name %q (%q) in URI %v already used", name, s, u)
+					return fmt.Errorf("name %q (%q) in box-uri-%d %v already used", name, s, i+1, u)
 				}
 				boxNames.Add(s)
 				hasName[i] = true
