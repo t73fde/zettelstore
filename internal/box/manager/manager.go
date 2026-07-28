@@ -185,11 +185,11 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 					return fmt.Errorf("name %q (%q) in URI %v already used", name, s, u)
 				}
 				boxNames.Add(s)
+				hasName[i] = true
 			} else {
 				q.Del(QueryName)
 				u.RawQuery = q.Encode()
 			}
-			hasName[i] = true
 		}
 		if isReadonly {
 			q.Set(QueryReadOnly, "")
