@@ -27,10 +27,11 @@ func TestSetupBoxURIs(t *testing.T) {
 		expErr   bool
 		readonly bool
 	}{
-		// {"nothing", nil, nil, false, false},
-		// {"nothing/ro", nil, nil, false, true},
+		{"nothing", nil, nil, false, false},
+		{"nothing/ro", nil, nil, false, true},
 
-		// {"only comp", []string{"comp://"}, []string{"comp:?name=1"}, false, false},
+		{"only comp", []string{"comp://"}, []string{"comp:?name=1"}, false, false},
+		{"name-comp", []string{"mem:?name=comp", "mem:?name=mem"}, nil, true, false},
 
 		{"single-mem", []string{"mem:"}, []string{"mem:?name=mem"}, false, false},
 		{"single-mem/ro", []string{"mem:"}, []string{"mem:?name=mem&readonly="}, false, true},
