@@ -62,6 +62,7 @@ func (klh *kernelLogHandler) Handle(_ context.Context, rec slog.Record) error {
 
 func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	h := newKernelLogHandler(klh.klw, klh.level)
+	first := true
 	for _, attr := range attrs {
 		if attr.Equal(slog.Attr{}) {
 			continue
@@ -74,7 +75,12 @@ func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 			h.system = system
 			continue
 		}
-		h.attrs += attr.String()
+		if first {
+			first = false
+			h.attrs += attr.String()
+		} else {
+			h.attrs += " " + attr.String()
+		}
 	}
 	return h
 }
