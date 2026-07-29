@@ -59,13 +59,8 @@ func Connect(u *url.URL, cdata *ConnectData) (box.ManagedBox, error) {
 	if create, ok := registry[u.Scheme]; ok {
 		return create(u, cdata)
 	}
-	return nil, &ErrInvalidScheme{u.Scheme}
+	return nil, fmt.Errorf("invalid scheme: %q", u.Scheme)
 }
-
-// ErrInvalidScheme is returned if there is no box with the given scheme.
-type ErrInvalidScheme struct{ Scheme string }
-
-func (err *ErrInvalidScheme) Error() string { return "Invalid scheme: " + err.Scheme }
 
 type createFunc func(*url.URL, *ConnectData) (box.ManagedBox, error)
 
