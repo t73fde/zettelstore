@@ -24,7 +24,7 @@ func TestCapitalizeMetaKey(t *testing.T) {
 		{"alt-url", "Alt URL"},
 		{"author", "Author"},
 		{"back", "Back"},
-		{"box-number", "Box Number"},
+		{"box-name", "Box Name"},
 		{"cite-key", "Cite Key"},
 		{"fedi-url", "Fedi URL"},
 		{"github-url", "GitHub URL"},
