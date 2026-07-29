@@ -52,12 +52,7 @@ func getFileBoxes(wd, kind string) (root string, boxes []box.ManagedBox) {
 		panic(err)
 	}
 
-	cdata := manager.ConnectData{
-		Number:   0,
-		Config:   testConfig,
-		Enricher: &noEnrich{},
-		Notify:   nil,
-	}
+	cdata := manager.ConnectData{Config: testConfig, Enricher: &noEnrich{}, Notify: nil}
 	for _, entry := range entries {
 		if entry.IsDir() {
 			u, err2 := url.Parse("dir://" + filepath.Join(root, entry.Name()) + "?type=" + kernel.BoxDirTypeSimple)

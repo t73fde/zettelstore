@@ -42,7 +42,6 @@ import (
 
 // ConnectData contains all administration related values.
 type ConnectData struct {
-	Number   int // number of the box, starting with 1.
 	Config   config.Config
 	Enricher box.Enricher
 	Notify   box.UpdateNotifier
@@ -140,7 +139,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	if err := setupBoxURIs(boxURIs, authManager.IsReadonly()); err != nil {
 		return nil, err
 	}
-	cdata := ConnectData{Number: 1, Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged}
+	cdata := ConnectData{Config: rtConfig, Enricher: mgr, Notify: mgr.notifyChanged}
 	boxes := make([]box.ManagedBox, 0, len(boxURIs)+2)
 	for _, u := range boxURIs {
 		b, err := Connect(u, &cdata)
@@ -149,19 +148,16 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 		}
 		if b != nil {
 			boxes = append(boxes, b)
-			cdata.Number++
 		}
 	}
 	constbox, err := registry[box.SchemeConstBox](nil, &cdata)
 	if err != nil {
 		return nil, err
 	}
-	cdata.Number++
 	compbox, err := registry[box.SchemeCompBox](nil, &cdata)
 	if err != nil {
 		return nil, err
 	}
-	cdata.Number++
 	boxes = append(boxes, constbox, compbox)
 	mgr.boxes = boxes
 	return mgr, nil
