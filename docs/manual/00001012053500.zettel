@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210726174524
-modified: 20260609123237
+modified: 20260729141641
 
 The [[endpoint|00001012920000]] to work with evaluated metadata and content of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]].
 
@@ -30,14 +30,14 @@ In addition, you may provide a query parameter ''part=PART'' to select the relev
 <meta content="zmk" name="syntax">
 <meta content="00001006000000 00001012000000 00001012053600" name="back">
 <meta content="00001006000000 00001012000000 00001012053600 00001012920500" name="backward">
-<meta content="1" name="box-number">
+<meta content="manual" name="box-name">
 <meta content="(c) 2020-present by Detlef Stern &lt;ds@zettelstore.de&gt;" name="copyright">
 <meta content="20210726174524" name="created">
 <meta content="00001006050000 00001010040100 00001012050200 00001012920000 00001012920500 00001012920510 00001012920516 00001012920519 00001012920800" name="forward">
 <meta content="en" name="lang">
 <meta content="EUPL-1.2-or-later" name="license">
-<meta content="20260605140944" name="modified">
-<meta content="20260605140944" name="published">
+<meta content="20260609123237" name="modified">
+<meta content="20260609123237" name="published">
 <meta content="public" name="visibility">
 <title>API: Retrieve evaluated metadata and content of an existing zettel in various encodings</title>
 </head>

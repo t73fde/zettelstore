@@ -4,22 +4,23 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220912111111
-modified: 20260709184840
+modified: 20260729135524
 precursor: 00001012051200
 
 The [[endpoint|00001012920000]] ''/z'' also allows you to filter the list of all zettel[^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header] and optionally specify some actions.
 
-A [[query|00001007700000]] consists of an optional [[search expression|00001007700000#search-expression]] and an optional [[list of actions|00001007700000#action-list]] (described below).
-If no search expression is provided, all zettel are selected.
-Similarly, if no valid action is specified, or the action list is empty, the list of all selected zettel metadata is returned.
+A [[query|00001007700000]] consists of an optional [[search expression|00001007700000#search-expression]] and an optional [[list of actions|00001007700000#action-list]] ([[described below|#actions]]).
+If you provide no search expression, all zettel are selected.
+Similarly, if you specify no valid action, or the action list is empty, the list of all selected zettel metadata is returned.
 
 Search expression and action list are separated by a vertical bar character (""''|''"", U+007C), and must be given with the ''q'' query parameter.
 
-The query parameter ""''q''"" allows you to specify [[query expressions|00001007700000]] for a full-text search of all zettel content and/or restricting the search according to specific metadata.
+The query parameter ""''q''"" allows you to specify a [[query expression|00001007700000]] for a full-text search of all zettel content and / or restricting the search according to specific metadata.
 
 The query parameter can be provided multiple times.
+Query expressions are combined with a logical **AND**.
 
-It loosely resembles the search form of the [[web user interface|00001014000000]] or those of [[Zettelmarkup's Query Transclusion|00001007031140]].
+This loosely resembles the search form of the [[web user interface|00001014000000]] or those of [[Zettelmarkup's Query Transclusion|00001007031140]].
 
 For example, if you want to retrieve all zettel that contain the string ""API"" in their title, your request will be:
 ```sh
@@ -35,7 +36,7 @@ If you want to retrieve a data document, as a [[symbolic expression|000010129305
 
 ```sh
 # curl 'http://127.0.0.1:23123/z?q=title%3AAPI+ORDER+REVERSE+id+OFFSET+1&enc=data'
-(meta-list (query "title:API ORDER REVERSE id OFFSET 1") (human "title HAS API ORDER REVERSE id OFFSET 1") (zettel "00001012921200" (meta (back "00001012051200 00001012051400 00001012053200 00001012053300 00001012053400 00001012054200 00001012920528") (backward "00001012051200 00001012051400 00001012053200 00001012053300 00001012053400 00001012054200 00001012920528") (box-number "1") (created "20220201173115") (forward "00001003000000 00001006020400 00001010040100 00001010040200 00001010070200 00001010070300") (modified "20260605150128") (published "20260605150128") (role "manual") (syntax "zmk") (tags "#api #manual #reference #zettelstore") (title "API: Encoding of Zettel Access Rights")) (rights 46)) (zettel "00001012921000" (meta (back "00001012050600") (backward "00001012050200 00001012050400 00001012050600") (box-number "1") (created "20210126175322") (forward "00001012050200 00001012050400 00001012930000 00001012930500") (modified "20260605144534") (published "20260605144534") (role "manual") (syntax "zmk") (tags "#api #manual #reference #zettelstore") (title "API: Structure of an access token") ...
+(meta-list (query "title:API ORDER REVERSE id OFFSET 1") (human "title HAS API ORDER REVERSE id OFFSET 1") (zettel "00001012921200" (meta (back "00001012051200 00001012051400 00001012053200 00001012053300 00001012053400 00001012054200 00001012920528") (backward "00001012051200 00001012051400 00001012053200 00001012053300 00001012053400 00001012054200 00001012920528") (box-name "manual") (created "20220201173115") (forward "00001003000000 00001006020400 00001010040100 00001010040200 00001010070200 00001010070300") (modified "20260714200809") (published "20260714200809") (role "manual") (syntax "zmk") (tags "#api #manual #reference #zettelstore") (title "API: Encoding of Zettel Access Rights")) (rights create read update delete)) (zettel "00001012921000" (meta (back "00001012050600") (backward "00001012050200 00001012050400 00001012050600") (box-name "manual") (created "20210126175322") (forward "00001012050200 00001012050400 00001012930000 00001012930500") (modified "20260605144534") (published "20260605144534") (role "manual") (syntax "zmk") (tags "#api #manual #reference #zettelstore") (title "API: Structure of an access token") ...
 ```
 
 The data object contains a key ''"meta-list"'' to signal that it contains a list of metadata values (and some more).

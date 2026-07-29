@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210726174524
-modified: 20241216104120
+modified: 20260729141452
 
 The [[endpoint|00001012920000]] to work with metadata of a specific zettel is ''/z/{ID}'', where ''{ID}'' is a placeholder for the [[zettel identifier|00001006050000]][^If [[authentication is enabled|00001010040100]], you must include a valid [[access token|00001012050200]] in the ''Authorization'' header].
 
@@ -24,23 +24,25 @@ Alternatively, you may retrieve the zettel as a parseable object / a [[symbolic 
 
 ```sh
 # curl 'http://127.0.0.1:23123/z/00001012053400?part=meta&enc=data'
-(list (meta (title "API: Retrieve metadata of an existing zettel") (role "manual") (tags "#api #manual #zettelstore") (syntax "zmk") (back "00001012000000 00001012053300") (backward "00001012000000 00001012053300") (box-number "1") (created "20210726174524") (forward "00001006020000 00001006050000 00001010040100 00001012050200 00001012920000 00001012921200") (modified "20230703174515") (published "20230703174515")) (rights 62))
+(list (meta (back "00001012000000 00001012053300") (backward "00001012000000 00001012053300") (box-name "manual") (created "20210726174524") (forward "00001006050000 00001010040100 00001012050200 00001012920000 00001012921200 00001012930500") (modified "20241216104120") (published "20241216104120") (role "manual") (syntax "zmk") (tags "#api #manual #zettelstore") (title "API: Retrieve metadata of an existing zettel")) (rights create read update delete))
 ```
 
 Pretty-printed, this results in:
 ```
-(list (meta (title "API: Retrieve metadata of an existing zettel")
-            (role "manual")
-            (tags "#api #manual #zettelstore")
-            (syntax "zmk")
-            (back "00001012000000 00001012053300")
-            (backward "00001012000000 00001012053300")
-            (box-number "1")
-            (created "20210726174524")
-            (forward "00001006020000 00001006050000 00001010040100 00001012050200 00001012920000 00001012921200")
-            (modified "20230703174515")
-            (published "20230703174515"))
-      (rights 62))
+(list
+    (meta
+        (back "00001012000000 00001012053300")
+        (backward "00001012000000 00001012053300")
+        (box-name "manual")
+        (created "20210726174524")
+        (forward "00001006050000 00001010040100 00001012050200 00001012920000 00001012921200 00001012930500")
+        (modified "20241216104120")
+        (published "20241216104120")
+        (role "manual")
+        (syntax "zmk")
+        (tags "#api #manual #zettelstore")
+        (title "API: Retrieve metadata of an existing zettel"))
+    (rights create read update delete))
 ```
 
 * The result is a list, starting with the symbol ''list''.
