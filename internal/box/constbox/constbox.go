@@ -35,8 +35,7 @@ func init() {
 		box.SchemeConstBox,
 		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
 			return &constBox{
-				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "const", "boxnum", cdata.Number),
-				number:   cdata.Number,
+				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", box.SchemeConstBox),
 				zettel:   constZettelMap,
 				enricher: cdata.Enricher,
 			}, nil
@@ -52,7 +51,6 @@ type constZettel struct {
 
 type constBox struct {
 	logger   *slog.Logger
-	number   int
 	zettel   map[id.Zid]constZettel
 	enricher box.Enricher
 }
@@ -90,7 +88,7 @@ func (cb *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrai
 	for zid, zettel := range cb.zettel {
 		if constraint(zid) {
 			m := meta.NewWithData(zid, zettel.header)
-			cb.enricher.Enrich(ctx, m, cb.number, box.SchemeConstBox)
+			cb.enricher.Enrich(ctx, m, box.SchemeConstBox)
 			handle(m)
 		}
 	}

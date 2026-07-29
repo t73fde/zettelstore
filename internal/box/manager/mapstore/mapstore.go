@@ -347,7 +347,7 @@ func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 		key = ms.internString(key)
 		if isInternableValue(key) {
 			copyM.Set(key, meta.Value(ms.internString(string(val))))
-		} else if key == meta.KeyBoxName || key == meta.KeyBoxNumber || !meta.IsComputed(key) {
+		} else if key == meta.KeyBoxName || !meta.IsComputed(key) {
 			copyM.Set(key, val)
 		}
 	}

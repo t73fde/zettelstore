@@ -15,7 +15,6 @@ package manager
 
 import (
 	"context"
-	"strconv"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -24,7 +23,7 @@ import (
 )
 
 // Enrich computes additional properties and updates the given metadata.
-func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int, boxName string) {
+func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 	// Calculate computed, but stored values.
 	if _, hasCreated := m.Get(meta.KeyCreated); !hasCreated {
 		m.Set(meta.KeyCreated, computeCreated(m.Zid))
@@ -32,9 +31,6 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxNumber int, box
 
 	if box.DoEnrich(ctx) {
 		computePublished(m)
-		if boxNumber > 0 {
-			m.Set(meta.KeyBoxNumber, meta.Value(strconv.Itoa(boxNumber)))
-		}
 		if boxName != "" {
 			m.Set(meta.KeyBoxName, meta.Value(boxName))
 		}

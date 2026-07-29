@@ -33,13 +33,12 @@ func init() {
 	manager.Register(
 		box.SchemeCompBox,
 		func(_ *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
-			return getCompBox(cdata.Number, cdata.Enricher), nil
+			return getCompBox(cdata.Enricher), nil
 		})
 }
 
 type compBox struct {
 	logger   *slog.Logger
-	number   int
 	enricher box.Enricher
 }
 
@@ -68,10 +67,9 @@ var myZettel = map[id.Zid]struct {
 }
 
 // Get returns the one program box.
-func getCompBox(boxNumber int, mf box.Enricher) *compBox {
+func getCompBox(mf box.Enricher) *compBox {
 	return &compBox{
-		logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "comp", "boxnum", boxNumber),
-		number:   boxNumber,
+		logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", box.SchemeCompBox),
 		enricher: mf,
 	}
 }
@@ -131,7 +129,7 @@ func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrain
 		if genMeta := gen.meta; genMeta != nil {
 			if m := genMeta(zid); m != nil {
 				updateMeta(m)
-				cb.enricher.Enrich(ctx, m, cb.number, box.SchemeCompBox)
+				cb.enricher.Enrich(ctx, m, box.SchemeCompBox)
 				handle(m)
 			}
 		}

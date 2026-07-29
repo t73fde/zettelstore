@@ -32,7 +32,6 @@ import (
 
 type zipBox struct {
 	logger   *slog.Logger
-	number   int
 	name     string
 	location string
 	path     string
@@ -165,7 +164,7 @@ func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 		if err2 != nil {
 			continue
 		}
-		zb.enricher.Enrich(ctx, m, zb.number, zb.name)
+		zb.enricher.Enrich(ctx, m, zb.name)
 		handle(m)
 	}
 	return reader.Close()

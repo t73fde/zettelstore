@@ -37,10 +37,10 @@ func init() {
 			if ext != ".zip" {
 				return nil, errors.New("unknown extension '" + ext + "' in box URL: " + u.String())
 			}
+			name := u.Query().Get(manager.QueryName)
 			return &zipBox{
-				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "zip", "boxnum", cdata.Number),
-				number:   cdata.Number,
-				name:     u.Query().Get(manager.QueryName),
+				logger:   kernel.Main.GetLogger(kernel.BoxService).With("box", "zip", "name", name),
+				name:     name,
 				location: u.String(),
 				path:     path,
 				enricher: cdata.Enricher,

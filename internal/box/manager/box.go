@@ -90,11 +90,11 @@ func (mgr *Manager) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, erro
 	return mgr.getZettel(ctx, zid)
 }
 func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
-	for i, p := range mgr.boxes {
+	for _, p := range mgr.boxes {
 		z, err := p.GetZettel(ctx, zid)
 		if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr {
 			if err == nil {
-				mgr.Enrich(ctx, z.Meta, i+1, p.Name())
+				mgr.Enrich(ctx, z.Meta, p.Name())
 			}
 			return z, err
 		}
@@ -111,9 +111,9 @@ func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel,
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	var result []box.Zettel
-	for i, p := range mgr.boxes {
+	for _, p := range mgr.boxes {
 		if z, err := p.GetZettel(ctx, zid); err == nil {
-			mgr.Enrich(ctx, z.Meta, i+1, p.Name())
+			mgr.Enrich(ctx, z.Meta, p.Name())
 			result = append(result, z)
 		}
 	}
@@ -174,7 +174,7 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
 		return nil, err
 	}
-	mgr.Enrich(ctx, m, 0, "")
+	mgr.Enrich(ctx, m, "")
 	return m, nil
 }
 

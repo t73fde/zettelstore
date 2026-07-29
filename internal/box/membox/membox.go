@@ -32,11 +32,12 @@ func init() {
 	manager.Register(
 		box.SchemeMemoryBox,
 		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
+			name := u.Query().Get(manager.QueryName)
 			return &memBox{
 				logger: kernel.Main.GetLogger(kernel.BoxService).With(
-					"box", box.SchemeMemoryBox, "boxnum", cdata.Number),
+					"box", box.SchemeMemoryBox, "name", name),
 				cdata:     *cdata,
-				name:      u.Query().Get(manager.QueryName),
+				name:      name,
 				location:  u.String(),
 				maxZettel: box.GetQueryInt(u, "max-zettel", 0, 127, 65535),
 				maxBytes:  box.GetQueryInt(u, "max-bytes", 0, 65535, (1024*1024*1024)-1),
@@ -165,7 +166,7 @@ func (mb *memBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 	for zid, zettel := range mb.zettel {
 		if constraint(zid) {
 			m := zettel.Meta.Clone()
-			mb.cdata.Enricher.Enrich(ctx, m, mb.cdata.Number, mb.name)
+			mb.cdata.Enricher.Enrich(ctx, m, mb.name)
 			handle(m)
 		}
 	}

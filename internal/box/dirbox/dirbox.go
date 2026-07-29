@@ -38,20 +38,20 @@ func init() {
 	manager.Register(
 		box.SchemeDirBox,
 		func(u *url.URL, cdata *manager.ConnectData) (box.ManagedBox, error) {
+			q := u.Query()
+			name := q.Get(manager.QueryName)
 			var logger *slog.Logger
 			if krnl := kernel.Main; krnl != nil {
 				logger = krnl.GetLogger(kernel.BoxService).With(
-					"box", box.SchemeDirBox, "boxnum", cdata.Number)
+					"box", box.SchemeDirBox, "name", name)
 			}
 			path := getDirPath(u)
 			if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 				return nil, err
 			}
-			q := u.Query()
 			dp := dirBox{
 				logger:     logger,
-				number:     cdata.Number,
-				name:       q.Get(manager.QueryName),
+				name:       name,
 				location:   u.String(),
 				readonly:   box.GetQueryBool(u, manager.QueryReadOnly),
 				cdata:      *cdata,
@@ -122,7 +122,6 @@ func getDirPath(u *url.URL) string {
 // dirBox uses a directory to store zettel as files.
 type dirBox struct {
 	logger     *slog.Logger
-	number     int
 	name       string
 	location   string
 	readonly   bool
@@ -293,7 +292,7 @@ func (dp *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint
 			logging.LogTrace(dp.logger, "ApplyMeta/getMeta", "err", err)
 			return err
 		}
-		dp.cdata.Enricher.Enrich(ctx, m, dp.number, dp.name)
+		dp.cdata.Enricher.Enrich(ctx, m, dp.name)
 		handle(m)
 	}
 	return nil

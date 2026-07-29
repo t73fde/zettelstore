@@ -76,8 +76,8 @@ func getFileBoxes(wd, kind string) (root string, boxes []box.ManagedBox) {
 
 type noEnrich struct{}
 
-func (*noEnrich) Enrich(context.Context, *meta.Meta, int, string) {}
-func (*noEnrich) Remove(context.Context, *meta.Meta)              {}
+func (*noEnrich) Enrich(context.Context, *meta.Meta, string) {}
+func (*noEnrich) Remove(context.Context, *meta.Meta)         {}
 
 func trimLastEOL(s string) string {
 	if lastPos := len(s) - 1; lastPos >= 0 && s[lastPos] == '\n' {
