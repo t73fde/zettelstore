@@ -30,8 +30,8 @@ func (a *WebAPI) MakeGetDataHandler(ucVersion usecase.Version) http.Handler {
 			sx.Int64(version.Major),
 			sx.Int64(version.Minor),
 			sx.Int64(version.Patch),
-			sx.MakeString(version.Info),
-			sx.MakeString(version.Hash),
+			sx.MakeString(version.PreRelease),
+			sx.MakeString(version.Build),
 		))
 		if err != nil {
 			a.logger.Error("Write version info", "err", err)

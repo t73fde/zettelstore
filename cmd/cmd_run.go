@@ -18,6 +18,7 @@ import (
 	"flag"
 	"net/http"
 
+	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
@@ -80,7 +81,7 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	ucUpdate := usecase.NewUpdateZettel(ucLogger, protectedBoxManager)
 	ucRefresh := usecase.NewRefresh(ucLogger, protectedBoxManager)
 	ucReIndex := usecase.NewReIndex(ucLogger, protectedBoxManager)
-	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion))
+	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(semver.SemVer))
 
 	a := webapi.New(
 		webLogger.With("system", "WEBAPI"),
