@@ -488,7 +488,7 @@ func TestVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if ver.Major != 0 || ver.Minor != 0 || ver.Patch != 0 || ver.Info != "dev" || ver.Hash != "" {
+	if ver.Major != 0 || ver.Minor != 0 || ver.Patch != 0 || ver.PreRelease != "dev" || ver.Build != "" {
 		t.Error(ver)
 	}
 }
