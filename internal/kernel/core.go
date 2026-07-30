@@ -24,6 +24,7 @@ import (
 	"sync"
 	"time"
 
+	"t73f.de/r/zero/semver"
 	"t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 )
@@ -70,10 +71,10 @@ func (cs *coreService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger) 
 		CoreVersion: {
 			"Version",
 			cs.noFrozen(func(val string) (any, error) {
-				if val == "" {
-					return CoreDefaultVersion, nil
+				if version, ok := semver.Parse(val); ok {
+					return version, nil
 				}
-				return val, nil
+				return nil, fmt.Errorf("not a valid version: %q", val)
 			}),
 			false,
 		},

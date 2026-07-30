@@ -80,7 +80,7 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	ucUpdate := usecase.NewUpdateZettel(ucLogger, protectedBoxManager)
 	ucRefresh := usecase.NewRefresh(ucLogger, protectedBoxManager)
 	ucReIndex := usecase.NewReIndex(ucLogger, protectedBoxManager)
-	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(string))
+	ucVersion := usecase.NewVersion(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion))
 
 	a := webapi.New(
 		webLogger.With("system", "WEBAPI"),

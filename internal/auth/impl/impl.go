@@ -16,6 +16,7 @@ package impl
 
 import (
 	"errors"
+	"fmt"
 	"hash/fnv"
 	"io"
 	"time"
@@ -54,7 +55,6 @@ var configKeys = []string{
 	kernel.CoreHostname,
 	kernel.CoreGoOS,
 	kernel.CoreGoArch,
-	kernel.CoreVersion,
 }
 
 func calcSecret(extSecret string) []byte {
@@ -65,6 +65,7 @@ func calcSecret(extSecret string) []byte {
 	for _, key := range configKeys {
 		_, _ = io.WriteString(h, kernel.Main.GetConfig(kernel.CoreService, key).(string))
 	}
+	_, _ = io.WriteString(h, kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(fmt.Stringer).String())
 	return h.Sum(nil)
 }
 

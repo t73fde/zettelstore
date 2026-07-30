@@ -14,6 +14,7 @@
 package usecase
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 
@@ -26,8 +27,11 @@ type Version struct {
 }
 
 // NewVersion creates a new use case.
-func NewVersion(version string) Version {
-	return Version{calculateVersionResult(version)}
+func NewVersion(version any) Version {
+	if v, ok := version.(fmt.Stringer); ok {
+		return Version{calculateVersionResult(v.String())}
+	}
+	return Version{calculateVersionResult(kernel.CoreDefaultVersion)}
 }
 
 // VersionResult is the data structure returned by this usecase.
