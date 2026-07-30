@@ -4,25 +4,21 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220304164242
-modified: 20251215172906
+modified: 20260730145959
 
-The [[endpoint|00001012920000]] ''/x'' allows you to retrieve some (administrative) data.
+The [[endpoint|00001012920000]] ''/x'' allows you to retrieve administrative data.
 
-Currently, you can only request Zettelstore version data.
+Currently, the only available data is Zettelstore version information.
 
 ````
 # curl 'http://127.0.0.1:23123/x'
-(0 13 0 "dev" "f781dc384b-dirty")
+(3 0 0 "dev" "7efe008cc3")
 ````
 
-* Zettelstore conforms somehow to the Standard [[Semantic Versioning|https://semver.org/]].
-
-  The first three digits contain the major, minor, and patch version as described in this standard.
-* The first string contains additional information, e.g. ""dev"" for a development version, or ""preview"" for a preview version.
-* The second string contains data to identify the version from a developers perspective.
-
-If any of the three digits has the value -1, its semantic value is unknown.
-Similar, the two strings might be empty.
+ Zettelstore conforms to the [[Semantic Versioning|https://semver.org/]] standard.
+* The first three numbers represent the major, minor, and patch versions.
+* The first string contains optional pre-release information, for example ``"dev"`` for a development version or ``"preview"`` for a preview version.
+* The second string contains optional information that identifies the version from a developer's perspective.
 
 === HTTP Status codes
 ; ''200''
