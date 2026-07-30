@@ -16,12 +16,12 @@ package impl
 
 import (
 	"errors"
-	"fmt"
 	"hash/fnv"
 	"io"
 	"time"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sexp"
@@ -65,7 +65,7 @@ func calcSecret(extSecret string) []byte {
 	for _, key := range configKeys {
 		_, _ = io.WriteString(h, kernel.Main.GetConfig(kernel.CoreService, key).(string))
 	}
-	_, _ = io.WriteString(h, kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(fmt.Stringer).String())
+	_, _ = io.WriteString(h, kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(semver.SemVer).String())
 	return h.Sum(nil)
 }
 
