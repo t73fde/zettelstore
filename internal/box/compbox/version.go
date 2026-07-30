@@ -15,8 +15,8 @@ package compbox
 
 import (
 	"context"
-	"fmt"
 
+	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -30,10 +30,7 @@ func genVersionBuildM(zid id.Zid) *meta.Meta {
 	return m
 }
 func genVersionBuildC(context.Context, *compBox) []byte {
-	if v, ok := kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(fmt.Stringer); ok {
-		return []byte(v.String())
-	}
-	return []byte(kernel.CoreDefaultVersion)
+	return []byte(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(semver.SemVer).String())
 }
 
 func genVersionHostM(zid id.Zid) *meta.Meta {
