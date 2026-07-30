@@ -173,11 +173,6 @@ const (
 	CoreVTime      = "vtime"
 )
 
-// Defined values for core service.
-const (
-	CoreDefaultVersion = "unknown"
-)
-
 // Constants for config service keys.
 const (
 	ConfigInsecureHTML = "insecure-html"
