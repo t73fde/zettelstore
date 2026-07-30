@@ -32,6 +32,7 @@ import (
 	"syscall"
 	"time"
 
+	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/auth"
@@ -266,9 +267,9 @@ const (
 
 // Setup sets the most basic data of a software: its name, its version,
 // and when the version was created.
-func (kern *Kernel) Setup(progname, version string, versionTime time.Time) {
+func (kern *Kernel) Setup(progname string, version semver.SemVer, versionTime time.Time) {
 	_ = kern.SetConfig(CoreService, CoreProgname, progname)
-	_ = kern.SetConfig(CoreService, CoreVersion, version)
+	_ = kern.SetConfig(CoreService, CoreVersion, version.String())
 	_ = kern.SetConfig(CoreService, CoreVTime, versionTime.Local().Format(id.TimestampLayout))
 }
 

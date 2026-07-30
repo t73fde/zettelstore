@@ -27,6 +27,7 @@ import (
 	"strings"
 	"time"
 
+	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
@@ -334,12 +335,18 @@ var memprofile = flag.String("memprofile", "", "write memory profile to `file`")
 
 // Main is the real entrypoint of the zettelstore.
 func Main(progName, buildVersion string) int {
-	info := retrieveVCSInfo(buildVersion)
-	fullVersion := info.revision
-	if info.dirty {
-		fullVersion += "-dirty"
+	version := semver.SemVer{PreRelease: "dev"}
+	if buildVersion != "" {
+		v, ok := semver.Parse(buildVersion)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "Unable to parse version %q (build error)\n", buildVersion)
+			return 1
+		}
+		version = v
 	}
-	kernel.Main.Setup(progName, fullVersion, info.time)
+	buildTime := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
+	enhanceBuildData(&version, &buildTime)
+	kernel.Main.Setup(progName, version, buildTime)
 	flag.Parse()
 	if *cpuprofile != "" || *memprofile != "" {
 		var err error
@@ -365,36 +372,35 @@ func Main(progName, buildVersion string) int {
 	return executeCommand(args[0], args[1:]...)
 }
 
-type vcsInfo struct {
-	revision string
-	dirty    bool
-	time     time.Time
-}
-
-func retrieveVCSInfo(version string) vcsInfo {
-	buildTime := time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
+func enhanceBuildData(version *semver.SemVer, bt *time.Time) {
 	info, ok := debug.ReadBuildInfo()
 	if !ok {
-		return vcsInfo{revision: version, dirty: false, time: buildTime}
+		return
 	}
-	result := vcsInfo{time: buildTime}
+	dirty := false
 	for _, kv := range info.Settings {
 		switch kv.Key {
 		case "vcs.revision":
-			revision := "+" + kv.Value
-			if len(revision) > 11 {
-				revision = revision[:11]
+			revision := kv.Value
+			if len(revision) > 10 {
+				revision = revision[:10]
 			}
-			result.revision = version + revision
+			version.Build = revision
 		case "vcs.modified":
 			if kv.Value == "true" {
-				result.dirty = true
+				dirty = true
 			}
 		case "vcs.time":
 			if t, err := time.Parse(time.RFC3339, kv.Value); err == nil {
-				result.time = t
+				*bt = t
 			}
 		}
 	}
-	return result
+	if dirty {
+		if version.Build == "" {
+			version.Build = "dirty"
+		} else {
+			version.Build += ".dirty"
+		}
+	}
 }

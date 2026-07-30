@@ -29,7 +29,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
-	"zettelstore.de/z/internal/kernel"
 )
 
 func nextZid(zid id.Zid) id.Zid { return zid + 1 }
@@ -489,7 +488,7 @@ func TestVersion(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	if ver.Major != -1 || ver.Minor != -1 || ver.Patch != -1 || ver.Info != kernel.CoreDefaultVersion || ver.Hash != "" {
+	if ver.Major != 0 || ver.Minor != 0 || ver.Patch != 0 || ver.Info != "dev" || ver.Hash != "" {
 		t.Error(ver)
 	}
 }
