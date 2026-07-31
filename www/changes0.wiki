@@ -1,0 +1,1639 @@
+<title>Change Log</title>
+
+<a id="0_22"></a>
+<h2>Changes for Version 0.22.0 (2025-07-07)</h2>
+  *  Sx builtin <code>(bind-lookup ...)</code> is replaced with
+     <code>(resolve-symbol ...)</code>. If you maintain your own Sx code to
+     customize Zettelstore behaviour, you must update your code; otherwise it
+     will break. If your code use <code>(ROLE-DEFAULT-action ...)</code>
+     , infinite recursion might occur. This is now handled with the new startup
+     configuration <code>sx-max-nesting</code>. In such cases, you should omit
+     the call to <code>ROLE-DEFAULT-action</code>. For debugging purposes, use
+     the <code>web:trace</code> logging level, which logs all Sx computations.
+     (breaking: webui)
+  *  Sx templates are changed: base.sxn, info.sxn, zettel.sxn. If you are using
+     a (self-) modified version, you should update your modifications.
+     (breaking: webui)
+  *  Remove zettel for the Sx prelude. Fortunately, it was never documented,
+     so it was likely unused. The prelude is now a constant string whithin Sx's
+     code base.
+     (breaking: webui)
+  *  Remove support for metadata keys <code>predecessor</code> and
+     <code>successors</code>. A Zettelstore is not a version control system.
+     Use <code>precursor</code> instead (if appropriate), use your own metadata
+     key (which should end with <code>-zids</code>, or get rid of manually
+     versioned zettel. In the WebUI, action &ldquo;version&rdquo; is removed.
+     (breaking)
+  *  New query directives <code>FOLGE</code>, <code>SEQUEL</code>, and
+     <code>THREAD</code> support folge zettel and sequel zettel (and both). See
+     the manual for details. To make working with these directives a little bit
+     more easier, appropriate query links are placed on main zettel web user
+     interface and on info zettel page.
+     (major)
+  *  If authentication is enabled, Zettelstore can now be accessed from the
+     loopback device without logging in or obtaining an access token.
+     (major: api, webui)
+  *  Context directive allows <code>DIRECTED</code>.
+     (minor)
+  *  Metadata with keys ending with <code>-ref</code> or <code>-refs</code> are
+     interpreted as zettel identifier.
+     (minor)
+  *  The new startup configuration key <code>sx-max-nesting</code> allows
+     setting a limit on the nesting depth of Sx computations. This is primarily
+     useful to prevent unbounded recursion due to programming errors.
+     Previously, such issues would crash the Zettelstore.
+     (minor: webui)
+  *  At logging level <code>trace</code>, the web user interface now logs all
+     Sx computations, mainly those used for rendering HTML templates.
+     (minor: webui)
+  *  Move context link to zettel page.
+     (minor: webui)
+  *  Make writing to zettel files more robust. When an error occurs, the state
+     before writing the file is restored.
+     (info)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_21"></a>
+<h2>Changes for Version 0.21.0 (2025-04-17)</h2>
+  *  Change zettel identifier for Zettelstore Log, Zettelstore Memory, and
+     Zettelstore Sx Engine. See manual for updated identifier values.
+     (breaking)
+  *  Sz encodings of links were simplified into one <code>LINK</code> symbol.
+     Different link types are now specified by reference node.
+     (breaking: api)
+  *  Sz encodings of lists, descriptions, tables, table cells, and block BLOBs
+     have now an additional attributes entry, directly after the initial
+     symbol.
+     (breaking: api)
+  *  Sz encoding for table cell alignment (<code>CELL-*</code>) is now done via
+     table cell attribute <code>(align . *)</code>, where <code>*</code> is the
+     alignment value (<code>"center"</code>, <code>"left"</code>, or
+     <code>"right"</code>).
+     (breaking: api)
+  *  New API endpoint <code>/r/{ZID}</code> retrieves references of a zettel.
+     (major: api)
+  *  New computed zettel Zettelstore Modules, which shows all Go modules
+     Zettelstore is dependent to.
+     (minor)
+  *  Move most of the code to new internal package <code>internal</code>, to
+     make reuse by other software a little bit harder.
+  *  Move some code to external packages, esp. to Zettelstore Client, webs.
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_20"></a>
+<h2>Changes for Version 0.20.0 (2025-03-07)</h2>
+  *  Metadata with keys that have the suffix <code>-title</code> are no longer
+     interpreted as Zettelmarkup. This was a leftover from [#0_11|v0.11], when
+     type of metadata <code>title</code> was changed from Zettelmarkup to a
+     possibly empty string.
+     (breaking)
+  *  Type of metadata key <code>summary</code> changed from Zettelmarkup to
+     plain text. You might need to update your zettel that contain this key.
+     (breaking)
+  *  Remove support for metadata type <code>Zettelmarkup</code>. It made
+     implementation too complex, and it was seldom used (see above).
+     (breaking)
+  *  Remove metadata key <code>created-missing</code>, which was used to
+     support the cancelled migration process into a four letter zettel
+     identifier format.
+     (breaking)
+  *  Remove support for inline zettel snippets. Mostly used for some HTML
+     elements, which hinders portability and encoding in other formats.
+     (breaking: zettelmarkup)
+  *  Remove support for inline HTML text within Markdown text. Such HTML code
+     (did I ever say that Markdown is just a super-set of HTML?) is now
+     translated into literal text.
+     (breaking: markdown/CommonMark)
+  *  Query aggregates <code>ATOM</code> and <code>RSS</code> are removed, as
+     well as the accompanying <code>TITLE</code> query action (parameter).
+     Was announced as deprecated in version 0.19.
+     (breaking)
+  *  Query data encoding and aggregate data encoding were changed to remove the
+     superfluous <code>(list ...)</code>. Instead, the result list is now
+     spliced into the returned s-expression list. If you use the Zettelstore
+     Client, it will handle that for you.
+     (breaking: api)
+  *  &ldquo;Lists&rdquo; menu is build by reading a zettel with menu items
+     (Default: <code>00000000080001</code>) instead of being hard coded. Can be
+     customized with runtime and user configuration
+     <code>lists-menu-zettel</code>.
+     (major: webui)
+  *  Show metadata values <code>superior</code> and <code>subordinate</code>
+     on WebUI (again). Partially reverses the removal of support for these
+     values in v0.19. However, creating child zettel is not supported.
+     (major: webui)
+  *  Implement <code>CONTEXT</code> query more correctly, as stated in the
+     manual; add <code>MIN</code> directive.
+     (minor)
+  *  Remove timeouts for API and WebUI. If faced to the public internet,
+     Zettelstore should run behind a full proxy, like Caddy server, Nginx, or
+     similar.
+     (minor: api, webui)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_19"></a>
+<h2>Changes for Version 0.19.0 (2024-12-13)</h2>
+  *  Remove support for renaming zettel, i.e. changing zettel identifier. Was
+     announced as deprecated in version 0.18.
+     (breaking: api, webui)
+  *  Format of zettel identifier will be not changed. The deprecation message
+     from version 0.18 is no longer valid.
+     (major)
+  *  Zettel content for most predefined zettel (ID less or equal than
+     0000099999899) is not indexed any more. If you search / query for zettel
+     content, these zettel will not be returned. However, their metadata is
+     still searchable. Content of predefined zettel with ID between
+     00000999999900 and 00000999999999 will be indexed..
+     (breaking: api, webui)
+  *  Metadata keys <code>superior</code> and <code>subordinate</code> are not
+     supported on the WebUI any more. They are still typed as a set of zettel
+     identifier, but are treated as ordinary links. Zettel should not form a
+     hierarchy, in most cases.
+     (major: webui)
+  *  Metadata keys <code>sequel</code> and <code>prequel</code> support a
+     sequence of zettel. They are supported through the WebUI also.
+     <code>sequel</code> is calculated based on <code>prequel</code>. While
+     folge zettel are a train of thought, zettel sequences form different train
+     of thoughts.
+     (major)
+  *  Query aggregates <code>ATOM</code> and <code>RSS</code> will be removed in
+     the next version of Zettelstore. They were introduced in [#0_7|v0.7] and
+     [#0_8|v0.8]. Both are not needed for a digital zettelkasten. Their current
+     use is to transform Zettelstore into a blogging engine. RSS and Atom feed
+     can be provided by external software, much better than Zettelstore will
+     ever do.
+     (deprecation)
+  *  Fix wrong quote translation for markdown encoder.
+     (minor)
+  *  Generate <code>&lt;th></code> in table header (was: <code>&lt;td></code>).
+     Also applies to SHTML encoder. (minor: webui, api)
+  *  External links are now generated in shtml and html with attribute
+     rel="external" (previously: class="external").
+     (minor: webui, api)
+  *  Allow enabling runtime profiling of the software, to be used by
+     developers.
+     (minor)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_18"></a>
+<h2>Changes for Version 0.18.0 (2024-07-11)</h2>
+  *  Remove Sx macro <code>defunconst</code>. Use <code>defun</code> instead.
+     (breaking: webui)
+  *  The sz encoding of zettel does not make use of <code>(SPACE)</code>
+     elements any more. Instead, space characters are encoded within the
+     <code>(TEXT "...")</code> element. This might affect any client that works
+     with the sz encoding to produce some output.
+     (breaking)
+  *  Format of zettel identifier will be changed in the future to a new format,
+     instead of the current timestamp-based format. The usage of zettel
+     identifier that are before 1970-01-01T00:00:00 is not allowed any more
+     (with the exception of predefined identifier)
+     (deprecation)
+  *  Due to the planned format of zettel identifier, the &ldquo;rename&rdquo;
+     operation is deprecated. It will be removed in version 0.19 or later. If
+     you have a significant use case for the rename operation, please contact
+     the maintainer immediate.
+     (deprecation)
+  *  New zettel are now created with the permission for others to read/write
+     them. This is important especially for Unix-like systems. If you want the
+     previous behaviour, set <code>umask</code> accordingly, for example
+     <code>umask 066</code>.
+     (major: dirbox)
+  *  Add expert-mode zettel &ldquo;Zettelstore Warnings&rdquo; to help
+     identifying zettel to upgrade for future migration to planned new zettel
+     identifier format.
+     (minor: webui)
+  *  Add expert-mode zettel &ldquo;Zettelstore Identifier Mapping&rdquo; to
+     show a possible mapping from the old identifier format to the new one.
+     This should help users to possibly rename some zettel for a better
+     mapping.
+     (minor: webui)
+  *  Add metadata key <code>created-missing</code> to list zettel without
+     stored metadata key <code>created</code>. Needed for migration to planned
+     new zettelstore identifier format, which is not based on timestamp of
+     zettel creation date.
+     (minor)
+  *  Add zettel &ldquo;Zettelstore Application Directory&rdquo;, which contains
+     identifier for application specific zettel. Needed for planned new
+     identifier format.
+     (minor: webui)
+  *  Update Sx prelude: make macros more robust / more general. This might
+     break your code in the future.
+     (minor: webui)
+  *  Add computed expert-mode zettel &ldquo;Zettelstore Memory&rdquo; with
+     zettel identifier <code>00000000000008</code>. It shows some statistics
+     about memory usage.
+     (minor: webui)
+  *  Add computed expert-mode zettel &ldquo;Zettelstore Sx Engine&rdquo; with
+     zettel identifier <code>00000000000009</code>. It shows some statistics
+     about the internal Sx engine. (Currently only the number of used symbols,
+     but this will change in the future.)
+     (minor: webui)
+  *  Zettelstore client is now Go package t73f.de/r/zsc.
+     (minor)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_17"></a>
+<h2>Changes for Version 0.17.0 (2024-03-04)</h2>
+  *  Context search operates only on explicit references. Add the directive
+     <code>FULL</code> to follow zettel tags additionally.
+     (breaking)
+  *  Context cost calculation has been changed. Prepare to retrieve different
+     result.
+     (breaking)
+  *  Remove metadata type WordSet. It was never implemented completely, and
+     nobody complained about this.
+     (breaking)
+  *  Remove logging level &ldquo;sense&rdquo;, &ldquo;warn&rdquo;,
+     &ldquo;fatal&rdquo;, and &ldquo;panic&rdquo;.
+     (breaking)
+  *  Add query action <code>REDIRECT</code> which redirects to zettel that is
+     the first in the query result list.
+     (minor: api, webui)
+  *  Add link to <code>CONTEXT FULL</code> in the zettel info page.
+     (minor: webui)
+  *  When generating HTML code to query set based metadata (esp. tags), also
+     generate a query that matches all values.
+     (minor: webui)
+  *  Show all metadata with key ending &ldquo;-url&rdquo; on zettel view.
+     (minor: webui)
+  *  Make WebUI form elements a little bit more accessible by using HTML
+     <code>search</code> tag and <code>inputmode</code> attribute.
+     (minor: webui)
+  *  Add UI action for role zettel, similar to tag zettel. Obviously forgotten
+     in release 0.16.0, but thanks to the bug fix v0.16.1 detected.
+     (minor: webui)
+  *  If an action, which is written in uppercase letters, results in an empty
+     list, the list of selected zettel is returned instead. This allows some
+     backward compatibility if a new action is introduced.
+     (minor)
+  *  Only when query list is not empty, allow showing data and plain encoding,
+     an optionally show the &ldquo;Save As Zettel&rdquo; button.
+     (minor: webui)
+  *  If query list is greater than three elements, show the number of elements
+     at bottom (before other encodings).
+     (minor: webui)
+  *  Zettel with syntax &ldquo;sxn&rdquo; are pretty-printed during evaluation.
+     This allows to retrieve parsed zettel content, which checked for syntax,
+     but is not pretty-printed.
+     (minor)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_16"></a>
+<h2>Changes for Version 0.16.1 (2023-12-28)</h2>
+  *  Fix some Sxn definitions to allow role-based UI customizations.
+     (minor: webui)
+
+<h2>Changes for Version 0.16.0 (2023-11-30)</h2>
+  *  Sx function <code>define</code> is removed, as announced for version
+     0.15.0. Use <code>defvar</code> (to define variables) or
+     <code>defun</code> (to define functions) instead. In addition
+     <code>defunconst</code> defines a constant function, which ensures a fixed
+     binding of its name to its function body (performance optimization).
+     (breaking: webui)
+  *  Allow determing a role zettel for a given role.
+     (major: api, webui)
+  *  Present user the option to create a (missing) role zettel (in list view).
+     Results in a new predefined zettel with identifier 00000000090004, which
+     is a template for new role zettel.
+     (minor: webui)
+  *  Timestamp values can be abbreviated by omitting most of its components.
+     Previously, such values that are not in the format YYYYMMDDhhmmss were
+     ignored. Now the following formats are also allowed: YYYY, YYYYMM,
+     YYYYMMDD, YYYYMMDDhh, YYYYMMDDhhmm. Querying and sorting work accordingly.
+     Previously, only a sequences of zeroes were appended, resulting in illegal
+     timestamps, e.g. for YYYY or YYYYMM.
+     (minor)
+  *  SHTML encoder fixed w.r.t inline quoting. Previously, an &lt;q&gt; tag was
+     used, which is inappropriate. Restored smart quotes from version 0.3, but
+     with new SxHTML infrastructure. This affect the html encoder and the WebUI
+     too. Now, an empty quote should not result in a warning by HTML linters.
+     (minor: api, webui)
+  *  Add new zettelmarkup inline formatting: <code>##Text##</code> will mark /
+     highlight the given Text. It is typically used to highlight some text,
+     which is important for you, but not for the original author. When rendered
+     as HTML, the &lt;mark&gt; tag is used.
+     (minor: zettelmarkup)
+  *  Add configuration keys to show, not to show, or show the closed list of
+     referencing zettel in the web user interface. You can set these
+     configurations system-wide, per user, or per zettel. Often it is used to
+     ensure a &ldquo;clean&rdquo; home zettel. Affects the list of incoming
+     / back links, folge zettel, subordinate zettel, and successor zettel.
+     (minor: webui)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_15"></a>
+<h2>Changes for Version 0.15.0 (2023-10-26)</h2>
+  *  Sx function <code>define</code> is now deprecated. It will be removed in
+     version 0.16. Use <code>defvar</code> or <code>defun</code> instead.
+     Otherwise the WebUI will not work in version 0.16.
+     (major: webui, deprecated)
+  *  Zettel can be re-indexed via WebUI or API query action
+     <code>REINDEX</code>. The info page of a zettel contains a link to
+     re-index the zettel. In a query transclusion, this action is ignored.
+     (major: api, webui).
+  *  Allow determining a tag zettel for a given tag.
+     (major: api, webui)
+  *  Present user the option to create a (missing) tag zettel (in list view).
+     Results in a new predefined zettel with identifier 00000000090003, which
+     is a template for new tag zettel.
+     (minor: webui)
+  *  ZIP file with manual now contains a zettel 00001000000000 that contains
+     its build date (metadata key <code>created</code>) and version (in the
+     zettel content)
+     (minor)
+  *  If an error page cannot be created due to template errors (or similar), a
+     plain text error page is delivered instead. It shows the original error
+     and the error that occurred during rendering the original error page.
+     (minor: webui)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_14"></a>
+<h2>Changes for Version 0.14.0 (2023-09-22)</h2>
+  *  Remove support for JSON. This was marked deprecated in version 0.12.0. Use
+     the <code>data</code> encoding instead, a form of symbolic expressions.
+     (breaking: api; minor: webui)
+  *  Remove deprecated syntax for a context list: <code>CONTEXT zid</code>. Use
+     <code>zid CONTEXT</code> instead. It was deprecated in version 0.13.0.
+     (breaking: api, webui, zettelmarkup)
+  *  Replace CSS-role-map mechanism with a more general Sx-based one: user
+     specific code may generates parts of resulting HTML document.
+     (breaking: webui)
+  *  Allow meta-tags, i.e. zettel for a specific tag. Meta-tags have the tag
+     name as a title and specify the role "tag".
+     (major: webui)
+  *  Allow loading sx code from multiple zettel; dependencies are specified
+     using <code>precursor</code> metadata.
+     (major: webui)
+  *  Allow sx code to change WebUI for zettel with specified role.
+     (major: webui)
+  *  Some minor usability improvements.
+     (minor: webui)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_13"></a>
+<h2>Changes for Version 0.13.0 (2023-08-07)</h2>
+  *  There are for new search operators: less, not less, greater, not greater.
+     These use the same syntax as the operators prefix, not prefix, suffix, not
+     suffix. The latter are now denoted as <code>[</code>, <code>![</code>,
+     <code>]</code>, and <code>!]</code>. The first may operate numerically for
+     metadata like numbers, timestamps, and zettel identifier. They are not
+     supported for full-text search.
+     (breaking: api, webui)
+  *  The API endpoint <code>/o/{ID}</code> (order of zettel ID) is no longer
+     available. Please use the query expression <code>{ID} ITEMS</code>
+     instead.
+     (breaking: api)
+  *  The API endpoint <code>/u/{ID}</code> (unlinked references of zettel ID)
+     is no longer available. Please use the query expression <code>{ID}
+     UNLINKED</code> instead.
+     (breaking: api)
+  *  All API endpoints allow encoding zettel data with the <code>data</code>
+     encodings, incl. creating, updating, retrieving, and querying zettel.
+     (major: api)
+  *  Change syntax for context query to <code>zid ... CONTEXT</code>. This will
+     allow adding more directives that operate on zettel identifier. Old syntax
+     <code>CONTEXT zid</code> will be removed in 0.14.
+     (major, deprecated)
+  *  Add query directive <code>ITEMS</code> that will produce a list of
+     metadata of all zettel that are referenced by the originating zettel in
+     a top-level list. It replaces the API endpoint <code>/o/{ID}</code> (and
+     makes it more useful).
+     (major: api, webui)
+  *  Add query directive <code>UNLINKED</code> that will produce a list of
+     metadata of all zettel that are mentioning the originating zettel in
+     a top-level, but do not mention them. It replaces the API endpoint
+     <code>/u/{ID}</code> (and makes it more useful).
+     (major: api, webui)
+  *  Add query directive <code>IDENT</code> to distinguish a search for
+     a zettel identifier (&ldquo;{ID}&rdquo;), that will list all metadata of
+     zettel containing that zettel identifier, and a request to just list the
+     metadata of given zettel (&ldquo;{ID} IDENT&rdquo;). The latter could be
+     filtered further.
+     (minor: api, webui)
+  *  Add support for metadata key <code>folge-role</code>.
+     (minor)
+  *  Allow creating a child from a given zettel.
+     (minor: webui)
+  *  Make zettel entry/edit form a little friendlier: auto-prepend missing '#'
+     to tags; ensure that role and syntax receive just a word.
+     (minor: webui)
+  *  Use a zettel that defines builtins for evaluating WebUI templates.
+     (minor: webui)
+  *  Add links to retrieve result of a query in other formats.
+     (minor: webui)
+  *  Always log the found configuration file.
+     (minor: server)
+  *  The use of the <code>json</code> zettel encoding is deprecated (since
+     version 0.12.0). Support for this encoding will be removed in version
+     0.14.0. Please use the new <code>data</code> encoding instead.
+     (deprecated: api)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_12"></a>
+<h2>Changes for Version 0.12.0 (2023-06-05)</h2>
+  *  Syntax of templates for the web user interface are changed from Mustache
+     to Sxn (S-Expressions). Mustache is no longer supported, nowhere in the
+     software. Mustache was marked deprecated in version 0.11.0. If you
+     modified the template zettel, you must adapt to the new syntax.
+     (breaking: webui)
+  *  Query expression is allowed to search for the "context" of a zettel.
+     Previously, this was a separate call, without adding a search expression
+     / action expression.
+     (breaking)
+  *  "sexpr" encoding is renamed to "sz" encoding. This will affect mostly the
+     API. Additionally, all string "sexpr" are renamed to "sz" also. "Sz" is
+     the short form for "symbolic expression for zettel", similar to "shtml"
+     that is the short form for "symbolic expression for HTML".
+     (breaking)
+  *  Render footer zettel on all WebUI pages.
+     (fix: webui)
+  *  Query search operator "=" now compares for equality, ":" compares
+     depending on the value type.
+     (minor: api, webui)
+  *  Search term <code>PICK</code> now respects the original sort order. This
+     makes it more useful and orthogonal to <code>RANDOM</code> and
+     <code>LIMIT</code>. As a side effect, zettel lists retrieved via the API
+     are no longer sorted. In case you want a specific order, you must specify
+     it explicit.
+     (minor: api, webui)
+  *  New metadata key <code>expire</code> records a timestamp when a zettel
+     should be treated as, well, expired.
+     (minor)
+  *  New metadata keys <code>superior</code> and <code>subordinate</code>
+     (calculated from <code>superior</code>) allow specifying an hierarchy
+     between zettel.
+     (minor)
+  *  Metadata keys with suffix <code>-date</code> and <code>-time</code> are
+     treated as
+     timestamp values.
+     (minor)
+  *  <code>sexpr</code> zettel encoding is now documented in the manual.
+     (minor: manual)
+  *  Build tool allows to install / update external Go tools needed to build
+     the software.
+     (minor)
+  *  Show only useful metadata on WebUI, not the internal metadata.
+     (minor: webui)
+  *  The use of the <code>json</code> zettel encoding is deprecated. Support
+     for this encoding may be removed in future versions. Please use the new
+     <code>data</code> encoding instead.
+     (deprecated: api)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_11"></a>
+<h2>Changes for Version 0.11.2 (2023-04-16)</h2>
+  *  Render footer zettel on all WebUI pages. Backported from 0.12.0. Many
+     thanks to HK for reporting it!
+     (fix: webui)
+
+<h2>Changes for Version 0.11.1 (2023-03-28)</h2>
+  *  Make <code>PICK</code> search term a little bit more deterministic so that
+     the &ldquo;Save As Zettel&rdquo; button produces the same list.
+     (fix: webui)
+
+<h2>Changes for Version 0.11.0 (2023-03-27)</h2>
+  *  Remove ZJSON encoding. It was announced in version 0.10.0. Use Sexpr
+     encoding instead.
+     (breaking)
+  *  Title of a zettel is no longer interpreted as Zettelmarkup text. Now it is
+     just a plain string, possibly empty. Therefore, no inline formatting (like
+     bold text), no links, no footnotes, no citations (the latter made
+     rendering the title often questionable, in some contexts). If you used
+     special entities, please use the Unicode characters directly. However, as
+     a good practice, it is often the best to printable ASCII characters.
+     (breaking)
+  *  Remove runtime configuration <code>marker-external</code>. It was added in
+     version [#0_0_6|0.0.6] and updated in [#0_0_10|0.0.10]. If you want to
+     change the marker for an external URL, you could modify zettel
+     00000000020001 (Zettelstore Base CSS) or zettel 00000000025001
+     (Zettelstore User CSS, preferred) by changing / adding a rule to add some
+     content after an external <code><a ...></code> tag.
+     (breaking: webui)
+  *  Add SHTML encoding. This allows to ensure the quality of generated HTML
+     code. In addition, clients might use it, because it is easier to parse and
+     manipulate than ordinary HTML. In the future, HTML template zettel will
+     probably also use SHTML, deprecating the current Mustache syntax (which
+     was added in [#0_0_9|0.0.9]).
+     (major)
+  *  Search term <code>PICK n</code>, where <code>n</code> is an integer value
+     greater zero, will pick randomly <code>n</code> elements from the search
+     result list. Somehow similar (and faster) as <code>RANDOM LIMIT n</code>,
+     but allows also later ordering of the resulting list.
+     (minor)
+  *  Changed cost model for zettel context: a zettel with more
+     outgoing/incoming references has higher cost than a zettel with less
+     references. Also added support for traversing tags, with a similar cost
+     model. As an effect, zettel hubs (in many cases your home zettel) will
+     less likely add its references. Same for often used tags. The cost model
+     might change in some details in the future, but the idea of a penalty
+     applied to zettel / tags with many references will hold.
+     (minor)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_10"></a>
+<h2>Changes for Version 0.10.1 (2023-01-30)</h2>
+  *  Show button to save a query into a zettel only when the current user has
+     authorization to do it.
+     (fix: webui)
+
+<h2>Changes for Version 0.10.0 (2023-01-24)</h2>
+  *  Remove support for endpoints <code>/j, /m, /q, /p, /v</code>. Their
+     functions are merged into endpoint <code>/z</code>. This was announced in
+     version 0.9.0. Please use only client library with at least version 0.10.0
+     too.
+     (breaking: api)
+  *  Remove support for runtime configuration key <code>footer-html</code>. Use
+     <code>footer-zettel</code> instead. Deprecated in version 0.9.0.
+     (breaking: webui)
+  *  Save a query into a zettel to freeze it.
+     (major: webui)
+  *  Allow showing all used metadata keys, linked with their occurrences and
+     their values.
+     (minor: webui)
+  *  Mark ZJSON encoding as deprecated for v0.11.0. Please use Sexpr encoding
+     instead.
+     (deprecated)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_9"></a>
+<h2>Changes for Version 0.9.0 (2022-12-12)</h2>
+  *  Remove support syntax <code>pikchr</code>. Although it was a nice idea to
+     include it into Zettelstore, the implementation is too brittle (w.r.t. the
+     expected long lifetime of Zettelstore). There should be other ways to
+     support SVG front-ends.
+     (breaking)
+  *  Allow uploading content when creating / updating a zettel.
+     (major: webui)
+  *  Add syntax &ldquo;draw&rdquo; (again)
+     (minor: zettelmarkup)
+  *  Allow encoding zettel in Markdown. Please note: not every aspect of
+     a zettel can be encoded in Markdown. Those aspects will be ignored.
+     (minor: api)
+  *  Enhance zettel context by raising the importance of folge zettel (and
+     similar).
+     (minor: api, webui)
+  *  Interpret zettel files with extension <code>.webp</code> as an binary
+     image file format.
+     (minor)
+  *  Allow specifying service specific log level via startup configuration and
+     via command line.
+     (minor)
+  *  Allow specifying a zettel to serve footer content via runtime
+     configuration <code>footer-zettel</code>. Can be overwritten by user
+     zettel.
+     (minor: webui)
+  *  Footer data is automatically separated by a thematic break / horizontal
+     rule. If you do not like it, you have to update the base template.
+     (minor: webui)
+  *  Allow setting runtime configuration <code>home-zettel</code> in the user
+     zettel to make it user-specific.
+     (minor: webui)
+  *  Serve favicon.ico from the asset directory.
+     (minor: webui)
+  *  Zettelmarkup cheat sheet
+     (minor: manual)
+  *  Runtime configuration key <code>footer-html</code> will be removed in
+     Version 0.10.0. Please use <code>footer-zettel</code> instead.
+     (deprecated: webui)
+  *  In the next version 0.10.0, the API endpoints for a zettel
+     (<code>/j</code>, <code>/p</code>, <code>/v</code>) will be merged with
+     endpoint <code>/z</code>. Basically, the previous endpoint will be
+     refactored as query parameter of endpoint <code>/z</code>. To reduce
+     errors, there will be no version, where the previous endpoint are still
+     available and the new functionality is still there. This is a warning to
+     prepare for some breaking changes in v0.10.0. This also affects the API
+     client implementation.
+     (warning: api)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_8"></a>
+<h2>Changes for Version 0.8.0 (2022-10-20)</h2>
+  *  Remove support for tags within zettel content. Removes also property
+     metadata keys <code>all-tags</code> and <code>computed-tags</code>.
+     Deprecated in version 0.7.0.
+     (breaking: zettelmarkup, api, webui)
+  *  Remove API endpoint <code>/m</code>, which retrieve aggregated (tags,
+     roles) zettel identifier. Deprecated in version 0.7.0.
+     (breaking: api)
+  *  Remove support for URL query parameter starting with an underscore.
+     Deprecated in version 0.7.0.
+     (breaking: api, webui)
+  *  Ignore HTML content by default, and allow HTML gradually by setting
+     startup value <code>insecure-html</code>.
+     (breaking: markup)
+  *  Endpoint <code>/q</code> returns list of full metadata, if no query action
+     is specified. A HTTP call <code>GET /z</code> (retrieving metadata of all
+     or some zettel) is now an alias for <code>GET /q</code>.
+     (major: api)
+  *  Allow creating a zettel that acts as the new version of an existing
+     zettel. Useful if you want to have access to older, outdated content.
+     (minor: webui)
+  *  Allow transclusion to reference local image via URL.
+     (minor: zettelmarkup, webui)
+  *  Add categories in RSS feed, based on zettel tags.
+     (minor: api, webui)
+  *  Add support for creating an Atom 1.0 feed using a query action.
+     (minor: api, webui)
+  *  Ignore entities with code point that is not allowed in HTML.
+     (minor: zettelmarkup)
+  *  Enhance distribution of tag sizes when show a tag cloud.
+     (minor: webui)
+  *  Warn user if zettelstore listens non-locally, but no authentication is
+     enabled.
+     (minor: server)
+  *  Fix error that a manual zettel deletion was not always detected.
+     (bug: dirbox)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_7"></a>
+<h2>Changes for Version 0.7.1 (2022-09-18)</h2>
+  *  Produce a RSS feed compatible to Miniflux.
+     (minor)
+  *  Make sure to always produce a pubdata in RSS feed.
+     (bug)
+  *  Prefix search for data that looks like a zettel identifier may end with a
+     <code>0</code>.
+     (bug)
+  *  Fix glitch on manual zettel.
+     (bug)
+
+<h2>Changes for Version 0.7.0 (2022-09-17)</h2>
+  *  Removes support for URL query parameter to search for metadata values,
+     sorting, offset, and limit a zettel list. Deprecated in version 0.6.0
+     (breaking: api, webui)
+  *  Allow searching for the existence / non-existence of a metadata key with
+     the "?" operator: <code>key?</code> and <code>key!?</code>. Previously,
+     the ":" operator was used for this by specifying an empty search value.
+     Now you can use the ":" operator to find empty / non-empty metadata
+     values. If you specify a search operator for metadata, the specified key
+     is assumed to exist.
+     (breaking: api, webui)
+  *  Rename &ldquo;search expression&rdquo; into &ldquo;query
+     expressions&rdquo;. Similar, the reference prefix <code>search:</code> to
+     specify a query link or a query transclusion is renamed to
+     <code>query:</code>
+     (breaking: zettelmarkup)
+  *  Rename query parameter for query expression from <code>_s</code> to
+     <code>q</code>.
+     (breaking: api, webui)
+  *  Cleanup names for HTTP query parameters in WebUI. Update your bookmarks
+     if you used them. (For API: see below)
+     (breaking: webui)
+  *  Allow search terms to be OR-ed. This allows to specify any search
+     expression in disjunctive normal form. Therefore, the NEGATE term is not
+     needed any more.
+     (breaking: api, webui)
+  *  Replace runtime configuration <code>default-lang</code> with
+     <code>lang</code>. Additionally, <code>lang</code> set at the zettel of
+     the current user, will provide a default value for the current user,
+     overwriting the global default value.
+     (breaking)
+  *  Add new syntax <code>pikchr</code>, a markup language for diagrams in
+     technical documentation.
+     (major)
+  *  Add endpoint <code>/q</code> to query the zettelstore and aggregate
+     resulting values. This is done by extending the query syntax.
+     (major: api)
+  *  Add support for query actions. Actions may aggregate w.r.t. some metadata
+     keys, or produce an RSS feed.
+     (major: api, webui)
+  *  Query results can be ordered for more than one metadata key. Ordering by
+     zettel identifier is an implicit last order expression to produce stable
+     results.
+     (minor: api, webui)
+  *  Add support for an asset directory, accessible via URL prefix
+     <code>/assests/</code>.
+     (minor: server)
+  *  Add support for metadata key <code>created</code>, a time stamp when the
+     zettel was created. Since key <code>published</code> is now either
+     <code>created</code> or <code>modified</code>, it will now always contains
+     a valid time stamp.
+     (minor)
+  *  Add support for metadata key <code>author</code>. It will be displayed on
+     a zettel, if set.
+     (minor: webui)
+  *  Remove CSS for lists. The browsers default value for
+     <code>padding-left</code> will be used.
+     (minor: webui)
+  *  Removed templates for rendering roles and tags lists. This is now done by
+     query actions.
+     (minor: webui)
+  *  Tags within zettel content are deprecated in version 0.8. This affects the
+     computed metadata keys <code>content-tags</code> and
+     <code>all-tags</code>. They will be removed. The number sign of a content
+     tag introduces unintended tags, esp. in the English language; content tags
+     may occur within links &rarr; links within links, when rendered as HTML;
+     content tags may occur in the title of a zettel; naming of content tags,
+     zettel tags, and their union is confusing for many. Migration: use zettel
+     tags or replace content tag with a search.
+     (deprecated: zettelmarkup)
+  *  Cleanup names for HTTP query parameter for API calls. Essentially,
+     underscore characters in front are removed. Please use new names, old
+     names will be deprecated in version 0.8.
+     (deprecated: api)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_6"></a>
+<h2>Changes for Version 0.6.2 (2022-08-22)</h2>
+  *  Recognize renaming of zettel file external to Zettelstore.
+     (bug)
+
+<h2>Changes for Version 0.6.1 (2022-08-22)</h2>
+  *  Ignore empty tags when reading metadata.
+     (bug)
+
+<h2>Changes for Version 0.6.0 (2022-08-11)</h2>
+  *  Translating of "..." into horizontal ellipsis is no longer supported. Use
+     &amp;hellip; instead.
+     (breaking: zettelmarkup)
+  *  Allow specifying search expressions, which allow specifying search
+     criteria by using a simple syntax. Can be specified in WebUI's search box
+     and via the API by using query parameter "_s".
+     (major: api, webui)
+  *  A link reference is allowed to be a search expression. The WebUI will
+     render this as a link to a list of zettel that satisfy the search
+     expression.
+     (major: zettelmarkup, webui)
+  *  A block transclusion is allowed to specify a search expression. When
+     evaluated, the transclusion is replaced by a list of zettel that satisfy
+     the search expression.
+     (major: zettelmarkup)
+  *  When presenting a zettel list, allow changing the search expression.
+     (minor: webui)
+  *  When evaluating a zettel, ignore transclusions if current user is not
+     allowed to read transcluded zettel.
+     (minor)
+  *  Added a small tutorial for Zettelmarkup.
+     (minor: manual)
+  *  Using URL query parameter to search for metadata values, specify an
+     ordering, an offset, and a limit for the resulting list, will be removed
+     in version 0.7. Replace these with the more useable search expressions.
+     Please be aware that the = search operator is also deprecated. It was only
+     introduced to help the migration.
+     (deprecated: api, webui)
+  *  Some smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_5_0"></a>
+<h2>Changes for Version 0.5.1 (2022-08-02)</h2>
+  *  Log missing authentication tokens in debug level (was: sense level)
+     (major)
+  *  Allow using empty metadata values of string and zmk types.
+     (minor)
+  *  Add IP address to some log messages, esp. when authentication fails.
+     (minor)
+
+<h2>Changes for Version 0.5.0 (2022-07-29)</h2>
+  *  Removed zettel syntax &ldquo;draw&rdquo;. The new default syntax for
+     inline zettel is now &ldquo;text&rdquo;. A drawing can now be made by
+     using the &ldquo;evaluation block&rdquo; syntax (see below) by setting
+     the generic attribute to &ldquo;draw&rdquo;.
+     (breaking: zettelmarkup, api, webui)
+  *  If authentication is enabled, a secret of at least 16 bytes must be set in
+     the startup configuration.
+     (breaking)
+  *  &ldquo;Sexpr&rdquo; encoding replaces &ldquo;Native&rdquo; encoding. Sexpr
+     encoding is much easier to parse, compared with native and ZJSON encoding.
+     In most cases it is smaller than ZJSON.
+     (breaking: api)
+  *  Endpoint <code>/r</code> is changed to <code>/m?_key=role</code> and
+     returns now a map of role names to the list of zettel having this role.
+     Endpoint <code>/t</code> is changed to <code>/m?_key=tags</code>. It
+     already returned mapping described before.
+     (breaking: api)
+  *  Remove support for a default value for metadata key title, role, and
+     syntax. Title and role are now allowed to be empty, an empty syntax value
+     defaults to &ldquo;plain&rdquo;.
+     (breaking)
+  *  Add support for an &ldquo;evaluation block&rdquo; syntax in Zettelmarkup
+     to allow interpretation of content by external software.
+     (minor: zettelmarkup)
+  *  Add initial support for a TeX-like math-mode to Zettelmarkup (both block-
+     and inline-structured elements). Currently, support only the syntax,
+     but WebUI does not render these elements in a special way.
+     (minor: zettelmarkup)
+  *  For block-structured elements, attributes may now span more than one line.
+     If a line ending occurs within a quoted attribute value, the line ending
+     characters are part of the attributes value.
+     (minor: zettelmarkup)
+  *  Zettel 00000000029000 acts as a map of zettel roles to identifier of
+     zettel that are included as additional CSS. Allows to display zettel
+     differently depending on their role. Use case: slides that are processed
+     by Zettel Presenter will use the same CSS if they are rendered by
+     Zettelstore WebUI.
+     (minor: webui)
+  *  A zettel can be saved while creating / editing it. There is no need to
+     manually re-edit it by using the 'e' endpoint.
+     (minor: webui)
+  *  Zettel role and zettel syntax are backed by a HTML5 data list element
+     which lists supported and used values to help to enter a valid value.
+     (minor: webui)
+  *  Allow using startup configuration, even if started in simple mode.
+     (minor)
+  *  Log authentication issues in level "sense"; add caller IP address to some
+     web server log messages.
+     (minor: web server)
+  *  New startup configuration key <kbd>max-request-size</kbd> to limit a web
+     request body to prevent client sending too large requests.
+     (minor: web server)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_4"></a>
+<h2>Changes for Version 0.4 (2022-03-08)</h2>
+  *  Encoding &ldquo;djson&rdquo; renamed to &ldquo;zjson&rdquo; (<em>zettel
+     json</em>).
+     (breaking: api; minor: webui)
+  *  Remove inline quotation syntax <code>&lt;&lt;...&lt;&lt;</code>. Now,
+     <code>&quot;&quot;...&quot;&quot;</code> generates the equivalent code.
+     Typographical quotes are generated by the browser, not by Zettelstore.
+     (breaking: Zettelmarkup)
+  *  Remove inline formatting for mono space. Its syntax is now used by the
+     similar syntax element of literal computer input. Mono space was just
+     a visual element with no semantic association. Now, the syntax
+     <kbd>++...++</kbd> is obsolete.
+     (breaking: Zettelmarkup).
+  *  Remove API call to parse Zettelmarkup texts and encode it as text and
+     HTML. Was call &ldquo;POST /v&rdquo;. It was needed to separately encode
+     the titles of zettel. The same effect can be achieved by fetching the
+     ZJSON representation and encode it using the function in the Zettelstore
+     client software.
+     (breaking: api)
+  *  Remove API call to retrieve all links of an zettel. This can be done more
+     easily on the client side by traversing the ZJSON encoding of a zettel.
+     (breaking: api)
+  *  ZJSON will encode metadata value as pairs of a metadata type and metadata
+     value. This allows a client to decode the associated value more easily.
+     (minor: api)
+  *  A sequence of inline-structured elements can be marked, not just a point
+     in the Zettelmarkup text.
+     (minor: zettelmarkup)
+  *  Metadata keys with suffix <kbd>-title</kbd> force their value to be
+     interpreted as Zettelmarkup. Similar, the suffix <kbd>-set</kbd> denotes
+     a set/list of words and the suffix <kbd>-zids</kbd> a set/list of zettel
+     identifier.
+     (minor: api, webui)
+  *  Change generated URLs for zettel-creation forms. If you have bookmarked
+     them, e.g. to create a new zettel, you should update.
+     (minor: webui)
+  *  Remove support for metadata key <code>no-index</code> to suppress indexing
+     selected zettel. It was introduced in [#0_0_11|v0.0.11], but disallows
+     some future optimizations for searching zettel.
+     (minor: api, webui)
+  *  Make some metadata-based searches a little bit faster by executing
+     a (in-memory-based) full-text search first. Now only those zettel are
+     loaded from file that contain the metadata value.
+     (minor: api, webui)
+  *  Add an API call to retrieve the version of the Zettelstore.
+     (minor: api)
+  *  Limit the amount of zettel and bytes to be stored in a memory box. Allows
+     to use it with public access.
+     (minor: box)
+  *  Disallow caching the authentication cookie. Will remove most unexpected
+     log-outs when using a mobile device.
+     (minor: webui)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_3"></a>
+<h2>Changes for Version 0.3 (2022-02-09)</h2>
+  *  Zettel files with extension <code>.meta</code> are now treated as content
+     files. Previously, they were interpreted as metadata files. The
+     interpretation as metadata files was deprecated in version 0.2.
+     (breaking: directory and file/zip box)
+  *  Add syntax &ldquo;draw&rdquo; to produce some graphical representations.
+     (major)
+  *  Add Zettelmarkup syntax to specify full transclusion of other zettel.
+     (major: Zettelmarkup)
+  *  Add Zettelmarkup syntax to specify inline-zettel, both for
+     block-structured and for inline-structured elements.
+     (major: Zettelmarkup)
+  *  Metadata-returning API calls additionally return an indication about
+     access rights for the given zettel.
+     (minor: api)
+  *  A previously duplicate file that is now useful (because another file was
+     deleted) is now logged as such.
+     (minor: directory and file/zip box)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_2"></a>
+<h2>Changes for Version 0.2 (2022-01-19)</h2>
+  *  v0.2.1 (2021-02-01) updates the license year in some documents
+  *  Remove support for <code>;;small text;;</code> Zettelmarkup.
+     (breaking: Zettelmarkup)
+  *  On macOS, the downloadable executable program is now called
+     &ldquo;zettelstore&rdquo;, as on all other Unix-like platforms.
+     (possibly breaking: macOS)
+  *  External metadata (e.g. for zettel with file extension other than
+     <code>.zettel</code>) are stored in files without an extension. Metadata
+     files with extension <code>.meta</code> are still recognized, but result
+     in a warning message. In a future version (probably v0.3),
+     <code>.meta</code> files will be treated as ordinary content files,
+     possibly resulting in duplicate content. In other words: usage of
+     <code>.meta</code> files for storing metadata is deprecated.
+     (possibly breaking: directory and file box)
+  *  Show unlinked references in info page of each zettel. Unlinked references
+     are phrases within zettel content that might reference another zettel with
+     the same title as the phase.
+     (major: webui)
+  *  Add endpoint <code>/u/{ID}</code> to retrieve unlinked references.
+     (major: api)
+  *  Provide a logging facility.
+     Log messages are written to standard output. Messages with level
+     &ldquo;information&rdquo; are also written to a circular buffer (of length
+     8192) which can be retrieved via a computed zettel. There is a command
+     line flag <code>-l LEVEL</code> to specify an application global logging
+     level on startup (default: &ldquo;information&rdquo;). Logging level can
+     also be changed via the administrator console, even for specific (sub-)
+     services.
+     (major)
+  *  The internal handling of zettel files is rewritten. This allows less
+     reloads ands detects when the directory containing the zettel files is
+     removed. The API, WebUI, and the admin console allow manually refreshing
+     the internal state on demand.
+     (major: box, webui)
+  *  <code>.zettel</code> files with YAML header are now correctly written.
+     (bug)
+  *  Selecting zettel based on their metadata allows the same syntax as
+     searching for zettel content. For example, you can list all zettel that
+     have an identifier not ending with <code>00</code> by using the query
+     <code>id=!&lt;00</code>.
+     (minor: api, webui)
+  *  Remove support for <code>//deprecated emphasized//</code> Zettelmarkup.
+     (minor: Zettelmarkup)
+  *  Add options to profile the software. Profiling can be enabled at the
+     command line or via the administrator console.
+     (minor)
+  *  Add computed zettel that lists all supported parser / recognized zettel
+     syntaxes.
+     (minor)
+  *  Add API call to check for enabled authentication.
+     (minor: api)
+  *  Renewing an API access token works even if authentication is not enabled.
+     This corresponds to the behaviour of obtaining an access token.
+     (minor: api)
+  *  If there is nothing to return, use HTTP status code 204, instead of 200 +
+     <code>Content-Length: 0</code>.
+     (minor: api)
+  *  Metadata key <code>duplicates</code> stores the duplicate file names,
+     instead of just a boolean value that there were duplicate file names.
+     (minor)
+  *  Document auto starting Zettelstore on Windows, macOS, and Linux.
+     (minor)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_1"></a><a id="0_1_0"></a>
+<h2>Changes for Version 0.1 (2021-11-11)</h2>
+  *  v0.1.3 (2021-12-15) fixes a bug where the modification date could be set
+     when a new zettel is created.
+  *  v0.1.2 (2021-11-18) fixes a bug when selecting zettel from a list when
+     more than one comparison is negated.
+  *  v0.1.1 (2021-11-12) updates the documentation, mostly related to the
+     deprecation of the <code>//</code> markup.
+  *  Remove visual Zettelmarkup (italic, underline). Semantic Zettelmarkup
+     (emphasize, insert) is still allowed, but got a different syntax. The new
+     syntax for <ins>inserted text</ins> is
+     <code>&gt;&gt;inserted&gt;&gt;</code>, while its previous syntax now
+     denotes <em>emphasized text</em>: <code>__emphasized__</code>. The
+     previous syntax for emphasized text is now deprecated: <code>//deprecated
+     emphasized//</code>. Starting with Version&nbsp;0.2.0, the deprecated
+     syntax will not be supported. The reason is the collision with URLs that
+     also contain the characters <code>//</code>. The ZMK encoding of a zettel
+     may help with the transition
+     (<code>/v/{ZettelID}?_part=zettel&amp;_enc=zmk</code>, on the Info page of
+     each zettel in the WebUI). Additionally, all deprecated uses of
+     <code>//</code> will be rendered with a dashed box within the WebUI.
+     (breaking: Zettelmarkup).
+  *  API client software is now a separate project.
+     (breaking)
+  *  Initial support for HTTP security headers (Content-Security-Policy,
+     Permissions-Policy, Referrer-Policy, X-Content-Type-Options,
+     X-Frame-Options). Header values are currently some constant values.
+     (possibly breaking: api, webui)
+  *  Remove visual Zettelmarkup (bold, strike through). Semantic Zettelmarkup
+     (strong, delete) is still allowed and replaces the visual elements
+     syntactically. The visual appearance should not change (depends on your
+     changes / additions to CSS zettel).
+     (possibly breaking: Zettelmarkup).
+  *  Add API endpoint <code>POST /v</code> to retrieve HTMl and text encoded
+     strings from given ZettelMarkup encoded values. This will be used to
+     render a HTML page from a given zettel: in many cases the title of
+     a zettel must be treated separately.
+     (minor: api)
+  *  Add API endpoint <code>/m</code> to retrieve only the metadata of
+     a zettel.
+     (minor: api)
+  *  New metadata value <code>content-tags</code> contains the tags that were
+     given in the zettel content. To put it simply, <code>all-tags</code>
+     = <code>tags</code> + <code>content-tags</code>.
+     (minor)
+  *  Calculating the context of a zettel stops at the home zettel.
+     (minor: api, webui)
+  *  When renaming or deleting a zettel, a warning will be given, if other
+     zettel references the given zettel, or when &ldquo;deleting&rdquo; will
+     uncover zettel in overlay box.
+     (minor: webui)
+  *  Fix: do not allow control characters in JSON-based creating/updating API.
+     Otherwise, the created / updated zettel might not be parseable by the
+     software (but still by a human). In certain cases, even the WebUI might be
+     affected.
+     (minor: api, webui)
+  *  Fix: when a very long word (longer than width of browser window) is given,
+     still allow scrolling horizontally.
+     (minor: webui)
+  *  Separate repository for [https://zettelstore.de/contrib/|contributed]
+     software. First entry is a software for creating a presentation by using
+     zettel.
+     (info)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_0_15"></a>
+<h2>Changes for Version 0.0.15 (2021-09-17)</h2>
+  *  Move again endpoint characters for authentication to make room for future
+     features. WebUI authentication moves from <code>/a</code> to
+     <code>/i</code> (login) and <code>/i?logout</code> (logout). API
+     authentication moves from <code>/v</code> to </code>/a</code>. JSON-based
+     basic zettel handling moves from <code>/z</code> to <code>/j</code> and
+     <code>/z/{ID}</code> to <code>/j/{ID}</code>. Since the API client is
+     updated too, this should not be a breaking change for most users.
+     (minor: api, webui; possibly breaking)
+  *  Add API endpoint <code>/v/{ID}</code> to retrieve an evaluated zettel in
+     various encodings. Mostly replaces endpoint <code>/z/{ID}</code> for other
+     encodings except &ldquo;json&rdquo; and &ldquo;raw&rdquo;. Endpoint
+     <code>/j/{ID}</code> now only returns JSON data, endpoint
+     <code>/z/{ID}</code> is used to retrieve plain zettel data (previously
+     called &ldquo;raw&rdquo;). See documentation for details.
+     (major: api; breaking)
+  *  Metadata values of type <em>tag set</em> (the metadata with key
+     <code>tags</code> is its most prominent example), are now compared in
+     a case-insensitive manner. Tags that only differ in upper / lower case
+     character are now treated identical. This might break your workflow, if
+     you depend on case-sensitive comparison of tag values. Tag values are
+     translated to their lower case equivalent before comparing them and when
+     you edit a zettel through Zettelstore. If you just modify the zettel
+     files, your tag values remain unchanged.
+     (major; breaking)
+  *  Endpoint <code>/z/{ID}</code> allows the same methods as endpoint
+     <code>/j/{ID}</code>: <code>GET</code> retrieves zettel (see above),
+     <code>PUT</code> updates a zettel, <code>DELETE</code> deletes a zettel,
+     <code>MOVE</code> renames a zettel. In addition, <code>POST /z</code> will
+     create a new zettel. When zettel data must be given, the format is plain
+     text, with metadata separated from content by an empty line. See
+     documentation for more details.
+     (major: api (plus WebUI for some details))
+  *  Allows to transclude / expand the content of another zettel into a target
+     zettel when the zettel is rendered. By using the syntax of embedding an
+     image (which is some kind of expansion too), the first top-level paragraph
+     of a zettel may be transcluded into the target zettel. Endless recursion
+     is checked, as well as a possible &ldquo;transclusion bomb &rdquo;
+     (similar to a XML bomb). See manual for details.
+     (major: zettelmarkup)
+  *  The endpoint <code>/z</code> allows to list zettel in a simpler format
+     than endpoint <code>/j</code>: one line per zettel, and only zettel
+     identifier plus zettel title.
+     (minor: api)
+  *  Folgezettel are now displayed with full title at the bottom of a page.
+     (minor: webui)
+  *  Add API endpoint <code>/p/{ID}</code> to retrieve a parsed, but not
+     evaluated zettel in various encodings.
+     (minor: api)
+  *  Fix: do not list a shadowed zettel that matches the select criteria.
+     (minor)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_0_14"></a>
+<h2>Changes for Version 0.0.14 (2021-07-23)</h2>
+  *  Rename &ldquo;place&rdquo; into &ldquo;box&rdquo;. This also affects the
+     configuration keys to specify boxes <code>box-uri<em>X</em></code>
+     (previously <code>place-uri-<em>X</em></code>. Older changes documented
+     here are renamed too.
+     (breaking)
+  *  Add API for creating, updating, renaming, and deleting zettel.
+     (major: api)
+  *  Initial API client for Go.
+     (major: api)
+  *  Remove support for paging of WebUI list. Runtime configuration key
+     <code>list-page-size</code> is removed. If you still specify it, it will
+     be ignored.
+     (major: webui)
+  *  Use endpoint <code>/v</code> for user authentication via API. Endpoint
+     <code>/a</code> is now used for the web user interface only. Similar,
+     endpoint <code>/y</code> (&ldquo;zettel context&rdquo;) is renamed to
+     <code>/x</code>.
+     (minor, possibly breaking)
+  *  Type of used-defined metadata is determined by suffix of key:
+     <code>-number</code>, <code>-url</code>, <code>-zid</code> will result the
+     values to be interpreted as a number, an URL, or a zettel identifier.
+     (minor, but possibly breaking if you already used a metadata key with
+     above suffixes, but as a string type)
+  *  New <code>user-role</code> &ldquo;creator&rdquo;, which is only allowed to
+     create new zettel (except user zettel). This role may only read and update
+     public zettel or its own user zettel. Added to support future client
+     software (e.g. on a mobile device) that automatically creates new zettel
+     but, in case of a password loss, should not allow reading existing zettel.
+     (minor, possibly breaking, because new zettel template zettel must always
+     prepend the string <code>new-</code> before metadata keys that should be
+     transferred to the new zettel)
+  *  New supported metadata key <code>box-number</code>, which gives an
+     indication from which box the zettel was loaded.
+     (minor)
+  *  New supported syntax <code>html</code>.
+     (minor)
+  *  New predefined zettel &ldquo;User CSS&rdquo; that can be used to redefine
+     some predefined CSS (without modifying the base CSS zettel).
+     (minor: webui)
+  *  When a user moves a zettel file with additional characters into the box
+     directory, these characters are preserved when zettel is updated.
+     (bug)
+  *  The phase &ldquo;filtering a zettel list&rdquo; is more precise
+     &ldquo;selecting zettel&rdquo;
+     (documentation)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_0_13"></a>
+<h2>Changes for Version 0.0.13 (2021-06-01)</h2>
+  *  Startup configuration <code>box-<em>X</em>-uri</code> (where <em>X</em> is
+     a number greater than zero) has been renamed to
+     <code>box-uri-<em>X</em></code>.
+     (breaking)
+  *  Web server processes startup configuration <code>url-prefix</code>. There
+     is no need for stripping the prefix by a front-end web server any more.
+     (breaking: webui, api)
+  *  Administrator console (only optional accessible locally). Enable it only
+     on systems with a single user or with trusted users. It is disabled by
+     default.
+     (major: core)
+  *  Remove visibility value &ldquo;simple-expert&rdquo; introduced in
+     [#0_0_8|version 0.0.8]. It was too complicated, esp. authorization. There
+     was a name collision with the &ldquo;simple&rdquo; directory box sub-type.
+     (major)
+  *  For security reasons, HTML blocks are not encoded as HTML if they contain
+     certain snippets, such as <code>&lt;script</code> or
+     <code>&lt;iframe</code>. These may be caused by using CommonMark as
+     a zettel syntax.
+     (major)
+  *  Full-text search can be a prefix search or a search for equal words, in
+     addition to the search whether a word just contains word of the search
+     term.
+     (minor: api, webui)
+  *  Full-text search for URLs, with above additional operators.
+     (minor: api, webui)
+  *  Add system zettel about license, contributors, and dependencies (and their
+     license).
+     For a nicer layout of zettel identifier, the zettel about environment
+     values and about runtime metrics got new zettel identifier. This affects
+     only user that referenced those zettel.
+     (minor)
+  *  Local images that cannot be read (not found or no access rights) are
+     substituted with the new default image, a spinning emoji.
+     See [/file?name=box/constbox/emoji_spin.gif].
+     (minor: webui)
+  *  Add zettelmarkup syntax for a table row that should be ignored:
+     <code>|%</code>. This allows to paste output of the administrator console
+     into a zettel.
+     (minor: zmk)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_0_12"></a>
+<h2>Changes for Version 0.0.12 (2021-04-16)</h2>
+  *  Raise the per-process limit of open files on macOS to 1.048.576. This
+     allows most macOS users to use at least 500.000 zettel. That should be
+     enough for the near future.
+     (major)
+  *  Mitigate the shortcomings of the macOS version by introducing types of
+     directory boxes. The original directory box type is now called "notify"
+     (the default value). There is a new type called "simple". This new type
+     does not notify Zettelstore when some of the underlying Zettel files
+     change.
+     (major)
+  *  Add new startup configuration <code>default-dir-box-type</code>, which
+     gives the default value for specifying a directory box type. The default
+     value is &ldquo;notify&rdquo;. On macOS, the default value may be changed
+     &ldquo;simple&rdquo; if some errors occur while raising the per-process
+     limit of open files.
+     (minor)
+
+<a id="0_0_11"></a>
+<h2>Changes for Version 0.0.11 (2021-04-05)</h2>
+  *  New box schema "file" allows to read zettel from a ZIP file.
+     A zettel collection can now be packaged and distributed easier.
+     (major: server)
+  *  Non-restricted search is a full-text search. The search string will be
+     normalized according to Unicode NFKD. Every character that is not a letter
+     or a number will be ignored for the search. It is sufficient if the words
+     to be searched are part of words inside a zettel, both content and
+     metadata.
+     (major: api, webui)
+  *  A zettel can be excluded from being indexed (and excluded from being found
+     in a search) if it contains the metadata <code>no-index: true</code>.
+     (minor: api, webui)
+  *  Menu bar is shown when displaying error messages.
+     (minor: webui)
+  *  When selecting zettel, it can be specified that a given value should
+     <em>not</em> match. Previously, only the whole select criteria could be
+     negated (which is still possible).
+     (minor: api, webui)
+  *  You can select a zettel by specifying that specific metadata keys must
+     (or must not) be present.
+     (minor: api, webui)
+  *  Context of a zettel (introduced in version 0.0.10) does not take tags into
+     account any more. Using some tags for determining the context resulted
+     into erratic, non-deterministic context lists.
+     (minor: api, webui)
+  *  Selecting zettel depending on tag values can be both by comparing only the
+     prefix or the whole string. If a search value begins with '#', only zettel
+     with the exact tag will be returned. Otherwise a zettel will be returned
+     if the search string just matches the prefix of only one of its tags.
+     (minor: api, webui)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+A note for users of macOS: in the current release and with macOS's default
+values, a zettel directory must not contain more than approx. 250 files. There
+are three options to mitigate this limitation temporarily:
+  #  You update the per-process limit of open files on macOS.
+  #  You setup a virtualisation environment to run Zettelstore on Linux or
+     Windows.
+  #  You wait for version 0.0.12 which addresses this issue.
+
+<a id="0_0_10"></a>
+<h2>Changes for Version 0.0.10 (2021-02-26)</h2>
+  *  Menu item &ldquo;Home&rdquo; now redirects to a home zettel.
+     Its default identifier is <code>000100000000</code>. The identifier can be
+     changed with configuration key <code>home-zettel</code>, which supersedes
+     key <code>start</code>. The default home zettel contains some welcoming
+     information for the new user.
+     (major: webui)
+  *  Show context of a zettel by following all backward and/or forward
+     reference up to a defined depth and list the resulting zettel.
+     Additionally, some zettel with similar tags as the initial zettel are also
+     taken into account.
+     (major: api, webui)
+  *  A zettel that references other zettel within first-level list items, can
+     act as a &ldquo;table of contents&rdquo; zettel. The API endpoint
+     <code>/o/{ID}</code> allows to retrieve the referenced zettel in the same
+     order as they occur in the zettel.
+     (major: api)
+  *  The zettel &ldquo;New Menu&rdquo; with identifier
+     <code>00000000090000</code> contains a list of all zettel that should act
+     as a template for new zettel. They are listed in the WebUIs
+     &rdquo;New&ldquo; menu. This is an application of the previous item. It
+     supersedes the usage of a role <code>new-template</code> introduced in
+     [#0_0_6|version 0.0.6]. <b>Please update your zettel if you make use of
+     the now deprecated feature.</b>
+     (major: webui)
+  *  A reference that starts with two slash characters
+     (&ldquo;<code>//</code>&rdquo;) it will be interpreted relative to the
+     value of <code>url-prefix</code>. For example, if <code>url-prefix</code>
+     has the value <code>/manual/</code>, the reference
+     <code>&lbrack;&lbrack;Zettel list|//h]]</code> will render as <code>&lt;a
+     href="/manual/h">Zettel list&lt;/a></code>.
+     (minor: syntax)
+  *  Searching/selecting ignores the leading '#' character of tags.
+     (minor: api, webui)
+  *  When result of selecting or searching is presented, the query is written
+     as the page heading.
+     (minor: webui)
+  *  A reference to a zettel that contains a URL fragment, will now be
+     processed by the indexer.
+     (bug: server)
+  *  Runtime configuration key <code>marker-external</code> now defaults to
+     &ldquo;&amp;#10138;&rdquo; (&ldquo;&#10138;&rdquo;). It is more beautiful
+     than the previous &ldquo;&amp;#8599;&amp;#xfe0e;&rdquo;
+     (&ldquo;&#8599;&#65038;&rdquo;), which also needed the additional
+     &ldquo;&amp;#xfe0e;&rdquo; to disable the conversion to an emoji on
+     iPadOS.
+     (minor: webui)
+  *  A pre-build binary for macOS ARM64 (also known as Apple silicon) is
+     available.
+     (minor: infrastructure)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
+
+<a id="0_0_9"></a>
+<h2>Changes for Version 0.0.9 (2021-01-29)</h2>
+This is the first version that is managed by [https://fossil-scm.org|Fossil]
+instead of GitHub. To access older versions, use the Git repository under
+[https://github.com/zettelstore/zettelstore-github|zettelstore-github].
+
+<h3>Server / API</h3>
+  *  (major) Support for property metadata.
+             Metadata key <code>published</code> is the first example of such
+             a property.
+  *  (major) A background activity (called <i>indexer</i>) continuously
+             monitors zettel changes to establish the reverse direction of
+             found internal links. This affects the new metadata keys
+             <code>precursor</code> and <code>folge</code>. A user specifies
+             the precursor of a zettel and the indexer computes the property
+             metadata for
+             [https://forum.zettelkasten.de/discussion/996/definition-folgezettel|Folgezettel].
+             Metadata keys with type &ldquo;Identifier&rdquo; or
+             &ldquo;IdentifierSet&rdquo; that have no inverse key (like
+             <code>precursor</code> and <code>folge</code> with add to the key
+             <code>forward</code> that also collects all internal links within
+             the content. The computed inverse is <code>backward</code>, which
+             provides all backlinks. The key <code>back</code> is computed as
+             the value of <code>backward</code>, but without forward links.
+             Therefore, <code>back</code> is something like the list of
+             &ldquo;smart backlinks&rdquo;.
+  *  (minor) If Zettelstore is being stopped, an appropriate message is written
+             in the console log.
+  *  (minor) New computed zettel with environmental data, the list of supported
+             meta data keys, and statistics about all configured zettel boxes.
+             Some other computed zettel got a new identifier (to make room for
+             other variant).
+  *  (minor) Remove zettel <code>00000000000004</code>, which contained the Go
+             version that produced the Zettelstore executable. It was too
+             specific to the current implementation. This information is now
+             included in zettel <code>00000000000006</code> (<i>Zettelstore
+             Environment Values</i>).
+  *  (minor) Predefined templates for new zettel do not contain any value for
+             attribute <code>visibility</code> any more.
+  *  (minor) Add a new metadata key type called &ldquo;Zettelmarkup&rdquo;.
+             It is a non-empty string, that will be formatted with
+             Zettelmarkup. <code>title</code> and <code>default-title</code>
+             have this type.
+  *  (major) Rename zettel syntax &ldquo;meta&rdquo; to &ldquo;none&rdquo;.
+             Please update the <i>Zettelstore Runtime Configuration</i> and all
+             other zettel that previously used the value &ldquo;meta&rdquo;.
+             Other zettel are typically user zettel, used for authentication.
+             However, there is no real harm, if you do not update these zettel.
+             In this case, the metadata is just not presented when rendered.
+             Zettelstore will still work.
+  *  (minor) Login will take at least 500 milliseconds to mitigate login
+             attacks. This affects both the API and the WebUI.
+  *  (minor) Add a sort option &ldquo;_random&rdquo; to produce a zettel list
+             in random order. <code>_order</code> / <code>order</code> are now
+             an aliases for the query parameters <code>_sort</code>
+             / <code>sort</code>.
+
+<h3>WebUI</h3>
+  *  (major) HTML template zettel for WebUI now use
+             [https://mustache.github.io/|Mustache] syntax instead of
+             previously used [https://golang.org/pkg/html/template/|Go
+             template] syntax. This allows these zettel to be used, even when
+             there is another Zettelstore implementation, in another
+             programming language. Mustache is available for approx. 48
+             programming languages, instead of only one for Go templates. <b>If
+             you modified your templates, you <i>must</i> adapt them to the new
+             syntax. Otherwise the WebUI will not work.</b>
+  *  (major) Show zettel identifier of folgezettel and precursor zettel in the
+             header of a rendered zettel. If a zettel has real backlinks, they
+             are shown at the botton of the page (&ldquo;Additional links to
+             this zettel&rdquo;).
+  *  (minor) All property metadata, even computed metadata is shown in the info
+             page of a zettel.
+  *  (minor) Rendering of metadata keys <code>title</code> and
+             <code>default-title</code> in info page changed to a full HTML
+             output for these Zettelmarkup encoded values.
+  *  (minor) Always show the zettel identifier on the zettel detail view.
+             Previously, the identifier was not shown if the zettel was not
+             editable.
+  *  (minor) Do not show computed metadata in edit forms anymore.
+
+<a id="0_0_8"></a>
+<h2>Changes for Version 0.0.8 (2020-12-23)</h2>
+<h3>Server / API</h3>
+  *  (bug) Zettel files with extension <code>.jpg</code> and without metadata
+           will get a <code>syntax</code> value &ldquo;jpg&rdquo;. The internal
+           data structure got the same value internally, instead of
+           &ldquo;jpeg&rdquo;. This has been fixed for all possible alternative
+           syntax values.
+  *  (bug) If a file, e.g. an image file like <code>20201130190200.jpg</code>,
+           is added to the directory box, its metadata are just calculated from
+           the information available. Updated metadata did not find its way
+           into the zettel box, because the <code>.meta</code> file was not
+           written.
+  *  (bug) If just the <code>.meta</code> file was deleted manually, the zettel
+           was assumed to be missing. A workaround is to restart the software.
+           If the <code>.meta</code> file is deleted, metadata is now
+           calculated in the same way when the <code>.meta</code> file is
+           non-existing at the start of the software.
+  *  (bug) A link to the current zettel, only using a fragment (e.g.
+           <code>&#91;&#91;Title|#title]]</code>) is now handled correctly as
+           a zettel link (and not as a link to external material).
+  *  (minor) Allow zettel to be marked as &ldquo;read only&rdquo;.
+             This is done through the metadata key <code>read-only</code>.
+  *  (bug) When renaming a zettel, check all boxes for the new zettel
+           identifier, not just the first one. Otherwise it will be possible to
+           shadow a read-only zettel from a next box, effectively modifying it.
+  *  (minor) Add support for a configurable default value for metadata key
+             <code>visibility</code>.
+  *  (bug) If <code>list-page-size</code> is set to a relatively small value
+           and the authenticated user is <i>not</i> the owner, some zettel were
+           not shown in the list of zettel or were not returned by the API.
+  *  (minor) Add support for new visibility &ldquo;expert&rdquo;.
+             An owner becomes an expert, if the runtime configuration key
+             <code>expert-mode</code> is set to true.
+  *  (major) Add support for computed zettel.
+             These zettel have an identifier less than
+             <code>0000000000100</code>. Most of them are only visible, if
+             <code>expert-mode</code> is enabled.
+  *  (bug)   Fixes a memory leak that results in too many open files after
+             approx. 125 reload operations.
+  *  (major) Predefined templates for new zettel got an explicit value for
+             visibility: &ldquo;login&rdquo;. Please update these zettel if you
+             modified them.
+  *  (major) Rename key <code>readonly</code> of <i>Zettelstore Startup
+             Configuration</i> to <code>read-only-mode</code>. This was done to
+             avoid some confusion with the zettel metadata key
+             <code>read-only</code>. <b>Please adapt your startup
+             configuration. Otherwise your Zettelstore will be accidentally
+             writable.</b>
+  *  (minor) References starting with &ldquo;./&rdquo; and &ldquo;../&rdquo;
+             are treated as a local reference. Previously, only the prefix
+             &ldquo;/&rdquo; was treated as a local reference.
+  *  (major) Metadata key <code>modified</code> will be set automatically to
+             the current local time if a zettel is updated through Zettelstore.
+             <b>If you used that key previously for your own, you should rename
+             it before you upgrade.</b>
+  *  (minor) The new visibility value &ldquo;simple-expert&rdquo; ensures that
+             many computed zettel are shown for new users. This is to enable
+             them to send useful bug reports.
+  *  (minor) When a zettel is stored as a file, its identifier is additionally
+             stored within the metadata. This helps for better robustness in
+             case the file names were corrupted. In addition, there could be
+             a tool that compares the identifier with the file name.
+
+<h3>WebUI</h3>
+  *  (minor) Remove list of tags in &ldquo;List Zettel&rdquo; and search
+             results. There was some feedback that the additional tags were not
+             helpful.
+  *  (minor) Move zettel field "role" above "tags" and move "syntax" more to
+             "content".
+  *  (minor) Rename zettel operation &ldquo;clone&rdquo; to &ldquo;copy&rdquo;.
+  *  (major) All predefined HTML templates have now a visibility value
+             &ldquo;expert&rdquo;. If you want to see them as an non-expert
+             owner, you must temporary enable <code>expert-mode</code> and
+             change the <code>visibility</code> metadata value.
+  *  (minor) Initial support for
+             [https://zettelkasten.de/posts/tags/folgezettel/|Folgezettel]. If
+             you click on &ldquo;Folge&rdquo; (detail view or info view), a new
+             zettel is created with a reference (<code>precursor</code>) to the
+             original zettel. Title, role, tags, and syntax are copied from the
+             original zettel.
+  *  (major) Most predefined zettel have a title prefix of
+             &ldquo;Zettelstore&rdquo;.
+  *  (minor) If started in simple mode, e.g. via double click or without any
+             command, some information for the new user is presented. In the
+             terminal, there is a hint about opening the web browser and use
+             a specific URL. A <i>Welcome zettel</i> is created, to give some
+             more information. (This change also applies to the server itself,
+             but it is more suited to the WebUI user.)
+
+<a id="0_0_7"></a>
+<h2>Changes for Version 0.0.7 (2020-11-24)</h2>
+  *  With this version, Zettelstore and this manual got a new license, the
+     [https://joinup.ec.europa.eu/collection/eupl|European Union Public
+     Licence] (EUPL), version 1.2 or later. Nothing else changed. If you want
+     to stay with the old licenses (AGPLv3+, CC BY-SA 4.0), you are free to
+     fork from the previous version.
+
+<a id="0_0_6"></a>
+<h2>Changes for Version 0.0.6 (2020-11-23)</h2>
+<h3>Server</h3>
+  *  (major) Rename identifier of <i>Zettelstore Runtime Configuration</i> to
+             <code>00000000000100</code> (previously
+             <code>00000000000001</code>). This is done to gain some free
+             identifier with smaller number to be used internally. <b>If you
+             customized this zettel, please make sure to rename it to the new
+             identifier.</b>
+  *  (major) Rename the two essential metadata keys of a user zettel to
+             <code>credential</code> and <code>user-id</code>. The previous
+             values were <code>cred</code> and <code>ident</code>. <b>If you
+             enabled user authentication and added some user zettel, make sure
+             to change them accordingly. Otherwise these users will not
+             authenticated any more.</b>
+  *  (minor) Rename the scheme of the box URL where predefined zettel are
+             stored to &ldquo;const&rdquo;. The previous value was
+             &ldquo;globals&rdquo;.
+
+<h3>Zettelmarkup</h3>
+  *  (bug) Allow specifying a <i>fragment</i> in a reference to a zettel.
+           Used to link to an internal position within a zettel.
+           This applies to CommonMark too.
+
+<h3>API</h3>
+  *  (bug)   Encoding binary content in format &ldquo;json&rdquo; now results
+             in valid JSON content.
+  *  (bug)   All query parameters of selecting zettel must be true, regardless
+             if a specific key occurs more than one or not.
+  *  (minor) Encode all inherited meta values in all formats except
+             &ldquo;raw&rdquo;. A meta value is called <i>inherited</i> if
+             there is a key starting with <code>default-</code> in the
+             <i>Zettelstore Runtime Configuration</i>. Applies to WebUI also.
+  *  (minor) Automatic calculated identifier for headings (only for
+             &ldquo;html&rdquo;, &ldquo;djson&rdquo;, &ldquo;native&rdquo;
+             format and for the Web user interface). You can use this to
+             provide a zettel reference that links to the heading, without
+             specifying an explicit mark (<code>&#91;!mark]</code>).
+  *  (major) Allow retrieving all references of a given zettel.
+
+<h3>Web user interface (WebUI)</h3>
+  *  (minor) Focus on the first text field on some forms (new zettel, edit
+             zettel, rename zettel, login)
+  *  (major) Adapt all HTML templates to a simpler structure.
+  *  (bug)   Rendered wrong URLs for internal links on info page.
+  *  (bug)   If a zettel contains binary content it cannot be cloned.
+             For such a zettel only the metadata can be changed.
+  *  (minor) Non-zettel references that neither have an URL scheme, user info,
+             nor host name, are considered &ldquo;local references&rdquo; (in
+             contrast to &ldquo;zettel references&rdquo; and &ldquo;external
+             references&rdquo;). When a local reference is displayed as an URL
+             on the WebUI, it will not opened in a new window/tab. They will
+             receive a <i>local</i> marker, when encoded as &ldquo;djson&rdquo;
+             or &ldquo;native&rdquo;. Local references are listed on the
+             <i>Info page</i> of each zettel.
+  *  (minor) Change the default value for some visual sugar put after an
+             external URL to <code>&\#8599;&\#xfe0e;</code>
+             (&ldquo;&#8599;&#xfe0e;&rdquo;). This affects the former key
+             <code>icon-material</code> of the <i>Zettelstore Runtime
+             Configuration</i>, which is renamed to
+             <code>marker-external</code>.
+  *  (major) Allow multiple zettel to act as templates for creating new zettel.
+             All zettel with a role value &ldquo;new-template&rdquo; act as
+             a template to create a new zettel. The WebUI menu item
+             &ldquo;New&rdquo; changed to a drop-down list with all those
+             zettel, ordered by their identifier. All metadata keys with the
+             prefix <code>new-</code> will be translated to a new or updated
+             keys/value without that prefix. You can use this mechanism to
+             specify a role for the new zettel, or a different title. The title
+             of the template zettel is used in the drop-down list. The initial
+             template zettel &ldquo;New Zettel&rdquo; has now a different
+             zettel identifier (now: <code>00000000091001</code>, was:
+             <code>00000000040001</code>). <b>Please update it, if you changed
+             that zettel.</b>
+             <br>Note: this feature was superseded in [#0_0_10|version 0.0.10]
+             by the &ldquo;New Menu&rdquo; zettel.
+  *  (minor) When a page should be opened in a new windows (e.g. for external
+             references), the web browser is instructed to decouple the new
+             page from the previous one for privacy and security reasons. In
+             detail, the web browser is instructed to omit referrer information
+             and to omit a JS object linking to the page that contained the
+             external link.
+  *  (minor) If the value of the <i>Zettelstore Runtime Configuration</i> key
+             <code>list-page-size</code> is greater than zero, the number of
+             WebUI list elements will be restricted and it is possible to
+             change to the next/previous page to list more elements.
+  *  (minor) Change CSS to enhance reading: make <code>line-height</code>
+             a little smaller (previous: 1.6, now 1.4) and move list items to
+             the left.
+
+<a id="0_0_5"></a>
+<h2>Changes for Version 0.0.5 (2020-10-22)</h2>
+  *  Application Programming Interface (API) to allow external software to
+     retrieve zettel data from the Zettelstore.
+  *  Specify boxes, where zettel are stored, via an URL.
+  *  Add support for a custom footer.
+
+<a id="0_0_4"></a>
+<h2>Changes for Version 0.0.4 (2020-09-11)</h2>
+  *  Optional user authentication/authorization.
+  *  New sub-commands <code>file</code> (use Zettelstore as a command line
+     filter), <code>password</code> (for authentication), and
+     <code>config</code>.
+
+<a id="0_0_3"></a>
+<h2>Changes for Version 0.0.3 (2020-08-31)</h2>
+  *  Starting Zettelstore has been changed by introducing sub-commands.
+     This change is also reflected on the server installation procedures.
+  *  Limitations on renaming zettel has been relaxed.
+
+<a id="0_0_2"></a>
+<h2>Changes for Version 0.0.2 (2020-08-28)</h2>
+  *  Configuration zettel now has ID <code>00000000000001</code> (previously:
+     <code>00000000000000</code>).
+  *  The zettel with ID <code>00000000000000</code> is no longer shown in any
+     zettel list. If you changed the configuration zettel, you should rename it
+     manually in its file directory.
+  *  Creating a new zettel is now done by cloning an existing zettel.
+     To mimic the previous behaviour, a zettel with ID
+     <code>00000000040001</code> is introduced. You can change it if you need
+     a different template zettel.
+
+<a id="0_0_1"></a>
+<h2>Changes for Version 0.0.1 (2020-08-21)</h2>
+  *  Initial public release.
