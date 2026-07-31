@@ -75,7 +75,8 @@ func (e *evaluator) evalTransclusion(tn *sx.Pair) *sx.Pair {
 			e.transcludeCount++
 			return e.evalQueryTransclusion(refVal)
 		default:
-			return makeBlock(createInlineErrorText(ref, "Illegal reference symvol "+refSym.GetValue()))
+			return makeBlock(createInlineErrorText(
+				ref, "Unknown transclusion reference symbol "+refSym.GetValue()))
 		}
 	}
 
