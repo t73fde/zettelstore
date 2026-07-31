@@ -142,8 +142,13 @@ func (e *evaluator) evalEmbed(en *sx.Pair) *sx.Pair {
 		e.transcludeCount += cost.ec
 	}
 
-	newAttrs := styleAttr(attrs, "width")
-	return zsx.MakeFormat(zsx.SymFormatSpan, newAttrs, result)
+	if newAttrs := styleAttr(attrs, "width"); newAttrs != nil {
+		return zsx.MakeFormat(zsx.SymFormatSpan, newAttrs, result)
+	}
+	if result.Tail() == nil {
+		return result.Head()
+	}
+	return result.Cons(zsx.SymSpecialSplice)
 }
 
 func (e *evaluator) updateImageRefNode(

@@ -42,7 +42,7 @@ func TestZettelTransclusion(t *testing.T) {
 	}
 	expect := string(content)
 	for count, zid := range []id.Zid{abc10Zid, abc100Zid, abc1000Zid} {
-		expect = strings.Repeat("<span>"+expect+"</span>", 10)
+		expect = strings.Repeat(expect, 10)
 		content, err = c.GetEvaluatedZettel(context.Background(), zid, webapi.EncoderHTML)
 		if err != nil {
 			t.Error(err)

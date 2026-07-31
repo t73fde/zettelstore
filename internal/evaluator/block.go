@@ -48,7 +48,7 @@ func (e *evaluator) evalVerbatimZettel(vn *sx.Pair) *sx.Pair {
 	}
 	e.transcludeCount++
 	zn := e.evaluateEmbeddedZettel(zettel)
-	return regionedBlocks(zn.Blocks, nil)
+	return regionedOrSplicedBlocks(zn.Blocks, nil)
 }
 
 func (e *evaluator) evalTransclusion(tn *sx.Pair) *sx.Pair {
@@ -108,7 +108,7 @@ func (e *evaluator) evalTransclusion(tn *sx.Pair) *sx.Pair {
 	if ec := cost.ec; ec > 0 {
 		e.transcludeCount += cost.ec
 	}
-	return regionedBlocks(zn.Blocks, attrs)
+	return regionedOrSplicedBlocks(zn.Blocks, attrs)
 }
 
 func (e *evaluator) evalQueryTransclusion(expr string) *sx.Pair {
@@ -129,8 +129,13 @@ func (e *evaluator) evalQueryTransclusion(expr string) *sx.Pair {
 
 func makeBlock(inl *sx.Pair) *sx.Pair { return zsx.MakePara(inl) }
 
-func regionedBlocks(block *sx.Pair, attrs *sx.Pair) *sx.Pair {
-	newAttrs := styleAttr(attrs, "width")
+func regionedOrSplicedBlocks(block *sx.Pair, attrs *sx.Pair) *sx.Pair {
 	blocks := zsx.GetBlock(block)
-	return zsx.MakeRegion(zsx.SymRegionBlock, newAttrs, blocks, nil)
+	if newAttrs := styleAttr(attrs, "width"); newAttrs != nil {
+		return zsx.MakeRegion(zsx.SymRegionBlock, newAttrs, blocks, nil)
+	}
+	if blocks.Tail() == nil {
+		return blocks.Head()
+	}
+	return blocks.Cons(zsx.SymSpecialSplice)
 }

@@ -4,13 +4,14 @@ role: manual
 tags: #manual #zettelmarkup #zettelstore
 syntax: zmk
 created: 20210811154251
-modified: 20251108163237
+modified: 20260731172023
 
 Inline-mode transclusion is applied to any zettel that is parsed in a non-trivial way, such as when the content is structured text.
 For instance, this applies to zettel written in [[Zettelmarkup|00001007000000]] or [[Markdown|00001008010000]].
 
 Since this type of transclusion involves [[inline-structured elements|00001007040000]], the transclusion specification must be replaced with an appropriate inline-structured content.
-Specifically, the transclusion specification is replaced with an [[inline span|00001007040100#inline-span]] containing the inline-structured content.
+Specifically, the transclusion specification is replaced with an [[inline span|00001007040100#inline-span]] containing the inline-structured content, if attributes are given to the transclusion.
+Otherwise, the inline-structured elements are inserted literally into the position of the transclusion.
 
 The process begins by reading the referenced zettel.
 If the zettel contains other transclusions, these will be expanded recursively.
