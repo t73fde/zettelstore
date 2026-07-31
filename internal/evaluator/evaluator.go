@@ -187,8 +187,8 @@ func styleAttr(attrs *sx.Pair, keys ...string) *sx.Pair {
 	a := zsx.GetAttributes(attrs)
 	style := strings.TrimSpace(a["style"])
 	var sb strings.Builder
-	sb.WriteString(style)
 	if style != "" && style[len(style)-1] != ';' {
+		sb.WriteString(style)
 		sb.WriteByte(';')
 	}
 	found := false
