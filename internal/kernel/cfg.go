@@ -49,7 +49,6 @@ const (
 	keyMarkdownDialect   = "markdown-dialect"
 	keyMaxTransclusions  = "max-transclusions"
 	keySiteName          = "site-name"
-	keyYAMLHeader        = "yaml-header"
 	keyZettelFileSyntax  = "zettel-file-syntax"
 )
 
@@ -110,7 +109,6 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keyMaxTransclusions: {"Maximum number of transclusions", parseInt, true},
 		keySiteName:         {"Site name", parseString, true},
 		ConfigSxMaxNesting:  {"Maximum nesting of Sx calls", parseInt, true},
-		keyYAMLHeader:       {"YAML header", parseBool, true},
 		keyZettelFileSyntax: {
 			"Zettel file syntax",
 			func(val string) (any, error) {
@@ -136,7 +134,6 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keyMaxTransclusions:       defaultMaxTransclusions,
 		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
-		keyYAMLHeader:             false,
 		keyZettelFileSyntax:       set.New[string](),
 		config.KeyListsMenuZettel: id.ZidTOCListsMenu,
 		config.KeyShowBackLinks:   "",
@@ -321,12 +318,6 @@ func (cs *configService) MaxTransclusions() int {
 		return mt
 	}
 	return defaultMaxTransclusions
-}
-
-// UseYAMLHeader returns the current value of the "yaml-header" key.
-func (cs *configService) UseYAMLHeader() bool {
-	yh, ok := cs.GetCurConfig(keyYAMLHeader).(bool)
-	return ok && yh
 }
 
 // IsZettelFileSyntax returns true, if zettel with given syntax should be stored in a .zettel file.

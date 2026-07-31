@@ -51,9 +51,6 @@ type Config interface {
 	// MaxTransclusions returns the maximum number of indirect transclusions.
 	MaxTransclusions() int
 
-	// UseYAMLHeader returns the current value of the "yaml-header" key.
-	UseYAMLHeader() bool
-
 	// IsZettelFileSyntax checks if zettel with given syntax should be stored
 	// in a single .zettel file.
 	IsZettelFileSyntax(string) bool

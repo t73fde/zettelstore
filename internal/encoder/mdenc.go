@@ -37,11 +37,7 @@ type mdEncoder struct {
 func (me *mdEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
 	v := newMDVisitor(w, me.lang)
 	v.b.WriteMeta(zn.InhMeta)
-	if zn.InhMeta.YamlSep {
-		v.b.WriteString("---\n")
-	} else {
-		v.b.WriteLn()
-	}
+	v.b.WriteLn()
 	v.walk(zn.Blocks, nil)
 	return v.b.Flush()
 }

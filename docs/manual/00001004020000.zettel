@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260702130200
+modified: 20260731141359
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -97,12 +97,6 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   Will be used when displaying some lists.
 
   Default: ""Zettelstore"".
-; [!yaml-header|''yaml-header'']
-: If [[true|00001006030500]], metadata and content will be separated by ''---\\n'' instead of an empty line (''\\n\\n'').
-
-  Default: ""False"".
-
-  You will probably use this key, if you are working with another software processing [[Markdown|https://daringfireball.net/projects/markdown/]] that uses a subset of [[YAML|https://yaml.org/]] to specify metadata.
 ; [!zettel-file-syntax|''zettel-file-syntax'']
 : If you create a new zettel with a syntax different to ""zmk"", Zettelstore will store the zettel as two files:
   one for the metadata (file without a filename extension) and another for the content (file extension based on the syntax value).
@@ -113,5 +107,3 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   In this case, you should set ''zettel-file-syntax: md markdown''.
 
   If you want all zettel to be stored as files with the extension ''.zettel'', use the special value ""''*''"".
-
-  If ''yaml-header'' evaluates to true, a zettel is always stored in one ''.zettel'' file.

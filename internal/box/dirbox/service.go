@@ -247,22 +247,12 @@ func writeZettelFile(contentPath string, m *meta.Meta, content []byte) error {
 	return zettelFile.Close()
 }
 
-var (
-	newline = []byte{'\n'}
-	yamlSep = []byte{'-', '-', '-', '\n'}
-)
+var newline = []byte{'\n'}
 
 func writeMetaHeader(w io.Writer, m *meta.Meta) {
-	if m.YamlSep {
-		_, _ = w.Write(yamlSep)
-	}
 	writeFileZid(w, m.Zid)
 	_, _ = m.WriteComputed(w)
-	if m.YamlSep {
-		_, _ = w.Write(yamlSep)
-	} else {
-		_, _ = w.Write(newline)
-	}
+	_, _ = w.Write(newline)
 }
 
 // COMMAND: srvDeleteZettel ----------------------------------------

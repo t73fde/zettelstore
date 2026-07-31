@@ -63,7 +63,7 @@ func (e *DirEntry) SetupFromMetaContent(m *meta.Meta, content zettel.Content, is
 	}
 
 	syntax := m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)
-	ext := calcContentExt(syntax, m.YamlSep, isZettelFileSyntax)
+	ext := calcContentExt(syntax, isZettelFileSyntax)
 	metaName := e.MetaName
 	eimc := extIsMetaAndContent(ext)
 	if eimc {
@@ -97,10 +97,7 @@ func contentExtWithMeta(syntax meta.Value, content zettel.Content) string {
 	return string(syntax)
 }
 
-func calcContentExt(syntax meta.Value, yamlSep bool, isZettelFileSyntax func(string) bool) string {
-	if yamlSep {
-		return extZettel
-	}
+func calcContentExt(syntax meta.Value, isZettelFileSyntax func(string) bool) string {
 	switch syntax {
 	case meta.ValueSyntaxNone, meta.ValueSyntaxZmk:
 		return extZettel

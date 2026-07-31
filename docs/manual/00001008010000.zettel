@@ -4,7 +4,7 @@ role: manual
 tags: #manual #markdown #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260630174914
+modified: 20260731141231
 
 If you prefer Markdown as your markup language, you can configure Zettelstore accordingly.
 Zettelstore supports the [[CommonMark|00001008010500]] dialect of Markdown, as well as an extended dialect, [[Extended CommonMark|00001008010800]].
@@ -23,13 +23,11 @@ The [[''syntax''|00001006020000#syntax]] metadata of a zettel determines which M
 Update the [[New Zettel|00000000090001]] template (and other relevant template zettel) by setting the syntax value to ""md"", ""markdown"", ""commonmark"", ""cmark"", ""emark"".
 Whether to use ""md"" or ""markdown"" is not just a matter of taste.
 The same applies for ""commonmark"" / ""cmark"".
-It also depends on the value of [[''zettel-file-syntax''|00001004020000#zettel-file-syntax]] and, to some extent, on the value of [[''yaml-header''|00001004020000#yaml-header]].
+It also depends on the value of [[''zettel-file-syntax''|00001004020000#zettel-file-syntax]].
 
-If you set ''yaml-header'' to true, then new content is always stored in a file with the extension ''.zettel''.
+''zettel-file-syntax'' lists all syntax values except ""zmk"", where its content should be stored in a file with the extension ''.zettel''.
 
-Otherwise ''zettel-file-syntax'' lists all syntax values, where its content should be stored in a file with the extension ''.zettel''.
-
-If neither ''yaml-header'' nor ''zettel-file-syntax'' is set, new content is stored in a file whose filename extension matches the zettel's ''syntax'' metadata value.
+If ''zettel-file-syntax'' is not set, new content is stored in a file whose filename extension matches the zettel's ''syntax'' metadata value.
 In this case, it makes a difference whether you specify ""md"" or ""markdown"", and likewise whether you specify ""commonmark"" or ""cmark"".
 If you specify the ''syntax'' metadata value ""md"", your content is stored in a file with the ''.md'' extension.
 The same applies to the values ""markdown"", ""commonmark"", ""cmark"", and ""emark"".
@@ -37,7 +35,7 @@ The same applies to the values ""markdown"", ""commonmark"", ""cmark"", and ""em
 If you want to process the files that store the zettel content, e.g. with some other Markdown tools, this may be important.
 Not every Markdown tool allows both file extensions.
 
-BTW, metadata is stored in a file without a file extension, if neither ''yaml-header'' nor ''zettel-file-syntax'' is set.
+BTW, metadata is stored in a file without a file extension, if ''zettel-file-syntax'' is not set.
 
 === Security aspects
 
