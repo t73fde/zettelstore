@@ -84,18 +84,18 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *s
 		switch ikd.Type {
 		case meta.TypeID:
 			if val, ok := m.Get(inverseKey); ok {
-				zidMap.Add(string(val))
+				zidMap.Insert(string(val))
 			}
 		case meta.TypeIDSet:
 			addListValues(zidMap, m, inverseKey)
 		}
 	}
-	return wui.zidLinksSxn(slices.Sorted(zidMap.Values()), getTextTitle)
+	return wui.zidLinksSxn(slices.Sorted(zidMap.All()), getTextTitle)
 }
 
 func addListValues(zidMap *set.Set[string], m *meta.Meta, key string) {
 	for val := range m.GetFields(key) {
-		zidMap.Add(val)
+		zidMap.Insert(val)
 	}
 }
 

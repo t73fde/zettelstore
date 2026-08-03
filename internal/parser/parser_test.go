@@ -52,7 +52,7 @@ func TestParserType(t *testing.T) {
 		{meta.ValueSyntaxZmk, true, false},
 	}
 	for _, tc := range testCases {
-		syntaxSet.Remove(tc.syntax)
+		syntaxSet.Delete(tc.syntax)
 		if got := parser.IsASTParser(tc.syntax); got != tc.ast {
 			t.Errorf("Syntax %q is AST: %v, but got %v", tc.syntax, tc.ast, got)
 		}
@@ -60,7 +60,7 @@ func TestParserType(t *testing.T) {
 			t.Errorf("Syntax %q is image: %v, but got %v", tc.syntax, tc.image, got)
 		}
 	}
-	for syntax := range syntaxSet.Values() {
+	for syntax := range syntaxSet.All() {
 		t.Errorf("Forgot to test syntax %q", syntax)
 	}
 }

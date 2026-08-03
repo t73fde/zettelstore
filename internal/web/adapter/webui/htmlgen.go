@@ -196,7 +196,7 @@ func (g *htmlGenerator) metaSxn(m *meta.Meta) *sx.Pair {
 	metaMap := make(map[string]*sx.Pair, 32)
 	if tags, ok := m.Get(meta.KeyTags); ok {
 		metaMap[meta.KeyTags] = g.transformMetaTags(tags)
-		ignore.Add(meta.KeyTags)
+		ignore.Insert(meta.KeyTags)
 	}
 
 	for elem := range hm.Values() {

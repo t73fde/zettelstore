@@ -120,7 +120,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	propertyKeys := set.New[string]()
 	for _, kd := range descrs {
 		if kd.IsProperty() {
-			propertyKeys.Add(kd.Name)
+			propertyKeys.Insert(kd.Name)
 		}
 	}
 	boxLogger := kernel.Main.GetLogger(kernel.BoxService)
@@ -175,7 +175,7 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 					}
 					return fmt.Errorf("name %q (%q) in box-uri-%d %v already used", name, s, i+1, u)
 				}
-				boxNames.Add(s)
+				boxNames.Insert(s)
 				hasName[i] = true
 			} else {
 				q.Del(QueryName)
@@ -191,7 +191,7 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 	newName := make([]string, len(boxURIs))
 	addedName := func(name string, pos int) bool {
 		if !boxNames.Contains(name) {
-			boxNames.Add(name)
+			boxNames.Insert(name)
 			newName[pos] = name
 			return true
 		}

@@ -533,7 +533,7 @@ func init() {
 	primarySyntax = set.New[string]()
 	for _, syntax := range syntaxList {
 		if parser.Get(syntax).Name == syntax {
-			primarySyntax.Add(syntax)
+			primarySyntax.Insert(syntax)
 		}
 	}
 }
