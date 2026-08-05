@@ -103,8 +103,7 @@ func (p *mdP) acceptBlock(node gmAst.Node) *sx.Pair {
 		return nil
 	}
 	if p.extended {
-		switch n := node.(type) {
-		case *gmExtAst.Table:
+		if n, isTable := node.(*gmExtAst.Table); isTable {
 			return p.acceptTable(n)
 		}
 	}
@@ -283,8 +282,7 @@ func (p *mdP) acceptInline(node gmAst.Node) (*sx.Pair, *sx.Pair) {
 		return p.acceptRawHTML(n)
 	}
 	if p.extended {
-		switch n := node.(type) {
-		case *gmExtAst.Strikethrough:
+		if n, isStrike := node.(*gmExtAst.Strikethrough); isStrike {
 			return p.acceptStrikethrough(n)
 		}
 	}

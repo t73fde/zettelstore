@@ -20,9 +20,7 @@ type WordSet map[string]int
 func NewWordSet() WordSet { return make(WordSet) }
 
 // Add one word to the set
-func (ws WordSet) Add(s string) {
-	ws[s] = ws[s] + 1
-}
+func (ws WordSet) Add(s string) { ws[s]++ }
 
 // Words gives the slice of all words in the set.
 func (ws WordSet) Words() []string {

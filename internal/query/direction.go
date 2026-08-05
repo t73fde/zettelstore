@@ -30,15 +30,16 @@ func (ds *directionSpec) cleanupAfterParse() {
 }
 
 func (ds directionSpec) print(pe *PrintEnv) {
-	if ds.isDirected {
+	switch {
+	case ds.isDirected:
 		pe.printSpace()
 		pe.writeString(webapi.DirectedDirective)
-	} else if ds.isForward {
+	case ds.isForward:
 		if !ds.isBackward {
 			pe.printSpace()
 			pe.writeString(webapi.ForwardDirective)
 		}
-	} else if ds.isBackward {
+	case ds.isBackward:
 		pe.printSpace()
 		pe.writeString(webapi.BackwardDirective)
 	}

@@ -90,11 +90,12 @@ func (cmd *fileGetMeta) run(dirPath string) {
 	if metaName := entry.MetaName; metaName == "" {
 		contentName := entry.ContentName
 		contentExt := entry.ContentExt
-		if contentName == "" || contentExt == "" {
+		switch {
+		case contentName == "", contentExt == "":
 			err = fmt.Errorf("no meta, no content in getMeta, zid=%v", zid)
-		} else if entry.HasMetaInContent() {
+		case entry.HasMetaInContent():
 			m, _, err = parseMetaContentFile(zid, filepath.Join(dirPath, contentName))
-		} else {
+		default:
 			m = filebox.CalcDefaultMeta(zid, contentExt)
 		}
 	} else {
@@ -144,11 +145,12 @@ func (cmd *fileGetMetaContent) run(dirPath string) {
 	contentExt := entry.ContentExt
 	contentPath := filepath.Join(dirPath, contentName)
 	if metaName := entry.MetaName; metaName == "" {
-		if contentName == "" || contentExt == "" {
+		switch {
+		case contentName == "", contentExt == "":
 			err = fmt.Errorf("no meta, no content in getMetaContent, zid=%v", zid)
-		} else if entry.HasMetaInContent() {
+		case entry.HasMetaInContent():
 			m, content, err = parseMetaContentFile(zid, contentPath)
-		} else {
+		default:
 			m = filebox.CalcDefaultMeta(zid, contentExt)
 			content, err = os.ReadFile(contentPath)
 		}

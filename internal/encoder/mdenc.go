@@ -219,18 +219,19 @@ func (v *mdVisitor) visitBreak(isHard bool) {
 
 func (v *mdVisitor) visitReference(ref, inlines, alst *sx.Pair) {
 	refState, val := zsx.GetReference(ref)
-	if sz.SymRefStateQuery.IsEqualSymbol(refState) {
+	switch {
+	case sz.SymRefStateQuery.IsEqualSymbol(refState):
 		v.walkList(inlines, alst)
-	} else if inlines != nil {
+	case inlines != nil:
 		_ = v.b.WriteByte('[')
 		v.walkList(inlines, alst)
 		v.b.WriteStrings("](", val)
 		_ = v.b.WriteByte(')')
-	} else if isAutoLinkable(refState, val) {
+	case isAutoLinkable(refState, val):
 		_ = v.b.WriteByte('<')
 		v.b.WriteString(val)
 		_ = v.b.WriteByte('>')
-	} else {
+	default:
 		v.b.WriteStrings("[", val, "](", val, ")")
 	}
 }

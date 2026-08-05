@@ -99,8 +99,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keyMarkdownDialect: {
 			"Default markdown dialect",
 			func(val string) (any, error) {
-				switch strings.TrimSpace(val) {
-				case meta.ValueSyntaxEMark:
+				if strings.TrimSpace(val) == meta.ValueSyntaxEMark {
 					return val, nil
 				}
 				return meta.ValueSyntaxCMark, nil

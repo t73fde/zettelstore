@@ -59,11 +59,12 @@ func TestSetupBoxURIs(t *testing.T) {
 				uris[i] = u
 			}
 			err := setupBoxURIs(uris, tc.readonly)
-			if err == nil && tc.expErr {
+			switch {
+			case err == nil && tc.expErr:
 				t.Errorf("error expected, but got none")
-			} else if err != nil && !tc.expErr {
+			case err != nil && !tc.expErr:
 				t.Errorf("no error expected, but got %v", err)
-			} else if err == nil {
+			case err == nil:
 				got := make([]string, len(uris))
 				for i, u := range uris {
 					got[i] = u.String()

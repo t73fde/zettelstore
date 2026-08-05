@@ -70,8 +70,7 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (*sx.Pair
 	}
 	var firstUnknowAct string
 	for _, act := range acts {
-		switch act {
-		case webapi.KeysAction:
+		if act == webapi.KeysAction {
 			return ap.createBlockNodeMetaKeys()
 		}
 		key := strings.ToLower(act)

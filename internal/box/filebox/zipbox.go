@@ -181,11 +181,12 @@ func (zb *zipBox) readZipMeta(reader *zip.ReadCloser, zid id.Zid, entry *notify.
 	if metaName := entry.MetaName; metaName == "" {
 		contentName := entry.ContentName
 		contentExt := entry.ContentExt
-		if contentName == "" || contentExt == "" {
+		switch {
+		case contentName == "", contentExt == "":
 			err = fmt.Errorf("no meta, no content in getMeta, zid=%v", zid)
-		} else if entry.HasMetaInContent() {
+		case entry.HasMetaInContent():
 			m, err = readZipMetaFile(reader, zid, contentName)
-		} else {
+		default:
 			m = CalcDefaultMeta(zid, contentExt)
 		}
 	} else {

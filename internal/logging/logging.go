@@ -53,7 +53,7 @@ func LevelString(level slog.Level) string {
 func LevelStringPad(level slog.Level) string {
 	s := LevelString(level)
 	if len(s) < 5 {
-		s = s + "     "[0:5-len(s)]
+		s += "     "[0 : 5-len(s)]
 	}
 	return s
 }

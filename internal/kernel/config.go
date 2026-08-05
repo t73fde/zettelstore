@@ -55,7 +55,7 @@ func (cfg *srvConfig) ConfigDescriptions() []serviceConfigDescription {
 	for _, k := range keys {
 		text := cfg.descr[k].text
 		if strings.HasSuffix(k, "-") {
-			text = text + " (list)"
+			text += " (list)"
 		}
 		result = append(result, serviceConfigDescription{Key: k, Descr: text})
 	}

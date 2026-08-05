@@ -184,11 +184,8 @@ func (mb *memBox) CanUpdateZettel(_ context.Context, zettel box.Zettel) bool {
 	newBytes := mb.curBytes + zettel.ByteSize()
 	if prevZettel, found := mb.zettel[zid]; found {
 		newBytes -= prevZettel.ByteSize()
-	} else {
-		// Zettel is duplicated from other box
-		if len(mb.zettel) >= mb.maxZettel {
-			return false
-		}
+	} else if len(mb.zettel) >= mb.maxZettel { // from other box && ...
+		return false
 	}
 	return newBytes <= mb.maxBytes && !mb.readonly
 }
@@ -206,12 +203,9 @@ func (mb *memBox) UpdateZettel(_ context.Context, zettel box.Zettel) error {
 	newBytes := mb.curBytes + zettel.ByteSize()
 	if prevZettel, found := mb.zettel[m.Zid]; found {
 		newBytes -= prevZettel.ByteSize()
-	} else {
-		// Zettel is duplicated from other box
-		if len(mb.zettel) >= mb.maxZettel {
-			mb.mx.Unlock()
-			return box.ErrCapacity
-		}
+	} else if len(mb.zettel) >= mb.maxZettel { // from other box && ...
+		mb.mx.Unlock()
+		return box.ErrCapacity
 	}
 	if mb.maxBytes < newBytes {
 		mb.mx.Unlock()
