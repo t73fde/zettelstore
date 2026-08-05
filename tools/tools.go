@@ -92,6 +92,9 @@ func Check(forRelease bool) error {
 	if err := checkStaticcheck(); err != nil {
 		return err
 	}
+	if err := checkGoCritic(); err != nil {
+		return err
+	}
 	if err := checkUnparam(forRelease); err != nil {
 		return err
 	}
@@ -160,6 +163,17 @@ func checkStaticcheck() error {
 	out, err := ExecuteCommand(EnvGoVCS, "staticcheck", "./...")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Some staticcheck problems found")
+		if len(out) > 0 {
+			fmt.Fprintln(os.Stderr, out)
+		}
+	}
+	return err
+}
+
+func checkGoCritic() error {
+	out, err := ExecuteCommand(EnvGoVCS, "go-critic", "check", "./...")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Some go-critic problems found")
 		if len(out) > 0 {
 			fmt.Fprintln(os.Stderr, out)
 		}
