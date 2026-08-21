@@ -36,7 +36,7 @@ func TestPolicies(t *testing.T) {
 		simple := x%2 != 0
 		x >>= 1
 		refresh := x%2 != 0
-		x >>= 1
+
 		pol := newPolicy(
 			&testAuthzManager{readOnly: readonly, withAuth: withAuth, refresh: refresh},
 			&authConfig{simple: simple, expert: expert},
