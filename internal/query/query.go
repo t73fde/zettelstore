@@ -279,7 +279,7 @@ func (q *Query) GetSeed() (int, bool) {
 func (q *Query) SetDeterministic() *Query {
 	q = createIfNeeded(q)
 	if q.seed <= 0 {
-		q.seed = int(rand.IntN(10000) + 1)
+		q.seed = rand.IntN(10000) + 1
 	}
 	return q
 }
