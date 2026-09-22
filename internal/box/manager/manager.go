@@ -25,6 +25,7 @@ import (
 	"sync"
 	"time"
 
+	"t73f.de/r/zero/iter"
 	"t73f.de/r/zero/set"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
@@ -167,7 +168,9 @@ func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
 	for i, u := range boxURIs {
 		q := u.Query()
 		if name := q.Get(QueryName); name != "" {
-			if s := zerostrings.JoinSeq(zerostrings.NormalizeWordsSeq(name), ""); s != "" {
+			if s := zerostrings.JoinSeq(
+				iter.MapSeq(zerostrings.NormalizeWordSeq(name),
+					func(b []byte) string { return string(b) }), ""); s != "" {
 				if boxNames.Contains(s) {
 					if name == s {
 						return fmt.Errorf("name %q in box-uri-%d %v already used", s, i+1, u)
@@ -238,7 +241,9 @@ func nameFromPath(path string) string {
 	if ext := filepath.Ext(name); ext != "" {
 		name = name[0 : len(name)-len(ext)]
 	}
-	return zerostrings.JoinSeq(zerostrings.NormalizeWordsSeq(name), "")
+	return zerostrings.JoinSeq(
+		iter.MapSeq(zerostrings.NormalizeWordSeq(name),
+			func(b []byte) string { return string(b) }), "")
 }
 
 func createIdxStore(_ config.Config) store.Store { return mapstore.New() }

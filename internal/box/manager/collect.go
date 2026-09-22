@@ -83,7 +83,7 @@ func (data *collectData) addRef(ref *sx.Pair) {
 }
 
 func (data *collectData) addText(s string) {
-	for word := range zerostrings.NormalizeWordsSeq(s) {
-		data.words.Add(word)
+	for word := range zerostrings.NormalizeWordSeq(s) {
+		data.words.Add(string(word))
 	}
 }

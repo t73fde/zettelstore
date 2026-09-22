@@ -198,8 +198,8 @@ func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *st
 
 func idxCollectMetaValue(stWords store.WordSet, value string) {
 	hasWords := false
-	for word := range strings.NormalizeWordsSeq(value) {
-		stWords.Add(word)
+	for word := range strings.NormalizeWordSeq(value) {
+		stWords.Add(string(word))
 		hasWords = true
 	}
 	if !hasWords {
