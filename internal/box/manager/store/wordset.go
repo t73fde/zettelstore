@@ -19,8 +19,20 @@ type WordSet map[string]struct{}
 // NewWordSet returns a new WordSet.
 func NewWordSet() WordSet { return make(WordSet) }
 
-// Add one word to the set
-func (ws WordSet) Add(s string) { ws[s] = struct{}{} }
+// AddBytes adds one byte-slice word to the set
+func (ws WordSet) AddBytes(b []byte) { ws[string(b)] = struct{}{} }
+
+// AddString adds one string word to the set
+func (ws WordSet) AddString(s string) { ws[s] = struct{}{} }
+
+// AddURI adds one string-encoded URI to the set
+func (ws WordSet) AddURI(s string) { ws[s] = struct{}{} }
+
+// Has returns an indication, where s is an element of the set.
+func (ws WordSet) Has(s string) bool {
+	_, found := ws[s]
+	return found
+}
 
 // Words gives the slice of all words in the set.
 func (ws WordSet) Words() []string {
@@ -36,26 +48,25 @@ func (ws WordSet) Words() []string {
 
 // Diff calculates the word slice to be added and to be removed from oldWords
 // to get the given word set.
-func (ws WordSet) Diff(oldWords []string) (newWords, removeWords []string) {
+func (ws WordSet) Diff(oldState []string) (newWords, removeWords []string) {
 	if len(ws) == 0 {
-		return nil, oldWords
+		return nil, oldState
 	}
-	if len(oldWords) == 0 {
+	if len(oldState) == 0 {
 		return ws.Words(), nil
 	}
-	oldSet := make(WordSet, len(oldWords))
-	for _, ow := range oldWords {
-		if _, ok := ws[ow]; ok {
-			oldSet[ow] = struct{}{}
-			continue
+	oldSet := make(WordSet, len(oldState))
+	for _, ow := range oldState {
+		if ws.Has(ow) {
+			oldSet.AddString(ow)
+		} else {
+			removeWords = append(removeWords, ow)
 		}
-		removeWords = append(removeWords, ow)
 	}
 	for w := range ws {
-		if _, ok := oldSet[w]; ok {
-			continue
+		if !oldSet.Has(w) {
+			newWords = append(newWords, w)
 		}
-		newWords = append(newWords, w)
 	}
 	return newWords, removeWords
 }

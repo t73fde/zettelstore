@@ -182,7 +182,7 @@ func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *st
 			}
 		case meta.TypeURL:
 			if _, err := url.Parse(string(val)); err == nil {
-				cData.urls.Add(string(val))
+				cData.urls.AddURI(string(val))
 			}
 		default:
 			if descr.Type.IsSet {
@@ -199,11 +199,11 @@ func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *st
 func idxCollectMetaValue(stWords store.WordSet, value string) {
 	hasWords := false
 	for word := range strings.NormalizeWordSeq(value) {
-		stWords.Add(string(word))
+		stWords.AddBytes(word)
 		hasWords = true
 	}
 	if !hasWords {
-		stWords.Add(value)
+		stWords.AddString(value)
 	}
 }
 

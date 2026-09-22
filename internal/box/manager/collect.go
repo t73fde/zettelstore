@@ -14,8 +14,6 @@
 package manager
 
 import (
-	"strings"
-
 	"t73f.de/r/sx"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
@@ -74,7 +72,7 @@ func (data *collectData) VisitItAfter(*sx.Pair, *sx.Pair) {}
 func (data *collectData) addRef(ref *sx.Pair) {
 	sym, refValue := zsx.GetReference(ref)
 	if zsx.SymRefStateExternal.IsEqual(sym) {
-		data.urls.Add(strings.ToLower(refValue))
+		data.urls.AddURI(refValue)
 	} else if sz.SymRefStateZettel.IsEqual(sym) {
 		if zid, err := id.Parse(refValue); err == nil {
 			data.refs.Add(zid)
@@ -84,6 +82,6 @@ func (data *collectData) addRef(ref *sx.Pair) {
 
 func (data *collectData) addText(s string) {
 	for word := range zerostrings.NormalizeWordSeq(s) {
-		data.words.Add(string(word))
+		data.words.AddBytes(word)
 	}
 }
