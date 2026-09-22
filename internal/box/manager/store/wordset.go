@@ -14,13 +14,13 @@
 package store
 
 // WordSet contains the set of all words, with the count of their occurrences.
-type WordSet map[string]int
+type WordSet map[string]struct{}
 
 // NewWordSet returns a new WordSet.
 func NewWordSet() WordSet { return make(WordSet) }
 
 // Add one word to the set
-func (ws WordSet) Add(s string) { ws[s]++ }
+func (ws WordSet) Add(s string) { ws[s] = struct{}{} }
 
 // Words gives the slice of all words in the set.
 func (ws WordSet) Words() []string {
@@ -46,7 +46,7 @@ func (ws WordSet) Diff(oldWords []string) (newWords, removeWords []string) {
 	oldSet := make(WordSet, len(oldWords))
 	for _, ow := range oldWords {
 		if _, ok := ws[ow]; ok {
-			oldSet[ow] = 1
+			oldSet[ow] = struct{}{}
 			continue
 		}
 		removeWords = append(removeWords, ow)

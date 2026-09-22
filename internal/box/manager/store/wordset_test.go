@@ -44,7 +44,7 @@ func TestWordsWords(t *testing.T) {
 	}{
 		{nil, nil},
 		{store.WordSet{}, nil},
-		{store.WordSet{"a": 1, "b": 2}, []string{"a", "b"}},
+		{store.WordSet{"a": struct{}{}, "b": struct{}{}}, []string{"a", "b"}},
 	}
 	for i, tc := range testcases {
 		got := tc.words.Words()
@@ -63,10 +63,10 @@ func TestWordsDiff(t *testing.T) {
 	}{
 		{nil, nil, nil, nil},
 		{store.WordSet{}, []string{}, nil, nil},
-		{store.WordSet{"a": 1}, []string{}, []string{"a"}, nil},
-		{store.WordSet{"a": 1}, []string{"b"}, []string{"a"}, []string{"b"}},
+		{store.WordSet{"a": struct{}{}}, []string{}, []string{"a"}, nil},
+		{store.WordSet{"a": struct{}{}}, []string{"b"}, []string{"a"}, []string{"b"}},
 		{store.WordSet{}, []string{"b"}, nil, []string{"b"}},
-		{store.WordSet{"a": 1}, []string{"a"}, nil, nil},
+		{store.WordSet{"a": struct{}{}}, []string{"a"}, nil, nil},
 	}
 	for i, tc := range testcases {
 		gotN, gotR := tc.cur.Diff(tc.old)
