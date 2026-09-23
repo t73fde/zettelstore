@@ -45,28 +45,3 @@ func (ws WordSet) Words() []string {
 	}
 	return words
 }
-
-// Diff calculates the word slice to be added and to be removed from oldWords
-// to get the given word set.
-func (ws WordSet) Diff(oldState []string) (newWords, removeWords []string) {
-	if len(ws) == 0 {
-		return nil, oldState
-	}
-	if len(oldState) == 0 {
-		return ws.Words(), nil
-	}
-	oldSet := make(WordSet, len(oldState))
-	for _, ow := range oldState {
-		if ws.Has(ow) {
-			oldSet.AddString(ow)
-		} else {
-			removeWords = append(removeWords, ow)
-		}
-	}
-	for w := range ws {
-		if !oldSet.Has(w) {
-			newWords = append(newWords, w)
-		}
-	}
-	return newWords, removeWords
-}

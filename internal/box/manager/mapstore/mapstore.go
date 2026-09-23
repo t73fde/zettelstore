@@ -429,7 +429,7 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 }
 
 func updateStrings(zid id.Zid, srefs stringRefs, prev []string, next store.WordSet) []string {
-	newWords, removeWords := next.Diff(prev)
+	newWords, removeWords := diffWordSet(next, prev)
 	for _, word := range newWords {
 		srefs[word] = srefs[word].Add(zid)
 	}
@@ -446,6 +446,31 @@ func updateStrings(zid id.Zid, srefs stringRefs, prev []string, next store.WordS
 		srefs[word] = refs
 	}
 	return next.Words()
+}
+
+// diffWordSet calculates the word slice to be added and to be removed from oldWords
+// to get the given word set.
+func diffWordSet(newState store.WordSet, oldState []string) (newWords, removeWords []string) {
+	if len(newState) == 0 {
+		return nil, oldState
+	}
+	if len(oldState) == 0 {
+		return newState.Words(), nil
+	}
+	oldSet := make(store.WordSet, len(oldState))
+	for _, ow := range oldState {
+		if newState.Has(ow) {
+			oldSet.AddString(ow)
+		} else {
+			removeWords = append(removeWords, ow)
+		}
+	}
+	for w := range newState {
+		if !oldSet.Has(w) {
+			newWords = append(newWords, w)
+		}
+	}
+	return newWords, removeWords
 }
 
 func (ms *mapStore) getOrCreateEntry(zid id.Zid) *zettelData {
