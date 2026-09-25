@@ -5,11 +5,14 @@
 You must install the following software:
 
 * A current, supported [release of Go](https://go.dev/doc/devel/release),
-* [staticcheck](https://staticcheck.io/),
 * [shadow](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/shadow),
 * [unparam](https://mvdan.cc/unparam),
-* [govulncheck](https://golang.org/x/vuln/cmd/govulncheck),
+* [staticcheck](https://staticcheck.io/),
+* [go-critic](https://go-critic.com/),
+* [deadcode](https://pkg.go.dev/golang.org/x/tools/cmd/deadcode),
+* [errcheck](https://github.com/kisielk/errcheck),
 * [revive](https://revive.run/),
+* [govulncheck](https://golang.org/x/vuln/cmd/govulncheck),
 * [Fossil](https://fossil-scm.org/),
 * [Git](https://git-scm.org) (so that Go can download some dependencies).
 

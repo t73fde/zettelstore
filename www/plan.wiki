@@ -18,6 +18,8 @@ They are planned to be solved.
      macOS), while others do not (e.g., default macOS, most Windows systems).
      Zettelstore cannot detect these differences. Avoid using files that differ
      only by case in your directory boxes or file boxes.
+  *  Zettelmarkup and Markdown encoder fail to escape certain characters, so
+     that the result will not always be parsed correctly.
   *  &hellip;
 
 Ideas about future development are documented in its own [../../../wiki?name=Ideas|wiki page].

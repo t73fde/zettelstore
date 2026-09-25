@@ -1,18 +1,21 @@
 <title>Change Log</title>
 
-<a id="3_0"></a>
-<h2>Changes for Version 3.0.0 (pending)</h2>
+<a id="3_1"></a>
+<h2>Changes for Version 3.1.0 (pending)</h2>
 
-This will be a breaking release. For example, the representation of version
-numbers may change. The sx- / sz-based encodings of zettel will change. Zettel
-IDs will always be encoded as strings; the numeric encoding will be removed.
-The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
+<a id="3_0"></a>
+<h2>Changes for Version 3.0.0 (2026-09-25)</h2>
+
+This is a breaking release. For example, the representation of version numbers
+is changed. The sx- / sz-based encodings of zettel is changed. Zettel IDs are
+always encoded as strings; the numeric encoding is removed. The behavior of
+<code>syntax</code> value &ldquo;none&rdquo; is changed.
 
   *  Change data encoding of zettel list queries. Zettel identifiers are
      encoded as a string value (was: numeric value). Make encoding of zettel
      list simpler by changing <code>(zettel (id ZID) ...</code> to
      <code>(zettel "ZID" ...</code>.
-    (breaking: api)
+     (breaking: api)
   *  Change data encoding for zettel retrieval: merge encoding/content encoding
      into one list. Now it is: <code>(content "" "Change data encoding
      ...")</code>.
@@ -54,6 +57,8 @@ The behavior of <code>syntax</code> value &ldquo;none&rdquo; will change.
      (minor: api, box)
   *  Allow to retrieve zettel content via data encoding.
      (minor: api)
+  *  Many smaller bug fixes and improvements, to the software and to the
+     documentation.
 
 <a id="2_1"></a>
 <h2>Changes for Version 2.1.0 (2026-07-07)</h2>
