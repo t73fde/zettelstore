@@ -3,7 +3,7 @@ title: Required Software
 role: zettel
 syntax: zmk
 created: 20210916193200
-modified: 20251107151939
+modified: 20260925173220
 
 The following software must be installed:
 
@@ -25,6 +25,7 @@ Otherwise you can install the software by hand:
 * [[shadow|https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/shadow]] via ``go install golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow@latest``{=sh},
 * [[unparam|https://mvdan.cc/unparam]][^[[GitHub|https://github.com/mvdan/unparam]]] via ``go install mvdan.cc/unparam@latest``{=sh},
 * [[staticcheck|https://staticcheck.io/]] via ``go install honnef.co/go/tools/cmd/staticcheck@latest``{=sh},
+* [[go-critic|https://go-critic.com/]][^[[GitHub|https://github.com/go-critic/go-critic]]] via ``go install "github.com/go-critic/go-critic/cmd/go-critic@latest``{=sh},
 * [[deadcode|https://pkg.go.dev/golang.org/x/tools/cmd/deadcode]] via ``go install golang.org/x/tools/cmd/deadcode@latest``{=sh},
 * [[errcheck|https://github.com/kisielk/errcheck]] via ``go install github.com/kisielk/errcheck@latest``{=sh},
 * [[revive|https://revive.run]] via ``go install github.com/mgechev/revive@latest``{=sh},
