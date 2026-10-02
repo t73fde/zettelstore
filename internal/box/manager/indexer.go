@@ -34,7 +34,7 @@ import (
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchEqual(word string) idset.ArraySet {
 	found := mgr.idxStore.SearchEqual(word)
-	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", found.Length())
+	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }
@@ -43,7 +43,7 @@ func (mgr *Manager) SearchEqual(word string) idset.ArraySet {
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchPrefix(prefix string) idset.ArraySet {
 	found := mgr.idxStore.SearchPrefix(prefix)
-	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", found.Length())
+	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }
@@ -52,7 +52,7 @@ func (mgr *Manager) SearchPrefix(prefix string) idset.ArraySet {
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchSuffix(suffix string) idset.ArraySet {
 	found := mgr.idxStore.SearchSuffix(suffix)
-	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", found.Length())
+	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }
@@ -61,7 +61,7 @@ func (mgr *Manager) SearchSuffix(suffix string) idset.ArraySet {
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchContains(s string) idset.ArraySet {
 	found := mgr.idxStore.SearchContains(s)
-	mgr.idxLogger.Debug("SearchContains", "s", s, "found", found.Length())
+	mgr.idxLogger.Debug("SearchContains", "s", s, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
 	return found
 }

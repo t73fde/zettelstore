@@ -405,7 +405,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.A
 			if pred == nil {
 				pred = startSet.Contains // startSet != nil
 			} else {
-				predSet := idset.NewCap(startSet.Length())
+				predSet := idset.NewCap(startSet.Count())
 				for zid := range startSet.Values() {
 					if pred(zid) {
 						predSet = predSet.Add(zid)

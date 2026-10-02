@@ -27,7 +27,7 @@ func safeSorted(s *idset.ArraySet) []id.Zid {
 	if s == nil {
 		return nil
 	}
-	result := make([]id.Zid, 0, s.Length())
+	result := make([]id.Zid, 0, s.Count())
 	for zid := range s.Values() {
 		result = append(result, zid)
 	}

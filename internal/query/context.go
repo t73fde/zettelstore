@@ -272,7 +272,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 		for _, tag := range tags {
 			tagZids := ct.tagZids[tag]
 			if tagZids != nil && tagZids.Contains(zid) {
-				cost := tagCost(baseCost, tagZids.Length())
+				cost := tagCost(baseCost, tagZids.Count())
 				if cost < minCost {
 					minCost = cost
 				}
@@ -333,11 +333,11 @@ func (ct *contextTask) hasEnough(cost float64, level uint) bool {
 		// Always add direct descendants of the initial zettel
 		return false
 	}
-	length := ct.seen.Length()
-	if minCount := ct.minCount; 0 < minCount && minCount > length {
+	cntSeen := ct.seen.Count()
+	if minCount := ct.minCount; 0 < minCount && minCount > cntSeen {
 		return false
 	}
-	if maxCount := ct.maxCount; 0 < maxCount && maxCount <= length {
+	if maxCount := ct.maxCount; 0 < maxCount && maxCount <= cntSeen {
 		return true
 	}
 	maxCost := ct.maxCost

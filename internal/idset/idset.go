@@ -75,13 +75,8 @@ func NewCap(c int, zids ...id.Zid) *ArraySet {
 // IsEmpty returns true, if the set conains no element.
 func (s ArraySet) IsEmpty() bool { return len(s.seq) == 0 }
 
-// Length returns the number of elements in this set.
-func (s *ArraySet) Length() int {
-	if s == nil {
-		return 0
-	}
-	return len(s.seq)
-}
+// Count returns the number of elements in this set.
+func (s ArraySet) Count() int { return len(s.seq) }
 
 // Clone returns a copy of the given set.
 func (s *ArraySet) Clone() *ArraySet {

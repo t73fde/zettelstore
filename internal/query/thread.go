@@ -145,7 +145,7 @@ func (ct *threadTask) hasEnough(level uint) bool {
 		// Always add direct descendants of the initial zettel
 		return false
 	}
-	return maxCount <= ct.seen.Length()
+	return maxCount <= ct.seen.Count()
 }
 
 func (ct *threadTask) addPair(ctx context.Context, key string, value meta.Value, level uint, dir int, spec *ThreadSpec) {
