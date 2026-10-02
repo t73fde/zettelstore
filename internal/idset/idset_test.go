@@ -58,13 +58,13 @@ func TestSetContainsOrNil(t *testing.T) {
 
 func TestSetContains(t *testing.T) {
 	testcases := []id.Zid{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22}
-	var s *idset.ArraySet
+	var e idset.ArraySet
 	for _, tc := range testcases {
-		if s.Contains(tc) {
+		if e.Contains(tc) {
 			t.Errorf("nil set contains %v", tc)
 		}
 	}
-	s = idset.New()
+	s := idset.New()
 	data := slices.Clone(testcases)
 	slices.Reverse(data)
 	for _, zid := range data {

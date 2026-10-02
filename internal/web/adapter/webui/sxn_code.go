@@ -68,7 +68,7 @@ func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFu
 	for pos := len(stack) - 1; pos >= 0; pos = len(stack) - 1 {
 		curr := stack[pos]
 		stack = stack[:pos]
-		if marked.Contains(curr.Zid) {
+		if marked != nil && marked.Contains(curr.Zid) {
 			continue
 		}
 		marked = marked.Add(curr.Zid)

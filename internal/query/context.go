@@ -271,7 +271,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 		costFactor := 1.1
 		for _, tag := range tags {
 			tagZids := ct.tagZids[tag]
-			if tagZids.Contains(zid) {
+			if tagZids != nil && tagZids.Contains(zid) {
 				cost := tagCost(baseCost, tagZids.Length())
 				if cost < minCost {
 					minCost = cost

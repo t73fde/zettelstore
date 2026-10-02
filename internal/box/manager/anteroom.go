@@ -60,7 +60,7 @@ func (ar *anteroomQueue) EnqueueZettel(zid id.Zid) {
 		if room.reload {
 			continue // Do not put zettel in reload room
 		}
-		if room.waiting.Contains(zid) {
+		if w := room.waiting; w != nil && w.Contains(zid) {
 			// Zettel is already waiting. Nothing to do.
 			return
 		}
