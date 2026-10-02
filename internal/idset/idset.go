@@ -269,7 +269,7 @@ func (s *ArraySet) Pop() (id.Zid, bool) {
 
 // Optimize the amount of memory to store the set.
 func (s *ArraySet) Optimize() {
-	if s != nil {
+	if s != nil && cap(s.seq) > len(s.seq) {
 		s.seq = slices.Clone(s.seq)
 	}
 }
