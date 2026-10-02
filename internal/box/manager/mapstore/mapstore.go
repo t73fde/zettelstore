@@ -256,7 +256,10 @@ func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) *id
 
 func addBackwardZids(result *idset.ArraySet, zid id.Zid, zi *zettelData) *idset.ArraySet {
 	// Must only be called if ms.mx is read-locked!
-	result = result.Add(zid)
+	if result == nil {
+		result = idset.New()
+	}
+	result.Add(zid)
 	result = result.IUnion(zi.backward)
 	for _, mref := range zi.otherRefs {
 		result = result.IUnion(mref.backward)
@@ -366,7 +369,10 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 		ms.dead[ref] = ms.dead[ref].Remove(zidx.Zid)
 	}
 	for ref := range newRefs.Values() {
-		ms.dead[ref] = ms.dead[ref].Add(zidx.Zid)
+		if ms.dead[ref] == nil {
+			ms.dead[ref] = idset.New()
+		}
+		ms.dead[ref].Add(zidx.Zid)
 	}
 }
 
@@ -381,14 +387,23 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 		bzi := ms.getOrCreateEntry(ref)
 		bzi.backward = bzi.backward.Remove(zidx.Zid)
 		if bzi.meta == nil {
-			toCheck = toCheck.Add(ref)
+			if toCheck == nil {
+				toCheck = idset.New()
+			}
+			toCheck.Add(ref)
 		}
 	}
 	for ref := range newRefs.Values() {
 		bzi := ms.getOrCreateEntry(ref)
-		bzi.backward = bzi.backward.Add(zidx.Zid)
+		if bzi.backward == nil {
+			bzi.backward = idset.New()
+		}
+		bzi.backward.Add(zidx.Zid)
 		if bzi.meta == nil {
-			toCheck = toCheck.Add(ref)
+			if toCheck == nil {
+				toCheck = idset.New()
+			}
+			toCheck.Add(ref)
 		}
 	}
 	return toCheck
@@ -419,10 +434,16 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 				bzi.otherRefs = make(map[string]bidiRefs)
 			}
 			bmr := bzi.otherRefs[key]
-			bmr.backward = bmr.backward.Add(zidx.Zid)
+			if bmr.backward == nil {
+				bmr.backward = idset.New()
+			}
+			bmr.backward.Add(zidx.Zid)
 			bzi.otherRefs[key] = bmr
 			if bzi.meta == nil {
-				toCheck = toCheck.Add(ref)
+				if toCheck == nil {
+					toCheck = idset.New()
+				}
+				toCheck.Add(ref)
 			}
 		}
 
@@ -434,7 +455,10 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 func updateStrings(zid id.Zid, srefs stringRefs, prev []string, next store.WordSet) []string {
 	newWords, removeWords := diffWordSet(next, prev)
 	for _, word := range newWords {
-		srefs[word] = srefs[word].Add(zid)
+		if srefs[word] == nil {
+			srefs[word] = idset.New()
+		}
+		srefs[word].Add(zid)
 	}
 	for _, word := range removeWords {
 		refs, ok := srefs[word]
@@ -535,7 +559,10 @@ func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.Arr
 	for ref := range zi.backward.Values() {
 		if bzi, ok := ms.idx[ref]; ok {
 			bzi.forward = bzi.forward.Remove(zid)
-			toCheck = toCheck.Add(ref)
+			if toCheck == nil {
+				toCheck = idset.New()
+			}
+			toCheck.Add(ref)
 		}
 	}
 	return toCheck

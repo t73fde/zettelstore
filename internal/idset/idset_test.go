@@ -46,7 +46,7 @@ func TestSetContains(t *testing.T) {
 	data := slices.Clone(testcases)
 	slices.Reverse(data)
 	for _, zid := range data {
-		s = s.Add(zid)
+		s.Add(zid)
 	}
 	for _, tc := range testcases {
 		if !s.Contains(tc) {

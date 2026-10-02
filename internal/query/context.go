@@ -296,7 +296,7 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Arr
 	zids := idset.NewCap(len(ml))
 	for _, m := range ml {
 		zid := m.Zid
-		zids = zids.Add(zid)
+		zids.Add(zid)
 		if _, found := ct.metaZid[zid]; !found {
 			ct.metaZid[zid] = m
 		}

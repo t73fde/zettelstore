@@ -46,7 +46,12 @@ func NewZettelIndex(m *meta.Meta) *ZettelIndex {
 
 // AddBackRef adds a reference to a zettel where the current zettel links to
 // without any more information.
-func (zi *ZettelIndex) AddBackRef(zid id.Zid) { zi.backrefs.Add(zid) }
+func (zi *ZettelIndex) AddBackRef(zid id.Zid) {
+	if zi.backrefs == nil {
+		zi.backrefs = idset.New()
+	}
+	zi.backrefs.Add(zid)
+}
 
 // AddInverseRef adds a named reference to a zettel. On that zettel, the given
 // metadata key should point back to the current zettel.
@@ -60,6 +65,9 @@ func (zi *ZettelIndex) AddInverseRef(key string, zid id.Zid) {
 
 // AddDeadRef adds a dead reference to a zettel.
 func (zi *ZettelIndex) AddDeadRef(zid id.Zid) {
+	if zi.deadrefs == nil {
+		zi.deadrefs = idset.New()
+	}
 	zi.deadrefs.Add(zid)
 }
 

@@ -86,14 +86,8 @@ func (s *ArraySet) Clone() *ArraySet {
 	return &ArraySet{seq: slices.Clone(s.seq)}
 }
 
-// Add adds a Add to the set.
-func (s *ArraySet) Add(zid id.Zid) *ArraySet {
-	if s == nil {
-		return New(zid)
-	}
-	s.add(zid)
-	return s
-}
+// Add adds a zid to the set.
+func (s *ArraySet) Add(zid id.Zid) { s.add(zid) }
 
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
 func (s ArraySet) Contains(zid id.Zid) bool {

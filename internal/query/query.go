@@ -391,7 +391,7 @@ func metaList2idSet(ml []*meta.Meta) *idset.ArraySet {
 	}
 	result := idset.NewCap(len(ml))
 	for _, m := range ml {
-		result = result.Add(m.Zid)
+		result.Add(m.Zid)
 	}
 	return result
 }
@@ -408,7 +408,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.A
 				predSet := idset.NewCap(startSet.Count())
 				for zid := range startSet.Values() {
 					if pred(zid) {
-						predSet = predSet.Add(zid)
+						predSet.Add(zid)
 					}
 				}
 				pred = predSet.Contains // predSet is known to be non-nil
