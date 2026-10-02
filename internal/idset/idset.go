@@ -103,7 +103,10 @@ func (s *ArraySet) Add(zid id.Zid) *ArraySet {
 }
 
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
-func (s ArraySet) Contains(zid id.Zid) bool { return s.contains(zid) }
+func (s ArraySet) Contains(zid id.Zid) bool {
+	_, found := slices.BinarySearch(s.seq, zid)
+	return found
+}
 
 // Intersection removes all elements from s that are not in o.
 // Only s is modified, o is left unchanged.
@@ -270,11 +273,6 @@ func (s *ArraySet) add(zid id.Zid) {
 	if pos, found := slices.BinarySearch(s.seq, zid); !found {
 		s.seq = slices.Insert(s.seq, pos, zid)
 	}
-}
-
-func (s *ArraySet) contains(zid id.Zid) bool {
-	_, found := slices.BinarySearch(s.seq, zid)
-	return found
 }
 
 // addSlice adds all identifier of the given slice to the set.
