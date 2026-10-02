@@ -17,11 +17,11 @@ import (
 	"t73f.de/r/sx"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/box/manager/store"
+	"zettelstore.de/z/internal/idset"
 )
 
 type collectData struct {

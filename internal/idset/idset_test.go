@@ -1,0 +1,268 @@
+//-----------------------------------------------------------------------------
+// Copyright (c) 2021-present Detlef Stern
+//
+// This file is part of Zettelstore.
+//
+// Zettelstore is licensed under the latest version of the EUPL (European Union
+// Public License). Please see file LICENSE.txt for your rights and obligations
+// under this license.
+//
+// SPDX-License-Identifier: EUPL-1.2
+// SPDX-FileCopyrightText: 2021-present Detlef Stern
+//-----------------------------------------------------------------------------
+
+package idset_test
+
+import (
+	"slices"
+	"testing"
+
+	"t73f.de/r/zsc/domain/id"
+
+	"zettelstore.de/z/internal/idset"
+)
+
+func TestSetContainsOrNil(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		s   *idset.Set
+		zid id.Zid
+		exp bool
+	}{
+		{nil, id.Invalid, true},
+		{nil, 14, true},
+		{idset.New(), id.Invalid, false},
+		{idset.New(), 1, false},
+		{idset.New(), id.Invalid, false},
+		{idset.New(1), 1, true},
+	}
+	for i, tc := range testcases {
+		got := tc.s.ContainsOrNil(tc.zid)
+		if got != tc.exp {
+			t.Errorf("%d: %v.ContainsOrNil(%v) == %v, but got %v", i, tc.s, tc.zid, tc.exp, got)
+		}
+	}
+}
+
+func TestSetContains(t *testing.T) {
+	testcases := []id.Zid{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22}
+	var s *idset.Set
+	for _, tc := range testcases {
+		if s.Contains(tc) {
+			t.Errorf("nil set contains %v", tc)
+		}
+	}
+	s = idset.New()
+	data := slices.Clone(testcases)
+	slices.Reverse(data)
+	s = s.AddSlice(data)
+	for _, tc := range testcases {
+		if !s.Contains(tc) {
+			t.Errorf("set does not contain %v", tc)
+		}
+	}
+	notFounds := []id.Zid{0, 1, 3, 5, 23}
+	for _, zid := range notFounds {
+		if s.Contains(zid) {
+			t.Errorf("set does contain %v", zid)
+
+		}
+	}
+}
+
+func TestSetAdd(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		s1, s2 *idset.Set
+		exp    []id.Zid
+	}{
+		{nil, nil, nil},
+		{idset.New(), nil, nil},
+		{idset.New(), idset.New(), nil},
+		{nil, idset.New(1), []id.Zid{1}},
+		{idset.New(1), nil, []id.Zid{1}},
+		{idset.New(1), idset.New(), []id.Zid{1}},
+		{idset.New(1), idset.New(2), []id.Zid{1, 2}},
+		{idset.New(1), idset.New(1), []id.Zid{1}},
+	}
+	for i, tc := range testcases {
+		sl1 := tc.s1.SafeSorted()
+		sl2 := tc.s2.SafeSorted()
+		got := tc.s1.IUnion(tc.s2).SafeSorted()
+		if !slices.Equal(got, tc.exp) {
+			t.Errorf("%d: %v.Add(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
+		}
+	}
+}
+
+func TestSetSafeSorted(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		set *idset.Set
+		exp []id.Zid
+	}{
+		{nil, nil},
+		{idset.New(), nil},
+		{idset.New(9, 4, 6, 1, 7), []id.Zid{1, 4, 6, 7, 9}},
+	}
+	for i, tc := range testcases {
+		got := tc.set.SafeSorted()
+		if !slices.Equal(got, tc.exp) {
+			t.Errorf("%d: %v.SafeSorted() should be %v, but got %v", i, tc.set, tc.exp, got)
+		}
+	}
+}
+
+func TestSetIntersectOrSet(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		s1, s2 *idset.Set
+		exp    []id.Zid
+	}{
+		{nil, nil, nil},
+		{idset.New(), nil, nil},
+		{nil, idset.New(), nil},
+		{idset.New(), idset.New(), nil},
+		{idset.New(1), nil, nil},
+		{nil, idset.New(1), []id.Zid{1}},
+		{idset.New(1), idset.New(), nil},
+		{idset.New(), idset.New(1), nil},
+		{idset.New(1), idset.New(2), nil},
+		{idset.New(2), idset.New(1), nil},
+		{idset.New(1), idset.New(1), []id.Zid{1}},
+	}
+	for i, tc := range testcases {
+		sl1 := tc.s1.SafeSorted()
+		sl2 := tc.s2.SafeSorted()
+		got := tc.s1.IntersectOrSet(tc.s2).SafeSorted()
+		if !slices.Equal(got, tc.exp) {
+			t.Errorf("%d: %v.IntersectOrSet(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
+		}
+	}
+}
+
+func TestSetIUnion(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		s1, s2 *idset.Set
+		exp    *idset.Set
+	}{
+		{nil, nil, nil},
+		{idset.New(), nil, idset.New()},
+		{nil, idset.New(), nil},
+		{idset.New(), idset.New(), idset.New()},
+		{idset.New(1), nil, idset.New(1)},
+		{nil, idset.New(1), idset.New(1)},
+		{idset.New(1), idset.New(), idset.New(1)},
+		{idset.New(), idset.New(1), idset.New(1)},
+		{idset.New(1), idset.New(2), idset.New(1, 2)},
+		{idset.New(2), idset.New(1), idset.New(2, 1)},
+		{idset.New(1), idset.New(1), idset.New(1)},
+		{idset.New(1, 2, 3), idset.New(2, 3, 4), idset.New(1, 2, 3, 4)},
+	}
+	for i, tc := range testcases {
+		s1 := tc.s1.Clone()
+		sl1 := s1.SafeSorted()
+		sl2 := tc.s2.SafeSorted()
+		got := s1.IUnion(tc.s2)
+		if !got.Equal(tc.exp) {
+			t.Errorf("%d: %v.IUnion(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
+		}
+	}
+}
+
+func TestSetISubtract(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		s1, s2 *idset.Set
+		exp    []id.Zid
+	}{
+		{nil, nil, nil},
+		{idset.New(), nil, nil},
+		{nil, idset.New(), nil},
+		{idset.New(), idset.New(), nil},
+		{idset.New(1), nil, []id.Zid{1}},
+		{nil, idset.New(1), nil},
+		{idset.New(1), idset.New(), []id.Zid{1}},
+		{idset.New(), idset.New(1), nil},
+		{idset.New(1), idset.New(2), []id.Zid{1}},
+		{idset.New(2), idset.New(1), []id.Zid{2}},
+		{idset.New(1), idset.New(1), nil},
+		{idset.New(1, 2, 3), idset.New(1), []id.Zid{2, 3}},
+		{idset.New(1, 2, 3), idset.New(2), []id.Zid{1, 3}},
+		{idset.New(1, 2, 3), idset.New(3), []id.Zid{1, 2}},
+		{idset.New(1, 2, 3), idset.New(1, 2), []id.Zid{3}},
+		{idset.New(1, 2, 3), idset.New(1, 3), []id.Zid{2}},
+		{idset.New(1, 2, 3), idset.New(2, 3), []id.Zid{1}},
+	}
+	for i, tc := range testcases {
+		s1 := tc.s1.Clone()
+		sl1 := s1.SafeSorted()
+		sl2 := tc.s2.SafeSorted()
+		s1.ISubstract(tc.s2)
+		got := s1.SafeSorted()
+		if !slices.Equal(got, tc.exp) {
+			t.Errorf("%d: %v.ISubstract(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
+		}
+	}
+}
+
+func TestSetDiff(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		in1, in2   *idset.Set
+		exp1, exp2 *idset.Set
+	}{
+		{nil, nil, nil, nil},
+		{idset.New(1), nil, nil, idset.New(1)},
+		{nil, idset.New(1), idset.New(1), nil},
+		{idset.New(1), idset.New(1), nil, nil},
+		{idset.New(1, 2), idset.New(1), nil, idset.New(2)},
+		{idset.New(1), idset.New(1, 2), idset.New(2), nil},
+		{idset.New(1, 2), idset.New(1, 3), idset.New(3), idset.New(2)},
+		{idset.New(1, 2, 3), idset.New(2, 3, 4), idset.New(4), idset.New(1)},
+		{idset.New(2, 3, 4), idset.New(1, 2, 3), idset.New(1), idset.New(4)},
+	}
+	for i, tc := range testcases {
+		gotN, gotO := tc.in1.Diff(tc.in2)
+		if !tc.exp1.Equal(gotN) {
+			t.Errorf("%d: expected %v, but got: %v", i, tc.exp1, gotN)
+		}
+		if !tc.exp2.Equal(gotO) {
+			t.Errorf("%d: expected %v, but got: %v", i, tc.exp2, gotO)
+		}
+	}
+}
+
+func TestSetRemove(t *testing.T) {
+	t.Parallel()
+	testcases := []struct {
+		s1, s2 *idset.Set
+		exp    []id.Zid
+	}{
+		{nil, nil, nil},
+		{idset.New(), nil, nil},
+		{idset.New(), idset.New(), nil},
+		{idset.New(1), nil, []id.Zid{1}},
+		{idset.New(1), idset.New(), []id.Zid{1}},
+		{idset.New(1), idset.New(2), []id.Zid{1}},
+		{idset.New(1), idset.New(1), []id.Zid{}},
+	}
+	for i, tc := range testcases {
+		sl1 := tc.s1.SafeSorted()
+		sl2 := tc.s2.SafeSorted()
+		newS1 := idset.New(sl1...)
+		newS1.ISubstract(tc.s2)
+		got := newS1.SafeSorted()
+		if !slices.Equal(got, tc.exp) {
+			t.Errorf("%d: %v.Remove(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
+		}
+	}
+}
+
+func BenchmarkSet(b *testing.B) {
+	s := idset.NewCap(b.N)
+	for i := range b.N {
+		s.Add(id.Zid(i))
+	}
+}

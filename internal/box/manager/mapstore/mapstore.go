@@ -24,11 +24,11 @@ import (
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager/store"
+	"zettelstore.de/z/internal/idset"
 )
 
 type zettelData struct {

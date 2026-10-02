@@ -17,7 +17,8 @@ import (
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
+
+	"zettelstore.de/z/internal/idset"
 )
 
 type arAction int

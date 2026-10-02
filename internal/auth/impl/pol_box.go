@@ -17,11 +17,11 @@ import (
 	"context"
 
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/idset"
 )
 
 // polBox implements a policy box.

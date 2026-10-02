@@ -17,10 +17,11 @@ import (
 	"strconv"
 
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
+
+	"zettelstore.de/z/internal/idset"
 )
 
 // Parse the query specification and return a Query object.

@@ -21,9 +21,10 @@ import (
 	"slices"
 
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
+
+	"zettelstore.de/z/internal/idset"
 )
 
 // ContextSpec contains all specification values for calculating a context.

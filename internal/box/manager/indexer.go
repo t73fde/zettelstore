@@ -20,11 +20,11 @@ import (
 
 	"t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager/store"
+	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"

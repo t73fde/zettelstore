@@ -19,7 +19,8 @@ import (
 	"strings"
 
 	zerostrings "t73f.de/r/zero/strings"
-	"t73f.de/r/zsc/domain/id/idset"
+
+	"zettelstore.de/z/internal/idset"
 )
 
 type searchOp struct {

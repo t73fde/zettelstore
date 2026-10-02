@@ -21,8 +21,9 @@ import (
 	"t73f.de/r/sx/sxeval"
 	"t73f.de/r/zero/graph"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/id/idset"
 	"t73f.de/r/zsc/domain/meta"
+
+	"zettelstore.de/z/internal/idset"
 )
 
 func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (graph.Digraph[id.Zid], *sxeval.Binding, error) {
