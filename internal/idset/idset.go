@@ -29,13 +29,13 @@ type ArraySet struct {
 }
 
 // String returns a string representation of the set.
-func (s *ArraySet) String() string {
+func (s ArraySet) String() string {
 	return "{" + s.metaString() + "}"
 }
 
 // metaString returns a string representation of the set to be stored as metadata.
-func (s *ArraySet) metaString() string {
-	if s == nil || len(s.seq) == 0 {
+func (s ArraySet) metaString() string {
+	if len(s.seq) == 0 {
 		return ""
 	}
 	var sb strings.Builder
@@ -49,7 +49,7 @@ func (s *ArraySet) metaString() string {
 }
 
 // MetaValue returns a metadata value representation of the set.
-func (s *ArraySet) MetaValue() meta.Value { return meta.Value(s.metaString()) }
+func (s ArraySet) MetaValue() meta.Value { return meta.Value(s.metaString()) }
 
 // New returns a new set of identifier with the given initial values.
 func New(zids ...id.Zid) *ArraySet {
