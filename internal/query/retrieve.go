@@ -27,7 +27,7 @@ type searchOp struct {
 	s  string
 	op compareOp
 }
-type searchFunc func(string) *idset.ArraySet
+type searchFunc func(string) idset.ArraySet
 type searchCallMap map[searchOp]searchFunc
 
 var cmpPred = map[compareOp]func(string, string) bool{
@@ -108,7 +108,8 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 	if isSuperset(normCalls, plainCalls) {
 		var normResult *idset.ArraySet
 		for c, sf := range normCalls {
-			normResult = normResult.IntersectOrSet(sf(c.s))
+			as := sf(c.s)
+			normResult = normResult.IntersectOrSet(&as)
 		}
 		return normResult
 	}
@@ -119,16 +120,17 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 	for c, sf := range plainCalls {
 		result := sf(c.s)
 		if _, found := normCalls[c]; found {
-			cache[c] = result
+			cache[c] = &result
 		}
-		plainResult = plainResult.IntersectOrSet(result)
+		plainResult = plainResult.IntersectOrSet(&result)
 	}
 	var normResult *idset.ArraySet
 	for c, sf := range normCalls {
 		if result, found := cache[c]; found {
 			normResult = normResult.IntersectOrSet(result)
 		} else {
-			normResult = normResult.IntersectOrSet(sf(c.s))
+			as := sf(c.s)
+			normResult = normResult.IntersectOrSet(&as)
 		}
 	}
 	return normResult.IUnion(plainResult)
@@ -146,7 +148,8 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 func retrieveNegatives(negCalls searchCallMap) *idset.ArraySet {
 	var negatives *idset.ArraySet
 	for val, sf := range negCalls {
-		negatives = negatives.IUnion(sf(val.s))
+		as := sf(val.s)
+		negatives = negatives.IUnion(&as)
 	}
 	return negatives
 }
@@ -166,4 +169,4 @@ func getSearchFunc(searcher Searcher, op compareOp) searchFunc {
 	}
 }
 
-func nilSearchFunc(string) *idset.ArraySet { return nil }
+func nilSearchFunc(string) idset.ArraySet { return idset.ArraySet{} }
