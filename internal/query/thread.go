@@ -100,7 +100,7 @@ func (q *ztlThreadQueue) Pop() any {
 
 type threadTask struct {
 	port     ThreadPort
-	seen     *idset.Set
+	seen     *idset.ArraySet
 	queue    ztlThreadQueue
 	maxCount int
 }

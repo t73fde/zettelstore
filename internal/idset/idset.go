@@ -23,18 +23,18 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 )
 
-// Set is a set of zettel identifier
-type Set struct {
+// ArraySet is a set of zettel identifier, stored as an sorted array.
+type ArraySet struct {
 	seq []id.Zid
 }
 
 // String returns a string representation of the set.
-func (s *Set) String() string {
+func (s *ArraySet) String() string {
 	return "{" + s.metaString() + "}"
 }
 
 // metaString returns a string representation of the set to be stored as metadata.
-func (s *Set) metaString() string {
+func (s *ArraySet) metaString() string {
 	if s == nil || len(s.seq) == 0 {
 		return ""
 	}
@@ -49,36 +49,36 @@ func (s *Set) metaString() string {
 }
 
 // MetaValue returns a metadata value representation of the set.
-func (s *Set) MetaValue() meta.Value { return meta.Value(s.metaString()) }
+func (s *ArraySet) MetaValue() meta.Value { return meta.Value(s.metaString()) }
 
 // New returns a new set of identifier with the given initial values.
-func New(zids ...id.Zid) *Set {
+func New(zids ...id.Zid) *ArraySet {
 	switch l := len(zids); l {
 	case 0:
-		return &Set{seq: nil}
+		return &ArraySet{seq: nil}
 	case 1:
-		return &Set{seq: []id.Zid{zids[0]}}
+		return &ArraySet{seq: []id.Zid{zids[0]}}
 	default:
-		result := Set{seq: make([]id.Zid, 0, l)}
+		result := ArraySet{seq: make([]id.Zid, 0, l)}
 		result.addSlice(zids)
 		return &result
 	}
 }
 
 // NewCap returns a new set of identifier with the given capacity and initial values.
-func NewCap(c int, zids ...id.Zid) *Set {
-	result := Set{seq: make([]id.Zid, 0, max(c, len(zids)))}
+func NewCap(c int, zids ...id.Zid) *ArraySet {
+	result := ArraySet{seq: make([]id.Zid, 0, max(c, len(zids)))}
 	result.addSlice(zids)
 	return &result
 }
 
 // IsEmpty returns true, if the set conains no element.
-func (s *Set) IsEmpty() bool {
+func (s *ArraySet) IsEmpty() bool {
 	return s == nil || len(s.seq) == 0
 }
 
 // Length returns the number of elements in this set.
-func (s *Set) Length() int {
+func (s *ArraySet) Length() int {
 	if s == nil {
 		return 0
 	}
@@ -86,15 +86,15 @@ func (s *Set) Length() int {
 }
 
 // Clone returns a copy of the given set.
-func (s *Set) Clone() *Set {
+func (s *ArraySet) Clone() *ArraySet {
 	if s == nil {
 		return nil
 	}
-	return &Set{seq: slices.Clone(s.seq)}
+	return &ArraySet{seq: slices.Clone(s.seq)}
 }
 
 // Add adds a Add to the set.
-func (s *Set) Add(zid id.Zid) *Set {
+func (s *ArraySet) Add(zid id.Zid) *ArraySet {
 	if s == nil {
 		return New(zid)
 	}
@@ -103,17 +103,17 @@ func (s *Set) Add(zid id.Zid) *Set {
 }
 
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
-func (s *Set) Contains(zid id.Zid) bool { return s != nil && s.contains(zid) }
+func (s *ArraySet) Contains(zid id.Zid) bool { return s != nil && s.contains(zid) }
 
 // ContainsOrNil return true if the set is nil or if the set contains the given Zettel identifier.
-func (s *Set) ContainsOrNil(zid id.Zid) bool { return s == nil || s.contains(zid) }
+func (s *ArraySet) ContainsOrNil(zid id.Zid) bool { return s == nil || s.contains(zid) }
 
 // IntersectOrSet removes all zettel identifier that are not in the other set.
 // Both sets can be modified by this method. One of them is the set returned.
 // It contains the intersection of both, if s is not nil.
 //
 // If s == nil, then the other set is always returned.
-func (s *Set) IntersectOrSet(other *Set) *Set {
+func (s *ArraySet) IntersectOrSet(other *ArraySet) *ArraySet {
 	if s == nil {
 		if other == nil {
 			return nil
@@ -145,7 +145,7 @@ func (s *Set) IntersectOrSet(other *Set) *Set {
 }
 
 // IUnion adds the elements of set other to s.
-func (s *Set) IUnion(other *Set) *Set {
+func (s *ArraySet) IUnion(other *ArraySet) *ArraySet {
 	if other == nil || len(other.seq) == 0 {
 		return s
 	}
@@ -154,7 +154,7 @@ func (s *Set) IUnion(other *Set) *Set {
 }
 
 // ISubstract removes all zettel identifier from 's' that are in the set 'other'.
-func (s *Set) ISubstract(other *Set) {
+func (s *ArraySet) ISubstract(other *ArraySet) {
 	if s == nil || len(s.seq) == 0 || other == nil || len(other.seq) == 0 {
 		return
 	}
@@ -187,7 +187,7 @@ func (s *Set) ISubstract(other *Set) {
 // in other words: the first result is the set of elements from other that must
 // be added to s; the second result is the set of elements that must be removed
 // from s, so that s would have the same elemest as other.
-func (s *Set) Diff(other *Set) (newS, remS *Set) {
+func (s *ArraySet) Diff(other *ArraySet) (newS, remS *ArraySet) {
 	if s == nil || len(s.seq) == 0 {
 		return other.Clone(), nil
 	}
@@ -222,7 +222,7 @@ func (s *Set) Diff(other *Set) (newS, remS *Set) {
 }
 
 // Remove the identifier from the set.
-func (s *Set) Remove(zid id.Zid) *Set {
+func (s *ArraySet) Remove(zid id.Zid) *ArraySet {
 	if s == nil || len(s.seq) == 0 {
 		return nil
 	}
@@ -237,7 +237,7 @@ func (s *Set) Remove(zid id.Zid) *Set {
 }
 
 // Equal returns true if the other set is equal to the given set.
-func (s *Set) Equal(other *Set) bool {
+func (s *ArraySet) Equal(other *ArraySet) bool {
 	if s == nil {
 		return other == nil
 	}
@@ -248,7 +248,7 @@ func (s *Set) Equal(other *Set) bool {
 }
 
 // Values returns an iterator for each element of the set, in ascending order.
-func (s *Set) Values() iter.Seq[id.Zid] {
+func (s *ArraySet) Values() iter.Seq[id.Zid] {
 	if s == nil {
 		return slices.Values([]id.Zid{})
 	}
@@ -256,7 +256,7 @@ func (s *Set) Values() iter.Seq[id.Zid] {
 }
 
 // Pop return one arbitrary element of the set.
-func (s *Set) Pop() (id.Zid, bool) {
+func (s *ArraySet) Pop() (id.Zid, bool) {
 	if s != nil {
 		if l := len(s.seq); l > 0 {
 			zid := s.seq[l-1]
@@ -268,7 +268,7 @@ func (s *Set) Pop() (id.Zid, bool) {
 }
 
 // Optimize the amount of memory to store the set.
-func (s *Set) Optimize() {
+func (s *ArraySet) Optimize() {
 	if s != nil {
 		s.seq = slices.Clone(s.seq)
 	}
@@ -276,26 +276,26 @@ func (s *Set) Optimize() {
 
 // ----- unchecked base operations
 
-func newFromSlice(seq []id.Zid) *Set {
+func newFromSlice(seq []id.Zid) *ArraySet {
 	if l := len(seq); l == 0 {
 		return nil
 	}
-	return &Set{seq: seq}
+	return &ArraySet{seq: seq}
 }
 
-func (s *Set) add(zid id.Zid) {
+func (s *ArraySet) add(zid id.Zid) {
 	if pos, found := slices.BinarySearch(s.seq, zid); !found {
 		s.seq = slices.Insert(s.seq, pos, zid)
 	}
 }
 
-func (s *Set) contains(zid id.Zid) bool {
+func (s *ArraySet) contains(zid id.Zid) bool {
 	_, found := slices.BinarySearch(s.seq, zid)
 	return found
 }
 
 // addSlice adds all identifier of the given slice to the set.
-func (s *Set) addSlice(sl []id.Zid) *Set {
+func (s *ArraySet) addSlice(sl []id.Zid) *ArraySet {
 	if s == nil {
 		return New(sl...)
 	}

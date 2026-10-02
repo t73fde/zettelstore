@@ -30,19 +30,19 @@ import (
 type Searcher interface {
 	// Select all zettel that contains the given exact word.
 	// The word must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchEqual(word string) *idset.Set
+	SearchEqual(word string) *idset.ArraySet
 
 	// Select all zettel that have a word with the given prefix.
 	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchPrefix(prefix string) *idset.Set
+	SearchPrefix(prefix string) *idset.ArraySet
 
 	// Select all zettel that have a word with the given suffix.
 	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchSuffix(suffix string) *idset.Set
+	SearchSuffix(suffix string) *idset.ArraySet
 
 	// Select all zettel that contains the given string.
 	// The string must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchContains(s string) *idset.Set
+	SearchContains(s string) *idset.ArraySet
 }
 
 // Query specifies a mechanism for querying zettel.
@@ -385,7 +385,7 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq
 	return result
 }
 
-func metaList2idSet(ml []*meta.Meta) *idset.Set {
+func metaList2idSet(ml []*meta.Meta) *idset.ArraySet {
 	if ml == nil {
 		return nil
 	}
@@ -396,7 +396,7 @@ func metaList2idSet(ml []*meta.Meta) *idset.Set {
 	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.Set) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.ArraySet) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
 	var pred RetrievePredicate
 	if searcher != nil {

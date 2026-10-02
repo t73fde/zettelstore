@@ -24,11 +24,11 @@ import (
 
 // ZettelIndex contains all index data of a zettel.
 type ZettelIndex struct {
-	Zid         id.Zid                // zid of the indexed zettel
-	meta        *meta.Meta            // full metadata
-	backrefs    *idset.Set            // set of back references
-	inverseRefs map[string]*idset.Set // references of inverse keys
-	deadrefs    *idset.Set            // set of dead references
+	Zid         id.Zid                     // zid of the indexed zettel
+	meta        *meta.Meta                 // full metadata
+	backrefs    *idset.ArraySet            // set of back references
+	inverseRefs map[string]*idset.ArraySet // references of inverse keys
+	deadrefs    *idset.ArraySet            // set of dead references
 	words       WordSet
 	urls        WordSet
 }
@@ -39,7 +39,7 @@ func NewZettelIndex(m *meta.Meta) *ZettelIndex {
 		Zid:         m.Zid,
 		meta:        m,
 		backrefs:    idset.New(),
-		inverseRefs: make(map[string]*idset.Set),
+		inverseRefs: make(map[string]*idset.ArraySet),
 		deadrefs:    idset.New(),
 	}
 }
@@ -70,16 +70,16 @@ func (zi *ZettelIndex) SetWords(words WordSet) { zi.words = words }
 func (zi *ZettelIndex) SetUrls(urls WordSet) { zi.urls = urls }
 
 // GetDeadRefs returns all dead references as a sorted list.
-func (zi *ZettelIndex) GetDeadRefs() *idset.Set { return zi.deadrefs }
+func (zi *ZettelIndex) GetDeadRefs() *idset.ArraySet { return zi.deadrefs }
 
 // GetMeta return just the raw metadata.
 func (zi *ZettelIndex) GetMeta() *meta.Meta { return zi.meta }
 
 // GetBackRefs returns all back references as a sorted list.
-func (zi *ZettelIndex) GetBackRefs() *idset.Set { return zi.backrefs }
+func (zi *ZettelIndex) GetBackRefs() *idset.ArraySet { return zi.backrefs }
 
 // GetInverseRefs returns all inverse meta references as a map of strings to a sorted list of references
-func (zi *ZettelIndex) GetInverseRefs() map[string]*idset.Set {
+func (zi *ZettelIndex) GetInverseRefs() map[string]*idset.ArraySet {
 	return maps.Clone(zi.inverseRefs)
 }
 

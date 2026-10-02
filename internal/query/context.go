@@ -144,14 +144,14 @@ func (q *ztlCtxQueue) Pop() any {
 
 type contextTask struct {
 	port     ContextPort
-	seen     *idset.Set
+	seen     *idset.ArraySet
 	queue    ztlCtxQueue
 	maxCost  float64
 	maxCount int
 	minCount int
 	tagMetas map[string][]*meta.Meta
-	tagZids  map[string]*idset.Set // just the zids of tagMetas
-	metaZid  map[id.Zid]*meta.Meta // maps zid to meta for all meta retrieved with tags
+	tagZids  map[string]*idset.ArraySet // just the zids of tagMetas
+	metaZid  map[id.Zid]*meta.Meta      // maps zid to meta for all meta retrieved with tags
 }
 
 func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
@@ -162,7 +162,7 @@ func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount 
 		maxCount: max(maxCount, minCount),
 		minCount: minCount,
 		tagMetas: make(map[string][]*meta.Meta),
-		tagZids:  make(map[string]*idset.Set),
+		tagZids:  make(map[string]*idset.ArraySet),
 		metaZid:  make(map[id.Zid]*meta.Meta),
 	}
 
@@ -261,7 +261,7 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 
 func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint, dir int) {
 	tags := slices.Collect(tagiter)
-	var zidSet *idset.Set
+	var zidSet *idset.ArraySet
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)
 		zidSet = zidSet.IUnion(zs)
@@ -283,7 +283,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 	}
 }
 
-func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Set {
+func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.ArraySet {
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}

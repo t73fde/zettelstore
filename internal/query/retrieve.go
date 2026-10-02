@@ -27,7 +27,7 @@ type searchOp struct {
 	s  string
 	op compareOp
 }
-type searchFunc func(string) *idset.Set
+type searchFunc func(string) *idset.ArraySet
 type searchCallMap map[searchOp]searchFunc
 
 var cmpPred = map[compareOp]func(string, string) bool{
@@ -104,18 +104,18 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 	return false
 }
 
-func retrievePositives(normCalls, plainCalls searchCallMap) *idset.Set {
+func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 	if isSuperset(normCalls, plainCalls) {
-		var normResult *idset.Set
+		var normResult *idset.ArraySet
 		for c, sf := range normCalls {
 			normResult = normResult.IntersectOrSet(sf(c.s))
 		}
 		return normResult
 	}
 
-	cache := make(map[searchOp]*idset.Set)
+	cache := make(map[searchOp]*idset.ArraySet)
 
-	var plainResult *idset.Set
+	var plainResult *idset.ArraySet
 	for c, sf := range plainCalls {
 		result := sf(c.s)
 		if _, found := normCalls[c]; found {
@@ -123,7 +123,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.Set {
 		}
 		plainResult = plainResult.IntersectOrSet(result)
 	}
-	var normResult *idset.Set
+	var normResult *idset.ArraySet
 	for c, sf := range normCalls {
 		if result, found := cache[c]; found {
 			normResult = normResult.IntersectOrSet(result)
@@ -143,8 +143,8 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 	return true
 }
 
-func retrieveNegatives(negCalls searchCallMap) *idset.Set {
-	var negatives *idset.Set
+func retrieveNegatives(negCalls searchCallMap) *idset.ArraySet {
+	var negatives *idset.ArraySet
 	for val, sf := range negCalls {
 		negatives = negatives.IUnion(sf(val.s))
 	}
@@ -166,4 +166,4 @@ func getSearchFunc(searcher Searcher, op compareOp) searchFunc {
 	}
 }
 
-func nilSearchFunc(string) *idset.Set { return nil }
+func nilSearchFunc(string) *idset.ArraySet { return nil }

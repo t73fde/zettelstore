@@ -23,7 +23,7 @@ import (
 )
 
 // SafeSorted returns the set as a new sorted slice of zettel identifier.
-func safeSorted(s *idset.Set) []id.Zid {
+func safeSorted(s *idset.ArraySet) []id.Zid {
 	if s == nil {
 		return nil
 	}
@@ -37,7 +37,7 @@ func safeSorted(s *idset.Set) []id.Zid {
 func TestSetContainsOrNil(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		s   *idset.Set
+		s   *idset.ArraySet
 		zid id.Zid
 		exp bool
 	}{
@@ -58,7 +58,7 @@ func TestSetContainsOrNil(t *testing.T) {
 
 func TestSetContains(t *testing.T) {
 	testcases := []id.Zid{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22}
-	var s *idset.Set
+	var s *idset.ArraySet
 	for _, tc := range testcases {
 		if s.Contains(tc) {
 			t.Errorf("nil set contains %v", tc)
@@ -87,7 +87,7 @@ func TestSetContains(t *testing.T) {
 func TestSetAdd(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		s1, s2 *idset.Set
+		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
 		{nil, nil, nil},
@@ -112,7 +112,7 @@ func TestSetAdd(t *testing.T) {
 func TestSetSafeSorted(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		set *idset.Set
+		set *idset.ArraySet
 		exp []id.Zid
 	}{
 		{nil, nil},
@@ -130,7 +130,7 @@ func TestSetSafeSorted(t *testing.T) {
 func TestSetIntersectOrSet(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		s1, s2 *idset.Set
+		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
 		{nil, nil, nil},
@@ -158,8 +158,8 @@ func TestSetIntersectOrSet(t *testing.T) {
 func TestSetIUnion(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		s1, s2 *idset.Set
-		exp    *idset.Set
+		s1, s2 *idset.ArraySet
+		exp    *idset.ArraySet
 	}{
 		{nil, nil, nil},
 		{idset.New(), nil, idset.New()},
@@ -188,7 +188,7 @@ func TestSetIUnion(t *testing.T) {
 func TestSetISubtract(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		s1, s2 *idset.Set
+		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
 		{nil, nil, nil},
@@ -224,8 +224,8 @@ func TestSetISubtract(t *testing.T) {
 func TestSetDiff(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		in1, in2   *idset.Set
-		exp1, exp2 *idset.Set
+		in1, in2   *idset.ArraySet
+		exp1, exp2 *idset.ArraySet
 	}{
 		{nil, nil, nil, nil},
 		{idset.New(1), nil, nil, idset.New(1)},
@@ -251,7 +251,7 @@ func TestSetDiff(t *testing.T) {
 func TestSetRemove(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
-		s1, s2 *idset.Set
+		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
 		{nil, nil, nil},

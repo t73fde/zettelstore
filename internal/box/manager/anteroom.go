@@ -31,7 +31,7 @@ const (
 
 type anteroom struct {
 	next    *anteroom
-	waiting *idset.Set
+	waiting *idset.ArraySet
 	curLoad int
 	reload  bool
 }
@@ -87,7 +87,7 @@ func (ar *anteroomQueue) Reset() {
 	ar.last = ar.first
 }
 
-func (ar *anteroomQueue) Reload(allZids *idset.Set) {
+func (ar *anteroomQueue) Reload(allZids *idset.ArraySet) {
 	ar.mx.Lock()
 	defer ar.mx.Unlock()
 	ar.deleteReloadedRooms()
