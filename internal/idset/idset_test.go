@@ -166,12 +166,7 @@ func TestSetISubtract(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{nil, nil, nil},
-		{idset.New(), nil, nil},
-		{nil, idset.New(), nil},
 		{idset.New(), idset.New(), nil},
-		{idset.New(1), nil, []id.Zid{1}},
-		{nil, idset.New(1), nil},
 		{idset.New(1), idset.New(), []id.Zid{1}},
 		{idset.New(), idset.New(1), nil},
 		{idset.New(1), idset.New(2), []id.Zid{1}},
@@ -188,7 +183,7 @@ func TestSetISubtract(t *testing.T) {
 		s1 := tc.s1.Clone()
 		sl1 := safeSorted(s1)
 		sl2 := safeSorted(tc.s2)
-		s1.ISubstract(tc.s2)
+		s1.ISubstract(*tc.s2)
 		got := safeSorted(s1)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.ISubstract(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
@@ -229,10 +224,7 @@ func TestSetRemove(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{nil, nil, nil},
-		{idset.New(), nil, nil},
 		{idset.New(), idset.New(), nil},
-		{idset.New(1), nil, []id.Zid{1}},
 		{idset.New(1), idset.New(), []id.Zid{1}},
 		{idset.New(1), idset.New(2), []id.Zid{1}},
 		{idset.New(1), idset.New(1), []id.Zid{}},
@@ -241,7 +233,7 @@ func TestSetRemove(t *testing.T) {
 		sl1 := safeSorted(tc.s1)
 		sl2 := safeSorted(tc.s2)
 		newS1 := idset.New(sl1...)
-		newS1.ISubstract(tc.s2)
+		newS1.ISubstract(*tc.s2)
 		got := safeSorted(newS1)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.Remove(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)

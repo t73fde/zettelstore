@@ -118,13 +118,13 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 	}
 	if zi.forward != nil && !zi.forward.IsEmpty() {
 		m.Set(meta.KeyForward, zi.forward.MetaValue())
-		back.ISubstract(zi.forward)
+		back.ISubstract(*zi.forward)
 		updated = true
 	}
 	for k, refs := range zi.otherRefs {
 		if refs.backward != nil && !refs.backward.IsEmpty() {
 			m.Set(k, refs.backward.MetaValue())
-			back.ISubstract(refs.backward)
+			back.ISubstract(*refs.backward)
 			updated = true
 		}
 	}
@@ -278,6 +278,9 @@ func removeOtherMetaRefs(m *meta.Meta, back *idset.ArraySet) *idset.ArraySet {
 				}
 			}
 		}
+	}
+	if back == nil {
+		return idset.New()
 	}
 	return back
 }

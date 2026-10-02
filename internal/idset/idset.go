@@ -133,8 +133,8 @@ func (s *ArraySet) IUnion(other *ArraySet) *ArraySet {
 }
 
 // ISubstract removes all zettel identifier from 's' that are in the set 'other'.
-func (s *ArraySet) ISubstract(other *ArraySet) {
-	if s == nil || len(s.seq) == 0 || other == nil || len(other.seq) == 0 {
+func (s *ArraySet) ISubstract(other ArraySet) {
+	if len(s.seq) == 0 || len(other.seq) == 0 {
 		return
 	}
 	topos, spos, opos := 0, 0, 0
