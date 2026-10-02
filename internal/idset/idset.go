@@ -108,25 +108,12 @@ func (s *ArraySet) Contains(zid id.Zid) bool { return s != nil && s.contains(zid
 // ContainsOrNil return true if the set is nil or if the set contains the given Zettel identifier.
 func (s *ArraySet) ContainsOrNil(zid id.Zid) bool { return s == nil || s.contains(zid) }
 
-// IntersectOrSet removes all zettel identifier that are not in the other set.
-// Both sets can be modified by this method. One of them is the set returned.
-// It contains the intersection of both, if s is not nil.
-//
-// If s == nil, then the other set is always returned.
-func (s *ArraySet) IntersectOrSet(other *ArraySet) *ArraySet {
-	if s == nil {
-		if other == nil {
-			return nil
-		}
-		return other.Clone() // must call other.Clone(), otherwise poss. race
-	}
-	if other == nil {
-		s.seq = s.seq[:0]
-		return s
-	}
+// Intersection removes all elements from s that are not in o.
+// Only s is modified, o is left unchanged.
+func (s *ArraySet) Intersection(o ArraySet) {
 	topos, spos, opos := 0, 0, 0
-	for spos < len(s.seq) && opos < len(other.seq) {
-		sz, oz := s.seq[spos], other.seq[opos]
+	for spos < len(s.seq) && opos < len(o.seq) {
+		sz, oz := s.seq[spos], o.seq[opos]
 		if sz < oz {
 			spos++
 			continue
@@ -141,7 +128,6 @@ func (s *ArraySet) IntersectOrSet(other *ArraySet) *ArraySet {
 		opos++
 	}
 	s.seq = s.seq[:topos]
-	return s
 }
 
 // IUnion adds the elements of set other to s.

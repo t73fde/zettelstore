@@ -106,34 +106,58 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 
 func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 	if isSuperset(normCalls, plainCalls) {
-		var normResult *idset.ArraySet
+		var normResult idset.ArraySet
+		first := true
 		for c, sf := range normCalls {
 			as := sf(c.s)
-			normResult = normResult.IntersectOrSet(&as)
+			if first {
+				normResult = *as.Clone()
+				first = false
+			} else {
+				normResult.Intersection(as)
+			}
 		}
-		return normResult
+		return &normResult
 	}
 
 	cache := make(map[searchOp]*idset.ArraySet)
 
-	var plainResult *idset.ArraySet
+	var plainResult idset.ArraySet
+	first := true
 	for c, sf := range plainCalls {
 		result := sf(c.s)
 		if _, found := normCalls[c]; found {
 			cache[c] = &result
 		}
-		plainResult = plainResult.IntersectOrSet(&result)
-	}
-	var normResult *idset.ArraySet
-	for c, sf := range normCalls {
-		if result, found := cache[c]; found {
-			normResult = normResult.IntersectOrSet(result)
+		if first {
+			plainResult = *result.Clone()
+			first = false
 		} else {
-			as := sf(c.s)
-			normResult = normResult.IntersectOrSet(&as)
+			plainResult.Intersection(result)
 		}
 	}
-	return normResult.IUnion(plainResult)
+
+	var normResult *idset.ArraySet
+	first = true
+	for c, sf := range normCalls {
+		if result, found := cache[c]; found {
+			if first {
+				normResult = result.Clone()
+				first = false
+			} else {
+				normResult.Intersection(*result)
+			}
+		} else {
+			as := sf(c.s)
+			if first {
+				normResult = as.Clone()
+				first = false
+			} else {
+				normResult.Intersection(as)
+			}
+		}
+	}
+	return normResult.IUnion(&plainResult)
 }
 
 func isSuperset(normCalls, plainCalls searchCallMap) bool {

@@ -127,18 +127,13 @@ func TestSetSafeSorted(t *testing.T) {
 	}
 }
 
-func TestSetIntersectOrSet(t *testing.T) {
+func TestSetIntersection(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{nil, nil, nil},
-		{idset.New(), nil, nil},
-		{nil, idset.New(), nil},
 		{idset.New(), idset.New(), nil},
-		{idset.New(1), nil, nil},
-		{nil, idset.New(1), []id.Zid{1}},
 		{idset.New(1), idset.New(), nil},
 		{idset.New(), idset.New(1), nil},
 		{idset.New(1), idset.New(2), nil},
@@ -148,7 +143,9 @@ func TestSetIntersectOrSet(t *testing.T) {
 	for i, tc := range testcases {
 		sl1 := safeSorted(tc.s1)
 		sl2 := safeSorted(tc.s2)
-		got := safeSorted(tc.s1.IntersectOrSet(tc.s2))
+		r := tc.s1.Clone()
+		r.Intersection(*tc.s2)
+		got := safeSorted(r)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.IntersectOrSet(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}
