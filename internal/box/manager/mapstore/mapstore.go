@@ -107,28 +107,28 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 		return false
 	}
 	var updated bool
-	if !zi.dead.IsEmpty() {
+	if zi.dead != nil && !zi.dead.IsEmpty() {
 		m.Set(meta.KeyDead, zi.dead.MetaValue())
 		updated = true
 	}
 	back := removeOtherMetaRefs(m, zi.backward.Clone())
-	if !zi.backward.IsEmpty() {
+	if zi.backward != nil && !zi.backward.IsEmpty() {
 		m.Set(meta.KeyBackward, zi.backward.MetaValue())
 		updated = true
 	}
-	if !zi.forward.IsEmpty() {
+	if zi.forward != nil && !zi.forward.IsEmpty() {
 		m.Set(meta.KeyForward, zi.forward.MetaValue())
 		back.ISubstract(zi.forward)
 		updated = true
 	}
 	for k, refs := range zi.otherRefs {
-		if !refs.backward.IsEmpty() {
+		if refs.backward != nil && !refs.backward.IsEmpty() {
 			m.Set(k, refs.backward.MetaValue())
 			back.ISubstract(refs.backward)
 			updated = true
 		}
 	}
-	if !back.IsEmpty() {
+	if back != nil && !back.IsEmpty() {
 		m.Set(meta.KeyBack, back.MetaValue())
 		updated = true
 	}
@@ -439,7 +439,7 @@ func updateStrings(zid id.Zid, srefs stringRefs, prev []string, next store.WordS
 			continue
 		}
 		refs = refs.Remove(zid)
-		if refs.IsEmpty() {
+		if refs == nil || refs.IsEmpty() {
 			delete(srefs, word)
 			continue
 		}
@@ -511,7 +511,7 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
 	for ref := range zi.dead.Values() {
 		if drefs, ok := ms.dead[ref]; ok {
-			if drefs = drefs.Remove(zid); drefs.IsEmpty() {
+			if drefs = drefs.Remove(zid); drefs == nil || drefs.IsEmpty() {
 				delete(ms.dead, ref)
 			} else {
 				ms.dead[ref] = drefs
@@ -550,7 +550,7 @@ func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward *idset.Arr
 			return
 		}
 		bmr.backward = bmr.backward.Remove(zid)
-		if !bmr.backward.IsEmpty() || !bmr.forward.IsEmpty() {
+		if (bmr.backward != nil && !bmr.backward.IsEmpty()) || (bmr.forward != nil && !bmr.forward.IsEmpty()) {
 			bzi.otherRefs[key] = bmr
 		} else {
 			delete(bzi.otherRefs, key)
@@ -569,7 +569,7 @@ func deleteStrings(msStringMap stringRefs, curStrings []string, zid id.Zid) {
 			continue
 		}
 		refs = refs.Remove(zid)
-		if refs.IsEmpty() {
+		if refs == nil || refs.IsEmpty() {
 			delete(msStringMap, word)
 			continue
 		}
@@ -628,7 +628,7 @@ func (ms *mapStore) dumpIndex(w io.Writer) {
 	for _, id := range zids {
 		_, _ = fmt.Fprintln(w, "=====", id)
 		zi := ms.idx[id]
-		if !zi.dead.IsEmpty() {
+		if zi.dead != nil && !zi.dead.IsEmpty() {
 			_, _ = fmt.Fprintln(w, "* Dead:", zi.dead)
 		}
 		dumpSet(w, "* Forward:", zi.forward)
@@ -666,7 +666,7 @@ func (ms *mapStore) dumpDead(w io.Writer) {
 }
 
 func dumpSet(w io.Writer, prefix string, s *idset.ArraySet) {
-	if !s.IsEmpty() {
+	if s != nil && !s.IsEmpty() {
 		_, _ = io.WriteString(w, prefix)
 		for zid := range s.Values() {
 			_, _ = io.WriteString(w, " ")

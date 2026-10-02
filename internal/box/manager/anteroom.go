@@ -92,7 +92,7 @@ func (ar *anteroomQueue) Reload(allZids *idset.ArraySet) {
 	defer ar.mx.Unlock()
 	ar.deleteReloadedRooms()
 
-	if !allZids.IsEmpty() {
+	if allZids != nil && !allZids.IsEmpty() {
 		ar.first = &anteroom{next: ar.first, waiting: allZids, curLoad: allZids.Length(), reload: true}
 		if ar.first.next == nil {
 			ar.last = ar.first
@@ -123,6 +123,7 @@ func (ar *anteroomQueue) Dequeue() (arAction, id.Zid, bool) {
 			ar.removeFirst()
 			return arReload, id.Invalid, false
 		}
+		// TODO: first.waiting == nil is possible
 		if zid, found := first.waiting.Pop(); found {
 			if first.waiting.IsEmpty() {
 				ar.removeFirst()

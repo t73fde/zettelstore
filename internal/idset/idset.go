@@ -73,9 +73,7 @@ func NewCap(c int, zids ...id.Zid) *ArraySet {
 }
 
 // IsEmpty returns true, if the set conains no element.
-func (s *ArraySet) IsEmpty() bool {
-	return s == nil || len(s.seq) == 0
-}
+func (s ArraySet) IsEmpty() bool { return len(s.seq) == 0 }
 
 // Length returns the number of elements in this set.
 func (s *ArraySet) Length() int {
