@@ -34,28 +34,6 @@ func safeSorted(s *idset.ArraySet) []id.Zid {
 	return result
 }
 
-func TestSetContainsOrNil(t *testing.T) {
-	t.Parallel()
-	testcases := []struct {
-		s   *idset.ArraySet
-		zid id.Zid
-		exp bool
-	}{
-		{nil, id.Invalid, true},
-		{nil, 14, true},
-		{idset.New(), id.Invalid, false},
-		{idset.New(), 1, false},
-		{idset.New(), id.Invalid, false},
-		{idset.New(1), 1, true},
-	}
-	for i, tc := range testcases {
-		got := tc.s.ContainsOrNil(tc.zid)
-		if got != tc.exp {
-			t.Errorf("%d: %v.ContainsOrNil(%v) == %v, but got %v", i, tc.s, tc.zid, tc.exp, got)
-		}
-	}
-}
-
 func TestSetContains(t *testing.T) {
 	testcases := []id.Zid{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22}
 	var e idset.ArraySet

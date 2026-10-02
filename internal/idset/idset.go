@@ -105,9 +105,6 @@ func (s *ArraySet) Add(zid id.Zid) *ArraySet {
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
 func (s ArraySet) Contains(zid id.Zid) bool { return s.contains(zid) }
 
-// ContainsOrNil return true if the set is nil or if the set contains the given Zettel identifier.
-func (s *ArraySet) ContainsOrNil(zid id.Zid) bool { return s == nil || s.contains(zid) }
-
 // Intersection removes all elements from s that are not in o.
 // Only s is modified, o is left unchanged.
 func (s *ArraySet) Intersection(o ArraySet) {

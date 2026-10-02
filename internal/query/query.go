@@ -403,7 +403,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.A
 		pred = ct.retrieveIndex(searcher)
 		if startSet != nil {
 			if pred == nil {
-				pred = startSet.ContainsOrNil
+				pred = startSet.Contains // startSet != nil
 			} else {
 				predSet := idset.NewCap(startSet.Length())
 				for zid := range startSet.Values() {
@@ -411,7 +411,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.A
 						predSet = predSet.Add(zid)
 					}
 				}
-				pred = predSet.ContainsOrNil
+				pred = predSet.Contains // predSet is known to be non-nil
 			}
 		}
 	}
@@ -433,7 +433,10 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) RetrievePredicate {
 		// No positive search for words, must contain only words for a negative search.
 		// Otherwise len(search) == 0 (see above)
 		negatives := retrieveNegatives(negCalls)
-		return func(zid id.Zid) bool { return !negatives.ContainsOrNil(zid) }
+		if negatives == nil {
+			return neverIncluded
+		}
+		return func(zid id.Zid) bool { return !negatives.Contains(zid) }
 	}
 	if positives.IsEmpty() {
 		// Positive search didn't found anything. We can omit the negative search.
@@ -448,7 +451,8 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) RetrievePredicate {
 		return positives.Contains
 	}
 	return func(zid id.Zid) bool {
-		return positives.Contains(zid) && !negatives.ContainsOrNil(zid)
+		// negatives != nil
+		return positives.Contains(zid) && !negatives.Contains(zid)
 	}
 }
 
