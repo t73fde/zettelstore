@@ -153,8 +153,9 @@ func TestSetIUnion(t *testing.T) {
 		s1 := tc.s1.Clone()
 		sl1 := safeSorted(s1)
 		sl2 := safeSorted(tc.s2)
-		got := s1.IUnion(tc.s2)
-		if !got.Equal(tc.exp) {
+		r := s1.IUnion(tc.s2)
+		got := safeSorted(r)
+		if !slices.Equal(got, safeSorted(tc.exp)) {
 			t.Errorf("%d: %v.IUnion(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}
 	}
@@ -209,10 +210,10 @@ func TestSetDiff(t *testing.T) {
 	}
 	for i, tc := range testcases {
 		gotN, gotO := tc.in1.Diff(tc.in2)
-		if !tc.exp1.Equal(gotN) {
+		if exp := safeSorted(tc.exp1); !slices.Equal(exp, safeSorted(gotN)) {
 			t.Errorf("%d: expected %v, but got: %v", i, tc.exp1, gotN)
 		}
-		if !tc.exp2.Equal(gotO) {
+		if exp := safeSorted(tc.exp2); !slices.Equal(exp, safeSorted(gotO)) {
 			t.Errorf("%d: expected %v, but got: %v", i, tc.exp2, gotO)
 		}
 	}

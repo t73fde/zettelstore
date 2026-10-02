@@ -209,17 +209,6 @@ func (s *ArraySet) Remove(zid id.Zid) *ArraySet {
 	return s
 }
 
-// Equal returns true if the other set is equal to the given set.
-func (s *ArraySet) Equal(other *ArraySet) bool {
-	if s == nil {
-		return other == nil
-	}
-	if other == nil {
-		return false
-	}
-	return slices.Equal(s.seq, other.seq)
-}
-
 // Values returns an iterator for each element of the set, in ascending order.
 func (s *ArraySet) Values() iter.Seq[id.Zid] {
 	if s == nil {
