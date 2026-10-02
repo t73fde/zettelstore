@@ -267,8 +267,8 @@ func (s *ArraySet) Pop() (id.Zid, bool) {
 	return id.Invalid, false
 }
 
-// Optimize the amount of memory to store the set.
-func (s *ArraySet) Optimize() {
+// Shrink the amount of memory to store the set.
+func (s *ArraySet) Shrink() {
 	if s != nil && cap(s.seq) > len(s.seq) {
 		s.seq = slices.Clone(s.seq)
 	}

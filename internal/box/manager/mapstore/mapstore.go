@@ -46,13 +46,13 @@ type bidiRefs struct {
 	backward *idset.ArraySet
 }
 
-func (zd *zettelData) optimize() {
-	zd.dead.Optimize()
-	zd.forward.Optimize()
-	zd.backward.Optimize()
+func (zd *zettelData) shrink() {
+	zd.dead.Shrink()
+	zd.forward.Shrink()
+	zd.backward.Shrink()
 	for _, bidi := range zd.otherRefs {
-		bidi.forward.Optimize()
-		bidi.backward.Optimize()
+		bidi.forward.Shrink()
+		bidi.backward.Shrink()
 	}
 }
 
@@ -313,7 +313,7 @@ func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex)
 	if !ziExist {
 		ms.idx[zidx.Zid] = zi
 	}
-	zi.optimize()
+	zi.shrink()
 	return toCheck
 }
 
@@ -577,19 +577,19 @@ func deleteStrings(msStringMap stringRefs, curStrings []string, zid id.Zid) {
 	}
 }
 
-func (ms *mapStore) Optimize() {
+func (ms *mapStore) Shrink() {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 
 	// No need to optimize ms.idx: is already done via ms.UpdateReferences
 	for _, dead := range ms.dead {
-		dead.Optimize()
+		dead.Shrink()
 	}
 	for _, s := range ms.words {
-		s.Optimize()
+		s.Shrink()
 	}
 	for _, s := range ms.urls {
-		s.Optimize()
+		s.Shrink()
 	}
 }
 

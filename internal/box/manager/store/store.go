@@ -59,8 +59,8 @@ type Store interface {
 	// Returns set of zettel identifier that must also be checked for changes.
 	DeleteZettel(context.Context, id.Zid) *idset.ArraySet
 
-	// Optimize removes unneeded space.
-	Optimize()
+	// Shrink removes unneeded space.
+	Shrink()
 
 	// ReadStats populates st with store statistics.
 	ReadStats(st *Stats)
