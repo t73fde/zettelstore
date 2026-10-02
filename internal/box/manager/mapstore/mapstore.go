@@ -359,12 +359,12 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 	drefs := zidx.GetDeadRefs()
 	newRefs, remRefs := zi.dead.Diff(drefs)
 	zi.dead = drefs
-	remRefs.ForEach(func(ref id.Zid) {
+	for ref := range remRefs.Values() {
 		ms.dead[ref] = ms.dead[ref].Remove(zidx.Zid)
-	})
-	newRefs.ForEach(func(ref id.Zid) {
+	}
+	for ref := range newRefs.Values() {
 		ms.dead[ref] = ms.dead[ref].Add(zidx.Zid)
-	})
+	}
 }
 
 func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi *zettelData) *idset.Set {
@@ -374,20 +374,20 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 	zi.forward = brefs
 
 	var toCheck *idset.Set
-	remRefs.ForEach(func(ref id.Zid) {
+	for ref := range remRefs.Values() {
 		bzi := ms.getOrCreateEntry(ref)
 		bzi.backward = bzi.backward.Remove(zidx.Zid)
 		if bzi.meta == nil {
 			toCheck = toCheck.Add(ref)
 		}
-	})
-	newRefs.ForEach(func(ref id.Zid) {
+	}
+	for ref := range newRefs.Values() {
 		bzi := ms.getOrCreateEntry(ref)
 		bzi.backward = bzi.backward.Add(zidx.Zid)
 		if bzi.meta == nil {
 			toCheck = toCheck.Add(ref)
 		}
-	})
+	}
 	return toCheck
 }
 
@@ -410,7 +410,7 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 		mr.forward = mrefs
 		zi.otherRefs[key] = mr
 
-		newRefs.ForEach(func(ref id.Zid) {
+		for ref := range newRefs.Values() {
 			bzi := ms.getOrCreateEntry(ref)
 			if bzi.otherRefs == nil {
 				bzi.otherRefs = make(map[string]bidiRefs)
@@ -421,7 +421,7 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 			if bzi.meta == nil {
 				toCheck = toCheck.Add(ref)
 			}
-		})
+		}
 
 		ms.removeInverseMeta(zidx.Zid, key, remRefs)
 	}
@@ -509,7 +509,7 @@ func (ms *mapStore) doDeleteZettel(zid id.Zid) *idset.Set {
 
 func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
-	zi.dead.ForEach(func(ref id.Zid) {
+	for ref := range zi.dead.Values() {
 		if drefs, ok := ms.dead[ref]; ok {
 			if drefs = drefs.Remove(zid); drefs.IsEmpty() {
 				delete(ms.dead, ref)
@@ -517,30 +517,30 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 				ms.dead[ref] = drefs
 			}
 		}
-	})
+	}
 }
 
 func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.Set {
 	// Must only be called if ms.mx is write-locked!
-	zi.forward.ForEach(func(ref id.Zid) {
+	for ref := range zi.forward.Values() {
 		if fzi, ok := ms.idx[ref]; ok {
 			fzi.backward = fzi.backward.Remove(zid)
 		}
-	})
+	}
 
 	var toCheck *idset.Set
-	zi.backward.ForEach(func(ref id.Zid) {
+	for ref := range zi.backward.Values() {
 		if bzi, ok := ms.idx[ref]; ok {
 			bzi.forward = bzi.forward.Remove(zid)
 			toCheck = toCheck.Add(ref)
 		}
-	})
+	}
 	return toCheck
 }
 
 func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward *idset.Set) {
 	// Must only be called if ms.mx is write-locked!
-	forward.ForEach(func(ref id.Zid) {
+	for ref := range forward.Values() {
 		bzi, ok := ms.idx[ref]
 		if !ok || bzi.otherRefs == nil {
 			return
@@ -558,7 +558,7 @@ func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward *idset.Set
 				bzi.otherRefs = nil
 			}
 		}
-	})
+	}
 }
 
 func deleteStrings(msStringMap stringRefs, curStrings []string, zid id.Zid) {
@@ -668,10 +668,10 @@ func (ms *mapStore) dumpDead(w io.Writer) {
 func dumpSet(w io.Writer, prefix string, s *idset.Set) {
 	if !s.IsEmpty() {
 		_, _ = io.WriteString(w, prefix)
-		s.ForEach(func(zid id.Zid) {
+		for zid := range s.Values() {
 			_, _ = io.WriteString(w, " ")
 			_, _ = w.Write(zid.Bytes())
-		})
+		}
 		_, _ = fmt.Fprintln(w)
 	}
 }

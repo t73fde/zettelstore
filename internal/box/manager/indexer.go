@@ -208,13 +208,13 @@ func idxCollectMetaValue(stWords store.WordSet, value string) {
 }
 
 func (mgr *Manager) idxProcessData(ctx context.Context, zi *store.ZettelIndex, cData *collectData) {
-	cData.refs.ForEach(func(ref id.Zid) {
+	for ref := range cData.refs.Values() {
 		if mgr.hasZettel(ctx, ref) {
 			zi.AddBackRef(ref)
 		} else {
 			zi.AddDeadRef(ref)
 		}
-	})
+	}
 	zi.SetWords(cData.words)
 	zi.SetUrls(cData.urls)
 }
@@ -241,7 +241,7 @@ func (mgr *Manager) idxDeleteZettel(ctx context.Context, zid id.Zid) {
 }
 
 func (mgr *Manager) idxCheckZettel(s *idset.Set) {
-	s.ForEach(func(zid id.Zid) {
+	for zid := range s.Values() {
 		mgr.idxAr.EnqueueZettel(zid)
-	})
+	}
 }

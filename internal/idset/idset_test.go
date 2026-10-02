@@ -22,6 +22,18 @@ import (
 	"zettelstore.de/z/internal/idset"
 )
 
+// SafeSorted returns the set as a new sorted slice of zettel identifier.
+func safeSorted(s *idset.Set) []id.Zid {
+	if s == nil {
+		return nil
+	}
+	result := make([]id.Zid, 0, s.Length())
+	for zid := range s.Values() {
+		result = append(result, zid)
+	}
+	return result
+}
+
 func TestSetContainsOrNil(t *testing.T) {
 	t.Parallel()
 	testcases := []struct {
@@ -55,7 +67,9 @@ func TestSetContains(t *testing.T) {
 	s = idset.New()
 	data := slices.Clone(testcases)
 	slices.Reverse(data)
-	s = s.AddSlice(data)
+	for _, zid := range data {
+		s = s.Add(zid)
+	}
 	for _, tc := range testcases {
 		if !s.Contains(tc) {
 			t.Errorf("set does not contain %v", tc)
@@ -86,9 +100,9 @@ func TestSetAdd(t *testing.T) {
 		{idset.New(1), idset.New(1), []id.Zid{1}},
 	}
 	for i, tc := range testcases {
-		sl1 := tc.s1.SafeSorted()
-		sl2 := tc.s2.SafeSorted()
-		got := tc.s1.IUnion(tc.s2).SafeSorted()
+		sl1 := safeSorted(tc.s1)
+		sl2 := safeSorted(tc.s2)
+		got := safeSorted(tc.s1.IUnion(tc.s2))
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.Add(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}
@@ -106,7 +120,7 @@ func TestSetSafeSorted(t *testing.T) {
 		{idset.New(9, 4, 6, 1, 7), []id.Zid{1, 4, 6, 7, 9}},
 	}
 	for i, tc := range testcases {
-		got := tc.set.SafeSorted()
+		got := safeSorted(tc.set)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.SafeSorted() should be %v, but got %v", i, tc.set, tc.exp, got)
 		}
@@ -132,9 +146,9 @@ func TestSetIntersectOrSet(t *testing.T) {
 		{idset.New(1), idset.New(1), []id.Zid{1}},
 	}
 	for i, tc := range testcases {
-		sl1 := tc.s1.SafeSorted()
-		sl2 := tc.s2.SafeSorted()
-		got := tc.s1.IntersectOrSet(tc.s2).SafeSorted()
+		sl1 := safeSorted(tc.s1)
+		sl2 := safeSorted(tc.s2)
+		got := safeSorted(tc.s1.IntersectOrSet(tc.s2))
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.IntersectOrSet(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}
@@ -162,8 +176,8 @@ func TestSetIUnion(t *testing.T) {
 	}
 	for i, tc := range testcases {
 		s1 := tc.s1.Clone()
-		sl1 := s1.SafeSorted()
-		sl2 := tc.s2.SafeSorted()
+		sl1 := safeSorted(s1)
+		sl2 := safeSorted(tc.s2)
 		got := s1.IUnion(tc.s2)
 		if !got.Equal(tc.exp) {
 			t.Errorf("%d: %v.IUnion(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
@@ -197,10 +211,10 @@ func TestSetISubtract(t *testing.T) {
 	}
 	for i, tc := range testcases {
 		s1 := tc.s1.Clone()
-		sl1 := s1.SafeSorted()
-		sl2 := tc.s2.SafeSorted()
+		sl1 := safeSorted(s1)
+		sl2 := safeSorted(tc.s2)
 		s1.ISubstract(tc.s2)
-		got := s1.SafeSorted()
+		got := safeSorted(s1)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.ISubstract(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}
@@ -249,11 +263,11 @@ func TestSetRemove(t *testing.T) {
 		{idset.New(1), idset.New(1), []id.Zid{}},
 	}
 	for i, tc := range testcases {
-		sl1 := tc.s1.SafeSorted()
-		sl2 := tc.s2.SafeSorted()
+		sl1 := safeSorted(tc.s1)
+		sl2 := safeSorted(tc.s2)
 		newS1 := idset.New(sl1...)
 		newS1.ISubstract(tc.s2)
-		got := newS1.SafeSorted()
+		got := safeSorted(newS1)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.Remove(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}

@@ -406,11 +406,11 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.S
 				pred = startSet.ContainsOrNil
 			} else {
 				predSet := idset.NewCap(startSet.Length())
-				startSet.ForEach(func(zid id.Zid) {
+				for zid := range startSet.Values() {
 					if pred(zid) {
 						predSet = predSet.Add(zid)
 					}
-				})
+				}
 				pred = predSet.ContainsOrNil
 			}
 		}

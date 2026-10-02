@@ -15,6 +15,7 @@
 package idset
 
 import (
+	"iter"
 	"slices"
 	"strings"
 
@@ -29,11 +30,11 @@ type Set struct {
 
 // String returns a string representation of the set.
 func (s *Set) String() string {
-	return "{" + s.MetaString() + "}"
+	return "{" + s.metaString() + "}"
 }
 
-// MetaString returns a string representation of the set to be stored as metadata.
-func (s *Set) MetaString() string {
+// metaString returns a string representation of the set to be stored as metadata.
+func (s *Set) metaString() string {
 	if s == nil || len(s.seq) == 0 {
 		return ""
 	}
@@ -48,7 +49,7 @@ func (s *Set) MetaString() string {
 }
 
 // MetaValue returns a metadata value representation of the set.
-func (s *Set) MetaValue() meta.Value { return meta.Value(s.MetaString()) }
+func (s *Set) MetaValue() meta.Value { return meta.Value(s.metaString()) }
 
 // New returns a new set of identifier with the given initial values.
 func New(zids ...id.Zid) *Set {
@@ -59,7 +60,7 @@ func New(zids ...id.Zid) *Set {
 		return &Set{seq: []id.Zid{zids[0]}}
 	default:
 		result := Set{seq: make([]id.Zid, 0, l)}
-		result.AddSlice(zids)
+		result.addSlice(zids)
 		return &result
 	}
 }
@@ -67,7 +68,7 @@ func New(zids ...id.Zid) *Set {
 // NewCap returns a new set of identifier with the given capacity and initial values.
 func NewCap(c int, zids ...id.Zid) *Set {
 	result := Set{seq: make([]id.Zid, 0, max(c, len(zids)))}
-	result.AddSlice(zids)
+	result.addSlice(zids)
 	return &result
 }
 
@@ -106,26 +107,6 @@ func (s *Set) Contains(zid id.Zid) bool { return s != nil && s.contains(zid) }
 
 // ContainsOrNil return true if the set is nil or if the set contains the given Zettel identifier.
 func (s *Set) ContainsOrNil(zid id.Zid) bool { return s == nil || s.contains(zid) }
-
-// AddSlice adds all identifier of the given slice to the set.
-func (s *Set) AddSlice(sl []id.Zid) *Set {
-	if s == nil {
-		return New(sl...)
-	}
-	s.seq = slices.Grow(s.seq, len(sl))
-	for _, zid := range sl {
-		s.add(zid)
-	}
-	return s
-}
-
-// SafeSorted returns the set as a new sorted slice of zettel identifier.
-func (s *Set) SafeSorted() []id.Zid {
-	if s == nil {
-		return nil
-	}
-	return slices.Clone(s.seq)
-}
 
 // IntersectOrSet removes all zettel identifier that are not in the other set.
 // Both sets can be modified by this method. One of them is the set returned.
@@ -169,7 +150,7 @@ func (s *Set) IUnion(other *Set) *Set {
 		return s
 	}
 	// TODO: if other is large enough (and s is not too small) -> optimize by swapping and/or loop through both
-	return s.AddSlice(other.seq)
+	return s.addSlice(other.seq)
 }
 
 // ISubstract removes all zettel identifier from 's' that are in the set 'other'.
@@ -266,15 +247,12 @@ func (s *Set) Equal(other *Set) bool {
 	return slices.Equal(s.seq, other.seq)
 }
 
-// ForEach calls the given function for each element of the set.
-//
-// Every element is bigger than the previous one.
-func (s *Set) ForEach(fn func(zid id.Zid)) {
-	if s != nil {
-		for _, zid := range s.seq {
-			fn(zid)
-		}
+// Values returns an iterator for each element of the set, in ascending order.
+func (s *Set) Values() iter.Seq[id.Zid] {
+	if s == nil {
+		return slices.Values([]id.Zid{})
 	}
+	return slices.Values(s.seq)
 }
 
 // Pop return one arbitrary element of the set.
@@ -292,7 +270,7 @@ func (s *Set) Pop() (id.Zid, bool) {
 // Optimize the amount of memory to store the set.
 func (s *Set) Optimize() {
 	if s != nil {
-		s.seq = slices.Clip(s.seq)
+		s.seq = slices.Clone(s.seq)
 	}
 }
 
@@ -314,4 +292,16 @@ func (s *Set) add(zid id.Zid) {
 func (s *Set) contains(zid id.Zid) bool {
 	_, found := slices.BinarySearch(s.seq, zid)
 	return found
+}
+
+// addSlice adds all identifier of the given slice to the set.
+func (s *Set) addSlice(sl []id.Zid) *Set {
+	if s == nil {
+		return New(sl...)
+	}
+	s.seq = slices.Grow(s.seq, len(sl))
+	for _, zid := range sl {
+		s.add(zid)
+	}
+	return s
 }
