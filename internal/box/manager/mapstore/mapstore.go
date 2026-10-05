@@ -428,15 +428,8 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 	var toCheck *idset.ArraySet
 	for key, mrefs := range inverseRefs {
 		mr := zi.otherRefs[key]
-		var newRefs, remRefs idset.ArraySet
-		if mrefs == nil {
-			tmp := mr.forward.Clone()
-			newRefs, remRefs = idset.New(), tmp
-			mr.forward = idset.ArraySet{}
-		} else {
-			newRefs, remRefs = mr.forward.Diff(*mrefs)
-			mr.forward = *mrefs
-		}
+		newRefs, remRefs := mr.forward.Diff(mrefs)
+		mr.forward = mrefs
 
 		zi.otherRefs[key] = mr
 
