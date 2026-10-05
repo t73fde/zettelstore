@@ -68,7 +68,7 @@ type mapStore struct {
 	mxStats sync.Mutex
 	updates uint64
 }
-type stringRefs map[string]*idset.ArraySet
+type stringRefs map[string]idset.ArraySet
 
 // New returns a new memory-based index store.
 func New() store.Store {
@@ -143,10 +143,10 @@ func (ms *mapStore) SearchEqual(word string) idset.ArraySet {
 	defer ms.mx.RUnlock()
 	result := idset.New()
 	if refs, ok := ms.words[word]; ok {
-		result.IUnion(*refs)
+		result.IUnion(refs)
 	}
 	if refs, ok := ms.urls[word]; ok {
-		result.IUnion(*refs)
+		result.IUnion(refs)
 	}
 	zid, err := id.Parse(word)
 	if err != nil {
@@ -244,13 +244,13 @@ func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) *id
 		if !pred(word, s) {
 			continue
 		}
-		result.IUnion(*refs)
+		result.IUnion(refs)
 	}
 	for u, refs := range ms.urls {
 		if !pred(u, s) {
 			continue
 		}
-		result.IUnion(*refs)
+		result.IUnion(refs)
 	}
 	return &result
 }
@@ -456,21 +456,16 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 func updateStrings(zid id.Zid, srefs stringRefs, prev []string, next store.WordSet) []string {
 	newWords, removeWords := diffWordSet(next, prev)
 	for _, word := range newWords {
-		if srefs[word] == nil {
-			tmp := idset.New()
-			srefs[word] = &tmp
-		}
-		srefs[word].Add(zid)
+		refs := srefs[word]
+		refs.Add(zid)
+		srefs[word] = refs
 	}
 	for _, word := range removeWords {
 		refs, ok := srefs[word]
 		if !ok {
 			continue
 		}
-		if refs != nil {
-			refs.Remove(zid)
-		}
-		if refs == nil || refs.IsEmpty() {
+		if refs.IsEmpty() {
 			delete(srefs, word)
 			continue
 		}
@@ -602,10 +597,8 @@ func deleteStrings(msStringMap stringRefs, curStrings []string, zid id.Zid) {
 		if !ok {
 			continue
 		}
-		if refs != nil {
-			refs.Remove(zid)
-		}
-		if refs == nil || refs.IsEmpty() {
+		refs.Remove(zid)
+		if refs.IsEmpty() {
 			delete(msStringMap, word)
 			continue
 		}
