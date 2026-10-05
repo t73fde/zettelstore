@@ -111,12 +111,13 @@ func (s *ArraySet) Intersection(o ArraySet) {
 }
 
 // IUnion adds the elements of set other to s.
-func (s *ArraySet) IUnion(other *ArraySet) *ArraySet {
-	if other == nil || len(other.seq) == 0 {
-		return s
+func (s *ArraySet) IUnion(other ArraySet) {
+	if len(other.seq) > 0 {
+		s.Grow(len(other.seq))
+		for _, zid := range other.seq {
+			s.add(zid)
+		}
 	}
-	// TODO: if other is large enough (and s is not too small) -> optimize by swapping and/or loop through both
-	return s.addSlice(other.seq)
 }
 
 // ISubstract removes all zettel identifier from 's' that are in the set 'other'.
@@ -251,16 +252,4 @@ func (s *ArraySet) add(zid id.Zid) {
 	if pos, found := slices.BinarySearch(s.seq, zid); !found {
 		s.seq = slices.Insert(s.seq, pos, zid)
 	}
-}
-
-// addSlice adds all identifier of the given slice to the set.
-func (s *ArraySet) addSlice(sl []id.Zid) *ArraySet {
-	if s == nil {
-		return Collect(sl)
-	}
-	s.seq = slices.Grow(s.seq, len(sl))
-	for _, zid := range sl {
-		s.add(zid)
-	}
-	return s
 }

@@ -137,29 +137,29 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 		}
 	}
 
-	var normResult *idset.ArraySet
-	first = true
+	var normResult idset.ArraySet
+	firstNorm := true
 	for c, sf := range normCalls {
 		if result, found := cache[c]; found {
-			if first {
-				tmp := result.Clone()
-				normResult = &tmp
-				first = false
+			if firstNorm {
+				normResult = result.Clone()
+				firstNorm = false
 			} else {
 				normResult.Intersection(*result)
 			}
 		} else {
 			as := sf(c.s)
-			if first {
-				tmp := as.Clone()
-				normResult = &tmp
-				first = false
+			if firstNorm {
+				normResult = as
+				firstNorm = false
 			} else {
 				normResult.Intersection(as)
 			}
 		}
 	}
-	return normResult.IUnion(&plainResult)
+
+	normResult.IUnion(plainResult)
+	return &normResult
 }
 
 func isSuperset(normCalls, plainCalls searchCallMap) bool {
@@ -172,12 +172,11 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 }
 
 func retrieveNegatives(negCalls searchCallMap) *idset.ArraySet {
-	var negatives *idset.ArraySet
+	var negatives idset.ArraySet
 	for val, sf := range negCalls {
-		as := sf(val.s)
-		negatives = negatives.IUnion(&as)
+		negatives.IUnion(sf(val.s))
 	}
-	return negatives
+	return &negatives
 }
 
 func getSearchFunc(searcher Searcher, op compareOp) searchFunc {

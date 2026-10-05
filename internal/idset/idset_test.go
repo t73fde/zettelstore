@@ -68,11 +68,7 @@ func TestSetAdd(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{nil, nil, nil},
-		{idset.New(), nil, nil},
 		{idset.New(), idset.New(), nil},
-		{nil, idset.Collect([]id.Zid{1}), []id.Zid{1}},
-		{idset.Collect([]id.Zid{1}), nil, []id.Zid{1}},
 		{idset.Collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
 		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2}), []id.Zid{1, 2}},
 		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), []id.Zid{1}},
@@ -80,7 +76,9 @@ func TestSetAdd(t *testing.T) {
 	for i, tc := range testcases {
 		sl1 := safeSorted(tc.s1)
 		sl2 := safeSorted(tc.s2)
-		got := safeSorted(tc.s1.IUnion(tc.s2))
+		tmp := tc.s1.Clone()
+		tmp.IUnion(*tc.s2)
+		got := safeSorted(&tmp)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.Add(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}
@@ -136,9 +134,7 @@ func TestSetIUnion(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    *idset.ArraySet
 	}{
-		{idset.New(), nil, idset.New()},
 		{idset.New(), idset.New(), idset.New()},
-		{idset.Collect([]id.Zid{1}), nil, idset.Collect([]id.Zid{1})},
 		{idset.Collect([]id.Zid{1}), idset.New(), idset.Collect([]id.Zid{1})},
 		{idset.New(), idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1})},
 		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2}), idset.Collect([]id.Zid{1, 2})},
@@ -150,8 +146,8 @@ func TestSetIUnion(t *testing.T) {
 		s1 := tc.s1.Clone()
 		sl1 := safeSorted(&s1)
 		sl2 := safeSorted(tc.s2)
-		r := s1.IUnion(tc.s2)
-		got := safeSorted(r)
+		s1.IUnion(*tc.s2)
+		got := safeSorted(&s1)
 		if !slices.Equal(got, safeSorted(tc.exp)) {
 			t.Errorf("%d: %v.IUnion(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}

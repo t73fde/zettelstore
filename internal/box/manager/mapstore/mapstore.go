@@ -148,10 +148,10 @@ func (ms *mapStore) SearchEqual(word string) idset.ArraySet {
 	defer ms.mx.RUnlock()
 	result := idset.New()
 	if refs, ok := ms.words[word]; ok {
-		result = result.IUnion(refs)
+		result.IUnion(*refs)
 	}
 	if refs, ok := ms.urls[word]; ok {
-		result = result.IUnion(refs)
+		result.IUnion(*refs)
 	}
 	zid, err := id.Parse(word)
 	if err != nil {
@@ -249,13 +249,13 @@ func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) *id
 		if !pred(word, s) {
 			continue
 		}
-		result.IUnion(refs)
+		result.IUnion(*refs)
 	}
 	for u, refs := range ms.urls {
 		if !pred(u, s) {
 			continue
 		}
-		result.IUnion(refs)
+		result.IUnion(*refs)
 	}
 	return result
 }
@@ -266,9 +266,13 @@ func addBackwardZids(result *idset.ArraySet, zid id.Zid, zi *zettelData) *idset.
 		result = idset.New()
 	}
 	result.Add(zid)
-	result = result.IUnion(zi.backward)
+	if zi.backward != nil {
+		result.IUnion(*zi.backward)
+	}
 	for _, mref := range zi.otherRefs {
-		result = result.IUnion(mref.backward)
+		if mref.backward != nil {
+			result.IUnion(*mref.backward)
+		}
 	}
 	return result
 }
@@ -306,14 +310,20 @@ func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex)
 		// These must be checked later again
 		toCheck = refs
 		delete(ms.dead, zidx.Zid)
+	} else {
+		toCheck = idset.New()
 	}
 
 	zi.meta = m
 	ms.updateDeadReferences(zidx, zi)
 	ids := ms.updateForwardBackwardReferences(zidx, zi)
-	toCheck = toCheck.IUnion(ids)
+	if ids != nil {
+		toCheck.IUnion(*ids)
+	}
 	ids = ms.updateMetadataReferences(zidx, zi)
-	toCheck = toCheck.IUnion(ids)
+	if ids != nil {
+		toCheck.IUnion(*ids)
+	}
 	zi.words = updateStrings(zidx.Zid, ms.words, zi.words, zidx.GetWords())
 	zi.urls = updateStrings(zidx.Zid, ms.urls, zi.urls, zidx.GetUrls())
 

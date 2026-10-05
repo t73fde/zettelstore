@@ -261,10 +261,11 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 
 func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint, dir int) {
 	tags := slices.Collect(tagiter)
-	var zidSet *idset.ArraySet
+	var zidSet idset.ArraySet
 	for _, tag := range tags {
-		zs := ct.updateTagData(ctx, tag)
-		zidSet = zidSet.IUnion(zs)
+		if zs := ct.updateTagData(ctx, tag); zs != nil {
+			zidSet.IUnion(*zs)
+		}
 	}
 	for zid := range zidSet.Values() {
 		minCost := math.MaxFloat64
