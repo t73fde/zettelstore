@@ -150,19 +150,19 @@ type contextTask struct {
 	maxCount int
 	minCount int
 	tagMetas map[string][]*meta.Meta
-	tagZids  map[string]*idset.ArraySet // just the zids of tagMetas
-	metaZid  map[id.Zid]*meta.Meta      // maps zid to meta for all meta retrieved with tags
+	tagZids  map[string]idset.ArraySet // just the zids of tagMetas
+	metaZid  map[id.Zid]*meta.Meta     // maps zid to meta for all meta retrieved with tags
 }
 
 func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
 	result := &contextTask{
 		port:     port,
-		seen:     idset.New(),
+		seen:     idset.ArraySet{},
 		maxCost:  maxCost,
 		maxCount: max(maxCount, minCount),
 		minCount: minCount,
 		tagMetas: make(map[string][]*meta.Meta),
-		tagZids:  make(map[string]*idset.ArraySet),
+		tagZids:  make(map[string]idset.ArraySet),
 		metaZid:  make(map[id.Zid]*meta.Meta),
 	}
 
@@ -263,16 +263,15 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 	tags := slices.Collect(tagiter)
 	var zidSet idset.ArraySet
 	for _, tag := range tags {
-		if zs := ct.updateTagData(ctx, tag); zs != nil {
-			zidSet.IUnion(*zs)
-		}
+		zs := ct.updateTagData(ctx, tag)
+		zidSet.IUnion(zs)
 	}
+
 	for zid := range zidSet.Values() {
 		minCost := math.MaxFloat64
 		costFactor := 1.1
 		for _, tag := range tags {
-			tagZids := ct.tagZids[tag]
-			if tagZids != nil && tagZids.Contains(zid) {
+			if tagZids := ct.tagZids[tag]; tagZids.Contains(zid) {
 				cost := tagCost(baseCost, tagZids.Count())
 				if cost < minCost {
 					minCost = cost
@@ -284,7 +283,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 	}
 }
 
-func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.ArraySet {
+func (ct *contextTask) updateTagData(ctx context.Context, tag string) idset.ArraySet {
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}
@@ -303,8 +302,8 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Arr
 			ct.metaZid[zid] = m
 		}
 	}
-	ct.tagZids[tag] = &zids
-	return &zids
+	ct.tagZids[tag] = zids
+	return zids
 }
 
 func tagCost(baseCost float64, numTags int) float64 {
