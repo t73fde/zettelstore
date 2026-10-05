@@ -111,7 +111,8 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 		m.Set(meta.KeyDead, zi.dead.MetaValue())
 		updated = true
 	}
-	back := removeOtherMetaRefs(m, zi.backward.Clone())
+	back := zi.backward.Clone()
+	removeOtherMetaRefs(m, back)
 	if zi.backward != nil && !zi.backward.IsEmpty() {
 		m.Set(meta.KeyBackward, zi.backward.MetaValue())
 		updated = true
@@ -128,7 +129,7 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 			updated = true
 		}
 	}
-	if back != nil && !back.IsEmpty() {
+	if !back.IsEmpty() {
 		m.Set(meta.KeyBack, back.MetaValue())
 		updated = true
 	}
@@ -267,25 +268,21 @@ func addBackwardZids(result *idset.ArraySet, zid id.Zid, zi *zettelData) *idset.
 	return result
 }
 
-func removeOtherMetaRefs(m *meta.Meta, back *idset.ArraySet) *idset.ArraySet {
+func removeOtherMetaRefs(m *meta.Meta, back *idset.ArraySet) {
 	for key, val := range m.Rest() {
 		switch meta.Type(key) {
 		case meta.TypeID:
 			if zid, err := id.Parse(string(val)); err == nil {
-				back = back.Remove(zid)
+				back.Remove(zid)
 			}
 		case meta.TypeIDSet:
 			for val := range val.Fields() {
 				if zid, err := id.Parse(val); err == nil {
-					back = back.Remove(zid)
+					back.Remove(zid)
 				}
 			}
 		}
 	}
-	if back == nil {
-		return idset.New()
-	}
-	return back
 }
 
 func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex) *idset.ArraySet {
@@ -366,7 +363,9 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 	newRefs, remRefs := zi.dead.Diff(drefs)
 	zi.dead = drefs
 	for ref := range remRefs.Values() {
-		ms.dead[ref] = ms.dead[ref].Remove(zidx.Zid)
+		if deadRef := ms.dead[ref]; deadRef != nil {
+			deadRef.Remove(zidx.Zid)
+		}
 	}
 	for ref := range newRefs.Values() {
 		if ms.dead[ref] == nil {
@@ -385,7 +384,9 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 	var toCheck *idset.ArraySet
 	for ref := range remRefs.Values() {
 		bzi := ms.getOrCreateEntry(ref)
-		bzi.backward = bzi.backward.Remove(zidx.Zid)
+		if bzi.backward != nil {
+			bzi.backward.Remove(zidx.Zid)
+		}
 		if bzi.meta == nil {
 			if toCheck == nil {
 				toCheck = idset.New()
@@ -465,7 +466,9 @@ func updateStrings(zid id.Zid, srefs stringRefs, prev []string, next store.WordS
 		if !ok {
 			continue
 		}
-		refs = refs.Remove(zid)
+		if refs != nil {
+			refs.Remove(zid)
+		}
 		if refs == nil || refs.IsEmpty() {
 			delete(srefs, word)
 			continue
@@ -538,7 +541,10 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
 	for ref := range zi.dead.Values() {
 		if drefs, ok := ms.dead[ref]; ok {
-			if drefs = drefs.Remove(zid); drefs == nil || drefs.IsEmpty() {
+			if drefs != nil {
+				drefs.Remove(zid)
+			}
+			if drefs == nil || drefs.IsEmpty() {
 				delete(ms.dead, ref)
 			} else {
 				ms.dead[ref] = drefs
@@ -551,14 +557,18 @@ func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.Arr
 	// Must only be called if ms.mx is write-locked!
 	for ref := range zi.forward.Values() {
 		if fzi, ok := ms.idx[ref]; ok {
-			fzi.backward = fzi.backward.Remove(zid)
+			if fzi.backward != nil {
+				fzi.backward.Remove(zid)
+			}
 		}
 	}
 
 	var toCheck *idset.ArraySet
 	for ref := range zi.backward.Values() {
 		if bzi, ok := ms.idx[ref]; ok {
-			bzi.forward = bzi.forward.Remove(zid)
+			if bzi.forward != nil {
+				bzi.forward.Remove(zid)
+			}
 			if toCheck == nil {
 				toCheck = idset.New()
 			}
@@ -579,7 +589,9 @@ func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward *idset.Arr
 		if !ok {
 			return
 		}
-		bmr.backward = bmr.backward.Remove(zid)
+		if bmr.backward != nil {
+			bmr.backward.Remove(zid)
+		}
 		if (bmr.backward != nil && !bmr.backward.IsEmpty()) || (bmr.forward != nil && !bmr.forward.IsEmpty()) {
 			bzi.otherRefs[key] = bmr
 		} else {
@@ -598,7 +610,9 @@ func deleteStrings(msStringMap stringRefs, curStrings []string, zid id.Zid) {
 		if !ok {
 			continue
 		}
-		refs = refs.Remove(zid)
+		if refs != nil {
+			refs.Remove(zid)
+		}
 		if refs == nil || refs.IsEmpty() {
 			delete(msStringMap, word)
 			continue

@@ -81,7 +81,7 @@ func (s ArraySet) Count() int { return len(s.seq) }
 // Clone returns a copy of the given set.
 func (s *ArraySet) Clone() *ArraySet {
 	if s == nil {
-		return nil
+		return &ArraySet{seq: nil}
 	}
 	return &ArraySet{seq: slices.Clone(s.seq)}
 }
@@ -195,18 +195,14 @@ func (s *ArraySet) Diff(other *ArraySet) (newS, remS *ArraySet) {
 }
 
 // Remove the identifier from the set.
-func (s *ArraySet) Remove(zid id.Zid) *ArraySet {
-	if s == nil || len(s.seq) == 0 {
-		return nil
+func (s *ArraySet) Remove(zid id.Zid) {
+	if len(s.seq) == 0 {
+		return
 	}
 	if pos, found := slices.BinarySearch(s.seq, zid); found {
 		copy(s.seq[pos:], s.seq[pos+1:])
 		s.seq = s.seq[:len(s.seq)-1]
 	}
-	if len(s.seq) == 0 {
-		return nil
-	}
-	return s
 }
 
 // Values returns an iterator for each element of the set, in ascending order.
