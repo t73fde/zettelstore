@@ -34,7 +34,11 @@ func safeSorted(s *idset.ArraySet) []id.Zid {
 	return result
 }
 
-// Collect returns a new set of identifiers based on all values of a slice.
+func makeNew() *idset.ArraySet {
+	tmp := idset.New()
+	return &tmp
+}
+
 func collect(sl []id.Zid) *idset.ArraySet {
 	result := idset.New()
 	if len(sl) > 0 {
@@ -43,7 +47,7 @@ func collect(sl []id.Zid) *idset.ArraySet {
 			result.Add(zid)
 		}
 	}
-	return result
+	return &result
 }
 
 func TestSetContains(t *testing.T) {
@@ -80,8 +84,8 @@ func TestSetAdd(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{idset.New(), idset.New(), nil},
-		{collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
+		{makeNew(), makeNew(), nil},
+		{collect([]id.Zid{1}), makeNew(), []id.Zid{1}},
 		{collect([]id.Zid{1}), collect([]id.Zid{2}), []id.Zid{1, 2}},
 		{collect([]id.Zid{1}), collect([]id.Zid{1}), []id.Zid{1}},
 	}
@@ -104,7 +108,7 @@ func TestSetSafeSorted(t *testing.T) {
 		exp []id.Zid
 	}{
 		{nil, nil},
-		{idset.New(), nil},
+		{makeNew(), nil},
 		{collect([]id.Zid{9, 4, 6, 1, 7}), []id.Zid{1, 4, 6, 7, 9}},
 	}
 	for i, tc := range testcases {
@@ -121,9 +125,9 @@ func TestSetIntersection(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{idset.New(), idset.New(), nil},
-		{collect([]id.Zid{1}), idset.New(), nil},
-		{idset.New(), collect([]id.Zid{1}), nil},
+		{makeNew(), makeNew(), nil},
+		{collect([]id.Zid{1}), makeNew(), nil},
+		{makeNew(), collect([]id.Zid{1}), nil},
 		{collect([]id.Zid{1}), collect([]id.Zid{2}), nil},
 		{collect([]id.Zid{2}), collect([]id.Zid{1}), nil},
 		{collect([]id.Zid{1}), collect([]id.Zid{1}), []id.Zid{1}},
@@ -146,9 +150,9 @@ func TestSetIUnion(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    *idset.ArraySet
 	}{
-		{idset.New(), idset.New(), idset.New()},
-		{collect([]id.Zid{1}), idset.New(), collect([]id.Zid{1})},
-		{idset.New(), collect([]id.Zid{1}), collect([]id.Zid{1})},
+		{makeNew(), makeNew(), makeNew()},
+		{collect([]id.Zid{1}), makeNew(), collect([]id.Zid{1})},
+		{makeNew(), collect([]id.Zid{1}), collect([]id.Zid{1})},
 		{collect([]id.Zid{1}), collect([]id.Zid{2}), collect([]id.Zid{1, 2})},
 		{collect([]id.Zid{2}), collect([]id.Zid{1}), collect([]id.Zid{2, 1})},
 		{collect([]id.Zid{1}), collect([]id.Zid{1}), collect([]id.Zid{1})},
@@ -172,9 +176,9 @@ func TestSetISubtract(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{idset.New(), idset.New(), nil},
-		{collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
-		{idset.New(), collect([]id.Zid{1}), nil},
+		{makeNew(), makeNew(), nil},
+		{collect([]id.Zid{1}), makeNew(), []id.Zid{1}},
+		{makeNew(), collect([]id.Zid{1}), nil},
 		{collect([]id.Zid{1}), collect([]id.Zid{2}), []id.Zid{1}},
 		{collect([]id.Zid{2}), collect([]id.Zid{1}), []id.Zid{2}},
 		{collect([]id.Zid{1}), collect([]id.Zid{1}), nil},
@@ -230,8 +234,8 @@ func TestSetRemove(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    []id.Zid
 	}{
-		{idset.New(), idset.New(), nil},
-		{collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
+		{makeNew(), makeNew(), nil},
+		{collect([]id.Zid{1}), makeNew(), []id.Zid{1}},
 		{collect([]id.Zid{1}), collect([]id.Zid{2}), []id.Zid{1}},
 		{collect([]id.Zid{1}), collect([]id.Zid{1}), []id.Zid{}},
 	}

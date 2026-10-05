@@ -26,9 +26,9 @@ import (
 type ZettelIndex struct {
 	Zid         id.Zid                     // zid of the indexed zettel
 	meta        *meta.Meta                 // full metadata
-	backrefs    *idset.ArraySet            // set of back references
+	backrefs    idset.ArraySet             // set of back references
 	inverseRefs map[string]*idset.ArraySet // references of inverse keys
-	deadrefs    *idset.ArraySet            // set of dead references
+	deadrefs    idset.ArraySet             // set of dead references
 	words       WordSet
 	urls        WordSet
 }
@@ -47,9 +47,6 @@ func NewZettelIndex(m *meta.Meta) *ZettelIndex {
 // AddBackRef adds a reference to a zettel where the current zettel links to
 // without any more information.
 func (zi *ZettelIndex) AddBackRef(zid id.Zid) {
-	if zi.backrefs == nil {
-		zi.backrefs = idset.New()
-	}
 	zi.backrefs.Add(zid)
 }
 
@@ -62,14 +59,11 @@ func (zi *ZettelIndex) AddInverseRef(key string, zid id.Zid) {
 	}
 	s := idset.New()
 	s.Add(zid)
-	zi.inverseRefs[key] = s
+	zi.inverseRefs[key] = &s
 }
 
 // AddDeadRef adds a dead reference to a zettel.
 func (zi *ZettelIndex) AddDeadRef(zid id.Zid) {
-	if zi.deadrefs == nil {
-		zi.deadrefs = idset.New()
-	}
 	zi.deadrefs.Add(zid)
 }
 
@@ -80,13 +74,13 @@ func (zi *ZettelIndex) SetWords(words WordSet) { zi.words = words }
 func (zi *ZettelIndex) SetUrls(urls WordSet) { zi.urls = urls }
 
 // GetDeadRefs returns all dead references as a sorted list.
-func (zi *ZettelIndex) GetDeadRefs() *idset.ArraySet { return zi.deadrefs }
+func (zi *ZettelIndex) GetDeadRefs() idset.ArraySet { return zi.deadrefs }
 
 // GetMeta return just the raw metadata.
 func (zi *ZettelIndex) GetMeta() *meta.Meta { return zi.meta }
 
 // GetBackRefs returns all back references as a sorted list.
-func (zi *ZettelIndex) GetBackRefs() *idset.ArraySet { return zi.backrefs }
+func (zi *ZettelIndex) GetBackRefs() idset.ArraySet { return zi.backrefs }
 
 // GetInverseRefs returns all inverse meta references as a map of strings to a sorted list of references
 func (zi *ZettelIndex) GetInverseRefs() map[string]*idset.ArraySet {

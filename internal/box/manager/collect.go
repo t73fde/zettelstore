@@ -25,7 +25,7 @@ import (
 )
 
 type collectData struct {
-	refs  *idset.ArraySet
+	refs  idset.ArraySet
 	words store.WordSet
 	urls  store.WordSet
 }

@@ -208,13 +208,11 @@ func idxCollectMetaValue(stWords store.WordSet, value string) {
 }
 
 func (mgr *Manager) idxProcessData(ctx context.Context, zi *store.ZettelIndex, cData *collectData) {
-	if cData.refs != nil {
-		for ref := range cData.refs.Values() {
-			if mgr.hasZettel(ctx, ref) {
-				zi.AddBackRef(ref)
-			} else {
-				zi.AddDeadRef(ref)
-			}
+	for ref := range cData.refs.Values() {
+		if mgr.hasZettel(ctx, ref) {
+			zi.AddBackRef(ref)
+		} else {
+			zi.AddDeadRef(ref)
 		}
 	}
 	zi.SetWords(cData.words)

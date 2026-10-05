@@ -113,7 +113,7 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 	}
 	var back idset.ArraySet
 	if zi.backward == nil {
-		back = *idset.New()
+		back = idset.New()
 	} else {
 		back = zi.backward.Clone()
 	}
@@ -155,14 +155,14 @@ func (ms *mapStore) SearchEqual(word string) idset.ArraySet {
 	}
 	zid, err := id.Parse(word)
 	if err != nil {
-		return *result
+		return result
 	}
 	zi, ok := ms.idx[zid]
 	if !ok {
-		return *result
+		return result
 	}
 
-	return *addBackwardZids(result, zid, zi)
+	return *addBackwardZids(&result, zid, zi)
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
@@ -257,13 +257,14 @@ func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) *id
 		}
 		result.IUnion(*refs)
 	}
-	return result
+	return &result
 }
 
 func addBackwardZids(result *idset.ArraySet, zid id.Zid, zi *zettelData) *idset.ArraySet {
 	// Must only be called if ms.mx is read-locked!
 	if result == nil {
-		result = idset.New()
+		tmp := idset.New()
+		result = &tmp
 	}
 	result.Add(zid)
 	if zi.backward != nil {
@@ -311,7 +312,8 @@ func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex)
 		toCheck = refs
 		delete(ms.dead, zidx.Zid)
 	} else {
-		toCheck = idset.New()
+		tmp := idset.New()
+		toCheck = &tmp
 	}
 
 	zi.meta = m
@@ -375,8 +377,8 @@ func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
 	drefs := zidx.GetDeadRefs()
-	newRefs, remRefs := zi.dead.Diff(drefs)
-	zi.dead = drefs
+	newRefs, remRefs := zi.dead.Diff(&drefs)
+	zi.dead = &drefs
 	if remRefs != nil {
 		for ref := range remRefs.Values() {
 			if deadRef := ms.dead[ref]; deadRef != nil {
@@ -387,7 +389,8 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 	if newRefs != nil {
 		for ref := range newRefs.Values() {
 			if ms.dead[ref] == nil {
-				ms.dead[ref] = idset.New()
+				tmp := idset.New()
+				ms.dead[ref] = &tmp
 			}
 			ms.dead[ref].Add(zidx.Zid)
 		}
@@ -397,8 +400,8 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi *zettelData) *idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
 	brefs := zidx.GetBackRefs()
-	newRefs, remRefs := zi.forward.Diff(brefs)
-	zi.forward = brefs
+	newRefs, remRefs := zi.forward.Diff(&brefs)
+	zi.forward = &brefs
 
 	var toCheck *idset.ArraySet
 	if remRefs != nil {
@@ -409,7 +412,8 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 			}
 			if bzi.meta == nil {
 				if toCheck == nil {
-					toCheck = idset.New()
+					tmp := idset.New()
+					toCheck = &tmp
 				}
 				toCheck.Add(ref)
 			}
@@ -419,12 +423,14 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 		for ref := range newRefs.Values() {
 			bzi := ms.getOrCreateEntry(ref)
 			if bzi.backward == nil {
-				bzi.backward = idset.New()
+				tmp := idset.New()
+				bzi.backward = &tmp
 			}
 			bzi.backward.Add(zidx.Zid)
 			if bzi.meta == nil {
 				if toCheck == nil {
-					toCheck = idset.New()
+					tmp := idset.New()
+					toCheck = &tmp
 				}
 				toCheck.Add(ref)
 			}
@@ -460,13 +466,15 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 				}
 				bmr := bzi.otherRefs[key]
 				if bmr.backward == nil {
-					bmr.backward = idset.New()
+					tmp := idset.New()
+					bmr.backward = &tmp
 				}
 				bmr.backward.Add(zidx.Zid)
 				bzi.otherRefs[key] = bmr
 				if bzi.meta == nil {
 					if toCheck == nil {
-						toCheck = idset.New()
+						tmp := idset.New()
+						toCheck = &tmp
 					}
 					toCheck.Add(ref)
 				}
@@ -482,7 +490,8 @@ func updateStrings(zid id.Zid, srefs stringRefs, prev []string, next store.WordS
 	newWords, removeWords := diffWordSet(next, prev)
 	for _, word := range newWords {
 		if srefs[word] == nil {
-			srefs[word] = idset.New()
+			tmp := idset.New()
+			srefs[word] = &tmp
 		}
 		srefs[word].Add(zid)
 	}
@@ -600,7 +609,8 @@ func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.Arr
 					bzi.forward.Remove(zid)
 				}
 				if toCheck == nil {
-					toCheck = idset.New()
+					tmp := idset.New()
+					toCheck = &tmp
 				}
 				toCheck.Add(ref)
 			}

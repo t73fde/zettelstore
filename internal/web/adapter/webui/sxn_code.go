@@ -72,7 +72,8 @@ func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFu
 			continue
 		}
 		if marked == nil {
-			marked = idset.New()
+			tmp := idset.New()
+			marked = &tmp
 		}
 		marked.Add(curr.Zid)
 		for pre := range curr.GetFields(meta.KeyPredecessor) {

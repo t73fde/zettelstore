@@ -145,7 +145,7 @@ func (mgr *Manager) fetchZids(ctx context.Context) (*idset.ArraySet, error) {
 			return nil, err
 		}
 	}
-	return result, nil
+	return &result, nil
 }
 
 func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {

@@ -67,7 +67,7 @@ func TestReset(t *testing.T) {
 	s := idset.New()
 	s.Add(3)
 	s.Add(4)
-	ar.Reload(s)
+	ar.Reload(&s)
 	ar.EnqueueZettel(id.Zid(5))
 	ar.EnqueueZettel(id.Zid(5))
 	if ar.first == ar.last || ar.first.next != ar.last /*|| ar.first.next.next != ar.last*/ {
@@ -96,7 +96,7 @@ func TestReset(t *testing.T) {
 	ar = newAnteroomQueue(1)
 	s = idset.New()
 	s.Add(6)
-	ar.Reload(s)
+	ar.Reload(&s)
 	action, zid, _ = ar.Dequeue()
 	if zid != id.Zid(6) || action != arZettel {
 		t.Errorf("Expected 6/arZettel, but got %v/%v", zid, action)

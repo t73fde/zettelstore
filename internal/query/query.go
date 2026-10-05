@@ -394,7 +394,7 @@ func metaList2idSet(ml []*meta.Meta) *idset.ArraySet {
 	for _, m := range ml {
 		result.Add(m.Zid)
 	}
-	return result
+	return &result
 }
 
 func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.ArraySet) CompiledTerm {

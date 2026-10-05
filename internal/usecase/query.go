@@ -186,7 +186,7 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 			}
 		}
 	}
-	candidates = filterByZid(candidates, refZids)
+	candidates = filterByZid(candidates, &refZids)
 	return uc.filterCandidates(ctx, candidates, words)
 }
 

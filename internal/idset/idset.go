@@ -52,9 +52,7 @@ func (s ArraySet) metaString() string {
 func (s ArraySet) MetaValue() meta.Value { return meta.Value(s.metaString()) }
 
 // New returns a new set of identifier with the given initial values.
-func New() *ArraySet {
-	return &ArraySet{seq: nil}
-}
+func New() ArraySet { return ArraySet{seq: nil} }
 
 // IsEmpty returns true, if the set conains no element.
 func (s ArraySet) IsEmpty() bool { return len(s.seq) == 0 }
@@ -145,7 +143,8 @@ func (s *ArraySet) ISubstract(other ArraySet) {
 func (s *ArraySet) Diff(other *ArraySet) (newS, remS *ArraySet) {
 	if s == nil || len(s.seq) == 0 {
 		if other == nil {
-			return New(), nil
+			tmp := New()
+			return &tmp, nil
 		}
 		o := other.Clone()
 		return &o, nil

@@ -144,7 +144,7 @@ func (q *ztlCtxQueue) Pop() any {
 
 type contextTask struct {
 	port     ContextPort
-	seen     *idset.ArraySet
+	seen     idset.ArraySet
 	queue    ztlCtxQueue
 	maxCost  float64
 	maxCount int
@@ -303,8 +303,8 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Arr
 			ct.metaZid[zid] = m
 		}
 	}
-	ct.tagZids[tag] = zids
-	return zids
+	ct.tagZids[tag] = &zids
+	return &zids
 }
 
 func tagCost(baseCost float64, numTags int) float64 {
