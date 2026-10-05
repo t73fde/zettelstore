@@ -32,18 +32,18 @@ import (
 )
 
 type zettelData struct {
-	meta      *meta.Meta      // a local copy of the metadata, without computed keys
-	dead      *idset.ArraySet // set of dead references in this zettel
-	forward   *idset.ArraySet // set of forward references in this zettel
-	backward  *idset.ArraySet // set of zettel that reference with zettel
+	meta      *meta.Meta     // a local copy of the metadata, without computed keys
+	dead      idset.ArraySet // set of dead references in this zettel
+	forward   idset.ArraySet // set of forward references in this zettel
+	backward  idset.ArraySet // set of zettel that reference with zettel
 	otherRefs map[string]bidiRefs
 	words     []string // list of words of this zettel
 	urls      []string // list of urls of this zettel
 }
 
 type bidiRefs struct {
-	forward  *idset.ArraySet
-	backward *idset.ArraySet
+	forward  idset.ArraySet
+	backward idset.ArraySet
 }
 
 func (zd *zettelData) shrink() {
@@ -107,30 +107,25 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 		return false
 	}
 	var updated bool
-	if zi.dead != nil && !zi.dead.IsEmpty() {
+	if !zi.dead.IsEmpty() {
 		m.Set(meta.KeyDead, zi.dead.MetaValue())
 		updated = true
 	}
-	var back idset.ArraySet
-	if zi.backward == nil {
-		back = idset.New()
-	} else {
-		back = zi.backward.Clone()
-	}
+	back := zi.backward.Clone()
 	removeOtherMetaRefs(m, &back)
-	if zi.backward != nil && !zi.backward.IsEmpty() {
+	if !zi.backward.IsEmpty() {
 		m.Set(meta.KeyBackward, zi.backward.MetaValue())
 		updated = true
 	}
-	if zi.forward != nil && !zi.forward.IsEmpty() {
+	if !zi.forward.IsEmpty() {
 		m.Set(meta.KeyForward, zi.forward.MetaValue())
-		back.ISubstract(*zi.forward)
+		back.ISubstract(zi.forward)
 		updated = true
 	}
 	for k, refs := range zi.otherRefs {
-		if refs.backward != nil && !refs.backward.IsEmpty() {
+		if !refs.backward.IsEmpty() {
 			m.Set(k, refs.backward.MetaValue())
-			back.ISubstract(*refs.backward)
+			back.ISubstract(refs.backward)
 			updated = true
 		}
 	}
@@ -267,13 +262,9 @@ func addBackwardZids(result *idset.ArraySet, zid id.Zid, zi *zettelData) *idset.
 		result = &tmp
 	}
 	result.Add(zid)
-	if zi.backward != nil {
-		result.IUnion(*zi.backward)
-	}
+	result.IUnion(zi.backward)
 	for _, mref := range zi.otherRefs {
-		if mref.backward != nil {
-			result.IUnion(*mref.backward)
-		}
+		result.IUnion(mref.backward)
 	}
 	return result
 }
@@ -374,13 +365,8 @@ func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
 	drefs := zidx.GetDeadRefs()
-	var newRefs, remRefs idset.ArraySet
-	if zi.dead != nil {
-		newRefs, remRefs = zi.dead.Diff(drefs)
-	} else {
-		newRefs, remRefs = drefs.Clone(), idset.New()
-	}
-	zi.dead = &drefs
+	newRefs, remRefs := zi.dead.Diff(drefs)
+	zi.dead = drefs
 	for ref := range remRefs.Values() {
 		if deadRef := ms.dead[ref]; deadRef != nil {
 			deadRef.Remove(zidx.Zid)
@@ -398,20 +384,13 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi *zettelData) *idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
 	brefs := zidx.GetBackRefs()
-	var newRefs, remRefs idset.ArraySet
-	if zi.forward != nil {
-		newRefs, remRefs = zi.forward.Diff(brefs)
-	} else {
-		newRefs, remRefs = brefs.Clone(), idset.New()
-	}
-	zi.forward = &brefs
+	newRefs, remRefs := zi.forward.Diff(brefs)
+	zi.forward = brefs
 
 	var toCheck *idset.ArraySet
 	for ref := range remRefs.Values() {
 		bzi := ms.getOrCreateEntry(ref)
-		if bzi.backward != nil {
-			bzi.backward.Remove(zidx.Zid)
-		}
+		bzi.backward.Remove(zidx.Zid)
 		if bzi.meta == nil {
 			if toCheck == nil {
 				tmp := idset.New()
@@ -422,10 +401,6 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 	}
 	for ref := range newRefs.Values() {
 		bzi := ms.getOrCreateEntry(ref)
-		if bzi.backward == nil {
-			tmp := idset.New()
-			bzi.backward = &tmp
-		}
 		bzi.backward.Add(zidx.Zid)
 		if bzi.meta == nil {
 			if toCheck == nil {
@@ -445,7 +420,7 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 		if _, ok := inverseRefs[key]; ok {
 			continue
 		}
-		ms.removeInverseMeta(zidx.Zid, key, mr.forward)
+		ms.removeInverseMeta(zidx.Zid, key, &mr.forward)
 	}
 	if zi.otherRefs == nil {
 		zi.otherRefs = make(map[string]bidiRefs)
@@ -454,21 +429,15 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 	for key, mrefs := range inverseRefs {
 		mr := zi.otherRefs[key]
 		var newRefs, remRefs idset.ArraySet
-		switch {
-		case mr.forward != nil:
-			if mrefs == nil {
-				tmp := mr.forward.Clone()
-				newRefs, remRefs = idset.New(), tmp
-			} else {
-				newRefs, remRefs = mr.forward.Diff(*mrefs)
-			}
-		case mrefs != nil:
-			newRefs, remRefs = mrefs.Clone(), idset.New()
-		default:
-			newRefs, remRefs = idset.New(), idset.New()
+		if mrefs == nil {
+			tmp := mr.forward.Clone()
+			newRefs, remRefs = idset.New(), tmp
+			mr.forward = idset.ArraySet{}
+		} else {
+			newRefs, remRefs = mr.forward.Diff(*mrefs)
+			mr.forward = *mrefs
 		}
 
-		mr.forward = mrefs
 		zi.otherRefs[key] = mr
 
 		for ref := range newRefs.Values() {
@@ -477,10 +446,6 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 				bzi.otherRefs = make(map[string]bidiRefs)
 			}
 			bmr := bzi.otherRefs[key]
-			if bmr.backward == nil {
-				tmp := idset.New()
-				bmr.backward = &tmp
-			}
 			bmr.backward.Add(zidx.Zid)
 			bzi.otherRefs[key] = bmr
 			if bzi.meta == nil {
@@ -574,7 +539,7 @@ func (ms *mapStore) doDeleteZettel(zid id.Zid) idset.ArraySet {
 	ms.deleteDeadSources(zid, zi)
 	toCheck := ms.deleteForwardBackward(zid, zi)
 	for key, mrefs := range zi.otherRefs {
-		ms.removeInverseMeta(zid, key, mrefs.forward)
+		ms.removeInverseMeta(zid, key, &mrefs.forward)
 	}
 	deleteStrings(ms.words, zi.words, zid)
 	deleteStrings(ms.urls, zi.urls, zid)
@@ -584,17 +549,15 @@ func (ms *mapStore) doDeleteZettel(zid id.Zid) idset.ArraySet {
 
 func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
-	if zi.dead != nil {
-		for ref := range zi.dead.Values() {
-			if drefs, ok := ms.dead[ref]; ok {
-				if drefs != nil {
-					drefs.Remove(zid)
-				}
-				if drefs == nil || drefs.IsEmpty() {
-					delete(ms.dead, ref)
-				} else {
-					ms.dead[ref] = drefs
-				}
+	for ref := range zi.dead.Values() {
+		if drefs, ok := ms.dead[ref]; ok {
+			if drefs != nil {
+				drefs.Remove(zid)
+			}
+			if drefs == nil || drefs.IsEmpty() {
+				delete(ms.dead, ref)
+			} else {
+				ms.dead[ref] = drefs
 			}
 		}
 	}
@@ -602,25 +565,17 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 
 func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
-	if zi.forward != nil {
-		for ref := range zi.forward.Values() {
-			if fzi, ok := ms.idx[ref]; ok {
-				if fzi.backward != nil {
-					fzi.backward.Remove(zid)
-				}
-			}
+	for ref := range zi.forward.Values() {
+		if fzi, ok := ms.idx[ref]; ok {
+			fzi.backward.Remove(zid)
 		}
 	}
 
 	var toCheck idset.ArraySet
-	if zi.backward != nil {
-		for ref := range zi.backward.Values() {
-			if bzi, ok := ms.idx[ref]; ok {
-				if bzi.forward != nil {
-					bzi.forward.Remove(zid)
-				}
-				toCheck.Add(ref)
-			}
+	for ref := range zi.backward.Values() {
+		if bzi, ok := ms.idx[ref]; ok {
+			bzi.forward.Remove(zid)
+			toCheck.Add(ref)
 		}
 	}
 	return toCheck
@@ -638,10 +593,8 @@ func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward *idset.Arr
 			if !ok {
 				return
 			}
-			if bmr.backward != nil {
-				bmr.backward.Remove(zid)
-			}
-			if (bmr.backward != nil && !bmr.backward.IsEmpty()) || (bmr.forward != nil && !bmr.forward.IsEmpty()) {
+			bmr.backward.Remove(zid)
+			if (!bmr.backward.IsEmpty()) || (!bmr.forward.IsEmpty()) {
 				bzi.otherRefs[key] = bmr
 			} else {
 				delete(bzi.otherRefs, key)
@@ -722,7 +675,7 @@ func (ms *mapStore) dumpIndex(w io.Writer) {
 	for _, id := range zids {
 		_, _ = fmt.Fprintln(w, "=====", id)
 		zi := ms.idx[id]
-		if zi.dead != nil && !zi.dead.IsEmpty() {
+		if !zi.dead.IsEmpty() {
 			_, _ = fmt.Fprintln(w, "* Dead:", zi.dead)
 		}
 		dumpSet(w, "* Forward:", zi.forward)
@@ -759,8 +712,8 @@ func (ms *mapStore) dumpDead(w io.Writer) {
 	}
 }
 
-func dumpSet(w io.Writer, prefix string, s *idset.ArraySet) {
-	if s != nil && !s.IsEmpty() {
+func dumpSet(w io.Writer, prefix string, s idset.ArraySet) {
+	if !s.IsEmpty() {
 		_, _ = io.WriteString(w, prefix)
 		for zid := range s.Values() {
 			_, _ = io.WriteString(w, " ")
