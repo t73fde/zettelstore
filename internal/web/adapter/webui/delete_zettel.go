@@ -90,7 +90,7 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *s
 			addListValues(zidMap, m, inverseKey)
 		}
 	}
-	return wui.zidLinksSxn(slices.Sorted(zidMap.All()), getTextTitle)
+	return wui.zidLinksSxn(slices.Sorted(zidMap.Values()), getTextTitle)
 }
 
 func addListValues(zidMap *set.Set[string], m *meta.Meta, key string) {

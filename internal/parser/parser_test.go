@@ -60,7 +60,7 @@ func TestParserType(t *testing.T) {
 			t.Errorf("Syntax %q is image: %v, but got %v", tc.syntax, tc.image, got)
 		}
 	}
-	for syntax := range syntaxSet.All() {
+	for syntax := range syntaxSet.Values() {
 		t.Errorf("Forgot to test syntax %q", syntax)
 	}
 }
