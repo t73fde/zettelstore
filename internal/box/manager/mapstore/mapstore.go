@@ -60,7 +60,7 @@ type mapStore struct {
 	mx     sync.RWMutex
 	intern map[string]string // map to intern strings
 	idx    map[id.Zid]*zettelData
-	dead   map[id.Zid]*idset.ArraySet // map dead refs where they occur
+	dead   map[id.Zid]idset.ArraySet // map dead refs where they occur
 	words  stringRefs
 	urls   stringRefs
 
@@ -75,7 +75,7 @@ func New() store.Store {
 	return &mapStore{
 		intern: make(map[string]string, 1024),
 		idx:    make(map[id.Zid]*zettelData),
-		dead:   make(map[id.Zid]*idset.ArraySet),
+		dead:   make(map[id.Zid]idset.ArraySet),
 		words:  make(stringRefs),
 		urls:   make(stringRefs),
 	}
@@ -300,7 +300,7 @@ func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex)
 	var toCheck idset.ArraySet
 	if refs, ok := ms.dead[zidx.Zid]; ok {
 		// These must be checked later again
-		toCheck = *refs
+		toCheck = refs
 		delete(ms.dead, zidx.Zid)
 	}
 
@@ -368,16 +368,14 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 	newRefs, remRefs := zi.dead.Diff(drefs)
 	zi.dead = drefs
 	for ref := range remRefs.Values() {
-		if deadRef := ms.dead[ref]; deadRef != nil {
-			deadRef.Remove(zidx.Zid)
-		}
+		deadRef := ms.dead[ref]
+		deadRef.Remove(zidx.Zid)
+		ms.dead[ref] = deadRef
 	}
 	for ref := range newRefs.Values() {
-		if ms.dead[ref] == nil {
-			tmp := idset.New()
-			ms.dead[ref] = &tmp
-		}
-		ms.dead[ref].Add(zidx.Zid)
+		deadRef := ms.dead[ref]
+		deadRef.Add(zidx.Zid)
+		ms.dead[ref] = deadRef
 	}
 }
 
@@ -544,10 +542,8 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
 	for ref := range zi.dead.Values() {
 		if drefs, ok := ms.dead[ref]; ok {
-			if drefs != nil {
-				drefs.Remove(zid)
-			}
-			if drefs == nil || drefs.IsEmpty() {
+			drefs.Remove(zid)
+			if drefs.IsEmpty() {
 				delete(ms.dead, ref)
 			} else {
 				ms.dead[ref] = drefs
