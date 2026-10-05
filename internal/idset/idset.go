@@ -56,18 +56,6 @@ func New() *ArraySet {
 	return &ArraySet{seq: nil}
 }
 
-// Collect returns a new set of identifiers based on all values of a slice.
-func Collect(sl []id.Zid) *ArraySet {
-	result := New()
-	if len(sl) > 0 {
-		result.Grow(len(sl))
-		for _, zid := range sl {
-			result.add(zid)
-		}
-	}
-	return result
-}
-
 // IsEmpty returns true, if the set conains no element.
 func (s ArraySet) IsEmpty() bool { return len(s.seq) == 0 }
 
@@ -205,10 +193,7 @@ func (s *ArraySet) Remove(zid id.Zid) {
 }
 
 // Values returns an iterator for each element of the set, in ascending order.
-func (s *ArraySet) Values() iter.Seq[id.Zid] {
-	if s == nil {
-		return slices.Values([]id.Zid{})
-	}
+func (s ArraySet) Values() iter.Seq[id.Zid] {
 	return slices.Values(s.seq)
 }
 

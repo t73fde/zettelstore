@@ -34,6 +34,18 @@ func safeSorted(s *idset.ArraySet) []id.Zid {
 	return result
 }
 
+// Collect returns a new set of identifiers based on all values of a slice.
+func collect(sl []id.Zid) *idset.ArraySet {
+	result := idset.New()
+	if len(sl) > 0 {
+		result.Grow(len(sl))
+		for _, zid := range sl {
+			result.Add(zid)
+		}
+	}
+	return result
+}
+
 func TestSetContains(t *testing.T) {
 	testcases := []id.Zid{2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22}
 	var e idset.ArraySet
@@ -69,9 +81,9 @@ func TestSetAdd(t *testing.T) {
 		exp    []id.Zid
 	}{
 		{idset.New(), idset.New(), nil},
-		{idset.Collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2}), []id.Zid{1, 2}},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), []id.Zid{1}},
+		{collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
+		{collect([]id.Zid{1}), collect([]id.Zid{2}), []id.Zid{1, 2}},
+		{collect([]id.Zid{1}), collect([]id.Zid{1}), []id.Zid{1}},
 	}
 	for i, tc := range testcases {
 		sl1 := safeSorted(tc.s1)
@@ -93,7 +105,7 @@ func TestSetSafeSorted(t *testing.T) {
 	}{
 		{nil, nil},
 		{idset.New(), nil},
-		{idset.Collect([]id.Zid{9, 4, 6, 1, 7}), []id.Zid{1, 4, 6, 7, 9}},
+		{collect([]id.Zid{9, 4, 6, 1, 7}), []id.Zid{1, 4, 6, 7, 9}},
 	}
 	for i, tc := range testcases {
 		got := safeSorted(tc.set)
@@ -110,11 +122,11 @@ func TestSetIntersection(t *testing.T) {
 		exp    []id.Zid
 	}{
 		{idset.New(), idset.New(), nil},
-		{idset.Collect([]id.Zid{1}), idset.New(), nil},
-		{idset.New(), idset.Collect([]id.Zid{1}), nil},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2}), nil},
-		{idset.Collect([]id.Zid{2}), idset.Collect([]id.Zid{1}), nil},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), []id.Zid{1}},
+		{collect([]id.Zid{1}), idset.New(), nil},
+		{idset.New(), collect([]id.Zid{1}), nil},
+		{collect([]id.Zid{1}), collect([]id.Zid{2}), nil},
+		{collect([]id.Zid{2}), collect([]id.Zid{1}), nil},
+		{collect([]id.Zid{1}), collect([]id.Zid{1}), []id.Zid{1}},
 	}
 	for i, tc := range testcases {
 		sl1 := safeSorted(tc.s1)
@@ -135,12 +147,12 @@ func TestSetIUnion(t *testing.T) {
 		exp    *idset.ArraySet
 	}{
 		{idset.New(), idset.New(), idset.New()},
-		{idset.Collect([]id.Zid{1}), idset.New(), idset.Collect([]id.Zid{1})},
-		{idset.New(), idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1})},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2}), idset.Collect([]id.Zid{1, 2})},
-		{idset.Collect([]id.Zid{2}), idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2, 1})},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1})},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{2, 3, 4}), idset.Collect([]id.Zid{1, 2, 3, 4})},
+		{collect([]id.Zid{1}), idset.New(), collect([]id.Zid{1})},
+		{idset.New(), collect([]id.Zid{1}), collect([]id.Zid{1})},
+		{collect([]id.Zid{1}), collect([]id.Zid{2}), collect([]id.Zid{1, 2})},
+		{collect([]id.Zid{2}), collect([]id.Zid{1}), collect([]id.Zid{2, 1})},
+		{collect([]id.Zid{1}), collect([]id.Zid{1}), collect([]id.Zid{1})},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{2, 3, 4}), collect([]id.Zid{1, 2, 3, 4})},
 	}
 	for i, tc := range testcases {
 		s1 := tc.s1.Clone()
@@ -161,17 +173,17 @@ func TestSetISubtract(t *testing.T) {
 		exp    []id.Zid
 	}{
 		{idset.New(), idset.New(), nil},
-		{idset.Collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
-		{idset.New(), idset.Collect([]id.Zid{1}), nil},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2}), []id.Zid{1}},
-		{idset.Collect([]id.Zid{2}), idset.Collect([]id.Zid{1}), []id.Zid{2}},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), nil},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{1}), []id.Zid{2, 3}},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{2}), []id.Zid{1, 3}},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{3}), []id.Zid{1, 2}},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{1, 2}), []id.Zid{3}},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{1, 3}), []id.Zid{2}},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{2, 3}), []id.Zid{1}},
+		{collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
+		{idset.New(), collect([]id.Zid{1}), nil},
+		{collect([]id.Zid{1}), collect([]id.Zid{2}), []id.Zid{1}},
+		{collect([]id.Zid{2}), collect([]id.Zid{1}), []id.Zid{2}},
+		{collect([]id.Zid{1}), collect([]id.Zid{1}), nil},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{1}), []id.Zid{2, 3}},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{2}), []id.Zid{1, 3}},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{3}), []id.Zid{1, 2}},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{1, 2}), []id.Zid{3}},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{1, 3}), []id.Zid{2}},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{2, 3}), []id.Zid{1}},
 	}
 	for i, tc := range testcases {
 		s1 := tc.s1.Clone()
@@ -192,14 +204,14 @@ func TestSetDiff(t *testing.T) {
 		exp1, exp2 *idset.ArraySet
 	}{
 		{nil, nil, nil, nil},
-		{idset.Collect([]id.Zid{1}), nil, nil, idset.Collect([]id.Zid{1})},
-		{nil, idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), nil},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), nil, nil},
-		{idset.Collect([]id.Zid{1, 2}), idset.Collect([]id.Zid{1}), nil, idset.Collect([]id.Zid{2})},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1, 2}), idset.Collect([]id.Zid{2}), nil},
-		{idset.Collect([]id.Zid{1, 2}), idset.Collect([]id.Zid{1, 3}), idset.Collect([]id.Zid{3}), idset.Collect([]id.Zid{2})},
-		{idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{2, 3, 4}), idset.Collect([]id.Zid{4}), idset.Collect([]id.Zid{1})},
-		{idset.Collect([]id.Zid{2, 3, 4}), idset.Collect([]id.Zid{1, 2, 3}), idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{4})},
+		{collect([]id.Zid{1}), nil, nil, collect([]id.Zid{1})},
+		{nil, collect([]id.Zid{1}), collect([]id.Zid{1}), nil},
+		{collect([]id.Zid{1}), collect([]id.Zid{1}), nil, nil},
+		{collect([]id.Zid{1, 2}), collect([]id.Zid{1}), nil, collect([]id.Zid{2})},
+		{collect([]id.Zid{1}), collect([]id.Zid{1, 2}), collect([]id.Zid{2}), nil},
+		{collect([]id.Zid{1, 2}), collect([]id.Zid{1, 3}), collect([]id.Zid{3}), collect([]id.Zid{2})},
+		{collect([]id.Zid{1, 2, 3}), collect([]id.Zid{2, 3, 4}), collect([]id.Zid{4}), collect([]id.Zid{1})},
+		{collect([]id.Zid{2, 3, 4}), collect([]id.Zid{1, 2, 3}), collect([]id.Zid{1}), collect([]id.Zid{4})},
 	}
 	for i, tc := range testcases {
 		gotN, gotO := tc.in1.Diff(tc.in2)
@@ -219,14 +231,14 @@ func TestSetRemove(t *testing.T) {
 		exp    []id.Zid
 	}{
 		{idset.New(), idset.New(), nil},
-		{idset.Collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{2}), []id.Zid{1}},
-		{idset.Collect([]id.Zid{1}), idset.Collect([]id.Zid{1}), []id.Zid{}},
+		{collect([]id.Zid{1}), idset.New(), []id.Zid{1}},
+		{collect([]id.Zid{1}), collect([]id.Zid{2}), []id.Zid{1}},
+		{collect([]id.Zid{1}), collect([]id.Zid{1}), []id.Zid{}},
 	}
 	for i, tc := range testcases {
 		sl1 := safeSorted(tc.s1)
 		sl2 := safeSorted(tc.s2)
-		newS1 := idset.Collect(sl1)
+		newS1 := collect(sl1)
 		newS1.ISubstract(*tc.s2)
 		got := safeSorted(newS1)
 		if !slices.Equal(got, tc.exp) {

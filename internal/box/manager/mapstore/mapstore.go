@@ -377,16 +377,20 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 	drefs := zidx.GetDeadRefs()
 	newRefs, remRefs := zi.dead.Diff(drefs)
 	zi.dead = drefs
-	for ref := range remRefs.Values() {
-		if deadRef := ms.dead[ref]; deadRef != nil {
-			deadRef.Remove(zidx.Zid)
+	if remRefs != nil {
+		for ref := range remRefs.Values() {
+			if deadRef := ms.dead[ref]; deadRef != nil {
+				deadRef.Remove(zidx.Zid)
+			}
 		}
 	}
-	for ref := range newRefs.Values() {
-		if ms.dead[ref] == nil {
-			ms.dead[ref] = idset.New()
+	if newRefs != nil {
+		for ref := range newRefs.Values() {
+			if ms.dead[ref] == nil {
+				ms.dead[ref] = idset.New()
+			}
+			ms.dead[ref].Add(zidx.Zid)
 		}
-		ms.dead[ref].Add(zidx.Zid)
 	}
 }
 
@@ -397,29 +401,33 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 	zi.forward = brefs
 
 	var toCheck *idset.ArraySet
-	for ref := range remRefs.Values() {
-		bzi := ms.getOrCreateEntry(ref)
-		if bzi.backward != nil {
-			bzi.backward.Remove(zidx.Zid)
-		}
-		if bzi.meta == nil {
-			if toCheck == nil {
-				toCheck = idset.New()
+	if remRefs != nil {
+		for ref := range remRefs.Values() {
+			bzi := ms.getOrCreateEntry(ref)
+			if bzi.backward != nil {
+				bzi.backward.Remove(zidx.Zid)
 			}
-			toCheck.Add(ref)
+			if bzi.meta == nil {
+				if toCheck == nil {
+					toCheck = idset.New()
+				}
+				toCheck.Add(ref)
+			}
 		}
 	}
-	for ref := range newRefs.Values() {
-		bzi := ms.getOrCreateEntry(ref)
-		if bzi.backward == nil {
-			bzi.backward = idset.New()
-		}
-		bzi.backward.Add(zidx.Zid)
-		if bzi.meta == nil {
-			if toCheck == nil {
-				toCheck = idset.New()
+	if newRefs != nil {
+		for ref := range newRefs.Values() {
+			bzi := ms.getOrCreateEntry(ref)
+			if bzi.backward == nil {
+				bzi.backward = idset.New()
 			}
-			toCheck.Add(ref)
+			bzi.backward.Add(zidx.Zid)
+			if bzi.meta == nil {
+				if toCheck == nil {
+					toCheck = idset.New()
+				}
+				toCheck.Add(ref)
+			}
 		}
 	}
 	return toCheck
@@ -444,22 +452,24 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 		mr.forward = mrefs
 		zi.otherRefs[key] = mr
 
-		for ref := range newRefs.Values() {
-			bzi := ms.getOrCreateEntry(ref)
-			if bzi.otherRefs == nil {
-				bzi.otherRefs = make(map[string]bidiRefs)
-			}
-			bmr := bzi.otherRefs[key]
-			if bmr.backward == nil {
-				bmr.backward = idset.New()
-			}
-			bmr.backward.Add(zidx.Zid)
-			bzi.otherRefs[key] = bmr
-			if bzi.meta == nil {
-				if toCheck == nil {
-					toCheck = idset.New()
+		if newRefs != nil {
+			for ref := range newRefs.Values() {
+				bzi := ms.getOrCreateEntry(ref)
+				if bzi.otherRefs == nil {
+					bzi.otherRefs = make(map[string]bidiRefs)
 				}
-				toCheck.Add(ref)
+				bmr := bzi.otherRefs[key]
+				if bmr.backward == nil {
+					bmr.backward = idset.New()
+				}
+				bmr.backward.Add(zidx.Zid)
+				bzi.otherRefs[key] = bmr
+				if bzi.meta == nil {
+					if toCheck == nil {
+						toCheck = idset.New()
+					}
+					toCheck.Add(ref)
+				}
 			}
 		}
 
@@ -554,15 +564,17 @@ func (ms *mapStore) doDeleteZettel(zid id.Zid) *idset.ArraySet {
 
 func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
-	for ref := range zi.dead.Values() {
-		if drefs, ok := ms.dead[ref]; ok {
-			if drefs != nil {
-				drefs.Remove(zid)
-			}
-			if drefs == nil || drefs.IsEmpty() {
-				delete(ms.dead, ref)
-			} else {
-				ms.dead[ref] = drefs
+	if zi.dead != nil {
+		for ref := range zi.dead.Values() {
+			if drefs, ok := ms.dead[ref]; ok {
+				if drefs != nil {
+					drefs.Remove(zid)
+				}
+				if drefs == nil || drefs.IsEmpty() {
+					delete(ms.dead, ref)
+				} else {
+					ms.dead[ref] = drefs
+				}
 			}
 		}
 	}
@@ -570,24 +582,28 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 
 func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
-	for ref := range zi.forward.Values() {
-		if fzi, ok := ms.idx[ref]; ok {
-			if fzi.backward != nil {
-				fzi.backward.Remove(zid)
+	if zi.forward != nil {
+		for ref := range zi.forward.Values() {
+			if fzi, ok := ms.idx[ref]; ok {
+				if fzi.backward != nil {
+					fzi.backward.Remove(zid)
+				}
 			}
 		}
 	}
 
 	var toCheck *idset.ArraySet
-	for ref := range zi.backward.Values() {
-		if bzi, ok := ms.idx[ref]; ok {
-			if bzi.forward != nil {
-				bzi.forward.Remove(zid)
+	if zi.backward != nil {
+		for ref := range zi.backward.Values() {
+			if bzi, ok := ms.idx[ref]; ok {
+				if bzi.forward != nil {
+					bzi.forward.Remove(zid)
+				}
+				if toCheck == nil {
+					toCheck = idset.New()
+				}
+				toCheck.Add(ref)
 			}
-			if toCheck == nil {
-				toCheck = idset.New()
-			}
-			toCheck.Add(ref)
 		}
 	}
 	return toCheck
@@ -595,24 +611,26 @@ func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.Arr
 
 func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward *idset.ArraySet) {
 	// Must only be called if ms.mx is write-locked!
-	for ref := range forward.Values() {
-		bzi, ok := ms.idx[ref]
-		if !ok || bzi.otherRefs == nil {
-			return
-		}
-		bmr, ok := bzi.otherRefs[key]
-		if !ok {
-			return
-		}
-		if bmr.backward != nil {
-			bmr.backward.Remove(zid)
-		}
-		if (bmr.backward != nil && !bmr.backward.IsEmpty()) || (bmr.forward != nil && !bmr.forward.IsEmpty()) {
-			bzi.otherRefs[key] = bmr
-		} else {
-			delete(bzi.otherRefs, key)
-			if len(bzi.otherRefs) == 0 {
-				bzi.otherRefs = nil
+	if forward != nil {
+		for ref := range forward.Values() {
+			bzi, ok := ms.idx[ref]
+			if !ok || bzi.otherRefs == nil {
+				return
+			}
+			bmr, ok := bzi.otherRefs[key]
+			if !ok {
+				return
+			}
+			if bmr.backward != nil {
+				bmr.backward.Remove(zid)
+			}
+			if (bmr.backward != nil && !bmr.backward.IsEmpty()) || (bmr.forward != nil && !bmr.forward.IsEmpty()) {
+				bzi.otherRefs[key] = bmr
+			} else {
+				delete(bzi.otherRefs, key)
+				if len(bzi.otherRefs) == 0 {
+					bzi.otherRefs = nil
+				}
 			}
 		}
 	}
