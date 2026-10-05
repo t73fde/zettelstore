@@ -186,11 +186,11 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 			}
 		}
 	}
-	candidates = filterByZid(candidates, &refZids)
+	candidates = filterByZid(candidates, refZids)
 	return uc.filterCandidates(ctx, candidates, words)
 }
 
-func filterByZid(candidates []*meta.Meta, ignoreSeq *idset.ArraySet) []*meta.Meta {
+func filterByZid(candidates []*meta.Meta, ignoreSeq idset.ArraySet) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
 	for _, m := range candidates {
 		if !ignoreSeq.Contains(m.Zid) {
