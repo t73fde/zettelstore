@@ -60,7 +60,9 @@ func (zi *ZettelIndex) AddInverseRef(key string, zid id.Zid) {
 		zids.Add(zid)
 		return
 	}
-	zi.inverseRefs[key] = idset.New(zid)
+	s := idset.New()
+	s.Add(zid)
+	zi.inverseRefs[key] = s
 }
 
 // AddDeadRef adds a dead reference to a zettel.

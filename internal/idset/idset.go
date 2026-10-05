@@ -52,17 +52,20 @@ func (s ArraySet) metaString() string {
 func (s ArraySet) MetaValue() meta.Value { return meta.Value(s.metaString()) }
 
 // New returns a new set of identifier with the given initial values.
-func New(zids ...id.Zid) *ArraySet {
-	switch l := len(zids); l {
-	case 0:
-		return &ArraySet{seq: nil}
-	case 1:
-		return &ArraySet{seq: []id.Zid{zids[0]}}
-	default:
-		result := ArraySet{seq: make([]id.Zid, 0, l)}
-		result.addSlice(zids)
-		return &result
+func New() *ArraySet {
+	return &ArraySet{seq: nil}
+}
+
+// Collect returns a new set of identifiers based on all values of a slice.
+func Collect(sl []id.Zid) *ArraySet {
+	result := New()
+	if len(sl) > 0 {
+		result.Grow(len(sl))
+		for _, zid := range sl {
+			result.add(zid)
+		}
 	}
+	return result
 }
 
 // IsEmpty returns true, if the set conains no element.
@@ -253,7 +256,7 @@ func (s *ArraySet) add(zid id.Zid) {
 // addSlice adds all identifier of the given slice to the set.
 func (s *ArraySet) addSlice(sl []id.Zid) *ArraySet {
 	if s == nil {
-		return New(sl...)
+		return Collect(sl)
 	}
 	s.seq = slices.Grow(s.seq, len(sl))
 	for _, zid := range sl {
