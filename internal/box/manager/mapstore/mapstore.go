@@ -295,7 +295,7 @@ func removeOtherMetaRefs(m *meta.Meta, back *idset.ArraySet) {
 	}
 }
 
-func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex) *idset.ArraySet {
+func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex) idset.ArraySet {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 	m := ms.makeMeta(zidx)
@@ -306,14 +306,11 @@ func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex)
 	}
 
 	// Is this zettel an old dead reference mentioned in other zettel?
-	var toCheck *idset.ArraySet
+	var toCheck idset.ArraySet
 	if refs, ok := ms.dead[zidx.Zid]; ok {
 		// These must be checked later again
-		toCheck = refs
+		toCheck = *refs
 		delete(ms.dead, zidx.Zid)
-	} else {
-		tmp := idset.New()
-		toCheck = &tmp
 	}
 
 	zi.meta = m
@@ -561,17 +558,17 @@ func (ms *mapStore) getOrCreateEntry(zid id.Zid) *zettelData {
 	return zi
 }
 
-func (ms *mapStore) DeleteZettel(_ context.Context, zid id.Zid) *idset.ArraySet {
+func (ms *mapStore) DeleteZettel(_ context.Context, zid id.Zid) idset.ArraySet {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 	return ms.doDeleteZettel(zid)
 }
 
-func (ms *mapStore) doDeleteZettel(zid id.Zid) *idset.ArraySet {
+func (ms *mapStore) doDeleteZettel(zid id.Zid) idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
 	zi, ok := ms.idx[zid]
 	if !ok {
-		return nil
+		return idset.ArraySet{}
 	}
 
 	ms.deleteDeadSources(zid, zi)
@@ -603,7 +600,7 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	}
 }
 
-func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.ArraySet {
+func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
 	if zi.forward != nil {
 		for ref := range zi.forward.Values() {
@@ -615,16 +612,12 @@ func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) *idset.Arr
 		}
 	}
 
-	var toCheck *idset.ArraySet
+	var toCheck idset.ArraySet
 	if zi.backward != nil {
 		for ref := range zi.backward.Values() {
 			if bzi, ok := ms.idx[ref]; ok {
 				if bzi.forward != nil {
 					bzi.forward.Remove(zid)
-				}
-				if toCheck == nil {
-					tmp := idset.New()
-					toCheck = &tmp
 				}
 				toCheck.Add(ref)
 			}

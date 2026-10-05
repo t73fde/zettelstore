@@ -240,10 +240,8 @@ func (mgr *Manager) idxDeleteZettel(ctx context.Context, zid id.Zid) {
 	mgr.idxCheckZettel(toCheck)
 }
 
-func (mgr *Manager) idxCheckZettel(s *idset.ArraySet) {
-	if s != nil {
-		for zid := range s.Values() {
-			mgr.idxAr.EnqueueZettel(zid)
-		}
+func (mgr *Manager) idxCheckZettel(s idset.ArraySet) {
+	for zid := range s.Values() {
+		mgr.idxAr.EnqueueZettel(zid)
 	}
 }
