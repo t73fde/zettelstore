@@ -385,36 +385,30 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq
 	return result
 }
 
-func metaList2idSet(ml []*meta.Meta) *idset.ArraySet {
-	if ml == nil {
-		return nil
-	}
-	result := idset.New()
+func metaList2idSet(ml []*meta.Meta) (result idset.ArraySet) {
 	result.Grow(len(ml))
 	for _, m := range ml {
 		result.Add(m.Zid)
 	}
-	return &result
+	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.ArraySet) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.ArraySet) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
 	var pred RetrievePredicate
 	if searcher != nil {
 		pred = ct.retrieveIndex(searcher)
-		if startSet != nil {
-			if pred == nil {
-				pred = startSet.Contains // startSet != nil
-			} else {
-				predSet := idset.New()
-				predSet.Grow(startSet.Count())
-				for zid := range startSet.Values() {
-					if pred(zid) {
-						predSet.Add(zid)
-					}
+		if pred == nil {
+			pred = startSet.Contains
+		} else {
+			predSet := idset.New()
+			predSet.Grow(startSet.Count())
+			for zid := range startSet.Values() {
+				if pred(zid) {
+					predSet.Add(zid)
 				}
-				pred = predSet.Contains // predSet is known to be non-nil
 			}
+			pred = predSet.Contains // predSet is known to be non-nil
 		}
 	}
 	return CompiledTerm{Match: match, Retrieve: pred}
@@ -431,11 +425,11 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) RetrievePredicate {
 	}
 
 	positives := retrievePositives(normCalls, plainCalls)
-	if positives == nil {
+	if positives.IsEmpty() {
 		// No positive search for words, must contain only words for a negative search.
 		// Otherwise len(search) == 0 (see above)
 		negatives := retrieveNegatives(negCalls)
-		if negatives == nil {
+		if negatives.IsEmpty() {
 			return neverIncluded
 		}
 		return func(zid id.Zid) bool { return !negatives.Contains(zid) }
@@ -449,7 +443,7 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) RetrievePredicate {
 		return positives.Contains
 	}
 	negatives := retrieveNegatives(negCalls)
-	if negatives == nil {
+	if negatives.IsEmpty() {
 		return positives.Contains
 	}
 	return func(zid id.Zid) bool {
