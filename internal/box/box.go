@@ -156,7 +156,7 @@ type Box interface {
 	DeleteBox
 
 	// FetchZids returns the set of all zettel identifer managed by the box.
-	FetchZids(ctx context.Context) (*idset.ArraySet, error)
+	FetchZids(ctx context.Context) (idset.ArraySet, error)
 
 	// GetMeta returns the metadata of the zettel with the given identifier.
 	GetMeta(context.Context, id.Zid) (*meta.Meta, error)

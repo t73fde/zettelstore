@@ -99,9 +99,7 @@ func (mgr *Manager) idxWorkService(ctx context.Context) {
 			zids, err := mgr.FetchZids(ctx)
 			if err == nil {
 				start = time.Now()
-				if zids != nil {
-					mgr.idxAr.Reload(*zids)
-				}
+				mgr.idxAr.Reload(zids)
 				mgr.idxMx.Lock()
 				mgr.idxLastReload = time.Now().Local()
 				mgr.idxSinceReload = 0
