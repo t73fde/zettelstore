@@ -111,7 +111,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 		for c, sf := range normCalls {
 			as := sf(c.s)
 			if first {
-				normResult = *as.Clone()
+				normResult = as.Clone()
 				first = false
 			} else {
 				normResult.Intersection(as)
@@ -130,7 +130,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 			cache[c] = &result
 		}
 		if first {
-			plainResult = *result.Clone()
+			plainResult = result.Clone()
 			first = false
 		} else {
 			plainResult.Intersection(result)
@@ -142,7 +142,8 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 	for c, sf := range normCalls {
 		if result, found := cache[c]; found {
 			if first {
-				normResult = result.Clone()
+				tmp := result.Clone()
+				normResult = &tmp
 				first = false
 			} else {
 				normResult.Intersection(*result)
@@ -150,7 +151,8 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
 		} else {
 			as := sf(c.s)
 			if first {
-				normResult = as.Clone()
+				tmp := as.Clone()
+				normResult = &tmp
 				first = false
 			} else {
 				normResult.Intersection(as)

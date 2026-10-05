@@ -123,7 +123,7 @@ func TestSetIntersection(t *testing.T) {
 		sl2 := safeSorted(tc.s2)
 		r := tc.s1.Clone()
 		r.Intersection(*tc.s2)
-		got := safeSorted(r)
+		got := safeSorted(&r)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.IntersectOrSet(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}
@@ -136,12 +136,9 @@ func TestSetIUnion(t *testing.T) {
 		s1, s2 *idset.ArraySet
 		exp    *idset.ArraySet
 	}{
-		{nil, nil, nil},
 		{idset.New(), nil, idset.New()},
-		{nil, idset.New(), nil},
 		{idset.New(), idset.New(), idset.New()},
 		{idset.New(1), nil, idset.New(1)},
-		{nil, idset.New(1), idset.New(1)},
 		{idset.New(1), idset.New(), idset.New(1)},
 		{idset.New(), idset.New(1), idset.New(1)},
 		{idset.New(1), idset.New(2), idset.New(1, 2)},
@@ -151,7 +148,7 @@ func TestSetIUnion(t *testing.T) {
 	}
 	for i, tc := range testcases {
 		s1 := tc.s1.Clone()
-		sl1 := safeSorted(s1)
+		sl1 := safeSorted(&s1)
 		sl2 := safeSorted(tc.s2)
 		r := s1.IUnion(tc.s2)
 		got := safeSorted(r)
@@ -182,10 +179,10 @@ func TestSetISubtract(t *testing.T) {
 	}
 	for i, tc := range testcases {
 		s1 := tc.s1.Clone()
-		sl1 := safeSorted(s1)
+		sl1 := safeSorted(&s1)
 		sl2 := safeSorted(tc.s2)
 		s1.ISubstract(*tc.s2)
-		got := safeSorted(s1)
+		got := safeSorted(&s1)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.ISubstract(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
 		}

@@ -111,8 +111,13 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 		m.Set(meta.KeyDead, zi.dead.MetaValue())
 		updated = true
 	}
-	back := zi.backward.Clone()
-	removeOtherMetaRefs(m, back)
+	var back idset.ArraySet
+	if zi.backward == nil {
+		back = *idset.New()
+	} else {
+		back = zi.backward.Clone()
+	}
+	removeOtherMetaRefs(m, &back)
 	if zi.backward != nil && !zi.backward.IsEmpty() {
 		m.Set(meta.KeyBackward, zi.backward.MetaValue())
 		updated = true

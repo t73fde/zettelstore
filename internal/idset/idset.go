@@ -79,11 +79,8 @@ func (s ArraySet) IsEmpty() bool { return len(s.seq) == 0 }
 func (s ArraySet) Count() int { return len(s.seq) }
 
 // Clone returns a copy of the given set.
-func (s *ArraySet) Clone() *ArraySet {
-	if s == nil {
-		return &ArraySet{seq: nil}
-	}
-	return &ArraySet{seq: slices.Clone(s.seq)}
+func (s ArraySet) Clone() ArraySet {
+	return ArraySet{seq: slices.Clone(s.seq)}
 }
 
 // Add adds a zid to the set.
@@ -162,10 +159,15 @@ func (s *ArraySet) ISubstract(other ArraySet) {
 // from s, so that s would have the same elemest as other.
 func (s *ArraySet) Diff(other *ArraySet) (newS, remS *ArraySet) {
 	if s == nil || len(s.seq) == 0 {
-		return other.Clone(), nil
+		if other == nil {
+			return New(), nil
+		}
+		o := other.Clone()
+		return &o, nil
 	}
 	if other == nil || len(other.seq) == 0 {
-		return nil, s.Clone()
+		res := s.Clone()
+		return nil, &res
 	}
 	seqS, seqO := s.seq, other.seq
 	var newRefs, remRefs []id.Zid
