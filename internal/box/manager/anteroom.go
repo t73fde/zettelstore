@@ -89,12 +89,12 @@ func (ar *anteroomQueue) Reset() {
 	ar.last = ar.first
 }
 
-func (ar *anteroomQueue) Reload(allZids *idset.ArraySet) {
+func (ar *anteroomQueue) Reload(allZids idset.ArraySet) {
 	ar.mx.Lock()
 	defer ar.mx.Unlock()
 	ar.deleteReloadedRooms()
 
-	if allZids != nil && !allZids.IsEmpty() {
+	if !allZids.IsEmpty() {
 		ar.first = &anteroom{next: ar.first, waiting: allZids.Clone(), curLoad: allZids.Count(), reload: true}
 		if ar.first.next == nil {
 			ar.last = ar.first
