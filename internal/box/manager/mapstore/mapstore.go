@@ -377,63 +377,65 @@ func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
 	drefs := zidx.GetDeadRefs()
-	newRefs, remRefs := zi.dead.Diff(&drefs)
+	var newRefs, remRefs idset.ArraySet
+	if zi.dead != nil {
+		newRefs, remRefs = zi.dead.Diff(drefs)
+	} else {
+		newRefs, remRefs = drefs.Clone(), idset.New()
+	}
 	zi.dead = &drefs
-	if remRefs != nil {
-		for ref := range remRefs.Values() {
-			if deadRef := ms.dead[ref]; deadRef != nil {
-				deadRef.Remove(zidx.Zid)
-			}
+	for ref := range remRefs.Values() {
+		if deadRef := ms.dead[ref]; deadRef != nil {
+			deadRef.Remove(zidx.Zid)
 		}
 	}
-	if newRefs != nil {
-		for ref := range newRefs.Values() {
-			if ms.dead[ref] == nil {
-				tmp := idset.New()
-				ms.dead[ref] = &tmp
-			}
-			ms.dead[ref].Add(zidx.Zid)
+	for ref := range newRefs.Values() {
+		if ms.dead[ref] == nil {
+			tmp := idset.New()
+			ms.dead[ref] = &tmp
 		}
+		ms.dead[ref].Add(zidx.Zid)
 	}
 }
 
 func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi *zettelData) *idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
 	brefs := zidx.GetBackRefs()
-	newRefs, remRefs := zi.forward.Diff(&brefs)
+	var newRefs, remRefs idset.ArraySet
+	if zi.forward != nil {
+		newRefs, remRefs = zi.forward.Diff(brefs)
+	} else {
+		newRefs, remRefs = brefs.Clone(), idset.New()
+	}
 	zi.forward = &brefs
 
 	var toCheck *idset.ArraySet
-	if remRefs != nil {
-		for ref := range remRefs.Values() {
-			bzi := ms.getOrCreateEntry(ref)
-			if bzi.backward != nil {
-				bzi.backward.Remove(zidx.Zid)
+	for ref := range remRefs.Values() {
+		bzi := ms.getOrCreateEntry(ref)
+		if bzi.backward != nil {
+			bzi.backward.Remove(zidx.Zid)
+		}
+		if bzi.meta == nil {
+			if toCheck == nil {
+				tmp := idset.New()
+				toCheck = &tmp
 			}
-			if bzi.meta == nil {
-				if toCheck == nil {
-					tmp := idset.New()
-					toCheck = &tmp
-				}
-				toCheck.Add(ref)
-			}
+			toCheck.Add(ref)
 		}
 	}
-	if newRefs != nil {
-		for ref := range newRefs.Values() {
-			bzi := ms.getOrCreateEntry(ref)
-			if bzi.backward == nil {
+	for ref := range newRefs.Values() {
+		bzi := ms.getOrCreateEntry(ref)
+		if bzi.backward == nil {
+			tmp := idset.New()
+			bzi.backward = &tmp
+		}
+		bzi.backward.Add(zidx.Zid)
+		if bzi.meta == nil {
+			if toCheck == nil {
 				tmp := idset.New()
-				bzi.backward = &tmp
+				toCheck = &tmp
 			}
-			bzi.backward.Add(zidx.Zid)
-			if bzi.meta == nil {
-				if toCheck == nil {
-					tmp := idset.New()
-					toCheck = &tmp
-				}
-				toCheck.Add(ref)
-			}
+			toCheck.Add(ref)
 		}
 	}
 	return toCheck
@@ -454,34 +456,46 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 	var toCheck *idset.ArraySet
 	for key, mrefs := range inverseRefs {
 		mr := zi.otherRefs[key]
-		newRefs, remRefs := mr.forward.Diff(mrefs)
+		var newRefs, remRefs idset.ArraySet
+		switch {
+		case mr.forward != nil:
+			if mrefs == nil {
+				tmp := mr.forward.Clone()
+				newRefs, remRefs = idset.New(), tmp
+			} else {
+				newRefs, remRefs = mr.forward.Diff(*mrefs)
+			}
+		case mrefs != nil:
+			newRefs, remRefs = mrefs.Clone(), idset.New()
+		default:
+			newRefs, remRefs = idset.New(), idset.New()
+		}
+
 		mr.forward = mrefs
 		zi.otherRefs[key] = mr
 
-		if newRefs != nil {
-			for ref := range newRefs.Values() {
-				bzi := ms.getOrCreateEntry(ref)
-				if bzi.otherRefs == nil {
-					bzi.otherRefs = make(map[string]bidiRefs)
-				}
-				bmr := bzi.otherRefs[key]
-				if bmr.backward == nil {
+		for ref := range newRefs.Values() {
+			bzi := ms.getOrCreateEntry(ref)
+			if bzi.otherRefs == nil {
+				bzi.otherRefs = make(map[string]bidiRefs)
+			}
+			bmr := bzi.otherRefs[key]
+			if bmr.backward == nil {
+				tmp := idset.New()
+				bmr.backward = &tmp
+			}
+			bmr.backward.Add(zidx.Zid)
+			bzi.otherRefs[key] = bmr
+			if bzi.meta == nil {
+				if toCheck == nil {
 					tmp := idset.New()
-					bmr.backward = &tmp
+					toCheck = &tmp
 				}
-				bmr.backward.Add(zidx.Zid)
-				bzi.otherRefs[key] = bmr
-				if bzi.meta == nil {
-					if toCheck == nil {
-						tmp := idset.New()
-						toCheck = &tmp
-					}
-					toCheck.Add(ref)
-				}
+				toCheck.Add(ref)
 			}
 		}
 
-		ms.removeInverseMeta(zidx.Zid, key, remRefs)
+		ms.removeInverseMeta(zidx.Zid, key, &remRefs)
 	}
 	return toCheck
 }

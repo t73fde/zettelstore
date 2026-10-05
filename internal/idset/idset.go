@@ -66,7 +66,11 @@ func (s ArraySet) Clone() ArraySet {
 }
 
 // Add adds a zid to the set.
-func (s *ArraySet) Add(zid id.Zid) { s.add(zid) }
+func (s *ArraySet) Add(zid id.Zid) {
+	if pos, found := slices.BinarySearch(s.seq, zid); !found {
+		s.seq = slices.Insert(s.seq, pos, zid)
+	}
+}
 
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
 func (s ArraySet) Contains(zid id.Zid) bool {
@@ -101,7 +105,7 @@ func (s *ArraySet) IUnion(other ArraySet) {
 	if len(other.seq) > 0 {
 		s.Grow(len(other.seq))
 		for _, zid := range other.seq {
-			s.add(zid)
+			s.Add(zid)
 		}
 	}
 }
@@ -137,21 +141,15 @@ func (s *ArraySet) ISubstract(other ArraySet) {
 // set is the set of elements that are in other, but not in s; the second
 // difference set is the set of element that are in s but not in other.
 //
-// in other words: the first result is the set of elements from other that must
+// In other words: the first result is the set of elements from other that must
 // be added to s; the second result is the set of elements that must be removed
 // from s, so that s would have the same elemest as other.
-func (s *ArraySet) Diff(other *ArraySet) (newS, remS *ArraySet) {
-	if s == nil || len(s.seq) == 0 {
-		if other == nil {
-			tmp := New()
-			return &tmp, nil
-		}
-		o := other.Clone()
-		return &o, nil
+func (s ArraySet) Diff(other ArraySet) (newS, remS ArraySet) {
+	if len(s.seq) == 0 {
+		return other.Clone(), New()
 	}
-	if other == nil || len(other.seq) == 0 {
-		res := s.Clone()
-		return nil, &res
+	if len(other.seq) == 0 {
+		return New(), s.Clone()
 	}
 	seqS, seqO := s.seq, other.seq
 	var newRefs, remRefs []id.Zid
@@ -177,7 +175,7 @@ func (s *ArraySet) Diff(other *ArraySet) (newS, remS *ArraySet) {
 	if opos < len(seqS) {
 		remRefs = append(remRefs, seqS[opos:]...)
 	}
-	return newFromSlice(newRefs), newFromSlice(remRefs)
+	return ArraySet{seq: newRefs}, ArraySet{seq: remRefs}
 }
 
 // Remove the identifier from the set.
@@ -220,20 +218,5 @@ func (s *ArraySet) Grow(n int) {
 func (s *ArraySet) Shrink() {
 	if s != nil && cap(s.seq) > len(s.seq) {
 		s.seq = slices.Clone(s.seq)
-	}
-}
-
-// ----- unchecked base operations
-
-func newFromSlice(seq []id.Zid) *ArraySet {
-	if l := len(seq); l == 0 {
-		return nil
-	}
-	return &ArraySet{seq: seq}
-}
-
-func (s *ArraySet) add(zid id.Zid) {
-	if pos, found := slices.BinarySearch(s.seq, zid); !found {
-		s.seq = slices.Insert(s.seq, pos, zid)
 	}
 }

@@ -207,9 +207,9 @@ func TestSetDiff(t *testing.T) {
 		in1, in2   *idset.ArraySet
 		exp1, exp2 *idset.ArraySet
 	}{
-		{nil, nil, nil, nil},
-		{collect([]id.Zid{1}), nil, nil, collect([]id.Zid{1})},
-		{nil, collect([]id.Zid{1}), collect([]id.Zid{1}), nil},
+		{collect([]id.Zid{}), collect([]id.Zid{}), collect([]id.Zid{}), collect([]id.Zid{})},
+		{collect([]id.Zid{1}), collect([]id.Zid{}), nil, collect([]id.Zid{1})},
+		{collect([]id.Zid{}), collect([]id.Zid{1}), collect([]id.Zid{1}), nil},
 		{collect([]id.Zid{1}), collect([]id.Zid{1}), nil, nil},
 		{collect([]id.Zid{1, 2}), collect([]id.Zid{1}), nil, collect([]id.Zid{2})},
 		{collect([]id.Zid{1}), collect([]id.Zid{1, 2}), collect([]id.Zid{2}), nil},
@@ -218,11 +218,11 @@ func TestSetDiff(t *testing.T) {
 		{collect([]id.Zid{2, 3, 4}), collect([]id.Zid{1, 2, 3}), collect([]id.Zid{1}), collect([]id.Zid{4})},
 	}
 	for i, tc := range testcases {
-		gotN, gotO := tc.in1.Diff(tc.in2)
-		if exp := safeSorted(tc.exp1); !slices.Equal(exp, safeSorted(gotN)) {
+		gotN, gotO := tc.in1.Diff(*tc.in2)
+		if exp := safeSorted(tc.exp1); !slices.Equal(exp, safeSorted(&gotN)) {
 			t.Errorf("%d: expected %v, but got: %v", i, tc.exp1, gotN)
 		}
-		if exp := safeSorted(tc.exp2); !slices.Equal(exp, safeSorted(gotO)) {
+		if exp := safeSorted(tc.exp2); !slices.Equal(exp, safeSorted(&gotO)) {
 			t.Errorf("%d: expected %v, but got: %v", i, tc.exp2, gotO)
 		}
 	}
