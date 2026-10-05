@@ -137,7 +137,8 @@ func (mgr *Manager) fetchZids(ctx context.Context) (*idset.ArraySet, error) {
 		p.ReadStats(&mbstats)
 		numZettel += mbstats.Zettel
 	}
-	result := idset.NewCap(numZettel)
+	result := idset.New()
+	result.Grow(numZettel)
 	for _, p := range mgr.boxes {
 		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Add(zid) }, query.AlwaysIncluded)
 		if err != nil {

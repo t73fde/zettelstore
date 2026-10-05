@@ -65,13 +65,6 @@ func New(zids ...id.Zid) *ArraySet {
 	}
 }
 
-// NewCap returns a new set of identifier with the given capacity and initial values.
-func NewCap(c int, zids ...id.Zid) *ArraySet {
-	result := ArraySet{seq: make([]id.Zid, 0, max(c, len(zids)))}
-	result.addSlice(zids)
-	return &result
-}
-
 // IsEmpty returns true, if the set conains no element.
 func (s ArraySet) IsEmpty() bool { return len(s.seq) == 0 }
 
@@ -225,6 +218,14 @@ func (s *ArraySet) Pop() (id.Zid, bool) {
 		}
 	}
 	return id.Invalid, false
+}
+
+// Grow ensures that n values can be inserted without further allocation.
+// It does not insert n.
+//
+// Grow panics if n is negative or too large to allocate the memory
+func (s *ArraySet) Grow(n int) {
+	s.seq = slices.Grow(s.seq, n)
 }
 
 // Shrink the amount of memory to store the set.

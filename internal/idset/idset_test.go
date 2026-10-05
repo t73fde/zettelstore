@@ -240,7 +240,8 @@ func TestSetRemove(t *testing.T) {
 }
 
 func BenchmarkSet(b *testing.B) {
-	s := idset.NewCap(b.N)
+	s := idset.New()
+	s.Grow(b.N)
 	for i := range b.N {
 		s.Add(id.Zid(i))
 	}

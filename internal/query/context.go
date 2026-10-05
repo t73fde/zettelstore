@@ -293,7 +293,8 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Arr
 		ml = nil
 	}
 	ct.tagMetas[tag] = ml
-	zids := idset.NewCap(len(ml))
+	zids := idset.New()
+	zids.Grow(len(ml))
 	for _, m := range ml {
 		zid := m.Zid
 		zids.Add(zid)

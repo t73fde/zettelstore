@@ -164,8 +164,10 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	if err != nil {
 		return nil
 	}
-	metaZids := idset.NewCap(len(metaSeq))
-	refZids := idset.NewCap(len(metaSeq) * 4) // Assumption: there are four zids per zettel
+	metaZids := idset.New()
+	metaZids.Grow(len(metaSeq))
+	refZids := idset.New()
+	refZids.Grow(len(metaSeq) * 4) // Assumption: there are four zids per zettel
 	for _, m := range metaSeq {
 		metaZids.Add(m.Zid)
 		refZids.Add(m.Zid)

@@ -389,7 +389,8 @@ func metaList2idSet(ml []*meta.Meta) *idset.ArraySet {
 	if ml == nil {
 		return nil
 	}
-	result := idset.NewCap(len(ml))
+	result := idset.New()
+	result.Grow(len(ml))
 	for _, m := range ml {
 		result.Add(m.Zid)
 	}
@@ -405,7 +406,8 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.A
 			if pred == nil {
 				pred = startSet.Contains // startSet != nil
 			} else {
-				predSet := idset.NewCap(startSet.Count())
+				predSet := idset.New()
+				predSet.Grow(startSet.Count())
 				for zid := range startSet.Values() {
 					if pred(zid) {
 						predSet.Add(zid)
