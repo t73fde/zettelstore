@@ -16,16 +16,16 @@ package idset
 
 import (
 	"iter"
-	"slices"
-	"strings"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 )
 
 // ArraySet is a set of zettel identifier, stored as an sorted array.
 type ArraySet struct {
-	seq []id.Zid
+	roster.Roster[id.Zid]
+	// seq []id.Zid
 }
 
 // String returns a string representation of the set.
@@ -35,106 +35,50 @@ func (s ArraySet) String() string {
 
 // metaString returns a string representation of the set to be stored as metadata.
 func (s ArraySet) metaString() string {
-	if len(s.seq) == 0 {
-		return ""
-	}
-	var sb strings.Builder
-	for i, zid := range s.seq {
-		if i > 0 {
-			sb.WriteByte(' ')
-		}
-		sb.Write(zid.Bytes())
-	}
-	return sb.String()
+	return s.Roster.String()
 }
 
 // MetaValue returns a metadata value representation of the set.
 func (s ArraySet) MetaValue() meta.Value { return meta.Value(s.metaString()) }
 
 // New returns a new set of identifier with the given initial values.
-func New() ArraySet { return ArraySet{seq: nil} }
+func New() ArraySet { return ArraySet{Roster: roster.New[id.Zid]()} }
 
 // IsEmpty returns true, if the set conains no element.
-func (s ArraySet) IsEmpty() bool { return len(s.seq) == 0 }
+func (s ArraySet) IsEmpty() bool { return s.Roster.IsEmpty() }
 
 // Count returns the number of elements in this set.
-func (s ArraySet) Count() int { return len(s.seq) }
+func (s ArraySet) Count() int { return s.Roster.Count() }
 
 // Clone returns a copy of the given set.
 func (s ArraySet) Clone() ArraySet {
-	return ArraySet{seq: slices.Clone(s.seq)}
+	return ArraySet{s.Roster.Clone()}
 }
 
 // Add adds a zid to the set.
 func (s *ArraySet) Add(zid id.Zid) {
-	if pos, found := slices.BinarySearch(s.seq, zid); !found {
-		s.seq = slices.Insert(s.seq, pos, zid)
-	}
+	s.Roster.Insert(zid)
 }
 
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
 func (s ArraySet) Contains(zid id.Zid) bool {
-	_, found := slices.BinarySearch(s.seq, zid)
-	return found
+	return s.Roster.Contains(zid)
 }
 
 // Intersection removes all elements from s that are not in o.
 // Only s is modified, o is left unchanged.
 func (s *ArraySet) Intersection(o ArraySet) {
-	topos, spos, opos := 0, 0, 0
-	for spos < len(s.seq) && opos < len(o.seq) {
-		sz, oz := s.seq[spos], o.seq[opos]
-		if sz < oz {
-			spos++
-			continue
-		}
-		if sz > oz {
-			opos++
-			continue
-		}
-		s.seq[topos] = sz
-		topos++
-		spos++
-		opos++
-	}
-	s.seq = s.seq[:topos]
+	s.Roster.And(o.Roster)
 }
 
 // IUnion adds the elements of set other to s.
 func (s *ArraySet) IUnion(other ArraySet) {
-	if len(other.seq) > 0 {
-		s.Grow(len(other.seq))
-		for _, zid := range other.seq {
-			s.Add(zid)
-		}
-	}
+	s.Roster.Or(other.Roster)
 }
 
 // ISubstract removes all zettel identifier from 's' that are in the set 'other'.
 func (s *ArraySet) ISubstract(other ArraySet) {
-	if len(s.seq) == 0 || len(other.seq) == 0 {
-		return
-	}
-	topos, spos, opos := 0, 0, 0
-	for spos < len(s.seq) && opos < len(other.seq) {
-		sz, oz := s.seq[spos], other.seq[opos]
-		if sz < oz {
-			s.seq[topos] = sz
-			topos++
-			spos++
-			continue
-		}
-		if sz == oz {
-			spos++
-		}
-		opos++
-	}
-	for spos < len(s.seq) {
-		s.seq[topos] = s.seq[spos]
-		topos++
-		spos++
-	}
-	s.seq = s.seq[:topos]
+	s.Roster.AndNot(other.Roster)
 }
 
 // Diff returns the difference sets between the two sets: the first difference
@@ -145,65 +89,23 @@ func (s *ArraySet) ISubstract(other ArraySet) {
 // be added to s; the second result is the set of elements that must be removed
 // from s, so that s would have the same elemest as other.
 func (s ArraySet) Diff(other ArraySet) (newS, remS ArraySet) {
-	if len(s.seq) == 0 {
-		return other.Clone(), New()
-	}
-	if len(other.seq) == 0 {
-		return New(), s.Clone()
-	}
-	seqS, seqO := s.seq, other.seq
-	var newRefs, remRefs []id.Zid
-	npos, opos := 0, 0
-	for npos < len(seqO) && opos < len(seqS) {
-		rn, ro := seqO[npos], seqS[opos]
-		if rn == ro {
-			npos++
-			opos++
-			continue
-		}
-		if rn < ro {
-			newRefs = append(newRefs, rn)
-			npos++
-			continue
-		}
-		remRefs = append(remRefs, ro)
-		opos++
-	}
-	if npos < len(seqO) {
-		newRefs = append(newRefs, seqO[npos:]...)
-	}
-	if opos < len(seqS) {
-		remRefs = append(remRefs, seqS[opos:]...)
-	}
-	return ArraySet{seq: newRefs}, ArraySet{seq: remRefs}
+	onlyS, onlyOther := s.Roster.Delta(other.Roster)
+	return ArraySet{onlyOther}, ArraySet{onlyS}
 }
 
 // Remove the identifier from the set.
 func (s *ArraySet) Remove(zid id.Zid) {
-	if len(s.seq) == 0 {
-		return
-	}
-	if pos, found := slices.BinarySearch(s.seq, zid); found {
-		copy(s.seq[pos:], s.seq[pos+1:])
-		s.seq = s.seq[:len(s.seq)-1]
-	}
+	s.Roster.Delete(zid)
 }
 
 // Values returns an iterator for each element of the set, in ascending order.
 func (s ArraySet) Values() iter.Seq[id.Zid] {
-	return slices.Values(s.seq)
+	return s.Roster.Values()
 }
 
 // Pop return one arbitrary element of the set.
 func (s *ArraySet) Pop() (id.Zid, bool) {
-	if s != nil {
-		if l := len(s.seq); l > 0 {
-			zid := s.seq[l-1]
-			s.seq = s.seq[:l-1]
-			return zid, true
-		}
-	}
-	return id.Invalid, false
+	return s.Roster.Pop()
 }
 
 // Grow ensures that n values can be inserted without further allocation.
@@ -211,12 +113,12 @@ func (s *ArraySet) Pop() (id.Zid, bool) {
 //
 // Grow panics if n is negative or too large to allocate the memory
 func (s *ArraySet) Grow(n int) {
-	s.seq = slices.Grow(s.seq, n)
+	s.Roster.Grow(n)
 }
 
 // Shrink the amount of memory to store the set.
 func (s *ArraySet) Shrink() {
-	if s != nil && cap(s.seq) > len(s.seq) {
-		s.seq = slices.Clone(s.seq)
+	if s != nil {
+		s.Roster.Shrink()
 	}
 }
