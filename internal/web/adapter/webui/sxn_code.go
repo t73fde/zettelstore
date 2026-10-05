@@ -62,18 +62,14 @@ func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFu
 	if err != nil {
 		return nil
 	}
-	var marked *idset.ArraySet
+	var marked idset.ArraySet
 	stack := []*meta.Meta{m}
 	dg := graph.Digraph[id.Zid](nil).AddVertex(startZid)
 	for pos := len(stack) - 1; pos >= 0; pos = len(stack) - 1 {
 		curr := stack[pos]
 		stack = stack[:pos]
-		if marked != nil && marked.Contains(curr.Zid) {
+		if marked.Contains(curr.Zid) {
 			continue
-		}
-		if marked == nil {
-			tmp := idset.New()
-			marked = &tmp
 		}
 		marked.Add(curr.Zid)
 		for pre := range curr.GetFields(meta.KeyPredecessor) {
