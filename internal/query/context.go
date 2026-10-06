@@ -264,7 +264,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 	var zidSet idset.ArraySet
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)
-		zidSet.IUnion(zs)
+		zidSet.Or(zs)
 	}
 
 	for zid := range zidSet.Values() {
@@ -297,7 +297,7 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) idset.Arra
 	zids.Grow(len(ml))
 	for _, m := range ml {
 		zid := m.Zid
-		zids.Add(zid)
+		zids.Insert(zid)
 		if _, found := ct.metaZid[zid]; !found {
 			ct.metaZid[zid] = m
 		}
@@ -323,7 +323,7 @@ func (ct *contextTask) next() (*meta.Meta, float64, uint, int) {
 		if ct.hasEnough(cost, level) {
 			break
 		}
-		ct.seen.Add(zid)
+		ct.seen.Insert(zid)
 		return m, cost, item.level, int(item.dir)
 	}
 	return nil, -1, 0, 0

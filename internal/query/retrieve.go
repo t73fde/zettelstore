@@ -114,7 +114,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) idset.ArraySet {
 				normResult = as.Clone()
 				first = false
 			} else {
-				normResult.Intersection(as)
+				normResult.And(as)
 			}
 		}
 		return normResult
@@ -133,7 +133,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) idset.ArraySet {
 			plainResult = result.Clone()
 			first = false
 		} else {
-			plainResult.Intersection(result)
+			plainResult.And(result)
 		}
 	}
 
@@ -145,7 +145,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) idset.ArraySet {
 				normResult = result.Clone()
 				firstNorm = false
 			} else {
-				normResult.Intersection(result)
+				normResult.And(result)
 			}
 		} else {
 			as := sf(c.s)
@@ -153,12 +153,12 @@ func retrievePositives(normCalls, plainCalls searchCallMap) idset.ArraySet {
 				normResult = as
 				firstNorm = false
 			} else {
-				normResult.Intersection(as)
+				normResult.And(as)
 			}
 		}
 	}
 
-	normResult.IUnion(plainResult)
+	normResult.Or(plainResult)
 	return normResult
 }
 
@@ -173,7 +173,7 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 
 func retrieveNegatives(negCalls searchCallMap) (negatives idset.ArraySet) {
 	for val, sf := range negCalls {
-		negatives.IUnion(sf(val.s))
+		negatives.Or(sf(val.s))
 	}
 	return negatives
 }

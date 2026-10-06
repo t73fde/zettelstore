@@ -52,21 +52,21 @@ func (s ArraySet) Count() int { return s.Roster.Count() }
 // Clone returns a copy of the given set.
 func (s ArraySet) Clone() ArraySet { return ArraySet{s.Roster.Clone()} }
 
-// Add adds a zid to the set.
-func (s *ArraySet) Add(zid id.Zid) { s.Roster.Insert(zid) }
+// Insert adds a zid to the set.
+func (s *ArraySet) Insert(zid id.Zid) { s.Roster.Insert(zid) }
 
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
 func (s ArraySet) Contains(zid id.Zid) bool { return s.Roster.Contains(zid) }
 
-// Intersection removes all elements from s that are not in o.
+// And removes all elements from s that are not in o.
 // Only s is modified, o is left unchanged.
-func (s *ArraySet) Intersection(o ArraySet) { s.Roster.And(o.Roster) }
+func (s *ArraySet) And(o ArraySet) { s.Roster.And(o.Roster) }
 
-// IUnion adds the elements of set other to s.
-func (s *ArraySet) IUnion(other ArraySet) { s.Roster.Or(other.Roster) }
+// Or adds the elements of set other to s.
+func (s *ArraySet) Or(other ArraySet) { s.Roster.Or(other.Roster) }
 
-// ISubstract removes all zettel identifier from 's' that are in the set 'other'.
-func (s *ArraySet) ISubstract(other ArraySet) { s.Roster.AndNot(other.Roster) }
+// AndNot removes all zettel identifier from 's' that are in the set 'other'.
+func (s *ArraySet) AndNot(other ArraySet) { s.Roster.AndNot(other.Roster) }
 
 // Delta returns the values that are only in r and the values that are only
 // in other. Neither r nor other is modified; the results do not share
@@ -78,8 +78,8 @@ func (s ArraySet) Delta(other ArraySet) (onlyS, onlyOther ArraySet) {
 	return ArraySet{onlySR}, ArraySet{onlyOtherR}
 }
 
-// Remove the identifier from the set.
-func (s *ArraySet) Remove(zid id.Zid) { s.Roster.Delete(zid) }
+// Delete the identifier from the set.
+func (s *ArraySet) Delete(zid id.Zid) { s.Roster.Delete(zid) }
 
 // Values returns an iterator for each element of the set, in ascending order.
 func (s ArraySet) Values() iter.Seq[id.Zid] { return s.Roster.Values() }

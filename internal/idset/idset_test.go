@@ -44,7 +44,7 @@ func collect(sl []id.Zid) *idset.ArraySet {
 	if len(sl) > 0 {
 		result.Grow(len(sl))
 		for _, zid := range sl {
-			result.Add(zid)
+			result.Insert(zid)
 		}
 	}
 	return &result
@@ -62,7 +62,7 @@ func TestSetContains(t *testing.T) {
 	data := slices.Clone(testcases)
 	slices.Reverse(data)
 	for _, zid := range data {
-		s.Add(zid)
+		s.Insert(zid)
 	}
 	for _, tc := range testcases {
 		if !s.Contains(tc) {
@@ -93,7 +93,7 @@ func TestSetAdd(t *testing.T) {
 		sl1 := safeSorted(tc.s1)
 		sl2 := safeSorted(tc.s2)
 		tmp := tc.s1.Clone()
-		tmp.IUnion(*tc.s2)
+		tmp.Or(*tc.s2)
 		got := safeSorted(&tmp)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.Add(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
@@ -136,7 +136,7 @@ func TestSetIntersection(t *testing.T) {
 		sl1 := safeSorted(tc.s1)
 		sl2 := safeSorted(tc.s2)
 		r := tc.s1.Clone()
-		r.Intersection(*tc.s2)
+		r.And(*tc.s2)
 		got := safeSorted(&r)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.IntersectOrSet(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
@@ -162,7 +162,7 @@ func TestSetIUnion(t *testing.T) {
 		s1 := tc.s1.Clone()
 		sl1 := safeSorted(&s1)
 		sl2 := safeSorted(tc.s2)
-		s1.IUnion(*tc.s2)
+		s1.Or(*tc.s2)
 		got := safeSorted(&s1)
 		if !slices.Equal(got, safeSorted(tc.exp)) {
 			t.Errorf("%d: %v.IUnion(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
@@ -193,7 +193,7 @@ func TestSetISubtract(t *testing.T) {
 		s1 := tc.s1.Clone()
 		sl1 := safeSorted(&s1)
 		sl2 := safeSorted(tc.s2)
-		s1.ISubstract(*tc.s2)
+		s1.AndNot(*tc.s2)
 		got := safeSorted(&s1)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.ISubstract(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
@@ -243,7 +243,7 @@ func TestSetRemove(t *testing.T) {
 		sl1 := safeSorted(tc.s1)
 		sl2 := safeSorted(tc.s2)
 		newS1 := collect(sl1)
-		newS1.ISubstract(*tc.s2)
+		newS1.AndNot(*tc.s2)
 		got := safeSorted(newS1)
 		if !slices.Equal(got, tc.exp) {
 			t.Errorf("%d: %v.Remove(%v) should be %v, but got %v", i, sl1, sl2, tc.exp, got)
@@ -255,6 +255,6 @@ func BenchmarkSet(b *testing.B) {
 	s := idset.New()
 	s.Grow(b.N)
 	for i := range b.N {
-		s.Add(id.Zid(i))
+		s.Insert(id.Zid(i))
 	}
 }

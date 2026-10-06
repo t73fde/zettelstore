@@ -91,7 +91,7 @@ func (ps *parserState) parse(q *Query) *Query {
 			break
 		}
 		if !zidSet.Contains(zid) {
-			zidSet.Add(zid)
+			zidSet.Insert(zid)
 			q = createIfNeeded(q)
 			q.zids = append(q.zids, zid)
 		}

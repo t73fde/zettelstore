@@ -75,7 +75,7 @@ func (data *collectData) addRef(ref *sx.Pair) {
 		data.urls.AddURI(refValue)
 	} else if sz.SymRefStateZettel.IsEqual(sym) {
 		if zid, err := id.Parse(refValue); err == nil {
-			data.refs.Add(zid)
+			data.refs.Insert(zid)
 		}
 	}
 }

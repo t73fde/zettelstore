@@ -140,7 +140,7 @@ func (mgr *Manager) fetchZids(ctx context.Context) (idset.ArraySet, error) {
 	result := idset.New()
 	result.Grow(numZettel)
 	for _, p := range mgr.boxes {
-		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Add(zid) }, query.AlwaysIncluded)
+		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Insert(zid) }, query.AlwaysIncluded)
 		if err != nil {
 			return idset.ArraySet{}, err
 		}
@@ -211,7 +211,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 				selected[zid] = m
 				logging.LogTrace(mgr.mgrLogger, "SelectMeta/match", "zid", zid)
 			} else {
-				rejected.Add(zid)
+				rejected.Insert(zid)
 				logging.LogTrace(mgr.mgrLogger, "SelectMeta/reject", "zid", zid)
 			}
 		}

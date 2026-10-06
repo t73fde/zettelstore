@@ -65,8 +65,8 @@ func TestReset(t *testing.T) {
 		t.Errorf("Expected reload & invalid Zid, but got %v/%v", action, zid)
 	}
 	s := idset.New()
-	s.Add(3)
-	s.Add(4)
+	s.Insert(3)
+	s.Insert(4)
 	ar.Reload(s)
 	ar.EnqueueZettel(id.Zid(5))
 	ar.EnqueueZettel(id.Zid(5))
@@ -95,7 +95,7 @@ func TestReset(t *testing.T) {
 
 	ar = newAnteroomQueue(1)
 	s = idset.New()
-	s.Add(6)
+	s.Insert(6)
 	ar.Reload(s)
 	action, zid, _ = ar.Dequeue()
 	if zid != id.Zid(6) || action != arZettel {

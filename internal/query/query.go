@@ -388,7 +388,7 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq
 func metaList2idSet(ml []*meta.Meta) (result idset.ArraySet) {
 	result.Grow(len(ml))
 	for _, m := range ml {
-		result.Add(m.Zid)
+		result.Insert(m.Zid)
 	}
 	return result
 }
@@ -406,7 +406,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.Ar
 				predSet.Grow(startSet.Count())
 				for zid := range startSet.Values() {
 					if pred(zid) {
-						predSet.Add(zid)
+						predSet.Insert(zid)
 					}
 				}
 				pred = predSet.Contains // predSet is known to be non-nil

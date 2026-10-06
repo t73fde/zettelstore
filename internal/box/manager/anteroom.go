@@ -66,7 +66,7 @@ func (ar *anteroomQueue) EnqueueZettel(zid id.Zid) {
 		}
 	}
 	if room := ar.last; !room.reload && (ar.maxLoad == 0 || room.curLoad < ar.maxLoad) {
-		room.waiting.Add(zid)
+		room.waiting.Insert(zid)
 		room.curLoad++
 		return
 	}
@@ -78,7 +78,7 @@ func (ar *anteroomQueue) EnqueueZettel(zid id.Zid) {
 func (ar *anteroomQueue) makeAnteroom(zid id.Zid) *anteroom {
 	waiting := idset.New()
 	waiting.Grow(max(ar.maxLoad, 100))
-	waiting.Add(zid)
+	waiting.Insert(zid)
 	return &anteroom{next: nil, waiting: waiting, curLoad: 1, reload: false}
 }
 

@@ -47,24 +47,24 @@ func NewZettelIndex(m *meta.Meta) *ZettelIndex {
 // AddBackRef adds a reference to a zettel where the current zettel links to
 // without any more information.
 func (zi *ZettelIndex) AddBackRef(zid id.Zid) {
-	zi.backrefs.Add(zid)
+	zi.backrefs.Insert(zid)
 }
 
 // AddInverseRef adds a named reference to a zettel. On that zettel, the given
 // metadata key should point back to the current zettel.
 func (zi *ZettelIndex) AddInverseRef(key string, zid id.Zid) {
 	if zids, ok := zi.inverseRefs[key]; ok {
-		zids.Add(zid)
+		zids.Insert(zid)
 		return
 	}
 	s := idset.New()
-	s.Add(zid)
+	s.Insert(zid)
 	zi.inverseRefs[key] = s
 }
 
 // AddDeadRef adds a dead reference to a zettel.
 func (zi *ZettelIndex) AddDeadRef(zid id.Zid) {
-	zi.deadrefs.Add(zid)
+	zi.deadrefs.Insert(zid)
 }
 
 // SetWords sets the words to the given value.

@@ -71,7 +71,7 @@ func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFu
 		if marked.Contains(curr.Zid) {
 			continue
 		}
-		marked.Add(curr.Zid)
+		marked.Insert(curr.Zid)
 		for pre := range curr.GetFields(meta.KeyPredecessor) {
 			if preZid, errParse := id.Parse(pre); errParse == nil {
 				m, err = getMeta(ctx, preZid)

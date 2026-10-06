@@ -169,18 +169,18 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	refZids := idset.New()
 	refZids.Grow(len(metaSeq) * 4) // Assumption: there are four zids per zettel
 	for _, m := range metaSeq {
-		metaZids.Add(m.Zid)
-		refZids.Add(m.Zid)
+		metaZids.Insert(m.Zid)
+		refZids.Insert(m.Zid)
 		for key, val := range m.ComputedRest() {
 			switch meta.Type(key) {
 			case meta.TypeID:
 				if zid, errParse := id.Parse(string(val)); errParse == nil {
-					refZids.Add(zid)
+					refZids.Insert(zid)
 				}
 			case meta.TypeIDSet:
 				for val := range val.Fields() {
 					if zid, errParse := id.Parse(val); errParse == nil {
-						refZids.Add(zid)
+						refZids.Insert(zid)
 					}
 				}
 			}

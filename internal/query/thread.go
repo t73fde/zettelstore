@@ -133,7 +133,7 @@ func (ct *threadTask) next() (*meta.Meta, uint, int) {
 		if ct.hasEnough(level) {
 			break
 		}
-		ct.seen.Add(zid)
+		ct.seen.Insert(zid)
 		return m, item.level, int(item.dir)
 	}
 	return nil, 0, 0
