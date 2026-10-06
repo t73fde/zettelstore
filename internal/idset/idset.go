@@ -25,7 +25,6 @@ import (
 // ArraySet is a set of zettel identifier, stored as an sorted array.
 type ArraySet struct {
 	roster.Roster[id.Zid]
-	// seq []id.Zid
 }
 
 // String returns a string representation of the set.
@@ -51,74 +50,48 @@ func (s ArraySet) IsEmpty() bool { return s.Roster.IsEmpty() }
 func (s ArraySet) Count() int { return s.Roster.Count() }
 
 // Clone returns a copy of the given set.
-func (s ArraySet) Clone() ArraySet {
-	return ArraySet{s.Roster.Clone()}
-}
+func (s ArraySet) Clone() ArraySet { return ArraySet{s.Roster.Clone()} }
 
 // Add adds a zid to the set.
-func (s *ArraySet) Add(zid id.Zid) {
-	s.Roster.Insert(zid)
-}
+func (s *ArraySet) Add(zid id.Zid) { s.Roster.Insert(zid) }
 
 // Contains return true if the set is non-nil and the set contains the given Zettel identifier.
-func (s ArraySet) Contains(zid id.Zid) bool {
-	return s.Roster.Contains(zid)
-}
+func (s ArraySet) Contains(zid id.Zid) bool { return s.Roster.Contains(zid) }
 
 // Intersection removes all elements from s that are not in o.
 // Only s is modified, o is left unchanged.
-func (s *ArraySet) Intersection(o ArraySet) {
-	s.Roster.And(o.Roster)
-}
+func (s *ArraySet) Intersection(o ArraySet) { s.Roster.And(o.Roster) }
 
 // IUnion adds the elements of set other to s.
-func (s *ArraySet) IUnion(other ArraySet) {
-	s.Roster.Or(other.Roster)
-}
+func (s *ArraySet) IUnion(other ArraySet) { s.Roster.Or(other.Roster) }
 
 // ISubstract removes all zettel identifier from 's' that are in the set 'other'.
-func (s *ArraySet) ISubstract(other ArraySet) {
-	s.Roster.AndNot(other.Roster)
-}
+func (s *ArraySet) ISubstract(other ArraySet) { s.Roster.AndNot(other.Roster) }
 
-// Diff returns the difference sets between the two sets: the first difference
-// set is the set of elements that are in other, but not in s; the second
-// difference set is the set of element that are in s but not in other.
+// Delta returns the values that are only in r and the values that are only
+// in other. Neither r nor other is modified; the results do not share
+// storage with them.
 //
-// In other words: the first result is the set of elements from other that must
-// be added to s; the second result is the set of elements that must be removed
-// from s, so that s would have the same elemest as other.
-func (s ArraySet) Diff(other ArraySet) (newS, remS ArraySet) {
-	onlyS, onlyOther := s.Roster.Delta(other.Roster)
-	return ArraySet{onlyOther}, ArraySet{onlyS}
+// Example: removed, added := old.Delta(new)
+func (s ArraySet) Delta(other ArraySet) (onlyS, onlyOther ArraySet) {
+	onlySR, onlyOtherR := s.Roster.Delta(other.Roster)
+	return ArraySet{onlySR}, ArraySet{onlyOtherR}
 }
 
 // Remove the identifier from the set.
-func (s *ArraySet) Remove(zid id.Zid) {
-	s.Roster.Delete(zid)
-}
+func (s *ArraySet) Remove(zid id.Zid) { s.Roster.Delete(zid) }
 
 // Values returns an iterator for each element of the set, in ascending order.
-func (s ArraySet) Values() iter.Seq[id.Zid] {
-	return s.Roster.Values()
-}
+func (s ArraySet) Values() iter.Seq[id.Zid] { return s.Roster.Values() }
 
 // Pop return one arbitrary element of the set.
-func (s *ArraySet) Pop() (id.Zid, bool) {
-	return s.Roster.Pop()
-}
+func (s *ArraySet) Pop() (id.Zid, bool) { return s.Roster.Pop() }
 
 // Grow ensures that n values can be inserted without further allocation.
 // It does not insert n.
 //
 // Grow panics if n is negative or too large to allocate the memory
-func (s *ArraySet) Grow(n int) {
-	s.Roster.Grow(n)
-}
+func (s *ArraySet) Grow(n int) { s.Roster.Grow(n) }
 
 // Shrink the amount of memory to store the set.
-func (s *ArraySet) Shrink() {
-	if s != nil {
-		s.Roster.Shrink()
-	}
-}
+func (s *ArraySet) Shrink() { s.Roster.Shrink() }

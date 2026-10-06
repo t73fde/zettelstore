@@ -356,7 +356,7 @@ func (ms *mapStore) makeMeta(zidx *store.ZettelIndex) *meta.Meta {
 func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData) {
 	// Must only be called if ms.mx is write-locked!
 	drefs := zidx.GetDeadRefs()
-	newRefs, remRefs := zi.dead.Diff(drefs)
+	remRefs, newRefs := zi.dead.Delta(drefs)
 	zi.dead = drefs
 	for ref := range remRefs.Values() {
 		deadRef := ms.dead[ref]
@@ -373,7 +373,7 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi *zettelData) idset.ArraySet {
 	// Must only be called if ms.mx is write-locked!
 	brefs := zidx.GetBackRefs()
-	newRefs, remRefs := zi.forward.Diff(brefs)
+	remRefs, newRefs := zi.forward.Delta(brefs)
 	zi.forward = brefs
 
 	var toCheck idset.ArraySet
@@ -409,7 +409,7 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 	var toCheck idset.ArraySet
 	for key, mrefs := range inverseRefs {
 		mr := zi.otherRefs[key]
-		newRefs, remRefs := mr.forward.Diff(mrefs)
+		remRefs, newRefs := mr.forward.Delta(mrefs)
 		mr.forward = mrefs
 
 		zi.otherRefs[key] = mr

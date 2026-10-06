@@ -218,7 +218,7 @@ func TestSetDiff(t *testing.T) {
 		{collect([]id.Zid{2, 3, 4}), collect([]id.Zid{1, 2, 3}), collect([]id.Zid{1}), collect([]id.Zid{4})},
 	}
 	for i, tc := range testcases {
-		gotN, gotO := tc.in1.Diff(*tc.in2)
+		gotO, gotN := tc.in1.Delta(*tc.in2)
 		if exp := safeSorted(tc.exp1); !slices.Equal(exp, safeSorted(&gotN)) {
 			t.Errorf("%d: expected %v, but got: %v", i, tc.exp1, gotN)
 		}
