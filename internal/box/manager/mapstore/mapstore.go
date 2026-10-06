@@ -108,32 +108,47 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 	}
 	var updated bool
 	if !zi.dead.IsEmpty() {
-		m.Set(meta.KeyDead, zi.dead.MetaValue())
+		m.Set(meta.KeyDead, zidsToValue(zi.dead))
 		updated = true
 	}
 	back := zi.backward.Clone()
 	removeOtherMetaRefs(m, &back)
 	if !zi.backward.IsEmpty() {
-		m.Set(meta.KeyBackward, zi.backward.MetaValue())
+		m.Set(meta.KeyBackward, zidsToValue(zi.backward))
 		updated = true
 	}
 	if !zi.forward.IsEmpty() {
-		m.Set(meta.KeyForward, zi.forward.MetaValue())
+		m.Set(meta.KeyForward, zidsToValue(zi.forward))
 		back.AndNot(zi.forward)
 		updated = true
 	}
 	for k, refs := range zi.otherRefs {
 		if !refs.backward.IsEmpty() {
-			m.Set(k, refs.backward.MetaValue())
+			m.Set(k, zidsToValue(refs.backward))
 			back.AndNot(refs.backward)
 			updated = true
 		}
 	}
 	if !back.IsEmpty() {
-		m.Set(meta.KeyBack, back.MetaValue())
+		m.Set(meta.KeyBack, zidsToValue(back))
 		updated = true
 	}
 	return updated
+}
+
+func zidsToValue(s idset.ArraySet) meta.Value {
+	var sb strings.Builder
+	sb.Grow(s.Count() * 15)
+	first := true
+	for zid := range s.Values() {
+		if first {
+			first = false
+		} else {
+			sb.WriteByte(' ')
+		}
+		sb.WriteString(zid.String())
+	}
+	return meta.Value(sb.String())
 }
 
 // SearchEqual returns all zettel that contains the given exact word.

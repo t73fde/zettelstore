@@ -19,26 +19,13 @@ import (
 
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/meta"
 )
 
 // ArraySet is a set of zettel identifier, stored as an sorted array.
-type ArraySet struct {
-	roster.Roster[id.Zid]
-}
+type ArraySet struct{ roster.Roster[id.Zid] }
 
 // String returns a string representation of the set.
-func (s ArraySet) String() string {
-	return "{" + s.metaString() + "}"
-}
-
-// metaString returns a string representation of the set to be stored as metadata.
-func (s ArraySet) metaString() string {
-	return s.Roster.String()
-}
-
-// MetaValue returns a metadata value representation of the set.
-func (s ArraySet) MetaValue() meta.Value { return meta.Value(s.metaString()) }
+func (s ArraySet) String() string { return s.Roster.String() }
 
 // New returns a new set of identifier with the given initial values.
 func New() ArraySet { return ArraySet{Roster: roster.New[id.Zid]()} }
