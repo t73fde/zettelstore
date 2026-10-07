@@ -21,7 +21,7 @@ import (
 	"slices"
 	"sync"
 
-	"t73f.de/r/zero/set"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/box"
@@ -525,16 +525,17 @@ func newNameIsBetter(oldName, newName string) bool {
 	return oldName > newName
 }
 
-var supportedSyntax, primarySyntax *set.Set[string]
+var supportedSyntax, primarySyntax roster.Roster[string]
 
 func init() {
-	supportedSyntax = set.New(slices.Collect(parser.Syntaxes())...)
-	primarySyntax = set.New[string]()
+	supportedSyntax = roster.Collect(parser.Syntaxes())
 	for syntax := range parser.Syntaxes() {
 		if parser.Get(syntax).Name == syntax {
 			primarySyntax.Insert(syntax)
 		}
 	}
+	supportedSyntax.Shrink()
+	primarySyntax.Shrink()
 }
 func newExtIsBetter(oldExt, newExt string) bool {
 	oldSyntax := supportedSyntax.Contains(oldExt)

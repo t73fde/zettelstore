@@ -14,17 +14,16 @@
 package parser_test
 
 import (
-	"slices"
 	"testing"
 
-	"t73f.de/r/zero/set"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/parser"
 )
 
 func TestParserType(t *testing.T) {
-	syntaxSet := set.New(slices.Collect(parser.Syntaxes())...)
+	syntaxSet := roster.Collect(parser.Syntaxes())
 	testCases := []struct {
 		syntax string
 		ast    bool

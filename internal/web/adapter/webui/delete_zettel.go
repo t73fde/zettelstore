@@ -18,7 +18,7 @@ import (
 	"slices"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zero/set"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -73,8 +73,8 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 }
 
 func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *sx.Pair {
-	zidMap := set.New[string]()
-	addListValues(zidMap, m, meta.KeyBackward)
+	var zidMap roster.Roster[string]
+	addListValues(&zidMap, m, meta.KeyBackward)
 	for _, kd := range meta.GetSortedKeyDescriptions() {
 		inverseKey := kd.Inverse
 		if inverseKey == "" {
@@ -87,13 +87,13 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *s
 				zidMap.Insert(string(val))
 			}
 		case meta.TypeIDSet:
-			addListValues(zidMap, m, inverseKey)
+			addListValues(&zidMap, m, inverseKey)
 		}
 	}
 	return wui.zidLinksSxn(slices.Sorted(zidMap.Values()), getTextTitle)
 }
 
-func addListValues(zidMap *set.Set[string], m *meta.Meta, key string) {
+func addListValues(zidMap *roster.Roster[string], m *meta.Meta, key string) {
 	for val := range m.GetFields(key) {
 		zidMap.Insert(val)
 	}

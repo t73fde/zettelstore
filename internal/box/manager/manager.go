@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"t73f.de/r/zero/iter"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/set"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
@@ -163,7 +164,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 	return mgr, nil
 }
 func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
-	boxNames := set.NewCap(len(boxURIs), box.SchemeCompBox, box.SchemeConstBox)
+	boxNames := roster.New(box.SchemeCompBox, box.SchemeConstBox)
 	hasName := make([]bool, len(boxURIs))
 	for i, u := range boxURIs {
 		q := u.Query()
