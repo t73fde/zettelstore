@@ -49,7 +49,7 @@ func getNaughtyStrings() (result []string, err error) {
 }
 
 func getAllParser() (result []*parser.Info) {
-	for _, pname := range parser.GetSyntaxes() {
+	for pname := range parser.Syntaxes() {
 		pinfo := parser.Get(pname)
 		if pname == pinfo.Name {
 			result = append(result, pinfo)

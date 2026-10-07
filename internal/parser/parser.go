@@ -17,6 +17,7 @@ package parser
 import (
 	"context"
 	"fmt"
+	"iter"
 	"maps"
 
 	"t73f.de/r/sx"
@@ -179,14 +180,9 @@ func parseBlob(inp *input.Input, m *meta.Meta, syntax string, _ *sx.Pair) *sx.Pa
 	return zsx.MakeBlock(zsx.MakeBLOB(nil, syntax, inp.Src, ParseDescription(m)))
 }
 
-// GetSyntaxes returns a list of syntaxes implemented by all registered parsers.
-func GetSyntaxes() []string {
-	result := make([]string, 0, len(registry))
-	for syntax := range registry {
-		result = append(result, syntax)
-	}
-	return result
-}
+// Syntaxes returns an iterator of supported syntaxes, implemented by all
+// registered parsers.
+func Syntaxes() iter.Seq[string] { return maps.Keys(registry) }
 
 // Get the parser (info) by name. If name not found, use a default parser.
 func Get(name string) *Info {

@@ -14,6 +14,7 @@
 package parser_test
 
 import (
+	"slices"
 	"testing"
 
 	"t73f.de/r/zero/set"
@@ -23,7 +24,7 @@ import (
 )
 
 func TestParserType(t *testing.T) {
-	syntaxSet := set.New(parser.GetSyntaxes()...)
+	syntaxSet := set.New(slices.Collect(parser.Syntaxes())...)
 	testCases := []struct {
 		syntax string
 		ast    bool

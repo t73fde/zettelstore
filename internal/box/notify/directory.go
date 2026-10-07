@@ -528,10 +528,9 @@ func newNameIsBetter(oldName, newName string) bool {
 var supportedSyntax, primarySyntax *set.Set[string]
 
 func init() {
-	syntaxList := parser.GetSyntaxes()
-	supportedSyntax = set.New(syntaxList...)
+	supportedSyntax = set.New(slices.Collect(parser.Syntaxes())...)
 	primarySyntax = set.New[string]()
-	for _, syntax := range syntaxList {
+	for syntax := range parser.Syntaxes() {
 		if parser.Get(syntax).Name == syntax {
 			primarySyntax.Insert(syntax)
 		}
