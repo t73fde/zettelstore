@@ -121,28 +121,27 @@ func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel,
 }
 
 // FetchZids returns the set of all zettel identifer managed by the box.
-func (mgr *Manager) FetchZids(ctx context.Context) (idset.ArraySet, error) {
+func (mgr *Manager) FetchZids(ctx context.Context) (idset.ZidSet, error) {
 	mgr.mgrLogger.Debug("FetchZids")
 	if err := mgr.checkContinue(ctx); err != nil {
-		return idset.ArraySet{}, err
+		return idset.ZidSet{}, err
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	return mgr.fetchZids(ctx)
 }
-func (mgr *Manager) fetchZids(ctx context.Context) (idset.ArraySet, error) {
+func (mgr *Manager) fetchZids(ctx context.Context) (result idset.ZidSet, _ error) {
 	numZettel := 0
 	for _, p := range mgr.boxes {
 		var mbstats box.ManagedBoxStats
 		p.ReadStats(&mbstats)
 		numZettel += mbstats.Zettel
 	}
-	result := idset.New()
 	result.Grow(numZettel)
 	for _, p := range mgr.boxes {
 		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Insert(zid) }, query.AlwaysIncluded)
 		if err != nil {
-			return idset.ArraySet{}, err
+			return idset.ZidSet{}, err
 		}
 	}
 	return result, nil
@@ -196,7 +195,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 	}
 	selected := map[id.Zid]*meta.Meta{}
 	for _, term := range compSearch.Terms {
-		rejected := idset.New()
+		var rejected idset.ZidSet
 		handleMeta := func(m *meta.Meta) {
 			zid := m.Zid
 			if rejected.Contains(zid) {

@@ -32,18 +32,18 @@ import (
 )
 
 type zettelData struct {
-	meta      *meta.Meta     // a local copy of the metadata, without computed keys
-	dead      idset.ArraySet // set of dead references in this zettel
-	forward   idset.ArraySet // set of forward references in this zettel
-	backward  idset.ArraySet // set of zettel that reference with zettel
+	meta      *meta.Meta   // a local copy of the metadata, without computed keys
+	dead      idset.ZidSet // set of dead references in this zettel
+	forward   idset.ZidSet // set of forward references in this zettel
+	backward  idset.ZidSet // set of zettel that reference with zettel
 	otherRefs map[string]bidiRefs
 	words     []string // list of words of this zettel
 	urls      []string // list of urls of this zettel
 }
 
 type bidiRefs struct {
-	forward  idset.ArraySet
-	backward idset.ArraySet
+	forward  idset.ZidSet
+	backward idset.ZidSet
 }
 
 func (zd *zettelData) shrink() {
@@ -60,7 +60,7 @@ type mapStore struct {
 	mx     sync.RWMutex
 	intern map[string]string // map to intern strings
 	idx    map[id.Zid]*zettelData
-	dead   map[id.Zid]idset.ArraySet // map dead refs where they occur
+	dead   map[id.Zid]idset.ZidSet // map dead refs where they occur
 	words  stringRefs
 	urls   stringRefs
 
@@ -68,14 +68,14 @@ type mapStore struct {
 	mxStats sync.Mutex
 	updates uint64
 }
-type stringRefs map[string]idset.ArraySet
+type stringRefs map[string]idset.ZidSet
 
 // New returns a new memory-based index store.
 func New() store.Store {
 	return &mapStore{
 		intern: make(map[string]string, 1024),
 		idx:    make(map[id.Zid]*zettelData),
-		dead:   make(map[id.Zid]idset.ArraySet),
+		dead:   make(map[id.Zid]idset.ZidSet),
 		words:  make(stringRefs),
 		urls:   make(stringRefs),
 	}
@@ -136,7 +136,7 @@ func (ms *mapStore) doEnrich(m *meta.Meta) bool {
 	return updated
 }
 
-func zidsToValue(s idset.ArraySet) meta.Value {
+func zidsToValue(s idset.ZidSet) meta.Value {
 	var sb strings.Builder
 	sb.Grow(s.Count() * 15)
 	first := true
@@ -153,10 +153,9 @@ func zidsToValue(s idset.ArraySet) meta.Value {
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchEqual(word string) idset.ArraySet {
+func (ms *mapStore) SearchEqual(word string) (result idset.ZidSet) {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
-	result := idset.New()
 	if refs, ok := ms.words[word]; ok {
 		result.Or(refs)
 	}
@@ -178,7 +177,7 @@ func (ms *mapStore) SearchEqual(word string) idset.ArraySet {
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchPrefix(prefix string) idset.ArraySet {
+func (ms *mapStore) SearchPrefix(prefix string) idset.ZidSet {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(prefix, strings.HasPrefix)
@@ -209,7 +208,7 @@ func (ms *mapStore) SearchPrefix(prefix string) idset.ArraySet {
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchSuffix(suffix string) idset.ArraySet {
+func (ms *mapStore) SearchSuffix(suffix string) idset.ZidSet {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(suffix, strings.HasSuffix)
@@ -235,7 +234,7 @@ func (ms *mapStore) SearchSuffix(suffix string) idset.ArraySet {
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchContains(s string) idset.ArraySet {
+func (ms *mapStore) SearchContains(s string) idset.ZidSet {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(s, strings.Contains)
@@ -253,7 +252,7 @@ func (ms *mapStore) SearchContains(s string) idset.ArraySet {
 	return result
 }
 
-func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) (result idset.ArraySet) {
+func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) (result idset.ZidSet) {
 	// Must only be called if ms.mx is read-locked!
 	for word, refs := range ms.words {
 		if !pred(word, s) {
@@ -270,7 +269,7 @@ func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) (re
 	return result
 }
 
-func addBackwardZids(result *idset.ArraySet, zid id.Zid, zi *zettelData) {
+func addBackwardZids(result *idset.ZidSet, zid id.Zid, zi *zettelData) {
 	// Must only be called if ms.mx is read-locked!
 	result.Insert(zid)
 	result.Or(zi.backward)
@@ -279,7 +278,7 @@ func addBackwardZids(result *idset.ArraySet, zid id.Zid, zi *zettelData) {
 	}
 }
 
-func removeOtherMetaRefs(m *meta.Meta, back *idset.ArraySet) {
+func removeOtherMetaRefs(m *meta.Meta, back *idset.ZidSet) {
 	for key, val := range m.Rest() {
 		switch meta.Type(key) {
 		case meta.TypeID:
@@ -296,7 +295,7 @@ func removeOtherMetaRefs(m *meta.Meta, back *idset.ArraySet) {
 	}
 }
 
-func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex) idset.ArraySet {
+func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex) idset.ZidSet {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 	m := ms.makeMeta(zidx)
@@ -307,7 +306,7 @@ func (ms *mapStore) UpdateReferences(_ context.Context, zidx *store.ZettelIndex)
 	}
 
 	// Is this zettel an old dead reference mentioned in other zettel?
-	var toCheck idset.ArraySet
+	var toCheck idset.ZidSet
 	if refs, ok := ms.dead[zidx.Zid]; ok {
 		// These must be checked later again
 		toCheck = refs
@@ -385,13 +384,13 @@ func (ms *mapStore) updateDeadReferences(zidx *store.ZettelIndex, zi *zettelData
 	}
 }
 
-func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi *zettelData) idset.ArraySet {
+func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi *zettelData) idset.ZidSet {
 	// Must only be called if ms.mx is write-locked!
 	brefs := zidx.GetBackRefs()
 	remRefs, newRefs := zi.forward.Delta(brefs)
 	zi.forward = brefs
 
-	var toCheck idset.ArraySet
+	var toCheck idset.ZidSet
 	for ref := range remRefs.Values() {
 		bzi := ms.getOrCreateEntry(ref)
 		bzi.backward.Delete(zidx.Zid)
@@ -409,7 +408,7 @@ func (ms *mapStore) updateForwardBackwardReferences(zidx *store.ZettelIndex, zi 
 	return toCheck
 }
 
-func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettelData) idset.ArraySet {
+func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettelData) idset.ZidSet {
 	// Must only be called if ms.mx is write-locked!
 	inverseRefs := zidx.GetInverseRefs()
 	for key, mr := range zi.otherRefs {
@@ -421,7 +420,7 @@ func (ms *mapStore) updateMetadataReferences(zidx *store.ZettelIndex, zi *zettel
 	if zi.otherRefs == nil {
 		zi.otherRefs = make(map[string]bidiRefs)
 	}
-	var toCheck idset.ArraySet
+	var toCheck idset.ZidSet
 	for key, mrefs := range inverseRefs {
 		mr := zi.otherRefs[key]
 		remRefs, newRefs := mr.forward.Delta(mrefs)
@@ -503,17 +502,17 @@ func (ms *mapStore) getOrCreateEntry(zid id.Zid) *zettelData {
 	return zi
 }
 
-func (ms *mapStore) DeleteZettel(_ context.Context, zid id.Zid) idset.ArraySet {
+func (ms *mapStore) DeleteZettel(_ context.Context, zid id.Zid) idset.ZidSet {
 	ms.mx.Lock()
 	defer ms.mx.Unlock()
 	return ms.doDeleteZettel(zid)
 }
 
-func (ms *mapStore) doDeleteZettel(zid id.Zid) idset.ArraySet {
+func (ms *mapStore) doDeleteZettel(zid id.Zid) idset.ZidSet {
 	// Must only be called if ms.mx is write-locked!
 	zi, ok := ms.idx[zid]
 	if !ok {
-		return idset.ArraySet{}
+		return idset.ZidSet{}
 	}
 
 	ms.deleteDeadSources(zid, zi)
@@ -541,7 +540,7 @@ func (ms *mapStore) deleteDeadSources(zid id.Zid, zi *zettelData) {
 	}
 }
 
-func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) idset.ArraySet {
+func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) idset.ZidSet {
 	// Must only be called if ms.mx is write-locked!
 	for ref := range zi.forward.Values() {
 		if fzi, ok := ms.idx[ref]; ok {
@@ -549,7 +548,7 @@ func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) idset.Arra
 		}
 	}
 
-	var toCheck idset.ArraySet
+	var toCheck idset.ZidSet
 	for ref := range zi.backward.Values() {
 		if bzi, ok := ms.idx[ref]; ok {
 			bzi.forward.Delete(zid)
@@ -559,7 +558,7 @@ func (ms *mapStore) deleteForwardBackward(zid id.Zid, zi *zettelData) idset.Arra
 	return toCheck
 }
 
-func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward idset.ArraySet) {
+func (ms *mapStore) removeInverseMeta(zid id.Zid, key string, forward idset.ZidSet) {
 	// Must only be called if ms.mx is write-locked!
 	for ref := range forward.Values() {
 		bzi, ok := ms.idx[ref]
@@ -686,7 +685,7 @@ func (ms *mapStore) dumpDead(w io.Writer) {
 	}
 }
 
-func dumpSet(w io.Writer, prefix string, s idset.ArraySet) {
+func dumpSet(w io.Writer, prefix string, s idset.ZidSet) {
 	if !s.IsEmpty() {
 		_, _ = io.WriteString(w, prefix)
 		for zid := range s.Values() {

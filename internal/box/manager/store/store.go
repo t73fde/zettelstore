@@ -53,11 +53,11 @@ type Store interface {
 
 	// UpdateReferences for a specific zettel.
 	// Returns set of zettel identifier that must also be checked for changes.
-	UpdateReferences(context.Context, *ZettelIndex) idset.ArraySet
+	UpdateReferences(context.Context, *ZettelIndex) idset.ZidSet
 
 	// DeleteZettel removes index data for given zettel.
 	// Returns set of zettel identifier that must also be checked for changes.
-	DeleteZettel(context.Context, id.Zid) idset.ArraySet
+	DeleteZettel(context.Context, id.Zid) idset.ZidSet
 
 	// Shrink removes unneeded space.
 	Shrink()

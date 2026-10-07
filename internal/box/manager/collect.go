@@ -25,13 +25,13 @@ import (
 )
 
 type collectData struct {
-	refs  idset.ArraySet
+	refs  idset.ZidSet
 	words store.WordSet
 	urls  store.WordSet
 }
 
 func (data *collectData) initialize() {
-	data.refs = idset.New()
+	data.refs = idset.ZidSet{}
 	data.words = store.NewWordSet()
 	data.urls = store.NewWordSet()
 }

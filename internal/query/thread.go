@@ -100,7 +100,7 @@ func (q *ztlThreadQueue) Pop() any {
 
 type threadTask struct {
 	port     ThreadPort
-	seen     idset.ArraySet
+	seen     idset.ZidSet
 	queue    ztlThreadQueue
 	maxCount int
 }
@@ -108,7 +108,7 @@ type threadTask struct {
 func newThreadQueue(startSeq []*meta.Meta, maxCount int, port ThreadPort) *threadTask {
 	result := &threadTask{
 		port:     port,
-		seen:     idset.New(),
+		seen:     idset.ZidSet{},
 		maxCount: maxCount,
 	}
 

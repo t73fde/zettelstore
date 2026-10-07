@@ -30,19 +30,19 @@ import (
 type Searcher interface {
 	// Select all zettel that contains the given exact word.
 	// The word must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchEqual(word string) idset.ArraySet
+	SearchEqual(word string) idset.ZidSet
 
 	// Select all zettel that have a word with the given prefix.
 	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchPrefix(prefix string) idset.ArraySet
+	SearchPrefix(prefix string) idset.ZidSet
 
 	// Select all zettel that have a word with the given suffix.
 	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchSuffix(suffix string) idset.ArraySet
+	SearchSuffix(suffix string) idset.ZidSet
 
 	// Select all zettel that contains the given string.
 	// The string must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchContains(s string) idset.ArraySet
+	SearchContains(s string) idset.ZidSet
 }
 
 // Query specifies a mechanism for querying zettel.
@@ -385,7 +385,7 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq
 	return result
 }
 
-func metaList2idSet(ml []*meta.Meta) (result idset.ArraySet) {
+func metaList2idSet(ml []*meta.Meta) (result idset.ZidSet) {
 	result.Grow(len(ml))
 	for _, m := range ml {
 		result.Insert(m.Zid)
@@ -393,7 +393,7 @@ func metaList2idSet(ml []*meta.Meta) (result idset.ArraySet) {
 	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.ArraySet) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.ZidSet) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
 	var pred RetrievePredicate
 	if searcher != nil {
@@ -402,7 +402,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.Ar
 			if pred == nil {
 				pred = startSet.Contains
 			} else {
-				predSet := idset.New()
+				var predSet idset.ZidSet
 				predSet.Grow(startSet.Count())
 				for zid := range startSet.Values() {
 					if pred(zid) {

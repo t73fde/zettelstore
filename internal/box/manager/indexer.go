@@ -32,7 +32,7 @@ import (
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchEqual(word string) idset.ArraySet {
+func (mgr *Manager) SearchEqual(word string) idset.ZidSet {
 	found := mgr.idxStore.SearchEqual(word)
 	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
@@ -41,7 +41,7 @@ func (mgr *Manager) SearchEqual(word string) idset.ArraySet {
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchPrefix(prefix string) idset.ArraySet {
+func (mgr *Manager) SearchPrefix(prefix string) idset.ZidSet {
 	found := mgr.idxStore.SearchPrefix(prefix)
 	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
@@ -50,7 +50,7 @@ func (mgr *Manager) SearchPrefix(prefix string) idset.ArraySet {
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchSuffix(suffix string) idset.ArraySet {
+func (mgr *Manager) SearchSuffix(suffix string) idset.ZidSet {
 	found := mgr.idxStore.SearchSuffix(suffix)
 	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
@@ -59,7 +59,7 @@ func (mgr *Manager) SearchSuffix(suffix string) idset.ArraySet {
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchContains(s string) idset.ArraySet {
+func (mgr *Manager) SearchContains(s string) idset.ZidSet {
 	found := mgr.idxStore.SearchContains(s)
 	mgr.idxLogger.Debug("SearchContains", "s", s, "found", found.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
@@ -240,7 +240,7 @@ func (mgr *Manager) idxDeleteZettel(ctx context.Context, zid id.Zid) {
 	mgr.idxCheckZettel(toCheck)
 }
 
-func (mgr *Manager) idxCheckZettel(s idset.ArraySet) {
+func (mgr *Manager) idxCheckZettel(s idset.ZidSet) {
 	for zid := range s.Values() {
 		mgr.idxAr.EnqueueZettel(zid)
 	}

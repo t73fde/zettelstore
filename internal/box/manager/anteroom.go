@@ -31,7 +31,7 @@ const (
 
 type anteroom struct {
 	next    *anteroom
-	waiting idset.ArraySet
+	waiting idset.ZidSet
 	curLoad int
 	reload  bool
 }
@@ -76,7 +76,7 @@ func (ar *anteroomQueue) EnqueueZettel(zid id.Zid) {
 }
 
 func (ar *anteroomQueue) makeAnteroom(zid id.Zid) *anteroom {
-	waiting := idset.New()
+	var waiting idset.ZidSet
 	waiting.Grow(max(ar.maxLoad, 100))
 	waiting.Insert(zid)
 	return &anteroom{next: nil, waiting: waiting, curLoad: 1, reload: false}
@@ -85,11 +85,11 @@ func (ar *anteroomQueue) makeAnteroom(zid id.Zid) *anteroom {
 func (ar *anteroomQueue) Reset() {
 	ar.mx.Lock()
 	defer ar.mx.Unlock()
-	ar.first = &anteroom{next: nil, waiting: idset.ArraySet{}, curLoad: 0, reload: true}
+	ar.first = &anteroom{next: nil, waiting: idset.ZidSet{}, curLoad: 0, reload: true}
 	ar.last = ar.first
 }
 
-func (ar *anteroomQueue) Reload(allZids idset.ArraySet) {
+func (ar *anteroomQueue) Reload(allZids idset.ZidSet) {
 	ar.mx.Lock()
 	defer ar.mx.Unlock()
 	ar.deleteReloadedRooms()

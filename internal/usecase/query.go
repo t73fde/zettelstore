@@ -164,9 +164,9 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	if err != nil {
 		return nil
 	}
-	metaZids := idset.New()
+	var metaZids idset.ZidSet
 	metaZids.Grow(len(metaSeq))
-	refZids := idset.New()
+	var refZids idset.ZidSet
 	refZids.Grow(len(metaSeq) * 4) // Assumption: there are four zids per zettel
 	for _, m := range metaSeq {
 		metaZids.Insert(m.Zid)
@@ -190,7 +190,7 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	return uc.filterCandidates(ctx, candidates, words)
 }
 
-func filterByZid(candidates []*meta.Meta, ignoreSeq idset.ArraySet) []*meta.Meta {
+func filterByZid(candidates []*meta.Meta, ignoreSeq idset.ZidSet) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
 	for _, m := range candidates {
 		if !ignoreSeq.Contains(m.Zid) {
