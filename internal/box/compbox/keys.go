@@ -17,6 +17,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"slices"
+	"strings"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -32,7 +34,9 @@ func genKeysM(zid id.Zid) *meta.Meta {
 }
 
 func genKeysC(context.Context, *compBox) []byte {
-	keys := meta.GetSortedKeyDescriptions()
+	keys := slices.SortedFunc(
+		meta.KeyDescriptionSeq(),
+		func(a, b meta.DescriptionKey) int { return strings.Compare(a.Name, b.Name) })
 	var buf bytes.Buffer
 	buf.WriteString("|=Name<|=Type<|=Computed?:|=Property?:\n")
 	for _, kd := range keys {

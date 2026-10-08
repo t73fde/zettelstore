@@ -75,7 +75,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *sx.Pair {
 	var zidMap roster.Roster[string]
 	addListValues(&zidMap, m, meta.KeyBackward)
-	for _, kd := range meta.GetSortedKeyDescriptions() {
+	for kd := range meta.KeyDescriptionSeq() {
 		inverseKey := kd.Inverse
 		if inverseKey == "" {
 			continue

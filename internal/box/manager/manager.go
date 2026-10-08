@@ -117,9 +117,8 @@ func (mgr *Manager) State() box.StartState {
 
 // New creates a new managing box.
 func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Config) (*Manager, error) {
-	descrs := meta.GetSortedKeyDescriptions()
 	propertyKeys := set.New[string]()
-	for _, kd := range descrs {
+	for kd := range meta.KeyDescriptionSeq() {
 		if kd.IsProperty() {
 			propertyKeys.Insert(kd.Name)
 		}
