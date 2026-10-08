@@ -38,6 +38,7 @@ import (
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
 )
@@ -59,12 +60,13 @@ type Kernel struct {
 	profileFile *os.File
 	profile     *pprof.Profile
 
-	self kernelService
-	core coreService
-	cfg  configService
-	auth authService
-	box  boxService
-	web  webService
+	self  kernelService
+	core  coreService
+	cfg   configService
+	auth  authService
+	index indexService
+	box   boxService
+	web   webService
 
 	srvs     map[Service]*serviceDescr
 	srvNames map[string]serviceData
@@ -104,6 +106,7 @@ func createKernel() *Kernel {
 		CoreService:   {srv: &kern.core, name: "core", logLevel: defaultNormalLogLevel},
 		ConfigService: {srv: &kern.cfg, name: "config", logLevel: defaultNormalLogLevel},
 		AuthService:   {srv: &kern.auth, name: "auth", logLevel: defaultNormalLogLevel},
+		IndexService:  {srv: &kern.index, name: "index", logLevel: defaultNormalLogLevel},
 		BoxService:    {srv: &kern.box, name: "box", logLevel: defaultNormalLogLevel},
 		WebService:    {srv: &kern.web, name: "web", logLevel: defaultNormalLogLevel},
 	}
@@ -125,7 +128,8 @@ func createKernel() *Kernel {
 		CoreService:   {KernelService},
 		ConfigService: {CoreService},
 		AuthService:   {CoreService},
-		BoxService:    {CoreService, ConfigService, AuthService},
+		IndexService:  {ConfigService},
+		BoxService:    {CoreService, ConfigService, AuthService, IndexService},
 		WebService:    {ConfigService, AuthService, BoxService},
 	}
 	kern.depStop = make(serviceDependency, len(kern.depStart))
@@ -153,6 +157,7 @@ const (
 	CoreService           // Manages startup specific functionality
 	ConfigService         // Provides access to runtime configuration
 	AuthService           // Manages authentication
+	IndexService          // Index allows to search faster
 	BoxService            // Boxes provide zettel
 	WebService            // Access to Zettelstore through Web-based API and WebUI
 )
@@ -240,10 +245,14 @@ type LogEntry struct {
 // CreateAuthManagerFunc is called to create a new auth manager.
 type CreateAuthManagerFunc func(readonly bool, owner id.Zid, refresh bool) (auth.Manager, error)
 
+// CreateIndexerFunc is called to create a new search index processor.
+type CreateIndexerFunc func() index.Indexer
+
 // CreateBoxManagerFunc is called to create a new box manager.
 type CreateBoxManagerFunc func(
 	boxURIs []*url.URL,
 	authManager auth.Manager,
+	enqueuer index.Enqueuer,
 	rtConfig config.Config,
 ) (box.Manager, error)
 
@@ -677,10 +686,12 @@ type serviceConfigDescription struct{ Key, Descr string }
 // SetCreators store functions to be called when a service has to be created.
 func (kern *Kernel) SetCreators(
 	createAuthManager CreateAuthManagerFunc,
+	createIndexer CreateIndexerFunc,
 	createBoxManager CreateBoxManagerFunc,
 	setupWebServer SetupWebServerFunc,
 ) {
 	kern.auth.createManager = createAuthManager
+	kern.index.create = createIndexer
 	kern.box.createManager = createBoxManager
 	kern.web.setupServer = setupWebServer
 }

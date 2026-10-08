@@ -39,6 +39,8 @@ import (
 	"zettelstore.de/z/internal/box/compbox"
 	"zettelstore.de/z/internal/box/manager"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/index"
+	indeximpl "zettelstore.de/z/internal/index/impl"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/web/server"
@@ -280,12 +282,12 @@ func executeCommand(name string, args ...string) int {
 	kern := kernel.Main
 	var createManager kernel.CreateBoxManagerFunc
 	if command.Boxes {
-		createManager = func(boxURIs []*url.URL, authManager auth.Manager, rtConfig config.Config) (box.Manager, error) {
+		createManager = func(boxURIs []*url.URL, authManager auth.Manager, enqueuer index.Enqueuer, rtConfig config.Config) (box.Manager, error) {
 			compbox.Setup(cfg)
-			return manager.New(boxURIs, authManager, rtConfig)
+			return manager.New(boxURIs, authManager, enqueuer, rtConfig)
 		}
 	} else {
-		createManager = func([]*url.URL, auth.Manager, config.Config) (box.Manager, error) { return nil, nil }
+		createManager = func([]*url.URL, auth.Manager, index.Enqueuer, config.Config) (box.Manager, error) { return nil, nil }
 	}
 
 	secret := cfg.GetDefault("secret", "")
@@ -300,6 +302,7 @@ func executeCommand(name string, args ...string) int {
 		func(readonly bool, owner id.Zid, refresh bool) (auth.Manager, error) {
 			return impl.New(readonly, owner, secretHash, refresh), nil
 		},
+		func() index.Indexer { return indeximpl.New() },
 		createManager,
 		func(srv server.Server, plMgr box.Manager, authMgr auth.Manager, rtConfig config.Config) error {
 			setupRouting(srv, plMgr, authMgr, rtConfig)

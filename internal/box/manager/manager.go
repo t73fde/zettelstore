@@ -36,6 +36,7 @@ import (
 	"zettelstore.de/z/internal/box/manager/mapstore"
 	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
 )
@@ -86,6 +87,7 @@ type Manager struct {
 	done         chan struct{}
 	infos        chan box.UpdateInfo
 	propertyKeys roster.Roster[string] // Set of property key names
+	enqueuer     index.Enqueuer
 
 	// Indexer data
 	idxLogger *slog.Logger
@@ -115,7 +117,7 @@ func (mgr *Manager) State() box.StartState {
 }
 
 // New creates a new managing box.
-func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Config) (*Manager, error) {
+func New(boxURIs []*url.URL, authManager auth.BaseManager, enq index.Enqueuer, rtConfig config.Config) (*Manager, error) {
 	var propertyKeys roster.Roster[string]
 	for kd := range meta.KeyDescriptionSeq() {
 		if kd.IsProperty() {
@@ -128,6 +130,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 		rtConfig:     rtConfig,
 		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
 		propertyKeys: propertyKeys,
+		enqueuer:     enq,
 
 		idxLogger: boxLogger.With("box", "index"),
 		idxStore:  createIdxStore(rtConfig),
@@ -288,6 +291,7 @@ func (mgr *Manager) notifier() {
 				}
 
 				isStarted := mgr.State() == box.StartStateStarted
+				mgr.enqueuer.Enqueue(mgr, reason, zid)
 				mgr.idxEnqueue(reason, zid)
 				if ci.Box == nil {
 					ci.Box = mgr
@@ -377,7 +381,8 @@ func (mgr *Manager) Start(ctx context.Context) error {
 		mgr.setState(box.StartStateStopped)
 		return err
 	}
-	mgr.idxAr.Reset() // Ensure an initial index run
+	mgr.enqueuer.Enqueue(mgr, box.OnReload, id.Invalid) // Ensure an initial index run
+	mgr.idxAr.Reset()                                   // Ensure an initial index run
 	mgr.done = make(chan struct{})
 	go mgr.notifier()
 
