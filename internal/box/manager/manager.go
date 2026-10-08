@@ -27,7 +27,6 @@ import (
 
 	"t73f.de/r/zero/iter"
 	"t73f.de/r/zero/roster"
-	"t73f.de/r/zero/set"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -86,7 +85,7 @@ type Manager struct {
 	mxObserver   sync.RWMutex
 	done         chan struct{}
 	infos        chan box.UpdateInfo
-	propertyKeys set.Set[string] // Set of property key names
+	propertyKeys roster.Roster[string] // Set of property key names
 
 	// Indexer data
 	idxLogger *slog.Logger
@@ -117,7 +116,7 @@ func (mgr *Manager) State() box.StartState {
 
 // New creates a new managing box.
 func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Config) (*Manager, error) {
-	propertyKeys := set.New[string]()
+	var propertyKeys roster.Roster[string]
 	for kd := range meta.KeyDescriptionSeq() {
 		if kd.IsProperty() {
 			propertyKeys.Insert(kd.Name)
