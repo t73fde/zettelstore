@@ -86,7 +86,7 @@ type Manager struct {
 	mxObserver   sync.RWMutex
 	done         chan struct{}
 	infos        chan box.UpdateInfo
-	propertyKeys *set.Set[string] // Set of property key names
+	propertyKeys set.Set[string] // Set of property key names
 
 	// Indexer data
 	idxLogger *slog.Logger
