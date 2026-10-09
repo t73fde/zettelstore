@@ -246,7 +246,7 @@ type LogEntry struct {
 type CreateAuthManagerFunc func(readonly bool, owner id.Zid, refresh bool) (auth.Manager, error)
 
 // CreateIndexerFunc is called to create a new search index processor.
-type CreateIndexerFunc func() index.Indexer
+type CreateIndexerFunc func(config.Config) index.Indexer
 
 // CreateBoxManagerFunc is called to create a new box manager.
 type CreateBoxManagerFunc func(

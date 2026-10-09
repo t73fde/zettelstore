@@ -290,13 +290,12 @@ func (mgr *Manager) notifier() {
 					continue
 				}
 
-				isStarted := mgr.State() == box.StartStateStarted
-				mgr.enqueuer.Enqueue(mgr, reason, zid)
 				mgr.idxEnqueue(reason, zid)
 				if ci.Box == nil {
 					ci.Box = mgr
 				}
-				if isStarted {
+				if mgr.State() == box.StartStateStarted {
+					mgr.enqueuer.Enqueue(mgr, reason, zid)
 					mgr.notifyObserver(&ci)
 				}
 			}
@@ -381,8 +380,7 @@ func (mgr *Manager) Start(ctx context.Context) error {
 		mgr.setState(box.StartStateStopped)
 		return err
 	}
-	mgr.enqueuer.Enqueue(mgr, box.OnReload, id.Invalid) // Ensure an initial index run
-	mgr.idxAr.Reset()                                   // Ensure an initial index run
+	mgr.idxAr.Reset() // Ensure an initial index run
 	mgr.done = make(chan struct{})
 	go mgr.notifier()
 
@@ -390,6 +388,8 @@ func (mgr *Manager) Start(ctx context.Context) error {
 	mgr.setState(box.StartStateStarted)
 
 	mgr.notifyObserver(&box.UpdateInfo{Box: mgr, Reason: box.OnReady})
+	mgr.enqueuer.Enqueue(mgr, box.OnReady, id.Invalid)  // Indexer can setup itself
+	mgr.enqueuer.Enqueue(mgr, box.OnReload, id.Invalid) // Ensure an initial index run
 
 	go mgr.idxIndexer()
 	return nil

@@ -15,11 +15,14 @@
 package impl
 
 import (
+	"context"
 	"log/slog"
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
+
 	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
 )
@@ -30,16 +33,21 @@ var _ index.Enqueuer = (*Index)(nil)
 // Index stores all data to provide an index.
 type Index struct {
 	logger *slog.Logger
+	config config.Config
 
-	mx    sync.RWMutex
-	queue chan queueData
+	mx     sync.RWMutex
+	cancel context.CancelFunc
+	wg     sync.WaitGroup
+	notify chan notifyData
+
+	pending *pendingQueue
 }
 
 // New creates a new index object.
-func New() *Index {
+func New(config config.Config) *Index {
 	return &Index{
 		logger: kernel.Main.GetLogger(kernel.IndexService),
-		queue:  nil,
+		config: config,
 	}
 }
 
@@ -47,13 +55,13 @@ func New() *Index {
 func (idx *Index) Enqueue(fetcher index.Fetcher, reason box.UpdateReason, zid id.Zid) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
-	if idx.queue == nil {
+	if idx.notify == nil {
 		return // not running
 	}
-	idx.queue <- queueData{fetcher: fetcher, reason: reason, zid: zid}
+	idx.notify <- notifyData{fetcher: fetcher, reason: reason, zid: zid}
 }
 
-type queueData struct {
+type notifyData struct {
 	fetcher index.Fetcher
 	reason  box.UpdateReason
 	zid     id.Zid

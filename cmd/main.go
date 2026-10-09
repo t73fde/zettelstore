@@ -302,7 +302,7 @@ func executeCommand(name string, args ...string) int {
 		func(readonly bool, owner id.Zid, refresh bool) (auth.Manager, error) {
 			return impl.New(readonly, owner, secretHash, refresh), nil
 		},
-		func() index.Indexer { return indeximpl.New() },
+		func(rtConfig config.Config) index.Indexer { return indeximpl.New(rtConfig) },
 		createManager,
 		func(srv server.Server, plMgr box.Manager, authMgr auth.Manager, rtConfig config.Config) error {
 			setupRouting(srv, plMgr, authMgr, rtConfig)

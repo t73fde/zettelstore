@@ -38,8 +38,8 @@ func (is *indexService) GetLogger() *slog.Logger { return is.logger }
 func (is *indexService) GetLevel() slog.Level    { return is.logLevelVar.Level() }
 func (is *indexService) SetLevel(l slog.Level)   { is.logLevelVar.Set(l) }
 
-func (is *indexService) Start(*Kernel) error {
-	idx := is.create()
+func (is *indexService) Start(kern *Kernel) error {
+	idx := is.create(&kern.cfg)
 	is.logger.Info("Start Index")
 	idx.Start()
 	is.indexer = idx
