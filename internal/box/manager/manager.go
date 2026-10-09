@@ -87,7 +87,7 @@ type Manager struct {
 	done         chan struct{}
 	infos        chan box.UpdateInfo
 	propertyKeys roster.Roster[string] // Set of property key names
-	enqueuer     index.Enqueuer
+	index        index.Index
 
 	// Indexer data
 	idxLogger *slog.Logger
@@ -117,7 +117,7 @@ func (mgr *Manager) State() box.StartState {
 }
 
 // New creates a new managing box.
-func New(boxURIs []*url.URL, authManager auth.BaseManager, enq index.Enqueuer, rtConfig config.Config) (*Manager, error) {
+func New(boxURIs []*url.URL, authManager auth.BaseManager, index index.Index, rtConfig config.Config) (*Manager, error) {
 	var propertyKeys roster.Roster[string]
 	for kd := range meta.KeyDescriptionSeq() {
 		if kd.IsProperty() {
@@ -130,7 +130,7 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, enq index.Enqueuer, r
 		rtConfig:     rtConfig,
 		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
 		propertyKeys: propertyKeys,
-		enqueuer:     enq,
+		index:        index,
 
 		idxLogger: boxLogger.With("box", "index"),
 		idxStore:  createIdxStore(rtConfig),
@@ -295,7 +295,7 @@ func (mgr *Manager) notifier() {
 					ci.Box = mgr
 				}
 				if mgr.State() == box.StartStateStarted {
-					mgr.enqueuer.Enqueue(mgr, reason, zid)
+					mgr.index.Enqueue(mgr, reason, zid)
 					mgr.notifyObserver(&ci)
 				}
 			}
@@ -388,8 +388,8 @@ func (mgr *Manager) Start(ctx context.Context) error {
 	mgr.setState(box.StartStateStarted)
 
 	mgr.notifyObserver(&box.UpdateInfo{Box: mgr, Reason: box.OnReady})
-	mgr.enqueuer.Enqueue(mgr, box.OnReady, id.Invalid)  // Indexer can setup itself
-	mgr.enqueuer.Enqueue(mgr, box.OnReload, id.Invalid) // Ensure an initial index run
+	mgr.index.Enqueue(mgr, box.OnReady, id.Invalid)  // Indexer can setup itself
+	mgr.index.Enqueue(mgr, box.OnReload, id.Invalid) // Ensure an initial index run
 
 	go mgr.idxIndexer()
 	return nil

@@ -35,6 +35,7 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 			m.Set(meta.KeyBoxName, meta.Value(boxName))
 		}
 		mgr.idxStore.Enrich(ctx, m)
+		mgr.index.Enrich(ctx, m)
 	}
 }
 

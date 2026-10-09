@@ -282,12 +282,12 @@ func executeCommand(name string, args ...string) int {
 	kern := kernel.Main
 	var createManager kernel.CreateBoxManagerFunc
 	if command.Boxes {
-		createManager = func(boxURIs []*url.URL, authManager auth.Manager, enqueuer index.Enqueuer, rtConfig config.Config) (box.Manager, error) {
+		createManager = func(boxURIs []*url.URL, authManager auth.Manager, index index.Index, rtConfig config.Config) (box.Manager, error) {
 			compbox.Setup(cfg)
-			return manager.New(boxURIs, authManager, enqueuer, rtConfig)
+			return manager.New(boxURIs, authManager, index, rtConfig)
 		}
 	} else {
-		createManager = func([]*url.URL, auth.Manager, index.Enqueuer, config.Config) (box.Manager, error) { return nil, nil }
+		createManager = func([]*url.URL, auth.Manager, index.Index, config.Config) (box.Manager, error) { return nil, nil }
 	}
 
 	secret := cfg.GetDefault("secret", "")

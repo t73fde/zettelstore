@@ -252,7 +252,7 @@ type CreateIndexerFunc func(config.Config) index.Indexer
 type CreateBoxManagerFunc func(
 	boxURIs []*url.URL,
 	authManager auth.Manager,
-	enqueuer index.Enqueuer,
+	index index.Index,
 	rtConfig config.Config,
 ) (box.Manager, error)
 

@@ -25,10 +25,12 @@ import (
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
+	"zettelstore.de/z/internal/query"
 )
 
 var _ index.Indexer = (*Index)(nil)
 var _ index.Enqueuer = (*Index)(nil)
+var _ query.Searcher = (*Index)(nil)
 
 // Index stores all data to provide an index.
 type Index struct {
