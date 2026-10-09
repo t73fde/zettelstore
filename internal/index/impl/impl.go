@@ -43,6 +43,7 @@ type Index struct {
 	notify chan notifyData
 
 	pending *pendingQueue
+	store   *store
 }
 
 // New creates a new index object.

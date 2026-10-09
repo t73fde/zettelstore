@@ -37,6 +37,9 @@ func (idx *Index) Start() {
 	if idx.notify != nil {
 		return // already running
 	}
+
+	idx.store = &store{}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	idx.cancel = cancel
 
@@ -71,7 +74,7 @@ func (idx *Index) Stop() {
 	close(idx.notify)
 	idx.cancel() // interrupts blocking GetZettel / FetchZids
 	idx.wg.Wait()
-	idx.notify, idx.pending, idx.cancel = nil, nil, nil
+	idx.store, idx.notify, idx.pending, idx.cancel = nil, nil, nil, nil
 }
 
 // collectService receives update notifications and adds them to an unlimited
