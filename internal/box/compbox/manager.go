@@ -14,7 +14,6 @@
 package compbox
 
 import (
-	"bytes"
 	"fmt"
 
 	"t73f.de/r/zsc/domain/id"
@@ -32,10 +31,10 @@ func genManagerC() []byte {
 	if len(kvl) == 0 {
 		return nil
 	}
-	var buf bytes.Buffer
-	buf.WriteString("|=Name|=Value>\n")
+	var buf []byte
+	buf = append(buf, "|=Name|=Value>\n"...)
 	for _, kv := range kvl {
-		fmt.Fprintf(&buf, "| %v | %v\n", kv.Key, kv.Value)
+		buf = fmt.Appendf(buf, "| %v | %v\n", kv.Key, kv.Value)
 	}
-	return buf.Bytes()
+	return buf
 }

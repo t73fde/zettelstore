@@ -14,7 +14,6 @@
 package compbox
 
 import (
-	"bytes"
 	"fmt"
 
 	"t73f.de/r/zsc/domain/id"
@@ -31,12 +30,12 @@ func genKeysM(zid id.Zid) *meta.Meta {
 }
 
 func genKeysC() []byte {
-	keys := meta.GetSortedKeyDescriptions()
-	var buf bytes.Buffer
-	buf.WriteString("|=Name<|=Type<|=Computed?:|=Property?:\n")
-	for _, kd := range keys {
-		fmt.Fprintf(&buf,
-			"|[[%v|query:%v?]]|%v|%v|%v\n", kd.Name, kd.Name, kd.Type.Name, kd.IsComputed(), kd.IsProperty())
+	var buf []byte
+	buf = append(buf, "|=Name<|=Type<|=Computed?:|=Property?:\n"...)
+	for _, kd := range meta.GetSortedKeyDescriptions() {
+		buf = fmt.Appendf(buf,
+			"|[[%v|query:%v?]]|%v|%v|%v\n", kd.Name, kd.Name,
+			kd.Type.Name, kd.IsComputed(), kd.IsProperty())
 	}
-	return buf.Bytes()
+	return buf
 }
