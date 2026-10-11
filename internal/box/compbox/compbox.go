@@ -16,6 +16,7 @@ package compbox
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/url"
 
@@ -42,11 +43,13 @@ type compBox struct {
 	enricher box.Enricher
 }
 
-var myConfig *meta.Meta
-var myZettel = map[id.Zid]struct {
+type genFns = struct {
 	meta    func(id.Zid) *meta.Meta
 	content func() []byte
-}{
+}
+
+var myConfig *meta.Meta
+var myZettel = map[id.Zid]genFns{
 	id.ZidVersion:         {genVersionBuildM, genVersionBuildC},
 	id.ZidHost:            {genVersionHostM, genVersionHostC},
 	id.ZidOperatingSystem: {genVersionOSM, genVersionOSC},
@@ -54,16 +57,50 @@ var myZettel = map[id.Zid]struct {
 	id.ZidLog:             {genLogM, genLogC},
 	id.ZidMemory:          {genMemoryM, genMemoryC},
 	id.ZidSx:              {genSxM, genSxC},
-	// id.ZidHTTP:                 {genHttpM, genHttpC},
 	// id.ZidAPI:                  {genApiM, genApiC},
 	// id.ZidWebUI:                {genWebUiM, genWebUiC},
 	// id.ZidConsole:              {genConsoleM, genConsoleC},
-	id.ZidBoxManager: {genManagerM, genManagerC},
-	// id.ZidIndex:                {genIndexM, genIndexC},
+	ZidKernelService: makeSrvGen(kernel.KernelService, "Kernel"),
+	ZidCoreService:   makeSrvGen(kernel.CoreService, "Core"),
+	ZidConfigService: makeSrvGen(kernel.ConfigService, "Configuration"),
+	ZidAuthService:   makeSrvGen(kernel.AuthService, "Authentication"),
+	ZidBoxService:    makeSrvGen(kernel.BoxService, "Box"),
+	// ZidIndexService:  makeSrvGen(kernel.IndexService, "Index"),
+	ZidWebService: makeSrvGen(kernel.WebService, "Web"),
 	// id.ZidQuery:                {genQueryM, genQueryC},
 	id.ZidMetadataKey:          {genKeysM, genKeysC},
 	id.ZidParser:               {genParserM, genParserC},
 	id.ZidStartupConfiguration: {genConfigZettelM, genConfigZettelC},
+}
+
+const (
+	ZidKernelService = id.Zid(16)
+	ZidCoreService   = id.Zid(17)
+	ZidConfigService = id.Zid(18)
+	ZidAuthService   = id.Zid(19)
+	ZidBoxService    = id.ZidBoxManager
+	ZidIndexService  = id.ZidIndex
+	ZidWebService    = id.ZidHTTP
+)
+
+func makeSrvGen(srv kernel.Service, name string) genFns {
+	return genFns{
+		func(zid id.Zid) *meta.Meta {
+			return getTitledMeta(zid, "Zettelstore "+name+"Service")
+		},
+		func() []byte {
+			stats := kernel.Main.GetServiceStatistics(srv)
+			if len(stats) == 0 {
+				return nil
+			}
+			var buf []byte
+			buf = append(buf, "|=Name|=Value>\n"...)
+			for _, kv := range stats {
+				buf = fmt.Appendf(buf, "| %v | %v\n", kv.Key, kv.Value)
+			}
+			return buf
+		},
+	}
 }
 
 // Get returns the one program box.
