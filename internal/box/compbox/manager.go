@@ -15,7 +15,6 @@ package compbox
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 
 	"t73f.de/r/zsc/domain/id"
@@ -28,7 +27,7 @@ func genManagerM(zid id.Zid) *meta.Meta {
 	return getTitledMeta(zid, "Zettelstore Box Manager")
 }
 
-func genManagerC(context.Context, *compBox) []byte {
+func genManagerC() []byte {
 	kvl := kernel.Main.GetServiceStatistics(kernel.BoxService)
 	if len(kvl) == 0 {
 		return nil

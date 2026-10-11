@@ -15,7 +15,6 @@ package compbox
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -34,7 +33,7 @@ func genParserM(zid id.Zid) *meta.Meta {
 	return m
 }
 
-func genParserC(context.Context, *compBox) []byte {
+func genParserC() []byte {
 	var buf bytes.Buffer
 	buf.WriteString("|=Syntax<|=Alt. Value(s):|=Text Parser?:|=Text Format?:|=Image Format?:\n")
 	syntaxes := parser.GetSyntaxes()

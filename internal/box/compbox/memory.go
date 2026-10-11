@@ -15,7 +15,6 @@ package compbox
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"runtime"
@@ -30,7 +29,7 @@ func genMemoryM(zid id.Zid) *meta.Meta {
 	return getTitledMeta(zid, "Zettelstore Memory")
 }
 
-func genMemoryC(context.Context, *compBox) []byte {
+func genMemoryC() []byte {
 	pageSize := os.Getpagesize()
 	var m runtime.MemStats
 	runtime.GC()

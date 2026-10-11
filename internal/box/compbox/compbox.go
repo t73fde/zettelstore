@@ -45,7 +45,7 @@ type compBox struct {
 var myConfig *meta.Meta
 var myZettel = map[id.Zid]struct {
 	meta    func(id.Zid) *meta.Meta
-	content func(context.Context, *compBox) []byte
+	content func() []byte
 }{
 	id.ZidVersion:         {genVersionBuildM, genVersionBuildC},
 	id.ZidHost:            {genVersionHostM, genVersionHostC},
@@ -80,7 +80,7 @@ func Setup(cfg *meta.Meta) { myConfig = cfg.Clone() }
 func (*compBox) Name() string     { return box.SchemeCompBox }
 func (*compBox) Location() string { return box.SchemeCompBox + ":" }
 
-func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
+func (cb *compBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	if gen, ok := myZettel[zid]; ok && gen.meta != nil {
 		if m := gen.meta(zid); m != nil {
 			updateMeta(m)
@@ -88,7 +88,7 @@ func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error
 				logging.LogTrace(cb.logger, "GetZettel/Content")
 				return box.Zettel{
 					Meta:    m,
-					Content: zettel.NewContent(genContent(ctx, cb)),
+					Content: zettel.NewContent(genContent()),
 				}, nil
 			}
 			logging.LogTrace(cb.logger, "GetZettel/NoContent")

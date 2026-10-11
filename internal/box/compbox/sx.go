@@ -15,7 +15,6 @@ package compbox
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 
 	"t73f.de/r/sx"
@@ -27,7 +26,7 @@ func genSxM(zid id.Zid) *meta.Meta {
 	return getTitledMeta(zid, "Zettelstore Sx Engine")
 }
 
-func genSxC(context.Context, *compBox) []byte {
+func genSxC() []byte {
 	var buf bytes.Buffer
 	buf.WriteString("|=Name|=Value>\n")
 	numSymbols := 0

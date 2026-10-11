@@ -15,7 +15,6 @@ package compbox
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"runtime/debug"
 
@@ -29,7 +28,7 @@ func genModulesM(zid id.Zid) *meta.Meta {
 	return m
 }
 
-func genModulesC(context.Context, *compBox) []byte {
+func genModulesC() []byte {
 	info, ok := debug.ReadBuildInfo()
 	var buf bytes.Buffer
 	if !ok {
