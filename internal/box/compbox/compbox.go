@@ -16,6 +16,7 @@ package compbox
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/url"
 
@@ -42,28 +43,50 @@ type compBox struct {
 	enricher box.Enricher
 }
 
-var myConfig *meta.Meta
-var myZettel = map[id.Zid]struct {
+type genFns = struct {
 	meta    func(id.Zid) *meta.Meta
-	content func(context.Context, *compBox) []byte
-}{
-	id.ZidVersion:         {genVersionBuildM, genVersionBuildC},
-	id.ZidHost:            {genVersionHostM, genVersionHostC},
-	id.ZidOperatingSystem: {genVersionOSM, genVersionOSC},
-	id.ZidModules:         {genModulesM, genModulesC},
-	id.ZidLog:             {genLogM, genLogC},
-	id.ZidMemory:          {genMemoryM, genMemoryC},
-	id.ZidSx:              {genSxM, genSxC},
-	// id.ZidHTTP:                 {genHttpM, genHttpC},
-	// id.ZidAPI:                  {genApiM, genApiC},
-	// id.ZidWebUI:                {genWebUiM, genWebUiC},
-	// id.ZidConsole:              {genConsoleM, genConsoleC},
-	id.ZidBoxManager: {genManagerM, genManagerC},
-	// id.ZidIndex:                {genIndexM, genIndexC},
-	// id.ZidQuery:                {genQueryM, genQueryC},
+	content func() []byte
+}
+
+var myConfig *meta.Meta
+var myZettel = map[id.Zid]genFns{
+	id.ZidVersion:              {genVersionBuildM, genVersionBuildC},
+	id.ZidHost:                 {genVersionHostM, genVersionHostC},
+	id.ZidOperatingSystem:      {genVersionOSM, genVersionOSC},
+	id.ZidModules:              {genModulesM, genModulesC},
+	id.ZidLog:                  {genLogM, genLogC},
+	id.ZidMemory:               {genMemoryM, genMemoryC},
+	id.ZidSx:                   {genSxM, genSxC},
+	id.ZidKernelService:        makeSrvGen(kernel.KernelService, "Kernel"),
+	id.ZidCoreService:          makeSrvGen(kernel.CoreService, "Core"),
+	id.ZidConfigService:        makeSrvGen(kernel.ConfigService, "Configuration"),
+	id.ZidAuthService:          makeSrvGen(kernel.AuthService, "Authentication"),
+	id.ZidBoxService:           makeSrvGen(kernel.BoxService, "Box"),
+	id.ZidIndexService:         makeSrvGen(kernel.IndexService, "Index"),
+	id.ZidWebService:           makeSrvGen(kernel.WebService, "Web"),
 	id.ZidMetadataKey:          {genKeysM, genKeysC},
 	id.ZidParser:               {genParserM, genParserC},
 	id.ZidStartupConfiguration: {genConfigZettelM, genConfigZettelC},
+}
+
+func makeSrvGen(srv kernel.Service, name string) genFns {
+	return genFns{
+		func(zid id.Zid) *meta.Meta {
+			return getTitledMeta(zid, "Zettelstore "+name+" Service")
+		},
+		func() []byte {
+			var buf []byte
+			stats := kernel.Main.GetServiceStatistics(srv)
+			if len(stats) == 0 {
+				return append(buf, "No service data is currently available.\n"...)
+			}
+			buf = append(buf, "|=Name|=Value>\n"...)
+			for _, kv := range stats {
+				buf = fmt.Appendf(buf, "| %v | %v\n", kv.Key, kv.Value)
+			}
+			return buf
+		},
+	}
 }
 
 // Get returns the one program box.
@@ -80,7 +103,7 @@ func Setup(cfg *meta.Meta) { myConfig = cfg.Clone() }
 func (*compBox) Name() string     { return box.SchemeCompBox }
 func (*compBox) Location() string { return box.SchemeCompBox + ":" }
 
-func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
+func (cb *compBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	if gen, ok := myZettel[zid]; ok && gen.meta != nil {
 		if m := gen.meta(zid); m != nil {
 			updateMeta(m)
@@ -88,7 +111,7 @@ func (cb *compBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error
 				logging.LogTrace(cb.logger, "GetZettel/Content")
 				return box.Zettel{
 					Meta:    m,
-					Content: zettel.NewContent(genContent(ctx, cb)),
+					Content: zettel.NewContent(genContent()),
 				}, nil
 			}
 			logging.LogTrace(cb.logger, "GetZettel/NoContent")

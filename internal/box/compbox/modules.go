@@ -14,8 +14,6 @@
 package compbox
 
 import (
-	"bytes"
-	"context"
 	"fmt"
 	"runtime/debug"
 
@@ -29,18 +27,18 @@ func genModulesM(zid id.Zid) *meta.Meta {
 	return m
 }
 
-func genModulesC(context.Context, *compBox) []byte {
+func genModulesC() []byte {
 	info, ok := debug.ReadBuildInfo()
-	var buf bytes.Buffer
+	var buf []byte
 	if !ok {
-		buf.WriteString("No module info available\n")
+		buf = append(buf, "No module info available\n"...)
 	} else {
-		buf.WriteString("|=Module|Version\n")
-		fmt.Fprintf(&buf, "|Zettelstore|{{%v}}\n", id.ZidVersion)
+		buf = append(buf, "|=Module|Version\n"...)
+		buf = fmt.Appendf(buf, "|Zettelstore|{{%v}}\n", id.ZidVersion)
 		for _, m := range info.Deps {
-			fmt.Fprintf(&buf, "|%s|%s\n", m.Path, m.Version)
+			buf = fmt.Appendf(buf, "|%s|%s\n", m.Path, m.Version)
 		}
 	}
-	fmt.Fprintf(&buf, "\nSee [[Zettelstore Dependencies|%v]] for license details.", id.ZidDependencies)
-	return buf.Bytes()
+	buf = fmt.Appendf(buf, "\nSee [[Zettelstore Dependencies|%v]] for license details.", id.ZidDependencies)
+	return buf
 }
