@@ -42,6 +42,7 @@ type Index struct {
 	wg     sync.WaitGroup
 	notify chan notifyData
 
+	stats   *stats
 	pending *pendingQueue
 	store   *store
 }
@@ -68,4 +69,24 @@ type notifyData struct {
 	fetcher index.Fetcher
 	reason  box.UpdateReason
 	zid     id.Zid
+}
+
+// ReadStats populates st with index statistics.
+func (idx *Index) ReadStats(st *index.Stats) {
+	idx.mx.RLock()
+	defer idx.mx.RUnlock()
+
+	store := idx.store
+	store.mx.RLock()
+	defer store.mx.RUnlock()
+	st.NumZettel = len(store.zidNum)
+	st.NumWords = store.voc.Count()
+	st.Vocabulary = store.voc.StoreLen()
+
+	stats := idx.stats
+	stats.mx.RLock()
+	defer stats.mx.RUnlock()
+	st.UpdatedZettel = stats.updates
+	st.RemovedZettel = stats.removes
+	st.NumReloads = stats.maxGen
 }

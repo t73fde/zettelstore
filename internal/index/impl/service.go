@@ -38,7 +38,8 @@ func (idx *Index) Start() {
 		return // already running
 	}
 
-	idx.store = &store{}
+	idx.stats = &stats{}
+	idx.store = makeStore(idx.stats) // TODO: configurable sizeHint for voc
 
 	ctx, cancel := context.WithCancel(context.Background())
 	idx.cancel = cancel
@@ -46,19 +47,19 @@ func (idx *Index) Start() {
 	idx.pending = &pendingQueue{maxLoad: 1000} // TODO: maxLoad could be configurable?
 	idx.notify = make(chan notifyData, 10)     // TODO: make 10 configurable?
 
-	store := make(chan storeData, 4) // TODO: make configurable?
-	parse := make(chan parseData, 4) // TODO: make configurable?
-	wake := make(chan struct{}, 1)   // collector signals fetcher that new data was placed in pending.
+	storeCh := make(chan storeData, 4) // TODO: make configurable?
+	parseCh := make(chan parseData, 4) // TODO: make configurable?
+	wakeCh := make(chan struct{}, 1)   // collector signals fetcher that new data was placed in pending.
 
-	storeSrv := storeService{logger: idx.logger.With("service", "store")}
+	storeSrv := storeService{logger: idx.logger.With("service", "store"), store: idx.store}
 	parseSrv := parseService{logger: idx.logger.With("service", "parse"), config: idx.config}
 	fetchSrv := fetchService{logger: idx.logger.With("service", "fetcher")}
 	collectSrv := collectService{logger: idx.logger.With("service", "collector")}
 
-	idx.spawn(ctx, "IndexStore", func() { storeSrv.service(store) })
-	idx.spawn(ctx, "IndexParser", func() { parseSrv.service(ctx, parse, store) })
-	idx.spawn(ctx, "IndexFetcher", func() { fetchSrv.service(ctx, wake, idx.pending, parse) })
-	idx.spawn(ctx, "IndexCollector", func() { collectSrv.service(idx.notify, idx.pending, wake) })
+	idx.spawn(ctx, "IndexStore", func() { storeSrv.service(storeCh) })
+	idx.spawn(ctx, "IndexParser", func() { parseSrv.service(ctx, parseCh, storeCh) })
+	idx.spawn(ctx, "IndexFetcher", func() { fetchSrv.service(ctx, wakeCh, idx.pending, parseCh) })
+	idx.spawn(ctx, "IndexCollector", func() { collectSrv.service(idx.notify, idx.pending, wakeCh) })
 
 	idx.logger.Debug("Started")
 }
@@ -74,7 +75,7 @@ func (idx *Index) Stop() {
 	close(idx.notify)
 	idx.cancel() // interrupts blocking GetZettel / FetchZids
 	idx.wg.Wait()
-	idx.store, idx.notify, idx.pending, idx.cancel = nil, nil, nil, nil
+	idx.stats, idx.store, idx.notify, idx.pending, idx.cancel = nil, nil, nil, nil, nil
 }
 
 // collectService receives update notifications and adds them to an unlimited
@@ -219,18 +220,22 @@ type storeData struct {
 
 type storeService struct {
 	logger *slog.Logger
+	store  *store
 }
 
 func (ssrv *storeService) service(in <-chan storeData) {
 	for sd := range in {
 		if sd.zettel == nil {
-			ssrv.logger.Info("Deleted", "zid", sd.zid)
-			// TODO: remove data from store
+			ssrv.logger.Info("Deleted", "zid", sd.zid, "generation", sd.generation)
+			ssrv.store.removeZettel(sd.zid, sd.generation)
 			continue
 		}
-		ssrv.logger.Info("Update", "zid", sd.zid)
-		// TODO: update zettel in store.
-
+		ssrv.logger.Info("Update", "zid", sd.zid, "generation", sd.generation)
+		if sd.zid != sd.zettel.Zid {
+			ssrv.logger.Error("Differing Zids: queue (%s) vs parsed zettel (%s)", sd.zid.String(), sd.zettel.Zid.String())
+			sd.zettel.Zid = sd.zid
+		}
+		ssrv.store.updateZettel(sd.zettel, sd.generation)
 	}
 
 	ssrv.logger.Info("Finalforget")

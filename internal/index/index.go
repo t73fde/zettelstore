@@ -66,4 +66,18 @@ type Index interface {
 
 	// Entrich metadata with data from search index.
 	Enrich(context.Context, *meta.Meta)
+
+	// ReadStats populates st with index statistics.
+	ReadStats(st *Stats)
+}
+
+// Stats records statistics about the box.
+type Stats struct {
+	NumZettel  int
+	NumWords   int
+	Vocabulary int
+
+	UpdatedZettel uint64
+	RemovedZettel uint64
+	NumReloads    uint64
 }

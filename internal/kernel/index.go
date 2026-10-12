@@ -15,6 +15,7 @@ package kernel
 
 import (
 	"log/slog"
+	"strconv"
 	"sync"
 
 	"zettelstore.de/z/internal/index"
@@ -62,4 +63,18 @@ func (is *indexService) Stop(*Kernel) {
 	is.mxService.Unlock()
 
 }
-func (is *indexService) GetStatistics() []KeyValue { return nil }
+
+func (is *indexService) GetStatistics() []KeyValue {
+	var st index.Stats
+	is.mxService.RLock()
+	is.indexer.ReadStats(&st)
+	is.mxService.RUnlock()
+	return []KeyValue{
+		{Key: "Zettel", Value: strconv.Itoa(st.NumZettel)},
+		{Key: "Words / Fragments", Value: strconv.Itoa(st.NumWords)},
+		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},
+		{Key: "Updated zettel", Value: strconv.FormatUint(st.UpdatedZettel, 10)},
+		{Key: "Removed zettel", Value: strconv.FormatUint(st.RemovedZettel, 10)},
+		{Key: "Reloads", Value: strconv.FormatUint(st.NumReloads, 10)},
+	}
+}
