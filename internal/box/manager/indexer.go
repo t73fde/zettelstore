@@ -32,7 +32,7 @@ import (
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchEqual(word string) idset.ZidSet {
+func (mgr *Manager) SearchEqual(word string) *idset.SearchResult {
 	found := mgr.index.SearchEqual(word)
 	foundOld := mgr.idxStore.SearchEqual(word)
 	if !found.Equal(foundOld) {
@@ -45,7 +45,7 @@ func (mgr *Manager) SearchEqual(word string) idset.ZidSet {
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchPrefix(prefix string) idset.ZidSet {
+func (mgr *Manager) SearchPrefix(prefix string) *idset.SearchResult {
 	found := mgr.index.SearchPrefix(prefix)
 	foundOld := mgr.idxStore.SearchPrefix(prefix)
 	if !found.Equal(foundOld) {
@@ -58,7 +58,7 @@ func (mgr *Manager) SearchPrefix(prefix string) idset.ZidSet {
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchSuffix(suffix string) idset.ZidSet {
+func (mgr *Manager) SearchSuffix(suffix string) *idset.SearchResult {
 	found := mgr.index.SearchSuffix(suffix)
 	foundOld := mgr.idxStore.SearchSuffix(suffix)
 	if !found.Equal(foundOld) {
@@ -71,7 +71,7 @@ func (mgr *Manager) SearchSuffix(suffix string) idset.ZidSet {
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchContains(s string) idset.ZidSet {
+func (mgr *Manager) SearchContains(s string) *idset.SearchResult {
 	found := mgr.index.SearchContains(s)
 	foundOld := mgr.idxStore.SearchContains(s)
 	if !found.Equal(foundOld) {
