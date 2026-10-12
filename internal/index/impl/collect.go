@@ -15,20 +15,50 @@ package impl
 
 import (
 	"t73f.de/r/sx"
+	"t73f.de/r/zero/dense"
+	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
+	"t73f.de/r/zero/vocab"
+	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
+	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 )
 
 // Collect data for one specific zettel.
 
-func (st *store) collect(szid storeZid, blocks *sx.Pair) {
-	zc := zettelCollector{st, szid}
-	zsx.WalkIt(&zc, blocks, nil)
-}
+type storeMeta map[vocab.WordID]meta.Value
 
 type zettelCollector struct {
-	store *store
+	// Input
+	dense *dense.Dense[id.Zid, storeZid]
+	voc   *vocab.Vocabulary
 	szid  storeZid
+
+	// Output
+	meta  storeMeta
+	words roster.Roster[vocab.WordID]
+	refs  roster.Roster[storeZid]
+	urls  roster.Roster[string]
+}
+
+func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
+	zc.meta = make(storeMeta)
+	for k, v := range m.All() {
+		keyId := zc.voc.AddString(k)
+		zc.words.Insert(keyId)
+		for word := range zerostrings.NormalizeWordSeq(string(v)) {
+			zc.words.Insert(zc.voc.AddBytes(word))
+		}
+		zc.meta[keyId] = v
+	}
+
+	if mustIndexZettel(m) {
+		zsx.WalkIt(zc, blocks, nil)
+	}
+}
+func mustIndexZettel(m *meta.Meta) bool {
+	return m.Zid >= id.Zid(999999900)
 }
 
 func (zc *zettelCollector) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
@@ -45,16 +75,13 @@ func (zc *zettelCollector) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 		zc.addText(s)
 	case zsx.SymLink:
 		_, ref, _ := zsx.GetLink(node)
-		// data.addRef(ref)
-		_ = ref
+		zc.addRef(ref)
 	case zsx.SymEmbed:
 		_, ref, _, _ := zsx.GetEmbed(node)
-		// data.addRef(ref)
-		_ = ref
+		zc.addRef(ref)
 	case zsx.SymTransclude:
 		_, ref, _ := zsx.GetTransclusion(node)
-		// data.addRef(ref)
-		_ = ref
+		zc.addRef(ref)
 	case zsx.SymCite:
 		_, key, _ := zsx.GetCite(node)
 		zc.addText(key)
@@ -64,6 +91,16 @@ func (zc *zettelCollector) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 func (zc *zettelCollector) VisitItAfter(*sx.Pair, *sx.Pair) {}
 func (zc *zettelCollector) addText(s string) {
 	for word := range zerostrings.NormalizeWordSeq(s) {
-		_ = zc.store.voc.AddBytes(word)
+		zc.words.Insert(zc.voc.AddBytes(word))
+	}
+}
+func (zc *zettelCollector) addRef(ref *sx.Pair) {
+	sym, refValue := zsx.GetReference(ref)
+	if zsx.SymRefStateExternal.IsEqual(sym) {
+		zc.urls.Insert(refValue)
+	} else if sz.SymRefStateZettel.IsEqual(sym) {
+		if zid, err := id.Parse(refValue); err == nil {
+			zc.refs.Insert(zc.dense.Encode(zid))
+		}
 	}
 }

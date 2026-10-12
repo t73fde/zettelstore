@@ -27,14 +27,16 @@ type store struct {
 	stats *stats
 
 	mx    sync.RWMutex
-	dense dense.Dense[id.Zid, storeZid]
+	dense *denser
 	voc   *vocab.Vocabulary
 }
 type storeZid uint32
+type denser = dense.Dense[id.Zid, storeZid]
 
 func makeStore(stats *stats) *store {
 	result := &store{
 		stats: stats,
+		dense: &denser{},
 		voc:   vocab.New(0),
 	}
 	return result
@@ -45,7 +47,12 @@ func (st *store) updateZettel(ztl *zettel.ParsedZettel, generation uint64) {
 	defer st.mx.Unlock()
 
 	szid := st.dense.Encode(ztl.Zid)
-	st.collect(szid, ztl.Blocks)
+	zc := zettelCollector{
+		dense: st.dense,
+		voc:   st.voc,
+		szid:  szid,
+	}
+	zc.collect(ztl.Meta, ztl.Blocks)
 	st.stats.finishUpdateZettel(generation)
 }
 
