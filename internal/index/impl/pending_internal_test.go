@@ -14,6 +14,7 @@
 package impl
 
 import (
+	"runtime"
 	"sync"
 	"testing"
 
@@ -66,10 +67,13 @@ func checkInvariants(t *testing.T, pq *pendingQueue) {
 		if len(b.members) == 0 {
 			t.Error("empty batch in queue")
 		}
-		if b.isReload && b != pq.first {
+		if b.isReload() && b != pq.first {
 			t.Error("reload batch not at the front")
 		}
-		if !b.isReload && pq.maxLoad > 0 && len(b.members) > pq.maxLoad {
+		if b.isReload() && b.generation > pq.generation {
+			t.Errorf("batch generation %d is greater than queue generation %d", b.generation, pq.generation)
+		}
+		if !b.isReload() && pq.maxLoad > 0 && len(b.members) > pq.maxLoad {
 			t.Errorf("batch has %d members, maxLoad is %d", len(b.members), pq.maxLoad)
 		}
 	}
@@ -94,6 +98,9 @@ func TestInvalidInputIgnored(t *testing.T) {
 	pq.reload(nil, zidSet(1, 2))
 	if jobs := drain(pq); len(jobs) != 0 {
 		t.Errorf("expected no jobs, got %d", len(jobs))
+	}
+	if pq.generation != 0 {
+		t.Errorf("generation = %d after ignored calls, want 0", pq.generation)
 	}
 	checkInvariants(t, pq)
 }
@@ -169,8 +176,8 @@ func TestReloadBatchComesFirst(t *testing.T) {
 	}
 	for i, job := range jobs {
 		wantReload := i < 2
-		if job.fromReload != wantReload {
-			t.Errorf("job %d: fromReload=%v, want %v", i, job.fromReload, wantReload)
+		if job.fromReload() != wantReload {
+			t.Errorf("job %d: fromReload()=%v, want %v", i, job.fromReload(), wantReload)
 		}
 		if wantReload && job.fetcher != index.Fetcher(fr) {
 			t.Errorf("job %d: wrong fetcher", i)
@@ -188,7 +195,7 @@ func TestAddZettelNeverEntersReloadBatch(t *testing.T) {
 	pq.addZettel(fz, zid(2)) // last batch is a reload batch -> new batch
 	checkInvariants(t, pq)
 	for _, job := range drain(pq) {
-		if job.zid == zid(2) && job.fromReload {
+		if job.zid == zid(2) && job.fromReload() {
 			t.Error("zettel 2 was put into the reload batch")
 		}
 	}
@@ -204,7 +211,7 @@ func TestReloadReplacesPreviousReloadKeepsZettel(t *testing.T) {
 
 	got := map[id.Zid]bool{}
 	for _, job := range drain(pq) {
-		got[job.zid] = job.fromReload
+		got[job.zid] = job.fromReload()
 	}
 	if len(got) != 2 || !got[zid(3)] || got[zid(9)] {
 		t.Errorf("expected {3: reload, 9: zettel}, got %v", got)
@@ -230,7 +237,13 @@ func TestResetDeliveredOnceAndFirst(t *testing.T) {
 
 	job := pq.getJob()
 	if job.action != pendingReset || job.fetcher != index.Fetcher(fr) {
-		t.Fatalf("expected pendingReload with reset fetcher, got %+v", job)
+		t.Fatalf("expected pendingReset with reset fetcher, got %+v", job)
+	}
+	if job.generation != 1 {
+		t.Errorf("reset job generation = %d, want 1", job.generation)
+	}
+	if job.fromReload() {
+		t.Error("reset job must not report fromReload()")
 	}
 	if job = pq.getJob(); job.action != pendingNothing {
 		t.Errorf("expected pendingNothing after reset was delivered, got %+v", job)
@@ -260,11 +273,99 @@ func TestResetThenReloadOrder(t *testing.T) {
 	if len(jobs) != 2 {
 		t.Fatalf("expected 2 jobs, got %d", len(jobs))
 	}
-	if jobs[0].action != pendingReset {
-		t.Errorf("first job must be the reset signal, got %+v", jobs[0])
+	if jobs[0].action != pendingReset || jobs[0].generation != 1 {
+		t.Errorf("first job must be the reset signal of generation 1, got %+v", jobs[0])
 	}
-	if jobs[1].action != pendingZettel || jobs[1].zid != zid(5) || !jobs[1].fromReload {
-		t.Errorf("second job must be zettel 5 from reload, got %+v", jobs[1])
+	if jobs[1].action != pendingZettel || jobs[1].zid != zid(5) || !jobs[1].fromReload() || jobs[1].generation != 1 {
+		t.Errorf("second job must be zettel 5 from the reload of generation 1, got %+v", jobs[1])
+	}
+}
+
+// TestJobGenerations covers the system start: a reset is followed by a reload
+// (triggered by the fetch service). Both belong to the same generation.
+func TestJobGenerations(t *testing.T) {
+	pq := &pendingQueue{}
+	f := &fakeFetcher{name: "f"}
+	pq.reset(nil)             // ignored
+	pq.reload(nil, zidSet(1)) // ignored
+	pq.reset(f)               // generation 1
+	pq.reload(f, zidSet(2))   // belongs to generation 1
+	pq.addZettel(f, zid(3))   // individual zettel: generation 0
+
+	jobs := drain(pq)
+	if len(jobs) != 3 {
+		t.Fatalf("expected 3 jobs, got %d", len(jobs))
+	}
+	if jobs[0].action != pendingReset || jobs[0].generation != 1 {
+		t.Errorf("reset job: %+v", jobs[0])
+	}
+	if jobs[1].zid != zid(2) || jobs[1].generation != 1 || !jobs[1].fromReload() {
+		t.Errorf("reload job: %+v", jobs[1])
+	}
+	if jobs[2].zid != zid(3) || jobs[2].generation != 0 || jobs[2].fromReload() {
+		t.Errorf("individual job: %+v", jobs[2])
+	}
+}
+
+func TestSecondResetIncrementsGeneration(t *testing.T) {
+	pq := &pendingQueue{}
+	f := &fakeFetcher{name: "f"}
+	pq.reset(f)
+	pq.reset(f) // overwrites the pending reset, generation 2
+	pq.reload(f, zidSet(1))
+
+	jobs := drain(pq)
+	if len(jobs) != 2 {
+		t.Fatalf("expected 2 jobs, got %d", len(jobs))
+	}
+	if jobs[0].action != pendingReset || jobs[0].generation != 2 {
+		t.Errorf("reset job: %+v", jobs[0])
+	}
+	if jobs[1].generation != 2 || !jobs[1].fromReload() {
+		t.Errorf("reload job: %+v", jobs[1])
+	}
+}
+
+func TestReloadWithoutResetStartsGeneration1(t *testing.T) {
+	pq := &pendingQueue{}
+	f := &fakeFetcher{name: "f"}
+	pq.reload(f, zidSet(1))
+
+	jobs := drain(pq)
+	if len(jobs) != 1 || jobs[0].generation != 1 || !jobs[0].fromReload() {
+		t.Errorf("expected one reload job of generation 1, got %+v", jobs)
+	}
+}
+
+func TestReloadDoesNotIncrementGeneration(t *testing.T) {
+	pq := &pendingQueue{}
+	f := &fakeFetcher{name: "f"}
+	pq.reset(f)
+	pq.reload(f, zidSet(1))
+	pq.reload(f, zidSet(2))
+	pq.reload(f, idset.ZidSet{})
+	if pq.generation != 1 {
+		t.Errorf("generation = %d after reset and reloads, want 1", pq.generation)
+	}
+}
+
+func TestBatchGenerations(t *testing.T) {
+	pq := &pendingQueue{}
+	f := &fakeFetcher{name: "f"}
+	pq.reset(f)
+	pq.addZettel(f, zid(1))
+	pq.reload(f, zidSet(2))
+	pq.addZettel(f, zid(3))
+
+	pq.mx.Lock()
+	defer pq.mx.Unlock()
+	for b := pq.first; b != nil; b = b.next {
+		if b == pq.first && b.generation != 1 {
+			t.Errorf("reload batch has generation %d, want 1", b.generation)
+		}
+		if b != pq.first && b.generation != 0 {
+			t.Errorf("individual batch has generation %d, want 0", b.generation)
+		}
 	}
 }
 
@@ -285,9 +386,11 @@ func TestConcurrent(t *testing.T) {
 			}
 		}()
 	}
+	producersDone := make(chan struct{})
+	go func() { wg.Wait(); close(producersDone) }()
 
-	done := make(chan struct{})
 	seen := map[id.Zid]bool{}
+	done := make(chan struct{})
 	go func() {
 		defer close(done)
 		for {
@@ -297,12 +400,13 @@ func TestConcurrent(t *testing.T) {
 				continue
 			}
 			select {
-			case <-stop(&wg):
+			case <-producersDone:
 				for _, job := range drain(pq) {
 					seen[job.zid] = true
 				}
 				return
 			default:
+				runtime.Gosched()
 			}
 		}
 	}()
@@ -312,11 +416,4 @@ func TestConcurrent(t *testing.T) {
 		t.Errorf("expected %d distinct zettel, got %d", producers*perProducer, len(seen))
 	}
 	checkInvariants(t, pq)
-}
-
-// stop returns a channel that is closed when wg is done.
-func stop(wg *sync.WaitGroup) <-chan struct{} {
-	ch := make(chan struct{})
-	go func() { wg.Wait(); close(ch) }()
-	return ch
 }

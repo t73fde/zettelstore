@@ -28,12 +28,13 @@ type pendingQueue struct {
 	last         *pendingBatch
 	maxLoad      int
 	resetFetcher index.Fetcher // non-nil: pendingReload to be delivered first
+	generation   uint64        // number of accepted resets and reloads so far
 }
 
 type pendingBatch struct {
-	next     *pendingBatch
-	members  memberSet
-	isReload bool
+	next       *pendingBatch
+	members    memberSet
+	generation uint64 // >0: reload batch created in that generation; 0: individual zettel
 }
 type memberSet map[id.Zid]index.Fetcher
 
@@ -48,6 +49,7 @@ func (pb *pendingBatch) pop() (index.Fetcher, id.Zid) {
 	}
 	return nil, id.Invalid
 }
+func (pb *pendingBatch) isReload() bool { return pb.generation != 0 }
 
 func (pq *pendingQueue) reset(fetcher index.Fetcher) {
 	if fetcher == nil {
@@ -55,6 +57,7 @@ func (pq *pendingQueue) reset(fetcher index.Fetcher) {
 	}
 	pq.mx.Lock()
 	defer pq.mx.Unlock()
+	pq.generation++
 	pq.first, pq.last = nil, nil
 	pq.resetFetcher = fetcher
 }
@@ -67,7 +70,7 @@ func (pq *pendingQueue) addZettel(fetcher index.Fetcher, zid id.Zid) {
 	defer pq.mx.Unlock()
 
 	for batch := pq.first; batch != nil; batch = batch.next {
-		if batch.isReload {
+		if batch.isReload() {
 			continue // Do not put zettel in reload batch
 		}
 		if batch.has(zid) {
@@ -75,11 +78,11 @@ func (pq *pendingQueue) addZettel(fetcher index.Fetcher, zid id.Zid) {
 			return
 		}
 	}
-	if batch := pq.last; batch != nil && !batch.isReload && (pq.maxLoad == 0 || len(batch.members) < pq.maxLoad) {
+	if batch := pq.last; batch != nil && !batch.isReload() && (pq.maxLoad == 0 || len(batch.members) < pq.maxLoad) {
 		batch.members[zid] = fetcher
 		return
 	}
-	batch := &pendingBatch{members: memberSet{zid: fetcher}}
+	batch := &pendingBatch{members: memberSet{zid: fetcher}} // generation 0: individual zettel
 	if pq.last == nil {
 		pq.first = batch
 	} else {
@@ -102,15 +105,18 @@ func (pq *pendingQueue) reload(fetcher index.Fetcher, allZids idset.ZidSet) {
 
 	pq.mx.Lock()
 	defer pq.mx.Unlock()
+	if pq.generation == 0 {
+		pq.generation = 1 // reload without preceding reset: start the first generation
+	}
 	if members == nil {
 		pq.first, pq.last = nil, nil
 		return
 	}
 	batch := pq.first
-	for batch != nil && batch.isReload {
+	for batch != nil && batch.isReload() {
 		batch = batch.next
 	}
-	pq.first = &pendingBatch{next: batch, members: members, isReload: true}
+	pq.first = &pendingBatch{next: batch, members: members, generation: pq.generation}
 	if batch == nil {
 		pq.last = pq.first
 	}
@@ -120,10 +126,13 @@ func (pq *pendingQueue) reload(fetcher index.Fetcher, allZids idset.ZidSet) {
 
 // pendingJob is the result of getJob.
 type pendingJob struct {
-	fetcher    index.Fetcher
-	zid        id.Zid
-	action     pendingAction
-	fromReload bool // zettel stems from a reload batch
+	fetcher index.Fetcher
+	zid     id.Zid
+	action  pendingAction
+
+	// pendingReset: generation of the reset;
+	// pendingZettel: generation of the reload batch, 0 for an individual zettel
+	generation uint64
 }
 
 type pendingAction uint8
@@ -141,7 +150,7 @@ func (pq *pendingQueue) getJob() pendingJob {
 	// A pending reset is delivered first.
 	if f := pq.resetFetcher; f != nil {
 		pq.resetFetcher = nil
-		return pendingJob{fetcher: f, action: pendingReset}
+		return pendingJob{fetcher: f, action: pendingReset, generation: pq.generation}
 	}
 
 	for batch := pq.first; batch != nil; batch = pq.first {
@@ -153,7 +162,7 @@ func (pq *pendingQueue) getJob() pendingJob {
 		if len(batch.members) == 0 {
 			pq.removeFirst()
 		}
-		return pendingJob{fetcher: fetcher, zid: zid, action: pendingZettel, fromReload: batch.isReload}
+		return pendingJob{fetcher: fetcher, zid: zid, action: pendingZettel, generation: batch.generation}
 	}
 	return pendingJob{action: pendingNothing}
 }
@@ -163,3 +172,4 @@ func (pq *pendingQueue) removeFirst() {
 		pq.last = nil
 	}
 }
+func (j pendingJob) fromReload() bool { return j.action == pendingZettel && j.generation != 0 }
