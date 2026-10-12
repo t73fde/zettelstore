@@ -153,9 +153,10 @@ func zidsToValue(s idset.ZidSet) meta.Value {
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchEqual(word string) (result idset.ZidSet) {
+func (ms *mapStore) SearchEqual(word string) *idset.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
+	var result idset.ZidSet
 	if refs, ok := ms.words[word]; ok {
 		result.Or(refs)
 	}
@@ -164,30 +165,30 @@ func (ms *mapStore) SearchEqual(word string) (result idset.ZidSet) {
 	}
 	zid, err := id.Parse(word)
 	if err != nil {
-		return result
+		return idset.NewSearchResult(result)
 	}
 	zi, ok := ms.idx[zid]
 	if !ok {
-		return result
+		return idset.NewSearchResult(result)
 	}
 
 	addBackwardZids(&result, zid, zi)
-	return result
+	return idset.NewSearchResult(result)
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchPrefix(prefix string) idset.ZidSet {
+func (ms *mapStore) SearchPrefix(prefix string) *idset.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(prefix, strings.HasPrefix)
 	l := len(prefix)
 	if l > 14 {
-		return result
+		return idset.NewSearchResult(result)
 	}
 	maxZid, err := id.Parse(prefix + "99999999999999"[:14-l])
 	if err != nil {
-		return result
+		return idset.NewSearchResult(result)
 	}
 	var minZid id.Zid
 	if l < 14 && prefix == "0000000000000"[:l] {
@@ -195,7 +196,7 @@ func (ms *mapStore) SearchPrefix(prefix string) idset.ZidSet {
 	} else {
 		minZid, err = id.Parse(prefix + "00000000000000"[:14-l])
 		if err != nil {
-			return result
+			return idset.NewSearchResult(result)
 		}
 	}
 	for zid, zi := range ms.idx {
@@ -203,22 +204,22 @@ func (ms *mapStore) SearchPrefix(prefix string) idset.ZidSet {
 			addBackwardZids(&result, zid, zi)
 		}
 	}
-	return result
+	return idset.NewSearchResult(result)
 }
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchSuffix(suffix string) idset.ZidSet {
+func (ms *mapStore) SearchSuffix(suffix string) *idset.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(suffix, strings.HasSuffix)
 	l := len(suffix)
 	if l > 14 {
-		return result
+		return idset.NewSearchResult(result)
 	}
 	val, err := id.ParseUint(suffix)
 	if err != nil {
-		return result
+		return idset.NewSearchResult(result)
 	}
 	modulo := uint64(1)
 	for range l {
@@ -229,27 +230,27 @@ func (ms *mapStore) SearchSuffix(suffix string) idset.ZidSet {
 			addBackwardZids(&result, zid, zi)
 		}
 	}
-	return result
+	return idset.NewSearchResult(result)
 }
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchContains(s string) idset.ZidSet {
+func (ms *mapStore) SearchContains(s string) *idset.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(s, strings.Contains)
 	if len(s) > 14 {
-		return result
+		return idset.NewSearchResult(result)
 	}
 	if _, err := id.ParseUint(s); err != nil {
-		return result
+		return idset.NewSearchResult(result)
 	}
 	for zid, zi := range ms.idx {
 		if strings.Contains(zid.String(), s) {
 			addBackwardZids(&result, zid, zi)
 		}
 	}
-	return result
+	return idset.NewSearchResult(result)
 }
 
 func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) (result idset.ZidSet) {

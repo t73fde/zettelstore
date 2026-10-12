@@ -30,19 +30,19 @@ import (
 type Searcher interface {
 	// Select all zettel that contains the given exact word.
 	// The word must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchEqual(word string) idset.ZidSet
+	SearchEqual(word string) *idset.SearchResult
 
 	// Select all zettel that have a word with the given prefix.
 	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchPrefix(prefix string) idset.ZidSet
+	SearchPrefix(prefix string) *idset.SearchResult
 
 	// Select all zettel that have a word with the given suffix.
 	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchSuffix(suffix string) idset.ZidSet
+	SearchSuffix(suffix string) *idset.SearchResult
 
 	// Select all zettel that contains the given string.
 	// The string must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchContains(s string) idset.ZidSet
+	SearchContains(s string) *idset.SearchResult
 }
 
 // Query specifies a mechanism for querying zettel.
@@ -434,19 +434,22 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) idset.RetrievePredicate {
 		if negatives.IsEmpty() {
 			return neverIncluded
 		}
-		return func(zid id.Zid) bool { return !negatives.Contains(zid) }
+		negativePred := negatives.MakePredicate()
+		return func(zid id.Zid) bool { return !negativePred(zid) }
 	}
+	positivePred := positives.MakePredicate()
 	if len(negCalls) == 0 {
 		// Positive search found something, but there is no negative search.
-		return positives.Contains
+		return positivePred
 	}
 	negatives := retrieveNegatives(negCalls)
 	if negatives.IsEmpty() {
-		return positives.Contains
+		return positivePred
 	}
 	return func(zid id.Zid) bool {
 		// negatives != nil
-		return positives.Contains(zid) && !negatives.Contains(zid)
+		negativePred := negatives.MakePredicate()
+		return positivePred(zid) && !negativePred(zid)
 	}
 }
 
