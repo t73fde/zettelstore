@@ -131,7 +131,7 @@ type pendingAction uint8
 const (
 	pendingNothing pendingAction = iota
 	pendingZettel
-	pendingReload
+	pendingReset
 )
 
 func (pq *pendingQueue) getJob() pendingJob {
@@ -141,7 +141,7 @@ func (pq *pendingQueue) getJob() pendingJob {
 	// A pending reset is delivered first.
 	if f := pq.resetFetcher; f != nil {
 		pq.resetFetcher = nil
-		return pendingJob{fetcher: f, action: pendingReload}
+		return pendingJob{fetcher: f, action: pendingReset}
 	}
 
 	for batch := pq.first; batch != nil; batch = pq.first {

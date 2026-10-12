@@ -161,7 +161,7 @@ func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pen
 				}
 				out <- parseData{zid: job.zid, zettel: zettel, deleted: false}
 
-			case pendingReload:
+			case pendingReset:
 				fsrv.logger.Info("Reload", "fromReload", job.fromReload)
 				zids, err := job.fetcher.FetchZids(ctx)
 				if err != nil {

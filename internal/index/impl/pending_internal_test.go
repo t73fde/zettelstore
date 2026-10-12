@@ -229,7 +229,7 @@ func TestResetDeliveredOnceAndFirst(t *testing.T) {
 	pq.reset(fr) // clears the queue
 
 	job := pq.getJob()
-	if job.action != pendingReload || job.fetcher != index.Fetcher(fr) {
+	if job.action != pendingReset || job.fetcher != index.Fetcher(fr) {
 		t.Fatalf("expected pendingReload with reset fetcher, got %+v", job)
 	}
 	if job = pq.getJob(); job.action != pendingNothing {
@@ -245,7 +245,7 @@ func TestResetSurvivesFollowingReload(t *testing.T) {
 	pq.reload(fl, idset.ZidSet{}) // even an empty reload keeps the reset signal
 
 	jobs := drain(pq)
-	if len(jobs) != 1 || jobs[0].action != pendingReload || jobs[0].fetcher != index.Fetcher(fr) {
+	if len(jobs) != 1 || jobs[0].action != pendingReset || jobs[0].fetcher != index.Fetcher(fr) {
 		t.Errorf("expected exactly the reset signal, got %+v", jobs)
 	}
 }
@@ -260,7 +260,7 @@ func TestResetThenReloadOrder(t *testing.T) {
 	if len(jobs) != 2 {
 		t.Fatalf("expected 2 jobs, got %d", len(jobs))
 	}
-	if jobs[0].action != pendingReload {
+	if jobs[0].action != pendingReset {
 		t.Errorf("first job must be the reset signal, got %+v", jobs[0])
 	}
 	if jobs[1].action != pendingZettel || jobs[1].zid != zid(5) || !jobs[1].fromReload {
