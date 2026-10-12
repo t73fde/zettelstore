@@ -79,7 +79,7 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	store := idx.store
 	store.mx.RLock()
 	defer store.mx.RUnlock()
-	st.NumZettel = len(store.zidNum)
+	st.NumZettel = store.dense.Count()
 	st.NumWords = store.voc.Count()
 	st.Vocabulary = store.voc.StoreLen()
 
