@@ -14,8 +14,6 @@
 package compbox
 
 import (
-	"context"
-
 	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -29,21 +27,21 @@ func genVersionBuildM(zid id.Zid) *meta.Meta {
 	m.Set(meta.KeyVisibility, meta.ValueVisibilityLogin)
 	return m
 }
-func genVersionBuildC(context.Context, *compBox) []byte {
+func genVersionBuildC() []byte {
 	return []byte(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreVersion).(semver.SemVer).String())
 }
 
 func genVersionHostM(zid id.Zid) *meta.Meta {
 	return getTitledMeta(zid, "Zettelstore Host")
 }
-func genVersionHostC(context.Context, *compBox) []byte {
+func genVersionHostC() []byte {
 	return []byte(kernel.Main.GetConfig(kernel.CoreService, kernel.CoreHostname).(string))
 }
 
 func genVersionOSM(zid id.Zid) *meta.Meta {
 	return getTitledMeta(zid, "Zettelstore Operating System")
 }
-func genVersionOSC(context.Context, *compBox) []byte {
+func genVersionOSC() []byte {
 	goOS := kernel.Main.GetConfig(kernel.CoreService, kernel.CoreGoOS).(string)
 	goArch := kernel.Main.GetConfig(kernel.CoreService, kernel.CoreGoArch).(string)
 	result := make([]byte, 0, len(goOS)+len(goArch)+1)

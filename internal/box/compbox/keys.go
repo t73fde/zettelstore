@@ -14,8 +14,6 @@
 package compbox
 
 import (
-	"bytes"
-	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -33,15 +31,16 @@ func genKeysM(zid id.Zid) *meta.Meta {
 	return m
 }
 
-func genKeysC(context.Context, *compBox) []byte {
+func genKeysC() []byte {
 	keys := slices.SortedFunc(
 		meta.KeyDescriptionSeq(),
 		func(a, b meta.DescriptionKey) int { return strings.Compare(a.Name, b.Name) })
-	var buf bytes.Buffer
-	buf.WriteString("|=Name<|=Type<|=Computed?:|=Property?:\n")
+	var buf []byte
+	buf = append(buf, "|=Name<|=Type<|=Computed?:|=Property?:\n"...)
 	for _, kd := range keys {
-		fmt.Fprintf(&buf,
-			"|[[%v|query:%v?]]|%v|%v|%v\n", kd.Name, kd.Name, kd.Type.Name, kd.IsComputed(), kd.IsProperty())
+		buf = fmt.Appendf(buf,
+			"|[[%v|query:%v?]]|%v|%v|%v\n", kd.Name, kd.Name,
+			kd.Type.Name, kd.IsComputed(), kd.IsProperty())
 	}
-	return buf.Bytes()
+	return buf
 }

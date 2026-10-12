@@ -14,8 +14,6 @@
 package compbox
 
 import (
-	"bytes"
-	"context"
 	"fmt"
 
 	"t73f.de/r/sx"
@@ -27,16 +25,16 @@ func genSxM(zid id.Zid) *meta.Meta {
 	return getTitledMeta(zid, "Zettelstore Sx Engine")
 }
 
-func genSxC(context.Context, *compBox) []byte {
-	var buf bytes.Buffer
-	buf.WriteString("|=Name|=Value>\n")
+func genSxC() []byte {
+	var buf []byte
+	buf = append(buf, "|=Name|=Value>\n"...)
 	numSymbols := 0
 	for pkg := range sx.AllPackages() {
 		if size := pkg.Size(); size > 0 {
-			fmt.Fprintf(&buf, "|Symbols in package %q|%d\n", pkg.Name(), size)
+			buf = fmt.Appendf(buf, "|Symbols in package %q|%d\n", pkg.Name(), size)
 			numSymbols += size
 		}
 	}
-	fmt.Fprintf(&buf, "|All symbols|%d\n", numSymbols)
-	return buf.Bytes()
+	buf = fmt.Appendf(buf, "|All symbols|%d\n", numSymbols)
+	return buf
 }

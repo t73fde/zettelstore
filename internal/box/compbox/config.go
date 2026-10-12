@@ -15,7 +15,6 @@ package compbox
 
 import (
 	"bytes"
-	"context"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -28,7 +27,7 @@ func genConfigZettelM(zid id.Zid) *meta.Meta {
 	return getTitledMeta(zid, "Zettelstore Startup Configuration")
 }
 
-func genConfigZettelC(context.Context, *compBox) []byte {
+func genConfigZettelC() []byte {
 	var buf bytes.Buffer
 	second := false
 	for key, val := range myConfig.All() {

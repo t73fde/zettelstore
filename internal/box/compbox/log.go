@@ -14,8 +14,7 @@
 package compbox
 
 import (
-	"bytes"
-	"context"
+	"fmt"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -31,25 +30,21 @@ func genLogM(zid id.Zid) *meta.Meta {
 	return m
 }
 
-func genLogC(context.Context, *compBox) []byte {
+func genLogC() []byte {
 	const tsFormat = "2006-01-02 15:04:05.999999"
-	entries := kernel.Main.RetrieveLogEntries()
-	var buf bytes.Buffer
-	for _, entry := range entries {
+	var buf []byte
+	for _, entry := range kernel.Main.RetrieveLogEntries() {
 		ts := entry.TS.Format(tsFormat)
-		buf.WriteString(ts)
+		buf = append(buf, ts...)
 		for j := len(ts); j < len(tsFormat); j++ {
-			buf.WriteByte('0')
+			buf = append(buf, '0')
 		}
-		buf.WriteByte(' ')
-		buf.WriteString(logging.LevelStringPad(entry.Level))
-		buf.WriteByte(' ')
-		buf.WriteString(entry.Prefix)
-		buf.WriteByte(' ')
-		buf.WriteString(entry.Message)
-		buf.WriteByte(' ')
-		buf.WriteString(entry.Details)
-		buf.WriteByte('\n')
+		buf = fmt.Appendf(buf, " %s %s %s %s\n",
+			logging.LevelStringPad(entry.Level),
+			entry.Prefix,
+			entry.Message,
+			entry.Details,
+		)
 	}
-	return buf.Bytes()
+	return buf
 }
