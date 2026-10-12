@@ -21,3 +21,6 @@ import (
 
 // ZidSet is a set of zettel identifier, stored as an sorted array.
 type ZidSet = roster.Roster[id.Zid]
+
+// RetrievePredicate returns true, if the given Zid is contained somewhere.
+type RetrievePredicate func(id.Zid) bool

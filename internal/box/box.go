@@ -37,8 +37,8 @@ type (
 	// Query is a mechanism to select zettel
 	Query = query.Query
 
-	// RetrievePredicate is a bool function that show if a zettel is contained in a Query.
-	RetrievePredicate = query.RetrievePredicate
+	// RetrievePredicate is a bool function that show if a zettel is contained in a query result.
+	RetrievePredicate = idset.RetrievePredicate
 )
 
 // BaseBox is implemented by all Zettel boxes.

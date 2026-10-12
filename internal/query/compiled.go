@@ -19,6 +19,8 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+
+	"zettelstore.de/z/internal/idset"
 )
 
 // Compiled is a compiled query, to be used in a Box
@@ -45,12 +47,9 @@ func matchNever(*meta.Meta) bool  { return false }
 
 // CompiledTerm is the preprocessed sequence of conjugated search terms.
 type CompiledTerm struct {
-	Match    MetaMatchFunc     // Match on metadata
-	Retrieve RetrievePredicate // Retrieve from full-text search
+	Match    MetaMatchFunc           // Match on metadata
+	Retrieve idset.RetrievePredicate // Retrieve from full-text search
 }
-
-// RetrievePredicate returns true, if the given Zid is contained in the (full-text) search.
-type RetrievePredicate func(id.Zid) bool
 
 // AlwaysIncluded is a RetrievePredicate that always returns true.
 func AlwaysIncluded(id.Zid) bool { return true }

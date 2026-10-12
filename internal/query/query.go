@@ -395,7 +395,7 @@ func metaList2idSet(ml []*meta.Meta) (result idset.ZidSet) {
 
 func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.ZidSet) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
-	var pred RetrievePredicate
+	var pred idset.RetrievePredicate
 	if searcher != nil {
 		pred = ct.retrieveIndex(searcher)
 		if !startSet.IsEmpty() {
@@ -417,7 +417,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.Zi
 }
 
 // retrieveIndex and return a predicate to ask for results.
-func (ct *conjTerms) retrieveIndex(searcher Searcher) RetrievePredicate {
+func (ct *conjTerms) retrieveIndex(searcher Searcher) idset.RetrievePredicate {
 	if len(ct.search) == 0 {
 		return nil
 	}
