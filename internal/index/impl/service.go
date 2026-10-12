@@ -153,13 +153,13 @@ func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pen
 						break loop // cancelled by Stop: not an error, not a deletion
 					}
 					if _, notFound := errors.AsType[box.ErrZettelNotFound](err); notFound {
-						out <- parseData{zid: job.zid, deleted: true}
+						out <- parseData{zid: job.zid, generation: job.generation, deleted: true}
 					} else {
 						fsrv.logger.Error("GetZettel", "zid", job.zid, "error", err)
 					}
 					continue
 				}
-				out <- parseData{zid: job.zid, zettel: zettel, deleted: false}
+				out <- parseData{zid: job.zid, zettel: zettel, generation: job.generation, deleted: false}
 
 			case pendingReset:
 				fsrv.logger.Info("Reload", "generation", job.generation)
@@ -182,9 +182,10 @@ func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pen
 // ----- parse service ----------
 
 type parseData struct {
-	zid     id.Zid
-	zettel  zettel.Zettel
-	deleted bool
+	zid        id.Zid
+	zettel     zettel.Zettel
+	generation uint64
+	deleted    bool
 }
 
 type parseService struct {
@@ -196,13 +197,13 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 	ctx = box.NoEnrichContext(ctx)
 	for zd := range in {
 		if zd.deleted {
-			psrv.logger.Info("Deleted", "zid", zd.zid)
-			out <- storeData{zid: zd.zid, zettel: nil}
+			psrv.logger.Info("Deleted", "zid", zd.zid, "generation", zd.generation)
+			out <- storeData{zid: zd.zid, zettel: nil, generation: zd.generation}
 			continue
 		}
-		psrv.logger.Info("Update", "zid", zd.zid)
+		psrv.logger.Info("Update", "zid", zd.zid, "generation", zd.generation)
 		ztl := parser.ParseZettel(ctx, zd.zettel, "", psrv.config)
-		out <- storeData{zid: zd.zid, zettel: ztl}
+		out <- storeData{zid: zd.zid, zettel: ztl, generation: zd.generation}
 	}
 	psrv.logger.Info("NotTwoPi")
 	close(out)
@@ -211,8 +212,9 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 // ----- store service ----------
 
 type storeData struct {
-	zid    id.Zid // for use when zettel is deleted
-	zettel *zettel.ParsedZettel
+	zid        id.Zid // for use when zettel is deleted
+	zettel     *zettel.ParsedZettel
+	generation uint64
 }
 
 type storeService struct {
