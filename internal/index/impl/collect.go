@@ -47,9 +47,7 @@ func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
 	for k, v := range m.All() {
 		keyId := zc.voc.AddString(k)
 		zc.words.Insert(keyId)
-		for word := range zerostrings.NormalizeWordSeq(string(v)) {
-			zc.words.Insert(zc.voc.AddBytes(word))
-		}
+		zc.addString(string(v))
 		zc.meta[keyId] = v
 	}
 
@@ -60,19 +58,26 @@ func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
 func mustIndexZettel(m *meta.Meta) bool {
 	return m.Zid >= id.Zid(999999900)
 }
+func (zc *zettelCollector) addString(s string) {
+	for word := range zerostrings.NormalizeWordSeq(s) {
+		if len(word) <= vocab.MaxWordLen {
+			zc.words.Insert(zc.voc.AddBytes(word))
+		}
+	}
+}
 
 func (zc *zettelCollector) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	switch sym := zsx.NodeSymbol(node); sym {
 	case zsx.SymText:
-		zc.addText(zsx.GetText(node))
+		zc.addString(zsx.GetText(node))
 	case zsx.SymVerbatimCode, zsx.SymVerbatimComment, zsx.SymVerbatimEval,
 		zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:
 		_, _, s := zsx.GetVerbatim(node)
-		zc.addText(s)
+		zc.addString(s)
 	case zsx.SymLiteralCode, zsx.SymLiteralComment, zsx.SymLiteralInput,
 		zsx.SymLiteralMath, zsx.SymLiteralOutput:
 		_, _, s := zsx.GetLiteral(node)
-		zc.addText(s)
+		zc.addString(s)
 	case zsx.SymLink:
 		_, ref, _ := zsx.GetLink(node)
 		zc.addRef(ref)
@@ -84,16 +89,11 @@ func (zc *zettelCollector) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 		zc.addRef(ref)
 	case zsx.SymCite:
 		_, key, _ := zsx.GetCite(node)
-		zc.addText(key)
+		zc.addString(key)
 	}
 	return false
 }
 func (zc *zettelCollector) VisitItAfter(*sx.Pair, *sx.Pair) {}
-func (zc *zettelCollector) addText(s string) {
-	for word := range zerostrings.NormalizeWordSeq(s) {
-		zc.words.Insert(zc.voc.AddBytes(word))
-	}
-}
 func (zc *zettelCollector) addRef(ref *sx.Pair) {
 	sym, refValue := zsx.GetReference(ref)
 	if zsx.SymRefStateExternal.IsEqual(sym) {
