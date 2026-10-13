@@ -14,6 +14,8 @@
 package impl
 
 import (
+	"slices"
+
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/dense"
 	"t73f.de/r/zero/roster"
@@ -26,8 +28,6 @@ import (
 )
 
 // Collect data for one specific zettel.
-
-type storeMeta map[vocab.WordID]meta.Value
 
 type zettelCollector struct {
 	// Input
@@ -43,12 +43,12 @@ type zettelCollector struct {
 }
 
 func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
-	zc.meta = make(storeMeta)
+	zc.meta = storeMeta{}
 	for k, v := range m.All() {
-		keyId := zc.voc.AddString(k)
-		zc.words.Insert(keyId)
+		keyID := zc.voc.AddString(k)
+		zc.words.Insert(keyID)
 		zc.addString(string(v))
-		zc.meta[keyId] = v
+		zc.meta.add(keyID, v)
 	}
 
 	if mustIndexZettel(m) {
@@ -102,5 +102,26 @@ func (zc *zettelCollector) addRef(ref *sx.Pair) {
 		if zid, err := id.Parse(refValue); err == nil {
 			zc.refs.Insert(zc.dense.Encode(zid))
 		}
+	}
+}
+
+// storeMeta is a compact representation of a meta map. The two separate
+// slices are to avoid padding. storeMeta does not need to be a map.
+type storeMeta struct {
+	ks []vocab.WordID
+	vs []meta.Value
+}
+
+func (sm *storeMeta) add(key vocab.WordID, val meta.Value) {
+	sm.ks = append(sm.ks, key)
+	sm.vs = append(sm.vs, val)
+}
+func (sm *storeMeta) shrink() {
+	if len(sm.ks) == 0 {
+		sm.ks = nil
+		sm.vs = nil
+	} else if cap(sm.ks) > len(sm.ks) {
+		sm.ks = slices.Clone(sm.ks)
+		sm.vs = slices.Clone(sm.vs)
 	}
 }
