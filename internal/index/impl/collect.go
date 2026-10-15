@@ -43,8 +43,8 @@ type zettelCollector struct {
 }
 
 func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
-	zc.meta = storeMeta{}
-	for k, v := range m.All() {
+	zc.meta = makeStoreMeta(m.Count())
+	for k, v := range m.Values() {
 		keyID := zc.voc.AddString(k)
 		zc.words.Insert(keyID)
 		zc.addString(string(v))
@@ -112,6 +112,12 @@ type storeMeta struct {
 	vs []meta.Value
 }
 
+func makeStoreMeta(sizeHint int) storeMeta {
+	return storeMeta{
+		ks: make([]vocab.WordID, 0, sizeHint),
+		vs: make([]meta.Value, 0, sizeHint),
+	}
+}
 func (sm *storeMeta) add(key vocab.WordID, val meta.Value) {
 	sm.ks = append(sm.ks, key)
 	sm.vs = append(sm.vs, val)
