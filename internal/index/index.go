@@ -64,6 +64,10 @@ type Index interface {
 	Enqueuer
 	query.Searcher
 
+	// GetMeta returns metadata of the given zettel. It signals an error if
+	// the zettel is not found or for other retrieval errors.
+	GetMeta(zid id.Zid) (*meta.Meta, error)
+
 	// Entrich metadata with data from search index.
 	Enrich(context.Context, *meta.Meta)
 

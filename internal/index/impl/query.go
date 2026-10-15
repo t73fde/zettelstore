@@ -16,7 +16,9 @@ package impl
 import (
 	"context"
 
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
+	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/idset"
 )
 
@@ -42,6 +44,12 @@ func (idx *Index) SearchSuffix(suffix string) *idset.SearchResult {
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchContains(s string) *idset.SearchResult {
 	return idset.NewSearchResult(idset.ZidSet{})
+}
+
+// GetMeta returns metadata of the given zettel. It signals an error if
+// the zettel is not found or for other retrieval errors.
+func (idx *Index) GetMeta(zid id.Zid) (*meta.Meta, error) {
+	return nil, box.ErrZettelNotFound{Zid: zid}
 }
 
 // Enrich computes additional properties and updates the given metadata.
