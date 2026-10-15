@@ -18,9 +18,9 @@ import (
 	"sync"
 	"testing"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/index"
 )
 
@@ -33,8 +33,7 @@ type fakeFetcher struct {
 
 func zid(n int) id.Zid { return id.Zid(uint64(20260101000000) + uint64(n)) }
 
-func zidSet(ns ...int) idset.ZidSet {
-	var s idset.ZidSet
+func zidSet(ns ...int) (s roster.Roster[id.Zid]) {
 	for _, n := range ns {
 		s.Insert(zid(n))
 	}
@@ -222,7 +221,7 @@ func TestReloadWithEmptySetClearsQueue(t *testing.T) {
 	pq := &pendingQueue{}
 	f := &fakeFetcher{name: "f"}
 	pq.addZettel(f, zid(1))
-	pq.reload(f, idset.ZidSet{})
+	pq.reload(f, roster.Roster[id.Zid]{})
 	if jobs := drain(pq); len(jobs) != 0 {
 		t.Errorf("expected empty queue, got %d jobs", len(jobs))
 	}
@@ -255,7 +254,7 @@ func TestResetSurvivesFollowingReload(t *testing.T) {
 	fr, fl := &fakeFetcher{name: "reset"}, &fakeFetcher{name: "reload"}
 	pq.reset(fr)
 	pq.reload(fl, zidSet(5))
-	pq.reload(fl, idset.ZidSet{}) // even an empty reload keeps the reset signal
+	pq.reload(fl, roster.Roster[id.Zid]{}) // even an empty reload keeps the reset signal
 
 	jobs := drain(pq)
 	if len(jobs) != 1 || jobs[0].action != pendingReset || jobs[0].fetcher != index.Fetcher(fr) {
@@ -343,7 +342,7 @@ func TestReloadDoesNotIncrementGeneration(t *testing.T) {
 	pq.reset(f)
 	pq.reload(f, zidSet(1))
 	pq.reload(f, zidSet(2))
-	pq.reload(f, idset.ZidSet{})
+	pq.reload(f, roster.Roster[id.Zid]{})
 	if pq.generation != 1 {
 		t.Errorf("generation = %d after reset and reloads, want 1", pq.generation)
 	}

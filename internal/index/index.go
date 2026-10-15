@@ -17,11 +17,11 @@ package index
 import (
 	"context"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -40,7 +40,7 @@ type Indexer interface {
 // Fetcher declares all methods an Indexer needs to operate.
 type Fetcher interface {
 	// FetchZids returns the set of all zettel identifer.
-	FetchZids(ctx context.Context) (idset.ZidSet, error)
+	FetchZids(ctx context.Context) (roster.Roster[id.Zid], error)
 
 	// GetZettel retrieves a specific zettel.
 	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)

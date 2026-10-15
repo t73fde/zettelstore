@@ -16,9 +16,9 @@ package impl
 import (
 	"sync"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/index"
 )
 
@@ -91,7 +91,7 @@ func (pq *pendingQueue) addZettel(fetcher index.Fetcher, zid id.Zid) {
 	pq.last = batch
 }
 
-func (pq *pendingQueue) reload(fetcher index.Fetcher, allZids idset.ZidSet) {
+func (pq *pendingQueue) reload(fetcher index.Fetcher, allZids roster.Roster[id.Zid]) {
 	if fetcher == nil {
 		return
 	}

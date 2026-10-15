@@ -16,6 +16,7 @@ package impl
 import (
 	"context"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"zettelstore.de/z/internal/box"
@@ -25,25 +26,25 @@ import (
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchEqual(word string) *idset.SearchResult {
-	return idset.NewSearchResult(idset.ZidSet{})
+	return idset.NewSearchResult(roster.Roster[id.Zid]{})
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchPrefix(prefix string) *idset.SearchResult {
-	return idset.NewSearchResult(idset.ZidSet{})
+	return idset.NewSearchResult(roster.Roster[id.Zid]{})
 }
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchSuffix(suffix string) *idset.SearchResult {
-	return idset.NewSearchResult(idset.ZidSet{})
+	return idset.NewSearchResult(roster.Roster[id.Zid]{})
 }
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchContains(s string) *idset.SearchResult {
-	return idset.NewSearchResult(idset.ZidSet{})
+	return idset.NewSearchResult(roster.Roster[id.Zid]{})
 }
 
 // GetMeta returns metadata of the given zettel. It signals an error if
