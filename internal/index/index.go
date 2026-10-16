@@ -99,70 +99,70 @@ type Stats struct {
 type Searcher interface {
 	// Select all zettel that contains the given exact word.
 	// The word must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchEqual(word string) *SearchResult
+	SearchEqual(word string) *Result
 
 	// Select all zettel that have a word with the given prefix.
 	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchPrefix(prefix string) *SearchResult
+	SearchPrefix(prefix string) *Result
 
 	// Select all zettel that have a word with the given suffix.
 	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchSuffix(suffix string) *SearchResult
+	SearchSuffix(suffix string) *Result
 
 	// Select all zettel that contains the given string.
 	// The string must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchContains(s string) *SearchResult
+	SearchContains(s string) *Result
 }
 
 // RetrievePredicate reports whether the given zettel identifier is part of a
 // search result.
 type RetrievePredicate func(id.Zid) bool
 
-// SearchResult is a set of zettel identifiers that is the result of an index
+// Result is a set of zettel identifiers that is the result of an index
 // search. It hides the concrete set representation, so that the representation
 // can be changed depending on the size of the set.
 //
 // And and Or modify the receiver. They panic, if the receiver is frozen by a
-// call to MakePredicate. A SearchResult is not safe for concurrent use.
-type SearchResult struct {
+// call to MakePredicate. A Result is not safe for concurrent use.
+type Result struct {
 	base   roster.Roster[id.Zid]
 	frozen bool
 }
 
-// NewSearchResult creates a SearchResult that takes ownership of base.
-func NewSearchResult(base roster.Roster[id.Zid]) *SearchResult {
-	return &SearchResult{base: base}
+// NewResult creates a Result that takes ownership of base.
+func NewResult(base roster.Roster[id.Zid]) *Result {
+	return &Result{base: base}
 }
 
 // IsEmpty reports whether the result contains no identifier.
-func (sr *SearchResult) IsEmpty() bool { return sr.base.IsEmpty() }
+func (sr *Result) IsEmpty() bool { return sr.base.IsEmpty() }
 
 // Count returns the number of identifiers in the result.
-func (sr *SearchResult) Count() int { return sr.base.Count() }
+func (sr *Result) Count() int { return sr.base.Count() }
 
 // Equal returns true if both sets are identical.
-func (sr *SearchResult) Equal(other *SearchResult) bool { return sr.base.Equal(other.base) }
+func (sr *Result) Equal(other *Result) bool { return sr.base.Equal(other.base) }
 
 // Clone returns an independent, not frozen copy of the result.
-func (sr *SearchResult) Clone() *SearchResult {
-	return &SearchResult{base: sr.base.Clone()}
+func (sr *Result) Clone() *Result {
+	return &Result{base: sr.base.Clone()}
 }
 
 // And restricts the result to identifiers that are also contained in other.
 // It panics, if the receiver is frozen. The argument other is only read and
 // may be frozen.
-func (sr *SearchResult) And(other *SearchResult) {
+func (sr *Result) And(other *Result) {
 	if sr.frozen {
-		panic("search: And on frozen SearchResult")
+		panic("And operation on frozen Result")
 	}
 	sr.base.And(other.base)
 }
 
 // Or extends the result by all identifiers contained in other. It panics, if
 // the receiver is frozen. The argument other is only read and may be frozen.
-func (sr *SearchResult) Or(other *SearchResult) {
+func (sr *Result) Or(other *Result) {
 	if sr.frozen {
-		panic("search: Or on frozen SearchResult")
+		panic("Or operation on frozen Result")
 	}
 	sr.base.Or(other.base)
 }
@@ -171,7 +171,7 @@ func (sr *SearchResult) Or(other *SearchResult) {
 // tests. Subsequent calls to And or Or panic. Use Clone to obtain a modifiable
 // copy. Multiple calls are allowed. The predicate is not safe for concurrent
 // use.
-func (sr *SearchResult) MakePredicate() RetrievePredicate {
+func (sr *Result) MakePredicate() RetrievePredicate {
 	sr.frozen = true
 	return sr.base.Contains
 }

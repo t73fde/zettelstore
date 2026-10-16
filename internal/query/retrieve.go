@@ -27,7 +27,7 @@ type searchOp struct {
 	s  string
 	op compareOp
 }
-type searchFunc func(string) *index.SearchResult
+type searchFunc func(string) *index.Result
 type searchCallMap map[searchOp]searchFunc
 
 var cmpPred = map[compareOp]func(string, string) bool{
@@ -104,9 +104,9 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 	return false
 }
 
-func retrievePositives(normCalls, plainCalls searchCallMap) *index.SearchResult {
+func retrievePositives(normCalls, plainCalls searchCallMap) *index.Result {
 	if isSuperset(normCalls, plainCalls) {
-		var normResult *index.SearchResult
+		var normResult *index.Result
 		first := true
 		for c, sf := range normCalls {
 			as := sf(c.s)
@@ -120,9 +120,9 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *index.SearchResult 
 		return normResult
 	}
 
-	cache := make(map[searchOp]*index.SearchResult)
+	cache := make(map[searchOp]*index.Result)
 
-	var plainResult *index.SearchResult
+	var plainResult *index.Result
 	first := true
 	for c, sf := range plainCalls {
 		result := sf(c.s)
@@ -137,7 +137,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *index.SearchResult 
 		}
 	}
 
-	var normResult *index.SearchResult
+	var normResult *index.Result
 	firstNorm := true
 	for c, sf := range normCalls {
 		if result, found := cache[c]; found {
@@ -171,7 +171,7 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 	return true
 }
 
-func retrieveNegatives(negCalls searchCallMap) (negatives *index.SearchResult) {
+func retrieveNegatives(negCalls searchCallMap) (negatives *index.Result) {
 	first := false
 	for val, sf := range negCalls {
 		as := sf(val.s)
@@ -200,4 +200,4 @@ func getSearchFunc(searcher index.Searcher, op compareOp) searchFunc {
 	}
 }
 
-func nilSearchFunc(string) *index.SearchResult { return nil }
+func nilSearchFunc(string) *index.Result { return nil }
