@@ -24,7 +24,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
@@ -157,7 +156,7 @@ type Box interface {
 	DeleteBox
 
 	// FetchZids returns the set of all zettel identifer managed by the box.
-	FetchZids(ctx context.Context) (idset.ZidSet, error)
+	FetchZids(ctx context.Context) (map[id.Zid]struct{}, error)
 
 	// GetMeta returns the metadata of the zettel with the given identifier.
 	GetMeta(context.Context, id.Zid) (*meta.Meta, error)

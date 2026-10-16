@@ -38,7 +38,7 @@ type Indexer interface {
 // Fetcher declares all methods an Indexer needs to operate.
 type Fetcher interface {
 	// FetchZids returns the set of all zettel identifer.
-	FetchZids(ctx context.Context) (roster.Roster[id.Zid], error)
+	FetchZids(ctx context.Context) (map[id.Zid]struct{}, error)
 
 	// GetZettel retrieves a specific zettel.
 	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)

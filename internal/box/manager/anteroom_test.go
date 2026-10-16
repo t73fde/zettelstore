@@ -17,8 +17,6 @@ import (
 	"testing"
 
 	"t73f.de/r/zsc/domain/id"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 func TestSimple(t *testing.T) {
@@ -64,10 +62,7 @@ func TestReset(t *testing.T) {
 	if action != arReload || zid != id.Invalid {
 		t.Errorf("Expected reload & invalid Zid, but got %v/%v", action, zid)
 	}
-	var s idset.ZidSet
-	s.Insert(3)
-	s.Insert(4)
-	ar.Reload(s)
+	ar.Reload(map[id.Zid]struct{}{id.Zid(3): {}, id.Zid(4): {}})
 	ar.EnqueueZettel(id.Zid(5))
 	ar.EnqueueZettel(id.Zid(5))
 	if ar.first == ar.last || ar.first.next != ar.last /*|| ar.first.next.next != ar.last*/ {
@@ -94,9 +89,7 @@ func TestReset(t *testing.T) {
 	}
 
 	ar = newAnteroomQueue(1)
-	s.DeleteAll()
-	s.Insert(6)
-	ar.Reload(s)
+	ar.Reload(map[id.Zid]struct{}{6: {}})
 	action, zid, _ = ar.Dequeue()
 	if zid != id.Zid(6) || action != arZettel {
 		t.Errorf("Expected 6/arZettel, but got %v/%v", zid, action)
@@ -108,7 +101,7 @@ func TestReset(t *testing.T) {
 
 	ar = newAnteroomQueue(1)
 	ar.EnqueueZettel(id.Zid(8))
-	ar.Reload(idset.ZidSet{})
+	ar.Reload(map[id.Zid]struct{}{})
 	action, zid, _ = ar.Dequeue()
 	if action != arNothing || zid != id.Invalid {
 		t.Errorf("Expected nothing & invalid Zid, but got %v/%v", action, zid)

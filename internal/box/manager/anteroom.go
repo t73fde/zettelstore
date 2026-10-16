@@ -14,11 +14,10 @@
 package manager
 
 import (
+	"maps"
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 type arAction int
@@ -31,7 +30,7 @@ const (
 
 type anteroom struct {
 	next    *anteroom
-	waiting idset.ZidSet
+	waiting map[id.Zid]struct{}
 	curLoad int
 	reload  bool
 }
@@ -60,13 +59,13 @@ func (ar *anteroomQueue) EnqueueZettel(zid id.Zid) {
 		if room.reload {
 			continue // Do not put zettel in reload room
 		}
-		if room.waiting.Contains(zid) {
+		if _, found := room.waiting[zid]; found {
 			// Zettel is already waiting. Nothing to do.
 			return
 		}
 	}
 	if room := ar.last; !room.reload && (ar.maxLoad == 0 || room.curLoad < ar.maxLoad) {
-		room.waiting.Insert(zid)
+		room.waiting[zid] = struct{}{}
 		room.curLoad++
 		return
 	}
@@ -76,26 +75,25 @@ func (ar *anteroomQueue) EnqueueZettel(zid id.Zid) {
 }
 
 func (ar *anteroomQueue) makeAnteroom(zid id.Zid) *anteroom {
-	var waiting idset.ZidSet
-	waiting.Grow(max(ar.maxLoad, 100))
-	waiting.Insert(zid)
+	waiting := make(map[id.Zid]struct{}, max(ar.maxLoad, 100))
+	waiting[zid] = struct{}{}
 	return &anteroom{next: nil, waiting: waiting, curLoad: 1, reload: false}
 }
 
 func (ar *anteroomQueue) Reset() {
 	ar.mx.Lock()
 	defer ar.mx.Unlock()
-	ar.first = &anteroom{next: nil, waiting: idset.ZidSet{}, curLoad: 0, reload: true}
+	ar.first = &anteroom{next: nil, waiting: map[id.Zid]struct{}{}, curLoad: 0, reload: true}
 	ar.last = ar.first
 }
 
-func (ar *anteroomQueue) Reload(allZids idset.ZidSet) {
+func (ar *anteroomQueue) Reload(allZids map[id.Zid]struct{}) {
 	ar.mx.Lock()
 	defer ar.mx.Unlock()
 	ar.deleteReloadedRooms()
 
-	if !allZids.IsEmpty() {
-		ar.first = &anteroom{next: ar.first, waiting: allZids.Clone(), curLoad: allZids.Count(), reload: true}
+	if len(allZids) > 0 {
+		ar.first = &anteroom{next: ar.first, waiting: maps.Clone(allZids), curLoad: len(allZids), reload: true}
 		if ar.first.next == nil {
 			ar.last = ar.first
 		}
@@ -121,13 +119,13 @@ func (ar *anteroomQueue) Dequeue() (arAction, id.Zid, bool) {
 	defer ar.mx.Unlock()
 	first := ar.first
 	if first != nil {
-		if first.waiting.IsEmpty() && first.reload {
+		if len(first.waiting) == 0 && first.reload {
 			ar.removeFirst()
 			return arReload, id.Invalid, false
 		}
 		// TODO: first.waiting == nil is possible
-		if zid, found := first.waiting.Pop(); found {
-			if first.waiting.IsEmpty() {
+		if zid, found := mapPop(first.waiting); found {
+			if len(first.waiting) == 0 {
 				ar.removeFirst()
 			}
 			return arZettel, zid, first.reload
@@ -135,6 +133,13 @@ func (ar *anteroomQueue) Dequeue() (arAction, id.Zid, bool) {
 		ar.removeFirst()
 	}
 	return arNothing, id.Invalid, false
+}
+func mapPop(m map[id.Zid]struct{}) (id.Zid, bool) {
+	for zid := range m {
+		delete(m, zid)
+		return zid, true
+	}
+	return id.Invalid, false
 }
 
 func (ar *anteroomQueue) removeFirst() {

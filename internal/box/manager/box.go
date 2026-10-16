@@ -121,27 +121,27 @@ func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel,
 }
 
 // FetchZids returns the set of all zettel identifer managed by the box.
-func (mgr *Manager) FetchZids(ctx context.Context) (idset.ZidSet, error) {
+func (mgr *Manager) FetchZids(ctx context.Context) (map[id.Zid]struct{}, error) {
 	mgr.mgrLogger.Debug("FetchZids")
 	if err := mgr.checkContinue(ctx); err != nil {
-		return idset.ZidSet{}, err
+		return nil, err
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 	return mgr.fetchZids(ctx)
 }
-func (mgr *Manager) fetchZids(ctx context.Context) (result idset.ZidSet, _ error) {
+func (mgr *Manager) fetchZids(ctx context.Context) (map[id.Zid]struct{}, error) {
 	numZettel := 0
 	for _, p := range mgr.boxes {
 		var mbstats box.ManagedBoxStats
 		p.ReadStats(&mbstats)
 		numZettel += mbstats.Zettel
 	}
-	result.Grow(numZettel)
+	result := make(map[id.Zid]struct{}, numZettel)
 	for _, p := range mgr.boxes {
-		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Insert(zid) }, query.AlwaysIncluded)
+		err := p.ApplyZid(ctx, func(zid id.Zid) { result[zid] = struct{}{} }, query.AlwaysIncluded)
 		if err != nil {
-			return idset.ZidSet{}, err
+			return nil, err
 		}
 	}
 	return result, nil

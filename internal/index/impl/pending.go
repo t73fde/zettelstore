@@ -16,7 +16,6 @@ package impl
 import (
 	"sync"
 
-	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/index"
@@ -91,14 +90,14 @@ func (pq *pendingQueue) addZettel(fetcher index.Fetcher, zid id.Zid) {
 	pq.last = batch
 }
 
-func (pq *pendingQueue) reload(fetcher index.Fetcher, allZids roster.Roster[id.Zid]) {
+func (pq *pendingQueue) reload(fetcher index.Fetcher, allZids map[id.Zid]struct{}) {
 	if fetcher == nil {
 		return
 	}
 	var members memberSet
-	if !allZids.IsEmpty() {
-		members = make(memberSet, allZids.Count())
-		for zid := range allZids.Values() {
+	if len(allZids) > 0 {
+		members = make(memberSet, len(allZids))
+		for zid := range allZids {
 			members[zid] = fetcher
 		}
 	}
