@@ -25,6 +25,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/idset"
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -38,7 +39,7 @@ type (
 	Query = query.Query
 
 	// RetrievePredicate is a bool function that show if a zettel is contained in a query result.
-	RetrievePredicate = idset.RetrievePredicate
+	RetrievePredicate = index.RetrievePredicate
 )
 
 // BaseBox is implemented by all Zettel boxes.

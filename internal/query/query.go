@@ -24,26 +24,8 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/idset"
+	"zettelstore.de/z/internal/index"
 )
-
-// Searcher is used to select zettel identifier based on search criteria.
-type Searcher interface {
-	// Select all zettel that contains the given exact word.
-	// The word must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchEqual(word string) *idset.SearchResult
-
-	// Select all zettel that have a word with the given prefix.
-	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchPrefix(prefix string) *idset.SearchResult
-
-	// Select all zettel that have a word with the given suffix.
-	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchSuffix(suffix string) *idset.SearchResult
-
-	// Select all zettel that contains the given string.
-	// The string must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchContains(s string) *idset.SearchResult
-}
 
 // Query specifies a mechanism for querying zettel.
 type Query struct {
@@ -335,7 +317,7 @@ func (q *Query) EnrichNeeded() bool {
 
 // RetrieveAndCompile queries the search index and returns a predicate
 // for its results and returns a matching predicate.
-func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq []*meta.Meta) Compiled {
+func (q *Query) RetrieveAndCompile(_ context.Context, searcher index.Searcher, metaSeq []*meta.Meta) Compiled {
 	if q == nil {
 		return Compiled{
 			PreMatch: matchAlways,
@@ -393,9 +375,9 @@ func metaList2idSet(ml []*meta.Meta) (result idset.ZidSet) {
 	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.ZidSet) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(searcher index.Searcher, startSet idset.ZidSet) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
-	var pred idset.RetrievePredicate
+	var pred index.RetrievePredicate
 	if searcher != nil {
 		pred = ct.retrieveIndex(searcher)
 		if !startSet.IsEmpty() {
@@ -417,7 +399,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet idset.Zi
 }
 
 // retrieveIndex and return a predicate to ask for results.
-func (ct *conjTerms) retrieveIndex(searcher Searcher) idset.RetrievePredicate {
+func (ct *conjTerms) retrieveIndex(searcher index.Searcher) index.RetrievePredicate {
 	if len(ct.search) == 0 {
 		return nil
 	}

@@ -25,6 +25,7 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/idset"
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/parser"
@@ -32,7 +33,7 @@ import (
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchEqual(word string) *idset.SearchResult {
+func (mgr *Manager) SearchEqual(word string) *index.SearchResult {
 	found := mgr.index.SearchEqual(word)
 	foundOld := mgr.idxStore.SearchEqual(word)
 	if !found.Equal(foundOld) {
@@ -45,7 +46,7 @@ func (mgr *Manager) SearchEqual(word string) *idset.SearchResult {
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchPrefix(prefix string) *idset.SearchResult {
+func (mgr *Manager) SearchPrefix(prefix string) *index.SearchResult {
 	found := mgr.index.SearchPrefix(prefix)
 	foundOld := mgr.idxStore.SearchPrefix(prefix)
 	if !found.Equal(foundOld) {
@@ -58,7 +59,7 @@ func (mgr *Manager) SearchPrefix(prefix string) *idset.SearchResult {
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchSuffix(suffix string) *idset.SearchResult {
+func (mgr *Manager) SearchSuffix(suffix string) *index.SearchResult {
 	found := mgr.index.SearchSuffix(suffix)
 	foundOld := mgr.idxStore.SearchSuffix(suffix)
 	if !found.Equal(foundOld) {
@@ -71,7 +72,7 @@ func (mgr *Manager) SearchSuffix(suffix string) *idset.SearchResult {
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
-func (mgr *Manager) SearchContains(s string) *idset.SearchResult {
+func (mgr *Manager) SearchContains(s string) *index.SearchResult {
 	found := mgr.index.SearchContains(s)
 	foundOld := mgr.idxStore.SearchContains(s)
 	if !found.Equal(foundOld) {

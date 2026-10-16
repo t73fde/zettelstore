@@ -29,6 +29,7 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/idset"
+	"zettelstore.de/z/internal/index"
 )
 
 type zettelData struct {
@@ -153,7 +154,7 @@ func zidsToValue(s idset.ZidSet) meta.Value {
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchEqual(word string) *idset.SearchResult {
+func (ms *mapStore) SearchEqual(word string) *index.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	var result idset.ZidSet
@@ -165,30 +166,30 @@ func (ms *mapStore) SearchEqual(word string) *idset.SearchResult {
 	}
 	zid, err := id.Parse(word)
 	if err != nil {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 	zi, ok := ms.idx[zid]
 	if !ok {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 
 	addBackwardZids(&result, zid, zi)
-	return idset.NewSearchResult(result)
+	return index.NewSearchResult(result)
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchPrefix(prefix string) *idset.SearchResult {
+func (ms *mapStore) SearchPrefix(prefix string) *index.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(prefix, strings.HasPrefix)
 	l := len(prefix)
 	if l > 14 {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 	maxZid, err := id.Parse(prefix + "99999999999999"[:14-l])
 	if err != nil {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 	var minZid id.Zid
 	if l < 14 && prefix == "0000000000000"[:l] {
@@ -196,7 +197,7 @@ func (ms *mapStore) SearchPrefix(prefix string) *idset.SearchResult {
 	} else {
 		minZid, err = id.Parse(prefix + "00000000000000"[:14-l])
 		if err != nil {
-			return idset.NewSearchResult(result)
+			return index.NewSearchResult(result)
 		}
 	}
 	for zid, zi := range ms.idx {
@@ -204,22 +205,22 @@ func (ms *mapStore) SearchPrefix(prefix string) *idset.SearchResult {
 			addBackwardZids(&result, zid, zi)
 		}
 	}
-	return idset.NewSearchResult(result)
+	return index.NewSearchResult(result)
 }
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchSuffix(suffix string) *idset.SearchResult {
+func (ms *mapStore) SearchSuffix(suffix string) *index.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(suffix, strings.HasSuffix)
 	l := len(suffix)
 	if l > 14 {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 	val, err := id.ParseUint(suffix)
 	if err != nil {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 	modulo := uint64(1)
 	for range l {
@@ -230,27 +231,27 @@ func (ms *mapStore) SearchSuffix(suffix string) *idset.SearchResult {
 			addBackwardZids(&result, zid, zi)
 		}
 	}
-	return idset.NewSearchResult(result)
+	return index.NewSearchResult(result)
 }
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
-func (ms *mapStore) SearchContains(s string) *idset.SearchResult {
+func (ms *mapStore) SearchContains(s string) *index.SearchResult {
 	ms.mx.RLock()
 	defer ms.mx.RUnlock()
 	result := ms.selectWithPred(s, strings.Contains)
 	if len(s) > 14 {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 	if _, err := id.ParseUint(s); err != nil {
-		return idset.NewSearchResult(result)
+		return index.NewSearchResult(result)
 	}
 	for zid, zi := range ms.idx {
 		if strings.Contains(zid.String(), s) {
 			addBackwardZids(&result, zid, zi)
 		}
 	}
-	return idset.NewSearchResult(result)
+	return index.NewSearchResult(result)
 }
 
 func (ms *mapStore) selectWithPred(s string, pred func(string, string) bool) (result idset.ZidSet) {

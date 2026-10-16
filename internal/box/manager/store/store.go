@@ -22,7 +22,7 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/idset"
-	"zettelstore.de/z/internal/query"
+	"zettelstore.de/z/internal/index"
 )
 
 // Stats records statistics about the store.
@@ -43,7 +43,7 @@ type Stats struct {
 // Store all relevant zettel data. There may be multiple implementations, i.e.
 // memory-based, file-based, based on SQLite, ...
 type Store interface {
-	query.Searcher
+	index.Searcher
 
 	// GetMeta returns the metadata of the zettel with the given identifier.
 	GetMeta(context.Context, id.Zid) (*meta.Meta, error)
