@@ -21,7 +21,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -51,10 +50,21 @@ type Enqueuer interface {
 	// Enqueue signals that one or many zettel has been changed and the index
 	// should be updated to reflect the changes. Updates zettel data can be
 	// retrieved by the given Fetcher.
-	// Enqueue is called in the context of the box.Manager goroutine. It must
+	// Enqueue is called in the context of a separate goroutine. It must
 	// not take too long to process the enqueue signal.
-	Enqueue(Fetcher, box.UpdateReason, id.Zid)
+	Enqueue(Fetcher, Reason, id.Zid)
 }
+
+// Reason states why `Enqueuer.Enqueue` was called.
+type Reason int
+
+// Values for Reason.
+const (
+	_        Reason = iota
+	OnReady         // Index user is ready.
+	OnReset         // All zettel should be (re-) indexed.
+	OnZettel        // Something with a zettel happened
+)
 
 // Index describes the interface to use the search index on both sides:
 // An Enqueuer singals zettel changes. Via query.Searcher you can retrieve
@@ -83,5 +93,5 @@ type Stats struct {
 
 	UpdatedZettel uint64
 	RemovedZettel uint64
-	NumReloads    uint64
+	NumResets     uint64
 }

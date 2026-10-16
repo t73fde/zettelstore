@@ -23,6 +23,7 @@ import (
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/zettel"
@@ -39,7 +40,7 @@ func (idx *Index) Start() {
 	}
 
 	idx.stats = &stats{}
-	idx.store = makeStore(idx.stats) // TODO: configurable sizeHint for voc
+	idx.store = makeStore(idx.stats, 2000) // TODO: configurable wordsHint for voc
 
 	ctx, cancel := context.WithCancel(context.Background())
 	idx.cancel = cancel
@@ -95,17 +96,14 @@ loop:
 				break loop
 			}
 			switch d.reason {
-			case box.OnReady:
+			case index.OnReady:
 				csrv.logger.Info("OnReady")
 				continue
-			case box.OnReload:
-				csrv.logger.Info("OnReload")
+			case index.OnReset:
+				csrv.logger.Info("OnReset")
 				pending.reset(d.fetcher)
-			case box.OnZettel:
+			case index.OnZettel:
 				csrv.logger.Info("OnZettel", "zid", d.zid)
-				pending.addZettel(d.fetcher, d.zid)
-			case box.OnDelete:
-				csrv.logger.Info("OnDelete", "zid", d.zid)
 				pending.addZettel(d.fetcher, d.zid)
 			default:
 				csrv.logger.Error("Unknown notification reason", "reason", d.reason, "zid", d.zid)

@@ -33,11 +33,11 @@ type store struct {
 type storeZid uint32
 type denser = dense.Dense[id.Zid, storeZid]
 
-func makeStore(stats *stats) *store {
+func makeStore(stats *stats, wordsHint int) *store {
 	result := &store{
 		stats: stats,
 		dense: &denser{},
-		voc:   vocab.New(0),
+		voc:   vocab.New(wordsHint),
 	}
 	return result
 }

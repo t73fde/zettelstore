@@ -21,7 +21,6 @@ import (
 
 	"t73f.de/r/zsc/domain/id"
 
-	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
@@ -56,7 +55,7 @@ func New(config config.Config) *Index {
 }
 
 // Enqueue a new zettel to update the search index.
-func (idx *Index) Enqueue(fetcher index.Fetcher, reason box.UpdateReason, zid id.Zid) {
+func (idx *Index) Enqueue(fetcher index.Fetcher, reason index.Reason, zid id.Zid) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
 	if idx.notify == nil {
@@ -67,7 +66,7 @@ func (idx *Index) Enqueue(fetcher index.Fetcher, reason box.UpdateReason, zid id
 
 type notifyData struct {
 	fetcher index.Fetcher
-	reason  box.UpdateReason
+	reason  index.Reason
 	zid     id.Zid
 }
 
@@ -88,5 +87,5 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	defer stats.mx.RUnlock()
 	st.UpdatedZettel = stats.updates
 	st.RemovedZettel = stats.removes
-	st.NumReloads = stats.maxGen
+	st.NumResets = stats.maxGen
 }

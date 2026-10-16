@@ -75,6 +75,6 @@ func (is *indexService) GetStatistics() []KeyValue {
 		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},
 		{Key: "Updated zettel", Value: strconv.FormatUint(st.UpdatedZettel, 10)},
 		{Key: "Removed zettel", Value: strconv.FormatUint(st.RemovedZettel, 10)},
-		{Key: "Reloads", Value: strconv.FormatUint(st.NumReloads, 10)},
+		{Key: "Resets", Value: strconv.FormatUint(st.NumResets, 10)},
 	}
 }
