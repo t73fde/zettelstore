@@ -80,6 +80,7 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	st.NumZettel = store.dense.Count()
 	st.NumWords = store.voc.Count()
 	st.Vocabulary = store.voc.StoreLen()
+	st.WordCount = store.voc.WordCount()
 
 	stats := idx.stats
 	stats.mx.RLock()

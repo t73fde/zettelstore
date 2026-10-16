@@ -134,7 +134,6 @@ type fetchService struct {
 }
 
 func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pending *pendingQueue, out chan<- parseData) {
-	ctx = box.NoEnrichContext(ctx)
 	for range wake {
 		fsrv.logger.Info("WakeUp")
 	loop:
@@ -146,6 +145,7 @@ func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pen
 
 			case pendingZettel:
 				fsrv.logger.Info("Zettel", "zid", job.zid, "generation", job.generation)
+				ctx = box.NoEnrichContext(ctx) // TODO: does not seem to work always. Many zettel are enriched
 				zettel, err := job.fetcher.GetZettel(ctx, job.zid)
 				if err != nil {
 					if ctx.Err() != nil {

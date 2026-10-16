@@ -89,6 +89,7 @@ type Stats struct {
 	NumZettel  int
 	NumWords   int
 	Vocabulary int
+	WordCount  map[uint16]int
 
 	UpdatedZettel uint64
 	RemovedZettel uint64

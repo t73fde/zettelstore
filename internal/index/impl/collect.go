@@ -14,6 +14,7 @@
 package impl
 
 import (
+	"net/url"
 	"slices"
 
 	"t73f.de/r/sx"
@@ -46,9 +47,31 @@ func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
 	zc.meta = makeStoreMeta(m.Count())
 	for k, v := range m.Values() {
 		keyID := zc.voc.AddString(k)
-		zc.words.Insert(keyID)
-		zc.addString(string(v))
 		zc.meta.add(keyID, v)
+		zc.words.Insert(keyID)
+
+		kd := meta.GetDescription(k)
+		if kd.IsProperty() || kd.IsComputed() {
+			continue
+		}
+		switch kd.Type {
+		case meta.TypeID:
+			// TODO: mgr.idxUpdateValue(ctx, descr.Inverse, string(val), zi)
+		case meta.TypeIDSet:
+			// TODO: for val := range val.Fields() {
+			// 	mgr.idxUpdateValue(ctx, descr.Inverse, val, zi)
+			// }
+		case meta.TypeURL:
+			zc.addURL(string(v))
+		default:
+			if kd.Type.IsSet {
+				for val := range v.Fields() {
+					zc.addString(val)
+				}
+			} else {
+				zc.addString(string(v))
+			}
+		}
 	}
 
 	if mustIndexZettel(m) {
@@ -97,11 +120,16 @@ func (zc *zettelCollector) VisitItAfter(*sx.Pair, *sx.Pair) {}
 func (zc *zettelCollector) addRef(ref *sx.Pair) {
 	sym, refValue := zsx.GetReference(ref)
 	if zsx.SymRefStateExternal.IsEqual(sym) {
-		zc.urls.Insert(refValue)
+		zc.addURL(refValue)
 	} else if sz.SymRefStateZettel.IsEqual(sym) {
 		if zid, err := id.Parse(refValue); err == nil {
 			zc.refs.Insert(zc.dense.Encode(zid))
 		}
+	}
+}
+func (zc *zettelCollector) addURL(s string) {
+	if _, err := url.Parse(s); err == nil {
+		zc.urls.Insert(s)
 	}
 }
 

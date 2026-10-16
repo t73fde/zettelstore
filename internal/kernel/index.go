@@ -15,6 +15,8 @@ package kernel
 
 import (
 	"log/slog"
+	"maps"
+	"slices"
 	"strconv"
 	"sync"
 
@@ -69,12 +71,34 @@ func (is *indexService) GetStatistics() []KeyValue {
 	is.mxService.RLock()
 	is.indexer.ReadStats(&st)
 	is.mxService.RUnlock()
-	return []KeyValue{
+	result := make([]KeyValue, 0, 10+len(st.WordCount))
+	result = append(result, []KeyValue{
 		{Key: "Zettel", Value: strconv.Itoa(st.NumZettel)},
 		{Key: "Words / Fragments", Value: strconv.Itoa(st.NumWords)},
 		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},
 		{Key: "Updated zettel", Value: strconv.FormatUint(st.UpdatedZettel, 10)},
 		{Key: "Removed zettel", Value: strconv.FormatUint(st.RemovedZettel, 10)},
 		{Key: "Resets", Value: strconv.FormatUint(st.NumResets, 10)},
+	}...)
+
+	sizes := slices.Collect(maps.Keys(st.WordCount))
+	slices.Sort(sizes)
+	smallCount, totalCount, longSize := 0, 0, 0
+	for _, size := range sizes {
+		count := st.WordCount[size]
+		if size <= 14 {
+			smallCount += count
+		} else {
+			longSize += (int(size) * count)
+		}
+		totalCount += count
+		result = append(result, KeyValue{
+			Key:   "Size " + strconv.Itoa(int(size)),
+			Value: strconv.Itoa(count),
+		})
 	}
+	result = append(result, KeyValue{Key: "Small words", Value: strconv.Itoa(smallCount)})
+	result = append(result, KeyValue{Key: "All words", Value: strconv.Itoa(totalCount)})
+	result = append(result, KeyValue{Key: "Long size", Value: strconv.Itoa(longSize)})
+	return result
 }
