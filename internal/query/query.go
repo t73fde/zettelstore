@@ -20,10 +20,10 @@ import (
 	"math/rand/v2"
 	"slices"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/index"
 )
 
@@ -367,7 +367,7 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher index.Searcher, m
 	return result
 }
 
-func metaList2idSet(ml []*meta.Meta) (result idset.ZidSet) {
+func metaList2idSet(ml []*meta.Meta) (result roster.Roster[id.Zid]) {
 	result.Grow(len(ml))
 	for _, m := range ml {
 		result.Insert(m.Zid)
@@ -375,7 +375,7 @@ func metaList2idSet(ml []*meta.Meta) (result idset.ZidSet) {
 	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher index.Searcher, startSet idset.ZidSet) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(searcher index.Searcher, startSet roster.Roster[id.Zid]) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
 	var pred index.RetrievePredicate
 	if searcher != nil {
@@ -384,7 +384,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher index.Searcher, startSet id
 			if pred == nil {
 				pred = startSet.Contains
 			} else {
-				var predSet idset.ZidSet
+				var predSet roster.Roster[id.Zid]
 				predSet.Grow(startSet.Count())
 				for zid := range startSet.Values() {
 					if pred(zid) {

@@ -16,19 +16,18 @@ package store
 import (
 	"maps"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 // ZettelIndex contains all index data of a zettel.
 type ZettelIndex struct {
-	Zid         id.Zid                  // zid of the indexed zettel
-	meta        *meta.Meta              // full metadata
-	backrefs    idset.ZidSet            // set of back references
-	inverseRefs map[string]idset.ZidSet // references of inverse keys
-	deadrefs    idset.ZidSet            // set of dead references
+	Zid         id.Zid                           // zid of the indexed zettel
+	meta        *meta.Meta                       // full metadata
+	backrefs    roster.Roster[id.Zid]            // set of back references
+	inverseRefs map[string]roster.Roster[id.Zid] // references of inverse keys
+	deadrefs    roster.Roster[id.Zid]            // set of dead references
 	words       WordSet
 	urls        WordSet
 }
@@ -38,9 +37,9 @@ func NewZettelIndex(m *meta.Meta) *ZettelIndex {
 	return &ZettelIndex{
 		Zid:         m.Zid,
 		meta:        m,
-		backrefs:    idset.ZidSet{},
-		inverseRefs: make(map[string]idset.ZidSet),
-		deadrefs:    idset.ZidSet{},
+		backrefs:    roster.Roster[id.Zid]{},
+		inverseRefs: make(map[string]roster.Roster[id.Zid]),
+		deadrefs:    roster.Roster[id.Zid]{},
 	}
 }
 
@@ -57,7 +56,7 @@ func (zi *ZettelIndex) AddInverseRef(key string, zid id.Zid) {
 		zids.Insert(zid)
 		return
 	}
-	var s idset.ZidSet
+	var s roster.Roster[id.Zid]
 	s.Insert(zid)
 	zi.inverseRefs[key] = s
 }
@@ -74,16 +73,16 @@ func (zi *ZettelIndex) SetWords(words WordSet) { zi.words = words }
 func (zi *ZettelIndex) SetUrls(urls WordSet) { zi.urls = urls }
 
 // GetDeadRefs returns all dead references as a sorted list.
-func (zi *ZettelIndex) GetDeadRefs() idset.ZidSet { return zi.deadrefs }
+func (zi *ZettelIndex) GetDeadRefs() roster.Roster[id.Zid] { return zi.deadrefs }
 
 // GetMeta return just the raw metadata.
 func (zi *ZettelIndex) GetMeta() *meta.Meta { return zi.meta }
 
 // GetBackRefs returns all back references as a sorted list.
-func (zi *ZettelIndex) GetBackRefs() idset.ZidSet { return zi.backrefs }
+func (zi *ZettelIndex) GetBackRefs() roster.Roster[id.Zid] { return zi.backrefs }
 
 // GetInverseRefs returns all inverse meta references as a map of strings to a sorted list of references
-func (zi *ZettelIndex) GetInverseRefs() map[string]idset.ZidSet {
+func (zi *ZettelIndex) GetInverseRefs() map[string]roster.Roster[id.Zid] {
 	return maps.Clone(zi.inverseRefs)
 }
 

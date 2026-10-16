@@ -16,12 +16,11 @@ package query
 import (
 	"strconv"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx/input"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 // Parse the query specification and return a Query object.
@@ -82,7 +81,7 @@ func (ps *parserState) parse(q *Query) *Query {
 		return q
 	}
 	firstPos := inp.Pos
-	var zidSet idset.ZidSet
+	var zidSet roster.Roster[id.Zid]
 	for {
 		pos := inp.Pos
 		zid, found := ps.scanZid()

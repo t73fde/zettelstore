@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -28,7 +29,6 @@ import (
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
@@ -164,9 +164,9 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	if err != nil {
 		return nil
 	}
-	var metaZids idset.ZidSet
+	var metaZids roster.Roster[id.Zid]
 	metaZids.Grow(len(metaSeq))
-	var refZids idset.ZidSet
+	var refZids roster.Roster[id.Zid]
 	refZids.Grow(len(metaSeq) * 4) // Assumption: there are four zids per zettel
 	for _, m := range metaSeq {
 		metaZids.Insert(m.Zid)
@@ -190,7 +190,7 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	return uc.filterCandidates(ctx, candidates, words)
 }
 
-func filterByZid(candidates []*meta.Meta, ignoreSeq idset.ZidSet) []*meta.Meta {
+func filterByZid(candidates []*meta.Meta, ignoreSeq roster.Roster[id.Zid]) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
 	for _, m := range candidates {
 		if !ignoreSeq.Contains(m.Zid) {

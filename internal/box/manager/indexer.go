@@ -18,13 +18,13 @@ import (
 	"net/url"
 	"time"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/box/manager/store"
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
@@ -257,7 +257,7 @@ func (mgr *Manager) idxDeleteZettel(ctx context.Context, zid id.Zid) {
 	mgr.idxCheckZettel(toCheck)
 }
 
-func (mgr *Manager) idxCheckZettel(s idset.ZidSet) {
+func (mgr *Manager) idxCheckZettel(s roster.Roster[id.Zid]) {
 	for zid := range s.Values() {
 		mgr.idxAr.EnqueueZettel(zid)
 	}

@@ -17,11 +17,10 @@ import (
 	"container/heap"
 	"context"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 // ThreadSpec contains all information for a thread directive.
@@ -100,7 +99,7 @@ func (q *ztlThreadQueue) Pop() any {
 
 type threadTask struct {
 	port     ThreadPort
-	seen     idset.ZidSet
+	seen     roster.Roster[id.Zid]
 	queue    ztlThreadQueue
 	maxCount int
 }
@@ -108,7 +107,7 @@ type threadTask struct {
 func newThreadQueue(startSeq []*meta.Meta, maxCount int, port ThreadPort) *threadTask {
 	result := &threadTask{
 		port:     port,
-		seen:     idset.ZidSet{},
+		seen:     roster.Roster[id.Zid]{},
 		maxCount: maxCount,
 	}
 

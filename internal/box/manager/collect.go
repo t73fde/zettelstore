@@ -15,23 +15,23 @@ package manager
 
 import (
 	"t73f.de/r/sx"
+	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/box/manager/store"
-	"zettelstore.de/z/internal/idset"
 )
 
 type collectData struct {
-	refs  idset.ZidSet
+	refs  roster.Roster[id.Zid]
 	words store.WordSet
 	urls  store.WordSet
 }
 
 func (data *collectData) initialize() {
-	data.refs = idset.ZidSet{}
+	data.refs = roster.Roster[id.Zid]{}
 	data.words = store.NewWordSet()
 	data.urls = store.NewWordSet()
 }

@@ -18,11 +18,11 @@ import (
 	"errors"
 	"strings"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/query"
 )
@@ -195,7 +195,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 	}
 	selected := map[id.Zid]*meta.Meta{}
 	for _, term := range compSearch.Terms {
-		var rejected idset.ZidSet
+		var rejected roster.Roster[id.Zid]
 		handleMeta := func(m *meta.Meta) {
 			zid := m.Zid
 			if rejected.Contains(zid) {

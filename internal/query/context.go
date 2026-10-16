@@ -20,11 +20,10 @@ import (
 	"math"
 	"slices"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 // ContextSpec contains all specification values for calculating a context.
@@ -144,25 +143,25 @@ func (q *ztlCtxQueue) Pop() any {
 
 type contextTask struct {
 	port     ContextPort
-	seen     idset.ZidSet
+	seen     roster.Roster[id.Zid]
 	queue    ztlCtxQueue
 	maxCost  float64
 	maxCount int
 	minCount int
 	tagMetas map[string][]*meta.Meta
-	tagZids  map[string]idset.ZidSet // just the zids of tagMetas
-	metaZid  map[id.Zid]*meta.Meta   // maps zid to meta for all meta retrieved with tags
+	tagZids  map[string]roster.Roster[id.Zid] // just the zids of tagMetas
+	metaZid  map[id.Zid]*meta.Meta            // maps zid to meta for all meta retrieved with tags
 }
 
 func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
 	result := &contextTask{
 		port:     port,
-		seen:     idset.ZidSet{},
+		seen:     roster.Roster[id.Zid]{},
 		maxCost:  maxCost,
 		maxCount: max(maxCount, minCount),
 		minCount: minCount,
 		tagMetas: make(map[string][]*meta.Meta),
-		tagZids:  make(map[string]idset.ZidSet),
+		tagZids:  make(map[string]roster.Roster[id.Zid]),
 		metaZid:  make(map[id.Zid]*meta.Meta),
 	}
 
@@ -261,7 +260,7 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 
 func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint, dir int) {
 	tags := slices.Collect(tagiter)
-	var zidSet idset.ZidSet
+	var zidSet roster.Roster[id.Zid]
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)
 		zidSet.Or(zs)
@@ -283,7 +282,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 	}
 }
 
-func (ct *contextTask) updateTagData(ctx context.Context, tag string) (zids idset.ZidSet) {
+func (ct *contextTask) updateTagData(ctx context.Context, tag string) (zids roster.Roster[id.Zid]) {
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}

@@ -20,10 +20,9 @@ import (
 
 	"t73f.de/r/sx/sxeval"
 	"t73f.de/r/zero/graph"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 func (wui *WebUI) loadAllSxnCodeZettel(ctx context.Context) (graph.Digraph[id.Zid], *sxeval.Binding, error) {
@@ -62,7 +61,7 @@ func buildSxnCodeDigraph(ctx context.Context, startZid id.Zid, getMeta getMetaFu
 	if err != nil {
 		return nil
 	}
-	var marked idset.ZidSet
+	var marked roster.Roster[id.Zid]
 	stack := []*meta.Meta{m}
 	dg := graph.Digraph[id.Zid](nil).AddVertex(startZid)
 	for pos := len(stack) - 1; pos >= 0; pos = len(stack) - 1 {

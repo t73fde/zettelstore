@@ -18,10 +18,10 @@ import (
 	"context"
 	"io"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/index"
 )
 
@@ -53,11 +53,11 @@ type Store interface {
 
 	// UpdateReferences for a specific zettel.
 	// Returns set of zettel identifier that must also be checked for changes.
-	UpdateReferences(context.Context, *ZettelIndex) idset.ZidSet
+	UpdateReferences(context.Context, *ZettelIndex) roster.Roster[id.Zid]
 
 	// DeleteZettel removes index data for given zettel.
 	// Returns set of zettel identifier that must also be checked for changes.
-	DeleteZettel(context.Context, id.Zid) idset.ZidSet
+	DeleteZettel(context.Context, id.Zid) roster.Roster[id.Zid]
 
 	// Shrink removes unneeded space.
 	Shrink()
