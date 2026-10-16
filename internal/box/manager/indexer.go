@@ -170,7 +170,7 @@ func mustIndexZettel(m *meta.Meta) bool {
 func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *store.ZettelIndex, cData *collectData) {
 	for key, val := range m.Computed() {
 		descr := meta.GetDescription(key)
-		if descr.IsProperty() {
+		if descr.IsProperty() || descr.IsComputed() {
 			continue
 		}
 		switch descr.Type {

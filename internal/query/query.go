@@ -431,7 +431,7 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) idset.RetrievePredicate {
 		// No positive search for words, must contain only words for a negative search.
 		// Otherwise len(search) == 0 (see above)
 		negatives := retrieveNegatives(negCalls)
-		if negatives.IsEmpty() {
+		if negatives == nil || negatives.IsEmpty() {
 			return neverIncluded
 		}
 		negativePred := negatives.MakePredicate()
@@ -443,7 +443,7 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) idset.RetrievePredicate {
 		return positivePred
 	}
 	negatives := retrieveNegatives(negCalls)
-	if negatives.IsEmpty() {
+	if negatives == nil || negatives.IsEmpty() {
 		return positivePred
 	}
 	return func(zid id.Zid) bool {
