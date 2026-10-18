@@ -19,6 +19,7 @@ import (
 	"t73f.de/r/zero/dense"
 	"t73f.de/r/zero/vocab"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/zettel"
 )
@@ -29,15 +30,30 @@ type store struct {
 	mx    sync.RWMutex
 	dense *denser
 	voc   *vocab.Vocabulary
+
+	// inverse maps metadata keys to their inverse.
+	// Assumes that there will be no future inverse keys.
+	inverse map[vocab.WordID]vocab.WordID
 }
 type storeZid uint32
 type denser = dense.Dense[id.Zid, storeZid]
 
 func makeStore(stats *stats, wordsHint int) *store {
+	voc := vocab.New(wordsHint)
+	inverse := make(map[vocab.WordID]vocab.WordID, 8)
+	for kd := range meta.KeyDescriptionSeq() {
+		keyID := voc.AddString(kd.Name)
+		if invKey := kd.Inverse; invKey != "" {
+			invID := voc.AddString(invKey)
+			inverse[keyID] = invID
+			inverse[invID] = keyID
+		}
+	}
 	result := &store{
-		stats: stats,
-		dense: &denser{},
-		voc:   vocab.New(wordsHint),
+		stats:   stats,
+		dense:   &denser{},
+		voc:     voc,
+		inverse: inverse,
 	}
 	return result
 }
