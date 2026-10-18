@@ -82,10 +82,20 @@ func mustIndexZettel(m *meta.Meta) bool {
 	return m.Zid >= id.Zid(999999900)
 }
 func (zc *zettelCollector) addString(s string) {
+	hasWord := false
 	for word := range zerostrings.NormalizeWordSeq(s) {
 		if len(word) <= vocab.MaxWordLen {
 			zc.words.Insert(zc.voc.AddBytes(word))
+			hasWord = true
 		}
+	}
+	if !hasWord && len(s) <= vocab.MaxWordLen {
+		zc.words.Insert(zc.voc.AddString(s))
+	}
+}
+func (zc *zettelCollector) addURL(s string) {
+	if _, err := url.Parse(s); err == nil {
+		zc.urls.Insert(s)
 	}
 }
 
@@ -125,11 +135,6 @@ func (zc *zettelCollector) addRef(ref *sx.Pair) {
 		if zid, err := id.Parse(refValue); err == nil {
 			zc.refs.Insert(zc.dense.Encode(zid))
 		}
-	}
-}
-func (zc *zettelCollector) addURL(s string) {
-	if _, err := url.Parse(s); err == nil {
-		zc.urls.Insert(s)
 	}
 }
 
