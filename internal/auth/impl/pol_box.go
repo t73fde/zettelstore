@@ -21,7 +21,6 @@ import (
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/idset"
 )
 
 // polBox implements a policy box.
@@ -67,10 +66,6 @@ func (pp *polBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error)
 
 func (pp *polBox) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel, error) {
 	return pp.box.GetAllZettel(ctx, zid)
-}
-
-func (pp *polBox) FetchZids(ctx context.Context) (*idset.ArraySet, error) {
-	return nil, box.NewErrNotAllowed("fetch-zids", auth.GetCurrentUser(ctx), id.Invalid)
 }
 
 func (pp *polBox) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
