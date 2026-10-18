@@ -38,11 +38,14 @@ type Indexer interface {
 // Retriever declares all methods an Indexer needs to retrieve some zettel
 // related content.
 type Retriever interface {
-	// FetchZids returns the set of all zettel identifer.
-	FetchZids(ctx context.Context) (map[id.Zid]struct{}, error)
+	// HasZettel returns true, if the zettel with the given ID exists.
+	HasZettel(context.Context, id.Zid) bool
 
 	// GetZettel retrieves a specific zettel.
-	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)
+	GetZettel(context.Context, id.Zid) (zettel.Zettel, error)
+
+	// FetchZids returns the set of all zettel identifer.
+	FetchZids(context.Context) (map[id.Zid]struct{}, error)
 }
 
 // Enqueuer allows to operate with the search index.

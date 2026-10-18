@@ -147,7 +147,8 @@ func (mgr *Manager) fetchZids(ctx context.Context) (map[id.Zid]struct{}, error) 
 	return result, nil
 }
 
-func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {
+// HasZettel returns true, if the zettel with the given ID exists.
+func (mgr *Manager) HasZettel(ctx context.Context, zid id.Zid) bool {
 	mgr.mgrLogger.Debug("HasZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return false
