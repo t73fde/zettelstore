@@ -35,8 +35,9 @@ type Indexer interface {
 	Stop()
 }
 
-// Fetcher declares all methods an Indexer needs to operate.
-type Fetcher interface {
+// Retriever declares all methods an Indexer needs to retrieve some zettel
+// related content.
+type Retriever interface {
 	// FetchZids returns the set of all zettel identifer.
 	FetchZids(ctx context.Context) (map[id.Zid]struct{}, error)
 
@@ -48,10 +49,10 @@ type Fetcher interface {
 type Enqueuer interface {
 	// Enqueue signals that one or many zettel has been changed and the index
 	// should be updated to reflect the changes. Updates zettel data can be
-	// retrieved by the given Fetcher.
+	// retrieved by the given Retriever.
 	// Enqueue is called in the context of a separate goroutine. It must
 	// not take too long to process the enqueue signal.
-	Enqueue(Fetcher, Reason, id.Zid)
+	Enqueue(Retriever, Reason, id.Zid)
 }
 
 // Reason states why `Enqueuer.Enqueue` was called.

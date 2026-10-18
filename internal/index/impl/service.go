@@ -50,16 +50,16 @@ func (idx *Index) Start() {
 
 	storeCh := make(chan storeData, 4) // TODO: make configurable?
 	parseCh := make(chan parseData, 4) // TODO: make configurable?
-	wakeCh := make(chan struct{}, 1)   // collector signals fetcher that new data was placed in pending.
+	wakeCh := make(chan struct{}, 1)   // collector signals retrieve service that new data was placed in pending.
 
 	storeSrv := storeService{logger: idx.logger.With("service", "store"), store: idx.store}
 	parseSrv := parseService{logger: idx.logger.With("service", "parse"), config: idx.config}
-	fetchSrv := fetchService{logger: idx.logger.With("service", "fetcher")}
+	retrieveSrv := retrieveService{logger: idx.logger.With("service", "retrieve")}
 	collectSrv := collectService{logger: idx.logger.With("service", "collector")}
 
 	idx.spawn(ctx, "IndexStore", func() { storeSrv.service(storeCh) })
 	idx.spawn(ctx, "IndexParser", func() { parseSrv.service(ctx, parseCh, storeCh) })
-	idx.spawn(ctx, "IndexFetcher", func() { fetchSrv.service(ctx, wakeCh, idx.pending, parseCh) })
+	idx.spawn(ctx, "IndexRetriever", func() { retrieveSrv.service(ctx, wakeCh, idx.pending, parseCh) })
 	idx.spawn(ctx, "IndexCollector", func() { collectSrv.service(idx.notify, idx.pending, wakeCh) })
 
 	idx.logger.Debug("Started")
@@ -101,10 +101,10 @@ loop:
 				continue
 			case index.OnReset:
 				csrv.logger.Info("OnReset")
-				pending.reset(d.fetcher)
+				pending.reset(d.retriever)
 			case index.OnZettel:
 				csrv.logger.Info("OnZettel", "zid", d.zid)
-				pending.addZettel(d.fetcher, d.zid)
+				pending.addZettel(d.retriever, d.zid)
 			default:
 				csrv.logger.Error("Unknown notification reason", "reason", d.reason, "zid", d.zid)
 				continue
@@ -126,14 +126,14 @@ loop:
 	close(wake)
 }
 
-// ----- fetch service ----------
+// ----- retrieve service ----------
 
-// fetchService reads from the pending queue and tries to fetch zettel.
-type fetchService struct {
+// retrieveService reads from the pending queue and tries to retrieve zettel.
+type retrieveService struct {
 	logger *slog.Logger
 }
 
-func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pending *pendingQueue, out chan<- parseData) {
+func (fsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, pending *pendingQueue, out chan<- parseData) {
 	for range wake {
 		fsrv.logger.Info("WakeUp")
 	loop:
@@ -146,7 +146,7 @@ func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pen
 			case pendingZettel:
 				fsrv.logger.Info("Zettel", "zid", job.zid, "generation", job.generation)
 				ctx = box.NoEnrichContext(ctx) // TODO: does not seem to work always. Many zettel are enriched
-				zettel, err := job.fetcher.GetZettel(ctx, job.zid)
+				zettel, err := job.retriever.GetZettel(ctx, job.zid)
 				if err != nil {
 					if ctx.Err() != nil {
 						break loop // cancelled by Stop: not an error, not a deletion
@@ -162,7 +162,7 @@ func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pen
 
 			case pendingReset:
 				fsrv.logger.Info("Reload", "generation", job.generation)
-				zids, err := job.fetcher.FetchZids(ctx)
+				zids, err := job.retriever.FetchZids(ctx)
 				if err != nil {
 					if ctx.Err() != nil {
 						break loop // cancelled by Stop: not an error
@@ -170,7 +170,7 @@ func (fsrv *fetchService) service(ctx context.Context, wake <-chan struct{}, pen
 					fsrv.logger.Error("FetchZids", "error", err)
 					continue
 				}
-				pending.reload(job.fetcher, zids)
+				pending.reload(job.retriever, zids)
 			}
 		}
 	}

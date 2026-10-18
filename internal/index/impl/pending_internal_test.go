@@ -23,10 +23,10 @@ import (
 	"zettelstore.de/z/internal/index"
 )
 
-// fakeFetcher satisfies index.Fetcher by embedding the (nil) interface.
+// fakeRetriever satisfies index.Retriever by embedding the (nil) interface.
 // Only its identity is used; calling a method would panic.
-type fakeFetcher struct {
-	index.Fetcher
+type fakeRetriever struct {
+	index.Retriever
 	name string
 }
 
@@ -90,7 +90,7 @@ func TestEmptyQueue(t *testing.T) {
 
 func TestInvalidInputIgnored(t *testing.T) {
 	pq := &pendingQueue{}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	pq.addZettel(f, id.Invalid)
 	pq.addZettel(nil, zid(1))
 	pq.reset(nil)
@@ -104,42 +104,42 @@ func TestInvalidInputIgnored(t *testing.T) {
 	checkInvariants(t, pq)
 }
 
-func TestDuplicateCollapsesNewerFetcherWins(t *testing.T) {
+func TestDuplicateCollapsesNewerRetrieverWins(t *testing.T) {
 	pq := &pendingQueue{}
-	f1, f2 := &fakeFetcher{name: "f1"}, &fakeFetcher{name: "f2"}
+	f1, f2 := &fakeRetriever{name: "f1"}, &fakeRetriever{name: "f2"}
 	pq.addZettel(f1, zid(1))
 	pq.addZettel(f2, zid(1))
 	jobs := drain(pq)
 	if len(jobs) != 1 {
 		t.Fatalf("expected 1 job, got %d", len(jobs))
 	}
-	if jobs[0].fetcher != index.Fetcher(f2) || jobs[0].zid != zid(1) {
+	if jobs[0].retriever != index.Retriever(f2) || jobs[0].zid != zid(1) {
 		t.Errorf("unexpected job %+v", jobs[0])
 	}
 }
 
 func TestDuplicateAcrossBatches(t *testing.T) {
 	pq := &pendingQueue{maxLoad: 1} // every zettel gets its own batch
-	f1, f2 := &fakeFetcher{name: "f1"}, &fakeFetcher{name: "f2"}
+	f1, f2 := &fakeRetriever{name: "f1"}, &fakeRetriever{name: "f2"}
 	pq.addZettel(f1, zid(1))
 	pq.addZettel(f1, zid(2))
 	pq.addZettel(f2, zid(1)) // already waiting in the first batch
 	checkInvariants(t, pq)
-	got := map[id.Zid]index.Fetcher{}
+	got := map[id.Zid]index.Retriever{}
 	for _, job := range drain(pq) {
-		got[job.zid] = job.fetcher
+		got[job.zid] = job.retriever
 	}
 	if len(got) != 2 {
 		t.Fatalf("expected 2 distinct zettel, got %d", len(got))
 	}
-	if got[zid(1)] != index.Fetcher(f2) || got[zid(2)] != index.Fetcher(f1) {
-		t.Errorf("unexpected fetchers: %v", got)
+	if got[zid(1)] != index.Retriever(f2) || got[zid(2)] != index.Retriever(f1) {
+		t.Errorf("unexpected retrievers: %v", got)
 	}
 }
 
 func TestMaxLoadOpensNewBatches(t *testing.T) {
 	pq := &pendingQueue{maxLoad: 3}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	for i := 1; i <= 10; i++ {
 		pq.addZettel(f, zid(i))
 	}
@@ -163,7 +163,7 @@ func TestMaxLoadOpensNewBatches(t *testing.T) {
 
 func TestReloadBatchComesFirst(t *testing.T) {
 	pq := &pendingQueue{}
-	fz, fr := &fakeFetcher{name: "zettel"}, &fakeFetcher{name: "reload"}
+	fz, fr := &fakeRetriever{name: "zettel"}, &fakeRetriever{name: "reload"}
 	pq.addZettel(fz, zid(1))
 	pq.reload(fr, zidSet(2, 3))
 	pq.addZettel(fz, zid(4))
@@ -178,18 +178,18 @@ func TestReloadBatchComesFirst(t *testing.T) {
 		if job.fromReload() != wantReload {
 			t.Errorf("job %d: fromReload()=%v, want %v", i, job.fromReload(), wantReload)
 		}
-		if wantReload && job.fetcher != index.Fetcher(fr) {
-			t.Errorf("job %d: wrong fetcher", i)
+		if wantReload && job.retriever != index.Retriever(fr) {
+			t.Errorf("job %d: wrong retriever", i)
 		}
-		if !wantReload && job.fetcher != index.Fetcher(fz) {
-			t.Errorf("job %d: wrong fetcher", i)
+		if !wantReload && job.retriever != index.Retriever(fz) {
+			t.Errorf("job %d: wrong retriever", i)
 		}
 	}
 }
 
 func TestAddZettelNeverEntersReloadBatch(t *testing.T) {
 	pq := &pendingQueue{}
-	fz, fr := &fakeFetcher{name: "zettel"}, &fakeFetcher{name: "reload"}
+	fz, fr := &fakeRetriever{name: "zettel"}, &fakeRetriever{name: "reload"}
 	pq.reload(fr, zidSet(1))
 	pq.addZettel(fz, zid(2)) // last batch is a reload batch -> new batch
 	checkInvariants(t, pq)
@@ -202,7 +202,7 @@ func TestAddZettelNeverEntersReloadBatch(t *testing.T) {
 
 func TestReloadReplacesPreviousReloadKeepsZettel(t *testing.T) {
 	pq := &pendingQueue{}
-	fz, fr := &fakeFetcher{name: "zettel"}, &fakeFetcher{name: "reload"}
+	fz, fr := &fakeRetriever{name: "zettel"}, &fakeRetriever{name: "reload"}
 	pq.addZettel(fz, zid(9))
 	pq.reload(fr, zidSet(1, 2))
 	pq.reload(fr, zidSet(3))
@@ -219,7 +219,7 @@ func TestReloadReplacesPreviousReloadKeepsZettel(t *testing.T) {
 
 func TestReloadWithEmptySetClearsQueue(t *testing.T) {
 	pq := &pendingQueue{}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	pq.addZettel(f, zid(1))
 	pq.reload(f, zidSet())
 	if jobs := drain(pq); len(jobs) != 0 {
@@ -230,13 +230,13 @@ func TestReloadWithEmptySetClearsQueue(t *testing.T) {
 
 func TestResetDeliveredOnceAndFirst(t *testing.T) {
 	pq := &pendingQueue{}
-	fz, fr := &fakeFetcher{name: "zettel"}, &fakeFetcher{name: "reset"}
+	fz, fr := &fakeRetriever{name: "zettel"}, &fakeRetriever{name: "reset"}
 	pq.addZettel(fz, zid(1))
 	pq.reset(fr) // clears the queue
 
 	job := pq.getJob()
-	if job.action != pendingReset || job.fetcher != index.Fetcher(fr) {
-		t.Fatalf("expected pendingReset with reset fetcher, got %+v", job)
+	if job.action != pendingReset || job.retriever != index.Retriever(fr) {
+		t.Fatalf("expected pendingReset with reset retriever, got %+v", job)
 	}
 	if job.generation != 1 {
 		t.Errorf("reset job generation = %d, want 1", job.generation)
@@ -251,20 +251,20 @@ func TestResetDeliveredOnceAndFirst(t *testing.T) {
 
 func TestResetSurvivesFollowingReload(t *testing.T) {
 	pq := &pendingQueue{}
-	fr, fl := &fakeFetcher{name: "reset"}, &fakeFetcher{name: "reload"}
+	fr, fl := &fakeRetriever{name: "reset"}, &fakeRetriever{name: "reload"}
 	pq.reset(fr)
 	pq.reload(fl, zidSet(5))
 	pq.reload(fl, zidSet()) // even an empty reload keeps the reset signal
 
 	jobs := drain(pq)
-	if len(jobs) != 1 || jobs[0].action != pendingReset || jobs[0].fetcher != index.Fetcher(fr) {
+	if len(jobs) != 1 || jobs[0].action != pendingReset || jobs[0].retriever != index.Retriever(fr) {
 		t.Errorf("expected exactly the reset signal, got %+v", jobs)
 	}
 }
 
 func TestResetThenReloadOrder(t *testing.T) {
 	pq := &pendingQueue{}
-	fr, fl := &fakeFetcher{name: "reset"}, &fakeFetcher{name: "reload"}
+	fr, fl := &fakeRetriever{name: "reset"}, &fakeRetriever{name: "reload"}
 	pq.reset(fr)
 	pq.reload(fl, zidSet(5))
 
@@ -281,10 +281,10 @@ func TestResetThenReloadOrder(t *testing.T) {
 }
 
 // TestJobGenerations covers the system start: a reset is followed by a reload
-// (triggered by the fetch service). Both belong to the same generation.
+// (triggered by the retrieve service). Both belong to the same generation.
 func TestJobGenerations(t *testing.T) {
 	pq := &pendingQueue{}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	pq.reset(nil)             // ignored
 	pq.reload(nil, zidSet(1)) // ignored
 	pq.reset(f)               // generation 1
@@ -308,7 +308,7 @@ func TestJobGenerations(t *testing.T) {
 
 func TestSecondResetIncrementsGeneration(t *testing.T) {
 	pq := &pendingQueue{}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	pq.reset(f)
 	pq.reset(f) // overwrites the pending reset, generation 2
 	pq.reload(f, zidSet(1))
@@ -327,7 +327,7 @@ func TestSecondResetIncrementsGeneration(t *testing.T) {
 
 func TestReloadWithoutResetStartsGeneration1(t *testing.T) {
 	pq := &pendingQueue{}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	pq.reload(f, zidSet(1))
 
 	jobs := drain(pq)
@@ -338,7 +338,7 @@ func TestReloadWithoutResetStartsGeneration1(t *testing.T) {
 
 func TestReloadDoesNotIncrementGeneration(t *testing.T) {
 	pq := &pendingQueue{}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	pq.reset(f)
 	pq.reload(f, zidSet(1))
 	pq.reload(f, zidSet(2))
@@ -350,7 +350,7 @@ func TestReloadDoesNotIncrementGeneration(t *testing.T) {
 
 func TestBatchGenerations(t *testing.T) {
 	pq := &pendingQueue{}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 	pq.reset(f)
 	pq.addZettel(f, zid(1))
 	pq.reload(f, zidSet(2))
@@ -373,7 +373,7 @@ func TestBatchGenerations(t *testing.T) {
 func TestConcurrent(t *testing.T) {
 	const producers, perProducer = 8, 500
 	pq := &pendingQueue{maxLoad: 50}
-	f := &fakeFetcher{name: "f"}
+	f := &fakeRetriever{name: "f"}
 
 	var wg sync.WaitGroup
 	for p := range producers {

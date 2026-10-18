@@ -54,19 +54,19 @@ func New(config config.Config) *Index {
 }
 
 // Enqueue a new zettel to update the search index.
-func (idx *Index) Enqueue(fetcher index.Fetcher, reason index.Reason, zid id.Zid) {
+func (idx *Index) Enqueue(retriever index.Retriever, reason index.Reason, zid id.Zid) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
 	if idx.notify == nil {
 		return // not running
 	}
-	idx.notify <- notifyData{fetcher: fetcher, reason: reason, zid: zid}
+	idx.notify <- notifyData{retriever: retriever, reason: reason, zid: zid}
 }
 
 type notifyData struct {
-	fetcher index.Fetcher
-	reason  index.Reason
-	zid     id.Zid
+	retriever index.Retriever
+	reason    index.Reason
+	zid       id.Zid
 }
 
 // ReadStats populates st with index statistics.
