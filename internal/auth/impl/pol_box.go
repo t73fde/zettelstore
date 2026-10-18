@@ -68,10 +68,6 @@ func (pp *polBox) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel, e
 	return pp.box.GetAllZettel(ctx, zid)
 }
 
-func (pp *polBox) FetchZids(ctx context.Context) (map[id.Zid]struct{}, error) {
-	return nil, box.NewErrNotAllowed("fetch-zids", auth.GetCurrentUser(ctx), id.Invalid)
-}
-
 func (pp *polBox) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
 	m, err := pp.box.GetMeta(ctx, zid)
 	if err != nil {
