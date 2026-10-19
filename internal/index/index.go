@@ -77,6 +77,9 @@ type Index interface {
 	Enqueuer
 	Searcher
 
+	// RegisterRetriever allows to set a Retriever to be used by the Index.
+	RegisterRetriever(Retriever)
+
 	// GetMeta returns metadata of the given zettel. It signals an error if
 	// the zettel is not found or for other retrieval errors.
 	GetMeta(zid id.Zid) (*meta.Meta, error)

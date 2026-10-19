@@ -161,6 +161,8 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, index index.Index, rt
 		return nil, err
 	}
 	boxes = append(boxes, constbox, compbox)
+
+	mgr.index.RegisterRetriever(mgr)
 	mgr.boxes = boxes
 	return mgr, nil
 }

@@ -54,7 +54,7 @@ func (idx *Index) Start() {
 
 	storeSrv := storeService{logger: idx.logger.With("service", "store"), store: idx.store}
 	parseSrv := parseService{logger: idx.logger.With("service", "parse"), config: idx.config}
-	retrieveSrv := retrieveService{logger: idx.logger.With("service", "retrieve")}
+	retrieveSrv := retrieveService{logger: idx.logger.With("service", "retrieve"), getRetriever: idx.getRetriever}
 	collectSrv := collectService{logger: idx.logger.With("service", "collector")}
 
 	idx.spawn(ctx, "IndexStore", func() { storeSrv.service(storeCh) })
@@ -101,10 +101,10 @@ loop:
 				continue
 			case index.OnReset:
 				csrv.logger.Info("OnReset")
-				pending.reset(d.retriever)
+				pending.reset()
 			case index.OnZettel:
 				csrv.logger.Info("OnZettel", "zid", d.zid)
-				pending.addZettel(d.retriever, d.zid)
+				pending.addZettel(d.zid)
 			default:
 				csrv.logger.Error("Unknown notification reason", "reason", d.reason, "zid", d.zid)
 				continue
@@ -130,23 +130,25 @@ loop:
 
 // retrieveService reads from the pending queue and tries to retrieve zettel.
 type retrieveService struct {
-	logger *slog.Logger
+	logger       *slog.Logger
+	getRetriever func() index.Retriever
 }
 
-func (fsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, pending *pendingQueue, out chan<- parseData) {
+func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, pending *pendingQueue, out chan<- parseData) {
 	for range wake {
-		fsrv.logger.Info("WakeUp")
+		rsrv.logger.Info("WakeUp")
+		retriever := rsrv.getRetriever()
 	loop:
 		for {
 			switch job := pending.getJob(); job.action {
 			case pendingNothing:
-				fsrv.logger.Info("Nothing")
+				rsrv.logger.Info("Nothing")
 				break loop
 
 			case pendingZettel:
-				fsrv.logger.Info("Zettel", "zid", job.zid, "generation", job.generation)
+				rsrv.logger.Info("Zettel", "zid", job.zid, "generation", job.generation)
 				ctx = box.NoEnrichContext(ctx) // TODO: does not seem to work always. Many zettel are enriched
-				zettel, err := job.retriever.GetZettel(ctx, job.zid)
+				zettel, err := retriever.GetZettel(ctx, job.zid)
 				if err != nil {
 					if ctx.Err() != nil {
 						break loop // cancelled by Stop: not an error, not a deletion
@@ -154,27 +156,27 @@ func (fsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 					if _, notFound := errors.AsType[box.ErrZettelNotFound](err); notFound {
 						out <- parseData{zid: job.zid, generation: job.generation, deleted: true}
 					} else {
-						fsrv.logger.Error("GetZettel", "zid", job.zid, "error", err)
+						rsrv.logger.Error("GetZettel", "zid", job.zid, "error", err)
 					}
 					continue
 				}
 				out <- parseData{zid: job.zid, zettel: zettel, generation: job.generation, deleted: false}
 
 			case pendingReset:
-				fsrv.logger.Info("Reload", "generation", job.generation)
-				zids, err := job.retriever.FetchZids(ctx)
+				rsrv.logger.Info("Reload", "generation", job.generation)
+				zids, err := retriever.FetchZids(ctx)
 				if err != nil {
 					if ctx.Err() != nil {
 						break loop // cancelled by Stop: not an error
 					}
-					fsrv.logger.Error("FetchZids", "error", err)
+					rsrv.logger.Error("FetchZids", "error", err)
 					continue
 				}
-				pending.reload(job.retriever, zids)
+				pending.reload(zids)
 			}
 		}
 	}
-	fsrv.logger.Info("Byebye")
+	rsrv.logger.Info("Byebye")
 	close(out)
 }
 

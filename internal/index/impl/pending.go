@@ -14,20 +14,19 @@
 package impl
 
 import (
+	"maps"
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
-
-	"zettelstore.de/z/internal/index"
 )
 
 type pendingQueue struct {
-	mx             sync.Mutex
-	first          *pendingBatch
-	last           *pendingBatch
-	maxLoad        int
-	resetRetriever index.Retriever // non-nil: pendingReload to be delivered first
-	generation     uint64          // number of accepted resets and reloads so far
+	mx           sync.Mutex
+	first        *pendingBatch
+	last         *pendingBatch
+	maxLoad      int
+	resetPending bool   // a pendingReset is to be delivered first
+	generation   uint64 // number of accepted resets and reloads so far
 }
 
 type pendingBatch struct {
@@ -35,34 +34,31 @@ type pendingBatch struct {
 	members    memberSet
 	generation uint64 // >0: reload batch created in that generation; 0: individual zettel
 }
-type memberSet map[id.Zid]index.Retriever
+type memberSet map[id.Zid]struct{}
 
 func (pb *pendingBatch) has(zid id.Zid) bool {
 	_, found := pb.members[zid]
 	return found
 }
-func (pb *pendingBatch) pop() (index.Retriever, id.Zid) {
-	for zid, retriever := range pb.members {
+func (pb *pendingBatch) pop() id.Zid {
+	for zid := range pb.members {
 		delete(pb.members, zid)
-		return retriever, zid
+		return zid
 	}
-	return nil, id.Invalid
+	return id.Invalid
 }
 func (pb *pendingBatch) isReload() bool { return pb.generation != 0 }
 
-func (pq *pendingQueue) reset(retriever index.Retriever) {
-	if retriever == nil {
-		return
-	}
+func (pq *pendingQueue) reset() {
 	pq.mx.Lock()
 	defer pq.mx.Unlock()
 	pq.generation++
 	pq.first, pq.last = nil, nil
-	pq.resetRetriever = retriever
+	pq.resetPending = true
 }
 
-func (pq *pendingQueue) addZettel(retriever index.Retriever, zid id.Zid) {
-	if !zid.IsValid() || retriever == nil {
+func (pq *pendingQueue) addZettel(zid id.Zid) {
+	if !zid.IsValid() {
 		return
 	}
 	pq.mx.Lock()
@@ -73,15 +69,14 @@ func (pq *pendingQueue) addZettel(retriever index.Retriever, zid id.Zid) {
 			continue // Do not put zettel in reload batch
 		}
 		if batch.has(zid) {
-			batch.members[zid] = retriever // Zettel is already waiting; newer retriever wins.
-			return
+			return // Zettel is already waiting
 		}
 	}
 	if batch := pq.last; batch != nil && !batch.isReload() && (pq.maxLoad == 0 || len(batch.members) < pq.maxLoad) {
-		batch.members[zid] = retriever
+		batch.members[zid] = struct{}{}
 		return
 	}
-	batch := &pendingBatch{members: memberSet{zid: retriever}} // generation 0: individual zettel
+	batch := &pendingBatch{members: memberSet{zid: {}}} // generation 0: individual zettel
 	if pq.last == nil {
 		pq.first = batch
 	} else {
@@ -90,16 +85,10 @@ func (pq *pendingQueue) addZettel(retriever index.Retriever, zid id.Zid) {
 	pq.last = batch
 }
 
-func (pq *pendingQueue) reload(retriever index.Retriever, allZids map[id.Zid]struct{}) {
-	if retriever == nil {
-		return
-	}
+func (pq *pendingQueue) reload(allZids memberSet) {
 	var members memberSet
 	if len(allZids) > 0 {
-		members = make(memberSet, len(allZids))
-		for zid := range allZids {
-			members[zid] = retriever
-		}
+		members = maps.Clone(memberSet(allZids)) // do not share the caller's map
 	}
 
 	pq.mx.Lock()
@@ -125,9 +114,8 @@ func (pq *pendingQueue) reload(retriever index.Retriever, allZids map[id.Zid]str
 
 // pendingJob is the result of getJob.
 type pendingJob struct {
-	retriever index.Retriever
-	zid       id.Zid
-	action    pendingAction
+	zid    id.Zid
+	action pendingAction
 
 	// pendingReset: generation of the reset;
 	// pendingZettel: generation of the reload batch, 0 for an individual zettel
@@ -147,9 +135,9 @@ func (pq *pendingQueue) getJob() pendingJob {
 	defer pq.mx.Unlock()
 
 	// A pending reset is delivered first.
-	if f := pq.resetRetriever; f != nil {
-		pq.resetRetriever = nil
-		return pendingJob{retriever: f, action: pendingReset, generation: pq.generation}
+	if pq.resetPending {
+		pq.resetPending = false
+		return pendingJob{action: pendingReset, generation: pq.generation}
 	}
 
 	for batch := pq.first; batch != nil; batch = pq.first {
@@ -157,11 +145,11 @@ func (pq *pendingQueue) getJob() pendingJob {
 			pq.removeFirst()
 			continue
 		}
-		retriever, zid := batch.pop()
+		zid := batch.pop()
 		if len(batch.members) == 0 {
 			pq.removeFirst()
 		}
-		return pendingJob{retriever: retriever, zid: zid, action: pendingZettel, generation: batch.generation}
+		return pendingJob{zid: zid, action: pendingZettel, generation: batch.generation}
 	}
 	return pendingJob{action: pendingNothing}
 }

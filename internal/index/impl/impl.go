@@ -32,8 +32,9 @@ var _ index.Searcher = (*Index)(nil)
 
 // Index stores all data to provide an index.
 type Index struct {
-	logger *slog.Logger
-	config config.Config
+	logger    *slog.Logger
+	config    config.Config
+	retriever index.Retriever
 
 	mx     sync.RWMutex
 	cancel context.CancelFunc
@@ -48,10 +49,20 @@ type Index struct {
 // New creates a new index object.
 func New(config config.Config) *Index {
 	return &Index{
-		logger: kernel.Main.GetLogger(kernel.IndexService),
-		config: config,
+		logger:    kernel.Main.GetLogger(kernel.IndexService),
+		config:    config,
+		retriever: nil,
 	}
 }
+
+// RegisterRetriever allows to set a retriever to be used by the Index.
+func (idx *Index) RegisterRetriever(retriever index.Retriever) {
+	if idx.retriever != nil {
+		panic("Index.Retriever already set")
+	}
+	idx.retriever = retriever
+}
+func (idx *Index) getRetriever() index.Retriever { return idx.retriever }
 
 // Enqueue a new zettel to update the search index.
 func (idx *Index) Enqueue(retriever index.Retriever, reason index.Reason, zid id.Zid) {
