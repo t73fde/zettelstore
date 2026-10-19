@@ -24,7 +24,6 @@ import (
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/index"
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -42,8 +41,12 @@ func (idx *Index) Start() {
 	idx.stats = &stats{}
 	idx.store = makeStore(idx.stats, 2000) // TODO: configurable wordsHint for voc
 
-	ctx, cancel := context.WithCancel(context.Background())
-	idx.cancel = cancel
+	ctx, cancel := context.WithCancelCause(context.Background())
+	idx.pl = &pipeline{
+		ctx:    ctx,
+		cancel: cancel,
+		logger: idx.logger.With("service", "pipeline"),
+	}
 
 	idx.pending = &pendingQueue{maxLoad: 1000} // TODO: maxLoad could be configurable?
 	idx.notify = make(chan notifyData, 10)     // TODO: make 10 configurable?
@@ -57,10 +60,10 @@ func (idx *Index) Start() {
 	retrieveSrv := retrieveService{logger: idx.logger.With("service", "retrieve"), getRetriever: idx.getRetriever}
 	collectSrv := collectService{logger: idx.logger.With("service", "collector")}
 
-	idx.spawn(ctx, "IndexStore", func() { storeSrv.service(storeCh) })
-	idx.spawn(ctx, "IndexParser", func() { parseSrv.service(ctx, parseCh, storeCh) })
-	idx.spawn(ctx, "IndexRetriever", func() { retrieveSrv.service(ctx, wakeCh, idx.pending, parseCh) })
-	idx.spawn(ctx, "IndexCollector", func() { collectSrv.service(idx.notify, idx.pending, wakeCh) })
+	idx.pl.spawn("IndexStore", func() { storeSrv.service(ctx, storeCh) })
+	idx.pl.spawn("IndexParser", func() { parseSrv.service(ctx, parseCh, storeCh) })
+	idx.pl.spawn("IndexRetriever", func() { retrieveSrv.service(ctx, wakeCh, idx.pending, parseCh) })
+	idx.pl.spawn("IndexCollector", func() { collectSrv.service(ctx, idx.notify, idx.pending, wakeCh) })
 
 	idx.logger.Debug("Started")
 }
@@ -74,9 +77,10 @@ func (idx *Index) Stop() {
 	}
 	idx.logger.Debug("Stop")
 	close(idx.notify)
-	idx.cancel() // interrupts blocking GetZettel / FetchZids
-	idx.wg.Wait()
-	idx.stats, idx.store, idx.notify, idx.pending, idx.cancel = nil, nil, nil, nil, nil
+	idx.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
+	idx.pl.wg.Wait()
+	idx.notify, idx.pending, idx.pl = nil, nil, nil
+	idx.stats, idx.store = nil, nil
 }
 
 // collectService receives update notifications and adds them to an unlimited
@@ -85,7 +89,7 @@ type collectService struct {
 	logger *slog.Logger
 }
 
-func (csrv *collectService) service(notify <-chan notifyData, pending *pendingQueue, wake chan<- struct{}) {
+func (csrv *collectService) service(ctx context.Context, notify <-chan notifyData, pending *pendingQueue, wake chan<- struct{}) {
 	ticker := time.NewTicker(time.Minute)
 	defer ticker.Stop()
 loop:
@@ -120,6 +124,9 @@ loop:
 			case wake <- struct{}{}:
 			default:
 			}
+
+		case <-ctx.Done():
+			break loop
 		}
 	}
 	csrv.logger.Debug("Good Buy")
@@ -139,7 +146,7 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 		rsrv.logger.Info("WakeUp")
 		retriever := rsrv.getRetriever()
 	loop:
-		for {
+		for ctx.Err() == nil {
 			switch job := pending.getJob(); job.action {
 			case pendingNothing:
 				rsrv.logger.Info("Nothing")
@@ -154,13 +161,17 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 						break loop // cancelled by Stop: not an error, not a deletion
 					}
 					if _, notFound := errors.AsType[box.ErrZettelNotFound](err); notFound {
-						out <- parseData{zid: job.zid, generation: job.generation, deleted: true}
+						if !send(ctx, out, parseData{zid: job.zid, deleted: true}) {
+							break loop
+						}
 					} else {
 						rsrv.logger.Error("GetZettel", "zid", job.zid, "error", err)
 					}
 					continue
 				}
-				out <- parseData{zid: job.zid, zettel: zettel, generation: job.generation, deleted: false}
+				if !send(ctx, out, parseData{zid: job.zid, zettel: zettel}) {
+					break loop
+				}
 
 			case pendingReset:
 				rsrv.logger.Info("Reload", "generation", job.generation)
@@ -195,16 +206,19 @@ type parseService struct {
 }
 
 func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out chan<- storeData) {
-	ctx = box.NoEnrichContext(ctx)
-	for zd := range in {
+	for zd := range recvSeq(ctx, in) {
 		if zd.deleted {
 			psrv.logger.Info("Deleted", "zid", zd.zid, "generation", zd.generation)
-			out <- storeData{zid: zd.zid, zettel: nil, generation: zd.generation}
+			if !send(ctx, out, storeData{zid: zd.zid, zettel: nil, generation: zd.generation}) {
+				break
+			}
 			continue
 		}
 		psrv.logger.Info("Update", "zid", zd.zid, "generation", zd.generation)
 		ztl := parser.ParseZettel(ctx, zd.zettel, "", psrv.config)
-		out <- storeData{zid: zd.zid, zettel: ztl, generation: zd.generation}
+		if !send(ctx, out, storeData{zid: zd.zid, zettel: ztl, generation: zd.generation}) {
+			break
+		}
 	}
 	psrv.logger.Info("NotTwoPi")
 	close(out)
@@ -223,8 +237,8 @@ type storeService struct {
 	store  *store
 }
 
-func (ssrv *storeService) service(in <-chan storeData) {
-	for sd := range in {
+func (ssrv *storeService) service(ctx context.Context, in <-chan storeData) {
+	for sd := range recvSeq(ctx, in) {
 		if sd.zettel == nil {
 			ssrv.logger.Info("Deleted", "zid", sd.zid, "generation", sd.generation)
 			ssrv.store.removeZettel(sd.zid, sd.generation)
@@ -239,54 +253,4 @@ func (ssrv *storeService) service(in <-chan storeData) {
 	}
 
 	ssrv.logger.Info("Finalforget")
-}
-
-// ----- helper functions
-
-// spawn runs a service in its own goroutine, restarts it after a panic,
-// and registers it with the wait group for the whole time.
-func (idx *Index) spawn(ctx context.Context, name string, run func()) {
-	idx.wg.Go(func() {
-		const (
-			maxRestarts = 5           // within one window
-			window      = time.Minute // restarts older than this are forgotten
-			baseDelay   = 100 * time.Millisecond
-			maxDelay    = 10 * time.Second
-		)
-		var (
-			restarts int
-			first    time.Time
-			delay    = baseDelay
-		)
-		for !runRecovered(name, run) {
-			now := time.Now()
-			if restarts == 0 || now.Sub(first) > window {
-				first, restarts, delay = now, 0, baseDelay // new window
-			}
-			restarts++
-			if restarts > maxRestarts {
-				idx.logger.Error("Giving up", "service", name, "restarts", restarts)
-				return
-			}
-			idx.logger.Warn("Restarting", "service", name, "restart", restarts, "delay", delay)
-			select {
-			case <-time.After(delay):
-			case <-ctx.Done():
-				return // Stop was called during the pause
-			}
-			delay = min(delay*2, maxDelay)
-		}
-	})
-}
-
-// runRecovered returns false if run panicked.
-func runRecovered(name string, run func()) (ok bool) {
-	defer func() {
-		if ri := recover(); ri != nil {
-			kernel.Main.LogRecover(name, ri)
-			ok = false
-		}
-	}()
-	run()
-	return true
 }

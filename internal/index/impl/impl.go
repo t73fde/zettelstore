@@ -15,7 +15,6 @@
 package impl
 
 import (
-	"context"
 	"log/slog"
 	"sync"
 
@@ -36,9 +35,10 @@ type Index struct {
 	config    config.Config
 	retriever index.Retriever
 
-	mx     sync.RWMutex
-	cancel context.CancelFunc
-	wg     sync.WaitGroup
+	mx sync.RWMutex
+	pl *pipeline
+	// cancel context.CancelFunc
+	// wg     sync.WaitGroup
 	notify chan notifyData
 
 	stats   *stats
@@ -71,7 +71,8 @@ func (idx *Index) Enqueue(retriever index.Retriever, reason index.Reason, zid id
 	if idx.notify == nil {
 		return // not running
 	}
-	idx.notify <- notifyData{retriever: retriever, reason: reason, zid: zid}
+	// dropped if the pipeline has failed
+	send(idx.pl.ctx, idx.notify, notifyData{retriever: retriever, reason: reason, zid: zid})
 }
 
 type notifyData struct {
