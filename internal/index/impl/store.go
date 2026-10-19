@@ -13,71 +13,32 @@
 
 package impl
 
-import (
-	"sync"
-
-	"t73f.de/r/zero/dense"
-	"t73f.de/r/zero/vocab"
-	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/meta"
-
-	"zettelstore.de/z/internal/zettel"
-)
-
 type store struct {
 	stats *stats
-
-	mx    sync.RWMutex
-	dense *denser
-	voc   *vocab.Vocabulary
-
-	// inverse maps metadata keys to their inverse.
-	// Assumes that there will be no future inverse keys.
-	inverse map[vocab.WordID]vocab.WordID
-}
-type storeZid uint32
-type denser = dense.Dense[id.Zid, storeZid]
-
-func makeStore(stats *stats, wordsHint int) *store {
-	voc := vocab.New(wordsHint)
-	inverse := make(map[vocab.WordID]vocab.WordID, 8)
-	for kd := range meta.KeyDescriptionSeq() {
-		keyID := voc.AddString(kd.Name)
-		if invKey := kd.Inverse; invKey != "" {
-			invID := voc.AddString(invKey)
-			inverse[keyID] = invID
-			inverse[invID] = keyID
-		}
-	}
-	result := &store{
-		stats:   stats,
-		dense:   &denser{},
-		voc:     voc,
-		inverse: inverse,
-	}
-	return result
+	dict  *dictionary
 }
 
-func (st *store) updateZettel(ztl *zettel.ParsedZettel, generation uint64) {
-	st.mx.Lock()
-	defer st.mx.Unlock()
-
-	szid := st.dense.Encode(ztl.Zid)
-	zc := zettelCollector{
-		dense: st.dense,
-		voc:   st.voc,
-		szid:  szid,
+func makeStore(stats *stats, dict *dictionary) *store {
+	return &store{
+		stats: stats,
+		dict:  dict,
 	}
-	zc.collect(ztl.Meta, ztl.Blocks)
+}
+
+func (st *store) updateZettel(_ *analyzedZettel, generation uint64) {
 	st.stats.finishUpdateZettel(generation)
 }
 
 // ----- remove zettel -------------------------------------------------------
 
-func (st *store) removeZettel(zid id.Zid, generation uint64) {
-	st.mx.Lock()
-	defer st.mx.Unlock()
+func (st *store) removeZettel(dzid denseZid, generation uint64) {
+	// TODO: remove zettel from main store
 
-	st.dense.Remove(zid)
+	// Remove denseZid from dictionary
+	dict := st.dict
+	dict.Lock()
+	defer dict.Unlock()
+	dict.RemoveValue(dzid)
+
 	st.stats.finishRemoveZettel(generation)
 }

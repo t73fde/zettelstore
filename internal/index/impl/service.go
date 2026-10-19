@@ -39,7 +39,8 @@ func (idx *Index) Start() {
 	}
 
 	idx.stats = &stats{}
-	idx.store = makeStore(idx.stats, 2000) // TODO: configurable wordsHint for voc
+	idx.dict = makeDictionary(2000) // TODO: configurable wordsHint
+	idx.store = makeStore(idx.stats, idx.dict)
 
 	ctx, cancel := context.WithCancelCause(context.Background())
 	idx.pl = &pipeline{
@@ -52,19 +53,19 @@ func (idx *Index) Start() {
 	idx.notify = make(chan notifyData, 10)     // TODO: make 10 configurable?
 
 	storeCh := make(chan storeData, 4)     // TODO: make configurable?
-	analyseCh := make(chan analyseData, 4) // TODO: make configurable?
+	analyzeCh := make(chan analyzeData, 4) // TODO: make configurable?
 	parseCh := make(chan parseData, 4)     // TODO: make configurable?
 	wakeCh := make(chan struct{}, 1)       // collector signals retrieve service that new data was placed in pending.
 
 	storeSrv := storeService{logger: idx.logger.With("service", "store"), store: idx.store}
-	analyseSrv := analyseService{logger: idx.logger.With("service", "analyse")}
+	analyzeSrv := analyzeService{logger: idx.logger.With("service", "analyse"), analyser: makeAnalyzer(idx.dict)}
 	parseSrv := parseService{logger: idx.logger.With("service", "parse"), config: idx.config}
 	retrieveSrv := retrieveService{logger: idx.logger.With("service", "retrieve"), getRetriever: idx.getRetriever}
 	collectSrv := collectService{logger: idx.logger.With("service", "collector")}
 
 	idx.pl.spawn("IndexStore", func() { storeSrv.service(ctx, storeCh) })
-	idx.pl.spawn("IndexAnalyser", func() { analyseSrv.service(ctx, analyseCh, storeCh) })
-	idx.pl.spawn("IndexParser", func() { parseSrv.service(ctx, parseCh, analyseCh) })
+	idx.pl.spawn("IndexAnalyzer", func() { analyzeSrv.service(ctx, analyzeCh, storeCh) })
+	idx.pl.spawn("IndexParser", func() { parseSrv.service(ctx, parseCh, analyzeCh) })
 	idx.pl.spawn("IndexRetriever", func() { retrieveSrv.service(ctx, wakeCh, idx.pending, parseCh) })
 	idx.pl.spawn("IndexCollector", func() { collectSrv.service(ctx, idx.notify, idx.pending, wakeCh) })
 
@@ -83,7 +84,7 @@ func (idx *Index) Stop() {
 	idx.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
 	idx.pl.wg.Wait()
 	idx.notify, idx.pending, idx.pl = nil, nil, nil
-	idx.stats, idx.store = nil, nil
+	idx.store, idx.dict, idx.stats = nil, nil, nil
 }
 
 // collectService receives update notifications and adds them to an unlimited
@@ -164,7 +165,7 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 						break loop // cancelled by Stop: not an error, not a deletion
 					}
 					if _, notFound := errors.AsType[box.ErrZettelNotFound](err); notFound {
-						if !send(ctx, out, parseData{zid: job.zid, deleted: true}) {
+						if !send(ctx, out, parseData{zid: job.zid, generation: job.generation, deleted: true}) {
 							break loop
 						}
 					} else {
@@ -172,7 +173,7 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 					}
 					continue
 				}
-				if !send(ctx, out, parseData{zid: job.zid, zettel: zettel}) {
+				if !send(ctx, out, parseData{zid: job.zid, zettel: zettel, generation: job.generation}) {
 					break loop
 				}
 
@@ -208,18 +209,18 @@ type parseService struct {
 	config config.Config
 }
 
-func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out chan<- analyseData) {
+func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out chan<- analyzeData) {
 	for zd := range recvSeq(ctx, in) {
 		if zd.deleted {
 			psrv.logger.Info("Deleted", "zid", zd.zid, "generation", zd.generation)
-			if !send(ctx, out, analyseData{zid: zd.zid, zettel: nil, generation: zd.generation}) {
+			if !send(ctx, out, analyzeData{zid: zd.zid, zettel: nil, generation: zd.generation}) {
 				break
 			}
 			continue
 		}
 		psrv.logger.Info("Update", "zid", zd.zid, "generation", zd.generation)
 		ztl := parser.ParseZettel(ctx, zd.zettel, "", psrv.config)
-		if !send(ctx, out, analyseData{zid: zd.zid, zettel: ztl, generation: zd.generation}) {
+		if !send(ctx, out, analyzeData{zid: zd.zid, zettel: ztl, generation: zd.generation}) {
 			break
 		}
 	}
@@ -227,23 +228,26 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 	close(out)
 }
 
-// ----- analyse service ----------
+// ----- analyze service ----------
 
-type analyseData struct {
+type analyzeData struct {
 	zid        id.Zid // for use when zettel is deleted
 	zettel     *zettel.ParsedZettel
 	generation uint64
 }
 
-type analyseService struct {
-	logger *slog.Logger
+type analyzeService struct {
+	logger   *slog.Logger
+	analyser *analyzer
 }
 
-func (asrv *analyseService) service(ctx context.Context, in <-chan analyseData, out chan<- storeData) {
+func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, out chan<- storeData) {
 	for ad := range recvSeq(ctx, in) {
+		var sd storeData
 		if ad.zettel == nil {
 			asrv.logger.Info("Deleted", "zid", ad.zid, "generation", ad.generation)
-			if !send(ctx, out, storeData{zid: ad.zid, zettel: nil, generation: ad.generation}) {
+			asrv.analyser.processDeleted(&ad, &sd)
+			if !send(ctx, out, sd) {
 				break
 			}
 			continue
@@ -253,7 +257,8 @@ func (asrv *analyseService) service(ctx context.Context, in <-chan analyseData, 
 			asrv.logger.Error("Differing Zids: queue (%s) vs parsed zettel (%s)", ad.zid.String(), ad.zettel.Zid.String())
 			ad.zettel.Zid = ad.zid
 		}
-		if !send(ctx, out, storeData{zid: ad.zid, zettel: ad.zettel, generation: ad.generation}) {
+		asrv.analyser.analyze(&ad, &sd)
+		if !send(ctx, out, sd) {
 			break
 		}
 	}
@@ -265,8 +270,9 @@ func (asrv *analyseService) service(ctx context.Context, in <-chan analyseData, 
 // ----- store service ----------
 
 type storeData struct {
-	zid        id.Zid // for use when zettel is deleted
-	zettel     *zettel.ParsedZettel
+	zid        id.Zid   // for use when zettel is deleted
+	dzid       denseZid // for use when zettel is deleted
+	aztl       *analyzedZettel
 	generation uint64
 }
 
@@ -277,17 +283,13 @@ type storeService struct {
 
 func (ssrv *storeService) service(ctx context.Context, in <-chan storeData) {
 	for sd := range recvSeq(ctx, in) {
-		if sd.zettel == nil {
-			ssrv.logger.Info("Deleted", "zid", sd.zid, "generation", sd.generation)
-			ssrv.store.removeZettel(sd.zid, sd.generation)
+		if sd.aztl == nil {
+			ssrv.logger.Info("Deleted", "zid", sd.zid, "dzid", sd.dzid, "generation", sd.generation)
+			ssrv.store.removeZettel(sd.dzid, sd.generation)
 			continue
 		}
-		ssrv.logger.Info("Update", "zid", sd.zid, "generation", sd.generation)
-		if sd.zid != sd.zettel.Zid {
-			ssrv.logger.Error("Differing Zids: queue (%s) vs parsed zettel (%s)", sd.zid.String(), sd.zettel.Zid.String())
-			sd.zettel.Zid = sd.zid
-		}
-		ssrv.store.updateZettel(sd.zettel, sd.generation)
+		ssrv.logger.Info("Update", "zid", sd.zid, "dzid", sd.dzid, "generation", sd.generation)
+		ssrv.store.updateZettel(sd.aztl, sd.generation)
 	}
 
 	ssrv.logger.Info("Finalforget")

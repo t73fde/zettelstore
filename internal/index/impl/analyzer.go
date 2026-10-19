@@ -18,7 +18,6 @@ import (
 	"slices"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zero/dense"
 	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zero/vocab"
@@ -28,27 +27,65 @@ import (
 	"t73f.de/r/zsx"
 )
 
-// Collect data for one specific zettel.
+type analyzer struct {
+	dict *dictionary
+}
 
-type zettelCollector struct {
-	// Input
-	dense *dense.Dense[id.Zid, storeZid]
-	voc   *vocab.Vocabulary
-	szid  storeZid
+func makeAnalyzer(dict *dictionary) *analyzer {
+	return &analyzer{dict: dict}
+}
 
-	// Output
+func (a *analyzer) processDeleted(in *analyzeData, out *storeData) {
+	out.zid = in.zid
+	out.aztl = nil
+	out.generation = in.generation
+
+	a.dict.Lock()
+	defer a.dict.Unlock()
+	out.dzid = a.dict.Encode(in.zid)
+}
+
+type analyzedZettel struct {
 	meta  storeMeta
 	words roster.Roster[vocab.WordID]
-	refs  roster.Roster[storeZid]
+	refs  roster.Roster[denseZid]
 	urls  roster.Roster[string]
 }
 
-func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
-	zc.meta = makeStoreMeta(m.Count())
+func (a *analyzer) analyze(in *analyzeData, out *storeData) {
+	out.zid = in.zid
+	out.generation = in.generation
+
+	a.dict.Lock()
+	defer a.dict.Unlock()
+	out.dzid = a.dict.Encode(in.zid)
+	za := zettelAnalyzer{a, &analyzedZettel{}}
+	za.collect(in.zettel.Meta, in.zettel.Blocks)
+	out.aztl = za.az
+}
+
+type zettelAnalyzer struct {
+	a  *analyzer
+	az *analyzedZettel
+}
+
+func (za *zettelAnalyzer) collect(m *meta.Meta, blocks *sx.Pair) {
+	za.collectMeta(m)
+	if mustIndexZettel(m) {
+		zsx.WalkIt(za, blocks, nil)
+	}
+}
+
+func mustIndexZettel(m *meta.Meta) bool {
+	return m.Zid >= id.Zid(999999900)
+}
+func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
+	a, az := za.a, za.az
+	az.meta = makeStoreMeta(m.Count())
 	for k, v := range m.Values() {
-		keyID := zc.voc.AddString(k)
-		zc.meta.add(keyID, v)
-		zc.words.Insert(keyID)
+		keyID := a.dict.AddString(k)
+		az.meta.add(keyID, v)
+		az.words.Insert(keyID)
 
 		kd := meta.GetDescription(k)
 		if kd.IsProperty() || kd.IsComputed() {
@@ -62,81 +99,77 @@ func (zc *zettelCollector) collect(m *meta.Meta, blocks *sx.Pair) {
 			// 	mgr.idxUpdateValue(ctx, descr.Inverse, val, zi)
 			// }
 		case meta.TypeURL:
-			zc.addURL(string(v))
+			za.addURL(string(v))
 		default:
 			if kd.Type.IsSet {
 				for val := range v.Fields() {
-					zc.addString(val)
+					za.addString(val)
 				}
 			} else {
-				zc.addString(string(v))
+				za.addString(string(v))
 			}
 		}
 	}
+}
 
-	if mustIndexZettel(m) {
-		zsx.WalkIt(zc, blocks, nil)
-	}
-}
-func mustIndexZettel(m *meta.Meta) bool {
-	return m.Zid >= id.Zid(999999900)
-}
-func (zc *zettelCollector) addString(s string) {
+func (za *zettelAnalyzer) addString(s string) {
 	hasWord := false
 	for word := range zerostrings.NormalizeWordSeq(s) {
 		if len(word) <= vocab.MaxWordLen {
-			zc.words.Insert(zc.voc.AddBytes(word))
+			za.az.words.Insert(za.a.dict.AddBytes(word))
 			hasWord = true
 		}
 	}
 	if !hasWord && len(s) <= vocab.MaxWordLen {
-		zc.words.Insert(zc.voc.AddString(s))
+		za.az.words.Insert(za.a.dict.AddString(s))
 	}
 }
-func (zc *zettelCollector) addURL(s string) {
+func (za *zettelAnalyzer) addURL(s string) {
 	if _, err := url.Parse(s); err == nil {
-		zc.urls.Insert(s)
+		za.az.urls.Insert(s)
 	}
 }
 
-func (zc *zettelCollector) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
+func (za *zettelAnalyzer) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	switch sym := zsx.NodeSymbol(node); sym {
 	case zsx.SymText:
-		zc.addString(zsx.GetText(node))
+		za.addString(zsx.GetText(node))
 	case zsx.SymVerbatimCode, zsx.SymVerbatimComment, zsx.SymVerbatimEval,
 		zsx.SymVerbatimHTML, zsx.SymVerbatimMath, zsx.SymVerbatimZettel:
 		_, _, s := zsx.GetVerbatim(node)
-		zc.addString(s)
+		za.addString(s)
 	case zsx.SymLiteralCode, zsx.SymLiteralComment, zsx.SymLiteralInput,
 		zsx.SymLiteralMath, zsx.SymLiteralOutput:
 		_, _, s := zsx.GetLiteral(node)
-		zc.addString(s)
+		za.addString(s)
 	case zsx.SymLink:
 		_, ref, _ := zsx.GetLink(node)
-		zc.addRef(ref)
+		za.addRef(ref)
 	case zsx.SymEmbed:
 		_, ref, _, _ := zsx.GetEmbed(node)
-		zc.addRef(ref)
+		za.addRef(ref)
 	case zsx.SymTransclude:
 		_, ref, _ := zsx.GetTransclusion(node)
-		zc.addRef(ref)
+		za.addRef(ref)
 	case zsx.SymCite:
 		_, key, _ := zsx.GetCite(node)
-		zc.addString(key)
+		za.addString(key)
 	}
 	return false
 }
-func (zc *zettelCollector) VisitItAfter(*sx.Pair, *sx.Pair) {}
-func (zc *zettelCollector) addRef(ref *sx.Pair) {
+func (za *zettelAnalyzer) VisitItAfter(*sx.Pair, *sx.Pair) {}
+func (za *zettelAnalyzer) addRef(ref *sx.Pair) {
 	sym, refValue := zsx.GetReference(ref)
 	if zsx.SymRefStateExternal.IsEqual(sym) {
-		zc.addURL(refValue)
+		za.addURL(refValue)
 	} else if sz.SymRefStateZettel.IsEqual(sym) {
 		if zid, err := id.Parse(refValue); err == nil {
-			zc.refs.Insert(zc.dense.Encode(zid))
+			za.az.refs.Insert(za.a.dict.Encode(zid))
 		}
 	}
 }
+
+// ----- TODO: storeMeta in separate file, will be used by store too.
 
 // storeMeta is a compact representation of a meta map. The two separate
 // slices are to avoid padding. storeMeta does not need to be a map.

@@ -43,6 +43,7 @@ type Index struct {
 
 	stats   *stats
 	pending *pendingQueue
+	dict    *dictionary
 	store   *store
 }
 
@@ -86,13 +87,16 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
 
-	store := idx.store
-	store.mx.RLock()
-	defer store.mx.RUnlock()
-	st.NumZettel = store.dense.Count()
-	st.NumWords = store.voc.Count()
-	st.Vocabulary = store.voc.StoreLen()
-	st.WordCount = store.voc.WordCount()
+	var dst dictStats
+	d := idx.store.dict
+	d.RLock()
+	defer d.RUnlock()
+	d.readStats(&dst)
+
+	st.NumZettel = dst.NumZettel
+	st.NumWords = dst.NumWords
+	st.Vocabulary = dst.Vocabulary
+	st.WordCount = dst.WordCount
 
 	stats := idx.stats
 	stats.mx.RLock()
