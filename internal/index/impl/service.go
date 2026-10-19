@@ -51,17 +51,20 @@ func (idx *Index) Start() {
 	idx.pending = &pendingQueue{maxLoad: 1000} // TODO: maxLoad could be configurable?
 	idx.notify = make(chan notifyData, 10)     // TODO: make 10 configurable?
 
-	storeCh := make(chan storeData, 4) // TODO: make configurable?
-	parseCh := make(chan parseData, 4) // TODO: make configurable?
-	wakeCh := make(chan struct{}, 1)   // collector signals retrieve service that new data was placed in pending.
+	storeCh := make(chan storeData, 4)     // TODO: make configurable?
+	analyseCh := make(chan analyseData, 4) // TODO: make configurable?
+	parseCh := make(chan parseData, 4)     // TODO: make configurable?
+	wakeCh := make(chan struct{}, 1)       // collector signals retrieve service that new data was placed in pending.
 
 	storeSrv := storeService{logger: idx.logger.With("service", "store"), store: idx.store}
+	analyseSrv := analyseService{logger: idx.logger.With("service", "analyse")}
 	parseSrv := parseService{logger: idx.logger.With("service", "parse"), config: idx.config}
 	retrieveSrv := retrieveService{logger: idx.logger.With("service", "retrieve"), getRetriever: idx.getRetriever}
 	collectSrv := collectService{logger: idx.logger.With("service", "collector")}
 
 	idx.pl.spawn("IndexStore", func() { storeSrv.service(ctx, storeCh) })
-	idx.pl.spawn("IndexParser", func() { parseSrv.service(ctx, parseCh, storeCh) })
+	idx.pl.spawn("IndexAnalyser", func() { analyseSrv.service(ctx, analyseCh, storeCh) })
+	idx.pl.spawn("IndexParser", func() { parseSrv.service(ctx, parseCh, analyseCh) })
 	idx.pl.spawn("IndexRetriever", func() { retrieveSrv.service(ctx, wakeCh, idx.pending, parseCh) })
 	idx.pl.spawn("IndexCollector", func() { collectSrv.service(ctx, idx.notify, idx.pending, wakeCh) })
 
@@ -205,22 +208,57 @@ type parseService struct {
 	config config.Config
 }
 
-func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out chan<- storeData) {
+func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out chan<- analyseData) {
 	for zd := range recvSeq(ctx, in) {
 		if zd.deleted {
 			psrv.logger.Info("Deleted", "zid", zd.zid, "generation", zd.generation)
-			if !send(ctx, out, storeData{zid: zd.zid, zettel: nil, generation: zd.generation}) {
+			if !send(ctx, out, analyseData{zid: zd.zid, zettel: nil, generation: zd.generation}) {
 				break
 			}
 			continue
 		}
 		psrv.logger.Info("Update", "zid", zd.zid, "generation", zd.generation)
 		ztl := parser.ParseZettel(ctx, zd.zettel, "", psrv.config)
-		if !send(ctx, out, storeData{zid: zd.zid, zettel: ztl, generation: zd.generation}) {
+		if !send(ctx, out, analyseData{zid: zd.zid, zettel: ztl, generation: zd.generation}) {
 			break
 		}
 	}
 	psrv.logger.Info("NotTwoPi")
+	close(out)
+}
+
+// ----- analyse service ----------
+
+type analyseData struct {
+	zid        id.Zid // for use when zettel is deleted
+	zettel     *zettel.ParsedZettel
+	generation uint64
+}
+
+type analyseService struct {
+	logger *slog.Logger
+}
+
+func (asrv *analyseService) service(ctx context.Context, in <-chan analyseData, out chan<- storeData) {
+	for ad := range recvSeq(ctx, in) {
+		if ad.zettel == nil {
+			asrv.logger.Info("Deleted", "zid", ad.zid, "generation", ad.generation)
+			if !send(ctx, out, storeData{zid: ad.zid, zettel: nil, generation: ad.generation}) {
+				break
+			}
+			continue
+		}
+		asrv.logger.Info("Update", "zid", ad.zid, "generation", ad.generation)
+		if ad.zid != ad.zettel.Zid {
+			asrv.logger.Error("Differing Zids: queue (%s) vs parsed zettel (%s)", ad.zid.String(), ad.zettel.Zid.String())
+			ad.zettel.Zid = ad.zid
+		}
+		if !send(ctx, out, storeData{zid: ad.zid, zettel: ad.zettel, generation: ad.generation}) {
+			break
+		}
+	}
+
+	asrv.logger.Info("SchlussAL")
 	close(out)
 }
 
