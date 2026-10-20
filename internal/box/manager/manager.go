@@ -299,11 +299,11 @@ func (mgr *Manager) notifier() {
 				if mgr.State() == box.StartStateStarted {
 					switch reason {
 					case box.OnReady:
-						mgr.index.Enqueue(mgr, index.OnReady, zid)
+						mgr.index.Enqueue(index.OnReady, zid)
 					case box.OnReload:
-						mgr.index.Enqueue(mgr, index.OnReset, zid)
+						mgr.index.Enqueue(index.OnReset, zid)
 					case box.OnZettel, box.OnDelete:
-						mgr.index.Enqueue(mgr, index.OnZettel, zid)
+						mgr.index.Enqueue(index.OnZettel, zid)
 					default:
 						mgr.mgrLogger.Error("unknown notification reason", "reason", reason)
 					}
@@ -399,8 +399,8 @@ func (mgr *Manager) Start(ctx context.Context) error {
 	mgr.setState(box.StartStateStarted)
 
 	mgr.notifyObserver(&box.UpdateInfo{Box: mgr, Reason: box.OnReady})
-	mgr.index.Enqueue(mgr, index.OnReady, id.Invalid) // Indexer can setup itself
-	mgr.index.Enqueue(mgr, index.OnReset, id.Invalid) // Ensure an initial index run
+	mgr.index.Enqueue(index.OnReady, id.Invalid) // Indexer can setup itself
+	mgr.index.Enqueue(index.OnReset, id.Invalid) // Ensure an initial index run
 
 	go mgr.idxIndexer()
 	return nil

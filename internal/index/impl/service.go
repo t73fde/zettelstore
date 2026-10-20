@@ -32,6 +32,9 @@ import (
 
 // Start the search index.
 func (idx *Index) Start() {
+	idx.lifecycleMx.Lock()
+	defer idx.lifecycleMx.Unlock()
+
 	idx.mx.Lock()
 	defer idx.mx.Unlock()
 	if idx.notify != nil {
@@ -74,17 +77,24 @@ func (idx *Index) Start() {
 
 // Stop the search index.
 func (idx *Index) Stop() {
-	idx.mx.Lock()
-	defer idx.mx.Unlock()
-	if idx.notify == nil {
+	idx.lifecycleMx.Lock()
+	defer idx.lifecycleMx.Unlock()
+
+	idx.mx.RLock()
+	pl := idx.pl
+	idx.mx.RUnlock()
+	if pl == nil {
 		return // not running
 	}
+
 	idx.logger.Debug("Stop")
-	close(idx.notify)
 	idx.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
 	idx.pl.wg.Wait()
+
+	idx.mx.Lock()
 	idx.notify, idx.pending, idx.pl = nil, nil, nil
 	idx.store, idx.dict, idx.stats = nil, nil, nil
+	idx.mx.Unlock()
 }
 
 // collectService receives update notifications and adds them to an unlimited
@@ -146,6 +156,7 @@ type retrieveService struct {
 }
 
 func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, pending *pendingQueue, out chan<- parseData) {
+	getCtx := box.NoEnrichContext(ctx) // TODO: does not seem to work always. Many zettel are enriched
 	for range wake {
 		rsrv.logger.Info("WakeUp")
 		retriever := rsrv.getRetriever()
@@ -158,14 +169,13 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 
 			case pendingZettel:
 				rsrv.logger.Info("Zettel", "zid", job.zid, "generation", job.generation)
-				ctx = box.NoEnrichContext(ctx) // TODO: does not seem to work always. Many zettel are enriched
-				zettel, err := retriever.GetZettel(ctx, job.zid)
+				zettel, err := retriever.GetZettel(getCtx, job.zid)
 				if err != nil {
-					if ctx.Err() != nil {
+					if getCtx.Err() != nil {
 						break loop // cancelled by Stop: not an error, not a deletion
 					}
 					if _, notFound := errors.AsType[box.ErrZettelNotFound](err); notFound {
-						if !send(ctx, out, parseData{zid: job.zid, generation: job.generation, deleted: true}) {
+						if !send(getCtx, out, parseData{zid: job.zid, generation: job.generation, deleted: true}) {
 							break loop
 						}
 					} else {
@@ -173,7 +183,7 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 					}
 					continue
 				}
-				if !send(ctx, out, parseData{zid: job.zid, zettel: zettel, generation: job.generation}) {
+				if !send(getCtx, out, parseData{zid: job.zid, zettel: zettel, generation: job.generation}) {
 					break loop
 				}
 
@@ -254,7 +264,7 @@ func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, 
 		}
 		asrv.logger.Info("Update", "zid", ad.zid, "generation", ad.generation)
 		if ad.zid != ad.zettel.Zid {
-			asrv.logger.Error("Differing Zids: queue (%s) vs parsed zettel (%s)", ad.zid.String(), ad.zettel.Zid.String())
+			asrv.logger.Error("Differing Zids", "queue", ad.zid, "parsed", ad.zettel.Zid)
 			ad.zettel.Zid = ad.zid
 		}
 		asrv.analyser.analyze(&ad, &sd)

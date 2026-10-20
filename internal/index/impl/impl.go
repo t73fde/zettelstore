@@ -35,11 +35,10 @@ type Index struct {
 	config    config.Config
 	retriever index.Retriever
 
-	mx sync.RWMutex
-	pl *pipeline
-	// cancel context.CancelFunc
-	// wg     sync.WaitGroup
-	notify chan notifyData
+	lifecycleMx sync.Mutex   // serializes Start and Stop; may be held while waiting for the pipeline
+	mx          sync.RWMutex // protects the fields below; never held while waiting
+	pl          *pipeline
+	notify      chan notifyData
 
 	stats   *stats
 	pending *pendingQueue
@@ -66,26 +65,28 @@ func (idx *Index) RegisterRetriever(retriever index.Retriever) {
 func (idx *Index) getRetriever() index.Retriever { return idx.retriever }
 
 // Enqueue a new zettel to update the search index.
-func (idx *Index) Enqueue(retriever index.Retriever, reason index.Reason, zid id.Zid) {
+func (idx *Index) Enqueue(reason index.Reason, zid id.Zid) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
 	if idx.notify == nil {
 		return // not running
 	}
 	// dropped if the pipeline has failed
-	send(idx.pl.ctx, idx.notify, notifyData{retriever: retriever, reason: reason, zid: zid})
+	send(idx.pl.ctx, idx.notify, notifyData{reason: reason, zid: zid})
 }
 
 type notifyData struct {
-	retriever index.Retriever
-	reason    index.Reason
-	zid       id.Zid
+	reason index.Reason
+	zid    id.Zid
 }
 
 // ReadStats populates st with index statistics.
 func (idx *Index) ReadStats(st *index.Stats) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
+	if idx.pl == nil {
+		return // not running: st stays zero
+	}
 
 	var dst dictStats
 	d := idx.store.dict
