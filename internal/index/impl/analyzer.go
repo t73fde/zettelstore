@@ -102,26 +102,33 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 			za.addURL(string(v))
 		default:
 			if kd.Type.IsSet {
-				for val := range v.Fields() {
-					za.addString(val)
+				for s := range v.Fields() {
+					za.addMetaValue(meta.Value(s))
 				}
 			} else {
-				za.addString(string(v))
+				za.addMetaValue(v)
 			}
 		}
 	}
 }
 
-func (za *zettelAnalyzer) addString(s string) {
+func (za *zettelAnalyzer) addMetaValue(val meta.Value) {
 	hasWord := false
-	for word := range zerostrings.NormalizeWordSeq(s) {
+	for word := range zerostrings.NormalizeWordSeq(string(val)) {
 		if len(word) <= vocab.MaxWordLen {
 			za.az.words.Insert(za.a.dict.AddBytes(word))
 			hasWord = true
 		}
 	}
-	if !hasWord && len(s) <= vocab.MaxWordLen {
-		za.az.words.Insert(za.a.dict.AddString(s))
+	if !hasWord && len(string(val)) <= vocab.MaxWordLen {
+		za.az.words.Insert(za.a.dict.AddString(string(val)))
+	}
+}
+func (za *zettelAnalyzer) addString(s string) {
+	for word := range zerostrings.NormalizeWordSeq(s) {
+		if len(word) <= vocab.MaxWordLen {
+			za.az.words.Insert(za.a.dict.AddBytes(word))
+		}
 	}
 }
 func (za *zettelAnalyzer) addURL(s string) {
