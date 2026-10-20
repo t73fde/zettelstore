@@ -52,8 +52,8 @@ func (idx *Index) Start() {
 		logger: idx.logger.With("service", "pipeline"),
 	}
 
-	idx.pending = &pendingQueue{maxLoad: 1000} // TODO: maxLoad could be configurable?
-	idx.notify = make(chan notifyData, 10)     // TODO: make 10 configurable?
+	idx.pending = &pendingQueue{}
+	idx.notify = make(chan notifyData, 10) // TODO: make 10 configurable?
 
 	storeCh := make(chan storeData, 4)     // TODO: make configurable?
 	analyzeCh := make(chan analyzeData, 4) // TODO: make configurable?
