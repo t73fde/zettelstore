@@ -37,8 +37,8 @@ type Index struct {
 
 	lifecycleMx sync.Mutex   // serializes Start and Stop; may be held while waiting for the pipeline
 	mx          sync.RWMutex // protects the fields below; never held while waiting
+	wake        chan struct{}
 	pl          *pipeline
-	notify      chan notifyData
 
 	stats   *stats
 	pending *pendingQueue
@@ -68,16 +68,29 @@ func (idx *Index) getRetriever() index.Retriever { return idx.retriever }
 func (idx *Index) Enqueue(reason index.Reason, zid id.Zid) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
-	if idx.notify == nil {
-		return // not running
+	if idx.pending == nil {
+		return // not running, idx.wake == nil
 	}
-	// dropped if the pipeline has failed
-	send(idx.pl.ctx, idx.notify, notifyData{reason: reason, zid: zid})
-}
 
-type notifyData struct {
-	reason index.Reason
-	zid    id.Zid
+	switch reason {
+	case index.OnReady:
+		idx.logger.Info("OnReady")
+		return
+	case index.OnReset:
+		idx.logger.Info("OnReset")
+		idx.pending.reset()
+	case index.OnZettel:
+		idx.logger.Info("OnZettel", "zid", zid)
+		idx.pending.addZettel(zid)
+	default:
+		idx.logger.Error("Unknown notification reason", "reason", reason, "zid", zid)
+		return
+	}
+
+	select {
+	case idx.wake <- struct{}{}:
+	default:
+	}
 }
 
 // ReadStats populates st with index statistics.

@@ -17,7 +17,6 @@ import (
 	"context"
 	"errors"
 	"log/slog"
-	"time"
 
 	"t73f.de/r/zsc/domain/id"
 
@@ -37,9 +36,10 @@ func (idx *Index) Start() {
 
 	idx.mx.Lock()
 	defer idx.mx.Unlock()
-	if idx.notify != nil {
+	if idx.wake != nil {
 		return // already running
 	}
+	idx.wake = make(chan struct{}, 1)
 
 	idx.stats = &stats{}
 	idx.dict = makeDictionary(2000) // TODO: configurable wordsHint
@@ -53,24 +53,20 @@ func (idx *Index) Start() {
 	}
 
 	idx.pending = &pendingQueue{}
-	idx.notify = make(chan notifyData, 10) // TODO: make 10 configurable?
 
 	storeCh := make(chan storeData, 4)     // TODO: make configurable?
 	analyzeCh := make(chan analyzeData, 4) // TODO: make configurable?
 	parseCh := make(chan parseData, 4)     // TODO: make configurable?
-	wakeCh := make(chan struct{}, 1)       // collector signals retrieve service that new data was placed in pending.
 
 	storeSrv := storeService{logger: idx.logger.With("service", "store"), store: idx.store}
 	analyzeSrv := analyzeService{logger: idx.logger.With("service", "analyse"), analyser: makeAnalyzer(idx.dict)}
 	parseSrv := parseService{logger: idx.logger.With("service", "parse"), config: idx.config}
 	retrieveSrv := retrieveService{logger: idx.logger.With("service", "retrieve"), getRetriever: idx.getRetriever}
-	collectSrv := collectService{logger: idx.logger.With("service", "collector")}
 
 	idx.pl.spawn("IndexStore", func() { storeSrv.service(ctx, storeCh) })
 	idx.pl.spawn("IndexAnalyzer", func() { analyzeSrv.service(ctx, analyzeCh, storeCh) })
 	idx.pl.spawn("IndexParser", func() { parseSrv.service(ctx, parseCh, analyzeCh) })
-	idx.pl.spawn("IndexRetriever", func() { retrieveSrv.service(ctx, wakeCh, idx.pending, parseCh) })
-	idx.pl.spawn("IndexCollector", func() { collectSrv.service(ctx, idx.notify, idx.pending, wakeCh) })
+	idx.pl.spawn("IndexRetriever", func() { retrieveSrv.service(ctx, idx.wake, idx.pending, parseCh) })
 
 	idx.logger.Debug("Started")
 }
@@ -88,63 +84,14 @@ func (idx *Index) Stop() {
 	}
 
 	idx.logger.Debug("Stop")
-	idx.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
+	pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
 	idx.pl.wg.Wait()
 
 	idx.mx.Lock()
-	idx.notify, idx.pending, idx.pl = nil, nil, nil
+	close(idx.wake)
+	idx.wake, idx.pending, idx.pl = nil, nil, nil
 	idx.store, idx.dict, idx.stats = nil, nil, nil
 	idx.mx.Unlock()
-}
-
-// collectService receives update notifications and adds them to an unlimited
-// queue of pending jobs.
-type collectService struct {
-	logger *slog.Logger
-}
-
-func (csrv *collectService) service(ctx context.Context, notify <-chan notifyData, pending *pendingQueue, wake chan<- struct{}) {
-	ticker := time.NewTicker(time.Minute)
-	defer ticker.Stop()
-loop:
-	for {
-		select {
-		case d, ok := <-notify:
-			if !ok {
-				break loop
-			}
-			switch d.reason {
-			case index.OnReady:
-				csrv.logger.Info("OnReady")
-				continue
-			case index.OnReset:
-				csrv.logger.Info("OnReset")
-				pending.reset()
-			case index.OnZettel:
-				csrv.logger.Info("OnZettel", "zid", d.zid)
-				pending.addZettel(d.zid)
-			default:
-				csrv.logger.Error("Unknown notification reason", "reason", d.reason, "zid", d.zid)
-				continue
-			}
-			select {
-			case wake <- struct{}{}:
-			default:
-			}
-
-		case <-ticker.C:
-			csrv.logger.Info("OnTick")
-			select {
-			case wake <- struct{}{}:
-			default:
-			}
-
-		case <-ctx.Done():
-			break loop
-		}
-	}
-	csrv.logger.Debug("Good Buy")
-	close(wake)
 }
 
 // ----- retrieve service ----------
@@ -155,20 +102,28 @@ type retrieveService struct {
 	getRetriever func() index.Retriever
 }
 
-func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, pending *pendingQueue, out chan<- parseData) {
+func (rsrv *retrieveService) service(
+	ctx context.Context,
+	wake <-chan struct{},
+	pending *pendingQueue,
+	out chan<- parseData,
+) {
 	getCtx := box.NoEnrichContext(ctx) // TODO: does not seem to work always. Many zettel are enriched
-	for range wake {
-		rsrv.logger.Info("WakeUp")
-		retriever := rsrv.getRetriever()
+
+	for {
 	loop:
-		for ctx.Err() == nil {
+		for {
+			if ctx.Err() != nil {
+				break loop // cancelled by Stop
+			}
 			switch job := pending.getJob(); job.action {
 			case pendingNothing:
 				rsrv.logger.Info("Nothing")
 				break loop
 
 			case pendingZettel:
-				rsrv.logger.Info("Zettel", "zid", job.zid, "generation", job.generation)
+				rsrv.logger.Info("Zettel", "zid", job.zid, "generation", job.generation, "reload", job.fromReload)
+				retriever := rsrv.getRetriever()
 				zettel, err := retriever.GetZettel(getCtx, job.zid)
 				if err != nil {
 					if getCtx.Err() != nil {
@@ -188,7 +143,8 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 				}
 
 			case pendingReset:
-				rsrv.logger.Info("Reload", "generation", job.generation)
+				rsrv.logger.Info("Reset", "generation", job.generation)
+				retriever := rsrv.getRetriever()
 				zids, err := retriever.FetchZids(ctx)
 				if err != nil {
 					if ctx.Err() != nil {
@@ -198,11 +154,20 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 					continue
 				}
 				pending.reload(zids)
+
+			default:
+				rsrv.logger.Error("Unknown job action", "action", job.action)
 			}
+
+		}
+		select {
+		case <-wake:
+		case <-ctx.Done():
+			rsrv.logger.Info("Byebye")
+			close(out)
+			return
 		}
 	}
-	rsrv.logger.Info("Byebye")
-	close(out)
 }
 
 // ----- parse service ----------
