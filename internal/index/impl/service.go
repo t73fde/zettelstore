@@ -16,6 +16,7 @@ package impl
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -207,23 +208,29 @@ type storeService struct {
 	logger  *slog.Logger
 	store   *store
 	pending *pendingQueue
+	fatal   func(cause error)
 }
 
 func (ssrv *storeService) service(ctx context.Context, in <-chan storeData) {
 	for sd := range recvSeq(ctx, in) {
-		ok := runRecovered("IndexStore", func() {
-			if sd.aztl == nil {
-				ssrv.logger.Info("Deleted", "zid", sd.zid, "dzid", sd.dzid)
-				ssrv.store.removeZettel(sd.dzid)
-				return
-			}
-			ssrv.logger.Info("Upsert", "zid", sd.zid, "dzid", sd.dzid)
-			ssrv.store.upsertZettel(sd.dzid, sd.aztl)
-		})
+		if !runRecovered("IndexStore", func() { ssrv.apply(sd) }) {
+			// The store may be inconsistent: the instance cannot continue.
+			ssrv.fatal(fmt.Errorf("store step panicked for zettel %v", sd.zid))
+			return
+		}
 		if sd.bulk {
-			ssrv.pending.finishBulk(!ok)
+			ssrv.pending.finishBulk(false)
 		}
 	}
 
 	ssrv.logger.Info("Stop")
+}
+func (ssrv *storeService) apply(sd storeData) {
+	if sd.aztl == nil {
+		ssrv.logger.Info("Deleted", "zid", sd.zid, "dzid", sd.dzid)
+		ssrv.store.removeZettel(sd.dzid)
+		return
+	}
+	ssrv.logger.Info("Upsert", "zid", sd.zid, "dzid", sd.dzid)
+	ssrv.store.upsertZettel(sd.dzid, sd.aztl)
 }

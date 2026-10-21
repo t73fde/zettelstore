@@ -47,6 +47,7 @@ type instance struct {
 
 	started time.Time
 	ready   atomic.Bool // bulk is complete
+	onFail  func(*instance, error)
 }
 
 func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
@@ -60,6 +61,7 @@ func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
 	}
 	in.store = makeStore(in.stats, hints.zettel)
 	in.pending = newPendingQueue(func(res bulkResult) { idx.promote(in, res) })
+	in.onFail = idx.instanceFailed
 	return in
 }
 
@@ -68,9 +70,10 @@ func (in *instance) start(cfg config.Config, getRetriever func() index.Retriever
 	in.logger.Info("Start")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	in.pl = &pipeline{
-		ctx:    ctx,
-		cancel: cancel,
-		logger: in.logger.With("service", "pipeline"),
+		ctx:      ctx,
+		cancel:   cancel,
+		logger:   in.logger.With("service", "pipeline"),
+		onGiveUp: func(cause error) { in.onFail(in, cause) },
 	}
 
 	storeCh := make(chan storeData, 4)     // TODO: configurable?
@@ -81,6 +84,7 @@ func (in *instance) start(cfg config.Config, getRetriever func() index.Retriever
 		logger:  in.logger.With("service", "store"),
 		store:   in.store,
 		pending: in.pending,
+		fatal:   in.pl.giveUp,
 	}
 	analyzeSrv := analyzeService{
 		logger:   in.logger.With("service", "analyse"),
@@ -105,12 +109,23 @@ func (in *instance) start(cfg config.Config, getRetriever func() index.Retriever
 	in.pl.spawn("IndexRetriever", func() { retrieveSrv.service(ctx, in.wake, parseCh) })
 }
 
+const stopTimeout = 10 * time.Second
+
 // stop cancels the services and waits for their termination. It must not be
 // called while holding Index.mx.
 func (in *instance) stop() {
 	in.logger.Info("Stopping")
 	in.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
-	in.pl.wg.Wait()
+	done := make(chan struct{})
+	go func() {
+		in.pl.wg.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+	case <-time.After(stopTimeout):
+		in.logger.Error("Services did not stop in time, abandoning them", "timeout", stopTimeout)
+	}
 	in.logger.Info("Stopped")
 }
 

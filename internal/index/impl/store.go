@@ -13,7 +13,9 @@
 
 package impl
 
-import "sync"
+import (
+	"sync"
+)
 
 type store struct {
 	stats *stats
@@ -53,20 +55,26 @@ func (st *store) exists(dzid denseZid) bool {
 
 // upsertZettel takes ownership of az.
 func (st *store) upsertZettel(dzid denseZid, az *analyzedZettel) {
-	st.mx.Lock()
-	// TODO: old := st.zettel[dzid]; remove postings of the old version,
-	// add postings of az.
-	st.zettel[dzid] = az
-	st.mx.Unlock()
-
+	st.replace(dzid, az)
 	st.stats.finishUpdateZettel()
 }
 
-func (st *store) removeZettel(dzid denseZid) {
+func (st *store) replace(dzid denseZid, az *analyzedZettel) {
 	st.mx.Lock()
+	defer st.mx.Unlock()
+
+	// TODO: remove postings of the old version, add postings of az.
+	st.zettel[dzid] = az
+}
+
+func (st *store) removeZettel(dzid denseZid) {
+	st.drop(dzid)
+	st.stats.finishRemoveZettel()
+}
+
+func (st *store) drop(dzid denseZid) {
+	st.mx.Lock()
+	defer st.mx.Unlock()
 	// TODO: remove postings of st.zettel[dzid].
 	delete(st.zettel, dzid)
-	st.mx.Unlock()
-
-	st.stats.finishRemoveZettel()
 }

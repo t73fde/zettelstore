@@ -34,9 +34,10 @@ var _ index.Searcher = (*Index)(nil)
 // is complete. Until the very first build is complete, the active instance
 // serves partial results.
 type Index struct {
-	logger    *slog.Logger
-	config    config.Config
-	retriever index.Retriever
+	logger      *slog.Logger
+	config      config.Config
+	retriever   index.Retriever
+	stopService func(cause error)
 
 	lifecycleMx sync.Mutex   // serializes Start and Stop; may be held while waiting for pipelines
 	mx          sync.RWMutex // protects the fields below; never held while waiting for a pipeline
@@ -54,7 +55,7 @@ type buildInfo struct {
 }
 
 // New creates a new index object.
-func New(config config.Config) *Index {
+func New(config config.Config, stopService func(error)) *Index {
 	return &Index{
 		logger:    kernel.Main.GetLogger(kernel.IndexService),
 		config:    config,
@@ -90,25 +91,73 @@ func (idx *Index) Stop() {
 	idx.lifecycleMx.Lock()
 	defer idx.lifecycleMx.Unlock()
 
-	idx.mx.Lock()
-	if !idx.running {
-		idx.mx.Unlock()
+	toStop, wasRunning := idx.detachAll()
+	if !wasRunning {
 		return
 	}
-	idx.running = false
-	toStop := make([]*instance, 0, 2)
-	if idx.active != nil {
-		toStop = append(toStop, idx.active)
-	}
-	if idx.building != nil {
-		toStop = append(toStop, idx.building)
-	}
-	idx.active, idx.building = nil, nil
-	idx.mx.Unlock()
-
 	idx.logger.Debug("Stop")
 	for _, in := range toStop {
-		in.stop()
+		in.stop() // bounded by stopTimeout
+	}
+}
+
+// detachAll marks the index as stopped and removes all instances from it.
+// The caller stops the returned instances.
+func (idx *Index) detachAll() (instances []*instance, wasRunning bool) {
+	idx.mx.Lock()
+	defer idx.mx.Unlock()
+
+	if !idx.running {
+		return nil, false
+	}
+	idx.running = false
+	if idx.active != nil {
+		instances = append(instances, idx.active)
+	}
+	if idx.building != nil {
+		instances = append(instances, idx.building)
+	}
+	idx.active, idx.building = nil, nil
+	return instances, true
+}
+
+type failureAction uint8
+
+const (
+	failIgnore       failureAction = iota // instance was already replaced or stopped
+	failDropBuilding                      // rebuild failed, active index is kept
+	failStopService                       // active index failed
+)
+
+// classifyFailure decides what to do about a failed instance. It detaches a
+// failed building instance.
+func (idx *Index) classifyFailure(in *instance) failureAction {
+	idx.mx.Lock()
+	defer idx.mx.Unlock()
+
+	switch in {
+	case idx.building:
+		idx.building = nil
+		return failDropBuilding
+	case idx.active:
+		return failStopService
+	default:
+		return failIgnore
+	}
+}
+
+// instanceFailed is called in its own goroutine when a service of in gave up
+// or the store step panicked.
+func (idx *Index) instanceFailed(in *instance, cause error) {
+	switch idx.classifyFailure(in) {
+	case failDropBuilding:
+		idx.logger.Error("Rebuild failed, active index is kept", "instance", in.id, "cause", cause)
+		in.stop() // pipeline is already cancelled; waits for its goroutines
+	case failStopService:
+		idx.logger.Error("Index failed, stopping index service", "instance", in.id, "cause", cause)
+		if idx.stopService != nil {
+			idx.stopService(cause)
+		}
 	}
 }
 
@@ -148,30 +197,29 @@ func (idx *Index) reset() {
 		idx.logger.Error("Reset without retriever")
 		return
 	}
-
-	idx.mx.Lock()
-	if !idx.running {
-		idx.mx.Unlock()
-		return
+	in, discard := idx.installNew()
+	if in == nil {
+		return // not running
 	}
-	idx.resets++
-	in := newInstance(idx, idx.resets, idx.hintsLocked())
-
-	var discard *instance
-	if idx.active == nil || !idx.active.ready.Load() {
-		// No complete index to keep serving: restart the initial build in place.
-		discard = idx.active
-		idx.active = in
-	} else {
-		discard = idx.building // an unfinished rebuild is aborted
-		idx.building = in
-	}
-	in.start(idx.config, idx.getRetriever)
-	idx.mx.Unlock()
-
 	if discard != nil {
 		go discard.stop()
 	}
+}
+func (idx *Index) installNew() (in, discard *instance) {
+	idx.mx.Lock()
+	defer idx.mx.Unlock()
+	if !idx.running {
+		return nil, nil
+	}
+	idx.resets++
+	in = newInstance(idx, idx.resets, idx.hintsLocked())
+	if idx.active == nil || !idx.active.ready.Load() {
+		discard, idx.active = idx.active, in
+	} else {
+		discard, idx.building = idx.building, in
+	}
+	in.start(idx.config, idx.getRetriever)
+	return in, discard
 }
 
 // hintsLocked derives the dimension of a new instance from the active one.
@@ -188,28 +236,35 @@ func withMargin(n int) int { return n + n/8 }
 // promote is called, exactly once per instance, when its bulk load is
 // complete. It makes the instance the active one.
 func (idx *Index) promote(in *instance, res bulkResult) {
-	idx.mx.Lock()
-	var old *instance
-	switch {
-	case idx.active == in:
-		// Initial build is complete; the instance already serves.
-	case idx.building == in:
-		old = idx.active
-		idx.active, idx.building = in, nil
-	default:
-		idx.mx.Unlock()
+	old, duration, ok := idx.swapIn(in, res)
+	if !ok {
 		return // superseded by a newer reset, or stopped
 	}
-	duration := time.Since(in.started)
-	idx.lastBuild = buildInfo{duration: duration, zettel: res.total, failed: res.failed}
-	in.ready.Store(true)
-	idx.mx.Unlock()
-
 	idx.logger.Info("Index complete",
 		"instance", in.id, "duration", duration, "zettel", res.total, "failed", res.failed)
 	if old != nil {
 		go old.stop() // never wait here: called from a goroutine of in
 	}
+}
+
+// swapIn makes in the active instance and returns the replaced one.
+func (idx *Index) swapIn(in *instance, res bulkResult) (old *instance, duration time.Duration, ok bool) {
+	idx.mx.Lock()
+	defer idx.mx.Unlock()
+
+	switch in {
+	case idx.active:
+		// Initial build is complete; the instance already serves.
+	case idx.building:
+		old = idx.active
+		idx.active, idx.building = in, nil
+	default:
+		return nil, 0, false
+	}
+	duration = time.Since(in.started)
+	idx.lastBuild = buildInfo{duration: duration, zettel: res.total, failed: res.failed}
+	in.ready.Store(true)
+	return old, duration, true
 }
 
 // ReadStats populates st with index statistics.

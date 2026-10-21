@@ -15,6 +15,7 @@ package impl
 
 import (
 	"context"
+	"fmt"
 	"iter"
 	"log/slog"
 	"sync"
@@ -28,6 +29,11 @@ type pipeline struct {
 	cancel context.CancelCauseFunc
 	wg     sync.WaitGroup
 	logger *slog.Logger
+
+	// onGiveUp is called at most once, in its own goroutine, when a service
+	// has used up its restarts. It must not be nil.
+	onGiveUp   func(cause error)
+	giveUpOnce sync.Once
 }
 
 func (p *pipeline) spawn(name string, run func()) {
@@ -54,6 +60,7 @@ func (p *pipeline) supervise(name string, run func()) {
 		restarts++
 		if restarts > maxRestarts {
 			p.logger.Error("Giving up", "service", name, "restarts", restarts)
+			p.giveUp(fmt.Errorf("service %s gave up after %d restarts", name, restarts))
 			return
 		}
 		p.logger.Warn("Restarting", "service", name, "restart", restarts, "delay", delay)
@@ -64,6 +71,15 @@ func (p *pipeline) supervise(name string, run func()) {
 		}
 		delay = min(delay*2, maxDelay)
 	}
+}
+func (p *pipeline) giveUp(cause error) {
+	p.giveUpOnce.Do(func() {
+		if p.ctx.Err() != nil {
+			return // Stop is already in progress
+		}
+		p.cancel(cause) // stops the remaining services of this pipeline
+		go p.onGiveUp(cause)
+	})
 }
 
 // runRecovered returns false if run panicked.

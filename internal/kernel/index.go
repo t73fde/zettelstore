@@ -43,7 +43,7 @@ func (is *indexService) GetLevel() slog.Level    { return is.logLevelVar.Level()
 func (is *indexService) SetLevel(l slog.Level)   { is.logLevelVar.Set(l) }
 
 func (is *indexService) Start(kern *Kernel) error {
-	idx := is.create(&kern.cfg)
+	idx := is.create(&kern.cfg, func(error) { kern.stopService(IndexService) })
 	is.logger.Info("Start Index")
 	idx.Start()
 	is.indexer = idx
