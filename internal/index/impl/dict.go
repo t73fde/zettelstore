@@ -38,8 +38,8 @@ type dictionary struct {
 	inverse map[vocab.WordID]vocab.WordID
 }
 
-func makeDictionary(wordsHint int) *dictionary {
-	voc := vocab.New(wordsHint)
+func makeDictionary(hints sizeHints) *dictionary {
+	voc := vocab.New(hints.words)
 
 	inverse := make(map[vocab.WordID]vocab.WordID, 8)
 	for kd := range meta.KeyDescriptionSeq() {
@@ -50,8 +50,10 @@ func makeDictionary(wordsHint int) *dictionary {
 			inverse[invID] = keyID
 		}
 	}
+	d := &dense.Dense[id.Zid, denseZid]{}
+	d.Grow(hints.zettel)
 	return &dictionary{
-		dense:   &dense.Dense[id.Zid, denseZid]{},
+		dense:   d,
 		voc:     voc,
 		inverse: inverse,
 	}

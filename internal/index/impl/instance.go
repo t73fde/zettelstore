@@ -56,7 +56,7 @@ func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
 		logger:  idx.logger.With("instance", instID),
 		wake:    make(chan struct{}, 1),
 		stats:   &stats{},
-		dict:    makeDictionary(hints.words),
+		dict:    makeDictionary(hints),
 		started: time.Now(),
 	}
 	in.store = makeStore(in.stats, hints.zettel)

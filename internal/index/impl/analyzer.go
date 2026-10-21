@@ -72,7 +72,7 @@ func (za *zettelAnalyzer) collect(m *meta.Meta, blocks *sx.Pair) {
 }
 
 func mustIndexZettel(m *meta.Meta) bool {
-	return m.Zid >= id.Zid(999999900)
+	return m.Zid >= id.ZidMinIndex
 }
 func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 	a, az := za.a, za.az
