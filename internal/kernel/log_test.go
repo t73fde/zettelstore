@@ -72,3 +72,23 @@ func TestLogHand(t *testing.T) {
 	}
 	t.Error(sb.String())
 }
+
+func TestLogWithAttrs(t *testing.T) {
+	var sb strings.Builder
+	lw := newKernelLogWriter(&sb, 8192)
+	h := newKernelLogHandler(lw, slog.LevelInfo)
+	mainLogger := slog.New(h)
+	sysLogger := mainLogger.With("system", "TESTS")
+	sysLogger.Info("sys", "var", "fasel")
+	exp := "INFO  TESTS  sys var=fasel"
+	if got := sb.String(); !strings.Contains(got, exp) {
+		t.Errorf("log output should contain %q, but got %q", exp, got)
+	}
+
+	appLogger := sysLogger.With("app", "myapp", "subapp", "subby")
+	appLogger.Info("app", "val", "doit")
+	exp = "INFO  TESTS  app app=myapp subapp=subby val=doit"
+	if got := sb.String(); !strings.Contains(got, exp) {
+		t.Errorf("log output should contain %q, but got %q", exp, got)
+	}
+}
