@@ -240,8 +240,14 @@ func (idx *Index) promote(in *instance, res bulkResult) {
 	if !ok {
 		return // superseded by a newer reset, or stopped
 	}
-	idx.logger.Info("Index complete",
-		"instance", in.id, "duration", duration, "zettel", res.total, "failed", res.failed)
+	if res.failed > 0 {
+		idx.logger.Error("Index complete",
+			"instance", in.id, "duration", duration, "zettel", res.total, "failed", res.failed)
+
+	} else {
+		idx.logger.Info("Index complete",
+			"instance", in.id, "duration", duration, "zettel", res.total)
+	}
 	if old != nil {
 		go old.stop() // never wait here: called from a goroutine of in
 	}
