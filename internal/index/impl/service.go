@@ -50,7 +50,7 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 		select {
 		case <-wake:
 		case <-ctx.Done():
-			rsrv.logger.Info("RetrievService ended")
+			rsrv.logger.Info("Stop")
 			close(out)
 			return
 		}
@@ -147,7 +147,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 			break
 		}
 	}
-	psrv.logger.Info("ParseService ended")
+	psrv.logger.Info("Stop")
 	close(out)
 }
 
@@ -190,7 +190,7 @@ func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, 
 		}
 	}
 
-	asrv.logger.Info("AnalyzeService ended")
+	asrv.logger.Info("Stop")
 	close(out)
 }
 
@@ -225,5 +225,5 @@ func (ssrv *storeService) service(ctx context.Context, in <-chan storeData) {
 		}
 	}
 
-	ssrv.logger.Info("StoreService ended")
+	ssrv.logger.Info("Stop")
 }
