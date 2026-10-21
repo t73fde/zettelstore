@@ -13,32 +13,60 @@
 
 package impl
 
+import "sync"
+
 type store struct {
 	stats *stats
-	dict  *dictionary
+
+	mx     sync.RWMutex
+	zettel map[denseZid]*analyzedZettel // all existing zettel
 }
 
-func makeStore(stats *stats, dict *dictionary) *store {
+func makeStore(stats *stats, zettelHint int) *store {
 	return &store{
-		stats: stats,
-		dict:  dict,
+		stats:  stats,
+		zettel: make(map[denseZid]*analyzedZettel, zettelHint),
 	}
 }
 
-func (st *store) updateZettel(_ *analyzedZettel, generation uint64) {
-	st.stats.finishUpdateZettel(generation)
+// grow dimensions an empty store. It has no effect on a store with content.
+func (st *store) grow(n int) {
+	st.mx.Lock()
+	defer st.mx.Unlock()
+	if len(st.zettel) == 0 && n > 0 {
+		st.zettel = make(map[denseZid]*analyzedZettel, n)
+	}
 }
 
-// ----- remove zettel -------------------------------------------------------
+func (st *store) count() int {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	return len(st.zettel)
+}
 
-func (st *store) removeZettel(dzid denseZid, generation uint64) {
-	// TODO: remove zettel from main store
+func (st *store) exists(dzid denseZid) bool {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	_, found := st.zettel[dzid]
+	return found
+}
 
-	// Remove denseZid from dictionary
-	dict := st.dict
-	dict.Lock()
-	defer dict.Unlock()
-	dict.RemoveValue(dzid)
+// upsertZettel takes ownership of az.
+func (st *store) upsertZettel(dzid denseZid, az *analyzedZettel) {
+	st.mx.Lock()
+	// TODO: old := st.zettel[dzid]; remove postings of the old version,
+	// add postings of az.
+	st.zettel[dzid] = az
+	st.mx.Unlock()
 
-	st.stats.finishRemoveZettel(generation)
+	st.stats.finishUpdateZettel()
+}
+
+func (st *store) removeZettel(dzid denseZid) {
+	st.mx.Lock()
+	// TODO: remove postings of st.zettel[dzid].
+	delete(st.zettel, dzid)
+	st.mx.Unlock()
+
+	st.stats.finishRemoveZettel()
 }

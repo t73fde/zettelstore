@@ -14,6 +14,7 @@
 package kernel
 
 import (
+	"fmt"
 	"log/slog"
 	"maps"
 	"slices"
@@ -73,6 +74,10 @@ func (is *indexService) GetStatistics() []KeyValue {
 	is.mxService.RUnlock()
 	result := make([]KeyValue, 0, 10+len(st.WordCount))
 	result = append(result, []KeyValue{
+		{Key: "Ready", Value: fmt.Sprint(st.Ready)},
+		{Key: "Building", Value: fmt.Sprint(st.Building)},
+		{Key: "Build duration", Value: st.BuildDuration.String()},
+		{Key: "Build failed", Value: strconv.Itoa(st.BuildFailed)},
 		{Key: "Zettel", Value: strconv.Itoa(st.NumZettel)},
 		{Key: "Words / Fragments", Value: strconv.Itoa(st.NumWords)},
 		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},

@@ -38,10 +38,7 @@ func makeAnalyzer(dict *dictionary) *analyzer {
 func (a *analyzer) processDeleted(in *analyzeData, out *storeData) {
 	out.zid = in.zid
 	out.aztl = nil
-	out.generation = in.generation
-
-	a.dict.Lock()
-	defer a.dict.Unlock()
+	out.bulk = in.bulk
 	out.dzid = a.dict.Encode(in.zid)
 }
 
@@ -54,11 +51,9 @@ type analyzedZettel struct {
 
 func (a *analyzer) analyze(in *analyzeData, out *storeData) {
 	out.zid = in.zid
-	out.generation = in.generation
-
-	a.dict.Lock()
-	defer a.dict.Unlock()
+	out.bulk = in.bulk
 	out.dzid = a.dict.Encode(in.zid)
+
 	za := zettelAnalyzer{a, &analyzedZettel{}}
 	za.collect(in.zettel.Meta, in.zettel.Blocks)
 	out.aztl = za.az

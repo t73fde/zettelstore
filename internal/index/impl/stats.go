@@ -16,23 +16,25 @@ package impl
 import "sync"
 
 type stats struct {
-	mx sync.RWMutex
-
-	maxGen  uint64
+	mx      sync.RWMutex
 	updates uint64
 	removes uint64
 }
 
-func (st *stats) finishUpdateZettel(generation uint64) {
+func (st *stats) finishUpdateZettel() {
 	st.mx.Lock()
 	defer st.mx.Unlock()
-	st.maxGen = max(st.maxGen, generation)
 	st.updates++
 }
 
-func (st *stats) finishRemoveZettel(generation uint64) {
+func (st *stats) finishRemoveZettel() {
 	st.mx.Lock()
 	defer st.mx.Unlock()
-	st.maxGen = max(st.maxGen, generation)
 	st.removes++
+}
+
+func (st *stats) read() (updates, removes uint64) {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	return st.updates, st.removes
 }

@@ -16,6 +16,7 @@ package index
 
 import (
 	"context"
+	"time"
 
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
@@ -91,7 +92,7 @@ type Index interface {
 	ReadStats(st *Stats)
 }
 
-// Stats records statistics about the box.
+// Stats records statistics about the indexer.
 type Stats struct {
 	NumZettel  int
 	NumWords   int
@@ -101,6 +102,11 @@ type Stats struct {
 	UpdatedZettel uint64
 	RemovedZettel uint64
 	NumResets     uint64
+
+	Ready         bool          // initial build is complete
+	Building      bool          // a rebuild is in progress
+	BuildDuration time.Duration // duration of the last complete build
+	BuildFailed   int           // zettel of the last complete build that failed
 }
 
 // Searcher is used to select zettel identifier based on search criteria.
@@ -130,17 +136,30 @@ type RetrievePredicate func(id.Zid) bool
 // search. It hides the concrete set representation, so that the representation
 // can be changed depending on the size of the set.
 //
-// And and Or modify the receiver. They panic, if the receiver is frozen by a
-// call to MakePredicate. A Result is not safe for concurrent use.
+// A Result is incomplete, if it was computed while the initial build of the
+// index was still running. And and Or modify the receiver. They panic, if the
+// receiver is frozen by a call to MakePredicate. A Result is not safe for
+// concurrent use.
 type Result struct {
-	base   roster.Roster[id.Zid]
-	frozen bool
+	base    roster.Roster[id.Zid]
+	frozen  bool
+	partial bool
 }
 
 // NewResult creates a Result that takes ownership of base.
 func NewResult(base roster.Roster[id.Zid]) *Result {
 	return &Result{base: base}
 }
+
+// NewPartialResult creates a Result that takes ownership of base and that is
+// marked as possibly incomplete.
+func NewPartialResult(base roster.Roster[id.Zid]) *Result {
+	return &Result{base: base, partial: true}
+}
+
+// Incomplete reports whether the result may miss zettel, because it was
+// computed before the initial build of the index was complete.
+func (sr *Result) Incomplete() bool { return sr.partial }
 
 // IsEmpty reports whether the result contains no identifier.
 func (sr *Result) IsEmpty() bool { return sr.base.IsEmpty() }
@@ -153,7 +172,7 @@ func (sr *Result) Equal(other *Result) bool { return sr.base.Equal(other.base) }
 
 // Clone returns an independent, not frozen copy of the result.
 func (sr *Result) Clone() *Result {
-	return &Result{base: sr.base.Clone()}
+	return &Result{base: sr.base.Clone(), partial: sr.partial}
 }
 
 // And restricts the result to identifiers that are also contained in other.
@@ -164,6 +183,7 @@ func (sr *Result) And(other *Result) {
 		panic("And operation on frozen Result")
 	}
 	sr.base.And(other.base)
+	sr.partial = sr.partial || other.partial
 }
 
 // Or extends the result by all identifiers contained in other. It panics, if
@@ -173,6 +193,7 @@ func (sr *Result) Or(other *Result) {
 		panic("Or operation on frozen Result")
 	}
 	sr.base.Or(other.base)
+	sr.partial = sr.partial || other.partial
 }
 
 // MakePredicate freezes the receiver and returns a predicate for membership

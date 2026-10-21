@@ -22,16 +22,21 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 )
 
+type denseZid uint32
+
+// dictionary maps zettel identifier to dense identifier and words to word
+// identifier. Identifier are never given back; a dense identifier may
+// therefore refer to a zettel that does not (yet) exist. The store decides
+// about existence. All methods are safe for concurrent use.
 type dictionary struct {
 	mx    sync.RWMutex
 	dense *dense.Dense[id.Zid, denseZid]
 	voc   *vocab.Vocabulary
 
-	// inverse maps metadata keys to their inverse.
-	// Assumes that there will be no future inverse keys.
+	// inverse maps metadata keys to their inverse. It is read-only after
+	// construction. Assumes that there will be no future inverse keys.
 	inverse map[vocab.WordID]vocab.WordID
 }
-type denseZid uint32
 
 func makeDictionary(wordsHint int) *dictionary {
 	voc := vocab.New(wordsHint)
@@ -45,45 +50,52 @@ func makeDictionary(wordsHint int) *dictionary {
 			inverse[invID] = keyID
 		}
 	}
-	result := &dictionary{
+	return &dictionary{
 		dense:   &dense.Dense[id.Zid, denseZid]{},
 		voc:     voc,
 		inverse: inverse,
 	}
-	return result
 }
 
-func (d *dictionary) Lock()    { d.mx.Lock() }
-func (d *dictionary) Unlock()  { d.mx.Unlock() }
-func (d *dictionary) RLock()   { d.mx.RLock() }
-func (d *dictionary) RUnlock() { d.mx.RUnlock() }
-
-func (d *dictionary) Encode(zid id.Zid) denseZid          { return d.dense.Encode(zid) }
-func (d *dictionary) Decode(dzid denseZid) (id.Zid, bool) { return d.dense.Decode(dzid) }
-func (d *dictionary) RemoveValue(dzid denseZid)           { d.dense.RemoveValue(dzid) }
-func (d *dictionary) SafeEncode(zid id.Zid) denseZid {
-	d.RLock()
-	defer d.RUnlock()
+func (d *dictionary) Encode(zid id.Zid) denseZid {
+	d.mx.Lock()
+	defer d.mx.Unlock()
 	return d.dense.Encode(zid)
 }
-func (d *dictionary) SafeDecode(dzid denseZid) (id.Zid, bool) {
-	d.RLock()
-	defer d.RUnlock()
+
+func (d *dictionary) Decode(dzid denseZid) (id.Zid, bool) {
+	d.mx.RLock()
+	defer d.mx.RUnlock()
 	return d.dense.Decode(dzid)
 }
 
-func (d *dictionary) AddBytes(b []byte) vocab.WordID  { return d.voc.AddBytes(b) }
-func (d *dictionary) AddString(s string) vocab.WordID { return d.voc.AddString(s) }
+func (d *dictionary) AddBytes(b []byte) vocab.WordID {
+	d.mx.Lock()
+	defer d.mx.Unlock()
+	return d.voc.AddBytes(b)
+}
+
+func (d *dictionary) AddString(s string) vocab.WordID {
+	d.mx.Lock()
+	defer d.mx.Unlock()
+	return d.voc.AddString(s)
+}
+
+func (d *dictionary) numWords() int {
+	d.mx.RLock()
+	defer d.mx.RUnlock()
+	return d.voc.Count()
+}
 
 func (d *dictionary) readStats(st *dictStats) {
-	st.NumZettel = d.dense.Count()
+	d.mx.RLock()
+	defer d.mx.RUnlock()
 	st.NumWords = d.voc.Count()
 	st.Vocabulary = d.voc.StoreLen()
 	st.WordCount = d.voc.WordCount()
 }
 
 type dictStats struct {
-	NumZettel  int
 	NumWords   int
 	Vocabulary int
 	WordCount  map[uint16]int
