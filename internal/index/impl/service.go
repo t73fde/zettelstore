@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
@@ -134,7 +135,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 		ad := analyzeData{zid: pd.zid, bulk: pd.bulk}
 		if pd.deleted {
 			psrv.logger.Info("Deleted", "zid", pd.zid)
-		} else {
+		} else if mustIndexZettel(pd.zettel.Meta) {
 			psrv.logger.Info("Upsert", "zid", pd.zid)
 			ok := runRecovered("IndexParser", func() {
 				ad.zettel = parser.ParseZettel(ctx, pd.zettel, "", psrv.config)
@@ -143,6 +144,14 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 				psrv.pending.dropped(pd.bulk)
 				continue
 			}
+		} else {
+			psrv.logger.Info("NoParse", "zid", pd.zid)
+			ad.zettel = &zettel.ParsedZettel{
+				Meta:    pd.zettel.Meta,
+				Zid:     pd.zid,
+				InhMeta: pd.zettel.Meta,
+				Blocks:  nil,
+			}
 		}
 		if !send(ctx, out, ad) {
 			break
@@ -150,6 +159,9 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 	}
 	psrv.logger.Info("Stop")
 	close(out)
+}
+func mustIndexZettel(m *meta.Meta) bool {
+	return m.Zid >= id.ZidMinIndex
 }
 
 // ----- analyze service ----------

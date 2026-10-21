@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: EUPL-1.2
 // SPDX-FileCopyrightText: 2026-present Detlef Stern
 // -----------------------------------------------------------------------------
+
 // Package impl implements the index.Indexer interface.
 package impl
 

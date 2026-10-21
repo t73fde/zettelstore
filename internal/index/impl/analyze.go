@@ -66,14 +66,9 @@ type zettelAnalyzer struct {
 
 func (za *zettelAnalyzer) collect(m *meta.Meta, blocks *sx.Pair) {
 	za.collectMeta(m)
-	if mustIndexZettel(m) {
-		zsx.WalkIt(za, blocks, nil)
-	}
+	zsx.WalkIt(za, blocks, nil)
 }
 
-func mustIndexZettel(m *meta.Meta) bool {
-	return m.Zid >= id.ZidMinIndex
-}
 func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 	a, az := za.a, za.az
 	az.meta = makeStoreMeta(m.Count())
