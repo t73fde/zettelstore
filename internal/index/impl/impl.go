@@ -58,9 +58,10 @@ type buildInfo struct {
 // New creates a new index object.
 func New(config config.Config, stopService func(error)) *Index {
 	return &Index{
-		logger:    kernel.Main.GetLogger(kernel.IndexService),
-		config:    config,
-		retriever: nil,
+		logger:      kernel.Main.GetLogger(kernel.IndexService),
+		config:      config,
+		retriever:   nil,
+		stopService: stopService,
 	}
 }
 
