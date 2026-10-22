@@ -132,7 +132,7 @@ type parseService struct {
 
 func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out chan<- analyzeData) {
 	for pd := range recvSeq(ctx, in) {
-		ad := analyzeData{zid: pd.zid, bulk: pd.bulk}
+		ad := analyzeData{zid: pd.zid, bulk: pd.bulk, deleted: pd.deleted}
 		if pd.deleted {
 			psrv.logger.Info("Deleted", "zid", pd.zid)
 		} else if mustIndexZettel(pd.zettel.Meta) {
@@ -140,7 +140,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 			ok := runRecovered("IndexParser", func() {
 				ad.zettel = parser.ParseZettel(ctx, pd.zettel, "", psrv.config)
 			})
-			if !ok { // element is dropped, the service continues
+			if !ok || ad.zettel == nil { // element is dropped, the service continues
 				psrv.pending.dropped(pd.bulk)
 				continue
 			}
@@ -167,9 +167,10 @@ func mustIndexZettel(m *meta.Meta) bool {
 // ----- analyze service ----------
 
 type analyzeData struct {
-	zid    id.Zid // for use when zettel is deleted
-	zettel *zettel.ParsedZettel
-	bulk   bool
+	zid     id.Zid // for use when zettel is deleted
+	zettel  *zettel.ParsedZettel
+	deleted bool
+	bulk    bool
 }
 
 type analyzeService struct {
@@ -182,7 +183,7 @@ func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, 
 	for ad := range recvSeq(ctx, in) {
 		var sd storeData
 		ok := runRecovered("IndexAnalyzer", func() {
-			if ad.zettel == nil {
+			if ad.deleted {
 				asrv.logger.Info("Deleted", "zid", ad.zid)
 				asrv.analyser.processDeleted(&ad, &sd)
 				return
