@@ -15,7 +15,6 @@ package impl
 
 import (
 	"net/url"
-	"slices"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/roster"
@@ -184,13 +183,4 @@ func makeStoreMeta(sizeHint int) storeMeta {
 func (sm *storeMeta) add(key vocab.WordID, val meta.Value) {
 	sm.ks = append(sm.ks, key)
 	sm.vs = append(sm.vs, val)
-}
-func (sm *storeMeta) shrink() {
-	if len(sm.ks) == 0 {
-		sm.ks = nil
-		sm.vs = nil
-	} else if cap(sm.ks) > len(sm.ks) {
-		sm.ks = slices.Clone(sm.ks)
-		sm.vs = slices.Clone(sm.vs)
-	}
 }
