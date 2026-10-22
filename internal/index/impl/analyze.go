@@ -109,7 +109,7 @@ func (za *zettelAnalyzer) addMetaValue(val meta.Value) {
 			hasWord = true
 		}
 	}
-	if !hasWord && len(string(val)) <= vocab.MaxWordLen {
+	if !hasWord && len(string(val)) <= vocab.MaxWordLen && val != "" {
 		za.az.words.Insert(za.a.dict.AddString(string(val)))
 	}
 }
