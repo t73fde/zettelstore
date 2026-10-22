@@ -101,12 +101,16 @@ type Stats struct {
 
 	UpdatedZettel uint64
 	RemovedZettel uint64
-	NumResets     uint64
+	NumRebuild    uint64
 
 	Ready         bool          // initial build is complete
 	Building      bool          // a rebuild is in progress
 	BuildDuration time.Duration // duration of the last complete build
 	BuildFailed   int           // zettel of the last complete build that failed
+
+	DroppedZettel  uint64 // elements dropped due to errors since the start of the active instance
+	Failure        string // not empty: the index failed and is unusable
+	RebuildFailure string // not empty: the last rebuild failed; the previous index is kept
 }
 
 // Searcher is used to select zettel identifier based on search criteria.

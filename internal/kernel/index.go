@@ -68,33 +68,37 @@ func (is *indexService) Stop(*Kernel) {
 }
 
 func (is *indexService) GetStatistics() []KeyValue {
-	var st index.Stats
+	st := index.Stats{
+		Failure:        "n/a",
+		RebuildFailure: "n/a",
+	}
 	is.mxService.RLock()
 	is.indexer.ReadStats(&st)
 	is.mxService.RUnlock()
-	result := make([]KeyValue, 0, 10+len(st.WordCount))
+	result := make([]KeyValue, 0, 16+len(st.WordCount))
 	result = append(result, []KeyValue{
 		{Key: "Ready", Value: fmt.Sprint(st.Ready)},
 		{Key: "Building", Value: fmt.Sprint(st.Building)},
 		{Key: "Build duration", Value: st.BuildDuration.String()},
 		{Key: "Build failed", Value: strconv.Itoa(st.BuildFailed)},
+		{Key: "Dropped zettel", Value: strconv.FormatUint(st.DroppedZettel, 10)},
+		{Key: "Failure", Value: st.Failure},
+		{Key: "Rebuild failure", Value: st.RebuildFailure},
 		{Key: "Zettel", Value: strconv.Itoa(st.NumZettel)},
 		{Key: "Words / Fragments", Value: strconv.Itoa(st.NumWords)},
 		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},
 		{Key: "Updated zettel", Value: strconv.FormatUint(st.UpdatedZettel, 10)},
 		{Key: "Removed zettel", Value: strconv.FormatUint(st.RemovedZettel, 10)},
-		{Key: "Resets", Value: strconv.FormatUint(st.NumResets, 10)},
+		{Key: "Rebuilds", Value: strconv.FormatUint(st.NumRebuild, 10)},
 	}...)
 
 	sizes := slices.Collect(maps.Keys(st.WordCount))
 	slices.Sort(sizes)
-	smallCount, totalCount, longSize := 0, 0, 0
+	smallCount, totalCount := 0, 0
 	for _, size := range sizes {
 		count := st.WordCount[size]
 		if size <= 14 {
 			smallCount += count
-		} else {
-			longSize += (int(size) * count)
 		}
 		totalCount += count
 		result = append(result, KeyValue{
@@ -102,8 +106,10 @@ func (is *indexService) GetStatistics() []KeyValue {
 			Value: strconv.Itoa(count),
 		})
 	}
-	result = append(result, KeyValue{Key: "Small words", Value: strconv.Itoa(smallCount)})
-	result = append(result, KeyValue{Key: "All words", Value: strconv.Itoa(totalCount)})
-	result = append(result, KeyValue{Key: "Long size", Value: strconv.Itoa(longSize)})
+	result = append(result, []KeyValue{
+		{Key: "All words", Value: strconv.Itoa(totalCount)},
+		{Key: "Small words", Value: strconv.Itoa(smallCount)},
+		{Key: "Long words", Value: strconv.Itoa(totalCount - smallCount)},
+	}...)
 	return result
 }

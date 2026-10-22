@@ -47,6 +47,9 @@ type Index struct {
 	building    *instance // nil, if no rebuild is in progress
 	resets      uint64
 	lastBuild   buildInfo
+
+	failure        error // set when the active instance failed; cleared by Start
+	rebuildFailure error // set when a rebuild failed; cleared by the next complete build
 }
 
 type buildInfo struct {
@@ -85,6 +88,8 @@ func (idx *Index) Start() {
 		return
 	}
 	idx.running = true
+	idx.failure, idx.rebuildFailure = nil, nil
+
 	idx.logger.Debug("Started")
 }
 
@@ -133,15 +138,20 @@ const (
 
 // classifyFailure decides what to do about a failed instance. It detaches a
 // failed building instance.
-func (idx *Index) classifyFailure(in *instance) failureAction {
+func (idx *Index) classifyFailure(in *instance, cause error) failureAction {
 	idx.mx.Lock()
 	defer idx.mx.Unlock()
 
 	switch in {
 	case idx.building:
 		idx.building = nil
+		idx.rebuildFailure = cause
 		return failDropBuilding
 	case idx.active:
+		idx.failure = cause
+		// Until the kernel has stopped the service, results of a failed
+		// index are flagged as incomplete.
+		in.ready.Store(false)
 		return failStopService
 	default:
 		return failIgnore
@@ -151,7 +161,7 @@ func (idx *Index) classifyFailure(in *instance) failureAction {
 // instanceFailed is called in its own goroutine when a service of in gave up
 // or the store step panicked.
 func (idx *Index) instanceFailed(in *instance, cause error) {
-	switch idx.classifyFailure(in) {
+	switch idx.classifyFailure(in, cause) {
 	case failDropBuilding:
 		idx.logger.Error("Rebuild failed, active index is kept", "instance", in.id, "cause", cause)
 		in.stop() // pipeline is already cancelled; waits for its goroutines
@@ -271,6 +281,7 @@ func (idx *Index) swapIn(in *instance, res bulkResult) (old *instance, duration 
 	}
 	duration = time.Since(in.started)
 	idx.lastBuild = buildInfo{duration: duration, zettel: res.total, failed: res.failed}
+	idx.rebuildFailure = nil
 	in.ready.Store(true)
 	return old, duration, true
 }
@@ -278,14 +289,19 @@ func (idx *Index) swapIn(in *instance, res bulkResult) (old *instance, duration 
 // ReadStats populates st with index statistics.
 func (idx *Index) ReadStats(st *index.Stats) {
 	idx.mx.RLock()
-	defer idx.mx.RUnlock()
-
-	st.NumResets = idx.resets
+	st.NumRebuild = idx.resets
 	st.Building = idx.building != nil
 	st.BuildDuration = idx.lastBuild.duration
 	st.BuildFailed = idx.lastBuild.failed
-
+	if idx.failure != nil {
+		st.Failure = idx.failure.Error()
+	}
+	if idx.rebuildFailure != nil {
+		st.RebuildFailure = idx.rebuildFailure.Error()
+	}
 	a := idx.active
+	idx.mx.RUnlock()
+
 	if a == nil {
 		return // no instance yet: remaining fields stay zero
 	}
@@ -294,9 +310,9 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	st.NumWords = ds.NumWords
 	st.Vocabulary = ds.Vocabulary
 	st.WordCount = ds.WordCount
-
 	st.NumZettel = a.store.count()
 	st.UpdatedZettel, st.RemovedZettel = a.stats.read()
+	st.DroppedZettel = a.pending.droppedTotal()
 	st.Ready = a.ready.Load()
 }
 

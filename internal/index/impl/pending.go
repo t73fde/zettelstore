@@ -16,6 +16,7 @@ package impl
 import (
 	"maps"
 	"sync"
+	"sync/atomic"
 
 	"t73f.de/r/zsc/domain/id"
 )
@@ -48,6 +49,8 @@ type pendingQueue struct {
 	failed       int
 
 	onBulkDone func(bulkResult) // called once, without holding mx
+
+	droppedCount atomic.Uint64 // all elements that left the pipeline unprocessed
 }
 
 func newPendingQueue(onBulkDone func(bulkResult)) *pendingQueue {
@@ -150,10 +153,12 @@ func (pq *pendingQueue) finishBulk(failed bool) {
 // dropped accounts for an element that left the pipeline without reaching the
 // store. Only bulk elements are counted.
 func (pq *pendingQueue) dropped(bulk bool) {
+	pq.droppedCount.Add(1)
 	if bulk {
 		pq.finishBulk(true)
 	}
 }
+func (pq *pendingQueue) droppedTotal() uint64 { return pq.droppedCount.Load() }
 
 func (pq *pendingQueue) markFinished(failed bool) (bulkResult, bool) {
 	pq.mx.Lock()
