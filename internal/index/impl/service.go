@@ -52,7 +52,7 @@ func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, 
 		select {
 		case <-wake:
 		case <-ctx.Done():
-			rsrv.logger.Info("Stop")
+			rsrv.logger.Debug("Stop")
 			close(out)
 			return
 		}
@@ -79,7 +79,7 @@ func (rsrv *retrieveService) process(ctx, getCtx context.Context, out chan<- par
 }
 
 func (rsrv *retrieveService) fetch(ctx context.Context) {
-	rsrv.logger.Info("Fetch")
+	rsrv.logger.Debug("Fetch")
 	zids, err := rsrv.getRetriever().FetchZids(ctx)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -99,7 +99,7 @@ func (rsrv *retrieveService) fetch(ctx context.Context) {
 
 // retrieve returns false if the pipeline was cancelled.
 func (rsrv *retrieveService) retrieve(ctx context.Context, job pendingJob, out chan<- parseData) bool {
-	rsrv.logger.Info("Zettel", "zid", job.zid, "bulk", job.fromBulk)
+	rsrv.logger.Debug("Zettel", "zid", job.zid, "bulk", job.fromBulk)
 	ztl, err := rsrv.getRetriever().GetZettel(ctx, job.zid)
 	if err != nil {
 		if ctx.Err() != nil {
@@ -134,9 +134,9 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 	for pd := range recvSeq(ctx, in) {
 		ad := analyzeData{zid: pd.zid, bulk: pd.bulk, deleted: pd.deleted}
 		if pd.deleted {
-			psrv.logger.Info("Deleted", "zid", pd.zid)
+			psrv.logger.Debug("Deleted", "zid", pd.zid)
 		} else if mustIndexZettel(pd.zettel.Meta) {
-			psrv.logger.Info("Upsert", "zid", pd.zid)
+			psrv.logger.Debug("Upsert", "zid", pd.zid)
 			ok := runRecovered("IndexParser", func() {
 				ad.zettel = parser.ParseZettel(ctx, pd.zettel, "", psrv.config)
 			})
@@ -145,7 +145,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 				continue
 			}
 		} else {
-			psrv.logger.Info("NoParse", "zid", pd.zid)
+			psrv.logger.Debug("NoParse", "zid", pd.zid)
 			ad.zettel = &zettel.ParsedZettel{
 				Meta:    pd.zettel.Meta,
 				Zid:     pd.zid,
@@ -157,7 +157,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 			break
 		}
 	}
-	psrv.logger.Info("Stop")
+	psrv.logger.Debug("Stop")
 	close(out)
 }
 func mustIndexZettel(m *meta.Meta) bool {
@@ -184,11 +184,11 @@ func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, 
 		var sd storeData
 		ok := runRecovered("IndexAnalyzer", func() {
 			if ad.deleted {
-				asrv.logger.Info("Deleted", "zid", ad.zid)
+				asrv.logger.Debug("Deleted", "zid", ad.zid)
 				asrv.analyser.processDeleted(&ad, &sd)
 				return
 			}
-			asrv.logger.Info("Upsert", "zid", ad.zid)
+			asrv.logger.Debug("Upsert", "zid", ad.zid)
 			if ad.zid != ad.zettel.Zid {
 				asrv.logger.Error("Differing Zids", "queue", ad.zid, "parsed", ad.zettel.Zid)
 				ad.zettel.Zid = ad.zid
@@ -204,7 +204,7 @@ func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, 
 		}
 	}
 
-	asrv.logger.Info("Stop")
+	asrv.logger.Debug("Stop")
 	close(out)
 }
 
@@ -236,14 +236,14 @@ func (ssrv *storeService) service(ctx context.Context, in <-chan storeData) {
 		}
 	}
 
-	ssrv.logger.Info("Stop")
+	ssrv.logger.Debug("Stop")
 }
 func (ssrv *storeService) apply(sd storeData) {
 	if sd.aztl == nil {
-		ssrv.logger.Info("Deleted", "zid", sd.zid, "dzid", sd.dzid)
+		ssrv.logger.Debug("Deleted", "zid", sd.zid, "dzid", sd.dzid)
 		ssrv.store.removeZettel(sd.dzid)
 		return
 	}
-	ssrv.logger.Info("Upsert", "zid", sd.zid, "dzid", sd.dzid)
+	ssrv.logger.Debug("Upsert", "zid", sd.zid, "dzid", sd.dzid)
 	ssrv.store.upsertZettel(sd.dzid, sd.aztl)
 }

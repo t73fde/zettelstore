@@ -67,7 +67,7 @@ func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
 
 // start spawns the services. The first thing they do is fetching all zettel.
 func (in *instance) start(cfg config.Config, getRetriever func() index.Retriever) {
-	in.logger.Info("Start")
+	in.logger.Debug("Start")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	in.pl = &pipeline{
 		ctx:      ctx,
@@ -114,7 +114,7 @@ const stopTimeout = 10 * time.Second
 // stop cancels the services and waits for their termination. It must not be
 // called while holding Index.mx.
 func (in *instance) stop() {
-	in.logger.Info("Stopping")
+	in.logger.Debug("Stopping")
 	in.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
 	done := make(chan struct{})
 	go func() {
@@ -126,7 +126,7 @@ func (in *instance) stop() {
 	case <-time.After(stopTimeout):
 		in.logger.Error("Services did not stop in time, abandoning them", "timeout", stopTimeout)
 	}
-	in.logger.Info("Stopped")
+	in.logger.Debug("Stopped")
 }
 
 // enqueue schedules the zettel for (re-) indexing.

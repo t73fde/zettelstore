@@ -177,9 +177,9 @@ func (idx *Index) instanceFailed(in *instance, cause error) {
 func (idx *Index) Enqueue(reason index.Reason, zid id.Zid) {
 	switch reason {
 	case index.OnReady:
-		idx.logger.Info("OnReady")
+		idx.logger.Debug("OnReady")
 	case index.OnReset:
-		idx.logger.Info("OnReset")
+		idx.logger.Debug("OnReset")
 		idx.reset()
 	case index.OnZettel:
 		idx.logger.Debug("OnZettel", "zid", zid)
