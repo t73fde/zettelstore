@@ -15,19 +15,35 @@ package impl
 
 import (
 	"sync"
+
+	"t73f.de/r/zero/roster"
+	"t73f.de/r/zero/vocab"
 )
 
 type store struct {
 	stats *stats
 
 	mx     sync.RWMutex
-	zettel map[denseZid]*analyzedZettel // all existing zettel
+	zettel map[denseZid]*storeZettel                // all existing zettel
+	words  map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
+	urls   map[string]roster.Roster[denseZid]       // URL -> zettel containing it
 }
 
-func makeStore(stats *stats, zettelHint int) *store {
+// storeZettel stores data of a specific zettel.
+//
+// TODO: just an idea: make it immutable.
+type storeZettel struct {
+	meta  storeMeta
+	words roster.Roster[vocab.WordID]
+	urls  roster.Roster[string]
+}
+
+func makeStore(stats *stats) *store {
 	return &store{
 		stats:  stats,
-		zettel: make(map[denseZid]*analyzedZettel, zettelHint),
+		zettel: make(map[denseZid]*storeZettel),
+		words:  make(map[vocab.WordID]roster.Roster[denseZid]),
+		urls:   make(map[string]roster.Roster[denseZid]),
 	}
 }
 
@@ -36,7 +52,7 @@ func (st *store) grow(n int) {
 	st.mx.Lock()
 	defer st.mx.Unlock()
 	if len(st.zettel) == 0 && n > 0 {
-		st.zettel = make(map[denseZid]*analyzedZettel, n)
+		st.zettel = make(map[denseZid]*storeZettel, n)
 	}
 }
 
@@ -44,13 +60,6 @@ func (st *store) count() int {
 	st.mx.RLock()
 	defer st.mx.RUnlock()
 	return len(st.zettel)
-}
-
-func (st *store) exists(dzid denseZid) bool {
-	st.mx.RLock()
-	defer st.mx.RUnlock()
-	_, found := st.zettel[dzid]
-	return found
 }
 
 // upsertZettel takes ownership of az.
@@ -63,18 +72,58 @@ func (st *store) replace(dzid denseZid, az *analyzedZettel) {
 	st.mx.Lock()
 	defer st.mx.Unlock()
 
-	// TODO: remove postings of the old version, add postings of az.
-	st.zettel[dzid] = az
+	newSz := st.buildStoreZettel(az)
+	if prevSz, found := st.zettel[dzid]; found {
+		st.updateZettel(dzid, prevSz, newSz)
+	} else {
+		st.insertZettel(dzid, newSz)
+	}
+	st.zettel[dzid] = newSz
 }
+
+func (st *store) insertZettel(dzid denseZid, newSz *storeZettel) {
+	for word := range newSz.words.Values() {
+		r := st.words[word]
+		r.Insert(dzid)
+		st.words[word] = r
+	}
+	for u := range newSz.urls.Values() {
+		r := st.urls[u]
+		r.Insert(dzid)
+		st.urls[u] = r
+	}
+}
+
+func (st *store) updateZettel(dzid denseZid, prevSz, newSz *storeZettel) {
+}
+
+func (st *store) buildStoreZettel(az *analyzedZettel) *storeZettel {
+	result := &storeZettel{
+		meta:  az.meta,
+		words: az.words,
+		urls:  az.urls,
+	}
+	return result
+}
+
+// ----- removeZettel --------------------------------------------------------
 
 func (st *store) removeZettel(dzid denseZid) {
-	st.drop(dzid)
-	st.stats.finishRemoveZettel()
+	if st.drop(dzid) {
+		st.stats.finishRemoveZettel()
+	}
 }
 
-func (st *store) drop(dzid denseZid) {
+func (st *store) drop(dzid denseZid) bool {
 	st.mx.Lock()
 	defer st.mx.Unlock()
-	// TODO: remove postings of st.zettel[dzid].
-	delete(st.zettel, dzid)
+
+	if sz, found := st.zettel[dzid]; found {
+		delete(st.zettel, dzid)
+		st.deleteZettel(sz)
+		return true
+	}
+	return false
 }
+
+func (st *store) deleteZettel(sz *storeZettel) {}
