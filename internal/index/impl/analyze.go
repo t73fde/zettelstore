@@ -164,23 +164,3 @@ func (za *zettelAnalyzer) addRef(ref *sx.Pair) {
 		}
 	}
 }
-
-// ----- TODO: storeMeta in separate file, will be used by store too.
-
-// storeMeta is a compact representation of a meta map. The two separate
-// slices are to avoid padding. storeMeta does not need to be a map.
-type storeMeta struct {
-	ks []vocab.WordID
-	vs []meta.Value
-}
-
-func makeStoreMeta(sizeHint int) storeMeta {
-	return storeMeta{
-		ks: make([]vocab.WordID, 0, sizeHint),
-		vs: make([]meta.Value, 0, sizeHint),
-	}
-}
-func (sm *storeMeta) add(key vocab.WordID, val meta.Value) {
-	sm.ks = append(sm.ks, key)
-	sm.vs = append(sm.vs, val)
-}
