@@ -39,9 +39,6 @@ type Indexer interface {
 // Retriever declares all methods an Indexer needs to retrieve some zettel
 // related content.
 type Retriever interface {
-	// HasZettel returns true, if the zettel with the given ID exists.
-	HasZettel(context.Context, id.Zid) bool
-
 	// GetZettel retrieves a specific zettel.
 	GetZettel(context.Context, id.Zid) (zettel.Zettel, error)
 
