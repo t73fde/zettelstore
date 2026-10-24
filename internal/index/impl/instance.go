@@ -31,6 +31,7 @@ const defaultWordsHint = 2000 // TODO: configurable
 type sizeHints struct {
 	words  int // expected number of distinct words
 	zettel int // expected number of zettel
+	urls   int // expected number of URLs
 }
 
 // instance is one complete indexing pipeline with its own dictionary, store
@@ -59,7 +60,7 @@ func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
 		dict:    makeDictionary(hints),
 		started: time.Now(),
 	}
-	in.store = makeStore(in.stats)
+	in.store = makeStore(in.stats, hints)
 	in.pending = newPendingQueue(func(res bulkResult) { idx.promote(in, res) })
 	in.onFail = idx.instanceFailed
 	return in

@@ -237,7 +237,8 @@ func (idx *Index) hintsLocked() sizeHints {
 	h := sizeHints{words: defaultWordsHint}
 	if a := idx.active; a != nil {
 		h.words = max(h.words, withMargin(a.dict.numWords()))
-		h.zettel = withMargin(a.store.count())
+		h.zettel = withMargin(a.dict.numZids())
+		h.urls = withMargin(a.store.urlCount())
 	}
 	return h
 }

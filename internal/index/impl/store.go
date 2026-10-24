@@ -25,6 +25,7 @@ type store struct {
 	stats *stats
 
 	mx     sync.RWMutex
+	hint   int                                      // expected number of zettel
 	zettel map[denseZid]*storeZettel                // all existing zettel
 	words  map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
 	urls   map[string]roster.Roster[denseZid]       // URL -> zettel containing it
@@ -38,12 +39,13 @@ type storeZettel struct {
 	urls  roster.Roster[string]
 }
 
-func makeStore(stats *stats) *store {
+func makeStore(stats *stats, h sizeHints) *store {
 	return &store{
 		stats:  stats,
-		zettel: make(map[denseZid]*storeZettel),
-		words:  make(map[vocab.WordID]roster.Roster[denseZid]),
-		urls:   make(map[string]roster.Roster[denseZid]),
+		hint:   h.zettel,
+		zettel: make(map[denseZid]*storeZettel, h.zettel),
+		words:  make(map[vocab.WordID]roster.Roster[denseZid], h.words),
+		urls:   make(map[string]roster.Roster[denseZid], h.urls),
 	}
 }
 
@@ -51,7 +53,8 @@ func makeStore(stats *stats) *store {
 func (st *store) grow(n int) {
 	st.mx.Lock()
 	defer st.mx.Unlock()
-	if len(st.zettel) == 0 && n > 0 {
+	if n > st.hint && len(st.zettel) == 0 {
+		st.hint = n
 		st.zettel = make(map[denseZid]*storeZettel, n)
 	}
 }
@@ -60,6 +63,12 @@ func (st *store) count() int {
 	st.mx.RLock()
 	defer st.mx.RUnlock()
 	return len(st.zettel)
+}
+
+func (st *store) urlCount() int {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	return len(st.urls)
 }
 
 // upsertZettel takes ownership of az.

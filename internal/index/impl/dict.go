@@ -89,6 +89,12 @@ func (d *dictionary) numWords() int {
 	return d.voc.Count()
 }
 
+func (d *dictionary) numZids() int {
+	d.mx.RLock()
+	defer d.mx.RUnlock()
+	return d.dense.Count()
+}
+
 func (d *dictionary) readStats(st *dictStats) {
 	d.mx.RLock()
 	defer d.mx.RUnlock()
