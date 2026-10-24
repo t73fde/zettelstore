@@ -14,6 +14,7 @@
 package impl
 
 import (
+	"t73f.de/r/zero/slices"
 	"t73f.de/r/zero/vocab"
 	"t73f.de/r/zsc/domain/meta"
 )
@@ -34,4 +35,8 @@ func makeStoreMeta(sizeHint int) storeMeta {
 func (sm *storeMeta) add(key vocab.WordID, val meta.Value) {
 	sm.ks = append(sm.ks, key)
 	sm.vs = append(sm.vs, val)
+}
+func (sm *storeMeta) shrink() {
+	sm.ks = slices.Shrink(sm.ks)
+	sm.vs = slices.Shrink(sm.vs)
 }

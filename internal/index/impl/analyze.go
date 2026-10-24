@@ -43,9 +43,16 @@ func (a *analyzer) processDeleted(in *analyzeData, out *storeData) {
 
 type analyzedZettel struct {
 	meta  storeMeta
-	words roster.Roster[vocab.WordID]
 	refs  roster.Roster[denseZid]
+	words roster.Roster[vocab.WordID]
 	urls  roster.Roster[string]
+}
+
+func (az *analyzedZettel) shrink() {
+	az.meta.shrink()
+	az.refs.Shrink()
+	az.words.Shrink()
+	az.urls.Shrink()
 }
 
 func (a *analyzer) analyze(in *analyzeData, out *storeData) {
@@ -53,9 +60,11 @@ func (a *analyzer) analyze(in *analyzeData, out *storeData) {
 	out.bulk = in.bulk
 	out.dzid = a.dict.Encode(in.zid)
 
-	za := zettelAnalyzer{a, &analyzedZettel{}}
+	az := &analyzedZettel{}
+	za := zettelAnalyzer{a, az}
 	za.collect(in.zettel.Meta, in.zettel.Blocks)
-	out.aztl = za.az
+	az.shrink()
+	out.aztl = az
 }
 
 type zettelAnalyzer struct {

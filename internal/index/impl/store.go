@@ -14,6 +14,7 @@
 package impl
 
 import (
+	"cmp"
 	"sync"
 
 	"t73f.de/r/zero/roster"
@@ -29,9 +30,8 @@ type store struct {
 	urls   map[string]roster.Roster[denseZid]       // URL -> zettel containing it
 }
 
-// storeZettel stores data of a specific zettel.
-//
-// TODO: just an idea: make it immutable.
+// storeZettel stores data of a specific zettel. After adding it to a store,
+// it is treated as immutable.
 type storeZettel struct {
 	meta  storeMeta
 	words roster.Roster[vocab.WordID]
@@ -83,18 +83,16 @@ func (st *store) replace(dzid denseZid, az *analyzedZettel) {
 
 func (st *store) insertZettel(dzid denseZid, newSz *storeZettel) {
 	for word := range newSz.words.Values() {
-		r := st.words[word]
-		r.Insert(dzid)
-		st.words[word] = r
+		addPosting(st.words, word, dzid)
 	}
 	for u := range newSz.urls.Values() {
-		r := st.urls[u]
-		r.Insert(dzid)
-		st.urls[u] = r
+		addPosting(st.urls, u, dzid)
 	}
 }
 
 func (st *store) updateZettel(dzid denseZid, prevSz, newSz *storeZettel) {
+	syncPostings(st.words, dzid, prevSz.words, newSz.words)
+	syncPostings(st.urls, dzid, prevSz.urls, newSz.urls)
 }
 
 func (st *store) buildStoreZettel(az *analyzedZettel) *storeZettel {
@@ -120,10 +118,51 @@ func (st *store) drop(dzid denseZid) bool {
 
 	if sz, found := st.zettel[dzid]; found {
 		delete(st.zettel, dzid)
-		st.deleteZettel(sz)
+		st.deleteZettel(dzid, sz)
 		return true
 	}
 	return false
 }
 
-func (st *store) deleteZettel(sz *storeZettel) {}
+func (st *store) deleteZettel(dzid denseZid, sz *storeZettel) {
+	for w := range sz.words.Values() {
+		removePosting(st.words, w, dzid)
+	}
+	for u := range sz.urls.Values() {
+		removePosting(st.urls, u, dzid)
+	}
+}
+
+// ----- posting helpers -----------------------------------------------------
+
+func addPosting[K cmp.Ordered](m map[K]roster.Roster[denseZid], key K, dzid denseZid) {
+	r := m[key]
+	r.Insert(dzid)
+	m[key] = r
+}
+
+// removePosting removes dzid from the set under key. An empty set is deleted.
+func removePosting[K cmp.Ordered](m map[K]roster.Roster[denseZid], key K, dzid denseZid) {
+	if r, found := m[key]; found {
+		r.Delete(dzid)
+		if r.IsEmpty() {
+			delete(m, key)
+		} else {
+			m[key] = r
+		}
+	}
+}
+
+// syncPostings files dzid under the keys that are new and removes it from the
+// keys that are gone.
+func syncPostings[K cmp.Ordered](
+	m map[K]roster.Roster[denseZid], dzid denseZid, prev, next roster.Roster[K],
+) {
+	removed, added := prev.Delta(next)
+	for k := range removed.Values() {
+		removePosting(m, k, dzid)
+	}
+	for k := range added.Values() {
+		addPosting(m, k, dzid)
+	}
+}
