@@ -138,3 +138,10 @@ func (in *instance) enqueue(zid id.Zid) {
 	default:
 	}
 }
+
+func (in *instance) getZettel(zid id.Zid) *storeZettel {
+	if dzid, found := in.dict.dense.Find(zid); found {
+		return in.store.getZettel(dzid)
+	}
+	return nil
+}

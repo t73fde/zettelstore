@@ -321,3 +321,13 @@ func (idx *Index) isReady() bool {
 	defer idx.mx.RUnlock()
 	return idx.active != nil && idx.active.ready.Load()
 }
+
+// getActiveInstance returns the active instance, if it is ready. Otherwise return nil.
+func (idx *Index) getActiveInstance() *instance {
+	idx.mx.RLock()
+	defer idx.mx.RUnlock()
+	if a := idx.active; a != nil && a.ready.Load() {
+		return a
+	}
+	return nil
+}

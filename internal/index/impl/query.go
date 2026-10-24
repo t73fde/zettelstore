@@ -60,8 +60,19 @@ func (idx *Index) newResult(base roster.Roster[id.Zid]) *index.Result {
 // GetMeta returns metadata of the given zettel. It signals an error if
 // the zettel is not found or for other retrieval errors.
 func (idx *Index) GetMeta(zid id.Zid) (*meta.Meta, error) {
+	if in := idx.getActiveInstance(); in != nil {
+		if zettel := in.getZettel(zid); zettel != nil {
+			m := zettel.meta.toMeta(zid, in.dict)
+			return m, nil
+		}
+	}
 	return nil, box.ErrZettelNotFound{Zid: zid}
 }
 
 // Enrich computes additional properties and updates the given metadata.
-func (idx *Index) Enrich(context.Context, *meta.Meta) {}
+func (idx *Index) Enrich(context.Context, *meta.Meta) {
+	in := idx.getActiveInstance()
+	if in == nil {
+		return
+	}
+}

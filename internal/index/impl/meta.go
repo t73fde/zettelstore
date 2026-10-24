@@ -18,6 +18,7 @@ import (
 
 	zeroslices "t73f.de/r/zero/slices"
 	"t73f.de/r/zero/vocab"
+	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 )
 
@@ -44,6 +45,14 @@ func (sm *storeMeta) sort() {
 func (sm *storeMeta) shrink() {
 	sm.ks = zeroslices.Shrink(sm.ks)
 	sm.vs = zeroslices.Shrink(sm.vs)
+}
+
+func (sm storeMeta) toMeta(zid id.Zid, dict *dictionary) *meta.Meta {
+	m := make(map[string]string, len(sm.ks))
+	for i, k := range sm.ks {
+		m[dict.GetString(k)] = string(sm.vs[i])
+	}
+	return meta.NewWithData(zid, m)
 }
 
 // ----- helpers, to make metaStore sortable.

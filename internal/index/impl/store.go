@@ -72,6 +72,15 @@ func (st *store) urlCount() int {
 	return len(st.urls)
 }
 
+func (st *store) getZettel(dzid denseZid) *storeZettel {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	if sz, found := st.zettel[dzid]; found {
+		return sz
+	}
+	return nil
+}
+
 // upsertZettel takes ownership of az.
 func (st *store) upsertZettel(dzid denseZid, az *analyzedZettel) {
 	st.replace(dzid, az)

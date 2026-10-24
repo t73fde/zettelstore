@@ -170,13 +170,20 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 		return nil, err
 	}
 
-	m, err := mgr.idxStore.GetMeta(ctx, zid)
+	m0, err := mgr.idxStore.GetMeta(ctx, zid)
 	if err != nil {
 		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
 		return nil, err
 	}
-	mgr.Enrich(ctx, m, "")
-	return m, nil
+
+	if m1, err := mgr.index.GetMeta(zid); err != nil {
+		mgr.mgrLogger.Error("GetMeta", "zid", zid, "err", err)
+	} else if !m0.Equal(m1, true) {
+		mgr.mgrLogger.Error("GetMeta", "zid", zid, "new", m1, "old", m0)
+	}
+
+	mgr.Enrich(ctx, m0, "")
+	return m0, nil
 }
 
 // SelectMeta returns all zettel meta data that match the selection

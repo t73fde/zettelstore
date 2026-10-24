@@ -83,6 +83,13 @@ func (d *dictionary) AddString(s string) vocab.WordID {
 	return d.voc.AddString(s)
 }
 
+func (d *dictionary) GetString(id vocab.WordID) string {
+	d.mx.Lock()
+	defer d.mx.Unlock()
+	b := d.voc.AppendBytes(nil, id)
+	return string(b)
+}
+
 func (d *dictionary) numWords() int {
 	d.mx.RLock()
 	defer d.mx.RUnlock()
