@@ -205,8 +205,7 @@ func (idx *Index) enqueueZettel(zid id.Zid) {
 // reset starts indexing all zettel in a new instance.
 func (idx *Index) reset() {
 	if idx.retriever == nil {
-		idx.logger.Error("Reset without retriever")
-		return
+		panic("Index.Retriever not registered")
 	}
 	in, discard := idx.installNew()
 	if in == nil {
