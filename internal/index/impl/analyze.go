@@ -14,9 +14,11 @@
 package impl
 
 import (
+	"iter"
 	"net/url"
 
 	"t73f.de/r/sx"
+	zeroiter "t73f.de/r/zero/iter"
 	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zero/vocab"
@@ -42,15 +44,24 @@ func (a *analyzer) processDeleted(in *analyzeData, out *storeData) {
 }
 
 type analyzedZettel struct {
-	meta  storeMeta
-	refs  roster.Roster[denseZid]
-	words roster.Roster[vocab.WordID]
-	urls  roster.Roster[string]
+	meta    storeMeta
+	forward roster.Roster[denseZid]
+	words   roster.Roster[vocab.WordID]
+	urls    roster.Roster[string]
+
+	// metaZids store zids from metadata. It is used only in the store phase
+	// to calculate backrefs and inverse metadata.
+	metaZids []metaZids
+}
+
+type metaZids struct {
+	keyID   vocab.WordID
+	forward roster.Roster[denseZid]
 }
 
 func (az *analyzedZettel) shrink() {
 	az.meta.shrink()
-	az.refs.Shrink()
+	az.forward.Shrink()
 	az.words.Shrink()
 	az.urls.Shrink()
 }
@@ -91,11 +102,9 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 		}
 		switch kd.Type {
 		case meta.TypeID:
-			// TODO: mgr.idxUpdateValue(ctx, descr.Inverse, string(val), zi)
+			za.addMetaZid(keyID, zeroiter.OneSeq(string(v)))
 		case meta.TypeIDSet:
-			// TODO: for val := range val.Fields() {
-			// 	mgr.idxUpdateValue(ctx, descr.Inverse, val, zi)
-			// }
+			za.addMetaZid(keyID, v.Fields())
 		case meta.TypeURL:
 			za.addURL(string(v))
 		default:
@@ -107,6 +116,19 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 				za.addMetaValue(v)
 			}
 		}
+	}
+}
+
+func (za *zettelAnalyzer) addMetaZid(keyID vocab.WordID, vals iter.Seq[string]) {
+	mz := metaZids{keyID: keyID}
+	for val := range vals {
+		if zid, err := id.Parse(val); err == nil {
+			dzid := za.a.dict.Encode(zid)
+			mz.forward.Insert(dzid)
+		}
+	}
+	if !mz.forward.IsEmpty() {
+		za.az.metaZids = append(za.az.metaZids, mz)
 	}
 }
 
@@ -169,7 +191,7 @@ func (za *zettelAnalyzer) addRef(ref *sx.Pair) {
 		za.addURL(refValue)
 	} else if sz.SymRefStateZettel.IsEqual(sym) {
 		if zid, err := id.Parse(refValue); err == nil {
-			za.az.refs.Insert(za.a.dict.Encode(zid))
+			za.az.forward.Insert(za.a.dict.Encode(zid))
 		}
 	}
 }
