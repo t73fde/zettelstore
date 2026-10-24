@@ -14,12 +14,16 @@
 package impl
 
 import (
+	"cmp"
 	"iter"
 	"net/url"
+	"slices"
+	"strings"
 
 	"t73f.de/r/sx"
 	zeroiter "t73f.de/r/zero/iter"
 	"t73f.de/r/zero/roster"
+	zeroslices "t73f.de/r/zero/slices"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zero/vocab"
 	"t73f.de/r/zsc/domain/id"
@@ -44,17 +48,14 @@ func (a *analyzer) processDeleted(in *analyzeData, out *storeData) {
 }
 
 type analyzedZettel struct {
-	meta    storeMeta
-	forward roster.Roster[denseZid]
-	words   roster.Roster[vocab.WordID]
-	urls    roster.Roster[string]
-
-	// metaZids store zids from metadata. It is used only in the store phase
-	// to calculate backrefs and inverse metadata.
-	metaZids []metaZids
+	meta     storeMeta
+	forward  roster.Roster[denseZid]
+	words    roster.Roster[vocab.WordID]
+	urls     roster.Roster[string]
+	metaZids []metaZid
 }
 
-type metaZids struct {
+type metaZid struct {
 	keyID   vocab.WordID
 	forward roster.Roster[denseZid]
 }
@@ -64,6 +65,10 @@ func (az *analyzedZettel) shrink() {
 	az.forward.Shrink()
 	az.words.Shrink()
 	az.urls.Shrink()
+	for i := range az.metaZids {
+		az.metaZids[i].forward.Shrink()
+	}
+	az.metaZids = zeroslices.Shrink(az.metaZids)
 }
 
 func (a *analyzer) analyze(in *analyzeData, out *storeData) {
@@ -91,9 +96,10 @@ func (za *zettelAnalyzer) collect(m *meta.Meta, blocks *sx.Pair) {
 func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 	a, az := za.a, za.az
 	az.meta = makeStoreMeta(m.Count())
-	for k, v := range m.Values() {
+	for k, v := range m.All() {
 		keyID := a.dict.AddString(k)
-		az.meta.add(keyID, v)
+		cv := strings.Clone(string(v))
+		az.meta.add(keyID, meta.Value(cv))
 		az.words.Insert(keyID)
 
 		kd := meta.GetDescription(k)
@@ -106,7 +112,7 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 		case meta.TypeIDSet:
 			za.addMetaZid(keyID, v.Fields())
 		case meta.TypeURL:
-			za.addURL(string(v))
+			za.addClonedURL(cv)
 		default:
 			if kd.Type.IsSet {
 				for s := range v.Fields() {
@@ -117,10 +123,12 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 			}
 		}
 	}
+	az.meta.sort()
+	slices.SortFunc(az.metaZids, func(a, b metaZid) int { return cmp.Compare(a.keyID, b.keyID) })
 }
 
 func (za *zettelAnalyzer) addMetaZid(keyID vocab.WordID, vals iter.Seq[string]) {
-	mz := metaZids{keyID: keyID}
+	mz := metaZid{keyID: keyID}
 	for val := range vals {
 		if zid, err := id.Parse(val); err == nil {
 			dzid := za.a.dict.Encode(zid)
@@ -152,6 +160,11 @@ func (za *zettelAnalyzer) addString(s string) {
 	}
 }
 func (za *zettelAnalyzer) addURL(s string) {
+	if _, err := url.Parse(s); err == nil {
+		za.az.urls.Insert(strings.Clone(s))
+	}
+}
+func (za *zettelAnalyzer) addClonedURL(s string) {
 	if _, err := url.Parse(s); err == nil {
 		za.az.urls.Insert(s)
 	}

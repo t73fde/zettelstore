@@ -14,7 +14,9 @@
 package impl
 
 import (
-	"t73f.de/r/zero/slices"
+	"sort"
+
+	zeroslices "t73f.de/r/zero/slices"
 	"t73f.de/r/zero/vocab"
 	"t73f.de/r/zsc/domain/meta"
 )
@@ -36,7 +38,23 @@ func (sm *storeMeta) add(key vocab.WordID, val meta.Value) {
 	sm.ks = append(sm.ks, key)
 	sm.vs = append(sm.vs, val)
 }
+func (sm *storeMeta) sort() {
+	sort.Sort(sm)
+}
 func (sm *storeMeta) shrink() {
-	sm.ks = slices.Shrink(sm.ks)
-	sm.vs = slices.Shrink(sm.vs)
+	sm.ks = zeroslices.Shrink(sm.ks)
+	sm.vs = zeroslices.Shrink(sm.vs)
+}
+
+// ----- helpers, to make metaStore sortable.
+
+func (sm storeMeta) Len() int { return len(sm.ks) }
+
+func (sm storeMeta) Less(i, j int) bool {
+	return sm.ks[i] < sm.ks[j]
+}
+
+func (sm storeMeta) Swap(i, j int) {
+	sm.ks[i], sm.ks[j] = sm.ks[j], sm.ks[i]
+	sm.vs[i], sm.vs[j] = sm.vs[j], sm.vs[i]
 }

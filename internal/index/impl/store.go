@@ -34,9 +34,10 @@ type store struct {
 // storeZettel stores data of a specific zettel. After adding it to a store,
 // it is treated as immutable.
 type storeZettel struct {
-	meta  storeMeta
-	words roster.Roster[vocab.WordID]
-	urls  roster.Roster[string]
+	meta     storeMeta
+	words    roster.Roster[vocab.WordID]
+	urls     roster.Roster[string]
+	metaZids []metaZid
 }
 
 func makeStore(stats *stats, h sizeHints) *store {
@@ -106,9 +107,10 @@ func (st *store) updateZettel(dzid denseZid, prevSz, newSz *storeZettel) {
 
 func (st *store) buildStoreZettel(az *analyzedZettel) *storeZettel {
 	result := &storeZettel{
-		meta:  az.meta,
-		words: az.words,
-		urls:  az.urls,
+		meta:     az.meta,
+		words:    az.words,
+		urls:     az.urls,
+		metaZids: az.metaZids,
 	}
 	return result
 }
