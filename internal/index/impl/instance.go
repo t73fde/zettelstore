@@ -66,7 +66,7 @@ func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
 }
 
 // start spawns the services. The first thing they do is fetching all zettel.
-func (in *instance) start(cfg config.Config, getRetriever func() index.Retriever) {
+func (in *instance) start(cfg config.Config, retriever index.Retriever) {
 	in.logger.Debug("Start")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	in.pl = &pipeline{
@@ -97,10 +97,10 @@ func (in *instance) start(cfg config.Config, getRetriever func() index.Retriever
 		pending: in.pending,
 	}
 	retrieveSrv := retrieveService{
-		logger:       in.logger.With("service", "retrieve"),
-		getRetriever: getRetriever,
-		pending:      in.pending,
-		store:        in.store,
+		logger:    in.logger.With("service", "retrieve"),
+		retriever: retriever,
+		pending:   in.pending,
+		store:     in.store,
 	}
 
 	in.pl.spawn("IndexStore", func() { storeSrv.service(ctx, storeCh) })

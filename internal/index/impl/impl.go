@@ -75,7 +75,6 @@ func (idx *Index) RegisterRetriever(retriever index.Retriever) {
 	}
 	idx.retriever = retriever
 }
-func (idx *Index) getRetriever() index.Retriever { return idx.retriever }
 
 // Start the search index. Indexing begins with the first OnReset.
 func (idx *Index) Start() {
@@ -230,7 +229,7 @@ func (idx *Index) installNew() (in, discard *instance) {
 	} else {
 		discard, idx.building = idx.building, in
 	}
-	in.start(idx.config, idx.getRetriever)
+	in.start(idx.config, idx.retriever)
 	return in, discard
 }
 

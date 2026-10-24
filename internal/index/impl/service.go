@@ -38,10 +38,10 @@ const fetchRetryDelay = 5 * time.Second // pause after a failed FetchZids
 
 // retrieveService reads from the pending queue and tries to retrieve zettel.
 type retrieveService struct {
-	logger       *slog.Logger
-	getRetriever func() index.Retriever
-	pending      *pendingQueue
-	store        *store
+	logger    *slog.Logger
+	retriever index.Retriever
+	pending   *pendingQueue
+	store     *store
 }
 
 func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, out chan<- parseData) {
@@ -80,7 +80,7 @@ func (rsrv *retrieveService) process(ctx, getCtx context.Context, out chan<- par
 
 func (rsrv *retrieveService) fetch(ctx context.Context) {
 	rsrv.logger.Debug("Fetch")
-	zids, err := rsrv.getRetriever().FetchZids(ctx)
+	zids, err := rsrv.retriever.FetchZids(ctx)
 	if err != nil {
 		if ctx.Err() != nil {
 			return // cancelled by Stop: not an error
@@ -100,7 +100,7 @@ func (rsrv *retrieveService) fetch(ctx context.Context) {
 // retrieve returns false if the pipeline was cancelled.
 func (rsrv *retrieveService) retrieve(ctx context.Context, job pendingJob, out chan<- parseData) bool {
 	rsrv.logger.Debug("Zettel", "zid", job.zid, "bulk", job.fromBulk)
-	ztl, err := rsrv.getRetriever().GetZettel(ctx, job.zid)
+	ztl, err := rsrv.retriever.GetZettel(ctx, job.zid)
 	if err != nil {
 		if ctx.Err() != nil {
 			return false // cancelled by Stop: not an error, not a deletion
