@@ -24,17 +24,19 @@ import (
 type store struct {
 	stats *stats
 
-	mx     sync.RWMutex
-	hint   int                                      // expected number of zettel
-	zettel map[denseZid]*storeZettel                // all existing zettel
-	words  map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
-	urls   map[string]roster.Roster[denseZid]       // URL -> zettel containing it
+	mx       sync.RWMutex
+	hint     int                                      // expected number of zettel
+	zettel   map[denseZid]*storeZettel                // all existing zettel
+	words    map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
+	urls     map[string]roster.Roster[denseZid]       // URL -> zettel containing it
+	backward map[denseZid]roster.Roster[denseZid]     // target -> zettel that reference it; the target may not exist
 }
 
 // storeZettel stores data of a specific zettel. After adding it to a store,
 // it is treated as immutable.
 type storeZettel struct {
 	meta     storeMeta
+	forward  roster.Roster[denseZid]
 	words    roster.Roster[vocab.WordID]
 	urls     roster.Roster[string]
 	metaZids []metaZid
@@ -42,11 +44,12 @@ type storeZettel struct {
 
 func makeStore(stats *stats, h sizeHints) *store {
 	return &store{
-		stats:  stats,
-		hint:   h.zettel,
-		zettel: make(map[denseZid]*storeZettel, h.zettel),
-		words:  make(map[vocab.WordID]roster.Roster[denseZid], h.words),
-		urls:   make(map[string]roster.Roster[denseZid], h.urls),
+		stats:    stats,
+		hint:     h.zettel,
+		zettel:   make(map[denseZid]*storeZettel, h.zettel),
+		words:    make(map[vocab.WordID]roster.Roster[denseZid], h.words),
+		urls:     make(map[string]roster.Roster[denseZid], h.urls),
+		backward: make(map[denseZid]roster.Roster[denseZid], h.zettel),
 	}
 }
 
@@ -87,11 +90,15 @@ func (st *store) upsertZettel(dzid denseZid, az *analyzedZettel) {
 	st.stats.finishUpdateZettel()
 }
 
+// replace upserts analyzed zettel data into the store.
+//
+// Invariant: for every zettel r in st.zettel, t is in r.forward if and only if
+// r is in st.backward[t]. Self-references are kept.
 func (st *store) replace(dzid denseZid, az *analyzedZettel) {
 	st.mx.Lock()
 	defer st.mx.Unlock()
 
-	newSz := st.buildStoreZettel(az)
+	newSz := (*storeZettel)(az) // az is owned by the store now
 	if prevSz, found := st.zettel[dzid]; found {
 		st.updateZettel(dzid, prevSz, newSz)
 	} else {
@@ -101,6 +108,9 @@ func (st *store) replace(dzid denseZid, az *analyzedZettel) {
 }
 
 func (st *store) insertZettel(dzid denseZid, newSz *storeZettel) {
+	for t := range newSz.forward.Values() {
+		addPosting(st.backward, t, dzid)
+	}
 	for word := range newSz.words.Values() {
 		addPosting(st.words, word, dzid)
 	}
@@ -110,18 +120,9 @@ func (st *store) insertZettel(dzid denseZid, newSz *storeZettel) {
 }
 
 func (st *store) updateZettel(dzid denseZid, prevSz, newSz *storeZettel) {
+	syncPostings(st.backward, dzid, prevSz.forward, newSz.forward)
 	syncPostings(st.words, dzid, prevSz.words, newSz.words)
 	syncPostings(st.urls, dzid, prevSz.urls, newSz.urls)
-}
-
-func (st *store) buildStoreZettel(az *analyzedZettel) *storeZettel {
-	result := &storeZettel{
-		meta:     az.meta,
-		words:    az.words,
-		urls:     az.urls,
-		metaZids: az.metaZids,
-	}
-	return result
 }
 
 // ----- removeZettel --------------------------------------------------------
@@ -145,6 +146,9 @@ func (st *store) drop(dzid denseZid) bool {
 }
 
 func (st *store) deleteZettel(dzid denseZid, sz *storeZettel) {
+	for t := range sz.forward.Values() {
+		removePosting(st.backward, t, dzid)
+	}
 	for w := range sz.words.Values() {
 		removePosting(st.words, w, dzid)
 	}
