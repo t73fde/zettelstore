@@ -14,7 +14,6 @@
 package impl
 
 import (
-	"maps"
 	"sync"
 	"sync/atomic"
 
@@ -73,19 +72,20 @@ func (pq *pendingQueue) addZettel(zid id.Zid) {
 }
 
 // reload sets the bulk. Only the first call has an effect.
+//
+// Ownership of allZids is transferred to pendingQueue.
 func (pq *pendingQueue) reload(allZids memberSet) {
-	bulk := maps.Clone(allZids) // do not share the caller's map
-
+	total := len(allZids)
 	pq.mx.Lock()
 	defer pq.mx.Unlock()
 	if pq.bulkLoaded {
 		return
 	}
 	for zid := range pq.single {
-		delete(bulk, zid)
+		delete(allZids, zid)
 	}
-	pq.bulk = bulk
-	pq.total = len(allZids)
+	pq.bulk = allZids
+	pq.total = total
 	pq.bulkLoaded = true
 	pq.fetchPending = false
 }

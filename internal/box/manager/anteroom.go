@@ -14,7 +14,6 @@
 package manager
 
 import (
-	"maps"
 	"sync"
 
 	"t73f.de/r/zsc/domain/id"
@@ -93,7 +92,7 @@ func (ar *anteroomQueue) Reload(allZids map[id.Zid]struct{}) {
 	ar.deleteReloadedRooms()
 
 	if len(allZids) > 0 {
-		ar.first = &anteroom{next: ar.first, waiting: maps.Clone(allZids), curLoad: len(allZids), reload: true}
+		ar.first = &anteroom{next: ar.first, waiting: allZids, curLoad: len(allZids), reload: true}
 		if ar.first.next == nil {
 			ar.last = ar.first
 		}
