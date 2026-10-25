@@ -18,6 +18,7 @@ import (
 	"context"
 	_ "embed"
 	"log/slog"
+	"maps"
 	"net/url"
 
 	"t73f.de/r/zsc/domain/id"
@@ -42,7 +43,7 @@ func init() {
 		})
 }
 
-type constHeader map[string]string
+type constHeader map[meta.Key]meta.Value
 
 type constZettel struct {
 	header  constHeader
@@ -61,7 +62,9 @@ func (*constBox) Location() string { return box.SchemeConstBox + ":" }
 func (cb *constBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	if z, ok := cb.zettel[zid]; ok {
 		logging.LogTrace(cb.logger, "GetZettel")
-		return box.Zettel{Meta: meta.NewWithData(zid, z.header), Content: z.content}, nil
+		return box.Zettel{
+			Meta:    meta.NewWithMap(zid, maps.Clone(z.header)),
+			Content: z.content}, nil
 	}
 	err := box.ErrZettelNotFound{Zid: zid}
 	logging.LogTrace(cb.logger, "GetZettel/Err", "err", err)
@@ -87,7 +90,7 @@ func (cb *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrai
 	logging.LogTrace(cb.logger, "ApplyMeta", "entries", len(cb.zettel))
 	for zid, zettel := range cb.zettel {
 		if constraint(zid) {
-			m := meta.NewWithData(zid, zettel.header)
+			m := meta.NewWithMap(zid, maps.Clone(zettel.header))
 			cb.enricher.Enrich(ctx, m, box.SchemeConstBox)
 			handle(m)
 		}
@@ -234,7 +237,7 @@ var constZettelMap = map[id.Zid]constZettel{
 			meta.KeyCreated:     "20230824160700",
 			meta.KeyModified:    "20240219145200",
 			meta.KeyVisibility:  meta.ValueVisibilityExpert,
-			meta.KeyPredecessor: id.ZidSxnBase.String(),
+			meta.KeyPredecessor: meta.Value(id.ZidSxnBase.String()),
 		},
 		zettel.NewContent(contentStartCodeSxn)},
 	id.ZidSxnBase: {

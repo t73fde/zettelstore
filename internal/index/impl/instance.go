@@ -139,9 +139,11 @@ func (in *instance) enqueue(zid id.Zid) {
 	}
 }
 
-func (in *instance) getZettel(zid id.Zid) *storeZettel {
-	if dzid, found := in.dict.dense.Find(zid); found {
-		return in.store.getZettel(dzid)
+// findZettel returns the dense identifier and the published storeZettel. The
+// storeZettel is nil, if the zettel does not exist; the dzid is valid, if found.
+func (in *instance) findZettel(zid id.Zid) (denseZid, *storeZettel, bool) {
+	if dzid, found := in.dict.Find(zid); found {
+		return dzid, in.store.getZettel(dzid), true
 	}
-	return nil
+	return 0, nil, false
 }

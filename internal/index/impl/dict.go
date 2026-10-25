@@ -71,6 +71,14 @@ func (d *dictionary) Decode(dzid denseZid) (id.Zid, bool) {
 	return d.dense.Decode(dzid)
 }
 
+// Find returns the dense identifier of zid, if one was already given. It does
+// not give a new one.
+func (d *dictionary) Find(zid id.Zid) (denseZid, bool) {
+	d.mx.RLock()
+	defer d.mx.RUnlock()
+	return d.dense.Find(zid)
+}
+
 func (d *dictionary) AddBytes(b []byte) vocab.WordID {
 	d.mx.Lock()
 	defer d.mx.Unlock()
@@ -114,4 +122,15 @@ type dictStats struct {
 	NumWords   int
 	Vocabulary int
 	WordCount  map[uint16]int
+}
+
+// buildMeta converts the compact form into a metadata object.
+func (d *dictionary) buildMeta(zid id.Zid, sm storeMeta) *meta.Meta {
+	pairs := make(map[meta.Key]meta.Value, len(sm.ks))
+	d.mx.RLock()
+	for i, k := range sm.ks {
+		pairs[d.voc.GetString(k)] = sm.vs[i]
+	}
+	d.mx.RUnlock()
+	return meta.NewWithMap(zid, pairs)
 }

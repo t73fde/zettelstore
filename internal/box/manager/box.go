@@ -172,12 +172,14 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 
 	m0, err := mgr.idxStore.GetMeta(ctx, zid)
 	if err != nil {
-		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
 		return nil, err
 	}
 
-	if m1, err := mgr.index.GetMeta(zid); err != nil {
+	m1, err := mgr.index.GetMeta(zid)
+	if err != nil {
 		mgr.mgrLogger.Error("GetMeta", "zid", zid, "err", err)
+		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
+		// return nil, err
 	} else if !m0.Equal(m1, true) {
 		mgr.mgrLogger.Error("GetMeta", "zid", zid, "new", m1, "old", m0)
 	}
