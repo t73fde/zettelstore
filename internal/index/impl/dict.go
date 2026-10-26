@@ -14,9 +14,11 @@
 package impl
 
 import (
+	"slices"
 	"sync"
 
 	"t73f.de/r/zero/dense"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/vocab"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -91,11 +93,18 @@ func (d *dictionary) AddString(s string) vocab.WordID {
 	return d.voc.AddString(s)
 }
 
+// LookupString returns the identifier of s, if it is known. Otherwise
+// vocab.InvalidWordID is returned.
+func (d *dictionary) LookupString(s string) vocab.WordID {
+	d.mx.RLock()
+	defer d.mx.RUnlock()
+	return d.voc.LookupString(s)
+}
+
 func (d *dictionary) GetString(id vocab.WordID) string {
 	d.mx.Lock()
 	defer d.mx.Unlock()
-	b := d.voc.AppendBytes(nil, id)
-	return string(b)
+	return d.voc.GetString(id)
 }
 
 func (d *dictionary) numWords() int {
@@ -133,4 +142,39 @@ func (d *dictionary) buildMeta(zid id.Zid, sm storeMeta) *meta.Meta {
 	}
 	d.mx.RUnlock()
 	return meta.NewWithMap(zid, pairs)
+}
+
+// lookupZidText returns the dense identifier of the zid that is represented by
+// the text s. It reports false, if s is not a zid or if the zid is unknown.
+func (d *dictionary) lookupZidText(s string) (denseZid, bool) {
+	zid, err := id.Parse(s)
+	if err != nil {
+		return 0, false
+	}
+	return d.Find(zid)
+}
+
+// zidRoster converts a set of dense identifier into a set of zettel identifier.
+func (d *dictionary) zidRoster(dzids roster.Roster[denseZid]) roster.Roster[id.Zid] {
+	var result roster.Roster[id.Zid]
+	if dzids.IsEmpty() {
+		return result
+	}
+
+	zids := make([]id.Zid, 0, dzids.Count())
+	d.mx.RLock()
+	for dz := range dzids.Values() {
+		if zid, found := d.dense.Decode(dz); found {
+			zids = append(zids, zid)
+		}
+	}
+	d.mx.RUnlock()
+
+	// The order of dense identifier is not the order of zettel identifier.
+	// Inserting in ascending order appends and does not shift elements.
+	slices.Sort(zids)
+	for _, zid := range zids {
+		result.Insert(zid)
+	}
+	return result
 }

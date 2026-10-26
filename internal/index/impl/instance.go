@@ -19,6 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/config"
@@ -146,4 +147,11 @@ func (in *instance) findZettel(zid id.Zid) (denseZid, *storeZettel, bool) {
 		return dzid, in.store.getZettel(dzid), true
 	}
 	return 0, nil, false
+}
+
+// searchEqual returns the identifier of all zettel that match s exactly.
+func (in *instance) searchEqual(s string) roster.Roster[id.Zid] {
+	wid := in.dict.LookupString(s)           // vocab.InvalidWordID, if s is not a known word
+	dzid, hasZid := in.dict.lookupZidText(s) // dense identifier, if s is the text of a known zid
+	return in.dict.zidRoster(in.store.matchEqual(wid, s, dzid, hasZid))
 }

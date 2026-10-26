@@ -103,7 +103,7 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 		az.words.Insert(keyID)
 
 		kd := meta.GetDescription(k)
-		if kd.IsProperty() || kd.IsComputed() {
+		if kd.IsComputed() { // IsComputed() ==> IsProperty()
 			continue
 		}
 		switch kd.Type {

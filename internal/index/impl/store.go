@@ -84,6 +84,8 @@ func (st *store) getZettel(dzid denseZid) *storeZettel {
 	return nil
 }
 
+// ----- store modification --------------------------------------------------
+
 // upsertZettel takes ownership of az.
 func (st *store) upsertZettel(dzid denseZid, az *analyzedZettel) {
 	st.replace(dzid, az)
@@ -189,4 +191,36 @@ func syncPostings[K cmp.Ordered](
 	for k := range added.Values() {
 		addPosting(m, k, dzid)
 	}
+}
+
+// ----- queries -------------------------------------------------------------
+
+// matchEqual returns the dense identifier of all zettel that match s exactly:
+// zettel that contain the word wid, zettel that contain the URL s, and the
+// zettel dzid, if hasZid is set and that zettel exists. All parts are read
+// under one lock and therefore come from the same state of the store. The
+// result is a new set, owned by the caller.
+func (st *store) matchEqual(wid vocab.WordID, s string, dzid denseZid, hasZid bool) roster.Roster[denseZid] {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	// Postings are modified in place, therefore they must be copied.
+	var result roster.Roster[denseZid]
+	if wid != vocab.InvalidWordID {
+		result = st.words[wid].Clone()
+	}
+	if r, found := st.urls[s]; found {
+		result.Or(r) // Or must not keep a reference to r
+	}
+	if hasZid {
+		// The dense identifier may exist without a zettel (e.g. as a reference
+		// target). Existence is decided by the store.
+		if st.zettel[dzid] != nil {
+			result.Insert(dzid)
+		}
+
+		// Add dead backwards also, because they should be found.
+		result.Or(st.backward[dzid])
+	}
+	return result
 }
