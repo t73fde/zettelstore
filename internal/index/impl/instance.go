@@ -102,7 +102,6 @@ func (in *instance) start(cfg config.Config, retriever index.Retriever) {
 		logger:    in.logger.With("service", "retrieve"),
 		retriever: retriever,
 		pending:   in.pending,
-		store:     in.store,
 	}
 
 	in.pl.spawn("IndexStore", func() { storeSrv.service(ctx, storeCh) })

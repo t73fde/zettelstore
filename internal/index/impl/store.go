@@ -25,7 +25,6 @@ type store struct {
 	stats *stats
 
 	mx       sync.RWMutex
-	hint     int                                      // expected number of zettel
 	zettel   map[denseZid]*storeZettel                // all existing zettel
 	backward map[denseZid]roster.Roster[denseZid]     // target -> zettel that reference it; the target may not exist
 	words    map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
@@ -45,21 +44,10 @@ type storeZettel struct {
 func makeStore(stats *stats, h sizeHints) *store {
 	return &store{
 		stats:    stats,
-		hint:     h.zettel,
 		zettel:   make(map[denseZid]*storeZettel, h.zettel),
 		backward: make(map[denseZid]roster.Roster[denseZid], h.zettel),
 		words:    make(map[vocab.WordID]roster.Roster[denseZid], h.words),
 		urls:     make(map[string]roster.Roster[denseZid], h.urls),
-	}
-}
-
-// grow dimensions an empty store. It has no effect on a store with content.
-func (st *store) grow(n int) {
-	st.mx.Lock()
-	defer st.mx.Unlock()
-	if n > st.hint && len(st.zettel) == 0 {
-		st.hint = n
-		st.zettel = make(map[denseZid]*storeZettel, n)
 	}
 }
 

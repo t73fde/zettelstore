@@ -41,7 +41,6 @@ type retrieveService struct {
 	logger    *slog.Logger
 	retriever index.Retriever
 	pending   *pendingQueue
-	store     *store
 }
 
 func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, out chan<- parseData) {
@@ -93,7 +92,6 @@ func (rsrv *retrieveService) fetch(ctx context.Context) {
 		}
 		return
 	}
-	rsrv.store.grow(len(zids))
 	rsrv.pending.reload(zids)
 }
 
