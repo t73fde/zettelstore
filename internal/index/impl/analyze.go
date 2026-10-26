@@ -48,14 +48,14 @@ func (a *analyzer) processDeleted(in *analyzeData, out *storeData) {
 }
 
 type analyzedZettel struct {
-	meta     storeMeta
-	forward  roster.Roster[denseZid]
-	words    roster.Roster[vocab.WordID]
-	urls     roster.Roster[string]
-	metaZids []metaZid
+	meta        storeMeta
+	forward     roster.Roster[denseZid]
+	words       roster.Roster[vocab.WordID]
+	urls        roster.Roster[string]
+	metaForward []metaZid
 }
 
-type metaZid struct {
+type metaZid struct { // TODO: remove alignment by creating metaZids{[]WordID;[]forward}
 	keyID   vocab.WordID
 	forward roster.Roster[denseZid]
 }
@@ -65,10 +65,10 @@ func (az *analyzedZettel) shrink() {
 	az.forward.Shrink()
 	az.words.Shrink()
 	az.urls.Shrink()
-	for i := range az.metaZids {
-		az.metaZids[i].forward.Shrink()
+	for i := range az.metaForward {
+		az.metaForward[i].forward.Shrink()
 	}
-	az.metaZids = zeroslices.Shrink(az.metaZids)
+	az.metaForward = zeroslices.Shrink(az.metaForward)
 }
 
 func (a *analyzer) analyze(in *analyzeData, out *storeData) {
@@ -124,7 +124,7 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 		}
 	}
 	az.meta.sort()
-	slices.SortFunc(az.metaZids, func(a, b metaZid) int { return cmp.Compare(a.keyID, b.keyID) })
+	slices.SortFunc(az.metaForward, func(a, b metaZid) int { return cmp.Compare(a.keyID, b.keyID) })
 }
 
 func (za *zettelAnalyzer) addMetaZid(keyID vocab.WordID, vals iter.Seq[string]) {
@@ -136,7 +136,7 @@ func (za *zettelAnalyzer) addMetaZid(keyID vocab.WordID, vals iter.Seq[string]) 
 		}
 	}
 	if !mz.forward.IsEmpty() {
-		za.az.metaZids = append(za.az.metaZids, mz)
+		za.az.metaForward = append(za.az.metaForward, mz)
 	}
 }
 

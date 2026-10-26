@@ -27,19 +27,19 @@ type store struct {
 	mx       sync.RWMutex
 	hint     int                                      // expected number of zettel
 	zettel   map[denseZid]*storeZettel                // all existing zettel
+	backward map[denseZid]roster.Roster[denseZid]     // target -> zettel that reference it; the target may not exist
 	words    map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
 	urls     map[string]roster.Roster[denseZid]       // URL -> zettel containing it
-	backward map[denseZid]roster.Roster[denseZid]     // target -> zettel that reference it; the target may not exist
 }
 
 // storeZettel stores data of a specific zettel. After adding it to a store,
 // it is treated as immutable.
 type storeZettel struct {
-	meta     storeMeta
-	forward  roster.Roster[denseZid]
-	words    roster.Roster[vocab.WordID]
-	urls     roster.Roster[string]
-	metaZids []metaZid
+	meta        storeMeta
+	forward     roster.Roster[denseZid]
+	words       roster.Roster[vocab.WordID]
+	urls        roster.Roster[string]
+	metaForward []metaZid
 }
 
 func makeStore(stats *stats, h sizeHints) *store {
@@ -47,9 +47,9 @@ func makeStore(stats *stats, h sizeHints) *store {
 		stats:    stats,
 		hint:     h.zettel,
 		zettel:   make(map[denseZid]*storeZettel, h.zettel),
+		backward: make(map[denseZid]roster.Roster[denseZid], h.zettel),
 		words:    make(map[vocab.WordID]roster.Roster[denseZid], h.words),
 		urls:     make(map[string]roster.Roster[denseZid], h.urls),
-		backward: make(map[denseZid]roster.Roster[denseZid], h.zettel),
 	}
 }
 
