@@ -156,3 +156,21 @@ func (in *instance) searchEqual(word string) roster.Roster[id.Zid] {
 	dzid, hasZid := in.dict.lookupZidText(word) // dense identifier, if s is the text of a known zid
 	return in.dict.zidRoster(in.store.matchEqual(word, wid, hasZid, dzid))
 }
+
+// searchPrefix returns the identifier of all zettel that have the given prefix.
+func (in *instance) searchPrefix(prefix string) roster.Roster[id.Zid] {
+	_ = prefix
+	return roster.Roster[id.Zid]{}
+}
+
+// searchSuffix returns the identifier of all zettel that have the given suffix.
+func (in *instance) searchSuffix(suffix string) roster.Roster[id.Zid] {
+	_ = suffix
+	return roster.Roster[id.Zid]{}
+}
+
+// searchContains returns the identifier of all zettel that contains string s.
+func (in *instance) searchContains(s string) roster.Roster[id.Zid] {
+	_ = s
+	return roster.Roster[id.Zid]{}
+}

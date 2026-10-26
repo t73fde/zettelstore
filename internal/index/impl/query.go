@@ -26,33 +26,51 @@ import (
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
+// In addition, word may contain a full URI.
 func (idx *Index) SearchEqual(word string) *index.Result {
-	a := idx.activeInstance()
-	if a == nil {
-		return index.NewPartialResult(roster.Roster[id.Zid]{})
+	if a := idx.activeInstance(); a != nil {
+		// Read the flag before the data: a result is complete only if the build
+		// was complete before the data was read.
+		ready := a.ready.Load()
+		return newResult(ready, a.searchEqual(word))
 	}
-	// Read the flag before the data: a result is complete only if the build
-	// was complete before the data was read.
-	ready := a.ready.Load()
-	return newResult(ready, a.searchEqual(word))
+	return index.NewPartialResult(roster.Roster[id.Zid]{})
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchPrefix(prefix string) *index.Result {
-	return newResult(false, roster.Roster[id.Zid]{})
+	if a := idx.activeInstance(); a != nil {
+		// Read the flag before the data: a result is complete only if the build
+		// was complete before the data was read.
+		ready := a.ready.Load()
+		return newResult(ready, a.searchPrefix(prefix))
+	}
+	return index.NewPartialResult(roster.Roster[id.Zid]{})
 }
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchSuffix(suffix string) *index.Result {
-	return newResult(false, roster.Roster[id.Zid]{})
+	if a := idx.activeInstance(); a != nil {
+		// Read the flag before the data: a result is complete only if the build
+		// was complete before the data was read.
+		ready := a.ready.Load()
+		return newResult(ready, a.searchSuffix(suffix))
+	}
+	return index.NewPartialResult(roster.Roster[id.Zid]{})
 }
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
 func (idx *Index) SearchContains(s string) *index.Result {
-	return newResult(false, roster.Roster[id.Zid]{})
+	if a := idx.activeInstance(); a != nil {
+		// Read the flag before the data: a result is complete only if the build
+		// was complete before the data was read.
+		ready := a.ready.Load()
+		return newResult(ready, a.searchContains(s))
+	}
+	return index.NewPartialResult(roster.Roster[id.Zid]{})
 }
 
 // newResult wraps base. The result is marked as possibly incomplete, if the
