@@ -230,6 +230,7 @@ func (mgr *Manager) idxProcessData(ctx context.Context, zi *store.ZettelIndex, c
 			zi.AddBackRef(ref)
 		} else {
 			zi.AddDeadRef(ref)
+			cData.words.AddString(ref.String())
 		}
 	}
 	zi.SetWords(cData.words)
