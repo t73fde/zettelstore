@@ -203,6 +203,8 @@ func (za *zettelAnalyzer) addRef(ref *sx.Pair) {
 	if zsx.SymRefStateExternal.IsEqual(sym) {
 		za.addURL(refValue)
 	} else if sz.SymRefStateZettel.IsEqual(sym) {
+		// TODO: if zettel reference has the form 12345678901234#mark, zid must
+		// be added to forwards, mark must be added to words.
 		if zid, err := id.Parse(refValue); err == nil {
 			za.az.forward.Insert(za.a.dict.Encode(zid))
 		}

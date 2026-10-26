@@ -147,11 +147,10 @@ func (d *dictionary) buildMeta(zid id.Zid, sm storeMeta) *meta.Meta {
 // lookupZidText returns the dense identifier of the zid that is represented by
 // the text s. It reports false, if s is not a zid or if the zid is unknown.
 func (d *dictionary) lookupZidText(s string) (denseZid, bool) {
-	zid, err := id.Parse(s)
-	if err != nil {
-		return 0, false
+	if zid, err := id.Parse(s); err == nil {
+		return d.Find(zid)
 	}
-	return d.Find(zid)
+	return 0, false
 }
 
 // zidRoster converts a set of dense identifier into a set of zettel identifier.

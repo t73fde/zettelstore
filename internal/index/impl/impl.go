@@ -315,13 +315,6 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	st.Ready = a.ready.Load()
 }
 
-// isReady reports whether the initial build is complete.
-func (idx *Index) isReady() bool {
-	idx.mx.RLock()
-	defer idx.mx.RUnlock()
-	return idx.active != nil && idx.active.ready.Load()
-}
-
 // activeInstance returns the active instance, if it is ready. Otherwise return nil.
 func (idx *Index) activeInstance() *instance {
 	idx.mx.RLock()

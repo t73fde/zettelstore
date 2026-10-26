@@ -140,6 +140,8 @@ func (in *instance) enqueue(zid id.Zid) {
 	}
 }
 
+// ----- query related methods -----------------------------------------------
+
 // findZettel returns the dense identifier and the published storeZettel. The
 // storeZettel is nil, if the zettel does not exist; the dzid is valid, if found.
 func (in *instance) findZettel(zid id.Zid) (denseZid, *storeZettel, bool) {
@@ -149,9 +151,9 @@ func (in *instance) findZettel(zid id.Zid) (denseZid, *storeZettel, bool) {
 	return 0, nil, false
 }
 
-// searchEqual returns the identifier of all zettel that match s exactly.
-func (in *instance) searchEqual(s string) roster.Roster[id.Zid] {
-	wid := in.dict.LookupString(s)           // vocab.InvalidWordID, if s is not a known word
-	dzid, hasZid := in.dict.lookupZidText(s) // dense identifier, if s is the text of a known zid
-	return in.dict.zidRoster(in.store.matchEqual(wid, s, dzid, hasZid))
+// searchEqual returns the identifier of all zettel that match word exactly.
+func (in *instance) searchEqual(word string) roster.Roster[id.Zid] {
+	wid := in.dict.LookupString(word)           // vocab.InvalidWordID, if s is not a known word
+	dzid, hasZid := in.dict.lookupZidText(word) // dense identifier, if s is the text of a known zid
+	return in.dict.zidRoster(in.store.matchEqual(word, wid, hasZid, dzid))
 }

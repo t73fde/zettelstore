@@ -195,12 +195,10 @@ func syncPostings[K cmp.Ordered](
 
 // ----- queries -------------------------------------------------------------
 
-// matchEqual returns the dense identifier of all zettel that match s exactly:
-// zettel that contain the word wid, zettel that contain the URL s, and the
-// zettel dzid, if hasZid is set and that zettel exists. All parts are read
-// under one lock and therefore come from the same state of the store. The
-// result is a new set, owned by the caller.
-func (st *store) matchEqual(wid vocab.WordID, s string, dzid denseZid, hasZid bool) roster.Roster[denseZid] {
+// matchEqual returns the dense identifier of all zettel that match word
+// exactly. All data is read under one lock and therefore come from the same
+// state of the store. The result is a new set, owned by the caller.
+func (st *store) matchEqual(word string, wid vocab.WordID, hasZid bool, dzid denseZid) roster.Roster[denseZid] {
 	st.mx.RLock()
 	defer st.mx.RUnlock()
 
@@ -209,8 +207,8 @@ func (st *store) matchEqual(wid vocab.WordID, s string, dzid denseZid, hasZid bo
 	if wid != vocab.InvalidWordID {
 		result = st.words[wid].Clone()
 	}
-	if r, found := st.urls[s]; found {
-		result.Or(r) // Or must not keep a reference to r
+	if r, found := st.urls[word]; found {
+		result.Or(r)
 	}
 	if hasZid {
 		// The dense identifier may exist without a zettel (e.g. as a reference
@@ -219,7 +217,8 @@ func (st *store) matchEqual(wid vocab.WordID, s string, dzid denseZid, hasZid bo
 			result.Insert(dzid)
 		}
 
-		// Add dead backwards also, because they should be found.
+		// Add zettel with references of the queries zettel.
+		// Include dead backwards also, because they should be found.
 		result.Or(st.backward[dzid])
 	}
 	return result
