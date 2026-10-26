@@ -158,7 +158,9 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 	psrv.logger.Debug("Stop")
 	close(out)
 }
+
 func mustIndexZettel(m *meta.Meta) bool {
+	// TODO: no index if certain metadata is set.
 	return m.Zid >= id.ZidMinIndex
 }
 
