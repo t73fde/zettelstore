@@ -100,7 +100,6 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 		keyID := a.dict.AddString(k)
 		cv := strings.Clone(string(v))
 		az.meta.add(keyID, meta.Value(cv))
-		az.words.Insert(keyID)
 
 		kd := meta.GetDescription(k)
 		if kd.IsComputed() { // IsComputed() ==> IsProperty()
