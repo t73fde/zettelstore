@@ -17,6 +17,7 @@ import (
 	"cmp"
 	"sync"
 
+	zeromaps "t73f.de/r/zero/maps"
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/vocab"
 )
@@ -24,11 +25,18 @@ import (
 type store struct {
 	stats *stats
 
-	mx       sync.RWMutex
-	zettel   map[denseZid]*storeZettel                // all existing zettel
-	backward map[denseZid]roster.Roster[denseZid]     // target -> zettel that reference it; the target may not exist
-	words    map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
-	urls     map[string]roster.Roster[denseZid]       // URL -> zettel containing it
+	mx           sync.RWMutex
+	zettel       map[denseZid]*storeZettel                // all existing zettel
+	backward     map[denseZid]roster.Roster[denseZid]     // target -> zettel that reference it; the target may not exist
+	words        map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
+	urls         map[string]roster.Roster[denseZid]       // URL -> zettel containing it
+	metaBackward map[vocab.WordID]map[denseZid]roster.Roster[denseZid]
+	// metaBackward: computed key -> target -> zettel that name the target in a
+	// metadata value of the inverse key. Invariant: for every zettel r in
+	// st.zettel, t is in r.forwardOf(k) if and only if r is in
+	// st.metaBackward[inverse(k)][t].
+
+	inverseKeys map[vocab.WordID]vocab.WordID // read-only; shared with dictionary.inverse
 }
 
 // storeZettel stores data of a specific zettel. After adding it to a store,
@@ -41,13 +49,26 @@ type storeZettel struct {
 	metaForward []metaZid
 }
 
-func makeStore(stats *stats, h sizeHints) *store {
+// forwardOf returns the targets that sz names in the metadata key keyID. The
+// result is empty, if there is none. Entries of metaForward are never empty.
+func (sz *storeZettel) forwardOf(keyID vocab.WordID) roster.Roster[denseZid] {
+	for _, mz := range sz.metaForward {
+		if mz.keyID == keyID {
+			return mz.forward
+		}
+	}
+	return roster.Roster[denseZid]{}
+}
+
+func makeStore(stats *stats, h sizeHints, inverseKeys map[vocab.WordID]vocab.WordID) *store {
 	return &store{
-		stats:    stats,
-		zettel:   make(map[denseZid]*storeZettel, h.zettel),
-		backward: make(map[denseZid]roster.Roster[denseZid], h.zettel),
-		words:    make(map[vocab.WordID]roster.Roster[denseZid], h.words),
-		urls:     make(map[string]roster.Roster[denseZid], h.urls),
+		stats:        stats,
+		zettel:       make(map[denseZid]*storeZettel, h.zettel),
+		words:        make(map[vocab.WordID]roster.Roster[denseZid], h.words),
+		urls:         make(map[string]roster.Roster[denseZid], h.urls),
+		backward:     make(map[denseZid]roster.Roster[denseZid], h.zettel),
+		metaBackward: make(map[vocab.WordID]map[denseZid]roster.Roster[denseZid], len(inverseKeys)),
+		inverseKeys:  inverseKeys,
 	}
 }
 
@@ -107,12 +128,14 @@ func (st *store) insertZettel(dzid denseZid, newSz *storeZettel) {
 	for u := range newSz.urls.Values() {
 		addPosting(st.urls, u, dzid)
 	}
+	st.syncMetaBackward(dzid, nil, newSz)
 }
 
 func (st *store) updateZettel(dzid denseZid, prevSz, newSz *storeZettel) {
 	syncPostings(st.backward, dzid, prevSz.forward, newSz.forward)
 	syncPostings(st.words, dzid, prevSz.words, newSz.words)
 	syncPostings(st.urls, dzid, prevSz.urls, newSz.urls)
+	st.syncMetaBackward(dzid, prevSz, newSz)
 }
 
 // ----- removeZettel --------------------------------------------------------
@@ -145,6 +168,7 @@ func (st *store) deleteZettel(dzid denseZid, sz *storeZettel) {
 	for u := range sz.urls.Values() {
 		removePosting(st.urls, u, dzid)
 	}
+	st.syncMetaBackward(dzid, sz, nil)
 }
 
 // ----- posting helpers -----------------------------------------------------
@@ -181,6 +205,80 @@ func syncPostings[K cmp.Ordered](
 	}
 }
 
+// syncMetaBackward brings metaBackward in line with the change of a zettel
+// from prev to next. prev is nil for an insert, next is nil for a delete.
+func (st *store) syncMetaBackward(dzid denseZid, prev, next *storeZettel) {
+	var none storeZettel
+	if prev == nil {
+		prev = &none
+	}
+	if next == nil {
+		next = &none
+	}
+	for _, mz := range prev.metaForward {
+		st.syncMetaKey(dzid, mz.keyID, mz.forward, next.forwardOf(mz.keyID))
+	}
+	for _, mz := range next.metaForward {
+		// Keys in both versions were handled above.
+		if prev.forwardOf(mz.keyID).IsEmpty() {
+			st.syncMetaKey(dzid, mz.keyID, roster.Roster[denseZid]{}, mz.forward)
+		}
+	}
+}
+
+func (st *store) syncMetaKey(dzid denseZid, keyID vocab.WordID, prev, next roster.Roster[denseZid]) {
+	invID, found := st.inverseKeys[keyID]
+	if !found {
+		return // the key has no inverse key
+	}
+	m := st.metaBackward[invID]
+	if m == nil {
+		if next.IsEmpty() {
+			return // nothing to remove, nothing to add
+		}
+		m = make(map[denseZid]roster.Roster[denseZid])
+		st.metaBackward[invID] = m
+	}
+	syncPostings(m, dzid, prev, next)
+}
+
+// ----- memory management ---------------------------------------------------
+
+// shrink removes the unused capacity of all shared structures. It is meant to
+// be called after many changes, e.g. after the bulk load.
+func (st *store) shrink() {
+	st.mx.Lock()
+	defer st.mx.Unlock()
+
+	st.zettel = zeromaps.Shrink(st.zettel)
+	st.words = shrinkPostings(st.words)
+	st.urls = shrinkPostings(st.urls)
+	st.backward = shrinkPostings(st.backward)
+	st.shrinkMetaBackward() // the caller holds the write lock
+}
+
+// shrinkMetaBackward removes unused capacity of metaBackward. It also drops
+// the inner maps that became empty. The caller holds the write lock.
+func (st *store) shrinkMetaBackward() {
+	for invID, m := range st.metaBackward {
+		if len(m) == 0 {
+			delete(st.metaBackward, invID)
+			continue
+		}
+		st.metaBackward[invID] = shrinkPostings(m)
+	}
+}
+
+// shrinkPostings removes unused capacity of the sets and of the map itself. It
+// returns the map that is to be used afterwards. The caller holds the write lock.
+func shrinkPostings[K comparable](m map[K]roster.Roster[denseZid]) map[K]roster.Roster[denseZid] {
+	for k, r := range m {
+		r.Shrink()
+		m[k] = r // r is a copy of the header
+	}
+	return zeromaps.Shrink(m) // adapt: returns a map without unused buckets
+}
+
 // ----- queries -------------------------------------------------------------
 
 // matchEqual returns the dense identifier of all zettel that match word
@@ -208,6 +306,12 @@ func (st *store) matchEqual(word string, wid vocab.WordID, hasZid bool, dzid den
 		// Add zettel with references of the queries zettel.
 		// Include dead backwards also, because they should be found.
 		result.Or(st.backward[dzid])
+
+		// Add zettel that name the zettel in a metadata value of a key that has
+		// an inverse key. The queried zettel need not exist.
+		for _, m := range st.metaBackward {
+			result.Or(m[dzid])
+		}
 	}
 	return result
 }

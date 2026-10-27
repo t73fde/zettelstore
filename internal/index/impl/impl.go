@@ -247,6 +247,10 @@ func withMargin(n int) int { return n + n/8 }
 // promote is called, exactly once per instance, when its bulk load is
 // complete. It makes the instance the active one.
 func (idx *Index) promote(in *instance, res bulkResult) {
+	// The bulk is complete. Remove the capacity that growing left behind,
+	// before the instance serves searches.
+	in.store.shrink()
+
 	old, duration, ok := idx.swapIn(in, res)
 	if !ok {
 		return // superseded by a newer reset, or stopped

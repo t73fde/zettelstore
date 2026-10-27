@@ -61,7 +61,7 @@ func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
 		dict:    makeDictionary(hints),
 		started: time.Now(),
 	}
-	in.store = makeStore(in.stats, hints)
+	in.store = makeStore(in.stats, hints, in.dict.inverse)
 	in.pending = newPendingQueue(func(res bulkResult) { idx.promote(in, res) })
 	in.onFail = idx.instanceFailed
 	return in
