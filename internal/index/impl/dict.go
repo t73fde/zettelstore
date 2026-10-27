@@ -102,8 +102,8 @@ func (d *dictionary) LookupString(s string) vocab.WordID {
 }
 
 func (d *dictionary) GetString(id vocab.WordID) string {
-	d.mx.Lock()
-	defer d.mx.Unlock()
+	d.mx.RLock()
+	defer d.mx.RUnlock()
 	return d.voc.GetString(id)
 }
 
