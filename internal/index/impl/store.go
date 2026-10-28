@@ -15,8 +15,11 @@ package impl
 
 import (
 	"cmp"
+	"iter"
+	"strings"
 	"sync"
 
+	"t73f.de/r/zero/bitset"
 	zeromaps "t73f.de/r/zero/maps"
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/vocab"
@@ -284,13 +287,15 @@ func shrinkPostings[K comparable](m map[K]roster.Roster[denseZid]) map[K]roster.
 // matchEqual returns the dense identifier of all zettel that match word
 // exactly. All data is read under one lock and therefore come from the same
 // state of the store. The result is a new set, owned by the caller.
-func (st *store) matchEqual(word string, wid vocab.WordID, hasZid bool, dzid denseZid) roster.Roster[denseZid] {
+func (st *store) matchEqual(
+	word string, wid vocab.WordID,
+	hasZid bool, dzid denseZid,
+) (result roster.Roster[denseZid]) {
 	st.mx.RLock()
 	defer st.mx.RUnlock()
 
-	// Postings are modified in place, therefore they must be copied.
-	var result roster.Roster[denseZid]
 	if wid != vocab.InvalidWordID {
+		// st.words is modified in place, therefore it must be cloned.
 		result = st.words[wid].Clone()
 	}
 	if r, found := st.urls[word]; found {
@@ -314,4 +319,113 @@ func (st *store) matchEqual(word string, wid vocab.WordID, hasZid bool, dzid den
 		}
 	}
 	return result
+}
+
+// matchPrefix returns the dense identifier of all zettel that have the given
+// prefix. words yields the words that have the given prefix, zidMatches holds
+// the dense identifier of all zids whose text has the given prefix. sizeHint
+// is the expected number of dense identifier. Postings, URLs and relations are read under one lock of the store.
+//
+//	The result is a new
+//
+// set, owned by the caller.
+func (st *store) matchPrefix(
+	prefix string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	sizeHint int,
+) bitset.BitSet[denseZid] {
+	return st.matchHelper(prefix, words, zidMatches, strings.HasPrefix, sizeHint)
+}
+
+// matchSuffix returns the dense identifier of all zettel that have the given
+// suffix. words yields the words that have the given suffix, zidMatches holds
+// the dense identifier of all zids whose text has the given suffix. sizeHint
+// is the expected number of dense identifier. Postings, URLs and relations
+// are read under one lock of the store. The result is a new set, owned by the
+// caller.
+func (st *store) matchSuffix(
+	suffix string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	sizeHint int,
+) bitset.BitSet[denseZid] {
+	return st.matchHelper(suffix, words, zidMatches, strings.HasSuffix, sizeHint)
+}
+
+// matchContains returns the dense identifier of all zettel that contain s.
+// words yields the words that contain s, zidMatches holds the dense
+// identifier of all zids whose text contains s. sizeHint is the expected
+// number of dense identifier. Postings, URLs and relations are read under one
+// lock of the store. The result is a new set, owned by the caller.
+func (st *store) matchContains(
+	s string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	sizeHint int,
+) bitset.BitSet[denseZid] {
+	return st.matchHelper(s, words, zidMatches, strings.Contains, sizeHint)
+}
+
+// matchHelper is the common function for matchPrefix, matchSuffix, and matchContains.
+func (st *store) matchHelper(
+	s string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	urlMatch func(string, string) bool,
+	sizeHint int,
+) (result bitset.BitSet[denseZid]) {
+	result.EnsureBit(denseZid(sizeHint))
+
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	// A word without postings (e.g. known to the vocabulary, but not yet or no
+	// longer used by a zettel) yields an empty set.
+	for wid := range words {
+		insertRosterIntoBitSet(&result, st.words[wid])
+	}
+	st.matchURLs(&result, s, urlMatch)
+	for dzid := range zidMatches.Values() {
+		st.addZidRelated(&result, dzid)
+	}
+
+	return result
+}
+
+// addZidRelated adds the zettel that are related to the zid with the dense
+// identifier dzid, using the same rules as matchEqual. The caller must hold
+// st.mx.
+func (st *store) addZidRelated(dst *bitset.BitSet[denseZid], dzid denseZid) {
+	// The dense identifier may exist without a zettel (e.g. as a reference
+	// target). Existence is decided by the store.
+	if st.zettel[dzid] != nil {
+		dst.Insert(dzid)
+	}
+	// Include dead backwards also, because they should be found.
+	insertRosterIntoBitSet(dst, st.backward[dzid])
+	for _, m := range st.metaBackward {
+		insertRosterIntoBitSet(dst, m[dzid])
+	}
+}
+
+// insertRosterIntoBitSet adds all elements of src to dst.
+func insertRosterIntoBitSet(dst *bitset.BitSet[denseZid], src roster.Roster[denseZid]) {
+	if m, ok := src.Max(); ok {
+		dst.EnsureBit(m)
+	}
+	for dz := range src.Values() {
+		dst.Insert(dz)
+	}
+}
+
+// matchURLs adds the zettel of every URL to into, if match(url, s) reports
+// true for that URL. Typical values for match are strings.Contains,
+// strings.HasPrefix and strings.HasSuffix. The caller must hold st.mx.
+func (st *store) matchURLs(dst *bitset.BitSet[denseZid], s string, match func(u, s string) bool) {
+	for u, r := range st.urls {
+		if match(u, s) {
+			insertRosterIntoBitSet(dst, r)
+		}
+	}
 }

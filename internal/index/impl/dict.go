@@ -14,9 +14,11 @@
 package impl
 
 import (
+	"iter"
 	"slices"
 	"sync"
 
+	"t73f.de/r/zero/bitset"
 	"t73f.de/r/zero/dense"
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/vocab"
@@ -113,6 +115,14 @@ func (d *dictionary) numWords() int {
 	return d.voc.Count()
 }
 
+// snapshot returns a read-only view of the vocabulary as of now. The result
+// can be used without holding any lock of the dictionary.
+func (d *dictionary) snapshot() vocab.Snapshot {
+	d.mx.RLock()
+	defer d.mx.RUnlock()
+	return d.voc.Snapshot()
+}
+
 func (d *dictionary) numZids() int {
 	d.mx.RLock()
 	defer d.mx.RUnlock()
@@ -154,26 +164,55 @@ func (d *dictionary) lookupZidText(s string) (denseZid, bool) {
 }
 
 // zidRoster converts a set of dense identifier into a set of zettel identifier.
-func (d *dictionary) zidRoster(dzids roster.Roster[denseZid]) roster.Roster[id.Zid] {
-	var result roster.Roster[id.Zid]
+func (d *dictionary) zidRoster(dzids roster.Roster[denseZid]) (result roster.Roster[id.Zid]) {
 	if dzids.IsEmpty() {
 		return result
 	}
+	return d.zidSet(dzids.Count(), dzids.Values())
+}
 
-	zids := make([]id.Zid, 0, dzids.Count())
+// zidBitset converts a set of dense identifier into a set of zettel identifier.
+func (d *dictionary) zidBitset(dzids bitset.BitSet[denseZid]) (result roster.Roster[id.Zid]) {
+	if dzids.IsEmpty() {
+		return result
+	}
+	return d.zidSet(dzids.Count(), dzids.Values())
+}
+
+// zidSet converts the dense identifier yielded by values into a set of zettel
+// identifier. count is the number of elements that values yields; it is only
+// used to size the result, a wrong value does not affect correctness. Dense
+// identifier without a zettel identifier are skipped.
+//
+// values is iterated while d.mx is read-locked. Therefore, it must not call
+// any method of d that locks d.mx.
+func (d *dictionary) zidSet(count int, values iter.Seq[denseZid]) (result roster.Roster[id.Zid]) {
+	zids := make([]id.Zid, 0, count)
 	d.mx.RLock()
-	for dz := range dzids.Values() {
+	for dz := range values {
 		if zid, found := d.dense.Decode(dz); found {
 			zids = append(zids, zid)
 		}
 	}
 	d.mx.RUnlock()
-
-	// The order of dense identifier is not the order of zettel identifier.
-	// Inserting in ascending order appends and does not shift elements.
 	slices.Sort(zids)
-	for _, zid := range zids {
-		result.Insert(zid)
+	return roster.FromSorted(zids)
+}
+
+// matchZids adds the dense identifier of every known zid to into, if
+// match(zid, pattern, patternLen) reports true. Typical values for match are
+// zidContains, zidHasPrefix and zidHasSuffix.
+func (d *dictionary) matchZids(
+	dst *bitset.BitSet[denseZid],
+	pattern uint64, patternLen int,
+	match func(number, pattern uint64, patternLen int) bool,
+) {
+	d.mx.RLock()
+	defer d.mx.RUnlock()
+	dst.EnsureBit(denseZid(d.dense.Count()))
+	for zid, dz := range d.dense.All() {
+		if match(uint64(zid), pattern, patternLen) {
+			dst.Insert(dz)
+		}
 	}
-	return result
 }

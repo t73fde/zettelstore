@@ -19,6 +19,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"t73f.de/r/zero/bitset"
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 
@@ -159,18 +160,36 @@ func (in *instance) searchEqual(word string) roster.Roster[id.Zid] {
 
 // searchPrefix returns the identifier of all zettel that have the given prefix.
 func (in *instance) searchPrefix(prefix string) roster.Roster[id.Zid] {
-	_ = prefix
-	return roster.Roster[id.Zid]{}
+	// The snapshot of the words is taken before the store is read, as in searchEqual.
+	words := in.dict.snapshot().WordsWithPrefixString(prefix)
+
+	var zidMatches bitset.BitSet[denseZid]
+	if pattern, ok := parseZidFragment(prefix); ok {
+		in.dict.matchZids(&zidMatches, pattern, len(prefix), zidHasPrefix)
+	}
+	return in.dict.zidBitset(in.store.matchPrefix(prefix, words, &zidMatches, in.dict.numZids()))
 }
 
 // searchSuffix returns the identifier of all zettel that have the given suffix.
 func (in *instance) searchSuffix(suffix string) roster.Roster[id.Zid] {
-	_ = suffix
-	return roster.Roster[id.Zid]{}
+	// The snapshot of the words is taken before the store is read, as in searchEqual.
+	words := in.dict.snapshot().WordsWithSuffixString(suffix)
+
+	var zidMatches bitset.BitSet[denseZid]
+	if pattern, ok := parseZidFragment(suffix); ok {
+		in.dict.matchZids(&zidMatches, pattern, len(suffix), zidHasSuffix)
+	}
+	return in.dict.zidBitset(in.store.matchSuffix(suffix, words, &zidMatches, in.dict.numZids()))
 }
 
-// searchContains returns the identifier of all zettel that contains string s.
+// searchContains returns the identifier of all zettel that contain s.
 func (in *instance) searchContains(s string) roster.Roster[id.Zid] {
-	_ = s
-	return roster.Roster[id.Zid]{}
+	// The snapshot of the words is taken before the store is read, as in searchEqual.
+	words := in.dict.snapshot().WordsContainingString(s)
+
+	var zidMatches bitset.BitSet[denseZid]
+	if pattern, ok := parseZidFragment(s); ok {
+		in.dict.matchZids(&zidMatches, pattern, len(s), zidContains)
+	}
+	return in.dict.zidBitset(in.store.matchContains(s, words, &zidMatches, in.dict.numZids()))
 }
