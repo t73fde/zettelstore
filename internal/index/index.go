@@ -95,6 +95,7 @@ type Stats struct {
 	NumWords   int
 	Vocabulary int
 	WordCount  map[uint16]int
+	NumURLs    int
 
 	UpdatedZettel uint64
 	RemovedZettel uint64

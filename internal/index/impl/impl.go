@@ -319,8 +319,9 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	st.NumWords = ds.NumWords
 	st.Vocabulary = ds.Vocabulary
 	st.WordCount = ds.WordCount
-	st.NumZettel = a.store.count()
 
+	st.NumZettel = a.store.count()
+	st.NumURLs = a.store.urlCount()
 	st.DroppedZettel = a.pending.droppedTotal()
 	st.Ready = a.ready.Load()
 }

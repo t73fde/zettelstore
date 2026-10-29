@@ -75,7 +75,7 @@ func (is *indexService) GetStatistics() []KeyValue {
 	is.mxService.RLock()
 	is.indexer.ReadStats(&st)
 	is.mxService.RUnlock()
-	result := make([]KeyValue, 0, 18+len(st.WordCount))
+	result := make([]KeyValue, 0, 19+len(st.WordCount))
 	result = append(result, []KeyValue{
 		{Key: "Ready", Value: fmt.Sprint(st.Ready)},
 		{Key: "Building", Value: fmt.Sprint(st.Building)},
@@ -87,6 +87,7 @@ func (is *indexService) GetStatistics() []KeyValue {
 		{Key: "Zettel", Value: strconv.Itoa(st.NumZettel)},
 		{Key: "Words / Fragments", Value: strconv.Itoa(st.NumWords)},
 		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},
+		{Key: "URLs", Value: strconv.Itoa(st.NumURLs)},
 		{Key: "Updated zettel", Value: strconv.FormatUint(st.UpdatedZettel, 10)},
 		{Key: "Removed zettel", Value: strconv.FormatUint(st.RemovedZettel, 10)},
 		{Key: "Enrichments", Value: strconv.FormatUint(st.EnrichCount, 10)},
@@ -104,7 +105,7 @@ func (is *indexService) GetStatistics() []KeyValue {
 		}
 		totalCount += count
 		result = append(result, KeyValue{
-			Key:   "Size " + strconv.Itoa(int(size)),
+			Key:   "Word size " + strconv.Itoa(int(size)),
 			Value: strconv.Itoa(count),
 		})
 	}
