@@ -39,7 +39,7 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 
 		mgr.index.Enrich(mNew)
 
-		if _, ignore := ignoreEqual[m.Zid]; !ignore && !m.Equal(mNew, true) {
+		if _, ignore := ignoreEqual[m.Zid]; !ignore && !mNew.Has(meta.KeyIndexState) && !m.Equal(mNew, true) {
 			asMap, oldAsMap := mNew.Map(), m.Map()
 			nmap, omap := map[string]string{}, map[string]string{}
 			for k, v := range asMap {
