@@ -268,7 +268,7 @@ type ctxNoEnrichType struct{}
 
 // DoEnrich determines if the context is not marked to not enrich metadata.
 func DoEnrich(ctx context.Context) bool {
-	_, ok := ctx.Value(ctxNoEnrichType{}).(*ctxNoEnrichType)
+	_, ok := ctx.Value(ctxNoEnrichType{}).(context.Context)
 	return !ok
 }
 
@@ -330,6 +330,8 @@ var ErrReadOnly = errors.New("read-only box")
 // ErrZettelNotFound is returned if a zettel was not found in the box.
 type ErrZettelNotFound struct{ Zid id.Zid }
 
+var _ error = *new(ErrZettelNotFound) // declare to use value receiver.
+
 func (eznf ErrZettelNotFound) Error() string { return "zettel not found: " + eznf.Zid.String() }
 
 // ErrConflict is returned if a box operation detected a conflict..
@@ -341,6 +343,8 @@ var ErrCapacity = errors.New("capacity exceeded")
 
 // ErrInvalidZid is returned if the zettel id is not appropriate for the box operation.
 type ErrInvalidZid struct{ Zid string }
+
+var _ error = *new(ErrInvalidZid) // declare to use value receiver.
 
 func (err ErrInvalidZid) Error() string { return "invalid Zettel id: " + err.Zid }
 
