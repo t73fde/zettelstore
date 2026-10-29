@@ -34,8 +34,26 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 		if boxName != "" {
 			m.Set(meta.KeyBoxName, meta.Value(boxName))
 		}
+		m1 := m.Clone()
 		mgr.idxStore.Enrich(ctx, m)
-		mgr.index.Enrich(ctx, m)
+		mgr.index.Enrich(ctx, m1)
+		if !m.Equal(m1, true) {
+			mmap, m1map := m.Map(), m1.Map()
+			omap, nmap := map[string]string{}, map[string]string{}
+			for k, v := range mmap {
+				val, found := m1map[k]
+				if !found || val != v {
+					omap[k] = v
+				}
+			}
+			for k, v := range m1map {
+				val, found := mmap[k]
+				if !found || val != v {
+					nmap[k] = v
+				}
+			}
+			mgr.idxLogger.Error("Enrich differ", "zid", m.Zid, "old", omap, "new", nmap)
+		}
 	}
 }
 
