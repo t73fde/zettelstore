@@ -133,7 +133,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 		ad := analyzeData{zid: pd.zid, bulk: pd.bulk, deleted: pd.deleted}
 		if pd.deleted {
 			psrv.logger.Debug("Deleted", "zid", pd.zid)
-		} else if mustIndexZettel(pd.zettel.Meta) {
+		} else if mustIndexZettelContent(pd.zettel.Meta) {
 			psrv.logger.Debug("Upsert", "zid", pd.zid)
 			ok := runRecovered("IndexParser", func() {
 				ad.zettel = parser.ParseZettel(ctx, pd.zettel, "", psrv.config)
@@ -159,7 +159,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 	close(out)
 }
 
-func mustIndexZettel(m *meta.Meta) bool {
+func mustIndexZettelContent(m *meta.Meta) bool {
 	// TODO: no index if certain metadata is set.
 	return m.Zid >= id.ZidMinIndex
 }
