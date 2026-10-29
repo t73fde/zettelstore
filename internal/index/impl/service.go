@@ -44,7 +44,7 @@ type retrieveService struct {
 }
 
 func (rsrv *retrieveService) service(ctx context.Context, wake <-chan struct{}, out chan<- parseData) {
-	getCtx := box.NoEnrichContext(ctx) // TODO: does not seem to work always. Many zettel are enriched
+	getCtx := box.NoEnrichContext(ctx)
 
 	for {
 		rsrv.process(ctx, getCtx, out) // also runs once after start: fetches the bulk

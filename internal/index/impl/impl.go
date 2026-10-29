@@ -308,13 +308,19 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	if a == nil {
 		return // no instance yet: remaining fields stay zero
 	}
+	stats := a.stats
+	st.UpdatedZettel = stats.updates.Load()
+	st.RemovedZettel = stats.removes.Load()
+	st.EnrichCount = stats.enrichUpdates.Load()
+	st.EnrichMissed = stats.enrichMissed.Load()
+
 	var ds dictStats
 	a.dict.readStats(&ds)
 	st.NumWords = ds.NumWords
 	st.Vocabulary = ds.Vocabulary
 	st.WordCount = ds.WordCount
 	st.NumZettel = a.store.count()
-	st.UpdatedZettel, st.RemovedZettel = a.stats.read()
+
 	st.DroppedZettel = a.pending.droppedTotal()
 	st.Ready = a.ready.Load()
 }

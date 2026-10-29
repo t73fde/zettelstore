@@ -101,7 +101,7 @@ func (st *store) getZettel(dzid denseZid) *storeZettel {
 // upsertZettel takes ownership of az.
 func (st *store) upsertZettel(dzid denseZid, az *analyzedZettel) {
 	st.replace(dzid, az)
-	st.stats.finishUpdateZettel()
+	st.stats.updates.Add(1)
 }
 
 // replace upserts analyzed zettel data into the store.
@@ -145,7 +145,7 @@ func (st *store) updateZettel(dzid denseZid, prevSz, newSz *storeZettel) {
 
 func (st *store) removeZettel(dzid denseZid) {
 	if st.drop(dzid) {
-		st.stats.finishRemoveZettel()
+		st.stats.removes.Add(1)
 	}
 }
 
@@ -428,4 +428,99 @@ func (st *store) matchURLs(dst *bitset.BitSet[denseZid], s string, match func(u,
 			insertRosterIntoBitSet(dst, r)
 		}
 	}
+}
+
+// ----- enrich --------------------------------------------------------------
+
+// enrichSlot names the kind of set that store.enrich reports.
+type enrichSlot uint8
+
+const (
+	slotDead         enrichSlot = iota // references to non-existing zettel
+	slotBackward                       // zettel that reference the zettel in their content
+	slotForward                        // zettel referenced in the content
+	slotBack                           // backward without forward and metadata relations
+	slotMetaBackward                   // keyID is the computed (inverse) key
+)
+
+// enrich reports all non-empty relation sets of the zettel dzid by calling
+// emit. It returns false, if the zettel is not stored.
+//
+// emit is called while st.mx is read-locked. It must not call methods of st,
+// and it must not retain or modify the roster. It may lock the dictionary.
+func (st *store) enrich(
+	dzid denseZid,
+	emit func(slot enrichSlot, keyID vocab.WordID, dzids roster.Roster[denseZid]),
+) bool {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	sz, found := st.zettel[dzid]
+	if !found {
+		return false
+	}
+
+	dead := st.deadRefs(sz)
+	if !dead.IsEmpty() {
+		emit(slotDead, 0, dead)
+	}
+
+	backward := st.backward[dzid]
+	if !backward.IsEmpty() {
+		emit(slotBackward, 0, backward)
+	}
+	if !sz.forward.IsEmpty() {
+		if !dead.IsEmpty() {
+			emit(slotForward, 0, sz.forward.Difference(dead))
+		} else {
+			emit(slotForward, 0, sz.forward)
+		}
+	}
+	for keyID, byTarget := range st.metaBackward {
+		if refs := byTarget[dzid]; !refs.IsEmpty() {
+			emit(slotMetaBackward, keyID, refs)
+		}
+	}
+
+	if !backward.IsEmpty() {
+		if back := st.backOnly(dzid, sz, backward); !back.IsEmpty() {
+			emit(slotBack, 0, back)
+		}
+	}
+	return true
+}
+
+// deadRefs returns the dense identifier, referenced by sz in content or
+// metadata, for which no zettel exists. The result is nil in the common case.
+func (st *store) deadRefs(sz *storeZettel) (dead roster.Roster[denseZid]) {
+	for dzid := range sz.forward.Values() {
+		if _, found := st.zettel[dzid]; !found {
+			dead.Insert(dzid)
+		}
+	}
+	for _, mz := range sz.metaForward {
+		for dzid := range mz.forward.Values() {
+			if _, found := st.zettel[dzid]; !found {
+				dead.Insert(dzid)
+			}
+		}
+	}
+	return dead
+}
+
+// backOnly returns back without all zettel, that sz references (content and
+// metadata) or that name sz in a metadata value (inverse keys).
+func (st *store) backOnly(
+	dzid denseZid,
+	sz *storeZettel,
+	backward roster.Roster[denseZid],
+) roster.Roster[denseZid] {
+	back := backward.Difference(sz.forward)
+	for _, mz := range sz.metaForward {
+		back.AndNot(mz.forward)
+	}
+	for _, byTarget := range st.metaBackward {
+		back.AndNot(byTarget[dzid])
+	}
+	return back
 }

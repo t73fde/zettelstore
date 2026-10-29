@@ -14,8 +14,6 @@
 package impl
 
 import (
-	"context"
-
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -94,9 +92,8 @@ func (idx *Index) GetMeta(zid id.Zid) (*meta.Meta, error) {
 }
 
 // Enrich computes additional properties and updates the given metadata.
-func (idx *Index) Enrich(context.Context, *meta.Meta) {
-	in := idx.activeInstance()
-	if in == nil {
-		return
+func (idx *Index) Enrich(m *meta.Meta) {
+	if a := idx.activeInstance(); a != nil {
+		a.enrich(m)
 	}
 }

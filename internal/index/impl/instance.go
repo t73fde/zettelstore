@@ -21,7 +21,9 @@ import (
 
 	"t73f.de/r/zero/bitset"
 	"t73f.de/r/zero/roster"
+	"t73f.de/r/zero/vocab"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/index"
@@ -192,4 +194,55 @@ func (in *instance) searchContains(s string) roster.Roster[id.Zid] {
 		in.dict.matchZids(&zidMatches, pattern, len(s), zidContains)
 	}
 	return in.dict.zidBitset(in.store.matchContains(s, words, &zidMatches, in.dict.numZids()))
+}
+
+// Enrich adds the computed metadata (relations) of m.Zid to m. It does nothing,
+// if the zettel is not stored.
+func (in *instance) enrich(m *meta.Meta) {
+	dzid, found := in.dict.Find(m.Zid)
+	if !found {
+		in.store.stats.enrichMissed.Add(1)
+		return
+	}
+
+	updated := false
+	known := in.store.enrich(dzid, func(slot enrichSlot, keyID vocab.WordID, dzids roster.Roster[denseZid]) {
+		zids := in.dict.zidRoster(dzids)
+		if zids.IsEmpty() { // no dense identifier could be decoded
+			return
+		}
+		var key string
+		switch slot {
+		case slotDead:
+			key = meta.KeyDead
+		case slotBackward:
+			key = meta.KeyBackward
+		case slotForward:
+			key = meta.KeyForward
+		case slotBack:
+			key = meta.KeyBack
+		case slotMetaBackward:
+			key = in.dict.GetString(keyID)
+		}
+		m.Set(key, zidsToValue(zids))
+		updated = true
+	})
+
+	switch {
+	case !known:
+		in.store.stats.enrichMissed.Add(1)
+	case updated:
+		in.store.stats.enrichUpdates.Add(1)
+	}
+}
+
+func zidsToValue(s roster.Roster[id.Zid]) meta.Value {
+	buf := make([]byte, 0, s.Count()*(id.LengthZid+1))
+	for zid := range s.Values() {
+		if len(buf) > 0 {
+			buf = append(buf, ' ')
+		}
+		buf = append(buf, zid.Bytes()...)
+	}
+	return meta.Value(buf)
 }

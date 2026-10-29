@@ -38,7 +38,8 @@ type dictionary struct {
 	voc   *vocab.Vocabulary
 
 	// inverse maps metadata keys to their inverse. It is read-only after
-	// construction. Assumes that there will be no future inverse keys.
+	// construction. Assumes that there will be no future inverse keys created
+	// on the fly.
 	inverse map[vocab.WordID]vocab.WordID
 }
 
@@ -51,7 +52,6 @@ func makeDictionary(hints sizeHints) *dictionary {
 		if invKey := kd.Inverse; invKey != "" {
 			invID := voc.AddString(invKey)
 			inverse[keyID] = invID
-			inverse[invID] = keyID
 		}
 	}
 	d := &dense.Dense[id.Zid, denseZid]{}

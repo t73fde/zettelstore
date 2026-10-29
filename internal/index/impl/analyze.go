@@ -127,11 +127,16 @@ func (za *zettelAnalyzer) collectMeta(m *meta.Meta) {
 }
 
 func (za *zettelAnalyzer) addMetaZid(keyID vocab.WordID, vals iter.Seq[string]) {
+	_, isInvertable := za.a.dict.inverse[keyID]
 	mz := metaZid{keyID: keyID}
 	for val := range vals {
 		if zid, err := id.Parse(val); err == nil {
 			dzid := za.a.dict.Encode(zid)
-			mz.forward.Insert(dzid)
+			if isInvertable {
+				mz.forward.Insert(dzid)
+			} else {
+				za.az.forward.Insert(dzid)
+			}
 		}
 	}
 	if !mz.forward.IsEmpty() {

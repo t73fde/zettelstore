@@ -13,28 +13,11 @@
 
 package impl
 
-import "sync"
+import "sync/atomic"
 
 type stats struct {
-	mx      sync.RWMutex
-	updates uint64
-	removes uint64
-}
-
-func (st *stats) finishUpdateZettel() {
-	st.mx.Lock()
-	defer st.mx.Unlock()
-	st.updates++
-}
-
-func (st *stats) finishRemoveZettel() {
-	st.mx.Lock()
-	defer st.mx.Unlock()
-	st.removes++
-}
-
-func (st *stats) read() (updates, removes uint64) {
-	st.mx.RLock()
-	defer st.mx.RUnlock()
-	return st.updates, st.removes
+	updates       atomic.Uint64
+	removes       atomic.Uint64
+	enrichUpdates atomic.Uint64
+	enrichMissed  atomic.Uint64
 }

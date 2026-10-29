@@ -75,7 +75,7 @@ func (is *indexService) GetStatistics() []KeyValue {
 	is.mxService.RLock()
 	is.indexer.ReadStats(&st)
 	is.mxService.RUnlock()
-	result := make([]KeyValue, 0, 16+len(st.WordCount))
+	result := make([]KeyValue, 0, 18+len(st.WordCount))
 	result = append(result, []KeyValue{
 		{Key: "Ready", Value: fmt.Sprint(st.Ready)},
 		{Key: "Building", Value: fmt.Sprint(st.Building)},
@@ -89,6 +89,8 @@ func (is *indexService) GetStatistics() []KeyValue {
 		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},
 		{Key: "Updated zettel", Value: strconv.FormatUint(st.UpdatedZettel, 10)},
 		{Key: "Removed zettel", Value: strconv.FormatUint(st.RemovedZettel, 10)},
+		{Key: "Enrichments", Value: strconv.FormatUint(st.EnrichCount, 10)},
+		{Key: "Failed enrichments", Value: strconv.FormatUint(st.EnrichMissed, 10)},
 		{Key: "Rebuilds", Value: strconv.FormatUint(st.NumRebuild, 10)},
 	}...)
 

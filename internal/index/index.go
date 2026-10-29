@@ -83,7 +83,7 @@ type Index interface {
 	GetMeta(zid id.Zid) (*meta.Meta, error)
 
 	// Entrich metadata with data from search index.
-	Enrich(context.Context, *meta.Meta)
+	Enrich(*meta.Meta)
 
 	// ReadStats populates st with index statistics.
 	ReadStats(st *Stats)
@@ -98,6 +98,8 @@ type Stats struct {
 
 	UpdatedZettel uint64
 	RemovedZettel uint64
+	EnrichCount   uint64 // Number of successful metadata enrichments
+	EnrichMissed  uint64 // Number of missing zettel for enrichments
 	NumRebuild    uint64
 
 	Ready         bool          // initial build is complete
