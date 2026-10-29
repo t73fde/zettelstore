@@ -2,6 +2,12 @@
 
 <a id="3_1"></a>
 <h2>Changes for Version 3.1.0 (pending)</h2>
+  *  Replace the previous search index with a new one, which is much more
+     maintainable and reliable.
+     (major: index)
+  *  Add new predefined metadata key <code>index-state</code>. It is used if
+     the search index cannot provide computed values for the given zettel.
+     (minor: box, api)
 
 <a id="3_0"></a>
 <h2>Changes for Version 3.0.0 (2026-09-25)</h2>

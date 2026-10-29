@@ -202,6 +202,7 @@ func (in *instance) enrich(m *meta.Meta) {
 	dzid, found := in.dict.Find(m.Zid)
 	if !found {
 		in.store.stats.enrichMissed.Add(1)
+		m.Set(meta.KeyIndexState, meta.ValueIndexStateUnindexed)
 		return
 	}
 
@@ -231,6 +232,7 @@ func (in *instance) enrich(m *meta.Meta) {
 	switch {
 	case !known:
 		in.store.stats.enrichMissed.Add(1)
+		m.Set(meta.KeyIndexState, meta.ValueIndexStateUnindexed)
 	case updated:
 		in.store.stats.enrichUpdates.Add(1)
 	}

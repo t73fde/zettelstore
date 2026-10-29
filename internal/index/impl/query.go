@@ -95,5 +95,7 @@ func (idx *Index) GetMeta(zid id.Zid) (*meta.Meta, error) {
 func (idx *Index) Enrich(m *meta.Meta) {
 	if a := idx.activeInstance(); a != nil {
 		a.enrich(m)
+	} else {
+		m.Set(meta.KeyIndexState, meta.ValueIndexStateIncomplete)
 	}
 }
