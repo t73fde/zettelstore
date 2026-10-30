@@ -37,6 +37,7 @@ func cmdTools() error {
 		{"unparam", "mvdan.cc/unparam@latest"},
 		{"staticcheck", "honnef.co/go/tools/cmd/staticcheck@latest"},
 		{"go-critic", "github.com/go-critic/go-critic/cmd/go-critic@latest"},
+		{"gohawk", "github.com/kojah/gohawk@latest"},
 		{"govulncheck", "golang.org/x/vuln/cmd/govulncheck@latest"},
 		{"deadcode", "golang.org/x/tools/cmd/deadcode@latest"},
 		{"errcheck", "github.com/kisielk/errcheck@latest"},

@@ -9,6 +9,7 @@ You must install the following software:
 * [unparam](https://mvdan.cc/unparam),
 * [staticcheck](https://staticcheck.io/),
 * [go-critic](https://go-critic.com/),
+* [gohawk](https://gohawk.dev/),
 * [deadcode](https://pkg.go.dev/golang.org/x/tools/cmd/deadcode),
 * [errcheck](https://github.com/kisielk/errcheck),
 * [revive](https://revive.run/),

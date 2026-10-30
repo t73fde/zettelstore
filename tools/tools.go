@@ -95,6 +95,9 @@ func Check(forRelease bool) error {
 	if err := checkGoCritic(); err != nil {
 		return err
 	}
+	if err := checkGohawk(); err != nil {
+		return err
+	}
 	if err := checkUnparam(forRelease); err != nil {
 		return err
 	}
@@ -174,6 +177,17 @@ func checkGoCritic() error {
 	out, err := ExecuteCommand(EnvGoVCS, "go-critic", "check", "./...")
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Some go-critic problems found")
+		if len(out) > 0 {
+			fmt.Fprintln(os.Stderr, out)
+		}
+	}
+	return err
+}
+
+func checkGohawk() error {
+	out, err := ExecuteCommand(EnvGoVCS, "gohawk", "./...")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Some gohawk problems found")
 		if len(out) > 0 {
 			fmt.Fprintln(os.Stderr, out)
 		}
