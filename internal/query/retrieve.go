@@ -107,12 +107,10 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 func retrievePositives(normCalls, plainCalls searchCallMap) *index.Result {
 	if isSuperset(normCalls, plainCalls) {
 		var normResult *index.Result
-		first := true
 		for c, sf := range normCalls {
 			as := sf(c.s)
-			if first {
+			if normResult == nil {
 				normResult = as.Clone()
-				first = false
 			} else {
 				normResult.And(as)
 			}
@@ -123,43 +121,45 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *index.Result {
 	cache := make(map[searchOp]*index.Result)
 
 	var plainResult *index.Result
-	first := true
 	for c, sf := range plainCalls {
 		result := sf(c.s)
 		if _, found := normCalls[c]; found {
 			cache[c] = result
 		}
-		if first {
+		if plainResult == nil {
 			plainResult = result.Clone()
-			first = false
 		} else {
 			plainResult.And(result)
 		}
 	}
 
 	var normResult *index.Result
-	firstNorm := true
 	for c, sf := range normCalls {
 		if result, found := cache[c]; found {
-			if firstNorm {
+			if normResult == nil {
 				normResult = result.Clone()
-				firstNorm = false
 			} else {
 				normResult.And(result)
 			}
 		} else {
 			as := sf(c.s)
-			if firstNorm {
+			if normResult == nil {
 				normResult = as
-				firstNorm = false
 			} else {
 				normResult.And(as)
 			}
 		}
 	}
 
-	normResult.Or(plainResult)
-	return normResult
+	switch {
+	case normResult == nil:
+		return plainResult
+	case plainResult == nil:
+		return normResult
+	default:
+		normResult.Or(plainResult)
+		return normResult
+	}
 }
 
 func isSuperset(normCalls, plainCalls searchCallMap) bool {
@@ -172,12 +172,10 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 }
 
 func retrieveNegatives(negCalls searchCallMap) (negatives *index.Result) {
-	first := false
 	for val, sf := range negCalls {
 		as := sf(val.s)
-		if first {
+		if negatives == nil {
 			negatives = as.Clone()
-			first = false
 		} else {
 			negatives.Or(as)
 		}

@@ -96,6 +96,7 @@ func (ps *parserState) parse(q *Query) *Query {
 		}
 		inp.SkipSpace()
 		if ps.mustStop() {
+			q = createIfNeeded(q)
 			q.zids = nil
 			break
 		}

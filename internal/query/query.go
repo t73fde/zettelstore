@@ -409,7 +409,7 @@ func (ct *conjTerms) retrieveIndex(searcher index.Searcher) index.RetrievePredic
 	}
 
 	positives := retrievePositives(normCalls, plainCalls)
-	if positives.IsEmpty() {
+	if positives == nil || positives.IsEmpty() {
 		// No positive search for words, must contain only words for a negative search.
 		// Otherwise len(search) == 0 (see above)
 		negatives := retrieveNegatives(negCalls)

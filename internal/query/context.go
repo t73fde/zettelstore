@@ -240,7 +240,7 @@ func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, d
 }
 
 func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint, dir int) {
-	if !ct.seen.Contains(m.Zid) {
+	if m != nil && !ct.seen.Contains(m.Zid) {
 		heap.Push(&ct.queue, ztlCtxItem{cost: newCost, meta: m, level: level + 1, dir: int8(dir)})
 	}
 }
