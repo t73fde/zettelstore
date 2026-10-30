@@ -92,9 +92,9 @@ func Check(forRelease bool) error {
 	if err := checkStaticcheck(); err != nil {
 		return err
 	}
-	if err := checkGoCritic(); err != nil {
-		return err
-	}
+	// if err := checkGoCritic(); err != nil {
+	// 	return err
+	// }
 	if err := checkGohawk(); err != nil {
 		return err
 	}
@@ -173,16 +173,17 @@ func checkStaticcheck() error {
 	return err
 }
 
-func checkGoCritic() error {
-	out, err := ExecuteCommand(EnvGoVCS, "go-critic", "check", "./...")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Some go-critic problems found")
-		if len(out) > 0 {
-			fmt.Fprintln(os.Stderr, out)
-		}
-	}
-	return err
-}
+// TODO: go-critic fails with wrong error messages, since go 1.27.0
+// func checkGoCritic() error {
+// 	out, err := ExecuteCommand(EnvGoVCS, "go-critic", "check", "./...")
+// 	if err != nil {
+// 		fmt.Fprintln(os.Stderr, "Some go-critic problems found")
+// 		if len(out) > 0 {
+// 			fmt.Fprintln(os.Stderr, out)
+// 		}
+// 	}
+// 	return err
+// }
 
 func checkGohawk() error {
 	out, err := ExecuteCommand(EnvGoVCS, "gohawk", "./...")
