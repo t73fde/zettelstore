@@ -24,18 +24,14 @@ import (
 )
 
 // Parse the query specification and return a Query object.
-func Parse(spec string) (q *Query) { return q.Parse(spec) }
-
-// Parse the query string and update the Query object.
-func (q *Query) Parse(spec string) *Query {
+func Parse(spec string) *Query {
+	q := &Query{terms: []conjTerms{{}}}
 	state := parserState{
 		inp: input.NewInput([]byte(spec)),
 	}
-	q = state.parse(q)
-	if q != nil {
-		for len(q.terms) > 1 && q.terms[len(q.terms)-1].isEmpty() {
-			q.terms = q.terms[:len(q.terms)-1]
-		}
+	state.parse(q)
+	for len(q.terms) > 1 && q.terms[len(q.terms)-1].isEmpty() {
+		q.terms = q.terms[:len(q.terms)-1]
 	}
 	return q
 }
@@ -74,11 +70,11 @@ const (
 	searchOperatorGreaterChar = '>'
 )
 
-func (ps *parserState) parse(q *Query) *Query {
+func (ps *parserState) parse(q *Query) {
 	inp := ps.inp
 	inp.SkipSpace()
 	if ps.mustStop() {
-		return q
+		return
 	}
 	firstPos := inp.Pos
 	var zidSet roster.Roster[id.Zid]
@@ -91,12 +87,10 @@ func (ps *parserState) parse(q *Query) *Query {
 		}
 		if !zidSet.Contains(zid) {
 			zidSet.Insert(zid)
-			q = createIfNeeded(q)
 			q.zids = append(q.zids, zid)
 		}
 		inp.SkipSpace()
 		if ps.mustStop() {
-			q = createIfNeeded(q)
 			q.zids = nil
 			break
 		}
@@ -110,25 +104,25 @@ func (ps *parserState) parse(q *Query) *Query {
 		}
 		pos := inp.Pos
 		if !hasContext && ps.acceptSingleKw(webapi.ContextDirective) {
-			q = ps.parseContext(q)
+			ps.parseContext(q)
 			hasContext = true
 			continue
 		}
 		inp.SetPos(pos)
 		if !hasThread && ps.acceptSingleKw(webapi.FolgeDirective) {
-			q = ps.parseThread(q, true, false)
+			ps.parseThread(q, true, false)
 			hasThread = true
 			continue
 		}
 		inp.SetPos(pos)
 		if !hasThread && ps.acceptSingleKw(webapi.SequelDirective) {
-			q = ps.parseThread(q, false, true)
+			ps.parseThread(q, false, true)
 			hasThread = true
 			continue
 		}
 		inp.SetPos(pos)
 		if !hasThread && ps.acceptSingleKw(webapi.ThreadDirective) {
-			q = ps.parseThread(q, true, true)
+			ps.parseThread(q, true, true)
 			hasThread = true
 			continue
 		}
@@ -165,7 +159,6 @@ func (ps *parserState) parse(q *Query) *Query {
 		}
 		pos := inp.Pos
 		if ps.acceptSingleKw(webapi.OrDirective) {
-			q = createIfNeeded(q)
 			if !q.terms[len(q.terms)-1].isEmpty() {
 				q.terms = append(q.terms, conjTerms{})
 			}
@@ -173,7 +166,6 @@ func (ps *parserState) parse(q *Query) *Query {
 		}
 		inp.SetPos(pos)
 		if ps.acceptSingleKw(webapi.RandomDirective) {
-			q = createIfNeeded(q)
 			if len(q.order) == 0 {
 				q.order = []sortOrder{{"", false}}
 			}
@@ -181,43 +173,38 @@ func (ps *parserState) parse(q *Query) *Query {
 		}
 		inp.SetPos(pos)
 		if ps.acceptKwArgs(webapi.PickDirective) {
-			if s, ok := ps.parsePick(q); ok {
-				q = s
+			if ps.parsePick(q) {
 				continue
 			}
 		}
 		inp.SetPos(pos)
 		if ps.acceptKwArgs(webapi.OrderDirective) {
-			if s, ok := ps.parseOrder(q); ok {
-				q = s
+			if ps.parseOrder(q) {
 				continue
 			}
 		}
 		inp.SetPos(pos)
 		if ps.acceptKwArgs(webapi.OffsetDirective) {
-			if s, ok := ps.parseOffset(q); ok {
-				q = s
+			if ps.parseOffset(q) {
 				continue
 			}
 		}
 		inp.SetPos(pos)
 		if ps.acceptKwArgs(webapi.LimitDirective) {
-			if s, ok := ps.parseLimit(q); ok {
-				q = s
+			if ps.parseLimit(q) {
 				continue
 			}
 		}
 		inp.SetPos(pos)
 		if ps.isActionSep() {
-			q = ps.parseActions(q)
+			ps.parseActions(q)
 			break
 		}
-		q = ps.parseText(q)
+		ps.parseText(q)
 	}
-	return q
 }
 
-func (ps *parserState) parseContext(q *Query) *Query {
+func (ps *parserState) parseContext(q *Query) {
 	inp := ps.inp
 	spec := &ContextSpec{}
 	for {
@@ -261,9 +248,7 @@ func (ps *parserState) parseContext(q *Query) *Query {
 	}
 	spec.directionSpec.cleanupAfterParse()
 
-	q = createIfNeeded(q)
 	q.directives = append(q.directives, spec)
-	return q
 }
 func (ps *parserState) parseCost(spec *ContextSpec) bool {
 	num, ok := ps.scanPosInt()
@@ -287,7 +272,7 @@ func (ps *parserState) parseMinCount(spec *ContextSpec) bool {
 	return true
 }
 
-func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) *Query {
+func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) {
 	inp := ps.inp
 	spec := &ThreadSpec{isFolge: isFolge, isSequel: isSequel}
 	for {
@@ -314,9 +299,7 @@ func (ps *parserState) parseThread(q *Query, isFolge, isSequel bool) *Query {
 	}
 	spec.directionSpec.cleanupAfterParse()
 
-	q = createIfNeeded(q)
 	q.directives = append(q.directives, spec)
-	return q
 }
 
 func (ps *parserState) parseDirection(ds *directionSpec) bool {
@@ -363,63 +346,59 @@ func (ps *parserState) parseUnlinked(q *Query) *Query {
 	return q
 }
 
-func (ps *parserState) parsePick(q *Query) (*Query, bool) {
+func (ps *parserState) parsePick(q *Query) bool {
 	num, ok := ps.scanPosInt()
 	if !ok {
-		return q, false
+		return false
 	}
-	q = createIfNeeded(q)
 	if q.pick == 0 || q.pick >= num {
 		q.pick = num
 	}
-	return q, true
+	return true
 }
 
-func (ps *parserState) parseOrder(q *Query) (*Query, bool) {
+func (ps *parserState) parseOrder(q *Query) bool {
 	reverse := false
 	if ps.acceptKwArgs(webapi.ReverseDirective) {
 		reverse = true
 	}
 	word := ps.scanWord()
 	if len(word) == 0 {
-		return q, false
+		return false
 	}
 	if sWord := string(word); meta.KeyIsValid(sWord) {
-		q = createIfNeeded(q)
 		if len(q.order) == 1 && q.order[0].isRandom() {
 			q.order = nil
 		}
 		q.order = append(q.order, sortOrder{sWord, reverse})
-		return q, true
+		return true
 	}
-	return q, false
+	return false
 }
 
-func (ps *parserState) parseOffset(q *Query) (*Query, bool) {
+func (ps *parserState) parseOffset(q *Query) bool {
 	num, ok := ps.scanPosInt()
 	if !ok {
-		return q, false
+		return false
 	}
-	q = createIfNeeded(q)
 	if q.offset <= num {
 		q.offset = num
 	}
-	return q, true
+	return true
 }
 
-func (ps *parserState) parseLimit(q *Query) (*Query, bool) {
+func (ps *parserState) parseLimit(q *Query) bool {
 	num, ok := ps.scanPosInt()
 	if !ok {
-		return q, false
+		return false
 	}
-	q = createIfNeeded(q)
 	if q.limit == 0 || q.limit >= num {
 		q.limit = num
 	}
-	return q, true
+	return true
 }
 
-func (ps *parserState) parseActions(q *Query) *Query {
+func (ps *parserState) parseActions(q *Query) {
 	inp := ps.inp
 	inp.Next()
 	var words []string
@@ -432,13 +411,11 @@ func (ps *parserState) parseActions(q *Query) *Query {
 		words = append(words, string(word))
 	}
 	if len(words) > 0 {
-		q = createIfNeeded(q)
 		q.actions = words
 	}
-	return q
 }
 
-func (ps *parserState) parseText(q *Query) *Query {
+func (ps *parserState) parseText(q *Query) {
 	inp := ps.inp
 	pos := inp.Pos
 	op, hasOp := ps.scanSearchOp()
@@ -453,7 +430,8 @@ func (ps *parserState) parseText(q *Query) *Query {
 		// Assert hasOp == true
 		if op == cmpExist || op == cmpNotExist {
 			if inp.IsSpace() || ps.isActionSep() || ps.mustStop() {
-				return q.addKey(string(key), op)
+				q.addKey(string(key), op)
+				return
 			}
 			ps.inp.SetPos(pos)
 			hasOp = false
@@ -464,9 +442,8 @@ func (ps *parserState) parseText(q *Query) *Query {
 		}
 	} else if len(text) == 0 {
 		// Only an empty search operation is found -> ignore it
-		return q
+		return
 	}
-	q = createIfNeeded(q)
 	if hasOp {
 		if key == nil {
 			q.addSearch(expValue{meta.Value(string(text)), op})
@@ -483,7 +460,6 @@ func (ps *parserState) parseText(q *Query) *Query {
 		// Assert key == nil
 		q.addSearch(expValue{meta.Value(string(text)), cmpMatch})
 	}
-	return q
 }
 
 func (ps *parserState) scanSearchTextOrKey(hasOp bool) ([]byte, []byte) {

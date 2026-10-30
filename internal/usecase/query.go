@@ -159,7 +159,7 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 		sb.WriteString(" :")
 		sb.WriteString(word)
 	}
-	q := (*query.Query)(nil).Parse(sb.String())
+	q := query.Parse(sb.String())
 	candidates, err := uc.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		return nil

@@ -47,7 +47,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 			return
 		}
 		q := adapter.GetQuery(urlQuery)
-		q = q.SetDeterministic()
+		q.SetDeterministic()
 		ctx := r.Context()
 		metaSeq, err := queryMeta.Run(ctx, q)
 		if err != nil {

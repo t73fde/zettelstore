@@ -108,21 +108,9 @@ type sortOrder struct {
 
 func (so *sortOrder) isRandom() bool { return so.key == "" }
 
-func createIfNeeded(q *Query) *Query {
-	if q == nil {
-		return &Query{
-			terms: []conjTerms{{}},
-		}
-	}
-	return q
-}
-
 // Clone the query value.
 func (q *Query) Clone() *Query {
-	if q == nil {
-		return nil
-	}
-	c := new(*q)
+	c := *q
 	c.zids = q.GetZids()
 	c.directives = q.GetDirectives()
 
@@ -134,7 +122,7 @@ func (q *Query) Clone() *Query {
 	}
 	c.order = slices.Clone(q.order)
 	c.actions = slices.Clone(q.actions)
-	return c
+	return &c
 }
 
 type compareOp uint8
@@ -200,10 +188,8 @@ type expValue struct {
 
 func (q *Query) addSearch(val expValue) { q.terms[len(q.terms)-1].addSearch(val) }
 
-func (q *Query) addKey(key string, op compareOp) *Query {
-	q = createIfNeeded(q)
+func (q *Query) addKey(key string, op compareOp) {
 	q.terms[len(q.terms)-1].addKey(key, op)
-	return q
 }
 
 var missingMap = map[compareOp]bool{
@@ -234,21 +220,15 @@ func (q *Query) GetMetaValues(key string, withMissing bool) (vals []meta.Value) 
 }
 
 // SetPreMatch sets the pre-selection predicate.
-func (q *Query) SetPreMatch(preMatch MetaMatchFunc) *Query {
-	q = createIfNeeded(q)
+func (q *Query) SetPreMatch(preMatch MetaMatchFunc) {
 	// if q.preMatch != nil {
 	// 	panic("search PreMatch already set")
 	// }
 	q.preMatch = preMatch
-	return q
 }
 
 // SetSeed sets a seed value.
-func (q *Query) SetSeed(seed int) *Query {
-	q = createIfNeeded(q)
-	q.seed = seed
-	return q
-}
+func (q *Query) SetSeed(seed int) { q.seed = seed }
 
 // GetSeed returns the seed value if one was set.
 func (q *Query) GetSeed() (int, bool) {
@@ -259,12 +239,10 @@ func (q *Query) GetSeed() (int, bool) {
 }
 
 // SetDeterministic signals that the result should be the same if the seed is the same.
-func (q *Query) SetDeterministic() *Query {
-	q = createIfNeeded(q)
+func (q *Query) SetDeterministic() {
 	if q.seed <= 0 {
 		q.seed = rand.IntN(10000) + 1
 	}
-	return q
 }
 
 // Actions returns the slice of action specifications
@@ -318,17 +296,9 @@ func (q *Query) EnrichNeeded() bool {
 // RetrieveAndCompile queries the search index and returns a predicate
 // for its results and returns a matching predicate.
 func (q *Query) RetrieveAndCompile(_ context.Context, searcher index.Searcher, metaSeq []*meta.Meta) Compiled {
-	if q == nil {
-		return Compiled{
-			PreMatch: matchAlways,
-			Terms: []CompiledTerm{{
-				Match:    matchAlways,
-				Retrieve: AlwaysIncluded,
-			}}}
-	}
-	q = q.Clone()
+	newQ := q.Clone()
 
-	preMatch := q.preMatch
+	preMatch := newQ.preMatch
 	if preMatch == nil {
 		preMatch = matchAlways
 	}
@@ -336,17 +306,17 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher index.Searcher, m
 	startSet := metaList2idSet(metaSeq)
 	result := Compiled{
 		hasQuery:  true,
-		seed:      q.seed,
-		pick:      q.pick,
-		order:     q.order,
-		offset:    q.offset,
-		limit:     q.limit,
+		seed:      newQ.seed,
+		pick:      newQ.pick,
+		order:     newQ.order,
+		offset:    newQ.offset,
+		limit:     newQ.limit,
 		startMeta: metaSeq,
 		PreMatch:  preMatch,
 		Terms:     []CompiledTerm{},
 	}
 
-	for _, term := range q.terms {
+	for _, term := range newQ.terms {
 		cTerm := term.retrieveAndCompileTerm(searcher, startSet)
 		if cTerm.Retrieve == nil {
 			if cTerm.Match == nil {

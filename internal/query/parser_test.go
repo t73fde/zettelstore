@@ -25,6 +25,7 @@ func TestParser(t *testing.T) {
 		spec string
 		exp  string
 	}{
+		{"", ""},
 		{"1", "1"}, // Just a number will transform to search for that number in all zettel
 
 		{"1 IDENT", "00000000000001 IDENT"},
