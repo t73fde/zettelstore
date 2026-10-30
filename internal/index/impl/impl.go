@@ -326,6 +326,16 @@ func (idx *Index) ReadStats(st *index.Stats) {
 	st.Ready = a.ready.Load()
 }
 
+// IsReady returns true, if the index has completed its initial build and
+// is able to serve searches and enrichment with complete data.
+//
+// It returns false until the first build has finished. After that it stays
+// true, even while a reset is rebuilding a replacement store, because the
+// active store continues to serve requests until it is replaced.
+//
+// It is safe for concurrent use.
+func (idx *Index) IsReady() bool { return idx.activeInstance() != nil }
+
 // activeInstance returns the active instance, if it is ready. Otherwise return nil.
 func (idx *Index) activeInstance() *instance {
 	idx.mx.RLock()
