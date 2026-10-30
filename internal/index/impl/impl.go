@@ -207,7 +207,7 @@ func (idx *Index) reset() {
 	if idx.retriever == nil {
 		panic("Index.Retriever not registered")
 	}
-	in, discard := idx.installNew()
+	in, discard := idx.installNewInstance()
 	if in == nil {
 		return // not running
 	}
@@ -215,14 +215,14 @@ func (idx *Index) reset() {
 		go discard.stop()
 	}
 }
-func (idx *Index) installNew() (in, discard *instance) {
+func (idx *Index) installNewInstance() (in, discard *instance) {
 	idx.mx.Lock()
 	defer idx.mx.Unlock()
 	if !idx.running {
 		return nil, nil
 	}
 	idx.resets++
-	in = newInstance(idx, idx.resets, idx.hintsLocked())
+	in = newInstance(idx, idx.resets, idx.computeHints())
 	if idx.active == nil || !idx.active.ready.Load() {
 		discard, idx.active = idx.active, in
 	} else {
@@ -232,8 +232,8 @@ func (idx *Index) installNew() (in, discard *instance) {
 	return in, discard
 }
 
-// hintsLocked derives the dimension of a new instance from the active one.
-func (idx *Index) hintsLocked() sizeHints {
+// computeHints derives the dimension of a new instance from the active one.
+func (idx *Index) computeHints() sizeHints {
 	h := sizeHints{words: defaultWordsHint}
 	if a := idx.active; a != nil {
 		h.words = max(h.words, withMargin(a.dict.numWords()))
@@ -257,7 +257,8 @@ func (idx *Index) promote(in *instance, res bulkResult) {
 	}
 	if res.failed > 0 {
 		idx.logger.Error("Index complete",
-			"instance", in.id, "duration", duration, "zettel", res.total, "failed", res.failed)
+			"instance", in.id, "duration", duration, "zettel", res.total,
+			"failed", res.failed)
 
 	} else {
 		idx.logger.Info("Index complete",
@@ -269,7 +270,10 @@ func (idx *Index) promote(in *instance, res bulkResult) {
 }
 
 // swapIn makes in the active instance and returns the replaced one.
-func (idx *Index) swapIn(in *instance, res bulkResult) (old *instance, duration time.Duration, ok bool) {
+func (idx *Index) swapIn(
+	in *instance,
+	res bulkResult,
+) (old *instance, duration time.Duration, ok bool) {
 	idx.mx.Lock()
 	defer idx.mx.Unlock()
 
