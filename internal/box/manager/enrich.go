@@ -35,9 +35,8 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 			m.Set(meta.KeyBoxName, meta.Value(boxName))
 		}
 		mNew := m.Clone()
-		mgr.idxStore.Enrich(ctx, m)
-
 		mgr.index.Enrich(mNew)
+		mgr.idxStore.Enrich(ctx, m)
 
 		if _, ignore := ignoreEqual[m.Zid]; !ignore && !mNew.Has(meta.KeyIndexState) && !m.Equal(mNew, true) {
 			asMap, oldAsMap := mNew.Map(), m.Map()
@@ -67,6 +66,10 @@ var ignoreEqual = map[id.Zid]struct{}{
 	20240208235400: {},
 	20251030170300: {},
 	20261025191000: {},
+
+	// API test
+	id.ZidAppDirectory: {},
+	20211020182600:     {},
 }
 
 func computeCreated(zid id.Zid) meta.Value {
