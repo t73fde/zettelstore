@@ -121,7 +121,7 @@ func (in *instance) stop() {
 	in.logger.Debug("Stopping")
 	in.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
 	done := make(chan struct{})
-	go func() {
+	go func() { //gohawk:ignore goroutineownership
 		in.pl.wg.Wait()
 		close(done)
 	}()
