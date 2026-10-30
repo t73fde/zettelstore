@@ -54,7 +54,7 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 					omap[k] = v
 				}
 			}
-			mgr.idxLogger.Error("Enrich differ", "zid", m.Zid, "old", omap, "new", nmap)
+			mgr.mgrLogger.Error("Enrich differ", "zid", m.Zid, "old", omap, "new", nmap)
 		}
 	}
 }

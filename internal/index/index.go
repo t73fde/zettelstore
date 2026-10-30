@@ -168,12 +168,6 @@ func (sr *Result) Incomplete() bool { return sr.partial }
 // IsEmpty reports whether the result contains no identifier.
 func (sr *Result) IsEmpty() bool { return sr.base.IsEmpty() }
 
-// Count returns the number of identifiers in the result.
-func (sr *Result) Count() int { return sr.base.Count() }
-
-// Equal returns true if both sets are identical.
-func (sr *Result) Equal(other *Result) bool { return sr.base.Equal(other.base) }
-
 // Clone returns an independent, not frozen copy of the result.
 func (sr *Result) Clone() *Result {
 	return &Result{base: sr.base.Clone(), partial: sr.partial}
@@ -207,4 +201,21 @@ func (sr *Result) Or(other *Result) {
 func (sr *Result) MakePredicate() RetrievePredicate {
 	sr.frozen = true
 	return sr.base.Contains
+}
+
+// ----- needed just for comparison of old and new indexer.
+
+// Count returns the number of identifiers in the result.
+func (sr *Result) Count() int { return sr.base.Count() }
+
+// Equal returns true if both sets are identical.
+func (sr *Result) Equal(other *Result) bool { return sr.base.Equal(other.base) }
+
+// Delta returns the values that are only in sr and the values that are only
+// in other. Neither sr nor other is modified; the results do not share
+// storage with them.
+//
+// Example: removed, added := old.Delta(new)
+func (sr *Result) Delta(other *Result) (onlyR, onlyOther roster.Roster[id.Zid]) {
+	return sr.base.Delta(other.base)
 }

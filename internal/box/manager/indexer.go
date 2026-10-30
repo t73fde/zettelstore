@@ -36,9 +36,8 @@ import (
 func (mgr *Manager) SearchEqual(word string) *index.Result {
 	found := mgr.index.SearchEqual(word)
 	foundOld := mgr.idxStore.SearchEqual(word)
-	if !found.Equal(foundOld) {
-		mgr.mgrLogger.Error("SearchEqual", "word", word, "countOld", foundOld.Count(), "found", found.Count())
-	}
+	mgr.compareSearch("SearchEqual", "word", word, foundOld, found)
+
 	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", foundOld.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
 	return foundOld
@@ -49,9 +48,8 @@ func (mgr *Manager) SearchEqual(word string) *index.Result {
 func (mgr *Manager) SearchPrefix(prefix string) *index.Result {
 	found := mgr.index.SearchPrefix(prefix)
 	foundOld := mgr.idxStore.SearchPrefix(prefix)
-	if !found.Equal(foundOld) {
-		mgr.mgrLogger.Error("SearchPrefix", "prefix", prefix, "countOld", foundOld.Count(), "found", found.Count())
-	}
+	mgr.compareSearch("SearchPrefix", "prefix", prefix, foundOld, found)
+
 	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", foundOld.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
 	return foundOld
@@ -62,9 +60,8 @@ func (mgr *Manager) SearchPrefix(prefix string) *index.Result {
 func (mgr *Manager) SearchSuffix(suffix string) *index.Result {
 	found := mgr.index.SearchSuffix(suffix)
 	foundOld := mgr.idxStore.SearchSuffix(suffix)
-	if !found.Equal(foundOld) {
-		mgr.mgrLogger.Error("SearchSuffix", "suffix", suffix, "countOld", foundOld.Count(), "found", found.Count())
-	}
+	mgr.compareSearch("SearchSuffix", "suffix", suffix, foundOld, found)
+
 	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", foundOld.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
 	return foundOld
@@ -75,12 +72,22 @@ func (mgr *Manager) SearchSuffix(suffix string) *index.Result {
 func (mgr *Manager) SearchContains(s string) *index.Result {
 	found := mgr.index.SearchContains(s)
 	foundOld := mgr.idxStore.SearchContains(s)
-	if !found.Equal(foundOld) {
-		mgr.mgrLogger.Error("SearchContains", "s", s, "countOld", foundOld.Count(), "found", found.Count())
-	}
+	mgr.compareSearch("SearchContains", "s", s, foundOld, found)
+
 	mgr.idxLogger.Debug("SearchContains", "s", s, "found", foundOld.Count())
 	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
 	return foundOld
+}
+
+func (mgr *Manager) compareSearch(msg, param, s string, foundOld, foundNew *index.Result) {
+	if foundOld.Equal(foundNew) {
+		return
+	}
+	onlyOld, onlyNew := foundOld.Delta(foundNew)
+	mgr.mgrLogger.Error(msg, param, s,
+		"countOld", foundOld.Count(), "countNew", foundNew.Count(),
+		"onlyOld", onlyOld, "onlyNew", onlyNew,
+	)
 }
 
 // idxIndexer runs in the background and updates the index data structures.
