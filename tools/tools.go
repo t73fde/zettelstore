@@ -80,38 +80,23 @@ func LogCommand(exec string, env []string, name string, arg []string) {
 
 // Check the source with some linters.
 func Check(forRelease bool) error {
-	if err := CheckGoTest("./..."); err != nil {
-		return err
-	}
-	if err := checkGoVet(); err != nil {
-		return err
-	}
-	if err := checkShadow(forRelease); err != nil {
-		return err
-	}
-	if err := checkStaticcheck(); err != nil {
-		return err
-	}
-	// if err := checkGoCritic(); err != nil {
-	// 	return err
-	// }
-	if err := checkGohawk(); err != nil {
-		return err
-	}
-	if err := checkUnparam(forRelease); err != nil {
-		return err
-	}
-	if err := checkDeadcode(); err != nil {
-		return err
-	}
-	if err := checkRevive(); err != nil {
-		return err
-	}
-	if err := checkErrCheck(); err != nil {
-		return err
+	checker := []func() error{
+		func() error { return CheckGoTest("./...") },
+		checkGoVet,
+		func() error { return checkShadow(forRelease) },
+		checkStaticcheck,
+		// checkGoCritic,
+		checkGohawk,
+		func() error { return checkUnparam(forRelease) },
+		checkDeadcode,
+		checkRevive,
+		checkErrCheck,
 	}
 	if forRelease {
-		if err := checkGoVulncheck(); err != nil {
+		checker = append(checker, checkGoVulncheck)
+	}
+	for _, chk := range checker {
+		if err := chk(); err != nil {
 			return err
 		}
 	}
