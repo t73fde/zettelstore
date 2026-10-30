@@ -80,35 +80,23 @@ func LogCommand(exec string, env []string, name string, arg []string) {
 
 // Check the source with some linters.
 func Check(forRelease bool) error {
-	if err := CheckGoTest("./..."); err != nil {
-		return err
-	}
-	if err := checkGoVet(); err != nil {
-		return err
-	}
-	if err := checkShadow(forRelease); err != nil {
-		return err
-	}
-	if err := checkStaticcheck(); err != nil {
-		return err
-	}
-	if err := checkGoCritic(); err != nil {
-		return err
-	}
-	if err := checkUnparam(forRelease); err != nil {
-		return err
-	}
-	if err := checkDeadcode(); err != nil {
-		return err
-	}
-	if err := checkRevive(); err != nil {
-		return err
-	}
-	if err := checkErrCheck(); err != nil {
-		return err
+	checker := []func() error{
+		func() error { return CheckGoTest("./...") },
+		checkGoVet,
+		func() error { return checkShadow(forRelease) },
+		checkStaticcheck,
+		// checkGoCritic,
+		checkGohawk,
+		func() error { return checkUnparam(forRelease) },
+		checkDeadcode,
+		checkRevive,
+		checkErrCheck,
 	}
 	if forRelease {
-		if err := checkGoVulncheck(); err != nil {
+		checker = append(checker, checkGoVulncheck)
+	}
+	for _, chk := range checker {
+		if err := chk(); err != nil {
 			return err
 		}
 	}
@@ -170,10 +158,22 @@ func checkStaticcheck() error {
 	return err
 }
 
-func checkGoCritic() error {
-	out, err := ExecuteCommand(EnvGoVCS, "go-critic", "check", "./...")
+// TODO: go-critic fails with wrong error messages, since go 1.27.0
+// func checkGoCritic() error {
+// 	out, err := ExecuteCommand(EnvGoVCS, "go-critic", "check", "./...")
+// 	if err != nil {
+// 		fmt.Fprintln(os.Stderr, "Some go-critic problems found")
+// 		if len(out) > 0 {
+// 			fmt.Fprintln(os.Stderr, out)
+// 		}
+// 	}
+// 	return err
+// }
+
+func checkGohawk() error {
+	out, err := ExecuteCommand(EnvGoVCS, "gohawk", "./...")
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Some go-critic problems found")
+		fmt.Fprintln(os.Stderr, "Some gohawk problems found")
 		if len(out) > 0 {
 			fmt.Fprintln(os.Stderr, out)
 		}
