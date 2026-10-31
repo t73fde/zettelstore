@@ -68,7 +68,7 @@ func (ct *conjTerms) createSelectSpecs() (posSpecs, negSpecs []matchSpec) {
 		}
 		var hasOp, hasNotOp compareOp
 		switch meta.Type(key) {
-		case meta.TypeString, meta.TypeURL:
+		case meta.TypeString, meta.TypeEmpty, meta.TypeURL:
 			hasOp, hasNotOp = cmpMatch, cmpNoMatch
 		default:
 			hasOp, hasNotOp = cmpEqual, cmpNotEqual
