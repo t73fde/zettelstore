@@ -38,9 +38,9 @@ func (mgr *Manager) SearchEqual(word string) *index.Result {
 	foundOld := mgr.idxStore.SearchEqual(word)
 	mgr.compareSearch("SearchEqual", "word", word, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", foundOld.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
-	return foundOld
+	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", found.Count())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	return found
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
@@ -50,9 +50,9 @@ func (mgr *Manager) SearchPrefix(prefix string) *index.Result {
 	foundOld := mgr.idxStore.SearchPrefix(prefix)
 	mgr.compareSearch("SearchPrefix", "prefix", prefix, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", foundOld.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
-	return foundOld
+	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", found.Count())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	return found
 }
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
@@ -62,9 +62,9 @@ func (mgr *Manager) SearchSuffix(suffix string) *index.Result {
 	foundOld := mgr.idxStore.SearchSuffix(suffix)
 	mgr.compareSearch("SearchSuffix", "suffix", suffix, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", foundOld.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
-	return foundOld
+	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", found.Count())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	return found
 }
 
 // SearchContains returns all zettel that contains the given string.
@@ -74,9 +74,9 @@ func (mgr *Manager) SearchContains(s string) *index.Result {
 	foundOld := mgr.idxStore.SearchContains(s)
 	mgr.compareSearch("SearchContains", "s", s, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchContains", "s", s, "found", foundOld.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", foundOld)
-	return foundOld
+	mgr.idxLogger.Debug("SearchContains", "s", s, "found", found.Count())
+	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	return found
 }
 
 func (mgr *Manager) compareSearch(msg, param, s string, foundOld, foundNew *index.Result) {
