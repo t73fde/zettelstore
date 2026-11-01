@@ -15,7 +15,11 @@ package impl
 
 import (
 	"cmp"
+	"fmt"
+	"io"
 	"iter"
+	"maps"
+	"slices"
 	"strings"
 	"sync"
 
@@ -23,6 +27,7 @@ import (
 	zeromaps "t73f.de/r/zero/maps"
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/vocab"
+	"t73f.de/r/zsc/domain/id"
 )
 
 type store struct {
@@ -523,4 +528,191 @@ func (st *store) backOnly(
 		back.AndNot(byTarget[dzid])
 	}
 	return back
+}
+
+// ----- dump index ----------------------------------------------------------
+
+// dump writes the content of the store to w. The store is read-locked for the
+// whole duration of the output; writers have to wait.
+func (st *store) dump(w io.Writer, dict *dictionary) {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	st.dumpZettel(w, dict)
+	st.dumpDead(w, dict)
+	dumpPostings(w, dict, "Words", "", "", st.wordPostings(dict))
+	dumpPostings(w, dict, "URLs", "[[", "]]", st.urls)
+}
+
+type zettelRef struct {
+	zid id.Zid
+	dz  denseZid
+}
+
+func (st *store) dumpZettel(w io.Writer, dict *dictionary) {
+	if len(st.zettel) == 0 {
+		return
+	}
+	refs := make([]zettelRef, 0, len(st.zettel))
+	for dz := range st.zettel {
+		if zid, found := dict.Decode(dz); found {
+			refs = append(refs, zettelRef{zid: zid, dz: dz})
+		}
+	}
+	slices.SortFunc(refs, func(a, b zettelRef) int { return cmp.Compare(a.zid, b.zid) })
+
+	_, _ = io.WriteString(w, "==== Zettel Index\n")
+	for _, ref := range refs {
+		zs := st.zettel[ref.dz]
+		_, _ = fmt.Fprintln(w, "=====", ref.zid)
+		dumpZids(w, "* Forward:", dict.zidRoster(zs.forward))
+		dumpZids(w, "* Backward:", dict.zidRoster(st.backward[ref.dz]))
+
+		for _, md := range st.metaDumps(dict, ref.dz, zs) {
+			_, _ = fmt.Fprintln(w, "* Meta", md.name)
+			dumpZids(w, "** Forward:", dict.zidRoster(md.forward))
+			dumpZids(w, "** Backward:", dict.zidRoster(md.backward))
+		}
+
+		words := make([]string, 0, zs.words.Count())
+		for wid := range zs.words.Values() {
+			words = append(words, dict.GetString(wid))
+		}
+		dumpStrings(w, "* Words", "", "", words)
+		dumpStrings(w, "* URLs", "[[", "]]", slices.Collect(zs.urls.Values()))
+	}
+}
+
+// metaDump collects the data of one metadata key pair, named after the
+// computed key (e.g. "folge" for the pair precursor / folge).
+//
+//   - forward: zettel that are computed for the key, i.e. the zettel that
+//     name the current zettel with the explicit key (e.g. precursor).
+//   - backward: zettel that the current zettel names with the explicit key.
+type metaDump struct {
+	name     string
+	forward  roster.Roster[denseZid]
+	backward roster.Roster[denseZid]
+}
+
+// metaDumps returns the metadata related data of a zettel, grouped by the
+// computed key and sorted by key name.
+func (st *store) metaDumps(dict *dictionary, dz denseZid, zs *storeZettel) []metaDump {
+	byKey := make(map[vocab.WordID]*metaDump, len(zs.metaForward))
+	get := func(keyID vocab.WordID) *metaDump {
+		md, found := byKey[keyID]
+		if !found {
+			md = &metaDump{name: dict.GetString(keyID)}
+			byKey[keyID] = md
+		}
+		return md
+	}
+	for _, mz := range zs.metaForward {
+		if invID, found := st.inverseKeys[mz.keyID]; found {
+			get(invID).backward = mz.forward
+		} else { // should not happen: metaForward only contains invertible keys
+			get(mz.keyID).forward = mz.forward
+		}
+	}
+	for keyID, targets := range st.metaBackward {
+		if computed, found := targets[dz]; found {
+			get(keyID).forward = computed
+		}
+	}
+	result := make([]metaDump, 0, len(byKey))
+	for _, md := range byKey {
+		result = append(result, *md)
+	}
+	slices.SortFunc(result, func(a, b metaDump) int { return cmp.Compare(a.name, b.name) })
+	return result
+}
+
+// dumpDead writes all referenced zettel identifier that do not belong to an
+// existing zettel, together with the zettel that reference them. As in
+// enrich, forward and metaForward are the source of the references.
+func (st *store) dumpDead(w io.Writer, dict *dictionary) {
+	dead := map[id.Zid][]id.Zid{}
+	add := func(source id.Zid, targets roster.Roster[denseZid]) {
+		for target := range targets.Values() {
+			if _, exists := st.zettel[target]; exists {
+				continue
+			}
+			if tz, found := dict.Decode(target); found {
+				dead[tz] = append(dead[tz], source)
+			}
+		}
+	}
+	for dz, zs := range st.zettel {
+		source, found := dict.Decode(dz)
+		if !found {
+			continue
+		}
+		add(source, zs.forward)
+		for _, mz := range zs.metaForward {
+			add(source, mz.forward)
+		}
+	}
+	if len(dead) == 0 {
+		return
+	}
+	_, _ = io.WriteString(w, "==== Dead References\n")
+	for _, target := range slices.Sorted(maps.Keys(dead)) {
+		sources := dead[target]
+		slices.Sort(sources)
+		sources = slices.Compact(sources)
+		_, _ = fmt.Fprintln(w, ";", target)
+		_, _ = io.WriteString(w, ":")
+		for _, source := range sources {
+			_, _ = io.WriteString(w, " ")
+			_, _ = w.Write(source.Bytes())
+		}
+		_, _ = io.WriteString(w, "\n")
+	}
+}
+
+// wordPostings returns the word postings with the words translated to strings.
+func (st *store) wordPostings(dict *dictionary) map[string]roster.Roster[denseZid] {
+	result := make(map[string]roster.Roster[denseZid], len(st.words))
+	for wid, postings := range st.words {
+		result[dict.GetString(wid)] = postings
+	}
+	return result
+}
+
+func dumpPostings(
+	w io.Writer, dict *dictionary, title, preString, postString string,
+	postings map[string]roster.Roster[denseZid],
+) {
+	if len(postings) == 0 {
+		return
+	}
+	_, _ = fmt.Fprintln(w, "====", title)
+	for _, s := range slices.Sorted(maps.Keys(postings)) {
+		_, _ = fmt.Fprintf(w, "; %s%s%s\n", preString, s, postString)
+		dumpZids(w, ":", dict.zidRoster(postings[s]))
+	}
+}
+
+func dumpZids(w io.Writer, prefix string, zids roster.Roster[id.Zid]) {
+	if zids.IsEmpty() {
+		return
+	}
+	_, _ = io.WriteString(w, prefix)
+	for zid := range zids.Values() {
+		_, _ = io.WriteString(w, " ")
+		_, _ = w.Write(zid.Bytes())
+	}
+	_, _ = io.WriteString(w, "\n")
+}
+
+// dumpStrings sorts strs in place and writes them below title.
+func dumpStrings(w io.Writer, title, preString, postString string, strs []string) {
+	if len(strs) == 0 {
+		return
+	}
+	slices.Sort(strs)
+	_, _ = fmt.Fprintln(w, title)
+	for _, s := range strs {
+		_, _ = fmt.Fprintf(w, "** %s%s%s\n", preString, s, postString)
+	}
 }

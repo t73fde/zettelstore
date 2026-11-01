@@ -16,6 +16,7 @@ package index
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"t73f.de/r/zero/roster"
@@ -90,6 +91,10 @@ type Index interface {
 
 	// ReadStats populates st with index statistics.
 	ReadStats(st *Stats)
+
+	// Dump writes a textual representation of search index to w. It is meant
+	// for debugging and analysis only.
+	Dump(w io.Writer)
 }
 
 // Stats records statistics about the indexer.

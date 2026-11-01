@@ -15,6 +15,7 @@
 package impl
 
 import (
+	"io"
 	"log/slog"
 	"sync"
 	"time"
@@ -348,4 +349,15 @@ func (idx *Index) activeInstance() *instance {
 		return a
 	}
 	return nil
+}
+
+// Dump writes a textual representation of the active store to w. It is
+// meant for debugging and analysis only.
+func (idx *Index) Dump(w io.Writer) {
+	_, _ = io.WriteString(w, "=== Dump\n")
+	if in := idx.activeInstance(); in != nil {
+		in.store.dump(w, in.dict)
+	} else {
+		_, _ = io.WriteString(w, "Index not yet built\n")
+	}
 }
