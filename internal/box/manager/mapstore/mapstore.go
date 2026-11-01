@@ -16,10 +16,6 @@ package mapstore
 
 import (
 	"context"
-	"fmt"
-	"io"
-	"maps"
-	"slices"
 	"strings"
 	"sync"
 
@@ -624,98 +620,4 @@ func (ms *mapStore) ReadStats(st *store.Stats) {
 	ms.mxStats.Lock()
 	st.Updates = ms.updates
 	ms.mxStats.Unlock()
-}
-
-func (ms *mapStore) Dump(w io.Writer) {
-	ms.mx.RLock()
-	defer ms.mx.RUnlock()
-
-	_, _ = io.WriteString(w, "=== Dump\n")
-	ms.dumpIndex(w)
-	ms.dumpDead(w)
-	dumpStringRefs(w, "Words", "", "", ms.words)
-	dumpStringRefs(w, "URLs", "[[", "]]", ms.urls)
-}
-
-func (ms *mapStore) dumpIndex(w io.Writer) {
-	if len(ms.idx) == 0 {
-		return
-	}
-	_, _ = io.WriteString(w, "==== Zettel Index\n")
-	zids := make([]id.Zid, 0, len(ms.idx))
-	for id := range ms.idx {
-		zids = append(zids, id)
-	}
-	slices.Sort(zids)
-	for _, id := range zids {
-		_, _ = fmt.Fprintln(w, "=====", id)
-		zi := ms.idx[id]
-		if !zi.dead.IsEmpty() {
-			_, _ = fmt.Fprintln(w, "* Dead:", zi.dead)
-		}
-		dumpSet(w, "* Forward:", zi.forward)
-		dumpSet(w, "* Backward:", zi.backward)
-
-		otherRefs := make([]string, 0, len(zi.otherRefs))
-		for k := range zi.otherRefs {
-			otherRefs = append(otherRefs, k)
-		}
-		slices.Sort(otherRefs)
-		for _, k := range otherRefs {
-			_, _ = fmt.Fprintln(w, "* Meta", k)
-			dumpSet(w, "** Forward:", zi.otherRefs[k].forward)
-			dumpSet(w, "** Backward:", zi.otherRefs[k].backward)
-		}
-		dumpStrings(w, "* Words", "", "", zi.words)
-		dumpStrings(w, "* URLs", "[[", "]]", zi.urls)
-	}
-}
-
-func (ms *mapStore) dumpDead(w io.Writer) {
-	if len(ms.dead) == 0 {
-		return
-	}
-	_, _ = fmt.Fprintf(w, "==== Dead References\n")
-	zids := make([]id.Zid, 0, len(ms.dead))
-	for id := range ms.dead {
-		zids = append(zids, id)
-	}
-	slices.Sort(zids)
-	for _, id := range zids {
-		_, _ = fmt.Fprintln(w, ";", id)
-		_, _ = fmt.Fprintln(w, ":", ms.dead[id])
-	}
-}
-
-func dumpSet(w io.Writer, prefix string, s roster.Roster[id.Zid]) {
-	if !s.IsEmpty() {
-		_, _ = io.WriteString(w, prefix)
-		for zid := range s.Values() {
-			_, _ = io.WriteString(w, " ")
-			_, _ = w.Write(zid.Bytes())
-		}
-		_, _ = fmt.Fprintln(w)
-	}
-}
-func dumpStrings(w io.Writer, title, preString, postString string, slice []string) {
-	if len(slice) > 0 {
-		sl := make([]string, len(slice))
-		copy(sl, slice)
-		slices.Sort(sl)
-		_, _ = fmt.Fprintln(w, title)
-		for _, s := range sl {
-			_, _ = fmt.Fprintf(w, "** %s%s%s\n", preString, s, postString)
-		}
-	}
-}
-
-func dumpStringRefs(w io.Writer, title, preString, postString string, srefs stringRefs) {
-	if len(srefs) == 0 {
-		return
-	}
-	_, _ = fmt.Fprintln(w, "====", title)
-	for _, s := range slices.Sorted(maps.Keys(srefs)) {
-		_, _ = fmt.Fprintf(w, "; %s%s%s\n", preString, s, postString)
-		_, _ = fmt.Fprintln(w, ":", srefs[s])
-	}
 }

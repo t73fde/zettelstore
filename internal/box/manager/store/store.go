@@ -16,7 +16,6 @@ package store
 
 import (
 	"context"
-	"io"
 
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
@@ -64,7 +63,4 @@ type Store interface {
 
 	// ReadStats populates st with store statistics.
 	ReadStats(st *Stats)
-
-	// Dump the content to a Writer.
-	Dump(io.Writer)
 }

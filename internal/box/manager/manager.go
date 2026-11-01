@@ -511,10 +511,7 @@ func (mgr *Manager) ReadStats(st *box.Stats) {
 }
 
 // Dump internal data structures to a Writer.
-func (mgr *Manager) Dump(w io.Writer) {
-	// mgr.idxStore.Dump(w)
-	mgr.index.Dump(w)
-}
+func (mgr *Manager) Dump(w io.Writer) { mgr.index.Dump(w) }
 
 func (mgr *Manager) checkContinue(ctx context.Context) error {
 	if mgr.State() != box.StartStateStarted {
