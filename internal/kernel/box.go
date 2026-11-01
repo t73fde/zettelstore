@@ -132,13 +132,6 @@ func (ps *boxService) GetStatistics() []KeyValue {
 		{Key: "Read-only", Value: strconv.FormatBool(st.ReadOnly)},
 		{Key: "Managed boxes", Value: strconv.Itoa(st.NumManagedBoxes)},
 		{Key: "Zettel (total)", Value: strconv.Itoa(st.ZettelTotal)},
-		{Key: "Zettel (indexed)", Value: strconv.Itoa(st.ZettelIndexed)},
-		{Key: "Last re-index", Value: st.LastReload.Format("2006-01-02 15:04:05 -0700 MST")},
-		{Key: "Duration last re-index", Value: fmt.Sprintf("%vms", st.DurLastReload.Milliseconds())},
-		{Key: "Indexes since last re-index", Value: strconv.FormatUint(st.IndexesSinceReload, 10)},
-		{Key: "Indexed words", Value: strconv.FormatUint(st.IndexedWords, 10)},
-		{Key: "Indexed URLs", Value: strconv.FormatUint(st.IndexedUrls, 10)},
-		{Key: "Zettel enrichments", Value: strconv.FormatUint(st.IndexUpdates, 10)},
 	}
 }
 

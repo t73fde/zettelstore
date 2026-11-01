@@ -33,8 +33,6 @@ import (
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/box/manager/mapstore"
-	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/config"
 	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
@@ -88,18 +86,6 @@ type Manager struct {
 	infos        chan box.UpdateInfo
 	propertyKeys roster.Roster[string] // Set of property key names
 	index        index.Index
-
-	// Indexer data
-	idxLogger *slog.Logger
-	idxStore  store.Store
-	idxAr     *anteroomQueue
-	idxReady  chan struct{} // Signal a non-empty anteroom to background task
-
-	// Indexer stats data
-	idxMx          sync.RWMutex
-	idxLastReload  time.Time
-	idxDurReload   time.Duration
-	idxSinceReload uint64
 }
 
 func (mgr *Manager) setState(newState box.StartState) {
@@ -131,11 +117,6 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, index index.Index, rt
 		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
 		propertyKeys: propertyKeys,
 		index:        index,
-
-		idxLogger: boxLogger.With("box", "index"),
-		idxStore:  createIdxStore(rtConfig),
-		idxAr:     newAnteroomQueue(1000),
-		idxReady:  make(chan struct{}, 1),
 	}
 
 	if err := setupBoxURIs(boxURIs, authManager.IsReadonly()); err != nil {
@@ -250,8 +231,6 @@ func nameFromPath(path string) string {
 			func(b []byte) string { return string(b) }), "")
 }
 
-func createIdxStore(_ config.Config) store.Store { return mapstore.New() }
-
 // RegisterObserver registers an observer that will be notified
 // if a zettel was found to be changed.
 func (mgr *Manager) RegisterObserver(f box.UpdateFunc) {
@@ -292,7 +271,6 @@ func (mgr *Manager) notifier() {
 					continue
 				}
 
-				mgr.idxEnqueue(reason, zid)
 				if ci.Box == nil {
 					ci.Box = mgr
 				}
@@ -335,26 +313,6 @@ func ignoreUpdate(cache destutterCache, now time.Time, reason box.UpdateReason, 
 	return false
 }
 
-func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zid id.Zid) {
-	switch reason {
-	case box.OnReady:
-		return
-	case box.OnReload:
-		mgr.idxAr.Reset()
-	case box.OnZettel:
-		mgr.idxAr.EnqueueZettel(zid)
-	case box.OnDelete:
-		mgr.idxAr.EnqueueZettel(zid)
-	default:
-		mgr.mgrLogger.Error("Unknown notification reason", "reason", reason, "zid", zid)
-		return
-	}
-	select {
-	case mgr.idxReady <- struct{}{}:
-	default:
-	}
-}
-
 func (mgr *Manager) notifyObserver(ci *box.UpdateInfo) {
 	mgr.mxObserver.RLock()
 	observers := mgr.observers
@@ -391,7 +349,6 @@ func (mgr *Manager) Start(ctx context.Context) error {
 		mgr.setState(box.StartStateStopped)
 		return err
 	}
-	mgr.idxAr.Reset() // Ensure an initial index run
 	mgr.done = make(chan struct{})
 	go mgr.notifier()
 
@@ -401,8 +358,6 @@ func (mgr *Manager) Start(ctx context.Context) error {
 	mgr.notifyObserver(&box.UpdateInfo{Box: mgr, Reason: box.OnReady})
 	mgr.index.Enqueue(index.OnReady, id.Invalid) // Indexer can setup itself
 	mgr.index.Enqueue(index.OnReset, id.Invalid) // Ensure an initial index run
-
-	go mgr.idxIndexer()
 	return nil
 }
 
@@ -495,19 +450,6 @@ func (mgr *Manager) ReadStats(st *box.Stats) {
 		sumZettel += sst.Zettel
 	}
 	st.ZettelTotal = sumZettel
-
-	var storeSt store.Stats
-	mgr.idxMx.RLock()
-	defer mgr.idxMx.RUnlock()
-	mgr.idxStore.ReadStats(&storeSt)
-
-	st.LastReload = mgr.idxLastReload
-	st.IndexesSinceReload = mgr.idxSinceReload
-	st.DurLastReload = mgr.idxDurReload
-	st.ZettelIndexed = storeSt.Zettel
-	st.IndexUpdates = storeSt.Updates
-	st.IndexedWords = storeSt.Words
-	st.IndexedUrls = storeSt.Urls
 }
 
 // Dump internal data structures to a Writer.

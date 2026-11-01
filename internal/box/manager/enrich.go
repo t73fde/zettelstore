@@ -34,43 +34,8 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 		if boxName != "" {
 			m.Set(meta.KeyBoxName, meta.Value(boxName))
 		}
-		mOld := m.Clone()
-		mNew := m
-		mgr.index.Enrich(mNew)
-		mgr.idxStore.Enrich(ctx, mOld)
-
-		if _, ignore := ignoreEqual[m.Zid]; !ignore && !mNew.Has(meta.KeyIndexState) && !mOld.Equal(mNew, true) {
-			asMap, oldAsMap := mNew.Map(), mOld.Map()
-			nmap, omap := map[string]string{}, map[string]string{}
-			for k, v := range asMap {
-				val, found := oldAsMap[k]
-				if !found || val != v {
-					nmap[k] = v
-				}
-			}
-			for k, v := range oldAsMap {
-				val, found := asMap[k]
-				if !found || val != v {
-					omap[k] = v
-				}
-			}
-			mgr.mgrLogger.Error("Enrich differ", "zid", m.Zid, "old", omap, "new", nmap)
-		}
+		mgr.index.Enrich(m)
 	}
-}
-
-var ignoreEqual = map[id.Zid]struct{}{
-	20210526101500: {},
-	20210719191100: {},
-	20220809194400: {},
-	20230920103800: {},
-	20240208235400: {},
-	20251030170300: {},
-	20261025191000: {},
-
-	// API test
-	id.ZidAppDirectory: {},
-	20211020182600:     {},
 }
 
 func computeCreated(zid id.Zid) meta.Value {

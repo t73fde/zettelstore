@@ -14,32 +14,17 @@
 package manager
 
 import (
-	"context"
-	"net/url"
-	"time"
-
-	"t73f.de/r/zero/roster"
-	"t73f.de/r/zero/strings"
-	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/meta"
-
-	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/index"
-	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
-	"zettelstore.de/z/internal/parser"
 )
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchEqual(word string) *index.Result {
 	found := mgr.index.SearchEqual(word)
-	foundOld := mgr.idxStore.SearchEqual(word)
-	mgr.compareSearch("SearchEqual", "word", word, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchEqual", "word", word, "found", found.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	mgr.mgrLogger.Debug("SearchEqual", "word", word, "found", found.Count())
+	logging.LogTrace(mgr.mgrLogger, "IDs", "ids", found)
 	return found
 }
 
@@ -47,11 +32,9 @@ func (mgr *Manager) SearchEqual(word string) *index.Result {
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchPrefix(prefix string) *index.Result {
 	found := mgr.index.SearchPrefix(prefix)
-	foundOld := mgr.idxStore.SearchPrefix(prefix)
-	mgr.compareSearch("SearchPrefix", "prefix", prefix, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchPrefix", "prefix", prefix, "found", found.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	mgr.mgrLogger.Debug("SearchPrefix", "prefix", prefix, "found", found.Count())
+	logging.LogTrace(mgr.mgrLogger, "IDs", "ids", found)
 	return found
 }
 
@@ -59,11 +42,9 @@ func (mgr *Manager) SearchPrefix(prefix string) *index.Result {
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchSuffix(suffix string) *index.Result {
 	found := mgr.index.SearchSuffix(suffix)
-	foundOld := mgr.idxStore.SearchSuffix(suffix)
-	mgr.compareSearch("SearchSuffix", "suffix", suffix, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchSuffix", "suffix", suffix, "found", found.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	mgr.mgrLogger.Debug("SearchSuffix", "suffix", suffix, "found", found.Count())
+	logging.LogTrace(mgr.mgrLogger, "IDs", "ids", found)
 	return found
 }
 
@@ -71,202 +52,8 @@ func (mgr *Manager) SearchSuffix(suffix string) *index.Result {
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
 func (mgr *Manager) SearchContains(s string) *index.Result {
 	found := mgr.index.SearchContains(s)
-	foundOld := mgr.idxStore.SearchContains(s)
-	mgr.compareSearch("SearchContains", "s", s, foundOld, found)
 
-	mgr.idxLogger.Debug("SearchContains", "s", s, "found", found.Count())
-	logging.LogTrace(mgr.idxLogger, "IDs", "ids", found)
+	mgr.mgrLogger.Debug("SearchContains", "s", s, "found", found.Count())
+	logging.LogTrace(mgr.mgrLogger, "IDs", "ids", found)
 	return found
-}
-
-func (mgr *Manager) compareSearch(msg, param, s string, foundOld, foundNew *index.Result) {
-	if foundOld.Equal(foundNew) {
-		return
-	}
-	onlyOld, onlyNew := foundOld.Delta(foundNew)
-	mgr.mgrLogger.Error(msg, param, s,
-		"countOld", foundOld.Count(), "countNew", foundNew.Count(),
-		"onlyOld", onlyOld, "onlyNew", onlyNew,
-	)
-}
-
-// idxIndexer runs in the background and updates the index data structures.
-// This is the main service of the idxIndexer.
-func (mgr *Manager) idxIndexer() {
-	// Something may panic. Ensure a running indexer.
-	defer func() {
-		if ri := recover(); ri != nil {
-			kernel.Main.LogRecover("Indexer", ri)
-			go mgr.idxIndexer()
-		}
-	}()
-
-	timerDuration := 15 * time.Second
-	timer := time.NewTimer(timerDuration)
-	ctx := box.NoEnrichContext(context.Background())
-	for {
-		mgr.idxWorkService(ctx)
-		if !mgr.idxSleepService(timer, timerDuration) {
-			return
-		}
-	}
-}
-
-func (mgr *Manager) idxWorkService(ctx context.Context) {
-	var start time.Time
-	for {
-		switch action, zid, lastReload := mgr.idxAr.Dequeue(); action {
-		case arNothing:
-			return
-		case arReload:
-			mgr.idxLogger.Debug("reload")
-			zids, err := mgr.FetchZids(ctx)
-			if err == nil {
-				start = time.Now()
-				mgr.idxAr.Reload(zids)
-				mgr.idxMx.Lock()
-				mgr.idxLastReload = time.Now().Local()
-				mgr.idxSinceReload = 0
-				mgr.idxMx.Unlock()
-			}
-		case arZettel:
-			mgr.idxLogger.Debug("zettel", "zid", zid)
-			zettel, err := mgr.GetZettel(ctx, zid)
-			if err != nil {
-				// Zettel was deleted or is not accessible b/c of other reasons
-				logging.LogTrace(mgr.idxLogger, "delete", "zid", zid)
-				mgr.idxDeleteZettel(ctx, zid)
-				continue
-			}
-			logging.LogTrace(mgr.idxLogger, "update", "zid", zid)
-			mgr.idxUpdateZettel(ctx, zettel)
-			mgr.idxMx.Lock()
-			if lastReload {
-				mgr.idxDurReload = time.Since(start)
-			}
-			mgr.idxSinceReload++
-			mgr.idxMx.Unlock()
-		}
-	}
-}
-
-func (mgr *Manager) idxSleepService(timer *time.Timer, timerDuration time.Duration) bool {
-	select {
-	case _, ok := <-mgr.idxReady:
-		if !ok {
-			return false
-		}
-	case _, ok := <-timer.C:
-		if !ok {
-			return false
-		}
-		// mgr.idxStore.Shrink() // TODO: make it less often, for example once per 10 minutes
-		timer.Reset(timerDuration)
-	case <-mgr.done:
-		if !timer.Stop() {
-			<-timer.C
-		}
-		return false
-	}
-	return true
-}
-
-func (mgr *Manager) idxUpdateZettel(ctx context.Context, zettel box.Zettel) {
-	var cData collectData
-	cData.initialize()
-	if mustIndexZettel(zettel.Meta) {
-		zn := parser.ParseZettel(ctx, zettel, "", mgr.rtConfig)
-		collectZettelIndexData(zn.Blocks, &cData)
-	}
-
-	m := zettel.Meta
-	zi := store.NewZettelIndex(m)
-	mgr.idxCollectFromMeta(ctx, m, zi, &cData)
-	mgr.idxProcessData(ctx, zi, &cData)
-	toCheck := mgr.idxStore.UpdateReferences(ctx, zi)
-	mgr.idxCheckZettel(toCheck)
-}
-
-func mustIndexZettel(m *meta.Meta) bool {
-	return m.Zid >= id.Zid(999999900)
-}
-
-func (mgr *Manager) idxCollectFromMeta(ctx context.Context, m *meta.Meta, zi *store.ZettelIndex, cData *collectData) {
-	for key, val := range m.Computed() {
-		descr := meta.GetDescription(key)
-		if descr.IsProperty() || descr.IsComputed() {
-			continue
-		}
-		switch descr.Type {
-		case meta.TypeID:
-			mgr.idxUpdateValue(ctx, descr.Inverse, string(val), zi)
-		case meta.TypeIDSet:
-			for val := range val.Fields() {
-				mgr.idxUpdateValue(ctx, descr.Inverse, val, zi)
-			}
-		case meta.TypeURL:
-			if _, err := url.Parse(string(val)); err == nil {
-				cData.urls.AddURI(string(val))
-			}
-		default:
-			if descr.Type.IsSet {
-				for val := range val.Fields() {
-					idxCollectMetaValue(cData.words, val)
-				}
-			} else {
-				idxCollectMetaValue(cData.words, string(val))
-			}
-		}
-	}
-}
-
-func idxCollectMetaValue(stWords store.WordSet, value string) {
-	hasWords := false
-	for word := range strings.NormalizeWordSeq(value) {
-		stWords.AddBytes(word)
-		hasWords = true
-	}
-	if !hasWords {
-		stWords.AddString(value)
-	}
-}
-
-func (mgr *Manager) idxProcessData(ctx context.Context, zi *store.ZettelIndex, cData *collectData) {
-	for ref := range cData.refs.Values() {
-		if mgr.HasZettel(ctx, ref) {
-			zi.AddBackRef(ref)
-		} else {
-			zi.AddDeadRef(ref)
-			cData.words.AddString(ref.String())
-		}
-	}
-	zi.SetWords(cData.words)
-	zi.SetUrls(cData.urls)
-}
-
-func (mgr *Manager) idxUpdateValue(ctx context.Context, inverseKey, value string, zi *store.ZettelIndex) {
-	zid, err := id.Parse(value)
-	if err != nil {
-		return
-	}
-	if !mgr.HasZettel(ctx, zid) {
-		zi.AddDeadRef(zid)
-		return
-	}
-	if inverseKey == "" {
-		zi.AddBackRef(zid)
-		return
-	}
-	zi.AddInverseRef(inverseKey, zid)
-}
-
-func (mgr *Manager) idxDeleteZettel(ctx context.Context, zid id.Zid) {
-	toCheck := mgr.idxStore.DeleteZettel(ctx, zid)
-	mgr.idxCheckZettel(toCheck)
-}
-
-func (mgr *Manager) idxCheckZettel(s roster.Roster[id.Zid]) {
-	for zid := range s.Values() {
-		mgr.idxAr.EnqueueZettel(zid)
-	}
 }

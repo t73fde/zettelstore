@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"time"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -183,27 +182,6 @@ type Stats struct {
 	// Zettel is the number of zettel managed by the box, including
 	// duplicates across managed boxes.
 	ZettelTotal int
-
-	// LastReload stores the timestamp when a full re-index was done.
-	LastReload time.Time
-
-	// DurLastReload is the duration of the last full re-index run.
-	DurLastReload time.Duration
-
-	// IndexesSinceReload counts indexing a zettel since the full re-index.
-	IndexesSinceReload uint64
-
-	// ZettelIndexed is the number of zettel managed by the indexer.
-	ZettelIndexed int
-
-	// IndexUpdates count the number of metadata updates.
-	IndexUpdates uint64
-
-	// IndexedWords count the different words indexed.
-	IndexedWords uint64
-
-	// IndexedUrls count the different URLs indexed.
-	IndexedUrls uint64
 }
 
 // Manager is a box-managing box.

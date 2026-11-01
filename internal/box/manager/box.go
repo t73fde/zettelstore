@@ -70,11 +70,7 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl box.Zettel) (id.Zid, e
 	defer mgr.mgrMx.RUnlock()
 	if createBox, isCreateBox := mgr.boxes[0].(box.CreateBox); isCreateBox {
 		ztl.Meta = mgr.cleanMetaProperties(ztl.Meta)
-		zid, err := createBox.CreateZettel(ctx, ztl)
-		if err == nil {
-			mgr.idxUpdateZettel(ctx, ztl)
-		}
-		return zid, err
+		return createBox.CreateZettel(ctx, ztl)
 	}
 	return id.Invalid, box.ErrReadOnly
 }
@@ -170,22 +166,15 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 		return nil, err
 	}
 
-	m0, err := mgr.idxStore.GetMeta(ctx, zid)
-	if err != nil {
-		return nil, err
-	}
-
-	m1, err := mgr.index.GetMeta(zid)
+	m, err := mgr.index.GetMeta(zid)
 	if err != nil {
 		mgr.mgrLogger.Error("GetMeta", "zid", zid, "err", err)
 		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
-		// return nil, err
-	} else if !m0.Equal(m1, true) {
-		mgr.mgrLogger.Error("GetMeta", "zid", zid, "new", m1, "old", m0)
+		return nil, err
 	}
 
-	mgr.Enrich(ctx, m0, "")
-	return m0, nil
+	mgr.Enrich(ctx, m, "")
+	return m, nil
 }
 
 // SelectMeta returns all zettel meta data that match the selection
@@ -264,11 +253,7 @@ func (mgr *Manager) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
 func (mgr *Manager) updateZettel(ctx context.Context, zettel box.Zettel) error {
 	if updateBox, isUpdateBox := mgr.boxes[0].(box.UpdateBox); isUpdateBox {
 		zettel.Meta = mgr.cleanMetaProperties(zettel.Meta)
-		if err := updateBox.UpdateZettel(ctx, zettel); err != nil {
-			return err
-		}
-		mgr.idxUpdateZettel(ctx, zettel)
-		return nil
+		return updateBox.UpdateZettel(ctx, zettel)
 	}
 	return box.ErrReadOnly
 }
@@ -300,8 +285,7 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 		if deleteBox, isDeleteBox := p.(box.DeleteBox); isDeleteBox {
 			err := deleteBox.DeleteZettel(ctx, zid)
 			if err == nil {
-				mgr.idxDeleteZettel(ctx, zid)
-				return err
+				return nil
 			}
 			if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr && !errors.Is(err, box.ErrReadOnly) {
 				return err
