@@ -136,10 +136,6 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	return box.Zettel{Meta: m, Content: zettel.NewContent(src)}, nil
 }
 
-func (zb *zipBox) HasZettel(_ context.Context, zid id.Zid) bool {
-	return zb.dirSrv.GetDirEntry(zid).IsValid()
-}
-
 func (zb *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	entries := zb.dirSrv.GetDirEntries(constraint)
 	logging.LogTrace(zb.logger, "ApplyZid", "entries", len(entries))

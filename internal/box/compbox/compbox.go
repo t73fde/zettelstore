@@ -123,11 +123,6 @@ func (cb *compBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) 
 	return box.Zettel{}, err
 }
 
-func (*compBox) HasZettel(_ context.Context, zid id.Zid) bool {
-	_, found := myZettel[zid]
-	return found
-}
-
 func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	logging.LogTrace(cb.logger, "ApplyZid", "entries", len(myZettel))
 	for zid, gen := range myZettel {

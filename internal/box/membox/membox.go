@@ -140,13 +140,6 @@ func (mb *memBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	return z, nil
 }
 
-func (mb *memBox) HasZettel(_ context.Context, zid id.Zid) bool {
-	mb.mx.RLock()
-	_, found := mb.zettel[zid]
-	mb.mx.RUnlock()
-	return found
-}
-
 func (mb *memBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
 	mb.mx.RLock()
 	defer mb.mx.RUnlock()

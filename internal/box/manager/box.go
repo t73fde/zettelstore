@@ -143,22 +143,6 @@ func (mgr *Manager) fetchZids(ctx context.Context) (map[id.Zid]struct{}, error) 
 	return result, nil
 }
 
-// HasZettel returns true, if the zettel with the given ID exists.
-func (mgr *Manager) HasZettel(ctx context.Context, zid id.Zid) bool {
-	mgr.mgrLogger.Debug("HasZettel", "zid", zid)
-	if err := mgr.checkContinue(ctx); err != nil {
-		return false
-	}
-	mgr.mgrMx.RLock()
-	defer mgr.mgrMx.RUnlock()
-	for _, bx := range mgr.boxes {
-		if bx.HasZettel(ctx, zid) {
-			return true
-		}
-	}
-	return false
-}
-
 // GetMeta returns just the metadata of the zettel with the given identifier.
 func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
 	mgr.mgrLogger.Debug("GetMeta", "zid", zid)

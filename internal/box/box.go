@@ -91,9 +91,6 @@ type MetaFunc func(*meta.Meta)
 type ManagedBox interface {
 	BaseBox
 
-	// HasZettel returns true, if box conains zettel with given identifier.
-	HasZettel(context.Context, id.Zid) bool
-
 	// Apply identifier of every zettel to the given function, if predicate returns true.
 	ApplyZid(context.Context, ZidFunc, RetrievePredicate) error
 
