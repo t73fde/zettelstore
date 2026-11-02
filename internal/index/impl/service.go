@@ -101,17 +101,31 @@ func (rsrv *retrieveService) retrieve(ctx context.Context, job pendingJob, out c
 	ztl, err := rsrv.retriever.GetZettel(ctx, job.zid)
 	if err != nil {
 		if ctx.Err() != nil {
-			return false // cancelled by Stop: not an error, not a deletion
+			notifyAll(job.waiters, errStopped)
+			return false
 		}
 		if _, notFound := errors.AsType[box.ErrZettelNotFound](err); notFound {
-			return send(ctx, out, parseData{zid: job.zid, deleted: true, bulk: job.fromBulk})
+			pd := parseData{zid: job.zid, deleted: true, bulk: job.fromBulk, waiters: job.waiters}
+			if !send(ctx, out, pd) {
+				notifyAll(job.waiters, errStopped)
+				return false
+			}
+			return true
 		}
 		rsrv.logger.Error("GetZettel", "zid", job.zid, "error", err)
-		rsrv.pending.dropped(job.fromBulk)
+		rsrv.pending.dropped(job.fromBulk, job.waiters, err)
 		return true
 	}
-	return send(ctx, out, parseData{zid: job.zid, zettel: ztl, bulk: job.fromBulk})
+	pd := parseData{zid: job.zid, zettel: ztl, bulk: job.fromBulk, waiters: job.waiters}
+	if !send(ctx, out, pd) {
+		notifyAll(job.waiters, errStopped)
+		return false
+	}
+	return true
 }
+
+// errStopped is signaled if an operation tries to use the index, but it is not ready.
+var errStopped = errors.New("index stopped")
 
 // ----- parse service ----------
 
@@ -120,6 +134,7 @@ type parseData struct {
 	zettel  zettel.Zettel
 	deleted bool
 	bulk    bool // element belongs to the bulk load
+	waiters []chan<- error
 }
 
 type parseService struct {
@@ -130,7 +145,7 @@ type parseService struct {
 
 func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out chan<- analyzeData) {
 	for pd := range recvSeq(ctx, in) {
-		ad := analyzeData{zid: pd.zid, bulk: pd.bulk, deleted: pd.deleted}
+		ad := analyzeData{zid: pd.zid, bulk: pd.bulk, deleted: pd.deleted, waiters: pd.waiters}
 		if pd.deleted {
 			psrv.logger.Debug("Deleted", "zid", pd.zid)
 		} else if mustIndexZettelContent(pd.zettel.Meta) {
@@ -139,7 +154,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 				ad.zettel = parser.ParseZettel(ctx, pd.zettel, "", psrv.config)
 			})
 			if !ok || ad.zettel == nil { // element is dropped, the service continues
-				psrv.pending.dropped(pd.bulk)
+				psrv.pending.dropped(pd.bulk, pd.waiters, fmt.Errorf("index: parsing zettel %v failed", pd.zid))
 				continue
 			}
 		} else {
@@ -152,6 +167,7 @@ func (psrv *parseService) service(ctx context.Context, in <-chan parseData, out 
 			}
 		}
 		if !send(ctx, out, ad) {
+			notifyAll(pd.waiters, errStopped)
 			break
 		}
 	}
@@ -171,6 +187,7 @@ type analyzeData struct {
 	zettel  *zettel.ParsedZettel
 	deleted bool
 	bulk    bool
+	waiters []chan<- error
 }
 
 type analyzeService struct {
@@ -196,10 +213,12 @@ func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, 
 			asrv.analyser.analyze(&ad, &sd)
 		})
 		if !ok {
-			asrv.pending.dropped(ad.bulk)
+			asrv.pending.dropped(ad.bulk, ad.waiters, fmt.Errorf("index: analyzing zettel %v failed", ad.zid))
 			continue
 		}
+		sd.waiters = ad.waiters
 		if !send(ctx, out, sd) {
+			notifyAll(ad.waiters, errStopped)
 			break
 		}
 	}
@@ -211,10 +230,11 @@ func (asrv *analyzeService) service(ctx context.Context, in <-chan analyzeData, 
 // ----- store service ----------
 
 type storeData struct {
-	zid  id.Zid
-	dzid denseZid
-	aztl *analyzedZettel // nil, if the zettel was deleted; owned by the store step
-	bulk bool
+	zid     id.Zid
+	dzid    denseZid
+	aztl    *analyzedZettel // nil, if the zettel was deleted; owned by the store step
+	bulk    bool
+	waiters []chan<- error
 }
 
 type storeService struct {
@@ -227,10 +247,12 @@ type storeService struct {
 func (ssrv *storeService) service(ctx context.Context, in <-chan storeData) {
 	for sd := range recvSeq(ctx, in) {
 		if !runRecovered("IndexStore", func() { ssrv.apply(sd) }) {
-			// The store may be inconsistent: the instance cannot continue.
-			ssrv.fatal(fmt.Errorf("store step panicked for zettel %v", sd.zid))
+			err := fmt.Errorf("store step panicked for zettel %v", sd.zid)
+			notifyAll(sd.waiters, err)
+			ssrv.fatal(err)
 			return
 		}
+		notifyAll(sd.waiters, nil) // the change is visible in the store now
 		if sd.bulk {
 			ssrv.pending.finishBulk(false)
 		}

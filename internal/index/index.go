@@ -54,7 +54,7 @@ type Enqueuer interface {
 	// retrieved by the given Retriever.
 	// Enqueue is called in the context of a separate goroutine. It must
 	// not take too long to process the enqueue signal.
-	Enqueue(Reason, id.Zid)
+	Enqueue(Reason, id.Zid, chan<- error)
 }
 
 // Reason states why `Enqueuer.Enqueue` was called.

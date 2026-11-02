@@ -74,18 +74,19 @@ func Register(scheme string, create createFunc) {
 
 // Manager is a coordinating box.
 type Manager struct {
-	mgrLogger    *slog.Logger
-	stateMx      sync.RWMutex
-	state        box.StartState
-	mgrMx        sync.RWMutex
-	rtConfig     config.Config
-	boxes        []box.ManagedBox
-	observers    []box.UpdateFunc
-	mxObserver   sync.RWMutex
-	done         chan struct{}
-	infos        chan box.UpdateInfo
-	propertyKeys roster.Roster[string] // Set of property key names
-	index        index.Index
+	mgrLogger        *slog.Logger
+	stateMx          sync.RWMutex
+	state            box.StartState
+	mgrMx            sync.RWMutex
+	rtConfig         config.Config
+	boxes            []box.ManagedBox
+	observers        []box.UpdateFunc
+	mxObserver       sync.RWMutex
+	done             chan struct{}
+	infos            chan box.UpdateInfo
+	propertyKeys     roster.Roster[string] // Set of property key names
+	index            index.Index
+	indexWaitTimeout time.Duration
 }
 
 func (mgr *Manager) setState(newState box.StartState) {
@@ -112,11 +113,12 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, index index.Index, rt
 	}
 	boxLogger := kernel.Main.GetLogger(kernel.BoxService)
 	mgr := &Manager{
-		mgrLogger:    boxLogger.With("box", "manager"),
-		rtConfig:     rtConfig,
-		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
-		propertyKeys: propertyKeys,
-		index:        index,
+		mgrLogger:        boxLogger.With("box", "manager"),
+		rtConfig:         rtConfig,
+		infos:            make(chan box.UpdateInfo, len(boxURIs)*10),
+		propertyKeys:     propertyKeys,
+		index:            index,
+		indexWaitTimeout: 4 * time.Second, // TODO: make configurable
 	}
 
 	if err := setupBoxURIs(boxURIs, authManager.IsReadonly()); err != nil {
@@ -277,11 +279,11 @@ func (mgr *Manager) notifier() {
 				if mgr.State() == box.StartStateStarted {
 					switch reason {
 					case box.OnReady:
-						mgr.index.Enqueue(index.OnReady, zid)
+						mgr.index.Enqueue(index.OnReady, zid, nil)
 					case box.OnReload:
-						mgr.index.Enqueue(index.OnReset, zid)
+						mgr.index.Enqueue(index.OnReset, zid, nil)
 					case box.OnZettel, box.OnDelete:
-						mgr.index.Enqueue(index.OnZettel, zid)
+						mgr.index.Enqueue(index.OnZettel, zid, nil)
 					default:
 						mgr.mgrLogger.Error("unknown notification reason", "reason", reason)
 					}
@@ -322,6 +324,32 @@ func (mgr *Manager) notifyObserver(ci *box.UpdateInfo) {
 	}
 }
 
+func (mgr *Manager) enqueueAndWait(ctx context.Context, zid id.Zid) {
+	if !mgr.index.IsReady() {
+		mgr.index.Enqueue(index.OnZettel, zid, nil) // do not wait for a not ready index
+		return
+	}
+	mgr.mgrLogger.Debug("enqueueAndWait/0", "zid", zid)
+	done := make(chan error, 1) // buffered, never closed
+	mgr.index.Enqueue(index.OnZettel, zid, done)
+	mgr.mgrLogger.Debug("enqueueAndWait/1", "zid", zid)
+
+	timer := time.NewTimer(mgr.indexWaitTimeout)
+	defer timer.Stop()
+	select {
+	case err := <-done:
+		if err == nil {
+			mgr.mgrLogger.Debug("Index updated", "zid", zid)
+		} else {
+			mgr.mgrLogger.Info("Index failed", "zid", zid, "error", err)
+		}
+	case <-timer.C:
+		mgr.mgrLogger.Info("Index wait timeout", "zid", zid)
+	case <-ctx.Done():
+		mgr.mgrLogger.Debug("Index wait cancelled", "zid", zid, "cause", context.Cause(ctx))
+	}
+}
+
 // Start the box. Now all other functions of the box are allowed.
 // Starting an already started box is not allowed.
 func (mgr *Manager) Start(ctx context.Context) error {
@@ -356,8 +384,8 @@ func (mgr *Manager) Start(ctx context.Context) error {
 	mgr.setState(box.StartStateStarted)
 
 	mgr.notifyObserver(&box.UpdateInfo{Box: mgr, Reason: box.OnReady})
-	mgr.index.Enqueue(index.OnReady, id.Invalid) // Indexer can setup itself
-	mgr.index.Enqueue(index.OnReset, id.Invalid) // Ensure an initial index run
+	mgr.index.Enqueue(index.OnReady, id.Invalid, nil) // Indexer can setup itself
+	mgr.index.Enqueue(index.OnReset, id.Invalid, nil) // Ensure an initial index run
 	return nil
 }
 

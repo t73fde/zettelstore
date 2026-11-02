@@ -22,6 +22,10 @@ import (
 
 type memberSet map[id.Zid]struct{}
 
+// waiterSet maps the zid of an individually notified zettel to the channels of
+// the callers that wait until that zettel is stored. The slice may be nil.
+type waiterSet map[id.Zid][]chan<- error
+
 // bulkResult summarizes a completed bulk load.
 type bulkResult struct {
 	total  int // number of zettel known when the bulk was fetched
@@ -37,7 +41,8 @@ type bulkResult struct {
 // and every bulk job that was handed out has been finished.
 type pendingQueue struct {
 	mx     sync.Mutex
-	single memberSet // individually notified zettel
+	single waiterSet // individually notified zettel
+	closed bool      // abort was called; new waiters are refused
 	bulk   memberSet // zettel of the initial load
 
 	fetchPending bool // the fetch job is still to be delivered
@@ -54,21 +59,29 @@ type pendingQueue struct {
 
 func newPendingQueue(onBulkDone func(bulkResult)) *pendingQueue {
 	return &pendingQueue{
-		single:       make(memberSet),
+		single:       make(waiterSet),
 		fetchPending: true,
 		onBulkDone:   onBulkDone,
 	}
 }
 
-func (pq *pendingQueue) addZettel(zid id.Zid) {
+func (pq *pendingQueue) addZettel(zid id.Zid, done chan<- error) {
 	if !zid.IsValid() {
 		return
 	}
 	pq.mx.Lock()
 	defer pq.mx.Unlock()
 
-	delete(pq.bulk, zid) // retrieved anew anyway; moves to the individual set
-	pq.single[zid] = struct{}{}
+	if pq.closed {
+		notify(done, errStopped) // do not let the caller wait for the timeout
+		done = nil
+	}
+	delete(pq.bulk, zid)      // retrieved anew anyway; moves to the individual set
+	waiters := pq.single[zid] // nil, if zid is not queued yet
+	if done != nil {
+		waiters = append(waiters, done)
+	}
+	pq.single[zid] = waiters // creates the entry, even if waiters is nil
 }
 
 // reload sets the bulk. Only the first call has an effect.
@@ -103,6 +116,7 @@ type pendingJob struct {
 	zid      id.Zid
 	action   pendingAction
 	fromBulk bool
+	waiters  []chan<- error // to be notified when the job is stored or dropped
 }
 
 type pendingAction uint8
@@ -129,10 +143,10 @@ func (pq *pendingQueue) takeJob() (job pendingJob, res bulkResult, done bool) {
 		pq.fetchPending = false
 		return pendingJob{action: pendingFetch}, res, false
 	}
-	if zid, ok := popAny(pq.single); ok {
-		return pendingJob{zid: zid, action: pendingZettel}, res, false
+	if zid, waiters, ok := popAny(pq.single); ok {
+		return pendingJob{zid: zid, action: pendingZettel, waiters: waiters}, res, false
 	}
-	if zid, ok := popAny(pq.bulk); ok {
+	if zid, _, ok := popAny(pq.bulk); ok {
 		pq.outstanding++
 		return pendingJob{zid: zid, action: pendingZettel, fromBulk: true}, res, false
 	}
@@ -151,9 +165,10 @@ func (pq *pendingQueue) finishBulk(failed bool) {
 }
 
 // dropped accounts for an element that left the pipeline without reaching the
-// store. Only bulk elements are counted.
-func (pq *pendingQueue) dropped(bulk bool) {
+// store. err is the reason, delivered to all waiters of the element.
+func (pq *pendingQueue) dropped(bulk bool, waiters []chan<- error, err error) {
 	pq.droppedCount.Add(1)
+	notifyAll(waiters, err)
 	if bulk {
 		pq.finishBulk(true)
 	}
@@ -171,6 +186,19 @@ func (pq *pendingQueue) markFinished(failed bool) (bulkResult, bool) {
 	return pq.completeLocked()
 }
 
+// abort notifies the waiters of all zettel not yet taken and refuses further
+// waiters. Called when the instance is stopped or replaced. Elements already
+// in the stages are completed by their dropped calls (with ErrIndexStopped).
+func (pq *pendingQueue) abort(err error) {
+	pq.mx.Lock()
+	defer pq.mx.Unlock()
+	pq.closed = true
+	for zid, waiters := range pq.single {
+		notifyAll(waiters, err)
+		pq.single[zid] = nil
+	}
+}
+
 // completeLocked reports true exactly once, when the bulk is complete.
 func (pq *pendingQueue) completeLocked() (bulkResult, bool) {
 	if !pq.bulkLoaded || pq.bulkDone || len(pq.bulk) > 0 || pq.outstanding > 0 {
@@ -180,10 +208,11 @@ func (pq *pendingQueue) completeLocked() (bulkResult, bool) {
 	return bulkResult{total: pq.total, failed: pq.failed}, true
 }
 
-func popAny(ms memberSet) (id.Zid, bool) {
-	for zid := range ms {
-		delete(ms, zid)
-		return zid, true
+func popAny[V any](m map[id.Zid]V) (id.Zid, V, bool) {
+	for zid, v := range m {
+		delete(m, zid)
+		return zid, v, true
 	}
-	return id.Invalid, false
+	var zero V
+	return id.Invalid, zero, false
 }

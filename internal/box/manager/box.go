@@ -70,7 +70,11 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl box.Zettel) (id.Zid, e
 	defer mgr.mgrMx.RUnlock()
 	if createBox, isCreateBox := mgr.boxes[0].(box.CreateBox); isCreateBox {
 		ztl.Meta = mgr.cleanMetaProperties(ztl.Meta)
-		return createBox.CreateZettel(ctx, ztl)
+		zid, err := createBox.CreateZettel(ctx, ztl)
+		if err != nil {
+			mgr.enqueueAndWait(ctx, zid)
+		}
+		return zid, err
 	}
 	return id.Invalid, box.ErrReadOnly
 }
@@ -237,7 +241,11 @@ func (mgr *Manager) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
 func (mgr *Manager) updateZettel(ctx context.Context, zettel box.Zettel) error {
 	if updateBox, isUpdateBox := mgr.boxes[0].(box.UpdateBox); isUpdateBox {
 		zettel.Meta = mgr.cleanMetaProperties(zettel.Meta)
-		return updateBox.UpdateZettel(ctx, zettel)
+		if err := updateBox.UpdateZettel(ctx, zettel); err != nil {
+			return err
+		}
+		mgr.enqueueAndWait(ctx, zettel.Meta.Zid)
+		return nil
 	}
 	return box.ErrReadOnly
 }
@@ -269,6 +277,7 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 		if deleteBox, isDeleteBox := p.(box.DeleteBox); isDeleteBox {
 			err := deleteBox.DeleteZettel(ctx, zid)
 			if err == nil {
+				mgr.enqueueAndWait(ctx, zid)
 				return nil
 			}
 			if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr && !errors.Is(err, box.ErrReadOnly) {

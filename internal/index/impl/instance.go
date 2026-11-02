@@ -75,10 +75,13 @@ func (in *instance) start(cfg config.Config, retriever index.Retriever) {
 	in.logger.Debug("Start")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	in.pl = &pipeline{
-		ctx:      ctx,
-		cancel:   cancel,
-		logger:   in.logger.With("service", "pipeline"),
-		onGiveUp: func(cause error) { in.onFail(in, cause) },
+		ctx:    ctx,
+		cancel: cancel,
+		logger: in.logger.With("service", "pipeline"),
+		onGiveUp: func(cause error) {
+			in.pending.abort(cause)
+			in.onFail(in, cause)
+		},
 	}
 
 	storeCh := make(chan storeData, 4)     // TODO: configurable?
@@ -120,6 +123,7 @@ const stopTimeout = 10 * time.Second
 func (in *instance) stop() {
 	in.logger.Debug("Stopping")
 	in.pl.cancel(nil) // interrupts blocking GetZettel / FetchZids
+	in.pending.abort(errStopped)
 	done := make(chan struct{})
 	go func() { //gohawk:ignore goroutineownership
 		in.pl.wg.Wait()
@@ -134,8 +138,8 @@ func (in *instance) stop() {
 }
 
 // enqueue schedules the zettel for (re-) indexing.
-func (in *instance) enqueue(zid id.Zid) {
-	in.pending.addZettel(zid)
+func (in *instance) enqueue(zid id.Zid, done chan<- error) {
+	in.pending.addZettel(zid, done)
 	select {
 	case in.wake <- struct{}{}:
 	default:

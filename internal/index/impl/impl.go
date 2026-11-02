@@ -174,7 +174,7 @@ func (idx *Index) instanceFailed(in *instance, cause error) {
 }
 
 // Enqueue a new zettel to update the search index.
-func (idx *Index) Enqueue(reason index.Reason, zid id.Zid) {
+func (idx *Index) Enqueue(reason index.Reason, zid id.Zid, done chan<- error) {
 	switch reason {
 	case index.OnReady:
 		idx.logger.Debug("OnReady")
@@ -183,7 +183,7 @@ func (idx *Index) Enqueue(reason index.Reason, zid id.Zid) {
 		idx.reset()
 	case index.OnZettel:
 		idx.logger.Debug("OnZettel", "zid", zid)
-		idx.enqueueZettel(zid)
+		idx.enqueueZettel(zid, done)
 	default:
 		idx.logger.Error("Unknown notification reason", "reason", reason, "zid", zid)
 	}
@@ -192,14 +192,29 @@ func (idx *Index) Enqueue(reason index.Reason, zid id.Zid) {
 // enqueueZettel hands the zettel to every instance that must reflect the
 // change: the active one serves searches, the building one becomes the active
 // one. Holding the read lock excludes a concurrent swap, so no update is lost.
-func (idx *Index) enqueueZettel(zid id.Zid) {
+func (idx *Index) enqueueZettel(zid id.Zid, done chan<- error) {
 	idx.mx.RLock()
 	defer idx.mx.RUnlock()
 	if idx.active != nil {
-		idx.active.enqueue(zid)
+		idx.active.enqueue(zid, done)
 	}
 	if idx.building != nil {
-		idx.building.enqueue(zid)
+		idx.building.enqueue(zid, done)
+	}
+}
+
+// notify never blocks. A nil done is a no-op: a send to a nil channel is never
+// ready, so select takes the default branch.
+func notify(done chan<- error, err error) {
+	select {
+	case done <- err:
+	default:
+	}
+}
+
+func notifyAll(waiters []chan<- error, err error) {
+	for _, w := range waiters {
+		notify(w, err)
 	}
 }
 
