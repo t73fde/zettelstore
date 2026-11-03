@@ -187,6 +187,10 @@ type Manager interface {
 	StartStopper
 	Subject
 
+	// IsReady returns true if the Manager is not just started, but also all
+	// zettel are indexed.
+	IsReady() bool
+
 	// ReadStats populates st with box statistics
 	ReadStats(st *Stats)
 

@@ -430,6 +430,12 @@ func (mgr *Manager) Stop(ctx context.Context) {
 	mgr.setState(box.StartStateStopped)
 }
 
+// IsReady returns true if the Manager is not just started, but also all
+// zettel are indexed.
+func (mgr *Manager) IsReady() bool {
+	return mgr.State() == box.StartStateStarted && mgr.index.IsReady()
+}
+
 // Refresh internal box data.
 func (mgr *Manager) Refresh(ctx context.Context) error {
 	mgr.mgrLogger.Debug("Refresh")

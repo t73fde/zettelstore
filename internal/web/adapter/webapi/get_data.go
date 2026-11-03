@@ -17,24 +17,54 @@ import (
 	"net/http"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
 
 	"zettelstore.de/z/internal/usecase"
 )
 
 // MakeGetDataHandler creates a new HTTP handler to return zettelstore data.
-func (a *WebAPI) MakeGetDataHandler(ucVersion usecase.Version) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		version := ucVersion.Run()
-		err := a.writeObject(w, id.Invalid, sx.MakeList(
-			sx.Int64(version.Major),
-			sx.Int64(version.Minor),
-			sx.Int64(version.Patch),
-			sx.MakeString(version.PreRelease),
-			sx.MakeString(version.Build),
-		))
-		if err != nil {
-			a.logger.Error("Write version info", "err", err)
+func (a *WebAPI) MakeGetDataHandler(ucVersion usecase.Version, ucIsReady usecase.IsReady) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		switch {
+		case q.Has("ready"):
+			a.writeIsReady(w, ucIsReady.Run())
+		default:
+			version := ucVersion.Run()
+			a.writeVersion(w, version)
 		}
 	})
+}
+
+func (a *WebAPI) writeVersion(w http.ResponseWriter, version semver.SemVer) {
+	err := a.writeObject(w, id.Invalid, sx.MakeList(
+		sx.Int64(version.Major),
+		sx.Int64(version.Minor),
+		sx.Int64(version.Patch),
+		sx.MakeString(version.PreRelease),
+		sx.MakeString(version.Build),
+	))
+	if err != nil {
+		a.logger.Error("Write version info", "err", err)
+	}
+}
+
+func (a *WebAPI) writeIsReady(w http.ResponseWriter, isReady bool) {
+	var result []byte
+
+	h := w.Header()
+	h.Add("Cache-Control", "no-store")
+	if isReady {
+		w.WriteHeader(http.StatusOK)
+		result = append(result, "ready\n"...)
+	} else {
+		h.Add("Retry-After", "1") // 1s, can be constant
+		w.WriteHeader(http.StatusServiceUnavailable)
+		result = append(result, "incomplete\n"...)
+	}
+
+	if _, err := w.Write(result); err != nil {
+		a.logger.Error("IsReady", "err", err)
+	}
 }

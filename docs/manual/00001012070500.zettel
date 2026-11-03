@@ -4,11 +4,13 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220304164242
-modified: 20260730145959
+modified: 20261103183735
 
-The [[endpoint|00001012920000]] ''/x'' allows you to retrieve administrative data.
+The [[endpoint|00001012920000]] ''/x'' allows you to retrieve some (administrative) data.
+Without any query parameter, it returns the Zettelstore version data.
+With the query parameter ''ready'', it reports whether the box service is ready for use.
 
-Currently, the only available data is Zettelstore version information.
+=== Version data
 
 ````
 # curl 'http://127.0.0.1:23123/x'
@@ -20,6 +22,66 @@ Currently, the only available data is Zettelstore version information.
 * The first string contains optional pre-release information, for example ``"dev"`` for a development version or ``"preview"`` for a preview version.
 * The second string contains optional information that identifies the version from a developer's perspective.
 
-=== HTTP Status codes
+==== HTTP Status codes
 ; ''200''
 : Retrieval was successful, the body contains an appropriate object.
+
+=== Readiness
+Zettelstore starts its web service before the initial indexing of all zettel is complete.
+Until then, search results and some computed metadata may be incomplete.
+Zettel metadata evaluated in this phase contains the key ''index-state'' with the value ''incomplete''.
+
+To find out whether the box service is completely ready, send an HTTP GET request to the endpoint ''/x'' with the query parameter ''ready''.
+The parameter has no value.
+A value, if given, is ignored.
+If query parameter ''ready'' is present, all other query parameters are ignored.
+
+This request does not require authentication, even if [[authentication is enabled|00001010040100]].
+It does not provide any information about the content of the Zettelstore.
+
+```sh
+# curl -i 'http://127.0.0.1:23123/x?ready'
+HTTP/1.1 503 Service Unavailable
+Cache-Control: no-store
+Retry-After: 1
+Content-Type: text/plain; charset=utf-8
+
+incomplete
+```
+
+```sh
+# curl -i 'http://127.0.0.1:23123/x?ready'
+HTTP/1.1 200 OK
+Cache-Control: no-store
+Content-Type: text/plain; charset=utf-8
+
+ready
+```
+
+The body contains a plain text value for human readers, followed by a newline:
+; ''ready''
+: The box service is started, and the initial indexing is complete.
+; ''incomplete''
+: The box service is started, but the initial indexing is not complete yet.
+
+The HTTP status code is authoritative.
+Clients must treat the status codes ''200'' and ''204'' as ""ready"".
+Currently, only ''200'' is used, with the body ''ready''.
+Future versions may respond with ''204'' and an empty body.
+Status ''503'' means ""incomplete"".
+The body is informational only and should not be evaluated by clients.
+Intermediate components, such as reverse proxies, may replace the body of a ''503'' response.
+
+Once ''ready'' is reported, the state does not change back during the lifetime of the Zettelstore process, even if the index is rebuilt later.
+During a rebuild, the previous index continues to serve requests.
+
+Clients should poll this endpoint until it reports ''ready''.
+The value of the ''Retry-After'' header is a hint for the polling interval in seconds.
+
+==== HTTP Status codes
+; ''200'', ''204''
+: The box service is ready.
+  Currently, only ''200'' is used.
+; ''503''
+: The box service is running, but the initial indexing is not complete.
+  Try again after the number of seconds given in the ''Retry-After'' header.
