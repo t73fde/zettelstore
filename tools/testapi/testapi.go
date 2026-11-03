@@ -107,7 +107,7 @@ func zsIsReady() error {
 	maxTime := time.Now().Add(1 * time.Minute)
 	for {
 		if time.Now().After(maxTime) {
-			return fmt.Errorf("No ready timeout")
+			return fmt.Errorf("no ready timeout")
 		}
 		req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://127.0.0.1:23123/x?ready", nil)
 		if err != nil {
