@@ -35,7 +35,7 @@ func genParserM(zid id.Zid) *meta.Meta {
 func genParserC() []byte {
 	var buf []byte
 	buf = append(buf, "|=Syntax<|=Alt. Value(s):|=Text Parser?:|=Text Format?:|=Image Format?:\n"...)
-	syntaxes := parser.GetSyntaxes()
+	syntaxes := slices.Collect(parser.Syntaxes())
 	slices.Sort(syntaxes)
 	for _, syntax := range syntaxes {
 		info := parser.Get(syntax)

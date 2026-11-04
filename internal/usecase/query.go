@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
+	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -28,7 +29,6 @@ import (
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
@@ -159,26 +159,28 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 		sb.WriteString(" :")
 		sb.WriteString(word)
 	}
-	q := (*query.Query)(nil).Parse(sb.String())
+	q := query.Parse(sb.String())
 	candidates, err := uc.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		return nil
 	}
-	metaZids := idset.NewCap(len(metaSeq))
-	refZids := idset.NewCap(len(metaSeq) * 4) // Assumption: there are four zids per zettel
+	var metaZids roster.Roster[id.Zid]
+	metaZids.Grow(len(metaSeq))
+	var refZids roster.Roster[id.Zid]
+	refZids.Grow(len(metaSeq) * 4) // Assumption: there are four zids per zettel
 	for _, m := range metaSeq {
-		metaZids.Add(m.Zid)
-		refZids.Add(m.Zid)
+		metaZids.Insert(m.Zid)
+		refZids.Insert(m.Zid)
 		for key, val := range m.ComputedRest() {
 			switch meta.Type(key) {
 			case meta.TypeID:
 				if zid, errParse := id.Parse(string(val)); errParse == nil {
-					refZids.Add(zid)
+					refZids.Insert(zid)
 				}
 			case meta.TypeIDSet:
 				for val := range val.Fields() {
 					if zid, errParse := id.Parse(val); errParse == nil {
-						refZids.Add(zid)
+						refZids.Insert(zid)
 					}
 				}
 			}
@@ -188,7 +190,7 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	return uc.filterCandidates(ctx, candidates, words)
 }
 
-func filterByZid(candidates []*meta.Meta, ignoreSeq *idset.ArraySet) []*meta.Meta {
+func filterByZid(candidates []*meta.Meta, ignoreSeq roster.Roster[id.Zid]) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
 	for _, m := range candidates {
 		if !ignoreSeq.Contains(m.Zid) {

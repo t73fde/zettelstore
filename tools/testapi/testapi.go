@@ -15,11 +15,12 @@
 package main
 
 import (
-	"errors"
+	"context"
 	"flag"
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"os"
 	"os/exec"
 	"strings"
@@ -44,16 +45,14 @@ type zsInfo struct {
 }
 
 func cmdTestAPI() error {
-	var err error
 	var info zsInfo
 	needServer := !addressInUse(":23123")
 	if needServer {
-		err = startZettelstore(&info)
+		if err := startZettelstore(&info); err != nil {
+			return err
+		}
 	}
-	if err != nil {
-		return err
-	}
-	err = tools.CheckGoTest("zettelstore.de/z/tests/client", "-base-url", "http://127.0.0.1:23123")
+	err := tools.CheckGoTest("zettelstore.de/z/tests/client", "-base-url", "http://127.0.0.1:23123")
 	if needServer {
 		err1 := stopZettelstore(&info)
 		if err == nil {
@@ -73,17 +72,10 @@ func startZettelstore(info *zsInfo) error {
 	if !tools.Verbose {
 		cmd.Stderr = nil
 	}
-	err := cmd.Start()
-	time.Sleep(2 * time.Second)
-	for range 100 {
-		time.Sleep(time.Millisecond * 100)
-		if addressInUse(info.adminAddress) {
-			info.cmd = cmd
-			return err
-		}
+	if err := cmd.Start(); err != nil {
+		return err
 	}
-	time.Sleep(4 * time.Second) // Wait for all zettel to be indexed.
-	return errors.New("zettelstore did not start")
+	return zsIsReady()
 }
 
 func stopZettelstore(i *zsInfo) error {
@@ -94,7 +86,7 @@ func stopZettelstore(i *zsInfo) error {
 	}
 	_, err = io.WriteString(conn, "shutdown\n")
 	_ = conn.Close()
-	if err == nil {
+	if err == nil && i.cmd != nil {
 		err = i.cmd.Wait()
 	}
 	return err
@@ -107,4 +99,36 @@ func addressInUse(address string) bool {
 	}
 	_ = conn.Close()
 	return true
+}
+
+func zsIsReady() error {
+	ctx := context.Background()
+	client := http.Client{Timeout: 5 * time.Second}
+	maxTime := time.Now().Add(1 * time.Minute)
+	for {
+		if time.Now().After(maxTime) {
+			return fmt.Errorf("no ready timeout")
+		}
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://127.0.0.1:23123/x?ready", nil)
+		if err != nil {
+			return err
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			if resp != nil && resp.Body != nil {
+				_ = resp.Body.Close()
+			}
+			continue
+		}
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
+		_ = resp.Body.Close()
+		switch resp.StatusCode {
+		case http.StatusOK, http.StatusNoContent:
+			return nil
+		case http.StatusServiceUnavailable:
+			time.Sleep(1 * time.Second)
+		default:
+			return fmt.Errorf("unexpected status: %s", resp.Status)
+		}
+	}
 }

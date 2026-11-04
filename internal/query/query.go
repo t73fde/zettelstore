@@ -20,30 +20,12 @@ import (
 	"math/rand/v2"
 	"slices"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/idset"
+	"zettelstore.de/z/internal/index"
 )
-
-// Searcher is used to select zettel identifier based on search criteria.
-type Searcher interface {
-	// Select all zettel that contains the given exact word.
-	// The word must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchEqual(word string) *idset.ArraySet
-
-	// Select all zettel that have a word with the given prefix.
-	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchPrefix(prefix string) *idset.ArraySet
-
-	// Select all zettel that have a word with the given suffix.
-	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchSuffix(suffix string) *idset.ArraySet
-
-	// Select all zettel that contains the given string.
-	// The string must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchContains(s string) *idset.ArraySet
-}
 
 // Query specifies a mechanism for querying zettel.
 type Query struct {
@@ -126,21 +108,9 @@ type sortOrder struct {
 
 func (so *sortOrder) isRandom() bool { return so.key == "" }
 
-func createIfNeeded(q *Query) *Query {
-	if q == nil {
-		return &Query{
-			terms: []conjTerms{{}},
-		}
-	}
-	return q
-}
-
 // Clone the query value.
 func (q *Query) Clone() *Query {
-	if q == nil {
-		return nil
-	}
-	c := new(*q)
+	c := *q
 	c.zids = q.GetZids()
 	c.directives = q.GetDirectives()
 
@@ -152,7 +122,7 @@ func (q *Query) Clone() *Query {
 	}
 	c.order = slices.Clone(q.order)
 	c.actions = slices.Clone(q.actions)
-	return c
+	return &c
 }
 
 type compareOp uint8
@@ -218,10 +188,8 @@ type expValue struct {
 
 func (q *Query) addSearch(val expValue) { q.terms[len(q.terms)-1].addSearch(val) }
 
-func (q *Query) addKey(key string, op compareOp) *Query {
-	q = createIfNeeded(q)
+func (q *Query) addKey(key string, op compareOp) {
 	q.terms[len(q.terms)-1].addKey(key, op)
-	return q
 }
 
 var missingMap = map[compareOp]bool{
@@ -252,21 +220,15 @@ func (q *Query) GetMetaValues(key string, withMissing bool) (vals []meta.Value) 
 }
 
 // SetPreMatch sets the pre-selection predicate.
-func (q *Query) SetPreMatch(preMatch MetaMatchFunc) *Query {
-	q = createIfNeeded(q)
+func (q *Query) SetPreMatch(preMatch MetaMatchFunc) {
 	// if q.preMatch != nil {
 	// 	panic("search PreMatch already set")
 	// }
 	q.preMatch = preMatch
-	return q
 }
 
 // SetSeed sets a seed value.
-func (q *Query) SetSeed(seed int) *Query {
-	q = createIfNeeded(q)
-	q.seed = seed
-	return q
-}
+func (q *Query) SetSeed(seed int) { q.seed = seed }
 
 // GetSeed returns the seed value if one was set.
 func (q *Query) GetSeed() (int, bool) {
@@ -277,12 +239,10 @@ func (q *Query) GetSeed() (int, bool) {
 }
 
 // SetDeterministic signals that the result should be the same if the seed is the same.
-func (q *Query) SetDeterministic() *Query {
-	q = createIfNeeded(q)
+func (q *Query) SetDeterministic() {
 	if q.seed <= 0 {
 		q.seed = rand.IntN(10000) + 1
 	}
-	return q
 }
 
 // Actions returns the slice of action specifications
@@ -335,18 +295,10 @@ func (q *Query) EnrichNeeded() bool {
 
 // RetrieveAndCompile queries the search index and returns a predicate
 // for its results and returns a matching predicate.
-func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq []*meta.Meta) Compiled {
-	if q == nil {
-		return Compiled{
-			PreMatch: matchAlways,
-			Terms: []CompiledTerm{{
-				Match:    matchAlways,
-				Retrieve: AlwaysIncluded,
-			}}}
-	}
-	q = q.Clone()
+func (q *Query) RetrieveAndCompile(_ context.Context, searcher index.Searcher, metaSeq []*meta.Meta) Compiled {
+	newQ := q.Clone()
 
-	preMatch := q.preMatch
+	preMatch := newQ.preMatch
 	if preMatch == nil {
 		preMatch = matchAlways
 	}
@@ -354,17 +306,17 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq
 	startSet := metaList2idSet(metaSeq)
 	result := Compiled{
 		hasQuery:  true,
-		seed:      q.seed,
-		pick:      q.pick,
-		order:     q.order,
-		offset:    q.offset,
-		limit:     q.limit,
+		seed:      newQ.seed,
+		pick:      newQ.pick,
+		order:     newQ.order,
+		offset:    newQ.offset,
+		limit:     newQ.limit,
 		startMeta: metaSeq,
 		PreMatch:  preMatch,
 		Terms:     []CompiledTerm{},
 	}
 
-	for _, term := range q.terms {
+	for _, term := range newQ.terms {
 		cTerm := term.retrieveAndCompileTerm(searcher, startSet)
 		if cTerm.Retrieve == nil {
 			if cTerm.Match == nil {
@@ -385,33 +337,31 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher Searcher, metaSeq
 	return result
 }
 
-func metaList2idSet(ml []*meta.Meta) *idset.ArraySet {
-	if ml == nil {
-		return nil
-	}
-	result := idset.NewCap(len(ml))
+func metaList2idSet(ml []*meta.Meta) (result roster.Roster[id.Zid]) {
+	result.Grow(len(ml))
 	for _, m := range ml {
-		result = result.Add(m.Zid)
+		result.Insert(m.Zid)
 	}
 	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.ArraySet) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(searcher index.Searcher, startSet roster.Roster[id.Zid]) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
-	var pred RetrievePredicate
+	var pred index.RetrievePredicate
 	if searcher != nil {
 		pred = ct.retrieveIndex(searcher)
-		if startSet != nil {
+		if !startSet.IsEmpty() {
 			if pred == nil {
-				pred = startSet.ContainsOrNil
+				pred = startSet.Contains
 			} else {
-				predSet := idset.NewCap(startSet.Length())
+				var predSet roster.Roster[id.Zid]
+				predSet.Grow(startSet.Count())
 				for zid := range startSet.Values() {
 					if pred(zid) {
-						predSet = predSet.Add(zid)
+						predSet.Insert(zid)
 					}
 				}
-				pred = predSet.ContainsOrNil
+				pred = predSet.Contains // predSet is known to be non-nil
 			}
 		}
 	}
@@ -419,7 +369,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher Searcher, startSet *idset.A
 }
 
 // retrieveIndex and return a predicate to ask for results.
-func (ct *conjTerms) retrieveIndex(searcher Searcher) RetrievePredicate {
+func (ct *conjTerms) retrieveIndex(searcher index.Searcher) index.RetrievePredicate {
 	if len(ct.search) == 0 {
 		return nil
 	}
@@ -429,26 +379,29 @@ func (ct *conjTerms) retrieveIndex(searcher Searcher) RetrievePredicate {
 	}
 
 	positives := retrievePositives(normCalls, plainCalls)
-	if positives == nil {
+	if positives == nil || positives.IsEmpty() {
 		// No positive search for words, must contain only words for a negative search.
 		// Otherwise len(search) == 0 (see above)
 		negatives := retrieveNegatives(negCalls)
-		return func(zid id.Zid) bool { return !negatives.ContainsOrNil(zid) }
+		if negatives == nil || negatives.IsEmpty() {
+			return neverIncluded
+		}
+		negativePred := negatives.MakePredicate()
+		return func(zid id.Zid) bool { return !negativePred(zid) }
 	}
-	if positives.IsEmpty() {
-		// Positive search didn't found anything. We can omit the negative search.
-		return neverIncluded
-	}
+	positivePred := positives.MakePredicate()
 	if len(negCalls) == 0 {
 		// Positive search found something, but there is no negative search.
-		return positives.Contains
+		return positivePred
 	}
 	negatives := retrieveNegatives(negCalls)
-	if negatives == nil {
-		return positives.Contains
+	if negatives == nil || negatives.IsEmpty() {
+		return positivePred
 	}
 	return func(zid id.Zid) bool {
-		return positives.Contains(zid) && !negatives.ContainsOrNil(zid)
+		// negatives != nil
+		negativePred := negatives.MakePredicate()
+		return positivePred(zid) && !negativePred(zid)
 	}
 }
 

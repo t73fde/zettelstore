@@ -22,7 +22,7 @@ import (
 	"strings"
 	"sync"
 
-	"t73f.de/r/zero/set"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -111,7 +111,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keyZettelFileSyntax: {
 			"Zettel file syntax",
 			func(val string) (any, error) {
-				return set.New(strings.Fields(val)...), nil
+				return roster.Collect(strings.FieldsSeq(val)), nil
 			},
 			true,
 		},
@@ -133,7 +133,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		keyMaxTransclusions:       defaultMaxTransclusions,
 		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
-		keyZettelFileSyntax:       set.New[string](),
+		keyZettelFileSyntax:       roster.New[string](),
 		config.KeyListsMenuZettel: id.ZidTOCListsMenu,
 		config.KeyShowBackLinks:   "",
 		config.KeyShowFolgeLinks:  "",
@@ -325,7 +325,7 @@ func (cs *configService) IsZettelFileSyntax(syntax string) bool {
 		return true
 	}
 	if zfs := cs.GetCurConfig(keyZettelFileSyntax); zfs != nil {
-		if syntaxSet, ok := zfs.(*set.Set[string]); ok {
+		if syntaxSet, ok := zfs.(roster.Roster[string]); ok {
 			return syntaxSet.Contains(syntax)
 		}
 	}

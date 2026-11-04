@@ -1,0 +1,718 @@
+//-----------------------------------------------------------------------------
+// Copyright (c) 2026-present Detlef Stern
+//
+// This file is part of Zettelstore.
+//
+// Zettelstore is licensed under the latest version of the EUPL (European Union
+// Public License). Please see file LICENSE.txt for your rights and obligations
+// under this license.
+//
+// SPDX-License-Identifier: EUPL-1.2
+// SPDX-FileCopyrightText: 2026-present Detlef Stern
+//-----------------------------------------------------------------------------
+
+package impl
+
+import (
+	"cmp"
+	"fmt"
+	"io"
+	"iter"
+	"maps"
+	"slices"
+	"strings"
+	"sync"
+
+	"t73f.de/r/zero/bitset"
+	zeromaps "t73f.de/r/zero/maps"
+	"t73f.de/r/zero/roster"
+	"t73f.de/r/zero/vocab"
+	"t73f.de/r/zsc/domain/id"
+)
+
+type store struct {
+	stats *stats
+
+	mx           sync.RWMutex
+	zettel       map[denseZid]*storeZettel                // all existing zettel
+	backward     map[denseZid]roster.Roster[denseZid]     // target -> zettel that reference it; the target may not exist
+	words        map[vocab.WordID]roster.Roster[denseZid] // word -> zettel containing it
+	urls         map[string]roster.Roster[denseZid]       // URL -> zettel containing it
+	metaBackward map[vocab.WordID]map[denseZid]roster.Roster[denseZid]
+	// metaBackward: computed key -> target -> zettel that name the target in a
+	// metadata value of the inverse key. Invariant: for every zettel r in
+	// st.zettel, t is in r.forwardOf(k) if and only if r is in
+	// st.metaBackward[inverse(k)][t].
+
+	inverseKeys map[vocab.WordID]vocab.WordID // read-only; shared with dictionary.inverse
+}
+
+// storeZettel stores data of a specific zettel. After adding it to a store,
+// it is treated as immutable.
+type storeZettel struct {
+	meta        storeMeta
+	forward     roster.Roster[denseZid]
+	words       roster.Roster[vocab.WordID]
+	urls        roster.Roster[string]
+	metaForward []metaZid
+}
+
+// forwardOf returns the targets that sz names in the metadata key keyID. The
+// result is empty, if there is none. Entries of metaForward are never empty.
+func (sz *storeZettel) forwardOf(keyID vocab.WordID) roster.Roster[denseZid] {
+	for _, mz := range sz.metaForward {
+		if mz.keyID == keyID {
+			return mz.forward
+		}
+	}
+	return roster.Roster[denseZid]{}
+}
+
+func makeStore(stats *stats, h sizeHints, inverseKeys map[vocab.WordID]vocab.WordID) *store {
+	return &store{
+		stats:        stats,
+		zettel:       make(map[denseZid]*storeZettel, h.zettel),
+		words:        make(map[vocab.WordID]roster.Roster[denseZid], h.words),
+		urls:         make(map[string]roster.Roster[denseZid], h.urls),
+		backward:     make(map[denseZid]roster.Roster[denseZid], h.zettel),
+		metaBackward: make(map[vocab.WordID]map[denseZid]roster.Roster[denseZid], len(inverseKeys)),
+		inverseKeys:  inverseKeys,
+	}
+}
+
+func (st *store) count() int {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	return len(st.zettel)
+}
+
+func (st *store) urlCount() int {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	return len(st.urls)
+}
+
+func (st *store) getZettel(dzid denseZid) *storeZettel {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+	if sz, found := st.zettel[dzid]; found {
+		return sz
+	}
+	return nil
+}
+
+// ----- store modification --------------------------------------------------
+
+// upsertZettel takes ownership of az.
+func (st *store) upsertZettel(dzid denseZid, az *analyzedZettel) {
+	st.replace(dzid, az)
+	st.stats.updates.Add(1)
+}
+
+// replace upserts analyzed zettel data into the store.
+//
+// Invariant: for every zettel r in st.zettel, t is in r.forward if and only if
+// r is in st.backward[t]. Self-references are kept.
+func (st *store) replace(dzid denseZid, az *analyzedZettel) {
+	st.mx.Lock()
+	defer st.mx.Unlock()
+
+	newSz := (*storeZettel)(az) // az is owned by the store now
+	if prevSz, found := st.zettel[dzid]; found {
+		st.updateZettel(dzid, prevSz, newSz)
+	} else {
+		st.insertZettel(dzid, newSz)
+	}
+	st.zettel[dzid] = newSz
+}
+
+func (st *store) insertZettel(dzid denseZid, newSz *storeZettel) {
+	for t := range newSz.forward.Values() {
+		addPosting(st.backward, t, dzid)
+	}
+	for word := range newSz.words.Values() {
+		addPosting(st.words, word, dzid)
+	}
+	for u := range newSz.urls.Values() {
+		addPosting(st.urls, u, dzid)
+	}
+	st.syncMetaBackward(dzid, nil, newSz)
+}
+
+func (st *store) updateZettel(dzid denseZid, prevSz, newSz *storeZettel) {
+	syncPostings(st.backward, dzid, prevSz.forward, newSz.forward)
+	syncPostings(st.words, dzid, prevSz.words, newSz.words)
+	syncPostings(st.urls, dzid, prevSz.urls, newSz.urls)
+	st.syncMetaBackward(dzid, prevSz, newSz)
+}
+
+// ----- removeZettel --------------------------------------------------------
+
+func (st *store) removeZettel(dzid denseZid) {
+	if st.drop(dzid) {
+		st.stats.removes.Add(1)
+	}
+}
+
+func (st *store) drop(dzid denseZid) bool {
+	st.mx.Lock()
+	defer st.mx.Unlock()
+
+	if sz, found := st.zettel[dzid]; found {
+		delete(st.zettel, dzid)
+		st.deleteZettel(dzid, sz)
+		return true
+	}
+	return false
+}
+
+func (st *store) deleteZettel(dzid denseZid, sz *storeZettel) {
+	for t := range sz.forward.Values() {
+		removePosting(st.backward, t, dzid)
+	}
+	for w := range sz.words.Values() {
+		removePosting(st.words, w, dzid)
+	}
+	for u := range sz.urls.Values() {
+		removePosting(st.urls, u, dzid)
+	}
+	st.syncMetaBackward(dzid, sz, nil)
+}
+
+// ----- posting helpers -----------------------------------------------------
+
+func addPosting[K cmp.Ordered](m map[K]roster.Roster[denseZid], key K, dzid denseZid) {
+	r := m[key]
+	r.Insert(dzid)
+	m[key] = r
+}
+
+// removePosting removes dzid from the set under key. An empty set is deleted.
+func removePosting[K cmp.Ordered](m map[K]roster.Roster[denseZid], key K, dzid denseZid) {
+	if r, found := m[key]; found {
+		r.Delete(dzid)
+		if r.IsEmpty() {
+			delete(m, key)
+		} else {
+			m[key] = r
+		}
+	}
+}
+
+// syncPostings files dzid under the keys that are new and removes it from the
+// keys that are gone.
+func syncPostings[K cmp.Ordered](
+	m map[K]roster.Roster[denseZid], dzid denseZid, prev, next roster.Roster[K],
+) {
+	removed, added := prev.Delta(next)
+	for k := range removed.Values() {
+		removePosting(m, k, dzid)
+	}
+	for k := range added.Values() {
+		addPosting(m, k, dzid)
+	}
+}
+
+// syncMetaBackward brings metaBackward in line with the change of a zettel
+// from prev to next. prev is nil for an insert, next is nil for a delete.
+func (st *store) syncMetaBackward(dzid denseZid, prev, next *storeZettel) {
+	var none storeZettel
+	if prev == nil {
+		prev = &none
+	}
+	if next == nil {
+		next = &none
+	}
+	for _, mz := range prev.metaForward {
+		st.syncMetaKey(dzid, mz.keyID, mz.forward, next.forwardOf(mz.keyID))
+	}
+	for _, mz := range next.metaForward {
+		// Keys in both versions were handled above.
+		if prev.forwardOf(mz.keyID).IsEmpty() {
+			st.syncMetaKey(dzid, mz.keyID, roster.Roster[denseZid]{}, mz.forward)
+		}
+	}
+}
+
+func (st *store) syncMetaKey(dzid denseZid, keyID vocab.WordID, prev, next roster.Roster[denseZid]) {
+	invID, found := st.inverseKeys[keyID]
+	if !found {
+		return // the key has no inverse key
+	}
+	m := st.metaBackward[invID]
+	if m == nil {
+		if next.IsEmpty() {
+			return // nothing to remove, nothing to add
+		}
+		m = make(map[denseZid]roster.Roster[denseZid])
+		st.metaBackward[invID] = m
+	}
+	syncPostings(m, dzid, prev, next)
+}
+
+// ----- memory management ---------------------------------------------------
+
+// shrink removes the unused capacity of all shared structures. It is meant to
+// be called after many changes, e.g. after the bulk load.
+func (st *store) shrink() {
+	st.mx.Lock()
+	defer st.mx.Unlock()
+
+	st.zettel = zeromaps.Shrink(st.zettel)
+	st.words = shrinkPostings(st.words)
+	st.urls = shrinkPostings(st.urls)
+	st.backward = shrinkPostings(st.backward)
+	st.shrinkMetaBackward() // the caller holds the write lock
+}
+
+// shrinkMetaBackward removes unused capacity of metaBackward. It also drops
+// the inner maps that became empty. The caller holds the write lock.
+func (st *store) shrinkMetaBackward() {
+	for invID, m := range st.metaBackward {
+		if len(m) == 0 {
+			delete(st.metaBackward, invID)
+			continue
+		}
+		st.metaBackward[invID] = shrinkPostings(m)
+	}
+}
+
+// shrinkPostings removes unused capacity of the sets and of the map itself. It
+// returns the map that is to be used afterwards. The caller holds the write lock.
+func shrinkPostings[K comparable](m map[K]roster.Roster[denseZid]) map[K]roster.Roster[denseZid] {
+	for k, r := range m {
+		r.Shrink()
+		m[k] = r // r is a copy of the header
+	}
+	return zeromaps.Shrink(m) // adapt: returns a map without unused buckets
+}
+
+// ----- queries -------------------------------------------------------------
+
+// matchEqual returns the dense identifier of all zettel that match word
+// exactly. All data is read under one lock and therefore come from the same
+// state of the store. The result is a new set, owned by the caller.
+func (st *store) matchEqual(
+	word string, wid vocab.WordID,
+	hasZid bool, dzid denseZid,
+) (result roster.Roster[denseZid]) {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	if wid != vocab.InvalidWordID {
+		// st.words is modified in place, therefore it must be cloned.
+		result = st.words[wid].Clone()
+	}
+	if r, found := st.urls[word]; found {
+		result.Or(r)
+	}
+	if hasZid {
+		// The dense identifier may exist without a zettel (e.g. as a reference
+		// target). Existence is decided by the store.
+		if st.zettel[dzid] != nil {
+			result.Insert(dzid)
+		}
+
+		// Add zettel with references of the queries zettel.
+		// Include dead backwards also, because they should be found.
+		result.Or(st.backward[dzid])
+
+		// Add zettel that name the zettel in a metadata value of a key that has
+		// an inverse key. The queried zettel need not exist.
+		for _, m := range st.metaBackward {
+			result.Or(m[dzid])
+		}
+	}
+	return result
+}
+
+// matchPrefix returns the dense identifier of all zettel that have the given
+// prefix. words yields the words that have the given prefix, zidMatches holds
+// the dense identifier of all zids whose text has the given prefix. sizeHint
+// is the expected number of dense identifier. Postings, URLs and relations are read under one lock of the store.
+//
+//	The result is a new
+//
+// set, owned by the caller.
+func (st *store) matchPrefix(
+	prefix string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	sizeHint int,
+) bitset.BitSet[denseZid] {
+	return st.matchHelper(prefix, words, zidMatches, strings.HasPrefix, sizeHint)
+}
+
+// matchSuffix returns the dense identifier of all zettel that have the given
+// suffix. words yields the words that have the given suffix, zidMatches holds
+// the dense identifier of all zids whose text has the given suffix. sizeHint
+// is the expected number of dense identifier. Postings, URLs and relations
+// are read under one lock of the store. The result is a new set, owned by the
+// caller.
+func (st *store) matchSuffix(
+	suffix string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	sizeHint int,
+) bitset.BitSet[denseZid] {
+	return st.matchHelper(suffix, words, zidMatches, strings.HasSuffix, sizeHint)
+}
+
+// matchContains returns the dense identifier of all zettel that contain s.
+// words yields the words that contain s, zidMatches holds the dense
+// identifier of all zids whose text contains s. sizeHint is the expected
+// number of dense identifier. Postings, URLs and relations are read under one
+// lock of the store. The result is a new set, owned by the caller.
+func (st *store) matchContains(
+	s string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	sizeHint int,
+) bitset.BitSet[denseZid] {
+	return st.matchHelper(s, words, zidMatches, strings.Contains, sizeHint)
+}
+
+// matchHelper is the common function for matchPrefix, matchSuffix, and matchContains.
+func (st *store) matchHelper(
+	s string,
+	words iter.Seq[vocab.WordID],
+	zidMatches *bitset.BitSet[denseZid],
+	urlMatch func(string, string) bool,
+	sizeHint int,
+) (result bitset.BitSet[denseZid]) {
+	result.EnsureBit(denseZid(sizeHint))
+
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	// A word without postings (e.g. known to the vocabulary, but not yet or no
+	// longer used by a zettel) yields an empty set.
+	for wid := range words {
+		insertRosterIntoBitSet(&result, st.words[wid])
+	}
+	st.matchURLs(&result, s, urlMatch)
+	for dzid := range zidMatches.Values() {
+		st.addZidRelated(&result, dzid)
+	}
+
+	return result
+}
+
+// addZidRelated adds the zettel that are related to the zid with the dense
+// identifier dzid, using the same rules as matchEqual. The caller must hold
+// st.mx.
+func (st *store) addZidRelated(dst *bitset.BitSet[denseZid], dzid denseZid) {
+	// The dense identifier may exist without a zettel (e.g. as a reference
+	// target). Existence is decided by the store.
+	if st.zettel[dzid] != nil {
+		dst.Insert(dzid)
+	}
+	// Include dead backwards also, because they should be found.
+	insertRosterIntoBitSet(dst, st.backward[dzid])
+	for _, m := range st.metaBackward {
+		insertRosterIntoBitSet(dst, m[dzid])
+	}
+}
+
+// insertRosterIntoBitSet adds all elements of src to dst.
+func insertRosterIntoBitSet(dst *bitset.BitSet[denseZid], src roster.Roster[denseZid]) {
+	if m, ok := src.Max(); ok {
+		dst.EnsureBit(m)
+	}
+	for dz := range src.Values() {
+		dst.Insert(dz)
+	}
+}
+
+// matchURLs adds the zettel of every URL to into, if match(url, s) reports
+// true for that URL. Typical values for match are strings.Contains,
+// strings.HasPrefix and strings.HasSuffix. The caller must hold st.mx.
+func (st *store) matchURLs(dst *bitset.BitSet[denseZid], s string, match func(u, s string) bool) {
+	for u, r := range st.urls {
+		if match(u, s) {
+			insertRosterIntoBitSet(dst, r)
+		}
+	}
+}
+
+// ----- enrich --------------------------------------------------------------
+
+// enrichSlot names the kind of set that store.enrich reports.
+type enrichSlot uint8
+
+const (
+	slotDead         enrichSlot = iota // references to non-existing zettel
+	slotBackward                       // zettel that reference the zettel in their content
+	slotForward                        // zettel referenced in the content
+	slotBack                           // backward without forward and metadata relations
+	slotMetaBackward                   // keyID is the computed (inverse) key
+)
+
+// enrich reports all non-empty relation sets of the zettel dzid by calling
+// emit. It returns false, if the zettel is not stored.
+//
+// emit is called while st.mx is read-locked. It must not call methods of st,
+// and it must not retain or modify the roster. It may lock the dictionary.
+func (st *store) enrich(
+	dzid denseZid,
+	emit func(slot enrichSlot, keyID vocab.WordID, dzids roster.Roster[denseZid]),
+) bool {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	sz, found := st.zettel[dzid]
+	if !found {
+		return false
+	}
+
+	dead := st.deadRefs(sz)
+	if !dead.IsEmpty() {
+		emit(slotDead, 0, dead)
+	}
+
+	backward := st.backward[dzid]
+	if !backward.IsEmpty() {
+		emit(slotBackward, 0, backward)
+	}
+	if !sz.forward.IsEmpty() {
+		if !dead.IsEmpty() {
+			emit(slotForward, 0, sz.forward.Difference(dead))
+		} else {
+			emit(slotForward, 0, sz.forward)
+		}
+	}
+	for keyID, byTarget := range st.metaBackward {
+		if refs := byTarget[dzid]; !refs.IsEmpty() {
+			emit(slotMetaBackward, keyID, refs)
+		}
+	}
+
+	if !backward.IsEmpty() {
+		if back := st.backOnly(dzid, sz, backward); !back.IsEmpty() {
+			emit(slotBack, 0, back)
+		}
+	}
+	return true
+}
+
+// deadRefs returns the dense identifier, referenced by sz in content or
+// metadata, for which no zettel exists. The result is nil in the common case.
+func (st *store) deadRefs(sz *storeZettel) (dead roster.Roster[denseZid]) {
+	for dzid := range sz.forward.Values() {
+		if _, found := st.zettel[dzid]; !found {
+			dead.Insert(dzid)
+		}
+	}
+	for _, mz := range sz.metaForward {
+		for dzid := range mz.forward.Values() {
+			if _, found := st.zettel[dzid]; !found {
+				dead.Insert(dzid)
+			}
+		}
+	}
+	return dead
+}
+
+// backOnly returns back without all zettel, that sz references (content and
+// metadata) or that name sz in a metadata value (inverse keys).
+func (st *store) backOnly(
+	dzid denseZid,
+	sz *storeZettel,
+	backward roster.Roster[denseZid],
+) roster.Roster[denseZid] {
+	back := backward.Difference(sz.forward)
+	for _, mz := range sz.metaForward {
+		back.AndNot(mz.forward)
+	}
+	for _, byTarget := range st.metaBackward {
+		back.AndNot(byTarget[dzid])
+	}
+	return back
+}
+
+// ----- dump index ----------------------------------------------------------
+
+// dump writes the content of the store to w. The store is read-locked for the
+// whole duration of the output; writers have to wait.
+func (st *store) dump(w io.Writer, dict *dictionary) {
+	st.mx.RLock()
+	defer st.mx.RUnlock()
+
+	st.dumpZettel(w, dict)
+	st.dumpDead(w, dict)
+	dumpPostings(w, dict, "Words", "", "", st.wordPostings(dict))
+	dumpPostings(w, dict, "URLs", "[[", "]]", st.urls)
+}
+
+type zettelRef struct {
+	zid id.Zid
+	dz  denseZid
+}
+
+func (st *store) dumpZettel(w io.Writer, dict *dictionary) {
+	if len(st.zettel) == 0 {
+		return
+	}
+	refs := make([]zettelRef, 0, len(st.zettel))
+	for dz := range st.zettel {
+		if zid, found := dict.Decode(dz); found {
+			refs = append(refs, zettelRef{zid: zid, dz: dz})
+		}
+	}
+	slices.SortFunc(refs, func(a, b zettelRef) int { return cmp.Compare(a.zid, b.zid) })
+
+	_, _ = io.WriteString(w, "==== Zettel Index\n")
+	for _, ref := range refs {
+		zs := st.zettel[ref.dz]
+		_, _ = fmt.Fprintln(w, "=====", ref.zid)
+		dumpZids(w, "* Forward:", dict.zidRoster(zs.forward))
+		dumpZids(w, "* Backward:", dict.zidRoster(st.backward[ref.dz]))
+
+		for _, md := range st.metaDumps(dict, ref.dz, zs) {
+			_, _ = fmt.Fprintln(w, "* Meta", md.name)
+			dumpZids(w, "** Forward:", dict.zidRoster(md.forward))
+			dumpZids(w, "** Backward:", dict.zidRoster(md.backward))
+		}
+
+		words := make([]string, 0, zs.words.Count())
+		for wid := range zs.words.Values() {
+			words = append(words, dict.GetString(wid))
+		}
+		dumpStrings(w, "* Words", "", "", words)
+		dumpStrings(w, "* URLs", "[[", "]]", slices.Collect(zs.urls.Values()))
+	}
+}
+
+// metaDump collects the data of one metadata key pair, named after the
+// computed key (e.g. "folge" for the pair precursor / folge).
+//
+//   - forward: zettel that are computed for the key, i.e. the zettel that
+//     name the current zettel with the explicit key (e.g. precursor).
+//   - backward: zettel that the current zettel names with the explicit key.
+type metaDump struct {
+	name     string
+	forward  roster.Roster[denseZid]
+	backward roster.Roster[denseZid]
+}
+
+// metaDumps returns the metadata related data of a zettel, grouped by the
+// computed key and sorted by key name.
+func (st *store) metaDumps(dict *dictionary, dz denseZid, zs *storeZettel) []metaDump {
+	byKey := make(map[vocab.WordID]*metaDump, len(zs.metaForward))
+	get := func(keyID vocab.WordID) *metaDump {
+		md, found := byKey[keyID]
+		if !found {
+			md = &metaDump{name: dict.GetString(keyID)}
+			byKey[keyID] = md
+		}
+		return md
+	}
+	for _, mz := range zs.metaForward {
+		if invID, found := st.inverseKeys[mz.keyID]; found {
+			get(invID).backward = mz.forward
+		} else { // should not happen: metaForward only contains invertible keys
+			get(mz.keyID).forward = mz.forward
+		}
+	}
+	for keyID, targets := range st.metaBackward {
+		if computed, found := targets[dz]; found {
+			get(keyID).forward = computed
+		}
+	}
+	result := make([]metaDump, 0, len(byKey))
+	for _, md := range byKey {
+		result = append(result, *md)
+	}
+	slices.SortFunc(result, func(a, b metaDump) int { return cmp.Compare(a.name, b.name) })
+	return result
+}
+
+// dumpDead writes all referenced zettel identifier that do not belong to an
+// existing zettel, together with the zettel that reference them. As in
+// enrich, forward and metaForward are the source of the references.
+func (st *store) dumpDead(w io.Writer, dict *dictionary) {
+	dead := map[id.Zid][]id.Zid{}
+	add := func(source id.Zid, targets roster.Roster[denseZid]) {
+		for target := range targets.Values() {
+			if _, exists := st.zettel[target]; exists {
+				continue
+			}
+			if tz, found := dict.Decode(target); found {
+				dead[tz] = append(dead[tz], source)
+			}
+		}
+	}
+	for dz, zs := range st.zettel {
+		source, found := dict.Decode(dz)
+		if !found {
+			continue
+		}
+		add(source, zs.forward)
+		for _, mz := range zs.metaForward {
+			add(source, mz.forward)
+		}
+	}
+	if len(dead) == 0 {
+		return
+	}
+	_, _ = io.WriteString(w, "==== Dead References\n")
+	for _, target := range slices.Sorted(maps.Keys(dead)) {
+		sources := dead[target]
+		slices.Sort(sources)
+		sources = slices.Compact(sources)
+		_, _ = fmt.Fprintln(w, ";", target)
+		_, _ = io.WriteString(w, ":")
+		for _, source := range sources {
+			_, _ = io.WriteString(w, " ")
+			_, _ = w.Write(source.Bytes())
+		}
+		_, _ = io.WriteString(w, "\n")
+	}
+}
+
+// wordPostings returns the word postings with the words translated to strings.
+func (st *store) wordPostings(dict *dictionary) map[string]roster.Roster[denseZid] {
+	result := make(map[string]roster.Roster[denseZid], len(st.words))
+	for wid, postings := range st.words {
+		result[dict.GetString(wid)] = postings
+	}
+	return result
+}
+
+func dumpPostings(
+	w io.Writer, dict *dictionary, title, preString, postString string,
+	postings map[string]roster.Roster[denseZid],
+) {
+	if len(postings) == 0 {
+		return
+	}
+	_, _ = fmt.Fprintln(w, "====", title)
+	for _, s := range slices.Sorted(maps.Keys(postings)) {
+		_, _ = fmt.Fprintf(w, "; %s%s%s\n", preString, s, postString)
+		dumpZids(w, ":", dict.zidRoster(postings[s]))
+	}
+}
+
+func dumpZids(w io.Writer, prefix string, zids roster.Roster[id.Zid]) {
+	if zids.IsEmpty() {
+		return
+	}
+	_, _ = io.WriteString(w, prefix)
+	for zid := range zids.Values() {
+		_, _ = io.WriteString(w, " ")
+		_, _ = w.Write(zid.Bytes())
+	}
+	_, _ = io.WriteString(w, "\n")
+}
+
+// dumpStrings sorts strs in place and writes them below title.
+func dumpStrings(w io.Writer, title, preString, postString string, strs []string) {
+	if len(strs) == 0 {
+		return
+	}
+	slices.Sort(strs)
+	_, _ = fmt.Fprintln(w, title)
+	for _, s := range strs {
+		_, _ = fmt.Fprintf(w, "** %s%s%s\n", preString, s, postString)
+	}
+}

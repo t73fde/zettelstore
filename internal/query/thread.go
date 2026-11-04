@@ -17,11 +17,10 @@ import (
 	"container/heap"
 	"context"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 // ThreadSpec contains all information for a thread directive.
@@ -100,7 +99,7 @@ func (q *ztlThreadQueue) Pop() any {
 
 type threadTask struct {
 	port     ThreadPort
-	seen     *idset.ArraySet
+	seen     roster.Roster[id.Zid]
 	queue    ztlThreadQueue
 	maxCount int
 }
@@ -108,7 +107,7 @@ type threadTask struct {
 func newThreadQueue(startSeq []*meta.Meta, maxCount int, port ThreadPort) *threadTask {
 	result := &threadTask{
 		port:     port,
-		seen:     idset.New(),
+		seen:     roster.Roster[id.Zid]{},
 		maxCount: maxCount,
 	}
 
@@ -133,7 +132,7 @@ func (ct *threadTask) next() (*meta.Meta, uint, int) {
 		if ct.hasEnough(level) {
 			break
 		}
-		ct.seen.Add(zid)
+		ct.seen.Insert(zid)
 		return m, item.level, int(item.dir)
 	}
 	return nil, 0, 0
@@ -145,7 +144,7 @@ func (ct *threadTask) hasEnough(level uint) bool {
 		// Always add direct descendants of the initial zettel
 		return false
 	}
-	return maxCount <= ct.seen.Length()
+	return maxCount <= ct.seen.Count()
 }
 
 func (ct *threadTask) addPair(ctx context.Context, key string, value meta.Value, level uint, dir int, spec *ThreadSpec) {

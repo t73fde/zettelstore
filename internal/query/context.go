@@ -20,11 +20,10 @@ import (
 	"math"
 	"slices"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
-
-	"zettelstore.de/z/internal/idset"
 )
 
 // ContextSpec contains all specification values for calculating a context.
@@ -144,25 +143,25 @@ func (q *ztlCtxQueue) Pop() any {
 
 type contextTask struct {
 	port     ContextPort
-	seen     *idset.ArraySet
+	seen     roster.Roster[id.Zid]
 	queue    ztlCtxQueue
 	maxCost  float64
 	maxCount int
 	minCount int
 	tagMetas map[string][]*meta.Meta
-	tagZids  map[string]*idset.ArraySet // just the zids of tagMetas
-	metaZid  map[id.Zid]*meta.Meta      // maps zid to meta for all meta retrieved with tags
+	tagZids  map[string]roster.Roster[id.Zid] // just the zids of tagMetas
+	metaZid  map[id.Zid]*meta.Meta            // maps zid to meta for all meta retrieved with tags
 }
 
 func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
 	result := &contextTask{
 		port:     port,
-		seen:     idset.New(),
+		seen:     roster.Roster[id.Zid]{},
 		maxCost:  maxCost,
 		maxCount: max(maxCount, minCount),
 		minCount: minCount,
 		tagMetas: make(map[string][]*meta.Meta),
-		tagZids:  make(map[string]*idset.ArraySet),
+		tagZids:  make(map[string]roster.Roster[id.Zid]),
 		metaZid:  make(map[id.Zid]*meta.Meta),
 	}
 
@@ -241,7 +240,7 @@ func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, d
 }
 
 func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint, dir int) {
-	if !ct.seen.Contains(m.Zid) {
+	if m != nil && !ct.seen.Contains(m.Zid) {
 		heap.Push(&ct.queue, ztlCtxItem{cost: newCost, meta: m, level: level + 1, dir: int8(dir)})
 	}
 }
@@ -261,18 +260,18 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 
 func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint, dir int) {
 	tags := slices.Collect(tagiter)
-	var zidSet *idset.ArraySet
+	var zidSet roster.Roster[id.Zid]
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)
-		zidSet = zidSet.IUnion(zs)
+		zidSet.Or(zs)
 	}
+
 	for zid := range zidSet.Values() {
 		minCost := math.MaxFloat64
 		costFactor := 1.1
 		for _, tag := range tags {
-			tagZids := ct.tagZids[tag]
-			if tagZids.Contains(zid) {
-				cost := tagCost(baseCost, tagZids.Length())
+			if tagZids := ct.tagZids[tag]; tagZids.Contains(zid) {
+				cost := tagCost(baseCost, tagZids.Count())
 				if cost < minCost {
 					minCost = cost
 				}
@@ -283,7 +282,7 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 	}
 }
 
-func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.ArraySet {
+func (ct *contextTask) updateTagData(ctx context.Context, tag string) (zids roster.Roster[id.Zid]) {
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}
@@ -293,10 +292,10 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) *idset.Arr
 		ml = nil
 	}
 	ct.tagMetas[tag] = ml
-	zids := idset.NewCap(len(ml))
+	zids.Grow(len(ml))
 	for _, m := range ml {
 		zid := m.Zid
-		zids = zids.Add(zid)
+		zids.Insert(zid)
 		if _, found := ct.metaZid[zid]; !found {
 			ct.metaZid[zid] = m
 		}
@@ -322,7 +321,7 @@ func (ct *contextTask) next() (*meta.Meta, float64, uint, int) {
 		if ct.hasEnough(cost, level) {
 			break
 		}
-		ct.seen.Add(zid)
+		ct.seen.Insert(zid)
 		return m, cost, item.level, int(item.dir)
 	}
 	return nil, -1, 0, 0
@@ -333,11 +332,11 @@ func (ct *contextTask) hasEnough(cost float64, level uint) bool {
 		// Always add direct descendants of the initial zettel
 		return false
 	}
-	length := ct.seen.Length()
-	if minCount := ct.minCount; 0 < minCount && minCount > length {
+	cntSeen := ct.seen.Count()
+	if minCount := ct.minCount; 0 < minCount && minCount > cntSeen {
 		return false
 	}
-	if maxCount := ct.maxCount; 0 < maxCount && maxCount <= length {
+	if maxCount := ct.maxCount; 0 < maxCount && maxCount <= cntSeen {
 		return true
 	}
 	maxCost := ct.maxCost

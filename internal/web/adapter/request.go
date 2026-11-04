@@ -45,11 +45,13 @@ func GetCredentialsViaForm(r *http.Request) (ident, cred string, ok bool) {
 func GetQuery(vals url.Values) (result *query.Query) {
 	if exprs, found := vals[webapi.QueryKeyQuery]; found {
 		result = query.Parse(strings.Join(exprs, " "))
+	} else {
+		result = query.Parse("")
 	}
 	if seeds, found := vals[webapi.QueryKeySeed]; found {
 		for _, seed := range seeds {
 			if si, err := strconv.ParseInt(seed, 10, 31); err == nil {
-				result = result.SetSeed(int(si))
+				result.SetSeed(int(si))
 				break
 			}
 		}

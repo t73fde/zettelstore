@@ -50,50 +50,36 @@ type genFns = struct {
 
 var myConfig *meta.Meta
 var myZettel = map[id.Zid]genFns{
-	id.ZidVersion:         {genVersionBuildM, genVersionBuildC},
-	id.ZidHost:            {genVersionHostM, genVersionHostC},
-	id.ZidOperatingSystem: {genVersionOSM, genVersionOSC},
-	id.ZidModules:         {genModulesM, genModulesC},
-	id.ZidLog:             {genLogM, genLogC},
-	id.ZidMemory:          {genMemoryM, genMemoryC},
-	id.ZidSx:              {genSxM, genSxC},
-	// id.ZidAPI:                  {genApiM, genApiC},
-	// id.ZidWebUI:                {genWebUiM, genWebUiC},
-	// id.ZidConsole:              {genConsoleM, genConsoleC},
-	ZidKernelService: makeSrvGen(kernel.KernelService, "Kernel"),
-	ZidCoreService:   makeSrvGen(kernel.CoreService, "Core"),
-	ZidConfigService: makeSrvGen(kernel.ConfigService, "Configuration"),
-	ZidAuthService:   makeSrvGen(kernel.AuthService, "Authentication"),
-	ZidBoxService:    makeSrvGen(kernel.BoxService, "Box"),
-	// ZidIndexService:  makeSrvGen(kernel.IndexService, "Index"),
-	ZidWebService: makeSrvGen(kernel.WebService, "Web"),
-	// id.ZidQuery:                {genQueryM, genQueryC},
+	id.ZidVersion:              {genVersionBuildM, genVersionBuildC},
+	id.ZidHost:                 {genVersionHostM, genVersionHostC},
+	id.ZidOperatingSystem:      {genVersionOSM, genVersionOSC},
+	id.ZidModules:              {genModulesM, genModulesC},
+	id.ZidLog:                  {genLogM, genLogC},
+	id.ZidMemory:               {genMemoryM, genMemoryC},
+	id.ZidSx:                   {genSxM, genSxC},
+	id.ZidKernelService:        makeSrvGen(kernel.KernelService, "Kernel"),
+	id.ZidCoreService:          makeSrvGen(kernel.CoreService, "Core"),
+	id.ZidConfigService:        makeSrvGen(kernel.ConfigService, "Configuration"),
+	id.ZidAuthService:          makeSrvGen(kernel.AuthService, "Authentication"),
+	id.ZidBoxService:           makeSrvGen(kernel.BoxService, "Box"),
+	id.ZidIndexService:         makeSrvGen(kernel.IndexService, "Index"),
+	id.ZidWebService:           makeSrvGen(kernel.WebService, "Web"),
 	id.ZidMetadataKey:          {genKeysM, genKeysC},
 	id.ZidParser:               {genParserM, genParserC},
 	id.ZidStartupConfiguration: {genConfigZettelM, genConfigZettelC},
 }
 
-const (
-	ZidKernelService = id.Zid(16)
-	ZidCoreService   = id.Zid(17)
-	ZidConfigService = id.Zid(18)
-	ZidAuthService   = id.Zid(19)
-	ZidBoxService    = id.ZidBoxManager
-	ZidIndexService  = id.ZidIndex
-	ZidWebService    = id.ZidHTTP
-)
-
 func makeSrvGen(srv kernel.Service, name string) genFns {
 	return genFns{
 		func(zid id.Zid) *meta.Meta {
-			return getTitledMeta(zid, "Zettelstore "+name+"Service")
+			return getTitledMeta(zid, "Zettelstore "+name+" Service")
 		},
 		func() []byte {
+			var buf []byte
 			stats := kernel.Main.GetServiceStatistics(srv)
 			if len(stats) == 0 {
-				return nil
+				return append(buf, "No service data is currently available.\n"...)
 			}
-			var buf []byte
 			buf = append(buf, "|=Name|=Value>\n"...)
 			for _, kv := range stats {
 				buf = fmt.Appendf(buf, "| %v | %v\n", kv.Key, kv.Value)
@@ -135,11 +121,6 @@ func (cb *compBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) 
 	err := box.ErrZettelNotFound{Zid: zid}
 	logging.LogTrace(cb.logger, "GetZettel/Err", "err", err)
 	return box.Zettel{}, err
-}
-
-func (*compBox) HasZettel(_ context.Context, zid id.Zid) bool {
-	_, found := myZettel[zid]
-	return found
 }
 
 func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {

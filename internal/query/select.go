@@ -66,13 +66,11 @@ func (ct *conjTerms) createSelectSpecs() (posSpecs, negSpecs []matchSpec) {
 		if !meta.KeyIsValid(key) {
 			continue
 		}
-		var hasOp, hasNotOp compareOp
-		switch meta.Type(key) {
-		case meta.TypeString, meta.TypeEmpty, meta.TypeURL:
+		hasOp, hasNotOp := cmpEqual, cmpNotEqual
+		if meta.Type(key).MatchHas {
 			hasOp, hasNotOp = cmpMatch, cmpNoMatch
-		default:
-			hasOp, hasNotOp = cmpEqual, cmpNotEqual
 		}
+
 		disambiguatedValues := make([]expValue, 0, len(values))
 		for _, val := range values {
 			switch val.op {

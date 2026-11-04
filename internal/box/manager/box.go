@@ -18,11 +18,11 @@ import (
 	"errors"
 	"strings"
 
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/idset"
 	"zettelstore.de/z/internal/logging"
 	"zettelstore.de/z/internal/query"
 )
@@ -71,8 +71,8 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl box.Zettel) (id.Zid, e
 	if createBox, isCreateBox := mgr.boxes[0].(box.CreateBox); isCreateBox {
 		ztl.Meta = mgr.cleanMetaProperties(ztl.Meta)
 		zid, err := createBox.CreateZettel(ctx, ztl)
-		if err == nil {
-			mgr.idxUpdateZettel(ctx, ztl)
+		if err != nil {
+			mgr.enqueueAndWait(ctx, zid)
 		}
 		return zid, err
 	}
@@ -121,7 +121,7 @@ func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel,
 }
 
 // FetchZids returns the set of all zettel identifer managed by the box.
-func (mgr *Manager) FetchZids(ctx context.Context) (*idset.ArraySet, error) {
+func (mgr *Manager) FetchZids(ctx context.Context) (map[id.Zid]struct{}, error) {
 	mgr.mgrLogger.Debug("FetchZids")
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
@@ -130,36 +130,21 @@ func (mgr *Manager) FetchZids(ctx context.Context) (*idset.ArraySet, error) {
 	defer mgr.mgrMx.RUnlock()
 	return mgr.fetchZids(ctx)
 }
-func (mgr *Manager) fetchZids(ctx context.Context) (*idset.ArraySet, error) {
+func (mgr *Manager) fetchZids(ctx context.Context) (map[id.Zid]struct{}, error) {
 	numZettel := 0
 	for _, p := range mgr.boxes {
 		var mbstats box.ManagedBoxStats
 		p.ReadStats(&mbstats)
 		numZettel += mbstats.Zettel
 	}
-	result := idset.NewCap(numZettel)
+	result := make(map[id.Zid]struct{}, numZettel)
 	for _, p := range mgr.boxes {
-		err := p.ApplyZid(ctx, func(zid id.Zid) { result.Add(zid) }, query.AlwaysIncluded)
+		err := p.ApplyZid(ctx, func(zid id.Zid) { result[zid] = struct{}{} }, query.AlwaysIncluded)
 		if err != nil {
 			return nil, err
 		}
 	}
 	return result, nil
-}
-
-func (mgr *Manager) hasZettel(ctx context.Context, zid id.Zid) bool {
-	mgr.mgrLogger.Debug("HasZettel", "zid", zid)
-	if err := mgr.checkContinue(ctx); err != nil {
-		return false
-	}
-	mgr.mgrMx.RLock()
-	defer mgr.mgrMx.RUnlock()
-	for _, bx := range mgr.boxes {
-		if bx.HasZettel(ctx, zid) {
-			return true
-		}
-	}
-	return false
 }
 
 // GetMeta returns just the metadata of the zettel with the given identifier.
@@ -169,11 +154,13 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 		return nil, err
 	}
 
-	m, err := mgr.idxStore.GetMeta(ctx, zid)
+	m, err := mgr.index.GetMeta(zid)
 	if err != nil {
+		mgr.mgrLogger.Error("GetMeta", "zid", zid, "err", err)
 		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
 		return nil, err
 	}
+
 	mgr.Enrich(ctx, m, "")
 	return m, nil
 }
@@ -195,7 +182,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 	}
 	selected := map[id.Zid]*meta.Meta{}
 	for _, term := range compSearch.Terms {
-		rejected := idset.New()
+		var rejected roster.Roster[id.Zid]
 		handleMeta := func(m *meta.Meta) {
 			zid := m.Zid
 			if rejected.Contains(zid) {
@@ -210,7 +197,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 				selected[zid] = m
 				logging.LogTrace(mgr.mgrLogger, "SelectMeta/match", "zid", zid)
 			} else {
-				rejected.Add(zid)
+				rejected.Insert(zid)
 				logging.LogTrace(mgr.mgrLogger, "SelectMeta/reject", "zid", zid)
 			}
 		}
@@ -257,7 +244,7 @@ func (mgr *Manager) updateZettel(ctx context.Context, zettel box.Zettel) error {
 		if err := updateBox.UpdateZettel(ctx, zettel); err != nil {
 			return err
 		}
-		mgr.idxUpdateZettel(ctx, zettel)
+		mgr.enqueueAndWait(ctx, zettel.Meta.Zid)
 		return nil
 	}
 	return box.ErrReadOnly
@@ -290,8 +277,8 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 		if deleteBox, isDeleteBox := p.(box.DeleteBox); isDeleteBox {
 			err := deleteBox.DeleteZettel(ctx, zid)
 			if err == nil {
-				mgr.idxDeleteZettel(ctx, zid)
-				return err
+				mgr.enqueueAndWait(ctx, zid)
+				return nil
 			}
 			if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr && !errors.Is(err, box.ErrReadOnly) {
 				return err

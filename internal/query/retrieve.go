@@ -20,14 +20,14 @@ import (
 
 	zerostrings "t73f.de/r/zero/strings"
 
-	"zettelstore.de/z/internal/idset"
+	"zettelstore.de/z/internal/index"
 )
 
 type searchOp struct {
 	s  string
 	op compareOp
 }
-type searchFunc func(string) *idset.ArraySet
+type searchFunc func(string) *index.Result
 type searchCallMap map[searchOp]searchFunc
 
 var cmpPred = map[compareOp]func(string, string) bool{
@@ -65,7 +65,7 @@ func (scm searchCallMap) addSearch(s string, op compareOp, sf searchFunc) {
 	scm[searchOp{s: s, op: op}] = sf
 }
 
-func prepareRetrieveCalls(searcher Searcher, search []expValue) (normCalls, plainCalls, negCalls searchCallMap) {
+func prepareRetrieveCalls(searcher index.Searcher, search []expValue) (normCalls, plainCalls, negCalls searchCallMap) {
 	normCalls = make(searchCallMap, len(search))
 	negCalls = make(searchCallMap, len(search))
 	for _, val := range search {
@@ -104,34 +104,62 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 	return false
 }
 
-func retrievePositives(normCalls, plainCalls searchCallMap) *idset.ArraySet {
+func retrievePositives(normCalls, plainCalls searchCallMap) *index.Result {
 	if isSuperset(normCalls, plainCalls) {
-		var normResult *idset.ArraySet
+		var normResult *index.Result
 		for c, sf := range normCalls {
-			normResult = normResult.IntersectOrSet(sf(c.s))
+			as := sf(c.s)
+			if normResult == nil {
+				normResult = as.Clone()
+			} else {
+				normResult.And(as)
+			}
 		}
 		return normResult
 	}
 
-	cache := make(map[searchOp]*idset.ArraySet)
+	cache := make(map[searchOp]*index.Result)
 
-	var plainResult *idset.ArraySet
+	var plainResult *index.Result
 	for c, sf := range plainCalls {
 		result := sf(c.s)
 		if _, found := normCalls[c]; found {
 			cache[c] = result
 		}
-		plainResult = plainResult.IntersectOrSet(result)
-	}
-	var normResult *idset.ArraySet
-	for c, sf := range normCalls {
-		if result, found := cache[c]; found {
-			normResult = normResult.IntersectOrSet(result)
+		if plainResult == nil {
+			plainResult = result.Clone()
 		} else {
-			normResult = normResult.IntersectOrSet(sf(c.s))
+			plainResult.And(result)
 		}
 	}
-	return normResult.IUnion(plainResult)
+
+	var normResult *index.Result
+	for c, sf := range normCalls {
+		if result, found := cache[c]; found {
+			if normResult == nil {
+				normResult = result.Clone()
+			} else {
+				normResult.And(result)
+			}
+		} else {
+			as := sf(c.s)
+			if normResult == nil {
+				normResult = as
+			} else {
+				normResult.And(as)
+			}
+		}
+	}
+
+	switch {
+	case normResult == nil:
+		return plainResult
+	case plainResult == nil:
+		return normResult
+	default:
+		normResult.Or(plainResult)
+		return normResult
+	}
 }
 
 func isSuperset(normCalls, plainCalls searchCallMap) bool {
@@ -143,15 +171,19 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 	return true
 }
 
-func retrieveNegatives(negCalls searchCallMap) *idset.ArraySet {
-	var negatives *idset.ArraySet
+func retrieveNegatives(negCalls searchCallMap) (negatives *index.Result) {
 	for val, sf := range negCalls {
-		negatives = negatives.IUnion(sf(val.s))
+		as := sf(val.s)
+		if negatives == nil {
+			negatives = as.Clone()
+		} else {
+			negatives.Or(as)
+		}
 	}
 	return negatives
 }
 
-func getSearchFunc(searcher Searcher, op compareOp) searchFunc {
+func getSearchFunc(searcher index.Searcher, op compareOp) searchFunc {
 	switch op {
 	case cmpEqual:
 		return searcher.SearchEqual
@@ -166,4 +198,4 @@ func getSearchFunc(searcher Searcher, op compareOp) searchFunc {
 	}
 }
 
-func nilSearchFunc(string) *idset.ArraySet { return nil }
+func nilSearchFunc(string) *index.Result { return nil }

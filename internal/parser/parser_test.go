@@ -16,14 +16,14 @@ package parser_test
 import (
 	"testing"
 
-	"t73f.de/r/zero/set"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/parser"
 )
 
 func TestParserType(t *testing.T) {
-	syntaxSet := set.New(parser.GetSyntaxes()...)
+	syntaxSet := roster.Collect(parser.Syntaxes())
 	testCases := []struct {
 		syntax string
 		ast    bool
@@ -60,7 +60,7 @@ func TestParserType(t *testing.T) {
 			t.Errorf("Syntax %q is image: %v, but got %v", tc.syntax, tc.image, got)
 		}
 	}
-	for syntax := range syntaxSet.All() {
+	for syntax := range syntaxSet.Values() {
 		t.Errorf("Forgot to test syntax %q", syntax)
 	}
 }

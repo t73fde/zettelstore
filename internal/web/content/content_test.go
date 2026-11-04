@@ -21,7 +21,7 @@ import (
 )
 
 func TestSupportedSyntax(t *testing.T) {
-	for _, syntax := range parser.GetSyntaxes() {
+	for syntax := range parser.Syntaxes() {
 		mt := content.MIMEFromSyntax(syntax)
 		if mt == content.UnknownMIME {
 			t.Errorf("No MIME type registered for syntax %q", syntax)

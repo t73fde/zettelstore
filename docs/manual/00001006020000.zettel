@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260729142153
+modified: 20261029181237
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -61,6 +61,15 @@ Most keys conform to a [[type|00001006030000]].
 ; [!id|''id'']
 : Contains the [[zettel identifier|00001006050000]], as given by the Zettelstore.
   It cannot be set manually, because it is a computed value.
+; [!index-state|''index-state'']
+: Is a computed property that is set only if the search index cannot provide computed values for the zettel.
+  In this case, no other properties are calculated.
+  If the key is not present, computed values are complete.
+  There is no need to set it via Zettelstore.
+
+  The value ""incomplete"" signals that the search index is not yet ready, e.g. because it is still being built during Zettelstore startup.
+
+  The value ""unindexed"" signals that the zettel is not known to the search index.
 ; [!lang|''lang'']
 : Language for the zettel.
   Mostly used for HTML rendering of the zettel.

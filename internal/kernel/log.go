@@ -85,7 +85,12 @@ func (klh *kernelLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	if h.system == "" {
 		h.system = klh.system
 	}
-	h.attrs = klh.attrs + h.attrs
+	if h.attrs != "" && klh.attrs != "" {
+		h.attrs = klh.attrs + " " + h.attrs
+
+	} else {
+		h.attrs = klh.attrs + h.attrs
+	}
 	return h
 }
 

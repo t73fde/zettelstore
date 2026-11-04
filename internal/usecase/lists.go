@@ -49,7 +49,7 @@ func (uc ListSyntax) Run(ctx context.Context) (meta.Arrangement, error) {
 		return nil, err
 	}
 	result := meta.CreateArrangement(metas, meta.KeySyntax)
-	for _, syn := range parser.GetSyntaxes() {
+	for syn := range parser.Syntaxes() {
 		if _, found := result[syn]; !found {
 			delete(result, syn)
 		}

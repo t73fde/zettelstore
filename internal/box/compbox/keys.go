@@ -15,6 +15,8 @@ package compbox
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -30,9 +32,12 @@ func genKeysM(zid id.Zid) *meta.Meta {
 }
 
 func genKeysC() []byte {
+	keys := slices.SortedFunc(
+		meta.KeyDescriptionSeq(),
+		func(a, b meta.DescriptionKey) int { return strings.Compare(a.Name, b.Name) })
 	var buf []byte
 	buf = append(buf, "|=Name<|=Type<|=Computed?:|=Property?:\n"...)
-	for _, kd := range meta.GetSortedKeyDescriptions() {
+	for _, kd := range keys {
 		buf = fmt.Appendf(buf,
 			"|[[%v|query:%v?]]|%v|%v|%v\n", kd.Name, kd.Name,
 			kd.Type.Name, kd.IsComputed(), kd.IsProperty())

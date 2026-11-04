@@ -19,11 +19,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"time"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/query"
 	"zettelstore.de/z/internal/zettel"
 )
@@ -36,8 +36,8 @@ type (
 	// Query is a mechanism to select zettel
 	Query = query.Query
 
-	// RetrievePredicate is a bool function that show if a zettel is contained in a Query.
-	RetrievePredicate = query.RetrievePredicate
+	// RetrievePredicate is a bool function that show if a zettel is contained in a query result.
+	RetrievePredicate = index.RetrievePredicate
 )
 
 // BaseBox is implemented by all Zettel boxes.
@@ -90,9 +90,6 @@ type MetaFunc func(*meta.Meta)
 // ManagedBox is the interface of managed boxes.
 type ManagedBox interface {
 	BaseBox
-
-	// HasZettel returns true, if box conains zettel with given identifier.
-	HasZettel(context.Context, id.Zid) bool
 
 	// Apply identifier of every zettel to the given function, if predicate returns true.
 	ApplyZid(context.Context, ZidFunc, RetrievePredicate) error
@@ -182,27 +179,6 @@ type Stats struct {
 	// Zettel is the number of zettel managed by the box, including
 	// duplicates across managed boxes.
 	ZettelTotal int
-
-	// LastReload stores the timestamp when a full re-index was done.
-	LastReload time.Time
-
-	// DurLastReload is the duration of the last full re-index run.
-	DurLastReload time.Duration
-
-	// IndexesSinceReload counts indexing a zettel since the full re-index.
-	IndexesSinceReload uint64
-
-	// ZettelIndexed is the number of zettel managed by the indexer.
-	ZettelIndexed int
-
-	// IndexUpdates count the number of metadata updates.
-	IndexUpdates uint64
-
-	// IndexedWords count the different words indexed.
-	IndexedWords uint64
-
-	// IndexedUrls count the different URLs indexed.
-	IndexedUrls uint64
 }
 
 // Manager is a box-managing box.
@@ -210,6 +186,10 @@ type Manager interface {
 	Box
 	StartStopper
 	Subject
+
+	// IsReady returns true if the Manager is not just started, but also all
+	// zettel are indexed.
+	IsReady() bool
 
 	// ReadStats populates st with box statistics
 	ReadStats(st *Stats)

@@ -20,7 +20,7 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zero/set"
+	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/shtml"
@@ -192,7 +192,7 @@ func (g *htmlGenerator) metaSxn(m *meta.Meta) *sx.Pair {
 		return nil
 	}
 
-	ignore := set.New(meta.KeyTitle, meta.KeyLang)
+	ignore := roster.New(meta.KeyTitle, meta.KeyLang)
 	metaMap := make(map[string]*sx.Pair, 32)
 	if tags, ok := m.Get(meta.KeyTags); ok {
 		metaMap[meta.KeyTags] = g.transformMetaTags(tags)

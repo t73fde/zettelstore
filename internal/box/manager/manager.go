@@ -26,16 +26,15 @@ import (
 	"time"
 
 	"t73f.de/r/zero/iter"
-	"t73f.de/r/zero/set"
+	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
-	"zettelstore.de/z/internal/box/manager/mapstore"
-	"zettelstore.de/z/internal/box/manager/store"
 	"zettelstore.de/z/internal/config"
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/kernel"
 	"zettelstore.de/z/internal/logging"
 )
@@ -75,29 +74,19 @@ func Register(scheme string, create createFunc) {
 
 // Manager is a coordinating box.
 type Manager struct {
-	mgrLogger    *slog.Logger
-	stateMx      sync.RWMutex
-	state        box.StartState
-	mgrMx        sync.RWMutex
-	rtConfig     config.Config
-	boxes        []box.ManagedBox
-	observers    []box.UpdateFunc
-	mxObserver   sync.RWMutex
-	done         chan struct{}
-	infos        chan box.UpdateInfo
-	propertyKeys *set.Set[string] // Set of property key names
-
-	// Indexer data
-	idxLogger *slog.Logger
-	idxStore  store.Store
-	idxAr     *anteroomQueue
-	idxReady  chan struct{} // Signal a non-empty anteroom to background task
-
-	// Indexer stats data
-	idxMx          sync.RWMutex
-	idxLastReload  time.Time
-	idxDurReload   time.Duration
-	idxSinceReload uint64
+	mgrLogger        *slog.Logger
+	stateMx          sync.RWMutex
+	state            box.StartState
+	mgrMx            sync.RWMutex
+	rtConfig         config.Config
+	boxes            []box.ManagedBox
+	observers        []box.UpdateFunc
+	mxObserver       sync.RWMutex
+	done             chan struct{}
+	infos            chan box.UpdateInfo
+	propertyKeys     roster.Roster[string] // Set of property key names
+	index            index.Index
+	indexWaitTimeout time.Duration
 }
 
 func (mgr *Manager) setState(newState box.StartState) {
@@ -115,25 +104,21 @@ func (mgr *Manager) State() box.StartState {
 }
 
 // New creates a new managing box.
-func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Config) (*Manager, error) {
-	descrs := meta.GetSortedKeyDescriptions()
-	propertyKeys := set.New[string]()
-	for _, kd := range descrs {
+func New(boxURIs []*url.URL, authManager auth.BaseManager, index index.Index, rtConfig config.Config) (*Manager, error) {
+	var propertyKeys roster.Roster[string]
+	for kd := range meta.KeyDescriptionSeq() {
 		if kd.IsProperty() {
 			propertyKeys.Insert(kd.Name)
 		}
 	}
 	boxLogger := kernel.Main.GetLogger(kernel.BoxService)
 	mgr := &Manager{
-		mgrLogger:    boxLogger.With("box", "manager"),
-		rtConfig:     rtConfig,
-		infos:        make(chan box.UpdateInfo, len(boxURIs)*10),
-		propertyKeys: propertyKeys,
-
-		idxLogger: boxLogger.With("box", "index"),
-		idxStore:  createIdxStore(rtConfig),
-		idxAr:     newAnteroomQueue(1000),
-		idxReady:  make(chan struct{}, 1),
+		mgrLogger:        boxLogger.With("box", "manager"),
+		rtConfig:         rtConfig,
+		infos:            make(chan box.UpdateInfo, len(boxURIs)*10),
+		propertyKeys:     propertyKeys,
+		index:            index,
+		indexWaitTimeout: 4 * time.Second, // TODO: make configurable
 	}
 
 	if err := setupBoxURIs(boxURIs, authManager.IsReadonly()); err != nil {
@@ -159,11 +144,13 @@ func New(boxURIs []*url.URL, authManager auth.BaseManager, rtConfig config.Confi
 		return nil, err
 	}
 	boxes = append(boxes, constbox, compbox)
+
+	mgr.index.RegisterRetriever(mgr)
 	mgr.boxes = boxes
 	return mgr, nil
 }
 func setupBoxURIs(boxURIs []*url.URL, isReadonly bool) error {
-	boxNames := set.NewCap(len(boxURIs), box.SchemeCompBox, box.SchemeConstBox)
+	boxNames := roster.New(box.SchemeCompBox, box.SchemeConstBox)
 	hasName := make([]bool, len(boxURIs))
 	for i, u := range boxURIs {
 		q := u.Query()
@@ -246,8 +233,6 @@ func nameFromPath(path string) string {
 			func(b []byte) string { return string(b) }), "")
 }
 
-func createIdxStore(_ config.Config) store.Store { return mapstore.New() }
-
 // RegisterObserver registers an observer that will be notified
 // if a zettel was found to be changed.
 func (mgr *Manager) RegisterObserver(f box.UpdateFunc) {
@@ -288,12 +273,20 @@ func (mgr *Manager) notifier() {
 					continue
 				}
 
-				isStarted := mgr.State() == box.StartStateStarted
-				mgr.idxEnqueue(reason, zid)
 				if ci.Box == nil {
 					ci.Box = mgr
 				}
-				if isStarted {
+				if mgr.State() == box.StartStateStarted {
+					switch reason {
+					case box.OnReady:
+						mgr.index.Enqueue(index.OnReady, zid, nil)
+					case box.OnReload:
+						mgr.index.Enqueue(index.OnReset, zid, nil)
+					case box.OnZettel, box.OnDelete:
+						mgr.index.Enqueue(index.OnZettel, zid, nil)
+					default:
+						mgr.mgrLogger.Error("unknown notification reason", "reason", reason)
+					}
 					mgr.notifyObserver(&ci)
 				}
 			}
@@ -322,32 +315,38 @@ func ignoreUpdate(cache destutterCache, now time.Time, reason box.UpdateReason, 
 	return false
 }
 
-func (mgr *Manager) idxEnqueue(reason box.UpdateReason, zid id.Zid) {
-	switch reason {
-	case box.OnReady:
-		return
-	case box.OnReload:
-		mgr.idxAr.Reset()
-	case box.OnZettel:
-		mgr.idxAr.EnqueueZettel(zid)
-	case box.OnDelete:
-		mgr.idxAr.EnqueueZettel(zid)
-	default:
-		mgr.mgrLogger.Error("Unknown notification reason", "reason", reason, "zid", zid)
-		return
-	}
-	select {
-	case mgr.idxReady <- struct{}{}:
-	default:
-	}
-}
-
 func (mgr *Manager) notifyObserver(ci *box.UpdateInfo) {
 	mgr.mxObserver.RLock()
 	observers := mgr.observers
 	mgr.mxObserver.RUnlock()
 	for _, ob := range observers {
 		ob(*ci)
+	}
+}
+
+func (mgr *Manager) enqueueAndWait(ctx context.Context, zid id.Zid) {
+	if !mgr.index.IsReady() {
+		mgr.index.Enqueue(index.OnZettel, zid, nil) // do not wait for a not ready index
+		return
+	}
+	mgr.mgrLogger.Debug("enqueueAndWait/0", "zid", zid)
+	done := make(chan error, 1) // buffered, never closed
+	mgr.index.Enqueue(index.OnZettel, zid, done)
+	mgr.mgrLogger.Debug("enqueueAndWait/1", "zid", zid)
+
+	timer := time.NewTimer(mgr.indexWaitTimeout)
+	defer timer.Stop()
+	select {
+	case err := <-done:
+		if err == nil {
+			mgr.mgrLogger.Debug("Index updated", "zid", zid)
+		} else {
+			mgr.mgrLogger.Info("Index failed", "zid", zid, "error", err)
+		}
+	case <-timer.C:
+		mgr.mgrLogger.Info("Index wait timeout", "zid", zid)
+	case <-ctx.Done():
+		mgr.mgrLogger.Debug("Index wait cancelled", "zid", zid, "cause", context.Cause(ctx))
 	}
 }
 
@@ -378,7 +377,6 @@ func (mgr *Manager) Start(ctx context.Context) error {
 		mgr.setState(box.StartStateStopped)
 		return err
 	}
-	mgr.idxAr.Reset() // Ensure an initial index run
 	mgr.done = make(chan struct{})
 	go mgr.notifier()
 
@@ -386,8 +384,8 @@ func (mgr *Manager) Start(ctx context.Context) error {
 	mgr.setState(box.StartStateStarted)
 
 	mgr.notifyObserver(&box.UpdateInfo{Box: mgr, Reason: box.OnReady})
-
-	go mgr.idxIndexer()
+	mgr.index.Enqueue(index.OnReady, id.Invalid, nil) // Indexer can setup itself
+	mgr.index.Enqueue(index.OnReset, id.Invalid, nil) // Ensure an initial index run
 	return nil
 }
 
@@ -430,6 +428,12 @@ func (mgr *Manager) Stop(ctx context.Context) {
 		}
 	}
 	mgr.setState(box.StartStateStopped)
+}
+
+// IsReady returns true if the Manager is not just started, but also all
+// zettel are indexed.
+func (mgr *Manager) IsReady() bool {
+	return mgr.State() == box.StartStateStarted && mgr.index.IsReady()
 }
 
 // Refresh internal box data.
@@ -480,25 +484,10 @@ func (mgr *Manager) ReadStats(st *box.Stats) {
 		sumZettel += sst.Zettel
 	}
 	st.ZettelTotal = sumZettel
-
-	var storeSt store.Stats
-	mgr.idxMx.RLock()
-	defer mgr.idxMx.RUnlock()
-	mgr.idxStore.ReadStats(&storeSt)
-
-	st.LastReload = mgr.idxLastReload
-	st.IndexesSinceReload = mgr.idxSinceReload
-	st.DurLastReload = mgr.idxDurReload
-	st.ZettelIndexed = storeSt.Zettel
-	st.IndexUpdates = storeSt.Updates
-	st.IndexedWords = storeSt.Words
-	st.IndexedUrls = storeSt.Urls
 }
 
 // Dump internal data structures to a Writer.
-func (mgr *Manager) Dump(w io.Writer) {
-	mgr.idxStore.Dump(w)
-}
+func (mgr *Manager) Dump(w io.Writer) { mgr.index.Dump(w) }
 
 func (mgr *Manager) checkContinue(ctx context.Context) error {
 	if mgr.State() != box.StartStateStarted {
