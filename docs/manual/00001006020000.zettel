@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20261029181237
+modified: 20261104133638
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the [[computed list of supported metadata keys|00000000000090]] for details.
@@ -118,6 +118,9 @@ Most keys conform to a [[type|00001006030000]].
   Can be used for selecting zettel.
   See [[supported zettel roles|00001006020100]].
   If not given, it is ignored.
+; [!see-also|''see-also'']
+: References other zettel, that might be relevant.
+  The WebUI renders these zettel as an unordered list under the heading ""See also"".
 ; [!sequel|''sequel'']
 : Is a property that contains identifiers of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
 

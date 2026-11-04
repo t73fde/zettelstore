@@ -95,6 +95,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		rb.bindString("superordinate-refs", wui.identifierSetAsLinks(zn.InhMeta, meta.KeySuperordinate, getTextTitle))
 		rb.bindString("urls", metaURLAssoc(zn.InhMeta))
 		rb.bindString("content", content)
+		rb.bindString("see-also", wui.zettelLinksSxn(zn.InhMeta, meta.KeySeeAlso, getTextTitle))
 		rb.bindString("endnotes", endnotes)
 		wui.bindLinks(ctx, &rb, "folge", zn.InhMeta, meta.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)

@@ -37,6 +37,10 @@
     )
   )
   ,@content
+  ,@(if see-also `(
+    (h2 "See also")
+    (ul ,@(map wui-item-link see-also))
+  ))
   ,endnotes
   ,@(if (or folge-links sequel-links back-links subordinate-links successor-links)
     `((nav

@@ -11,6 +11,10 @@
   *  Add WebAPI <code>/x?ready</code> to retrieve the ready state of
      Zettelstore.
      (minor: api)
+  *  Add support for metadata <code>see-also</code>, a set of zettel
+     identifier. These are rendered in the WebUI as an unordered list under the
+     heading &ldquo;See also&rdquo;.
+     (minor: webui)
 
 <a id="3_0"></a>
 <h2>Changes for Version 3.0.0 (2026-09-25)</h2>
