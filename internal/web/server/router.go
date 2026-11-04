@@ -192,7 +192,7 @@ func (rt *httpRouter) addUserContext(r *http.Request) *http.Request {
 	k := auth.KindAPI
 	t := getHeaderToken(r)
 	if len(t) == 0 {
-		rt.log.Debug("no jwt token found") // IP already logged: ServeHTTP
+		rt.log.Debug("no api token found") // IP already logged: ServeHTTP
 		k = auth.KindwebUI
 		t = getSessionToken(r)
 	}
