@@ -15,8 +15,8 @@ package webui
 
 import (
 	"context"
+	"iter"
 	"net/http"
-	"slices"
 	"strings"
 
 	"t73f.de/r/sx"
@@ -151,15 +151,12 @@ func (wui *WebUI) bindLinks(ctx context.Context, rb *renderBinder, varPrefix str
 }
 
 func (wui *WebUI) zettelLinksSxn(m *meta.Meta, key string, getTextTitle getTextTitleFunc) *sx.Pair {
-	if values := slices.Collect(m.GetFields(key)); len(values) > 0 {
-		return wui.zidLinksSxn(values, getTextTitle)
-	}
-	return nil
+	return wui.zidLinksSxn(m.GetFields(key), getTextTitle)
 }
 
-func (wui *WebUI) zidLinksSxn(values []string, getTextTitle getTextTitleFunc) *sx.Pair {
+func (wui *WebUI) zidLinksSxn(values iter.Seq[string], getTextTitle getTextTitleFunc) *sx.Pair {
 	var lb sx.ListBuilder
-	for _, val := range values {
+	for val := range values {
 		zid, err := id.Parse(val)
 		if err != nil {
 			continue
