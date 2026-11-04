@@ -51,6 +51,10 @@ type Config interface {
 	// MaxTransclusions returns the maximum number of indirect transclusions.
 	MaxTransclusions() int
 
+	// MinZidSearchDigits returns the minimum number of digits so that a number
+	// is used in the search for zettel identifier.
+	MinZidSearchDigits() int
+
 	// IsZettelFileSyntax checks if zettel with given syntax should be stored
 	// in a single .zettel file.
 	IsZettelFileSyntax(string) bool

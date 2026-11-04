@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260731141359
+modified: 20261104201503
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -78,6 +78,14 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   This is used to avoid an exploding ""transclusion bomb"", a form of a [[billion laughs attack|https://en.wikipedia.org/wiki/Billion_laughs_attack]].
 
   Default: ""1024"".
+; [!min-zid-search-digits|''min-zid-search-digits'']
+: Minimum number of digits that a search value must contain, if it is compared with a [[zettel identifier|00001006050000]] by the operators "match" (''~''), "prefix" (''[''), or "suffix ('']''), or by their negated forms.
+  See [[Identifier Key Type|00001006032000]] for details.
+
+  Allowed values are integers from ""1"" to ""14"".
+  Any other value is interpreted as the default value.
+
+  Default: ""4"".
 ; [!show-back-links|''show-back-links''], [!show-folge-links|''show-folge-links''], [!show-sequel-links|''show-sequel-links'']
 : When displaying a zettel in the web user interface, references to other zettel are normally shown below the content of the zettel.
   This affects the metadata keys [[''back''|00001006020000#back]], [[''folge''|00001006020000#folge]], and [[''sequel''|00001006020000#sequel]].

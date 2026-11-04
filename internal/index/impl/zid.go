@@ -34,16 +34,12 @@ var powersOf10 = [15]uint64{
 	100_000_000_000_000,
 }
 
-// minZidFragmentLen is the minimum length of a search string that is also
-// treated as a fragment of a zid.
-const minZidFragmentLen = 4
-
 // parseZidFragment converts s into the number it represents, if s may be a
 // part of a zid: it must consist of decimal digits only and its length must be
 // in the range minZidFragmentLen..id.LengthZid. Leading zeros are significant
 // and are covered by len(s).
-func parseZidFragment(s string) (uint64, bool) {
-	if len(s) < minZidFragmentLen || len(s) > id.LengthZid {
+func parseZidFragment(s string, minZidSearchDigits int) (uint64, bool) {
+	if len(s) < minZidSearchDigits || len(s) > id.LengthZid {
 		return 0, false
 	}
 	var n uint64

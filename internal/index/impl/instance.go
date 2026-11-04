@@ -50,6 +50,8 @@ type instance struct {
 	dict    *dictionary
 	store   *store
 
+	minZidSearchDigits func() int
+
 	started time.Time
 	ready   atomic.Bool // bulk is complete
 	onFail  func(*instance, error)
@@ -57,12 +59,13 @@ type instance struct {
 
 func newInstance(idx *Index, instID uint64, hints sizeHints) *instance {
 	in := &instance{
-		id:      instID,
-		logger:  idx.logger.With("instance", instID),
-		wake:    make(chan struct{}, 1),
-		stats:   &stats{},
-		dict:    makeDictionary(hints),
-		started: time.Now(),
+		id:                 instID,
+		logger:             idx.logger.With("instance", instID),
+		wake:               make(chan struct{}, 1),
+		stats:              &stats{},
+		dict:               makeDictionary(hints),
+		minZidSearchDigits: idx.config.MinZidSearchDigits,
+		started:            time.Now(),
 	}
 	in.store = makeStore(in.stats, hints, in.dict.inverse)
 	in.pending = newPendingQueue(func(res bulkResult) { idx.promote(in, res) })
@@ -170,7 +173,7 @@ func (in *instance) searchPrefix(prefix string) roster.Roster[id.Zid] {
 	words := in.dict.snapshot().WordsWithPrefixString(prefix)
 
 	var zidMatches bitset.BitSet[denseZid]
-	if pattern, ok := parseZidFragment(prefix); ok {
+	if pattern, ok := parseZidFragment(prefix, in.minZidSearchDigits()); ok {
 		in.dict.matchZids(&zidMatches, pattern, len(prefix), zidHasPrefix)
 	}
 	return in.dict.zidBitset(in.store.matchPrefix(prefix, words, &zidMatches, in.dict.numZids()))
@@ -182,7 +185,7 @@ func (in *instance) searchSuffix(suffix string) roster.Roster[id.Zid] {
 	words := in.dict.snapshot().WordsWithSuffixString(suffix)
 
 	var zidMatches bitset.BitSet[denseZid]
-	if pattern, ok := parseZidFragment(suffix); ok {
+	if pattern, ok := parseZidFragment(suffix, in.minZidSearchDigits()); ok {
 		in.dict.matchZids(&zidMatches, pattern, len(suffix), zidHasSuffix)
 	}
 	return in.dict.zidBitset(in.store.matchSuffix(suffix, words, &zidMatches, in.dict.numZids()))
@@ -194,7 +197,7 @@ func (in *instance) searchContains(s string) roster.Roster[id.Zid] {
 	words := in.dict.snapshot().WordsContainingString(s)
 
 	var zidMatches bitset.BitSet[denseZid]
-	if pattern, ok := parseZidFragment(s); ok {
+	if pattern, ok := parseZidFragment(s, in.minZidSearchDigits()); ok {
 		in.dict.matchZids(&zidMatches, pattern, len(s), zidContains)
 	}
 	return in.dict.zidBitset(in.store.matchContains(s, words, &zidMatches, in.dict.numZids()))

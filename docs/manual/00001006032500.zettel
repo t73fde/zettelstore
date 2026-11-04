@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20261104114340
+modified: 20261104201622
 
 Values of this type denote a (sorted) set of [[zettel identifier|00001006050000]].
 
@@ -19,7 +19,7 @@ A value matches an identifier set value, if the value matches any of the identif
 For example, ""000010060325"" is a prefix ""[[00001006032000]] [[00001006032500]]"".
 
 Every identifier of the set is compared as described for the [[identifier key type|00001006032000]].
-In particular, the minimum length of 4 digits for the search operators "match", "prefix", and "suffix" also applies here.
+In particular, the minimum length of [[''min-zid-search-digits''|00001004020000#min-zid-search-digits]] digits for the search operators "match", "prefix", and "suffix" also applies here.
 
 === Sorting
 Sorting is done by comparing the [[String|00001006033500]] values.

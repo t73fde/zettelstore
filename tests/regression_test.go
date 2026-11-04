@@ -171,6 +171,7 @@ func (*myConfig) IsSimpleMode() bool                       { return false }
 func (*myConfig) IsExpertMode() bool                       { return false }
 func (*myConfig) GetVisibility(*meta.Meta) meta.Visibility { return meta.VisibilityPublic }
 func (*myConfig) MaxTransclusions() int                    { return 1024 }
+func (*myConfig) MinZidSearchDigits() int                  { return 4 }
 
 var testConfig = &myConfig{}
 

@@ -42,20 +42,22 @@ type configService struct {
 // Predefined Metadata keys for runtime configuration
 // See: https://zettelstore.de/manual/h/00001004020000
 const (
-	keyDefaultCopyright  = "default-copyright"
-	keyDefaultLicense    = "default-license"
-	keyDefaultVisibility = "default-visibility"
-	keyExpertMode        = "expert-mode"
-	keyMarkdownDialect   = "markdown-dialect"
-	keyMaxTransclusions  = "max-transclusions"
-	keySiteName          = "site-name"
-	keyZettelFileSyntax  = "zettel-file-syntax"
+	keyDefaultCopyright   = "default-copyright"
+	keyDefaultLicense     = "default-license"
+	keyDefaultVisibility  = "default-visibility"
+	keyExpertMode         = "expert-mode"
+	keyMarkdownDialect    = "markdown-dialect"
+	keyMaxTransclusions   = "max-transclusions"
+	keyMinZidSearchDigits = "min-zid-search-digits"
+	keySiteName           = "site-name"
+	keyZettelFileSyntax   = "zettel-file-syntax"
 )
 
 const (
-	defaultHTMLInsecurity   = config.NoHTML
-	defaultMaxTransclusions = 1024
-	defaultSiteName         = "Zettelstore"
+	defaultHTMLInsecurity     = config.NoHTML
+	defaultMaxTransclusions   = 1024
+	defaultMinZidSearchDigits = 4
+	defaultSiteName           = "Zettelstore"
 )
 
 var errUnknownVisibility = errors.New("unknown visibility")
@@ -106,8 +108,22 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			}, true,
 		},
 		keyMaxTransclusions: {"Maximum number of transclusions", parseInt, true},
-		keySiteName:         {"Site name", parseString, true},
-		ConfigSxMaxNesting:  {"Maximum nesting of Sx calls", parseInt, true},
+		keyMinZidSearchDigits: {
+			"Minimum Zid search digits",
+			func(val string) (any, error) {
+				i, err := strconv.Atoi(val)
+				if err != nil {
+					return i, err
+				}
+				if 1 <= i && i <= 14 {
+					return i, nil
+				}
+				return defaultMinZidSearchDigits, nil
+			},
+			true,
+		},
+		ConfigSxMaxNesting: {"Maximum nesting of Sx calls", parseInt, true},
+		keySiteName:        {"Site name", parseString, true},
 		keyZettelFileSyntax: {
 			"Zettel file syntax",
 			func(val string) (any, error) {
@@ -131,6 +147,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 		meta.KeyLang:              meta.ValueLangEN,
 		keyMarkdownDialect:        meta.ValueSyntaxCMark,
 		keyMaxTransclusions:       defaultMaxTransclusions,
+		keyMinZidSearchDigits:     defaultMinZidSearchDigits,
 		keySiteName:               defaultSiteName,
 		ConfigSxMaxNesting:        32 * 1024,
 		keyZettelFileSyntax:       roster.New[string](),
@@ -317,6 +334,15 @@ func (cs *configService) MaxTransclusions() int {
 		return mt
 	}
 	return defaultMaxTransclusions
+}
+
+// MinZidSearchDigits return the minimum number of digits to include a number
+// into the search for a zettel identifier.
+func (cs *configService) MinZidSearchDigits() int {
+	if mt, ok := cs.GetCurConfig(keyMinZidSearchDigits).(int); ok {
+		return mt
+	}
+	return defaultMinZidSearchDigits
 }
 
 // IsZettelFileSyntax returns true, if zettel with given syntax should be stored in a .zettel file.
