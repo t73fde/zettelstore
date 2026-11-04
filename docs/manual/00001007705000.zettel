@@ -4,7 +4,7 @@ role: manual
 tags: #manual #search #zettelstore
 syntax: zmk
 created: 20220805150154
-modified: 20260608152220
+modified: 20261104114415
 
 A search operator specifies how the comparison of a search value and a zettel should be executed.
 Every comparison is done case-insensitive, treating all uppercase letters the same as lowercase letters.
@@ -42,3 +42,6 @@ Since the exclamation mark character can be combined with the other operators, t
 # ""''!?''"": is successful if the metadata does not contain the given key.
 # ""''''"": a missing search operator can only occur for a full-text search.
   It is equal to the ""''~''"" operator.
+
+Some [[key types|00001006030000]] restrict the search values allowed for specific operators.
+These restrictions are described in the section ""Query comparison"" of the respective key type, for example for [[identifiers|00001006032000]].

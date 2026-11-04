@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210212135017
-modified: 20230612183459
+modified: 20261104114219
 
 Values of this type denote a [[zettel identifier|00001006050000]].
 
@@ -16,6 +16,10 @@ Must be a sequence of 14 digits (""0""--""9"").
 
 When the [[search operators|00001007705000]] ""less"", ""not less"", ""greater"", and ""not greater"" are given, the length of the search value is checked.
 If it contains less than 14 digits, zero digits (""0"") are appended, until it contains exactly 14 digits.
+
+When the search operators "match" (''~''), "prefix" (''[''), or "suffix ("']'') are given, or their negated forms (''!~'', ''![''), ''!]''), the search value must contain at least 4 digits.
+A search value with less than 4 digits is ignored / yields an empty result.
+For example, ""0000"" is a valid search value for the match operator, but ""000"" is not.
 
 All other comparisons assume that up to 14 characters are given.
 
