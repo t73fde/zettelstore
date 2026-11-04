@@ -19,6 +19,7 @@ import (
 	"iter"
 	"math"
 	"slices"
+	"strings"
 
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
@@ -221,14 +222,31 @@ func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value
 	}
 }
 
+var keyCosts = map[string]float64{
+	meta.KeyFolge:         0.2,
+	meta.KeyPrecursor:     0.2,
+	meta.KeySequel:        0.4,
+	meta.KeyPrequel:       0.4,
+	meta.KeySuccessor:     0.8,
+	meta.KeyPredecessor:   0.8,
+	meta.KeySeeAlso:       0.8,
+	meta.KeySubordinate:   1.2,
+	meta.KeySuperordinate: 1.2,
+
+	meta.KeyBack:     4,
+	meta.KeyBackward: 4,
+	meta.KeyDead:     1e100,
+	meta.KeyForward:  4,
+}
+
 func contextCost(key string) float64 {
-	switch key {
-	case meta.KeyFolge, meta.KeyPrecursor:
-		return 0.2
-	case meta.KeySequel, meta.KeyPrequel:
-		return 1.0
+	if cost, found := keyCosts[key]; found {
+		return cost
 	}
-	return 2
+	if strings.HasSuffix(key, "-zid") {
+		return 2
+	}
+	return 4
 }
 
 func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, dir int, value meta.Value) {
