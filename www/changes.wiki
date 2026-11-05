@@ -8,7 +8,7 @@
   *  Add new predefined metadata key <code>index-state</code>. It is used if
      the search index cannot provide computed values for the given zettel.
      (minor: box, api)
-  *  Add WebAPI <code>/x?ready</code> to retrieve the ready state of
+  *  Add WebAPI <code>/x?data=ready</code> to retrieve the ready state of
      Zettelstore.
      (minor: api)
   *  Add support for metadata <code>see-also</code>, a set of zettel

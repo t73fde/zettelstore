@@ -24,15 +24,19 @@ import (
 )
 
 // MakeGetDataHandler creates a new HTTP handler to return zettelstore data.
-func (a *WebAPI) MakeGetDataHandler(ucVersion usecase.Version, ucIsReady usecase.IsReady) http.Handler {
+func (a *WebAPI) MakeGetDataHandler(
+	ucVersion usecase.Version,
+	ucIsReady usecase.IsReady,
+) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
-		switch {
-		case q.Has("ready"):
+		switch q.Get("data") {
+		case "ready":
 			a.writeIsReady(w, ucIsReady.Run())
+		case "", "version":
+			a.writeVersion(w, ucVersion.Run())
 		default:
-			version := ucVersion.Run()
-			a.writeVersion(w, version)
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
 	})
 }
