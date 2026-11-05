@@ -202,15 +202,18 @@ func (za *zettelAnalyzer) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 	return false
 }
 func (za *zettelAnalyzer) VisitItAfter(*sx.Pair, *sx.Pair) {}
+
 func (za *zettelAnalyzer) addRef(ref *sx.Pair) {
-	sym, refValue := zsx.GetReference(ref)
-	if zsx.SymRefStateExternal.IsEqual(sym) {
-		za.addURL(refValue)
-	} else if sz.SymRefStateZettel.IsEqual(sym) {
-		// TODO: if zettel reference has the form 12345678901234#mark, zid must
-		// be added to forwards, mark must be added to words.
-		if zid, err := id.Parse(refValue); err == nil {
+	switch sym, refValue := zsx.GetReference(ref); sym {
+	case sz.SymRefStateZettel:
+		zidValue, fragment, found := strings.Cut(refValue, "#")
+		if found {
+			za.addString(fragment)
+		}
+		if zid, err := id.Parse(zidValue); err == nil {
 			za.az.forward.Insert(za.a.dict.Encode(zid))
 		}
+	case zsx.SymRefStateExternal:
+		za.addURL(refValue)
 	}
 }
