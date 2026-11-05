@@ -493,6 +493,38 @@ func TestVersion(t *testing.T) {
 	}
 }
 
+func TestSiteInfo(t *testing.T) {
+	t.Parallel()
+	c := getClient()
+	siteInfo, err := c.GetSiteInfo(context.Background())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	check := func(name string, got, exp any) {
+		t.Run(name, func(t *testing.T) {
+			if got != exp {
+				t.Errorf("expected: %v, but got: %v", exp, got)
+			}
+		})
+	}
+	check("SiteName", siteInfo.SiteName, "Testdata")
+	check("DefaultLang", siteInfo.DefaultLang, "en")
+	check("HomeZettel", siteInfo.HomeZettel, id.ZidDefaultHome)
+	check("DefaultLang", siteInfo.Lang, "en")
+
+	c.SetAuth("reader", "reader")
+	siteInfo, err = c.GetSiteInfo(context.Background())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	check("SiteName:R", siteInfo.SiteName, "Testdata")
+	check("DefaultLang:R", siteInfo.DefaultLang, "en")
+	check("HomeZettel:R", siteInfo.HomeZettel, id.ZidDefaultHome)
+	check("Lang:R", siteInfo.Lang, "jbo")
+}
+
 func TestApplicationZid(t *testing.T) {
 	c := getClient()
 	c.SetAuth("reader", "reader")

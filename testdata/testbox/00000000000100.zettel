@@ -1,6 +1,7 @@
 id: 00000000000100
 title: Zettelstore Runtime Configuration
 role: configuration
+site-name: Testdata
 syntax: none
 expert-mode: true
 modified: 20220215171142

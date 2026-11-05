@@ -11,6 +11,9 @@
   *  Add WebAPI <code>/x?data=ready</code> to retrieve the ready state of
      Zettelstore.
      (minor: api)
+  *  Add WebAPI <code>/x?data=site-info</code> to retrieve some information
+     about the Zettelstore instance.
+     (minor: api)
   *  Add support for metadata <code>see-also</code>, a set of zettel
      identifier. These are rendered in the WebUI as an unordered list under the
      heading &ldquo;See also&rdquo;.

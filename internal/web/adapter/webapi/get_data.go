@@ -19,6 +19,7 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/usecase"
 )
@@ -27,6 +28,7 @@ import (
 func (a *WebAPI) MakeGetDataHandler(
 	ucVersion usecase.Version,
 	ucIsReady usecase.IsReady,
+	ucSiteInfo usecase.SiteInfo,
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
@@ -35,6 +37,13 @@ func (a *WebAPI) MakeGetDataHandler(
 			a.writeIsReady(w, ucIsReady.Run())
 		case "", "version":
 			a.writeVersion(w, ucVersion.Run())
+		case "site-info":
+			siteInfo, err := ucSiteInfo.Run(r.Context())
+			if err != nil {
+				a.reportUsecaseError(w, err)
+				return
+			}
+			a.writeSiteInfo(w, siteInfo)
 		default:
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
@@ -70,5 +79,17 @@ func (a *WebAPI) writeIsReady(w http.ResponseWriter, isReady bool) {
 
 	if _, err := w.Write(result); err != nil {
 		a.logger.Error("IsReady", "err", err)
+	}
+}
+
+func (a *WebAPI) writeSiteInfo(w http.ResponseWriter, siteInfo webapi.SiteInfo) {
+	err := a.writeObject(w, id.Invalid, sx.MakeList(
+		sx.MakeString(siteInfo.SiteName),
+		sx.MakeString(siteInfo.DefaultLang),
+		sx.MakeString(siteInfo.HomeZettel.String()),
+		sx.MakeString(siteInfo.Lang),
+	))
+	if err != nil {
+		a.logger.Error("Write site info", "err", err)
 	}
 }

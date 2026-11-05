@@ -123,7 +123,7 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 	webSrv.AddListRoute(isAPI, 'a', server.MethodPost, a.MakePostLoginHandler(&ucAuthenticate))
 	webSrv.AddListRoute(isAPI, 'a', server.MethodPut, a.MakeRenewAuthHandler())
 	webSrv.AddZettelRoute(isAPI, 'r', server.MethodGet, a.MakeGetReferencesHandler(ucParseZettel, ucGetReferences))
-	webSrv.AddListRoute(isAPI, 'x', server.MethodGet, a.MakeGetDataHandler(ucVersion, usecase.NewIsReady(boxManager)))
+	webSrv.AddListRoute(isAPI, 'x', server.MethodGet, a.MakeGetDataHandler(ucVersion, usecase.NewIsReady(boxManager), usecase.NewSiteInfo(rtConfig)))
 	webSrv.AddListRoute(isAPI, 'x', server.MethodPost, a.MakePostCommandHandler(&ucIsAuth, &ucRefresh))
 	webSrv.AddListRoute(isAPI, 'z', server.MethodGet, a.MakeQueryHandler(&ucQuery, &ucTagZettel, &ucRoleZettel, &ucReIndex))
 	webSrv.AddZettelRoute(isAPI, 'z', server.MethodGet, a.MakeGetZettelHandler(ucGetZettel, ucParseZettel, ucEvaluate))

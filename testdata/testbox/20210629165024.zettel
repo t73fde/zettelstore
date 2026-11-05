@@ -4,6 +4,7 @@ role: user
 tags: #test #user
 syntax: none
 credential: $2a$10$uC7LV2JdFhasw2HqSWZbSOihvFpwtaEXjXp98yzGfE3FHudq.vg.u
+lang: jbo
 modified: 20211220131906
 user-id: reader
 user-role: reader
