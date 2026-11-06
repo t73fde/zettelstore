@@ -78,3 +78,36 @@ func (uc SiteInfo) Run(ctx context.Context) (result webapi.SiteInfo, err error) 
 func (uc SiteInfo) getConfig(ctx context.Context, key string) string {
 	return uc.port.Get(ctx, nil, key)
 }
+
+// ----- Metadata key info ---------------------------------------------------
+
+// MetadataKeyInfo ist the use case itself.
+type MetadataKeyInfo struct{}
+
+// NewMetadataKeyInfo creates a new use case object.
+func NewMetadataKeyInfo() MetadataKeyInfo { return MetadataKeyInfo{} }
+
+// Run executes the use case
+func (uc MetadataKeyInfo) Run(key string) webapi.MetadataKeyInfo {
+	dk := meta.GetDescription(key)
+	return uc.getData(dk)
+}
+
+// RunPredefined executed the use case for the predefined keys.
+func (uc MetadataKeyInfo) RunPredefined() (result []webapi.MetadataKeyInfo) {
+	for dk := range meta.KeyDescriptionSeq() {
+		result = append(result, uc.getData(dk))
+	}
+	return result
+}
+
+func (MetadataKeyInfo) getData(dk meta.DescriptionKey) webapi.MetadataKeyInfo {
+	dt := dk.Type
+	return webapi.MetadataKeyInfo{
+		Name:       dk.Name,
+		Type:       dt.Name,
+		IsSet:      dt.IsSet,
+		IsComputed: dk.IsComputed(),
+		IsProperty: dk.IsProperty(),
+	}
+}

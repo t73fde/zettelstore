@@ -19,6 +19,7 @@ import (
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/usecase"
@@ -29,6 +30,7 @@ func (a *WebAPI) MakeGetDataHandler(
 	ucVersion usecase.Version,
 	ucIsReady usecase.IsReady,
 	ucSiteInfo usecase.SiteInfo,
+	ucMetaKeys usecase.MetadataKeyInfo,
 ) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := r.URL.Query()
@@ -44,6 +46,17 @@ func (a *WebAPI) MakeGetDataHandler(
 				return
 			}
 			a.writeSiteInfo(w, siteInfo)
+		case "meta-type":
+			// TODO: check for login
+			if keys := q["key"]; len(keys) > 0 {
+				dks := make([]webapi.MetadataKeyInfo, 0, len(keys))
+				for _, key := range keys {
+					dks = append(dks, ucMetaKeys.Run(key))
+				}
+				a.writeMetaType(w, dks)
+			} else {
+				a.writeMetaType(w, ucMetaKeys.RunPredefined())
+			}
 		default:
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
@@ -93,3 +106,53 @@ func (a *WebAPI) writeSiteInfo(w http.ResponseWriter, siteInfo webapi.SiteInfo) 
 		a.logger.Error("Write site info", "err", err)
 	}
 }
+
+func (a *WebAPI) writeMetaType(w http.ResponseWriter, md []webapi.MetadataKeyInfo) {
+	var lb sx.ListBuilder
+	for _, kd := range md {
+		lb.Add(sx.MakeList(
+			sx.MakeString(kd.Name),
+			typeSymbol(kd.Type),
+			sx.MakeBoolean(kd.IsSet),
+			sx.MakeBoolean(kd.IsComputed),
+			sx.MakeBoolean(kd.IsProperty),
+		))
+	}
+	err := a.writeObject(w, id.Invalid, lb.List())
+	if err != nil {
+		a.logger.Error("Write metadata info", "err", err)
+	}
+}
+
+func typeSymbol(s string) *sx.Symbol {
+	if sym, found := typeSymbolMap[s]; found {
+		return sym
+	}
+	panic("Unknown type name: " + s)
+}
+
+var (
+	symMetaCredential = sx.MakeSymbol(webapi.NameMetaCredential)
+	symMetaEmpty      = sx.MakeSymbol(webapi.NameMetaEmpty)
+	symMetaID         = sx.MakeSymbol(webapi.NameMetaID)
+	symMetaIDSet      = sx.MakeSymbol(webapi.NameMetaIDSet)
+	symMetaNumber     = sx.MakeSymbol(webapi.NameMetaNumber)
+	symMetaString     = sx.MakeSymbol(webapi.NameMetaString)
+	symMetaTagSet     = sx.MakeSymbol(webapi.NameMetaTagSet)
+	symMetaTimestamp  = sx.MakeSymbol(webapi.NameMetaTimestamp)
+	symMetaURL        = sx.MakeSymbol(webapi.NameMetaURL)
+	symMetaWord       = sx.MakeSymbol(webapi.NameMetaWord)
+
+	typeSymbolMap = map[string]*sx.Symbol{
+		meta.MetaCredential: symMetaCredential,
+		meta.MetaEmpty:      symMetaEmpty,
+		meta.MetaID:         symMetaID,
+		meta.MetaIDSet:      symMetaIDSet,
+		meta.MetaNumber:     symMetaNumber,
+		meta.MetaString:     symMetaString,
+		meta.MetaTagSet:     symMetaTagSet,
+		meta.MetaTimestamp:  symMetaTimestamp,
+		meta.MetaURL:        symMetaURL,
+		meta.MetaWord:       symMetaWord,
+	}
+)
