@@ -693,12 +693,12 @@ func dumpPostings(
 	}
 }
 
-func dumpZids(w io.Writer, prefix string, zids roster.Roster[id.Zid]) {
-	if zids.IsEmpty() {
+func dumpZids(w io.Writer, prefix string, zids queryResult) {
+	if len(zids) == 0 {
 		return
 	}
 	_, _ = io.WriteString(w, prefix)
-	for zid := range zids.Values() {
+	for _, zid := range slices.Sorted(maps.Keys(zids)) {
 		_, _ = io.WriteString(w, " ")
 		_, _ = w.Write(zid.Bytes())
 	}

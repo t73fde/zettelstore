@@ -14,13 +14,15 @@
 package impl
 
 import (
-	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
 	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/index"
 )
+
+// queryResult stores the result of a query, to be used in index.Result.
+type queryResult = map[id.Zid]struct{}
 
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
@@ -32,7 +34,7 @@ func (idx *Index) SearchEqual(word string) *index.Result {
 		ready := a.ready.Load()
 		return newResult(ready, a.searchEqual(word))
 	}
-	return index.NewPartialResult(roster.Roster[id.Zid]{})
+	return index.NewPartialResult(make(queryResult))
 }
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
@@ -44,7 +46,7 @@ func (idx *Index) SearchPrefix(prefix string) *index.Result {
 		ready := a.ready.Load()
 		return newResult(ready, a.searchPrefix(prefix))
 	}
-	return index.NewPartialResult(roster.Roster[id.Zid]{})
+	return index.NewPartialResult(make(queryResult))
 }
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
@@ -56,7 +58,7 @@ func (idx *Index) SearchSuffix(suffix string) *index.Result {
 		ready := a.ready.Load()
 		return newResult(ready, a.searchSuffix(suffix))
 	}
-	return index.NewPartialResult(roster.Roster[id.Zid]{})
+	return index.NewPartialResult(make(queryResult))
 }
 
 // SearchContains returns all zettel that contains the given string.
@@ -68,12 +70,12 @@ func (idx *Index) SearchContains(s string) *index.Result {
 		ready := a.ready.Load()
 		return newResult(ready, a.searchContains(s))
 	}
-	return index.NewPartialResult(roster.Roster[id.Zid]{})
+	return index.NewPartialResult(make(queryResult))
 }
 
 // newResult wraps base. The result is marked as possibly incomplete, if the
 // initial build was not complete when the search started.
-func newResult(ready bool, base roster.Roster[id.Zid]) *index.Result {
+func newResult(ready bool, base queryResult) *index.Result {
 	if ready {
 		return index.NewResult(base)
 	}

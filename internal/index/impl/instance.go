@@ -16,6 +16,8 @@ package impl
 import (
 	"context"
 	"log/slog"
+	"maps"
+	"slices"
 	"sync/atomic"
 	"time"
 
@@ -161,15 +163,14 @@ func (in *instance) findZettel(zid id.Zid) (denseZid, *storeZettel, bool) {
 }
 
 // searchEqual returns the identifier of all zettel that match word exactly.
-func (in *instance) searchEqual(word string) roster.Roster[id.Zid] {
+func (in *instance) searchEqual(word string) queryResult {
 	wid := in.dict.LookupString(word)           // vocab.InvalidWordID, if s is not a known word
 	dzid, hasZid := in.dict.lookupZidText(word) // dense identifier, if s is the text of a known zid
 	return in.dict.zidRoster(in.store.matchEqual(word, wid, hasZid, dzid))
 }
 
 // searchPrefix returns the identifier of all zettel that have the given prefix.
-func (in *instance) searchPrefix(prefix string) roster.Roster[id.Zid] {
-	// The snapshot of the words is taken before the store is read, as in searchEqual.
+func (in *instance) searchPrefix(prefix string) queryResult {
 	words := in.dict.snapshot().WordsWithPrefixString(prefix)
 
 	var zidMatches bitset.BitSet[denseZid]
@@ -180,8 +181,7 @@ func (in *instance) searchPrefix(prefix string) roster.Roster[id.Zid] {
 }
 
 // searchSuffix returns the identifier of all zettel that have the given suffix.
-func (in *instance) searchSuffix(suffix string) roster.Roster[id.Zid] {
-	// The snapshot of the words is taken before the store is read, as in searchEqual.
+func (in *instance) searchSuffix(suffix string) queryResult {
 	words := in.dict.snapshot().WordsWithSuffixString(suffix)
 
 	var zidMatches bitset.BitSet[denseZid]
@@ -192,8 +192,7 @@ func (in *instance) searchSuffix(suffix string) roster.Roster[id.Zid] {
 }
 
 // searchContains returns the identifier of all zettel that contain s.
-func (in *instance) searchContains(s string) roster.Roster[id.Zid] {
-	// The snapshot of the words is taken before the store is read, as in searchEqual.
+func (in *instance) searchContains(s string) queryResult {
 	words := in.dict.snapshot().WordsContainingString(s)
 
 	var zidMatches bitset.BitSet[denseZid]
@@ -216,7 +215,7 @@ func (in *instance) enrich(m *meta.Meta) {
 	updated := false
 	known := in.store.enrich(dzid, func(slot enrichSlot, keyID vocab.WordID, dzids roster.Roster[denseZid]) {
 		zids := in.dict.zidRoster(dzids)
-		if zids.IsEmpty() { // no dense identifier could be decoded
+		if len(zids) == 0 { // no dense identifier could be decoded
 			return
 		}
 		var key string
@@ -245,9 +244,9 @@ func (in *instance) enrich(m *meta.Meta) {
 	}
 }
 
-func zidsToValue(s roster.Roster[id.Zid]) meta.Value {
-	buf := make([]byte, 0, s.Count()*(id.LengthZid+1))
-	for zid := range s.Values() {
+func zidsToValue(s queryResult) meta.Value {
+	buf := make([]byte, 0, len(s)*(id.LengthZid+1))
+	for _, zid := range slices.Sorted(maps.Keys(s)) {
 		if len(buf) > 0 {
 			buf = append(buf, ' ')
 		}

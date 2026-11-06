@@ -17,9 +17,9 @@ package index
 import (
 	"context"
 	"io"
+	"maps"
 	"time"
 
-	"t73f.de/r/zero/roster"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
@@ -153,19 +153,19 @@ type RetrievePredicate func(id.Zid) bool
 // receiver is frozen by a call to MakePredicate. A Result is not safe for
 // concurrent use.
 type Result struct {
-	base    roster.Roster[id.Zid]
+	base    map[id.Zid]struct{}
 	frozen  bool
 	partial bool
 }
 
 // NewResult creates a Result that takes ownership of base.
-func NewResult(base roster.Roster[id.Zid]) *Result {
+func NewResult(base map[id.Zid]struct{}) *Result {
 	return &Result{base: base}
 }
 
 // NewPartialResult creates a Result that takes ownership of base and that is
 // marked as possibly incomplete.
-func NewPartialResult(base roster.Roster[id.Zid]) *Result {
+func NewPartialResult(base map[id.Zid]struct{}) *Result {
 	return &Result{base: base, partial: true}
 }
 
@@ -174,14 +174,14 @@ func NewPartialResult(base roster.Roster[id.Zid]) *Result {
 func (sr *Result) Incomplete() bool { return sr.partial }
 
 // IsEmpty reports whether the result contains no identifier.
-func (sr *Result) IsEmpty() bool { return sr.base.IsEmpty() }
+func (sr *Result) IsEmpty() bool { return len(sr.base) == 0 }
 
 // Count returns the number of identifiers in the result.
-func (sr *Result) Count() int { return sr.base.Count() }
+func (sr *Result) Count() int { return len(sr.base) }
 
 // Clone returns an independent, not frozen copy of the result.
 func (sr *Result) Clone() *Result {
-	return &Result{base: sr.base.Clone(), partial: sr.partial}
+	return &Result{base: maps.Clone(sr.base), partial: sr.partial}
 }
 
 // And restricts the result to identifiers that are also contained in other.
@@ -191,7 +191,11 @@ func (sr *Result) And(other *Result) {
 	if sr.frozen {
 		panic("And operation on frozen Result")
 	}
-	sr.base.And(other.base)
+	for zid := range sr.base {
+		if _, found := other.base[zid]; !found {
+			delete(sr.base, zid)
+		}
+	}
 	sr.partial = sr.partial || other.partial
 }
 
@@ -201,7 +205,9 @@ func (sr *Result) Or(other *Result) {
 	if sr.frozen {
 		panic("Or operation on frozen Result")
 	}
-	sr.base.Or(other.base)
+	for zid := range other.base {
+		sr.base[zid] = struct{}{}
+	}
 	sr.partial = sr.partial || other.partial
 }
 
@@ -211,5 +217,8 @@ func (sr *Result) Or(other *Result) {
 // use.
 func (sr *Result) MakePredicate() RetrievePredicate {
 	sr.frozen = true
-	return sr.base.Contains
+	return func(zid id.Zid) bool {
+		_, found := sr.base[zid]
+		return found
+	}
 }

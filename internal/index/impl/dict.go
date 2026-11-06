@@ -15,7 +15,6 @@ package impl
 
 import (
 	"iter"
-	"slices"
 	"sync"
 
 	"t73f.de/r/zero/bitset"
@@ -164,7 +163,7 @@ func (d *dictionary) lookupZidText(s string) (denseZid, bool) {
 }
 
 // zidRoster converts a set of dense identifier into a set of zettel identifier.
-func (d *dictionary) zidRoster(dzids roster.Roster[denseZid]) (result roster.Roster[id.Zid]) {
+func (d *dictionary) zidRoster(dzids roster.Roster[denseZid]) (result queryResult) {
 	if dzids.IsEmpty() {
 		return result
 	}
@@ -172,7 +171,7 @@ func (d *dictionary) zidRoster(dzids roster.Roster[denseZid]) (result roster.Ros
 }
 
 // zidBitset converts a set of dense identifier into a set of zettel identifier.
-func (d *dictionary) zidBitset(dzids bitset.BitSet[denseZid]) (result roster.Roster[id.Zid]) {
+func (d *dictionary) zidBitset(dzids bitset.BitSet[denseZid]) (result queryResult) {
 	if dzids.IsEmpty() {
 		return result
 	}
@@ -186,17 +185,16 @@ func (d *dictionary) zidBitset(dzids bitset.BitSet[denseZid]) (result roster.Ros
 //
 // values is iterated while d.mx is read-locked. Therefore, it must not call
 // any method of d that locks d.mx.
-func (d *dictionary) zidSet(count int, values iter.Seq[denseZid]) (result roster.Roster[id.Zid]) {
-	zids := make([]id.Zid, 0, count)
+func (d *dictionary) zidSet(count int, values iter.Seq[denseZid]) queryResult {
+	result := make(queryResult, count)
 	d.mx.RLock()
+	defer d.mx.RUnlock()
 	for dz := range values {
 		if zid, found := d.dense.Decode(dz); found {
-			zids = append(zids, zid)
+			result[zid] = struct{}{}
 		}
 	}
-	d.mx.RUnlock()
-	slices.Sort(zids)
-	return roster.FromSorted(zids)
+	return result
 }
 
 // matchZids adds the dense identifier of every known zid to into, if
