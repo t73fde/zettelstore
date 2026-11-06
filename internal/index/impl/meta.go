@@ -38,6 +38,14 @@ func (sm *storeMeta) add(key vocab.WordID, val meta.Value) {
 	sm.ks = append(sm.ks, key)
 	sm.vs = append(sm.vs, val)
 }
+func (sm *storeMeta) get(key vocab.WordID) (meta.Value, bool) {
+	for i, k := range sm.ks {
+		if k == key {
+			return sm.vs[i], true
+		}
+	}
+	return "", false
+}
 func (sm *storeMeta) sort() {
 	sort.Sort(sm)
 }

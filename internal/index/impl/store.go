@@ -28,6 +28,7 @@ import (
 	"t73f.de/r/zero/roster"
 	"t73f.de/r/zero/vocab"
 	"t73f.de/r/zsc/domain/id"
+	"t73f.de/r/zsc/domain/meta"
 )
 
 type store struct {
@@ -561,10 +562,16 @@ func (st *store) dumpZettel(w io.Writer, dict *dictionary) {
 	}
 	slices.SortFunc(refs, func(a, b zettelRef) int { return cmp.Compare(a.zid, b.zid) })
 
+	titleKey := dict.LookupString(meta.KeyTitle)
+
 	_, _ = io.WriteString(w, "==== Zettel Index\n")
 	for _, ref := range refs {
 		zs := st.zettel[ref.dz]
-		_, _ = fmt.Fprintln(w, "=====", ref.zid)
+		title := "(???)"
+		if t, found := zs.meta.get(titleKey); found {
+			title = string(t)
+		}
+		_, _ = fmt.Fprintln(w, "=====", ref.zid, title)
 		dumpZids(w, "* Forward:", dict.zidRoster(zs.forward))
 		dumpZids(w, "* Backward:", dict.zidRoster(st.backward[ref.dz]))
 
