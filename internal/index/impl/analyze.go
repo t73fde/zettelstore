@@ -164,13 +164,19 @@ func (za *zettelAnalyzer) addString(s string) {
 	}
 }
 func (za *zettelAnalyzer) addURL(s string) {
-	if _, err := url.Parse(s); err == nil {
-		za.az.urls.Insert(strings.Clone(s))
+	s = strings.TrimSpace(s)
+	if s != "" {
+		if _, err := url.Parse(s); err == nil {
+			za.az.urls.Insert(strings.Clone(s))
+		}
 	}
 }
 func (za *zettelAnalyzer) addClonedURL(s string) {
-	if _, err := url.Parse(s); err == nil {
-		za.az.urls.Insert(s)
+	s = strings.TrimSpace(s)
+	if s != "" {
+		if _, err := url.Parse(s); err == nil {
+			za.az.urls.Insert(s)
+		}
 	}
 }
 
