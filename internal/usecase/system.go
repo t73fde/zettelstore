@@ -19,6 +19,9 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
+
+	"zettelstore.de/z/internal/auth"
+	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/config"
 )
 
@@ -81,24 +84,39 @@ func (uc SiteInfo) getConfig(ctx context.Context, key string) string {
 
 // ----- Metadata key info ---------------------------------------------------
 
+// MetadataKeyInfoPort contains the interface needed by this use case.
+type MetadataKeyInfoPort interface {
+	GetUserRole(user *meta.Meta) meta.UserRole
+}
+
 // MetadataKeyInfo ist the use case itself.
-type MetadataKeyInfo struct{}
+type MetadataKeyInfo struct {
+	port MetadataKeyInfoPort
+}
 
 // NewMetadataKeyInfo creates a new use case object.
-func NewMetadataKeyInfo() MetadataKeyInfo { return MetadataKeyInfo{} }
+func NewMetadataKeyInfo(port MetadataKeyInfoPort) MetadataKeyInfo {
+	return MetadataKeyInfo{port: port}
+}
 
 // Run executes the use case
-func (uc MetadataKeyInfo) Run(key string) webapi.MetadataKeyInfo {
+func (uc MetadataKeyInfo) Run(ctx context.Context, key string) (result webapi.MetadataKeyInfo, _ error) {
+	if user := auth.GetCurrentUser(ctx); uc.port.GetUserRole(user) < meta.UserRoleReader {
+		return result, box.NewErrNotAllowed("GetMetadataKeyInfo", user, id.Invalid)
+	}
 	dk := meta.GetDescription(key)
-	return uc.getData(dk)
+	return uc.getData(dk), nil
 }
 
 // RunPredefined executed the use case for the predefined keys.
-func (uc MetadataKeyInfo) RunPredefined() (result []webapi.MetadataKeyInfo) {
+func (uc MetadataKeyInfo) RunPredefined(ctx context.Context) (result []webapi.MetadataKeyInfo, _ error) {
+	if user := auth.GetCurrentUser(ctx); uc.port.GetUserRole(user) < meta.UserRoleReader {
+		return result, box.NewErrNotAllowed("GetMetadataKeyInfo", user, id.Invalid)
+	}
 	for dk := range meta.KeyDescriptionSeq() {
 		result = append(result, uc.getData(dk))
 	}
-	return result
+	return result, nil
 }
 
 func (MetadataKeyInfo) getData(dk meta.DescriptionKey) webapi.MetadataKeyInfo {

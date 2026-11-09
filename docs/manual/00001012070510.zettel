@@ -1,0 +1,27 @@
+id: 00001012070510
+title: API: Version data
+role: manual
+tags: #api #manual #zettelstore
+syntax: zmk
+created: 20220304164242
+modified: 20261109130507
+
+To retrieve the version data, send an HTTP GET request to the endpoint ''/x'', either without the query parameter ''data'', with an empty value, or with ''data=version''.
+
+````
+# curl 'http://127.0.0.1:23123/x'
+(3 0 0 "dev" "7efe008cc3")
+# curl 'http://127.0.0.1:23123/x?data=version'
+(3 0 0 "dev" "7efe008cc3")
+````
+
+ Zettelstore conforms to the [[Semantic Versioning|https://semver.org/]] standard.
+* The first three numbers represent the major, minor, and patch versions.
+* The first string contains optional pre-release information, for example ``"dev"`` for a development version or ``"preview"`` for a preview version.
+* The second string contains optional information that identifies the version from a developer's perspective.
+
+==== HTTP Status codes
+; ''200''
+: Retrieval was successful, the body contains an appropriate object.
+; ''400''
+: The value of the query parameter ''data'' is unknown.

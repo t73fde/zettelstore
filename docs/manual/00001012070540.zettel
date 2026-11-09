@@ -1,0 +1,46 @@
+id: 00001012070540
+title: API: Metadata key information
+role: manual
+tags: #api #manual #zettelstore
+syntax: zmk
+created: 20220304164242
+modified: 20261109135645
+
+To retrieve information about metadata keys, send an HTTP GET request to the endpoint ''/x'' with the query parameter ''data=meta-type''.
+If [[authentication is enabled|00001010040100]], the caller must be authenticated and must have at least read access.
+
+Without the query parameter ''key'', information about all predefined metadata keys is returned.
+The order of the entries is not specified and may differ between requests.
+
+If the query parameter ''key'' is given (possibly more than once), the result contains one entry for each occurrence of ''key'', in the given order.
+If the same key is given more than once, the result contains the entry for that key more than once.
+An empty value for ''key'' is rejected with status code ''400''.
+The type of a key that is not predefined is derived from the suffix of its name, see [[Supported Key Types|00001006030000]].
+For example, the key ''data-url'' has the type ''URL''; a key with a suffix not listed there has the type ''EMPTY-STRING''.
+
+````
+# curl 'http://127.0.0.1:23123/x?data=meta-type&key=data-url&key=forward'
+(("data-url" "URL" () () ()) ("forward" "IdentifierSet" T T T))
+````
+
+The result is a list of entries.
+Each entry is a list of five elements, in this order:
+# The name of the key, in its string representation.
+# The name of the type of the key, in its string representation, see [[Supported Key Types|00001006030000]].
+# ''T'', if the type is a set type, i.e. the value is a set of elements, otherwise ''()''.
+# ''T'', if the value of the key is computed by Zettelstore, otherwise ''()''.
+  A computed value may be stored in the zettel, and the stored value is used.
+  If it is not stored, Zettelstore computes it and may update the zettel, so that the value becomes persistent.
+# ''T'', if the value of the key is a property, otherwise ''()''.
+
+A property is always computed by Zettelstore, even if a value is stored in the zettel; the stored value is ignored.
+Every property is also computed, but a computed value is not necessarily a property.
+See [[Supported Metadata Keys|00001006020000]] for the keys that are properties or computed.
+
+==== HTTP Status codes
+; ''200''
+: Retrieval was successful, the body contains the list.
+; ''400''
+: The value of the query parameter ''key'' is empty.
+; ''403''
+: Authentication is enabled, and the caller is not authenticated or does not have read access.

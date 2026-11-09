@@ -15,11 +15,11 @@ package webapi
 
 import (
 	"net/http"
+	"strings"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/semver"
 	"t73f.de/r/zsc/domain/id"
-	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
 
 	"zettelstore.de/z/internal/usecase"
@@ -37,8 +37,10 @@ func (a *WebAPI) MakeGetDataHandler(
 		switch q.Get("data") {
 		case "ready":
 			a.writeIsReady(w, ucIsReady.Run())
+
 		case "", "version":
 			a.writeVersion(w, ucVersion.Run())
+
 		case "site-info":
 			siteInfo, err := ucSiteInfo.Run(r.Context())
 			if err != nil {
@@ -46,17 +48,34 @@ func (a *WebAPI) MakeGetDataHandler(
 				return
 			}
 			a.writeSiteInfo(w, siteInfo)
+
 		case "meta-type":
 			// TODO: check for login
 			if keys := q["key"]; len(keys) > 0 {
 				dks := make([]webapi.MetadataKeyInfo, 0, len(keys))
 				for _, key := range keys {
-					dks = append(dks, ucMetaKeys.Run(key))
+					key = strings.TrimSpace(key)
+					if key == "" {
+						http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+						return
+					}
+					dk, err := ucMetaKeys.Run(r.Context(), key)
+					if err != nil {
+						a.reportUsecaseError(w, err)
+						return
+					}
+					dks = append(dks, dk)
 				}
 				a.writeMetaType(w, dks)
 			} else {
-				a.writeMetaType(w, ucMetaKeys.RunPredefined())
+				dks, err := ucMetaKeys.RunPredefined(r.Context())
+				if err != nil {
+					a.reportUsecaseError(w, err)
+					return
+				}
+				a.writeMetaType(w, dks)
 			}
+
 		default:
 			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		}
@@ -112,7 +131,7 @@ func (a *WebAPI) writeMetaType(w http.ResponseWriter, md []webapi.MetadataKeyInf
 	for _, kd := range md {
 		lb.Add(sx.MakeList(
 			sx.MakeString(kd.Name),
-			typeSymbol(kd.Type),
+			sx.MakeString(kd.Type),
 			sx.MakeBoolean(kd.IsSet),
 			sx.MakeBoolean(kd.IsComputed),
 			sx.MakeBoolean(kd.IsProperty),
@@ -123,36 +142,3 @@ func (a *WebAPI) writeMetaType(w http.ResponseWriter, md []webapi.MetadataKeyInf
 		a.logger.Error("Write metadata info", "err", err)
 	}
 }
-
-func typeSymbol(s string) *sx.Symbol {
-	if sym, found := typeSymbolMap[s]; found {
-		return sym
-	}
-	panic("Unknown type name: " + s)
-}
-
-var (
-	symMetaCredential = sx.MakeSymbol(webapi.NameMetaCredential)
-	symMetaEmpty      = sx.MakeSymbol(webapi.NameMetaEmpty)
-	symMetaID         = sx.MakeSymbol(webapi.NameMetaID)
-	symMetaIDSet      = sx.MakeSymbol(webapi.NameMetaIDSet)
-	symMetaNumber     = sx.MakeSymbol(webapi.NameMetaNumber)
-	symMetaString     = sx.MakeSymbol(webapi.NameMetaString)
-	symMetaTagSet     = sx.MakeSymbol(webapi.NameMetaTagSet)
-	symMetaTimestamp  = sx.MakeSymbol(webapi.NameMetaTimestamp)
-	symMetaURL        = sx.MakeSymbol(webapi.NameMetaURL)
-	symMetaWord       = sx.MakeSymbol(webapi.NameMetaWord)
-
-	typeSymbolMap = map[string]*sx.Symbol{
-		meta.MetaCredential: symMetaCredential,
-		meta.MetaEmpty:      symMetaEmpty,
-		meta.MetaID:         symMetaID,
-		meta.MetaIDSet:      symMetaIDSet,
-		meta.MetaNumber:     symMetaNumber,
-		meta.MetaString:     symMetaString,
-		meta.MetaTagSet:     symMetaTagSet,
-		meta.MetaTimestamp:  symMetaTimestamp,
-		meta.MetaURL:        symMetaURL,
-		meta.MetaWord:       symMetaWord,
-	}
-)

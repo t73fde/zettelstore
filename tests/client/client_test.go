@@ -335,6 +335,7 @@ func TestExecuteCommand(t *testing.T) {
 	}
 }
 func failNoErrorOrNoCode(t *testing.T, err error, goodCode int) {
+	t.Helper()
 	if err != nil {
 		if cErr, ok := err.(*client.Error); ok {
 			if cErr.StatusCode == goodCode {
@@ -523,6 +524,41 @@ func TestSiteInfo(t *testing.T) {
 	check("DefaultLang:R", siteInfo.DefaultLang, "en")
 	check("HomeZettel:R", siteInfo.HomeZettel, id.ZidDefaultHome)
 	check("Lang:R", siteInfo.Lang, "jbo")
+}
+
+func TestMetadataKeysInfo(t *testing.T) {
+	c := getClient()
+	infos, err := c.GetMetadataInfo(context.Background(), meta.KeyTitle, "a-refs")
+	if err == nil {
+		t.Error("Error expected, but got data:", infos)
+	} else if cErr, ok := err.(*client.Error); !ok || cErr.StatusCode != http.StatusForbidden {
+		t.Errorf("403 expected, but got: %T/%v", err, err)
+	}
+
+	c.SetAuth("creator", "creator")
+	infos, err = c.GetMetadataInfo(context.Background(), meta.KeyTitle, "a-refs")
+	if err == nil {
+		t.Error("Error expected, but got data:", infos)
+	} else if cErr, ok := err.(*client.Error); !ok || cErr.StatusCode != http.StatusForbidden {
+		t.Errorf("403 expected, but got: %T/%v", err, err)
+	}
+
+	c.SetAuth("reader", "reader")
+	infos, err = c.GetMetadataInfo(context.Background(), meta.KeyTitle, "a-refs")
+	if err != nil {
+		t.Errorf("no error should happen: %T/%v", err, err)
+	}
+	exp := []webapi.MetadataKeyInfo{
+		{Name: meta.KeyTitle, Type: "EString", IsSet: false, IsComputed: false, IsProperty: false},
+		{Name: "a-refs", Type: "IdentifierSet", IsSet: true, IsComputed: false, IsProperty: false},
+	}
+	ok := slices.EqualFunc(exp, infos, func(a, b webapi.MetadataKeyInfo) bool {
+		return a.Name == b.Name && a.Type == b.Type && a.IsSet == b.IsSet &&
+			a.IsComputed == b.IsComputed && a.IsProperty == b.IsProperty
+	})
+	if !ok {
+		t.Errorf("\nexpected: %v\ngot     : %v", exp, infos)
+	}
 }
 
 func TestApplicationZid(t *testing.T) {

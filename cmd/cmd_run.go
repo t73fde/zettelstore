@@ -127,7 +127,7 @@ func setupRouting(webSrv server.Server, boxManager box.Manager, authManager auth
 		ucVersion,
 		usecase.NewIsReady(boxManager),
 		usecase.NewSiteInfo(rtConfig),
-		usecase.NewMetadataKeyInfo(),
+		usecase.NewMetadataKeyInfo(authManager),
 	))
 	webSrv.AddListRoute(isAPI, 'x', server.MethodPost, a.MakePostCommandHandler(&ucIsAuth, &ucRefresh))
 	webSrv.AddListRoute(isAPI, 'z', server.MethodGet, a.MakeQueryHandler(&ucQuery, &ucTagZettel, &ucRoleZettel, &ucReIndex))

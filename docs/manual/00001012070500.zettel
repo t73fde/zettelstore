@@ -4,134 +4,21 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220304164242
-modified: 20261105170506
+modified: 20261109131032
 
 The [[endpoint|00001012920000]] ''/x'' allows you to retrieve some (administrative) data.
 The query parameter ''data'' selects the kind of data:
 
 ; ''version''
-: Zettelstore version data.
+: [[Zettelstore version data|00001012070510]]
 ; ''ready''
-: Whether the box service is ready for use.
+: [[Whether the box service is ready for use|00001012070520]]
 ; ''site-info''
-: Some base information about the Zettelstore site.
+: [[Some base information about the Zettelstore site|00001012070530]]
+; ''meta-type''
+: [[Details about metadata keys|00001012070540]]
 
 If the query parameter ''data'' is missing or empty, the version data is returned, as if ''data=version'' were given.
 If ''data'' is given more than once, the first value is used.
 Other query parameters are ignored.
 If the value of ''data'' is unknown, the request is rejected with status code ''400''.
-
-=== Version data
-
-To retrieve the version data, send an HTTP GET request to the endpoint ''/x'', either without the query parameter ''data'', with an empty value, or with ''data=version''.
-
-````
-# curl 'http://127.0.0.1:23123/x'
-(3 0 0 "dev" "7efe008cc3")
-# curl 'http://127.0.0.1:23123/x?data=version'
-(3 0 0 "dev" "7efe008cc3")
-````
-
- Zettelstore conforms to the [[Semantic Versioning|https://semver.org/]] standard.
-* The first three numbers represent the major, minor, and patch versions.
-* The first string contains optional pre-release information, for example ``"dev"`` for a development version or ``"preview"`` for a preview version.
-* The second string contains optional information that identifies the version from a developer's perspective.
-
-==== HTTP Status codes
-; ''200''
-: Retrieval was successful, the body contains an appropriate object.
-; ''400''
-: The value of the query parameter ''data'' is unknown.
-
-=== Readiness
-Zettelstore starts its web service before the initial indexing of all zettel is complete.
-Until then, search results and some computed metadata may be incomplete.
-Zettel metadata evaluated in this phase contains the key ''index-state'' with the value ''incomplete''.
-
-To find out whether the box service is completely ready, send an HTTP GET request to the endpoint ''/x'' with the query parameter ''data=ready''.
-
-This request does not require authentication, even if [[authentication is enabled|00001010040100]].
-It does not provide any information about the content of the Zettelstore.
-
-````sh
-# curl -i 'http://127.0.0.1:23123/x?data=ready'
-HTTP/1.1 503 Service Unavailable
-Cache-Control: no-store
-Retry-After: 1
-Content-Type: text/plain; charset=utf-8
-
-incomplete
-````
-
-````sh
-# curl -i 'http://127.0.0.1:23123/x?data=ready'
-HTTP/1.1 200 OK
-Cache-Control: no-store
-Content-Type: text/plain; charset=utf-8
-
-ready
-````
-
-The body contains a plain text value for human readers, followed by a newline:
-; ''ready''
-: The box service is started, and the initial indexing is complete.
-; ''incomplete''
-: The box service is started, but the initial indexing is not complete yet.
-
-The HTTP status code is authoritative.
-Clients must treat the status codes ''200'' and ''204'' as ""ready"".
-Currently, only ''200'' is used, with the body ''ready''.
-Future versions may respond with ''204'' and an empty body.
-Status ''503'' means ""incomplete"".
-The body is informational only and should not be evaluated by clients.
-Intermediate components, such as reverse proxies, may replace the body of a ''503'' response.
-
-Once ''ready'' is reported, the state does not change back during the lifetime of the Zettelstore process, even if the index is rebuilt later.
-During a rebuild, the previous index continues to serve requests.
-
-Clients should poll this endpoint until it reports ''ready''.
-The value of the ''Retry-After'' header is a hint for the polling interval in seconds.
-
-==== HTTP Status codes
-; ''200'', ''204''
-: The box service is ready.
-  Currently, only ''200'' is used.
-; ''400''
-: The value of the query parameter ''data'' is unknown.
-; ''503''
-: The box service is running, but the initial indexing is not complete.
-  Try again after the number of seconds given in the ''Retry-After'' header.
-
-=== Site Info
-
-Zettelstore can be configured to suit your personal needs.
-For example, you can configure the [[''site-name''|00001004020000#site-name]] or the [[default language|00001004020000#lang]].
-A user may override the language configuration or the [[''home-zettel''|00001004020000#home-zettel]] by specifying the appropriate key-value pairs in the [[user zettel|00001010040200]] (see also: [[Runtime configuration data that may be user specific or zettel specific|00001004020200]]).
-
-The zettel containing the [[runtime configuration|00001004020000]] is not available to all users in all situations.
-For example, if [[authentication is enabled|00001010040100]] and the current user is not authorized as an [[owner|00001010070200]], the runtime configuration cannot be read by the authenticated user.
-
-To retrieve some important data, send an HTTP GET request to the endpoint ''/x'' with the query parameter ''data=site-info''.
-
-Authentication for this request is optional.
-If authentication is enabled and the current user is authenticated, the request will be handled using that user's credentials.
-
-```sh
-# curl 'http://127.0.0.1:23123/x?data=site-info'
-("Zettelstore Manual" "en" "00001000000000" "en")
-```
-
-* The first string contains the site name.
-* The second string holds the default language.
-* The identifier of the home zettel is stored in the third string.
-* The fourth string contains the currently active language.
-
-If authentication is disabled, the second and fourth strings have the same value.
-They may differ only if a user is authenticated and has chosen to override the language setting.
-
-==== HTTP Status codes
-; ''200''
-: Retrieval was successful.
-  The response body contains an appropriate site info object.
-; ''400''
-: The value of the query parameter ''data'' is unknown.
