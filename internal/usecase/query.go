@@ -38,7 +38,7 @@ import (
 type QueryPort interface {
 	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)
 	GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
-	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error)
+	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) (query.SelectResult, error)
 }
 
 // Query is the data for this use case.
@@ -56,22 +56,22 @@ func NewQuery(port QueryPort) Query {
 func (uc *Query) SetEvaluate(ucEvaluate *Evaluate) { uc.ucEvaluate = *ucEvaluate }
 
 // Run executes the use case.
-func (uc *Query) Run(ctx context.Context, q *query.Query) ([]*meta.Meta, error) {
+func (uc *Query) Run(ctx context.Context, q *query.Query) (query.SelectResult, error) {
 	zids := q.GetZids()
 	if zids == nil {
 		return uc.port.SelectMeta(ctx, nil, q)
 	}
 	if len(zids) == 0 {
-		return nil, nil
+		return query.SelectResult{}, nil
 	}
 	metaSeq, err := uc.getMetaZid(ctx, zids)
 	if err != nil {
-		return metaSeq, err
+		return query.NewSelectResult(metaSeq), err
 	}
 	if metaSeq = uc.processDirectives(ctx, metaSeq, q.GetDirectives()); len(metaSeq) > 0 {
 		return uc.port.SelectMeta(ctx, metaSeq, q)
 	}
-	return nil, nil
+	return query.SelectResult{}, nil
 }
 
 func (uc *Query) getMetaZid(ctx context.Context, zids []id.Zid) ([]*meta.Meta, error) {
@@ -186,13 +186,13 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 			}
 		}
 	}
-	candidates = filterByZid(candidates, refZids)
-	return uc.filterCandidates(ctx, candidates, words)
+	zidCandidates := filterByZid(candidates, refZids)
+	return uc.filterCandidates(ctx, zidCandidates, words)
 }
 
-func filterByZid(candidates []*meta.Meta, ignoreSeq roster.Roster[id.Zid]) []*meta.Meta {
-	result := make([]*meta.Meta, 0, len(candidates))
-	for _, m := range candidates {
+func filterByZid(candidates query.SelectResult, ignoreSeq roster.Roster[id.Zid]) []*meta.Meta {
+	result := make([]*meta.Meta, 0, candidates.Count())
+	for m := range candidates.Values() {
 		if !ignoreSeq.Contains(m.Zid) {
 			result = append(result, m)
 		}

@@ -167,10 +167,10 @@ func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
 
 // SelectMeta returns all zettel meta data that match the selection
 // criteria. The result is ordered by descending zettel id.
-func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box.Query) ([]*meta.Meta, error) {
+func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box.Query) (query.SelectResult, error) {
 	mgr.mgrLogger.Debug("SelectMeta", "query", q)
 	if err := mgr.checkContinue(ctx); err != nil {
-		return nil, err
+		return query.SelectResult{}, err
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
@@ -178,7 +178,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 	compSearch := q.RetrieveAndCompile(ctx, mgr, metaSeq)
 	if result := compSearch.Result(); result != nil {
 		logging.LogTrace(mgr.mgrLogger, "found without ApplyMeta", "count", len(result))
-		return result, nil
+		return query.NewSelectResult(result), nil
 	}
 	selected := map[id.Zid]*meta.Meta{}
 	for _, term := range compSearch.Terms {
@@ -203,7 +203,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 		}
 		for _, p := range mgr.boxes {
 			if err2 := p.ApplyMeta(ctx, handleMeta, term.Retrieve); err2 != nil {
-				return nil, err2
+				return query.SelectResult{}, err2
 			}
 		}
 	}
@@ -213,7 +213,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 	}
 	result = compSearch.AfterSearch(result)
 	logging.LogTrace(mgr.mgrLogger, "found with ApplyMeta", "count", len(result))
-	return result, nil
+	return query.NewSelectResult(result), nil
 }
 
 // CanUpdateZettel returns true, if box could possibly update the given zettel.

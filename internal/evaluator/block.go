@@ -120,7 +120,7 @@ func (e *evaluator) evalQueryTransclusion(expr string) *sx.Pair {
 		}
 		return makeBlock(createInlineErrorText(nil, "Unable to search zettel"))
 	}
-	result, _ := QueryAction(e.ctx, q, ml)
+	result, _ := QueryAction(e.ctx, q, query.NewSelectResult(ml))
 	if result != nil {
 		result = mustPair(zsx.Walk(e, result, nil))
 	}

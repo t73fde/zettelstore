@@ -31,11 +31,11 @@ import (
 )
 
 // QueryAction transforms a list of metadata according to query actions into a SZ nested list.
-func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (*sx.Pair, int) {
+func QueryAction(ctx context.Context, q *query.Query, selRes query.SelectResult) (*sx.Pair, int) {
 	ap := actionPara{
 		ctx:    ctx,
 		q:      q,
-		ml:     ml,
+		selRes: selRes,
 		kind:   zsx.SymListUnordered,
 		minVal: -1,
 		maxVal: -1,
@@ -95,7 +95,7 @@ func QueryAction(ctx context.Context, q *query.Query, ml []*meta.Meta) (*sx.Pair
 type actionPara struct {
 	ctx    context.Context
 	q      *query.Query
-	ml     []*meta.Meta
+	selRes query.SelectResult
 	kind   *sx.Symbol
 	minVal int
 	maxVal int
@@ -180,7 +180,7 @@ func (ap *actionPara) limitTags(ccs meta.CountedCategories) meta.CountedCategori
 
 func (ap *actionPara) createBlockNodeMetaKeys() (*sx.Pair, int) {
 	arr := make(meta.Arrangement, 128)
-	for _, m := range ap.ml {
+	for m := range ap.selRes.Values() {
 		for k := range m.Map() {
 			arr[k] = append(arr[k], m)
 		}
@@ -222,12 +222,12 @@ func (ap *actionPara) createBlockNodeMetaKeys() (*sx.Pair, int) {
 }
 
 func (ap *actionPara) createBlockNodeMeta(key string) (*sx.Pair, int) {
-	if len(ap.ml) == 0 {
+	if ap.selRes.IsEmpty() {
 		return nil, 0
 	}
 	var items sx.ListBuilder
 	count := 0
-	for _, m := range ap.ml {
+	for m := range ap.selRes.Values() {
 		if key != "" {
 			if _, found := m.Get(key); !found {
 				continue
@@ -244,10 +244,10 @@ func (ap *actionPara) createBlockNodeMeta(key string) (*sx.Pair, int) {
 }
 
 func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.CountedCategories, int) {
-	if len(ap.ml) == 0 {
+	if ap.selRes.IsEmpty() {
 		return nil, 0
 	}
-	ccs := meta.CreateArrangement(ap.ml, key).Counted()
+	ccs := meta.CreateArrangement(ap.selRes.Values(), key).Counted()
 	if len(ccs) == 0 {
 		return nil, 0
 	}

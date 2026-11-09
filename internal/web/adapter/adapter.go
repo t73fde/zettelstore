@@ -24,7 +24,7 @@ import (
 )
 
 // TryReIndex executes a re-index if the appropriate query action is given.
-func TryReIndex(ctx context.Context, actions []string, metaSeq []*meta.Meta, reIndex *usecase.ReIndex) ([]string, error) {
+func TryReIndex(ctx context.Context, actions []string, metaSeq meta.Seq, reIndex *usecase.ReIndex) ([]string, error) {
 	if lenActions := len(actions); lenActions > 0 {
 		tempActions := make([]string, 0, lenActions)
 		hasReIndex := false
@@ -32,7 +32,7 @@ func TryReIndex(ctx context.Context, actions []string, metaSeq []*meta.Meta, reI
 			if !hasReIndex && act == webapi.ReIndexAction {
 				hasReIndex = true
 				var errAction error
-				for _, m := range metaSeq {
+				for m := range metaSeq {
 					if err := reIndex.Run(ctx, m.Zid); err != nil {
 						errAction = err
 					}

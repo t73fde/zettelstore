@@ -51,21 +51,21 @@ func (a *WebAPI) MakeQueryHandler(
 		}
 
 		sq := adapter.GetQuery(urlQuery)
-		metaSeq, err := queryMeta.Run(ctx, sq)
+		selRes, err := queryMeta.Run(ctx, sq)
 		if err != nil {
 			a.reportUsecaseError(w, err)
 			return
 		}
 
-		actions, err := adapter.TryReIndex(ctx, sq.Actions(), metaSeq, reIndex)
+		actions, err := adapter.TryReIndex(ctx, sq.Actions(), selRes.Values(), reIndex)
 		if err != nil {
 			a.reportUsecaseError(w, err)
 			return
 		}
 		if len(actions) > 0 {
-			if len(metaSeq) > 0 {
+			if !selRes.IsEmpty() {
 				if slices.Contains(actions, webapi.RedirectAction) {
-					zid := metaSeq[0].Zid
+					zid := selRes.First().Zid
 					ub := a.NewURLBuilder('z').SetZid(zid)
 					a.redirectFound(w, r, ub, zid)
 					return
@@ -93,7 +93,7 @@ func (a *WebAPI) MakeQueryHandler(
 		}
 
 		var buf bytes.Buffer
-		err = queryAction(&buf, encoder, metaSeq, actions)
+		err = queryAction(&buf, encoder, selRes.Values(), actions)
 		if err != nil {
 			a.logger.Error("execute query action", "err", err, "query", sq)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -104,7 +104,7 @@ func (a *WebAPI) MakeQueryHandler(
 		}
 	})
 }
-func queryAction(w io.Writer, enc zettelEncoder, ml []*meta.Meta, actions []string) error {
+func queryAction(w io.Writer, enc zettelEncoder, metaSeq meta.Seq, actions []string) error {
 	minVal, maxVal := -1, -1
 	if len(actions) > 0 {
 		acts := make([]string, 0, len(actions))
@@ -125,20 +125,20 @@ func queryAction(w io.Writer, enc zettelEncoder, ml []*meta.Meta, actions []stri
 		}
 		for _, act := range acts {
 			if act == webapi.KeysAction {
-				return encodeKeysArrangement(w, enc, ml, act)
+				return encodeKeysArrangement(w, enc, metaSeq, act)
 			}
 			switch key := strings.ToLower(act); meta.Type(key) {
 			case meta.TypeWord, meta.TypeTagSet:
-				return encodeMetaKeyArrangement(w, enc, ml, key, minVal, maxVal)
+				return encodeMetaKeyArrangement(w, enc, metaSeq, key, minVal, maxVal)
 			}
 		}
 	}
-	return enc.writeMetaList(w, ml)
+	return enc.writeMetaList(w, metaSeq)
 }
 
-func encodeKeysArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, act string) error {
+func encodeKeysArrangement(w io.Writer, enc zettelEncoder, metaSeq meta.Seq, act string) error {
 	arr := make(meta.Arrangement, 128)
-	for _, m := range ml {
+	for m := range metaSeq {
 		for k := range m.Map() {
 			arr[k] = append(arr[k], m)
 		}
@@ -146,8 +146,8 @@ func encodeKeysArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, act 
 	return enc.writeArrangement(w, act, arr)
 }
 
-func encodeMetaKeyArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, key string, minVal, maxVal int) error {
-	arr0 := meta.CreateArrangement(ml, key)
+func encodeMetaKeyArrangement(w io.Writer, enc zettelEncoder, metaSeq meta.Seq, key string, minVal, maxVal int) error {
+	arr0 := meta.CreateArrangement(metaSeq, key)
 	arr := make(meta.Arrangement, len(arr0))
 	for k0, ml0 := range arr0 {
 		if len(ml0) < minVal || (maxVal > 0 && len(ml0) > maxVal) {
@@ -159,14 +159,14 @@ func encodeMetaKeyArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, k
 }
 
 type zettelEncoder interface {
-	writeMetaList(w io.Writer, ml []*meta.Meta) error
+	writeMetaList(io.Writer, meta.Seq) error
 	writeArrangement(w io.Writer, act string, arr meta.Arrangement) error
 }
 
 type plainZettelEncoder struct{}
 
-func (*plainZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error {
-	for _, m := range ml {
+func (*plainZettelEncoder) writeMetaList(w io.Writer, metaSeq meta.Seq) error {
+	for m := range metaSeq {
 		_, err := fmt.Fprintln(w, m.Zid.String(), m.GetTitle())
 		if err != nil {
 			return err
@@ -214,14 +214,14 @@ var (
 	symQuery     = sx.MakeSymbol("query")
 )
 
-func (dze *dataZettelEncoder) writeMetaList(w io.Writer, ml []*meta.Meta) error {
+func (dze *dataZettelEncoder) writeMetaList(w io.Writer, metaSeq meta.Seq) error {
 	var lb sx.ListBuilder
 	lb.AddN(
 		symMetaList,
 		sx.MakeList(symQuery, sx.MakeString(dze.sq.String())),
 		sx.MakeList(symHuman, sx.MakeString(dze.sq.Human())),
 	)
-	for _, m := range ml {
+	for m := range metaSeq {
 		msz := sexp.EncodeMetaRights(webapi.MetaRights{
 			Meta:   m.Map(),
 			Rights: dze.getRights(m),

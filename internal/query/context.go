@@ -39,7 +39,7 @@ type ContextSpec struct {
 // ContextPort is the collection of box methods needed by this directive.
 type ContextPort interface {
 	GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
-	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *Query) ([]*meta.Meta, error)
+	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *Query) (SelectResult, error)
 }
 
 // Print the spec on the given print environment.
@@ -305,13 +305,13 @@ func (ct *contextTask) updateTagData(ctx context.Context, tag string) (zids rost
 		return ct.tagZids[tag]
 	}
 	q := Parse(meta.KeyTags + webapi.SearchOperatorHas + tag + " ORDER REVERSE " + meta.KeyID)
-	ml, err := ct.port.SelectMeta(ctx, nil, q)
+	selRes, err := ct.port.SelectMeta(ctx, nil, q)
 	if err != nil {
-		ml = nil
+		selRes = SelectResult{}
 	}
-	ct.tagMetas[tag] = ml
-	zids.Grow(len(ml))
-	for _, m := range ml {
+	ct.tagMetas[tag] = slices.Collect(selRes.Values())
+	zids.Grow(selRes.Count())
+	for m := range selRes.Values() {
 		zid := m.Zid
 		zids.Insert(zid)
 		if _, found := ct.metaZid[zid]; !found {

@@ -50,11 +50,11 @@ func (uc TagZettel) Run(ctx context.Context, tag meta.Value) (zettel.Zettel, err
 	tag = tag.NormalizeTag()
 	const qFindTag = " " + meta.KeyRole + webapi.SearchOperatorEqual + meta.ValueRoleTag
 	q := query.Parse(meta.KeyTitle + webapi.SearchOperatorEqual + string(tag) + qFindTag)
-	ml, err := uc.query.Run(ctx, q)
+	selRes, err := uc.query.Run(ctx, q)
 	if err != nil {
 		return zettel.Zettel{}, err
 	}
-	for _, m := range ml {
+	for m := range selRes.Values() {
 		z, errZ := uc.port.GetZettel(ctx, m.Zid)
 		if errZ == nil {
 			return z, nil
@@ -93,11 +93,11 @@ func NewRoleZettel(port GetZettelPort, query *Query) RoleZettel {
 func (uc RoleZettel) Run(ctx context.Context, role meta.Value) (zettel.Zettel, error) {
 	const qFindRole = " " + meta.KeyRole + webapi.SearchOperatorEqual + meta.ValueRoleRole
 	q := query.Parse(meta.KeyTitle + webapi.SearchOperatorEqual + string(role) + qFindRole)
-	ml, err := uc.query.Run(ctx, q)
+	selRes, err := uc.query.Run(ctx, q)
 	if err != nil {
 		return zettel.Zettel{}, err
 	}
-	for _, m := range ml {
+	for m := range selRes.Values() {
 		z, errZ := uc.port.GetZettel(ctx, m.Zid)
 		if errZ == nil {
 			return z, nil

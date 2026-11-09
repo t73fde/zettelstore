@@ -15,6 +15,7 @@ package usecase
 
 import (
 	"context"
+	"slices"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zsc/domain/id"
@@ -75,5 +76,9 @@ func (uc *Evaluate) GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, e
 
 // QueryMeta returns a list of metadata that comply to the given selection criteria.
 func (uc *Evaluate) QueryMeta(ctx context.Context, q *query.Query) ([]*meta.Meta, error) {
-	return uc.ucQuery.Run(ctx, q)
+	selRes, err := uc.ucQuery.Run(ctx, q)
+	if err == nil {
+		return slices.Collect(selRes.Values()), nil
+	}
+	return nil, err
 }

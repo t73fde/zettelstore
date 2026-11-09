@@ -156,7 +156,7 @@ type Box interface {
 
 	// SelectMeta returns a list of metadata that comply to the given selection criteria.
 	// If `metaSeq` is `nil`, the box assumes metadata of all available zettel.
-	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *Query) ([]*meta.Meta, error)
+	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *Query) (query.SelectResult, error)
 
 	// GetAllZettel retrieves a specific zettel from all managed boxes.
 	GetAllZettel(ctx context.Context, zid id.Zid) ([]Zettel, error)

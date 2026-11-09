@@ -49,19 +49,19 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		q := adapter.GetQuery(urlQuery)
 		q.SetDeterministic()
 		ctx := r.Context()
-		metaSeq, err := queryMeta.Run(ctx, q)
+		selRes, err := queryMeta.Run(ctx, q)
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return
 		}
-		actions, err := adapter.TryReIndex(ctx, q.Actions(), metaSeq, reIndex)
+		actions, err := adapter.TryReIndex(ctx, q.Actions(), selRes.Values(), reIndex)
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return
 		}
-		if len(metaSeq) > 0 {
+		if !selRes.IsEmpty() {
 			if slices.Contains(actions, webapi.RedirectAction) {
-				ub := wui.NewURLBuilder('h').SetZid(metaSeq[0].Zid)
+				ub := wui.NewURLBuilder('h').SetZid(selRes.First().Zid)
 				wui.redirectFound(w, r, ub)
 				return
 			}
@@ -71,7 +71,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 
 		var content, endnotes *sx.Pair
 		numEntries := 0
-		if bn, cnt := evaluator.QueryAction(ctx, q, metaSeq); bn != nil {
+		if bn, cnt := evaluator.QueryAction(ctx, q, selRes); bn != nil {
 			enc := wui.getSimpleHTMLEncoder(userLang)
 			content, endnotes, err = enc.BlocksSxn(zsx.MakeBlock(bn))
 			if err != nil {
@@ -113,7 +113,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		rb.bindString("content", content)
 		rb.bindString("endnotes", endnotes)
 		rb.bindString("num-entries", sx.Int64(numEntries))
-		rb.bindString("num-meta", sx.Int64(len(metaSeq)))
+		rb.bindString("num-meta", sx.Int64(selRes.Count()))
 		apiURL := wui.NewURLBuilder('z').AppendQuery(q.String())
 		seed, found := q.GetSeed()
 		if found {
@@ -121,7 +121,7 @@ func (wui *WebUI) MakeListHTMLMetaHandler(
 		} else {
 			seed = 0
 		}
-		if len(metaSeq) > 0 {
+		if !selRes.IsEmpty() {
 			rb.bindString("plain-url", sx.MakeString(apiURL.String()))
 			rb.bindString("data-url", sx.MakeString(apiURL.AppendKVQuery(webapi.QueryKeyEncoding, webapi.EncodingData).String()))
 			if wui.canCreate(ctx, user) {

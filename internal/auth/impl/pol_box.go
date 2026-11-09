@@ -21,6 +21,7 @@ import (
 
 	"zettelstore.de/z/internal/auth"
 	"zettelstore.de/z/internal/box"
+	"zettelstore.de/z/internal/query"
 )
 
 // polBox implements a policy box.
@@ -80,7 +81,7 @@ func (pp *polBox) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
 	return nil, box.NewErrNotAllowed("GetMeta", user, zid)
 }
 
-func (pp *polBox) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box.Query) ([]*meta.Meta, error) {
+func (pp *polBox) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box.Query) (query.SelectResult, error) {
 	user := auth.GetCurrentUser(ctx)
 	canRead := pp.policy.CanRead
 	q.SetPreMatch(func(m *meta.Meta) bool { return canRead(user, m) })

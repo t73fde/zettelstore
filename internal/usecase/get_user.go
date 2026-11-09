@@ -32,7 +32,7 @@ import (
 // GetUserPort is the interface used by this use case.
 type GetUserPort interface {
 	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)
-	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error)
+	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) (query.SelectResult, error)
 }
 
 // GetUser is the data for this use case.
@@ -59,14 +59,14 @@ func (uc GetUser) Run(ctx context.Context, ident string) (*meta.Meta, error) {
 	}
 	// Owner was not found or has another ident. Try via list search.
 	q := query.Parse(meta.KeyUserID + webapi.SearchOperatorHas + ident + " " + webapi.SearchOperatorHas + ident)
-	metaList, err := uc.port.SelectMeta(ctx, nil, q)
+	selRes, err := uc.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		return nil, err
 	}
-	if len(metaList) < 1 {
+	if selRes.IsEmpty() {
 		return nil, nil
 	}
-	return metaList[len(metaList)-1], nil
+	return selRes.Last(), nil
 }
 
 // Use case: return a user identified by zettel id and assert given ident value.

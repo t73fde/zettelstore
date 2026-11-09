@@ -167,12 +167,12 @@ func (wui *WebUI) MakeGetZettelFromListHandler(
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		q := adapter.GetQuery(r.URL.Query())
 		ctx := r.Context()
-		metaSeq, err := queryMeta.Run(box.NoEnrichQuery(ctx, q), q)
+		selRes, err := queryMeta.Run(box.NoEnrichQuery(ctx, q), q)
 		if err != nil {
 			wui.reportError(ctx, w, err)
 			return
 		}
-		entries, _ := evaluator.QueryAction(ctx, q, metaSeq)
+		entries, _ := evaluator.QueryAction(ctx, q, selRes)
 		blocks := evaluate.RunBlockNode(ctx, entries)
 		enc := encoder.Create(webapi.EncoderZmk, nil)
 		var zmkContent bytes.Buffer
