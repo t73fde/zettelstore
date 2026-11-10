@@ -175,7 +175,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 
-	compSearch := q.RetrieveAndCompile(ctx, mgr, metaSeq)
+	compSearch := q.RetrieveAndCompile(ctx, mgr.index, metaSeq)
 	if result := compSearch.Result(); result != nil {
 		logging.LogTrace(mgr.mgrLogger, "found without ApplyMeta", "count", len(result))
 		return result, nil
