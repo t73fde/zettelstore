@@ -295,7 +295,7 @@ func (q *Query) EnrichNeeded() bool {
 
 // RetrieveAndCompile queries the search index and returns a predicate
 // for its results and returns a matching predicate.
-func (q *Query) RetrieveAndCompile(_ context.Context, searcher index.Searcher, metaSeq []*meta.Meta) Compiled {
+func (q *Query) RetrieveAndCompile(ctx context.Context, searcher index.Searcher, metaSeq []*meta.Meta) Compiled {
 	newQ := q.Clone()
 
 	preMatch := newQ.preMatch
@@ -317,7 +317,7 @@ func (q *Query) RetrieveAndCompile(_ context.Context, searcher index.Searcher, m
 	}
 
 	for _, term := range newQ.terms {
-		cTerm := term.retrieveAndCompileTerm(searcher, startSet)
+		cTerm := term.retrieveAndCompileTerm(ctx, searcher, startSet)
 		if cTerm.Retrieve == nil {
 			if cTerm.Match == nil {
 				// no restriction on match/retrieve -> all will match
@@ -345,11 +345,15 @@ func metaList2idSet(ml []*meta.Meta) (result roster.Roster[id.Zid]) {
 	return result
 }
 
-func (ct *conjTerms) retrieveAndCompileTerm(searcher index.Searcher, startSet roster.Roster[id.Zid]) CompiledTerm {
+func (ct *conjTerms) retrieveAndCompileTerm(
+	ctx context.Context,
+	searcher index.Searcher,
+	startSet roster.Roster[id.Zid],
+) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
 	var pred index.RetrievePredicate
 	if searcher != nil {
-		pred = ct.retrieveIndex(searcher)
+		pred = ct.retrieveIndex(ctx, searcher)
 		if !startSet.IsEmpty() {
 			if pred == nil {
 				pred = startSet.Contains
@@ -369,7 +373,7 @@ func (ct *conjTerms) retrieveAndCompileTerm(searcher index.Searcher, startSet ro
 }
 
 // retrieveIndex and return a predicate to ask for results.
-func (ct *conjTerms) retrieveIndex(searcher index.Searcher) index.RetrievePredicate {
+func (ct *conjTerms) retrieveIndex(ctx context.Context, searcher index.Searcher) index.RetrievePredicate {
 	if len(ct.search) == 0 {
 		return nil
 	}
@@ -378,11 +382,11 @@ func (ct *conjTerms) retrieveIndex(searcher index.Searcher) index.RetrievePredic
 		return neverIncluded
 	}
 
-	positives := retrievePositives(normCalls, plainCalls)
+	positives := retrievePositives(ctx, normCalls, plainCalls)
 	if positives == nil || positives.IsEmpty() {
 		// No positive search for words, must contain only words for a negative search.
 		// Otherwise len(search) == 0 (see above)
-		negatives := retrieveNegatives(negCalls)
+		negatives := retrieveNegatives(ctx, negCalls)
 		if negatives == nil || negatives.IsEmpty() {
 			return neverIncluded
 		}
@@ -394,7 +398,7 @@ func (ct *conjTerms) retrieveIndex(searcher index.Searcher) index.RetrievePredic
 		// Positive search found something, but there is no negative search.
 		return positivePred
 	}
-	negatives := retrieveNegatives(negCalls)
+	negatives := retrieveNegatives(ctx, negCalls)
 	if negatives == nil || negatives.IsEmpty() {
 		return positivePred
 	}

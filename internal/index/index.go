@@ -125,19 +125,19 @@ type Stats struct {
 type Searcher interface {
 	// Select all zettel that contains the given exact word.
 	// The word must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchEqual(word string) *Result
+	SearchEqual(ctx context.Context, word string) *Result
 
 	// Select all zettel that have a word with the given prefix.
 	// The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchPrefix(prefix string) *Result
+	SearchPrefix(ctx context.Context, prefix string) *Result
 
 	// Select all zettel that have a word with the given suffix.
 	// The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchSuffix(suffix string) *Result
+	SearchSuffix(ctx context.Context, suffix string) *Result
 
 	// Select all zettel that contains the given string.
 	// The string must be normalized through Unicode NFKD, trimmed and not empty.
-	SearchContains(s string) *Result
+	SearchContains(ctx context.Context, s string) *Result
 }
 
 // RetrievePredicate reports whether the given zettel identifier is part of a

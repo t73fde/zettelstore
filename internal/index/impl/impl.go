@@ -354,23 +354,24 @@ func (idx *Index) ReadStats(st *index.Stats) {
 // active store continues to serve requests until it is replaced.
 //
 // It is safe for concurrent use.
-func (idx *Index) IsReady() bool { return idx.activeInstance() != nil }
+func (idx *Index) IsReady() bool {
+	in := idx.activeInstance()
+	return in != nil && in.ready.Load()
+}
 
 // activeInstance returns the active instance, if it is ready. Otherwise return nil.
 func (idx *Index) activeInstance() *instance {
 	idx.mx.RLock()
-	defer idx.mx.RUnlock()
-	if a := idx.active; a != nil && a.ready.Load() {
-		return a
-	}
-	return nil
+	in := idx.active
+	idx.mx.RUnlock()
+	return in
 }
 
 // Dump writes a textual representation of the active store to w. It is
 // meant for debugging and analysis only.
 func (idx *Index) Dump(w io.Writer) {
 	_, _ = io.WriteString(w, "=== Dump\n")
-	if in := idx.activeInstance(); in != nil {
+	if in := idx.activeInstance(); in != nil && in.ready.Load() {
 		in.store.dump(w, in.dict)
 	} else {
 		_, _ = io.WriteString(w, "Index not yet built\n")
