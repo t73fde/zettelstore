@@ -16,6 +16,7 @@ package query
 // This file contains helper functions to search within the index.
 
 import (
+	"context"
 	"strings"
 
 	zerostrings "t73f.de/r/zero/strings"
@@ -27,7 +28,7 @@ type searchOp struct {
 	s  string
 	op compareOp
 }
-type searchFunc func(string) *index.Result
+type searchFunc func(context.Context, string) *index.Result
 type searchCallMap map[searchOp]searchFunc
 
 var cmpPred = map[compareOp]func(string, string) bool{
@@ -104,11 +105,11 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 	return false
 }
 
-func retrievePositives(normCalls, plainCalls searchCallMap) *index.Result {
+func retrievePositives(ctx context.Context, normCalls, plainCalls searchCallMap) *index.Result {
 	if isSuperset(normCalls, plainCalls) {
 		var normResult *index.Result
 		for c, sf := range normCalls {
-			as := sf(c.s)
+			as := sf(ctx, c.s)
 			if normResult == nil {
 				normResult = as.Clone()
 			} else {
@@ -122,7 +123,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *index.Result {
 
 	var plainResult *index.Result
 	for c, sf := range plainCalls {
-		result := sf(c.s)
+		result := sf(ctx, c.s)
 		if _, found := normCalls[c]; found {
 			cache[c] = result
 		}
@@ -142,7 +143,7 @@ func retrievePositives(normCalls, plainCalls searchCallMap) *index.Result {
 				normResult.And(result)
 			}
 		} else {
-			as := sf(c.s)
+			as := sf(ctx, c.s)
 			if normResult == nil {
 				normResult = as
 			} else {
@@ -171,9 +172,9 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 	return true
 }
 
-func retrieveNegatives(negCalls searchCallMap) (negatives *index.Result) {
+func retrieveNegatives(ctx context.Context, negCalls searchCallMap) (negatives *index.Result) {
 	for val, sf := range negCalls {
-		as := sf(val.s)
+		as := sf(ctx, val.s)
 		if negatives == nil {
 			negatives = as.Clone()
 		} else {
@@ -198,4 +199,4 @@ func getSearchFunc(searcher index.Searcher, op compareOp) searchFunc {
 	}
 }
 
-func nilSearchFunc(string) *index.Result { return nil }
+func nilSearchFunc(context.Context, string) *index.Result { return nil }

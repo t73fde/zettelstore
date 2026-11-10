@@ -39,12 +39,11 @@ func (qrl queryResultLog) LogValue() slog.Value {
 // SearchEqual returns all zettel that contains the given exact word.
 // The word must be normalized through Unicode NFKD, trimmed and not empty.
 // In addition, word may contain a full URI.
-func (idx *Index) SearchEqual(word string) *index.Result {
+func (idx *Index) SearchEqual(ctx context.Context, word string) *index.Result {
 	if in := idx.activeInstance(); in != nil {
 		ready := in.ready.Load()
 		result := in.searchEqual(word)
 
-		ctx := context.Background()
 		idx.logger.LogAttrs(ctx, slog.LevelDebug, "SearchEqual",
 			slog.Bool("ready", ready),
 			slog.String("word", word),
@@ -60,12 +59,11 @@ func (idx *Index) SearchEqual(word string) *index.Result {
 
 // SearchPrefix returns all zettel that have a word with the given prefix.
 // The prefix must be normalized through Unicode NFKD, trimmed and not empty.
-func (idx *Index) SearchPrefix(prefix string) *index.Result {
+func (idx *Index) SearchPrefix(ctx context.Context, prefix string) *index.Result {
 	if in := idx.activeInstance(); in != nil {
 		ready := in.ready.Load()
 		result := in.searchPrefix(prefix)
 
-		ctx := context.Background()
 		idx.logger.LogAttrs(ctx, slog.LevelDebug, "SearchPrefix",
 			slog.Bool("ready", ready),
 			slog.String("prefix", prefix),
@@ -81,12 +79,11 @@ func (idx *Index) SearchPrefix(prefix string) *index.Result {
 
 // SearchSuffix returns all zettel that have a word with the given suffix.
 // The suffix must be normalized through Unicode NFKD, trimmed and not empty.
-func (idx *Index) SearchSuffix(suffix string) *index.Result {
+func (idx *Index) SearchSuffix(ctx context.Context, suffix string) *index.Result {
 	if in := idx.activeInstance(); in != nil {
 		ready := in.ready.Load()
 		result := in.searchSuffix(suffix)
 
-		ctx := context.Background()
 		idx.logger.LogAttrs(ctx, slog.LevelDebug, "SearchSuffix",
 			slog.Bool("ready", ready),
 			slog.String("suffix", suffix),
@@ -102,12 +99,11 @@ func (idx *Index) SearchSuffix(suffix string) *index.Result {
 
 // SearchContains returns all zettel that contains the given string.
 // The string must be normalized through Unicode NFKD, trimmed and not empty.
-func (idx *Index) SearchContains(s string) *index.Result {
+func (idx *Index) SearchContains(ctx context.Context, s string) *index.Result {
 	if in := idx.activeInstance(); in != nil {
 		ready := in.ready.Load()
 		result := in.searchContains(s)
 
-		ctx := context.Background()
 		idx.logger.LogAttrs(ctx, slog.LevelDebug, "SearchContains",
 			slog.Bool("ready", ready),
 			slog.String("s", s),
