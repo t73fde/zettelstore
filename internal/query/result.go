@@ -68,11 +68,3 @@ func (sr SelectResult) First() *meta.Meta { return sr.metas[0] }
 // zettel id). It panics if the result is empty; use [SelectResult.IsEmpty]
 // or [SelectResult.Count] to check beforehand.
 func (sr SelectResult) Last() *meta.Meta { return sr.metas[len(sr.metas)-1] }
-
-// Grow increases the capacity of the result, so that at least n further
-// metadata can be added without another allocation. It panics if n is
-// negative.
-func (sr *SelectResult) Grow(n int) { sr.metas = slices.Grow(sr.metas, n) }
-
-// Add appends the given metadata to the end of the result.
-func (sr *SelectResult) Add(m *meta.Meta) { sr.metas = append(sr.metas, m) }
