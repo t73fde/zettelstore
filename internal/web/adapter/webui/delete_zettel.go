@@ -15,7 +15,6 @@ package webui
 
 import (
 	"net/http"
-	"slices"
 
 	"t73f.de/r/sx"
 	"t73f.de/r/zero/roster"
@@ -54,11 +53,13 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 		env, rb := wui.createRenderEnvironment(
 			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+currZid, user)
 		if len(zs) > 1 {
-			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxName, "???"))))
+			rb.bindString("shadowed-box",
+				sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxName, "???"))))
 			rb.bindString("incoming", nil)
 		} else {
 			rb.bindString("shadowed-box", nil)
-			rb.bindString("incoming", wui.encodeIncoming(m, currZid, wui.makeGetTextTitle(ctx, getZettel)))
+			rb.bindString("incoming",
+				wui.encodeIncoming(m, currZid, wui.makeGetTextTitle(ctx, getZettel)))
 		}
 		wui.bindCommonZettelData(ctx, &rb, user, m, "", nil)
 
@@ -73,7 +74,11 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 	})
 }
 
-func (wui *WebUI) encodeIncoming(m *meta.Meta, currZid string, getTextTitle getTextTitleFunc) *sx.Pair {
+func (wui *WebUI) encodeIncoming(
+	m *meta.Meta,
+	currZid string,
+	getTextTitle getTextTitleFunc,
+) *sx.Pair {
 	var zidMap roster.Roster[string]
 	addListValues(&zidMap, m, meta.KeyBackward, currZid)
 	for kd := range meta.KeyDescriptionSeq() {
@@ -81,8 +86,7 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, currZid string, getTextTitle getT
 		if inverseKey == "" {
 			continue
 		}
-		ikd := meta.GetDescription(inverseKey)
-		switch ikd.Type {
+		switch meta.GetDescription(inverseKey).Type {
 		case meta.TypeID:
 			if val, ok := m.Get(inverseKey); ok && string(val) != currZid {
 				zidMap.Insert(string(val))
@@ -91,7 +95,8 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, currZid string, getTextTitle getT
 			addListValues(&zidMap, m, inverseKey, currZid)
 		}
 	}
-	return wui.zidLinksSxn(slices.Values(slices.Sorted(zidMap.Values())), getTextTitle)
+	// Roster.Values() is already sorted
+	return wui.zidLinksSxn(zidMap.Values(), getTextTitle)
 }
 
 func addListValues(zidMap *roster.Roster[string], m *meta.Meta, key string, currZid string) {
