@@ -48,16 +48,17 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 			return
 		}
 		m := zs[0].Meta
+		currZid := zid.String()
 
 		user := auth.GetCurrentUser(ctx)
 		env, rb := wui.createRenderEnvironment(
-			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+m.Zid.String(), user)
+			ctx, "delete", wui.getUserLang(ctx), "Delete Zettel "+currZid, user)
 		if len(zs) > 1 {
 			rb.bindString("shadowed-box", sx.MakeString(string(zs[1].Meta.GetDefault(meta.KeyBoxName, "???"))))
 			rb.bindString("incoming", nil)
 		} else {
 			rb.bindString("shadowed-box", nil)
-			rb.bindString("incoming", wui.encodeIncoming(m, wui.makeGetTextTitle(ctx, getZettel)))
+			rb.bindString("incoming", wui.encodeIncoming(m, currZid, wui.makeGetTextTitle(ctx, getZettel)))
 		}
 		wui.bindCommonZettelData(ctx, &rb, user, m, "", nil)
 
@@ -72,9 +73,9 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 	})
 }
 
-func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *sx.Pair {
+func (wui *WebUI) encodeIncoming(m *meta.Meta, currZid string, getTextTitle getTextTitleFunc) *sx.Pair {
 	var zidMap roster.Roster[string]
-	addListValues(&zidMap, m, meta.KeyBackward)
+	addListValues(&zidMap, m, meta.KeyBackward, currZid)
 	for kd := range meta.KeyDescriptionSeq() {
 		inverseKey := kd.Inverse
 		if inverseKey == "" {
@@ -83,19 +84,21 @@ func (wui *WebUI) encodeIncoming(m *meta.Meta, getTextTitle getTextTitleFunc) *s
 		ikd := meta.GetDescription(inverseKey)
 		switch ikd.Type {
 		case meta.TypeID:
-			if val, ok := m.Get(inverseKey); ok {
+			if val, ok := m.Get(inverseKey); ok && string(val) != currZid {
 				zidMap.Insert(string(val))
 			}
 		case meta.TypeIDSet:
-			addListValues(&zidMap, m, inverseKey)
+			addListValues(&zidMap, m, inverseKey, currZid)
 		}
 	}
 	return wui.zidLinksSxn(slices.Values(slices.Sorted(zidMap.Values())), getTextTitle)
 }
 
-func addListValues(zidMap *roster.Roster[string], m *meta.Meta, key string) {
+func addListValues(zidMap *roster.Roster[string], m *meta.Meta, key string, currZid string) {
 	for val := range m.GetFields(key) {
-		zidMap.Insert(val)
+		if val != currZid {
+			zidMap.Insert(val)
+		}
 	}
 }
 
