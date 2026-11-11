@@ -59,92 +59,92 @@ type memBox struct {
 	readonly  bool
 }
 
-func (mb *memBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
-	if notify := mb.cdata.Notify; notify != nil {
-		notify(mb, zid, reason)
+func (mbx *memBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
+	if notify := mbx.cdata.Notify; notify != nil {
+		notify(mbx, zid, reason)
 	}
 }
 
-func (mb *memBox) Name() string     { return mb.name }
-func (mb *memBox) Location() string { return mb.location }
+func (mbx *memBox) Name() string     { return mbx.name }
+func (mbx *memBox) Location() string { return mbx.location }
 
-func (mb *memBox) State() box.StartState {
-	mb.mx.RLock()
-	defer mb.mx.RUnlock()
-	if mb.zettel == nil {
+func (mbx *memBox) State() box.StartState {
+	mbx.mx.RLock()
+	defer mbx.mx.RUnlock()
+	if mbx.zettel == nil {
 		return box.StartStateStopped
 	}
 	return box.StartStateStarted
 }
 
-func (mb *memBox) Start(context.Context) error {
-	mb.mx.Lock()
-	mb.zettel = make(map[id.Zid]box.Zettel)
-	mb.curBytes = 0
-	mb.mx.Unlock()
-	logging.LogTrace(mb.logger, "Start box", "max-zettel", mb.maxZettel, "max-bytes", mb.maxBytes)
+func (mbx *memBox) Start(context.Context) error {
+	mbx.mx.Lock()
+	mbx.zettel = make(map[id.Zid]box.Zettel)
+	mbx.curBytes = 0
+	mbx.mx.Unlock()
+	logging.LogTrace(mbx.logger, "Start box", "max-zettel", mbx.maxZettel, "max-bytes", mbx.maxBytes)
 	return nil
 }
 
-func (mb *memBox) Stop(context.Context) {
-	mb.mx.Lock()
-	mb.zettel = nil
-	mb.mx.Unlock()
+func (mbx *memBox) Stop(context.Context) {
+	mbx.mx.Lock()
+	mbx.zettel = nil
+	mbx.mx.Unlock()
 }
 
-func (mb *memBox) CanCreateZettel(context.Context) bool {
-	mb.mx.RLock()
-	defer mb.mx.RUnlock()
-	return len(mb.zettel) < mb.maxZettel && !mb.readonly
+func (mbx *memBox) CanCreateZettel(context.Context) bool {
+	mbx.mx.RLock()
+	defer mbx.mx.RUnlock()
+	return len(mbx.zettel) < mbx.maxZettel && !mbx.readonly
 }
 
-func (mb *memBox) CreateZettel(_ context.Context, zettel box.Zettel) (id.Zid, error) {
-	if mb.readonly {
+func (mbx *memBox) CreateZettel(_ context.Context, zettel box.Zettel) (id.Zid, error) {
+	if mbx.readonly {
 		return id.Invalid, box.ErrReadOnly
 	}
-	mb.mx.Lock()
-	newBytes := mb.curBytes + zettel.ByteSize()
-	if mb.maxZettel <= len(mb.zettel) || mb.maxBytes < newBytes {
-		mb.mx.Unlock()
+	mbx.mx.Lock()
+	newBytes := mbx.curBytes + zettel.ByteSize()
+	if mbx.maxZettel <= len(mbx.zettel) || mbx.maxBytes < newBytes {
+		mbx.mx.Unlock()
 		return id.Invalid, box.ErrCapacity
 	}
 	zid, err := box.GetNewZid(func(zid id.Zid) (bool, error) {
-		_, ok := mb.zettel[zid]
+		_, ok := mbx.zettel[zid]
 		return !ok, nil
 	})
 	if err != nil {
-		mb.mx.Unlock()
+		mbx.mx.Unlock()
 		return id.Invalid, err
 	}
 	meta := zettel.Meta.Clone()
 	meta.Zid = zid
 	zettel.Meta = meta
-	mb.zettel[zid] = zettel
-	mb.curBytes = newBytes
-	mb.mx.Unlock()
+	mbx.zettel[zid] = zettel
+	mbx.curBytes = newBytes
+	mbx.mx.Unlock()
 
-	mb.notifyChanged(zid, box.OnZettel)
-	logging.LogTrace(mb.logger, "CreateZettel", "zid", zid)
+	mbx.notifyChanged(zid, box.OnZettel)
+	logging.LogTrace(mbx.logger, "CreateZettel", "zid", zid)
 	return zid, nil
 }
 
-func (mb *memBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
-	mb.mx.RLock()
-	z, ok := mb.zettel[zid]
-	mb.mx.RUnlock()
+func (mbx *memBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
+	mbx.mx.RLock()
+	z, ok := mbx.zettel[zid]
+	mbx.mx.RUnlock()
 	if !ok {
 		return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 	}
 	z.Meta = z.Meta.Clone()
-	logging.LogTrace(mb.logger, "GetZettel")
+	logging.LogTrace(mbx.logger, "GetZettel")
 	return z, nil
 }
 
-func (mb *memBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
-	mb.mx.RLock()
-	defer mb.mx.RUnlock()
-	logging.LogTrace(mb.logger, "ApplyZid", "entries", len(mb.zettel))
-	for zid := range mb.zettel {
+func (mbx *memBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
+	mbx.mx.RLock()
+	defer mbx.mx.RUnlock()
+	logging.LogTrace(mbx.logger, "ApplyZid", "entries", len(mbx.zettel))
+	for zid := range mbx.zettel {
 		if constraint(zid) {
 			handle(zid)
 		}
@@ -152,39 +152,39 @@ func (mb *memBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box
 	return nil
 }
 
-func (mb *memBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
-	mb.mx.RLock()
-	defer mb.mx.RUnlock()
-	logging.LogTrace(mb.logger, "ApplyMeta", "entries", len(mb.zettel))
-	for zid, zettel := range mb.zettel {
+func (mbx *memBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
+	mbx.mx.RLock()
+	defer mbx.mx.RUnlock()
+	logging.LogTrace(mbx.logger, "ApplyMeta", "entries", len(mbx.zettel))
+	for zid, zettel := range mbx.zettel {
 		if constraint(zid) {
 			m := zettel.Meta.Clone()
-			mb.cdata.Enricher.Enrich(ctx, m, mb.name)
+			mbx.cdata.Enricher.Enrich(ctx, m, mbx.name)
 			handle(m)
 		}
 	}
 	return nil
 }
 
-func (mb *memBox) CanUpdateZettel(_ context.Context, zettel box.Zettel) bool {
-	mb.mx.RLock()
-	defer mb.mx.RUnlock()
+func (mbx *memBox) CanUpdateZettel(_ context.Context, zettel box.Zettel) bool {
+	mbx.mx.RLock()
+	defer mbx.mx.RUnlock()
 	zid := zettel.Meta.Zid
 	if !zid.IsValid() {
 		return false
 	}
 
-	newBytes := mb.curBytes + zettel.ByteSize()
-	if prevZettel, found := mb.zettel[zid]; found {
+	newBytes := mbx.curBytes + zettel.ByteSize()
+	if prevZettel, found := mbx.zettel[zid]; found {
 		newBytes -= prevZettel.ByteSize()
-	} else if len(mb.zettel) >= mb.maxZettel { // from other box && ...
+	} else if len(mbx.zettel) >= mbx.maxZettel { // from other box && ...
 		return false
 	}
-	return newBytes <= mb.maxBytes && !mb.readonly
+	return newBytes <= mbx.maxBytes && !mbx.readonly
 }
 
-func (mb *memBox) UpdateZettel(_ context.Context, zettel box.Zettel) error {
-	if mb.readonly {
+func (mbx *memBox) UpdateZettel(_ context.Context, zettel box.Zettel) error {
+	if mbx.readonly {
 		return box.ErrReadOnly
 	}
 	m := zettel.Meta.Clone()
@@ -192,57 +192,57 @@ func (mb *memBox) UpdateZettel(_ context.Context, zettel box.Zettel) error {
 		return box.ErrInvalidZid{Zid: m.Zid.String()}
 	}
 
-	mb.mx.Lock()
-	newBytes := mb.curBytes + zettel.ByteSize()
-	if prevZettel, found := mb.zettel[m.Zid]; found {
+	mbx.mx.Lock()
+	newBytes := mbx.curBytes + zettel.ByteSize()
+	if prevZettel, found := mbx.zettel[m.Zid]; found {
 		newBytes -= prevZettel.ByteSize()
-	} else if len(mb.zettel) >= mb.maxZettel { // from other box && ...
-		mb.mx.Unlock()
+	} else if len(mbx.zettel) >= mbx.maxZettel { // from other box && ...
+		mbx.mx.Unlock()
 		return box.ErrCapacity
 	}
-	if mb.maxBytes < newBytes {
-		mb.mx.Unlock()
+	if mbx.maxBytes < newBytes {
+		mbx.mx.Unlock()
 		return box.ErrCapacity
 	}
 
 	zettel.Meta = m
-	mb.zettel[m.Zid] = zettel
-	mb.curBytes = newBytes
-	mb.mx.Unlock()
-	mb.notifyChanged(m.Zid, box.OnZettel)
-	logging.LogTrace(mb.logger, "UpdateZettel")
+	mbx.zettel[m.Zid] = zettel
+	mbx.curBytes = newBytes
+	mbx.mx.Unlock()
+	mbx.notifyChanged(m.Zid, box.OnZettel)
+	logging.LogTrace(mbx.logger, "UpdateZettel")
 	return nil
 }
 
-func (mb *memBox) CanDeleteZettel(_ context.Context, zid id.Zid) bool {
-	mb.mx.RLock()
-	_, ok := mb.zettel[zid]
-	mb.mx.RUnlock()
-	return ok && !mb.readonly
+func (mbx *memBox) CanDeleteZettel(_ context.Context, zid id.Zid) bool {
+	mbx.mx.RLock()
+	_, ok := mbx.zettel[zid]
+	mbx.mx.RUnlock()
+	return ok && !mbx.readonly
 }
 
-func (mb *memBox) DeleteZettel(_ context.Context, zid id.Zid) error {
-	if mb.readonly {
+func (mbx *memBox) DeleteZettel(_ context.Context, zid id.Zid) error {
+	if mbx.readonly {
 		return box.ErrReadOnly
 	}
-	mb.mx.Lock()
-	oldZettel, found := mb.zettel[zid]
+	mbx.mx.Lock()
+	oldZettel, found := mbx.zettel[zid]
 	if !found {
-		mb.mx.Unlock()
+		mbx.mx.Unlock()
 		return box.ErrZettelNotFound{Zid: zid}
 	}
-	delete(mb.zettel, zid)
-	mb.curBytes -= oldZettel.ByteSize()
-	mb.mx.Unlock()
-	mb.notifyChanged(zid, box.OnDelete)
-	logging.LogTrace(mb.logger, "DeleteZettel")
+	delete(mbx.zettel, zid)
+	mbx.curBytes -= oldZettel.ByteSize()
+	mbx.mx.Unlock()
+	mbx.notifyChanged(zid, box.OnDelete)
+	logging.LogTrace(mbx.logger, "DeleteZettel")
 	return nil
 }
 
-func (mb *memBox) ReadStats(st *box.ManagedBoxStats) {
-	st.ReadOnly = mb.readonly
-	mb.mx.RLock()
-	st.Zettel = len(mb.zettel)
-	mb.mx.RUnlock()
-	logging.LogTrace(mb.logger, "ReadStats", "zettel", st.Zettel)
+func (mbx *memBox) ReadStats(st *box.ManagedBoxStats) {
+	st.ReadOnly = mbx.readonly
+	mbx.mx.RLock()
+	st.Zettel = len(mbx.zettel)
+	mbx.mx.RUnlock()
+	logging.LogTrace(mbx.logger, "ReadStats", "zettel", st.Zettel)
 }

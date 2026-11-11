@@ -134,11 +134,11 @@ type dirBox struct {
 	mxCmds     sync.RWMutex
 }
 
-func (dp *dirBox) Name() string     { return dp.name }
-func (dp *dirBox) Location() string { return dp.location }
+func (dbx *dirBox) Name() string     { return dbx.name }
+func (dbx *dirBox) Location() string { return dbx.location }
 
-func (dp *dirBox) State() box.StartState {
-	if ds := dp.dirSrv; ds != nil {
+func (dbx *dirBox) State() box.StartState {
+	if ds := dbx.dirSrv; ds != nil {
 		switch ds.State() {
 		case notify.DsCreated:
 			return box.StartStateStopped
@@ -155,151 +155,151 @@ func (dp *dirBox) State() box.StartState {
 	return box.StartStateStopped
 }
 
-func (dp *dirBox) Start(context.Context) error {
-	dp.mxCmds.Lock()
-	defer dp.mxCmds.Unlock()
-	dp.fCmds = make([]chan fileCmd, 0, dp.fSrvs)
-	for i := range dp.fSrvs {
+func (dbx *dirBox) Start(context.Context) error {
+	dbx.mxCmds.Lock()
+	defer dbx.mxCmds.Unlock()
+	dbx.fCmds = make([]chan fileCmd, 0, dbx.fSrvs)
+	for i := range dbx.fSrvs {
 		cc := make(chan fileCmd)
-		go fileService(i, dp.logger.With("sub", "file", "fn", i), dp.dir, cc)
-		dp.fCmds = append(dp.fCmds, cc)
+		go fileService(i, dbx.logger.With("sub", "file", "fn", i), dbx.dir, cc)
+		dbx.fCmds = append(dbx.fCmds, cc)
 	}
 
 	var notifier notify.Notifier
 	var err error
-	switch dp.notifySpec {
+	switch dbx.notifySpec {
 	case dirNotifySimple:
-		notifier, err = notify.NewSimpleDirNotifier(dp.logger.With("notify", "simple"), dp.dir)
+		notifier, err = notify.NewSimpleDirNotifier(dbx.logger.With("notify", "simple"), dbx.dir)
 	default:
-		notifier, err = notify.NewFSDirNotifier(dp.logger.With("notify", "fs"), dp.dir)
+		notifier, err = notify.NewFSDirNotifier(dbx.logger.With("notify", "fs"), dbx.dir)
 	}
 	if err != nil {
-		dp.logger.Error("Unable to create directory supervisor", "err", err)
-		dp.stopFileServices()
+		dbx.logger.Error("Unable to create directory supervisor", "err", err)
+		dbx.stopFileServices()
 		return err
 	}
-	dp.dirSrv = notify.NewDirService(
-		dp,
-		dp.logger.With("sub", "dirsrv"),
+	dbx.dirSrv = notify.NewDirService(
+		dbx,
+		dbx.logger.With("sub", "dirsrv"),
 		notifier,
-		dp.cdata.Notify,
+		dbx.cdata.Notify,
 	)
-	dp.dirSrv.Start()
+	dbx.dirSrv.Start()
 	return nil
 }
 
-func (dp *dirBox) Refresh(_ context.Context) {
-	dp.dirSrv.Refresh()
-	logging.LogTrace(dp.logger, "Refresh")
+func (dbx *dirBox) Refresh(context.Context) {
+	dbx.dirSrv.Refresh()
+	logging.LogTrace(dbx.logger, "Refresh")
 }
 
-func (dp *dirBox) Stop(_ context.Context) {
-	dirSrv := dp.dirSrv
-	dp.dirSrv = nil
+func (dbx *dirBox) Stop(context.Context) {
+	dirSrv := dbx.dirSrv
+	dbx.dirSrv = nil
 	if dirSrv != nil {
 		dirSrv.Stop()
 	}
-	dp.stopFileServices()
+	dbx.stopFileServices()
 }
 
-func (dp *dirBox) stopFileServices() {
-	for _, c := range dp.fCmds {
+func (dbx *dirBox) stopFileServices() {
+	for _, c := range dbx.fCmds {
 		close(c)
 	}
 }
 
-func (dp *dirBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
-	if notify := dp.cdata.Notify; notify != nil {
-		logging.LogTrace(dp.logger, "notifyChanged", "zid", zid, "reason", reason)
-		notify(dp, zid, reason)
+func (dbx *dirBox) notifyChanged(zid id.Zid, reason box.UpdateReason) {
+	if notify := dbx.cdata.Notify; notify != nil {
+		logging.LogTrace(dbx.logger, "notifyChanged", "zid", zid, "reason", reason)
+		notify(dbx, zid, reason)
 	}
 }
 
-func (dp *dirBox) getFileChan(zid id.Zid) chan fileCmd {
+func (dbx *dirBox) getFileChan(zid id.Zid) chan fileCmd {
 	// Based on https://en.wikipedia.org/wiki/Fowler%E2%80%93Noll%E2%80%93Vo_hash_function
 	sum := 2166136261 ^ uint32(zid)
 	sum *= 16777619
 	sum ^= uint32(zid >> 32)
 	sum *= 16777619
 
-	dp.mxCmds.RLock()
-	defer dp.mxCmds.RUnlock()
-	return dp.fCmds[sum%dp.fSrvs]
+	dbx.mxCmds.RLock()
+	defer dbx.mxCmds.RUnlock()
+	return dbx.fCmds[sum%dbx.fSrvs]
 }
 
-func (dp *dirBox) CanCreateZettel(_ context.Context) bool {
-	return !dp.readonly
+func (dbx *dirBox) CanCreateZettel(context.Context) bool {
+	return !dbx.readonly
 }
 
-func (dp *dirBox) CreateZettel(ctx context.Context, zettel box.Zettel) (id.Zid, error) {
-	if dp.readonly {
+func (dbx *dirBox) CreateZettel(ctx context.Context, zettel box.Zettel) (id.Zid, error) {
+	if dbx.readonly {
 		return id.Invalid, box.ErrReadOnly
 	}
 
-	newZid, err := dp.dirSrv.SetNewDirEntry()
+	newZid, err := dbx.dirSrv.SetNewDirEntry()
 	if err != nil {
 		return id.Invalid, err
 	}
 	meta := zettel.Meta
 	meta.Zid = newZid
 	entry := notify.DirEntry{Zid: newZid}
-	dp.updateEntryFromMetaContent(&entry, meta, zettel.Content)
+	dbx.updateEntryFromMetaContent(&entry, meta, zettel.Content)
 
-	err = dp.srvSetZettel(ctx, &entry, zettel)
+	err = dbx.srvSetZettel(ctx, &entry, zettel)
 	if err == nil {
-		err = dp.dirSrv.UpdateDirEntry(&entry)
+		err = dbx.dirSrv.UpdateDirEntry(&entry)
 	}
-	dp.notifyChanged(meta.Zid, box.OnZettel)
-	logging.LogTrace(dp.logger, "CreateZettel", logging.Err(err), "zid", meta.Zid)
+	dbx.notifyChanged(meta.Zid, box.OnZettel)
+	logging.LogTrace(dbx.logger, "CreateZettel", logging.Err(err), "zid", meta.Zid)
 	return meta.Zid, err
 }
 
-func (dp *dirBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
-	entry := dp.dirSrv.GetDirEntry(zid)
+func (dbx *dirBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error) {
+	entry := dbx.dirSrv.GetDirEntry(zid)
 	if !entry.IsValid() {
 		return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 	}
-	m, c, err := dp.srvGetMetaContent(ctx, entry, zid)
+	m, c, err := dbx.srvGetMetaContent(ctx, entry, zid)
 	if err != nil {
 		return box.Zettel{}, err
 	}
 	zettel := box.Zettel{Meta: m, Content: zettel.NewContent(c)}
-	logging.LogTrace(dp.logger, "GetZettel", "zid", zid)
+	logging.LogTrace(dbx.logger, "GetZettel", "zid", zid)
 	return zettel, nil
 }
 
-func (dp *dirBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
-	entries := dp.dirSrv.GetDirEntries(constraint)
-	logging.LogTrace(dp.logger, "ApplyZid", "entries", len(entries))
+func (dbx *dirBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
+	entries := dbx.dirSrv.GetDirEntries(constraint)
+	logging.LogTrace(dbx.logger, "ApplyZid", "entries", len(entries))
 	for _, entry := range entries {
 		handle(entry.Zid)
 	}
 	return nil
 }
 
-func (dp *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
-	entries := dp.dirSrv.GetDirEntries(constraint)
-	logging.LogTrace(dp.logger, "ApplyMeta", "entries", len(entries))
+func (dbx *dirBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
+	entries := dbx.dirSrv.GetDirEntries(constraint)
+	logging.LogTrace(dbx.logger, "ApplyMeta", "entries", len(entries))
 
 	// The following loop could be parallelized if needed for performance.
 	for _, entry := range entries {
-		m, err := dp.srvGetMeta(ctx, entry, entry.Zid)
+		m, err := dbx.srvGetMeta(ctx, entry, entry.Zid)
 		if err != nil {
-			logging.LogTrace(dp.logger, "ApplyMeta/getMeta", "err", err)
+			logging.LogTrace(dbx.logger, "ApplyMeta/getMeta", "err", err)
 			return err
 		}
-		dp.cdata.Enricher.Enrich(ctx, m, dp.name)
+		dbx.cdata.Enricher.Enrich(ctx, m, dbx.name)
 		handle(m)
 	}
 	return nil
 }
 
-func (dp *dirBox) CanUpdateZettel(context.Context, box.Zettel) bool {
-	return !dp.readonly
+func (dbx *dirBox) CanUpdateZettel(context.Context, box.Zettel) bool {
+	return !dbx.readonly
 }
 
-func (dp *dirBox) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
-	if dp.readonly {
+func (dbx *dirBox) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
+	if dbx.readonly {
 		return box.ErrReadOnly
 	}
 
@@ -308,59 +308,59 @@ func (dp *dirBox) UpdateZettel(ctx context.Context, zettel box.Zettel) error {
 	if !zid.IsValid() {
 		return box.ErrInvalidZid{Zid: zid.String()}
 	}
-	entry := dp.dirSrv.GetDirEntry(zid)
+	entry := dbx.dirSrv.GetDirEntry(zid)
 	if !entry.IsValid() {
 		// Existing zettel, but new in this box.
 		entry = &notify.DirEntry{Zid: zid}
 	}
-	dp.updateEntryFromMetaContent(entry, meta, zettel.Content)
-	err := dp.dirSrv.UpdateDirEntry(entry)
+	dbx.updateEntryFromMetaContent(entry, meta, zettel.Content)
+	err := dbx.dirSrv.UpdateDirEntry(entry)
 	if err != nil {
 		return err
 	}
-	err = dp.srvSetZettel(ctx, entry, zettel)
+	err = dbx.srvSetZettel(ctx, entry, zettel)
 	if err == nil {
-		dp.notifyChanged(zid, box.OnZettel)
+		dbx.notifyChanged(zid, box.OnZettel)
 	}
-	logging.LogTrace(dp.logger, "UpdateZettel", "zid", zid, logging.Err(err))
+	logging.LogTrace(dbx.logger, "UpdateZettel", "zid", zid, logging.Err(err))
 	return err
 }
 
-func (dp *dirBox) updateEntryFromMetaContent(entry *notify.DirEntry, m *meta.Meta, content zettel.Content) {
-	entry.SetupFromMetaContent(m, content, dp.cdata.Config.IsZettelFileSyntax)
+func (dbx *dirBox) updateEntryFromMetaContent(entry *notify.DirEntry, m *meta.Meta, content zettel.Content) {
+	entry.SetupFromMetaContent(m, content, dbx.cdata.Config.IsZettelFileSyntax)
 }
 
-func (dp *dirBox) CanDeleteZettel(_ context.Context, zid id.Zid) bool {
-	if dp.readonly {
+func (dbx *dirBox) CanDeleteZettel(_ context.Context, zid id.Zid) bool {
+	if dbx.readonly {
 		return false
 	}
-	entry := dp.dirSrv.GetDirEntry(zid)
+	entry := dbx.dirSrv.GetDirEntry(zid)
 	return entry.IsValid()
 }
 
-func (dp *dirBox) DeleteZettel(ctx context.Context, zid id.Zid) error {
-	if dp.readonly {
+func (dbx *dirBox) DeleteZettel(ctx context.Context, zid id.Zid) error {
+	if dbx.readonly {
 		return box.ErrReadOnly
 	}
 
-	entry := dp.dirSrv.GetDirEntry(zid)
+	entry := dbx.dirSrv.GetDirEntry(zid)
 	if !entry.IsValid() {
 		return box.ErrZettelNotFound{Zid: zid}
 	}
-	err := dp.dirSrv.DeleteDirEntry(zid)
+	err := dbx.dirSrv.DeleteDirEntry(zid)
 	if err != nil {
 		return nil
 	}
-	err = dp.srvDeleteZettel(ctx, entry, zid)
+	err = dbx.srvDeleteZettel(ctx, entry, zid)
 	if err == nil {
-		dp.notifyChanged(zid, box.OnDelete)
+		dbx.notifyChanged(zid, box.OnDelete)
 	}
-	logging.LogTrace(dp.logger, "DeleteZettel", "zid", zid, logging.Err(err))
+	logging.LogTrace(dbx.logger, "DeleteZettel", "zid", zid, logging.Err(err))
 	return err
 }
 
-func (dp *dirBox) ReadStats(st *box.ManagedBoxStats) {
-	st.ReadOnly = dp.readonly
-	st.Zettel = dp.dirSrv.NumDirEntries()
-	logging.LogTrace(dp.logger, "ReadStats", "zettel", st.Zettel)
+func (dbx *dirBox) ReadStats(st *box.ManagedBoxStats) {
+	st.ReadOnly = dbx.readonly
+	st.Zettel = dbx.dirSrv.NumDirEntries()
+	logging.LogTrace(dbx.logger, "ReadStats", "zettel", st.Zettel)
 }

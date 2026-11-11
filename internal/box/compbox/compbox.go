@@ -103,28 +103,28 @@ func Setup(cfg *meta.Meta) { myConfig = cfg.Clone() }
 func (*compBox) Name() string     { return box.SchemeCompBox }
 func (*compBox) Location() string { return box.SchemeCompBox + ":" }
 
-func (cb *compBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
+func (cbx *compBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	if gen, ok := myZettel[zid]; ok && gen.meta != nil {
 		if m := gen.meta(zid); m != nil {
 			updateMeta(m)
 			if genContent := gen.content; genContent != nil {
-				logging.LogTrace(cb.logger, "GetZettel/Content")
+				logging.LogTrace(cbx.logger, "GetZettel/Content")
 				return box.Zettel{
 					Meta:    m,
 					Content: zettel.NewContent(genContent()),
 				}, nil
 			}
-			logging.LogTrace(cb.logger, "GetZettel/NoContent")
+			logging.LogTrace(cbx.logger, "GetZettel/NoContent")
 			return box.Zettel{Meta: m}, nil
 		}
 	}
 	err := box.ErrZettelNotFound{Zid: zid}
-	logging.LogTrace(cb.logger, "GetZettel/Err", "err", err)
+	logging.LogTrace(cbx.logger, "GetZettel/Err", "err", err)
 	return box.Zettel{}, err
 }
 
-func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
-	logging.LogTrace(cb.logger, "ApplyZid", "entries", len(myZettel))
+func (cbx *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
+	logging.LogTrace(cbx.logger, "ApplyZid", "entries", len(myZettel))
 	for zid, gen := range myZettel {
 		if !constraint(zid) {
 			continue
@@ -138,8 +138,8 @@ func (cb *compBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint bo
 	return nil
 }
 
-func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
-	logging.LogTrace(cb.logger, "ApplyMeta", "entries", len(myZettel))
+func (cbx *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
+	logging.LogTrace(cbx.logger, "ApplyMeta", "entries", len(myZettel))
 	for zid, gen := range myZettel {
 		if !constraint(zid) {
 			continue
@@ -147,7 +147,7 @@ func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrain
 		if genMeta := gen.meta; genMeta != nil {
 			if m := genMeta(zid); m != nil {
 				updateMeta(m)
-				cb.enricher.Enrich(ctx, m, box.SchemeCompBox)
+				cbx.enricher.Enrich(ctx, m, box.SchemeCompBox)
 				handle(m)
 			}
 		}
@@ -155,10 +155,10 @@ func (cb *compBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constrain
 	return nil
 }
 
-func (cb *compBox) ReadStats(st *box.ManagedBoxStats) {
+func (cbx *compBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
 	st.Zettel = len(myZettel)
-	logging.LogTrace(cb.logger, "ReadStats", "zettel", st.Zettel)
+	logging.LogTrace(cbx.logger, "ReadStats", "zettel", st.Zettel)
 }
 
 func getTitledMeta(zid id.Zid, title string) *meta.Meta {

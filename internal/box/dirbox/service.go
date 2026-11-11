@@ -59,9 +59,9 @@ const serviceTimeout = 5 * time.Second // must be shorter than the web servers t
 //
 // Retrieves the meta data from a zettel.
 
-func (dp *dirBox) srvGetMeta(ctx context.Context, entry *notify.DirEntry, zid id.Zid) (*meta.Meta, error) {
+func (dbx *dirBox) srvGetMeta(ctx context.Context, entry *notify.DirEntry, zid id.Zid) (*meta.Meta, error) {
 	rc := make(chan resGetMeta, 1)
-	dp.getFileChan(zid) <- &fileGetMeta{entry, rc}
+	dbx.getFileChan(zid) <- &fileGetMeta{entry, rc}
 	ctx, cancel := context.WithTimeout(ctx, serviceTimeout)
 	defer cancel()
 	select {
@@ -111,9 +111,9 @@ func (cmd *fileGetMeta) run(dirPath string) {
 //
 // Retrieves the meta data and the content of a zettel.
 
-func (dp *dirBox) srvGetMetaContent(ctx context.Context, entry *notify.DirEntry, zid id.Zid) (*meta.Meta, []byte, error) {
+func (dbx *dirBox) srvGetMetaContent(ctx context.Context, entry *notify.DirEntry, zid id.Zid) (*meta.Meta, []byte, error) {
 	rc := make(chan resGetMetaContent, 1)
-	dp.getFileChan(zid) <- &fileGetMetaContent{entry, rc}
+	dbx.getFileChan(zid) <- &fileGetMetaContent{entry, rc}
 	ctx, cancel := context.WithTimeout(ctx, serviceTimeout)
 	defer cancel()
 	select {
@@ -174,9 +174,9 @@ func (cmd *fileGetMetaContent) run(dirPath string) {
 //
 // Writes a new or exsting zettel.
 
-func (dp *dirBox) srvSetZettel(ctx context.Context, entry *notify.DirEntry, zettel box.Zettel) error {
+func (dbx *dirBox) srvSetZettel(ctx context.Context, entry *notify.DirEntry, zettel box.Zettel) error {
 	rc := make(chan resSetZettel, 1)
-	dp.getFileChan(zettel.Meta.Zid) <- &fileSetZettel{entry, zettel, rc}
+	dbx.getFileChan(zettel.Meta.Zid) <- &fileSetZettel{entry, zettel, rc}
 	ctx, cancel := context.WithTimeout(ctx, serviceTimeout)
 	defer cancel()
 	select {
@@ -261,9 +261,9 @@ func writeMetaHeader(w io.Writer, m *meta.Meta) {
 //
 // Deletes an existing zettel.
 
-func (dp *dirBox) srvDeleteZettel(ctx context.Context, entry *notify.DirEntry, zid id.Zid) error {
+func (dbx *dirBox) srvDeleteZettel(ctx context.Context, entry *notify.DirEntry, zid id.Zid) error {
 	rc := make(chan resDeleteZettel, 1)
-	dp.getFileChan(zid) <- &fileDeleteZettel{entry, rc}
+	dbx.getFileChan(zid) <- &fileDeleteZettel{entry, rc}
 	ctx, cancel := context.WithTimeout(ctx, serviceTimeout)
 	defer cancel()
 	select {

@@ -40,11 +40,11 @@ type zipBox struct {
 	dirSrv   *notify.DirService
 }
 
-func (zb *zipBox) Name() string     { return zb.name }
-func (zb *zipBox) Location() string { return zb.location }
+func (zbx *zipBox) Name() string     { return zbx.name }
+func (zbx *zipBox) Location() string { return zbx.location }
 
-func (zb *zipBox) State() box.StartState {
-	if ds := zb.dirSrv; ds != nil {
+func (zbx *zipBox) State() box.StartState {
+	if ds := zbx.dirSrv; ds != nil {
 		switch ds.State() {
 		case notify.DsCreated:
 			return box.StartStateStopped
@@ -61,36 +61,36 @@ func (zb *zipBox) State() box.StartState {
 	return box.StartStateStopped
 }
 
-func (zb *zipBox) Start(context.Context) error {
-	reader, err := zip.OpenReader(zb.path)
+func (zbx *zipBox) Start(context.Context) error {
+	reader, err := zip.OpenReader(zbx.path)
 	if err != nil {
 		return err
 	}
 	if err = reader.Close(); err != nil {
 		return err
 	}
-	zipNotifier := notify.NewSimpleZipNotifier(zb.logger, zb.path)
-	zb.dirSrv = notify.NewDirService(zb, zb.logger, zipNotifier, zb.notify)
-	zb.dirSrv.Start()
+	zipNotifier := notify.NewSimpleZipNotifier(zbx.logger, zbx.path)
+	zbx.dirSrv = notify.NewDirService(zbx, zbx.logger, zipNotifier, zbx.notify)
+	zbx.dirSrv.Start()
 	return nil
 }
 
-func (zb *zipBox) Refresh(_ context.Context) {
-	zb.dirSrv.Refresh()
-	logging.LogTrace(zb.logger, "Refresh")
+func (zbx *zipBox) Refresh(context.Context) {
+	zbx.dirSrv.Refresh()
+	logging.LogTrace(zbx.logger, "Refresh")
 }
 
-func (zb *zipBox) Stop(context.Context) {
-	zb.dirSrv.Stop()
-	zb.dirSrv = nil
+func (zbx *zipBox) Stop(context.Context) {
+	zbx.dirSrv.Stop()
+	zbx.dirSrv = nil
 }
 
-func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
-	entry := zb.dirSrv.GetDirEntry(zid)
+func (zbx *zipBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
+	entry := zbx.dirSrv.GetDirEntry(zid)
 	if !entry.IsValid() {
 		return box.Zettel{}, box.ErrZettelNotFound{Zid: zid}
 	}
-	reader, err := zip.OpenReader(zb.path)
+	reader, err := zip.OpenReader(zbx.path)
 	if err != nil {
 		return box.Zettel{}, err
 	}
@@ -132,47 +132,47 @@ func (zb *zipBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
 	}
 
 	CleanupMeta(m, entry.ContentExt, inMeta, entry.UselessFiles)
-	logging.LogTrace(zb.logger, "GetZettel", "zid", zid)
+	logging.LogTrace(zbx.logger, "GetZettel", "zid", zid)
 	return box.Zettel{Meta: m, Content: zettel.NewContent(src)}, nil
 }
 
-func (zb *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
-	entries := zb.dirSrv.GetDirEntries(constraint)
-	logging.LogTrace(zb.logger, "ApplyZid", "entries", len(entries))
+func (zbx *zipBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
+	entries := zbx.dirSrv.GetDirEntries(constraint)
+	logging.LogTrace(zbx.logger, "ApplyZid", "entries", len(entries))
 	for _, entry := range entries {
 		handle(entry.Zid)
 	}
 	return nil
 }
 
-func (zb *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
-	reader, err := zip.OpenReader(zb.path)
+func (zbx *zipBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
+	reader, err := zip.OpenReader(zbx.path)
 	if err != nil {
 		return err
 	}
-	entries := zb.dirSrv.GetDirEntries(constraint)
-	logging.LogTrace(zb.logger, "ApplyMeta", "entries", len(entries))
+	entries := zbx.dirSrv.GetDirEntries(constraint)
+	logging.LogTrace(zbx.logger, "ApplyMeta", "entries", len(entries))
 	for _, entry := range entries {
 		if !constraint(entry.Zid) {
 			continue
 		}
-		m, err2 := zb.readZipMeta(reader, entry.Zid, entry)
+		m, err2 := zbx.readZipMeta(reader, entry.Zid, entry)
 		if err2 != nil {
 			continue
 		}
-		zb.enricher.Enrich(ctx, m, zb.name)
+		zbx.enricher.Enrich(ctx, m, zbx.name)
 		handle(m)
 	}
 	return reader.Close()
 }
 
-func (zb *zipBox) ReadStats(st *box.ManagedBoxStats) {
+func (zbx *zipBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
-	st.Zettel = zb.dirSrv.NumDirEntries()
-	logging.LogTrace(zb.logger, "ReadStats", "zettel", st.Zettel)
+	st.Zettel = zbx.dirSrv.NumDirEntries()
+	logging.LogTrace(zbx.logger, "ReadStats", "zettel", st.Zettel)
 }
 
-func (zb *zipBox) readZipMeta(reader *zip.ReadCloser, zid id.Zid, entry *notify.DirEntry) (m *meta.Meta, err error) {
+func (zbx *zipBox) readZipMeta(reader *zip.ReadCloser, zid id.Zid, entry *notify.DirEntry) (m *meta.Meta, err error) {
 	var inMeta bool
 	if metaName := entry.MetaName; metaName == "" {
 		contentName := entry.ContentName

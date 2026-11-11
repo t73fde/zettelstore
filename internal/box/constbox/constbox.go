@@ -59,21 +59,21 @@ type constBox struct {
 func (*constBox) Name() string     { return box.SchemeConstBox }
 func (*constBox) Location() string { return box.SchemeConstBox + ":" }
 
-func (cb *constBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
-	if z, ok := cb.zettel[zid]; ok {
-		logging.LogTrace(cb.logger, "GetZettel")
+func (cbx *constBox) GetZettel(_ context.Context, zid id.Zid) (box.Zettel, error) {
+	if z, ok := cbx.zettel[zid]; ok {
+		logging.LogTrace(cbx.logger, "GetZettel")
 		return box.Zettel{
 			Meta:    meta.NewWithMap(zid, maps.Clone(z.header)),
 			Content: z.content}, nil
 	}
 	err := box.ErrZettelNotFound{Zid: zid}
-	logging.LogTrace(cb.logger, "GetZettel/Err", "err", err)
+	logging.LogTrace(cbx.logger, "GetZettel/Err", "err", err)
 	return box.Zettel{}, err
 }
 
-func (cb *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
-	logging.LogTrace(cb.logger, "ApplyZid", "entries", len(cb.zettel))
-	for zid := range cb.zettel {
+func (cbx *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint box.RetrievePredicate) error {
+	logging.LogTrace(cbx.logger, "ApplyZid", "entries", len(cbx.zettel))
+	for zid := range cbx.zettel {
 		if constraint(zid) {
 			handle(zid)
 		}
@@ -81,22 +81,22 @@ func (cb *constBox) ApplyZid(_ context.Context, handle box.ZidFunc, constraint b
 	return nil
 }
 
-func (cb *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
-	logging.LogTrace(cb.logger, "ApplyMeta", "entries", len(cb.zettel))
-	for zid, zettel := range cb.zettel {
+func (cbx *constBox) ApplyMeta(ctx context.Context, handle box.MetaFunc, constraint box.RetrievePredicate) error {
+	logging.LogTrace(cbx.logger, "ApplyMeta", "entries", len(cbx.zettel))
+	for zid, zettel := range cbx.zettel {
 		if constraint(zid) {
 			m := meta.NewWithMap(zid, maps.Clone(zettel.header))
-			cb.enricher.Enrich(ctx, m, box.SchemeConstBox)
+			cbx.enricher.Enrich(ctx, m, box.SchemeConstBox)
 			handle(m)
 		}
 	}
 	return nil
 }
 
-func (cb *constBox) ReadStats(st *box.ManagedBoxStats) {
+func (cbx *constBox) ReadStats(st *box.ManagedBoxStats) {
 	st.ReadOnly = true
-	st.Zettel = len(cb.zettel)
-	logging.LogTrace(cb.logger, "ReadStats", "zettel", st.Zettel)
+	st.Zettel = len(cbx.zettel)
+	logging.LogTrace(cbx.logger, "ReadStats", "zettel", st.Zettel)
 }
 
 var constZettelMap = map[id.Zid]constZettel{
