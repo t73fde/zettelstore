@@ -38,8 +38,8 @@ type ContextSpec struct {
 
 // ContextPort is the collection of box methods needed by this directive.
 type ContextPort interface {
-	GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
-	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *Query) ([]*meta.Meta, error)
+	FindMeta(context.Context, id.Zid) *meta.Meta
+	SelectMeta(context.Context, []*meta.Meta, *Query) ([]*meta.Meta, error)
 }
 
 // Print the spec on the given print environment.
@@ -251,7 +251,7 @@ func contextCost(key string) float64 {
 
 func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, dir int, value meta.Value) {
 	if zid, errParse := id.Parse(string(value)); errParse == nil {
-		if m, errGetMeta := ct.port.GetMeta(ctx, zid); errGetMeta == nil {
+		if m := ct.port.FindMeta(ctx, zid); m != nil {
 			ct.addMeta(m, newCost, level, dir)
 		}
 	}

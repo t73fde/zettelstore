@@ -22,7 +22,6 @@ import (
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 
-	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/logging"
 )
@@ -126,15 +125,17 @@ func newResult(ready bool, base queryResult) *index.Result {
 	return index.NewPartialResult(base)
 }
 
-// GetMeta returns metadata of the given zettel. It signals an error if
-// the zettel is not found or for other retrieval errors.
-func (idx *Index) GetMeta(zid id.Zid) (*meta.Meta, error) {
+// FindMeta returns metadata of the given zettel.
+// It returns nil if the zettel is not found.
+func (idx *Index) FindMeta(zid id.Zid) *meta.Meta {
 	if in := idx.activeInstance(); in != nil {
 		if _, sz, found := in.findZettel(zid); found {
-			return in.dict.buildMeta(zid, sz.meta), nil
+			if sz != nil {
+				return in.dict.buildMeta(zid, sz.meta)
+			}
 		}
 	}
-	return nil, box.ErrZettelNotFound{Zid: zid}
+	return nil
 }
 
 // Enrich computes additional properties and updates the given metadata.

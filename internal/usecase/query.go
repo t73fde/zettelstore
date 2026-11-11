@@ -15,7 +15,6 @@ package usecase
 
 import (
 	"context"
-	"errors"
 	"slices"
 	"strings"
 
@@ -27,7 +26,6 @@ import (
 	"t73f.de/r/zsc/sz"
 	"t73f.de/r/zsx"
 
-	"zettelstore.de/z/internal/box"
 	"zettelstore.de/z/internal/collect"
 	"zettelstore.de/z/internal/parser"
 	"zettelstore.de/z/internal/query"
@@ -36,9 +34,9 @@ import (
 
 // QueryPort is the interface used by this use case.
 type QueryPort interface {
-	GetZettel(ctx context.Context, zid id.Zid) (zettel.Zettel, error)
-	GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
-	SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *query.Query) ([]*meta.Meta, error)
+	GetZettel(context.Context, id.Zid) (zettel.Zettel, error)
+	FindMeta(context.Context, id.Zid) *meta.Meta
+	SelectMeta(context.Context, []*meta.Meta, *query.Query) ([]*meta.Meta, error)
 }
 
 // Query is the data for this use case.
@@ -64,30 +62,21 @@ func (uc *Query) Run(ctx context.Context, q *query.Query) ([]*meta.Meta, error) 
 	if len(zids) == 0 {
 		return nil, nil
 	}
-	metaSeq, err := uc.getMetaZid(ctx, zids)
-	if err != nil {
-		return metaSeq, err
-	}
+	metaSeq := uc.getMetaZid(ctx, zids)
 	if metaSeq = uc.processDirectives(ctx, metaSeq, q.GetDirectives()); len(metaSeq) > 0 {
 		return uc.port.SelectMeta(ctx, metaSeq, q)
 	}
 	return nil, nil
 }
 
-func (uc *Query) getMetaZid(ctx context.Context, zids []id.Zid) ([]*meta.Meta, error) {
+func (uc *Query) getMetaZid(ctx context.Context, zids []id.Zid) []*meta.Meta {
 	metaSeq := make([]*meta.Meta, 0, len(zids))
 	for _, zid := range zids {
-		m, err := uc.port.GetMeta(ctx, zid)
-		if err == nil {
+		if m := uc.port.FindMeta(ctx, zid); m != nil {
 			metaSeq = append(metaSeq, m)
-			continue
 		}
-		if errors.Is(err, &box.ErrNotAllowed{}) {
-			continue
-		}
-		return metaSeq, err
 	}
-	return metaSeq, nil
+	return metaSeq
 }
 
 func (uc *Query) processDirectives(ctx context.Context, metaSeq []*meta.Meta, directives []query.Directive) []*meta.Meta {
@@ -139,7 +128,7 @@ func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, 
 			if refSym, refVal := zsx.GetReference(ref); sz.SymRefStateZettel.IsEqualSymbol(refSym) {
 				val, _ := sz.SplitFragment(refVal)
 				if collectedZid, err2 := id.Parse(val); err2 == nil {
-					if collectedMeta, err3 := uc.port.GetMeta(ctx, collectedZid); err3 == nil {
+					if collectedMeta := uc.port.FindMeta(ctx, collectedZid); collectedMeta != nil {
 						result = append(result, collectedMeta)
 					}
 				}

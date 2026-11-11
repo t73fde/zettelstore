@@ -83,7 +83,6 @@ type WebUI struct {
 type webuiBox interface {
 	CanCreateZettel(context.Context) bool
 	GetZettel(context.Context, id.Zid) (zettel.Zettel, error)
-	GetMeta(context.Context, id.Zid) (*meta.Meta, error)
 	CanUpdateZettel(context.Context, zettel.Zettel) bool
 	CanDeleteZettel(context.Context, id.Zid) bool
 }

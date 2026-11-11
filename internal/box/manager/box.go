@@ -147,22 +147,19 @@ func (mgr *Manager) fetchZids(ctx context.Context) (map[id.Zid]struct{}, error) 
 	return result, nil
 }
 
-// GetMeta returns just the metadata of the zettel with the given identifier.
-func (mgr *Manager) GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error) {
-	mgr.mgrLogger.Debug("GetMeta", "zid", zid)
+// FindMeta returns metadata of the given zettel.
+// It returns nil if the zettel is not found.
+func (mgr *Manager) FindMeta(ctx context.Context, zid id.Zid) *meta.Meta {
+	mgr.mgrLogger.Debug("FindMeta", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
-		return nil, err
+		return nil
 	}
-
-	m, err := mgr.index.GetMeta(zid)
-	if err != nil {
-		mgr.mgrLogger.Error("GetMeta", "zid", zid, "err", err)
-		// TODO: Call GetZettel and return just metadata, in case the index is not complete.
-		return nil, err
+	m := mgr.index.FindMeta(zid)
+	if m != nil {
+		mgr.Enrich(ctx, m, "")
 	}
-
-	mgr.Enrich(ctx, m, "")
-	return m, nil
+	// TODO: Call GetZettel and return just metadata, in case the index is not complete.
+	return m
 }
 
 // SelectMeta returns all zettel meta data that match the selection

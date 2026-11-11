@@ -82,9 +82,9 @@ type Index interface {
 	// IsReady returns true, if the Index contains all needed data.
 	IsReady() bool
 
-	// GetMeta returns metadata of the given zettel. It signals an error if
-	// the zettel is not found or for other retrieval errors.
-	GetMeta(zid id.Zid) (*meta.Meta, error)
+	// FindMeta returns metadata of the given zettel.
+	// It returns nil if the zettel is not found.
+	FindMeta(zid id.Zid) *meta.Meta
 
 	// Entrich metadata with data from search index.
 	Enrich(*meta.Meta)

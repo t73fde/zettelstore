@@ -151,8 +151,9 @@ type Box interface {
 	UpdateBox
 	DeleteBox
 
-	// GetMeta returns the metadata of the zettel with the given identifier.
-	GetMeta(context.Context, id.Zid) (*meta.Meta, error)
+	// FindMeta returns metadata of the given zettel.
+	// It returns nil if the zettel is not found.
+	FindMeta(context.Context, id.Zid) *meta.Meta
 
 	// SelectMeta returns a list of metadata that comply to the given selection criteria.
 	// If `metaSeq` is `nil`, the box assumes metadata of all available zettel.

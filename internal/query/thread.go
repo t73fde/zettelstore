@@ -49,7 +49,7 @@ func (spec *ThreadSpec) Print(pe *PrintEnv) {
 
 // ThreadPort is the collection of box methods needed by this directive.
 type ThreadPort interface {
-	GetMeta(ctx context.Context, zid id.Zid) (*meta.Meta, error)
+	FindMeta(context.Context, id.Zid) *meta.Meta
 }
 
 // Execute the specification.
@@ -180,7 +180,7 @@ func (ct *threadTask) addPair(ctx context.Context, key string, value meta.Value,
 	elems := value.AsSlice()
 	for _, val := range elems {
 		if zid, errParse := id.Parse(val); errParse == nil {
-			if m, errGetMeta := ct.port.GetMeta(ctx, zid); errGetMeta == nil {
+			if m := ct.port.FindMeta(ctx, zid); m != nil {
 				if !ct.seen.Contains(m.Zid) {
 					heap.Push(&ct.queue, ztlThreadItem{meta: m, level: level + 1, dir: nextDir})
 				}
