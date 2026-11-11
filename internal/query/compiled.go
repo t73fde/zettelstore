@@ -22,14 +22,13 @@ import (
 	"zettelstore.de/z/internal/index"
 )
 
-// Compiled is a compiled query, to be used in a Box
+// Compiled is a compiled query, to be used in a box.
 type Compiled struct {
-	hasQuery bool
-	seed     int
-	pick     int
-	order    []sortOrder
-	offset   int // <= 0: no offset
-	limit    int // <= 0: no limit
+	seed   int
+	pick   int
+	order  []sortOrder
+	offset int // <= 0: no offset
+	limit  int // <= 0: no limit
 
 	startMeta []*meta.Meta
 	PreMatch  MetaMatchFunc // Precondition for Match and Retrieve
@@ -38,7 +37,12 @@ type Compiled struct {
 	sortFunc sortFunc
 }
 
-// MetaMatchFunc is a function determine whethe some metadata should be selected or not.
+// AlwaysIncluded is a RetrievePredicate that always returns true.
+func AlwaysIncluded(id.Zid) bool { return true }
+func neverIncluded(id.Zid) bool  { return false }
+
+// MetaMatchFunc is a function determine whether some metadata should be
+// selected or not.
 type MetaMatchFunc func(*meta.Meta) bool
 
 func matchAlways(*meta.Meta) bool { return true }
@@ -46,17 +50,14 @@ func matchNever(*meta.Meta) bool  { return false }
 
 // CompiledTerm is the preprocessed sequence of conjugated search terms.
 type CompiledTerm struct {
-	Match    MetaMatchFunc           // Match on metadata
 	Retrieve index.RetrievePredicate // Retrieve from full-text search
+	Match    MetaMatchFunc           // Match on metadata
 }
-
-// AlwaysIncluded is a RetrievePredicate that always returns true.
-func AlwaysIncluded(id.Zid) bool { return true }
-func neverIncluded(id.Zid) bool  { return false }
 
 func (c *Compiled) isDeterministic() bool { return c.seed > 0 }
 
-// Result returns a result of the compiled search, that is achievable without iterating through a box.
+// Result returns a result of the compiled search, that is achievable without
+// iterating through boxes.
 func (c *Compiled) Result() []*meta.Meta {
 	if len(c.startMeta) == 0 {
 		// nil -> no directive
@@ -66,23 +67,13 @@ func (c *Compiled) Result() []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(c.startMeta))
 	for _, m := range c.startMeta {
 		for _, term := range c.Terms {
-			if term.Match(m) && term.Retrieve(m.Zid) {
+			if c.PreMatch(m) && term.Retrieve(m.Zid) && term.Match(m) {
 				result = append(result, m)
 				break
 			}
 		}
 	}
-	result = c.pickElements(result)
-	c.ensureSortFunc()
-	result = c.sortElements(result)
-	result = c.offsetElements(result)
-	return limitElements(result, c.limit)
-}
-
-func (c *Compiled) ensureSortFunc() {
-	if c.sortFunc == nil {
-		c.sortFunc = buildSortFunc(c.order)
-	}
+	return c.pickSortWindow(result)
 }
 
 // AfterSearch applies all terms to the metadata list that was searched.
@@ -92,93 +83,69 @@ func (c *Compiled) AfterSearch(metaList []*meta.Meta) []*meta.Meta {
 	if len(metaList) == 0 {
 		return metaList
 	}
+	return c.pickSortWindow(metaList)
+}
 
-	if !c.hasQuery {
-		slices.SortFunc(metaList, defaultMetaSort)
-		return metaList
-	}
-
+// pickSortWindow picks, sorts, and windows (offset, limit) metaList.
+// It takes ownership of metaList.
+func (c *Compiled) pickSortWindow(metaList []*meta.Meta) []*meta.Meta {
 	if c.isDeterministic() {
-		// We need to sort to make it deterministic
+		// A reproducible input order is needed, so that picking and
+		// random sorting with a seed yield the same result every time.
 		if len(c.order) == 0 || c.order[0].isRandom() {
 			slices.SortFunc(metaList, defaultMetaSort)
 		} else {
-			c.ensureSortFunc()
-			slices.SortFunc(metaList, c.sortFunc)
+			c.sort(metaList)
 		}
 	}
-	metaList = c.pickElements(metaList)
-	if c.isDeterministic() {
-		if len(c.order) > 0 && c.order[0].isRandom() {
-			metaList = c.sortRandomly(metaList)
+
+	picking := c.pick > 0 && c.pick < len(metaList)
+	if picking {
+		// Partial Fisher-Yates shuffle
+		rnd := c.newRandom()
+		for i := range c.pick {
+			j := i + rnd.IntN(len(metaList)-i)
+			metaList[i], metaList[j] = metaList[j], metaList[i]
 		}
-	} else {
-		metaList = c.sortElements(metaList)
+		clear(metaList[c.pick:])
+		metaList = metaList[:c.pick:c.pick]
 	}
-	metaList = c.offsetElements(metaList)
-	return limitElements(metaList, c.limit)
-}
 
-func (c *Compiled) sortElements(metaList []*meta.Meta) []*meta.Meta {
-	if len(c.order) > 0 {
-		if c.order[0].isRandom() {
-			metaList = c.sortRandomly(metaList)
-		} else {
-			c.ensureSortFunc()
-			slices.SortFunc(metaList, c.sortFunc)
+	// Establish the final order. Picking destroyed the previous one.
+	switch {
+	case len(c.order) > 0 && c.order[0].isRandom():
+		rnd := c.newRandom()
+		rnd.Shuffle(
+			len(metaList),
+			func(i, j int) { metaList[i], metaList[j] = metaList[j], metaList[i] },
+		)
+
+	case len(c.order) > 0:
+		// A deterministic query without picking is already sorted.
+		if picking || !c.isDeterministic() {
+			c.sort(metaList)
 		}
+
+	case picking && c.isDeterministic():
+		slices.SortFunc(metaList, defaultMetaSort)
 	}
-	return metaList
+
+	// Handle offset / limit
+	start := min(max(c.offset, 0), len(metaList))
+	end := len(metaList)
+	if c.limit > 0 && c.limit < end-start {
+		end = start + c.limit
+	}
+	clear(metaList[:start])
+	clear(metaList[end:])
+	return metaList[start:end:end]
 }
 
-func (c *Compiled) offsetElements(metaList []*meta.Meta) []*meta.Meta {
-	if c.offset == 0 {
-		return metaList
+func (c *Compiled) sort(metaList []*meta.Meta) {
+	if c.sortFunc == nil {
+		c.sortFunc = buildSortFunc(c.order)
 	}
-	if c.offset > len(metaList) {
-		return nil
-	}
-	return metaList[c.offset:]
-}
-
-func (c *Compiled) pickElements(metaList []*meta.Meta) []*meta.Meta {
-	count := c.pick
-	if count <= 0 || count >= len(metaList) {
-		return metaList
-	}
-	if limit := c.limit; limit > 0 && limit < count {
-		count = limit
-		c.limit = 0
-	}
-
-	order := make([]int, len(metaList))
-	for i := range len(metaList) {
-		order[i] = i
-	}
-	rnd := c.newRandom()
-	picked := make([]int, count)
-	for i := range count {
-		last := len(order) - i
-		n := rnd.IntN(last)
-		picked[i] = order[n]
-		order[n] = order[last-1]
-	}
-	order = nil
-	slices.Sort(picked)
-	result := make([]*meta.Meta, count)
-	for i, p := range picked {
-		result[i] = metaList[p]
-	}
-	return result
-}
-
-func (c *Compiled) sortRandomly(metaList []*meta.Meta) []*meta.Meta {
-	rnd := c.newRandom()
-	rnd.Shuffle(
-		len(metaList),
-		func(i, j int) { metaList[i], metaList[j] = metaList[j], metaList[i] },
-	)
-	return metaList
+	slices.SortFunc(metaList, c.sortFunc)
 }
 
 func (c *Compiled) newRandom() *rand.Rand {
@@ -187,11 +154,4 @@ func (c *Compiled) newRandom() *rand.Rand {
 		seed = rand.IntN(10000) + 10001
 	}
 	return rand.New(rand.NewPCG(uint64(seed), uint64(seed)))
-}
-
-func limitElements(metaList []*meta.Meta, limit int) []*meta.Meta {
-	if limit > 0 && limit < len(metaList) {
-		return metaList[:limit]
-	}
-	return metaList
 }

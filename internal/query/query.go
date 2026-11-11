@@ -295,7 +295,11 @@ func (q *Query) EnrichNeeded() bool {
 
 // RetrieveAndCompile queries the search index and returns a predicate
 // for its results and returns a matching predicate.
-func (q *Query) RetrieveAndCompile(ctx context.Context, searcher index.Searcher, metaSeq []*meta.Meta) Compiled {
+func (q *Query) RetrieveAndCompile(
+	ctx context.Context,
+	searcher index.Searcher,
+	metaSeq []*meta.Meta,
+) Compiled {
 	newQ := q.Clone()
 
 	preMatch := newQ.preMatch
@@ -305,7 +309,6 @@ func (q *Query) RetrieveAndCompile(ctx context.Context, searcher index.Searcher,
 
 	startSet := metaList2idSet(metaSeq)
 	result := Compiled{
-		hasQuery:  true,
 		seed:      newQ.seed,
 		pick:      newQ.pick,
 		order:     newQ.order,
@@ -407,12 +410,4 @@ func (ct *conjTerms) retrieveIndex(ctx context.Context, searcher index.Searcher)
 		negativePred := negatives.MakePredicate()
 		return positivePred(zid) && !negativePred(zid)
 	}
-}
-
-// Limit returns only s.GetLimit() elements of the given list.
-func (q *Query) Limit(metaList []*meta.Meta) []*meta.Meta {
-	if q == nil {
-		return metaList
-	}
-	return limitElements(metaList, q.limit)
 }
