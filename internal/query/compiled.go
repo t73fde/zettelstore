@@ -73,7 +73,7 @@ func (c *Compiled) Result() []*meta.Meta {
 			}
 		}
 	}
-	return c.pickSortWindow(result)
+	return c.pickSortWindow(result, true)
 }
 
 // AfterSearch applies all terms to the metadata list that was searched.
@@ -83,51 +83,53 @@ func (c *Compiled) AfterSearch(metaList []*meta.Meta) []*meta.Meta {
 	if len(metaList) == 0 {
 		return metaList
 	}
-	return c.pickSortWindow(metaList)
+	return c.pickSortWindow(metaList, false)
 }
 
 // pickSortWindow picks, sorts, and windows (offset, limit) metaList.
 // It takes ownership of metaList.
-func (c *Compiled) pickSortWindow(metaList []*meta.Meta) []*meta.Meta {
-	if c.isDeterministic() {
-		// A reproducible input order is needed, so that picking and
-		// random sorting with a seed yield the same result every time.
-		if len(c.order) == 0 || c.order[0].isRandom() {
-			slices.SortFunc(metaList, defaultMetaSort)
-		} else {
-			c.sort(metaList)
-		}
-	}
-
+//
+// If alreadySorted is true, metaList is already sorted (in an order defined
+// by the caller). That order is kept, unless the query specifies an explicit
+// order: then the result is sorted according to it. Picking keeps the
+// relative order of the picked elements.
+//
+// If alreadySorted is false, the order of metaList is arbitrary. Then a
+// deterministic query sorts it first, so that picking and random ordering
+// with a seed yield the same result every time.
+func (c *Compiled) pickSortWindow(metaList []*meta.Meta, alreadySorted bool) []*meta.Meta {
+	hasOrder := len(c.order) > 0
+	randomOrder := hasOrder && c.order[0].isRandom()
+	explicitOrder := hasOrder && !randomOrder
 	picking := c.pick > 0 && c.pick < len(metaList)
-	if picking {
-		// Partial Fisher-Yates shuffle
-		rnd := c.newRandom()
-		for i := range c.pick {
-			j := i + rnd.IntN(len(metaList)-i)
-			metaList[i], metaList[j] = metaList[j], metaList[i]
+
+	// Establish a reproducible input order.
+	sortedByOrder := false
+	if !alreadySorted && c.isDeterministic() {
+		if explicitOrder && !picking {
+			// Nothing is picked, so this is already the final order.
+			c.sort(metaList)
+			sortedByOrder = true
+		} else {
+			// Without an explicit order, this is also the final order.
+			slices.SortFunc(metaList, defaultMetaSort)
 		}
-		clear(metaList[c.pick:])
-		metaList = metaList[:c.pick:c.pick]
 	}
 
-	// Establish the final order. Picking destroyed the previous one.
+	if picking {
+		metaList = pickInOrder(metaList, c.pick, c.newRandom())
+	}
+
+	// Establish the final order, if the query requires one.
 	switch {
-	case len(c.order) > 0 && c.order[0].isRandom():
+	case randomOrder:
 		rnd := c.newRandom()
 		rnd.Shuffle(
 			len(metaList),
 			func(i, j int) { metaList[i], metaList[j] = metaList[j], metaList[i] },
 		)
-
-	case len(c.order) > 0:
-		// A deterministic query without picking is already sorted.
-		if picking || !c.isDeterministic() {
-			c.sort(metaList)
-		}
-
-	case picking && c.isDeterministic():
-		slices.SortFunc(metaList, defaultMetaSort)
+	case explicitOrder && !sortedByOrder:
+		c.sort(metaList)
 	}
 
 	// Handle offset / limit
@@ -139,6 +141,26 @@ func (c *Compiled) pickSortWindow(metaList []*meta.Meta) []*meta.Meta {
 	clear(metaList[:start])
 	clear(metaList[end:])
 	return metaList[start:end:end]
+}
+
+// pickInOrder randomly picks k elements of metaList and returns them in their
+// original relative order (selection sampling, Knuth's Algorithm S). Every
+// subset of size k is equally likely. The list is modified in place; it
+// requires 0 < k <= len(metaList).
+func pickInOrder(metaList []*meta.Meta, k int, rnd interface{ IntN(int) int }) []*meta.Meta {
+	n := len(metaList)
+	w := 0 // number of picked elements, also the write position
+	for i, m := range metaList {
+		if rnd.IntN(n-i) < k-w {
+			metaList[w] = m
+			w++
+			if w == k {
+				break
+			}
+		}
+	}
+	clear(metaList[w:])
+	return metaList[:w:w]
 }
 
 func (c *Compiled) sort(metaList []*meta.Meta) {

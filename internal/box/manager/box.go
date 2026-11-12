@@ -162,9 +162,29 @@ func (mgr *Manager) FindMeta(ctx context.Context, zid id.Zid) *meta.Meta {
 	return m
 }
 
-// SelectMeta returns all zettel meta data that match the selection
-// criteria. The result is ordered by descending zettel id.
-func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box.Query) ([]*meta.Meta, error) {
+// SelectMeta returns the metadata of the zettel that match the query q.
+//
+// If metaList is nil, all zettel of the manager's boxes are candidates.
+// Otherwise, only the zettel of metaList are candidates; an empty, non-nil
+// metaList therefore selects nothing. The slice metaList may be modified by
+// this call and must not be used afterwards.
+//
+// The query may further restrict the result (pick, offset, limit), so the
+// result does not necessarily contain all matching zettel.
+//
+// The order of the result is defined by the order specification of q. Without
+// such a specification, the order depends on the candidates: if metaList is
+// nil, the result is ordered by descending zettel id; otherwise, the relative
+// order of the elements of metaList is kept.
+//
+// If an error occurs, e.g. because ctx is done or a box fails, no metadata is
+// returned. The returned metadata is created anew for each call and may be
+// modified by the caller.
+func (mgr *Manager) SelectMeta(
+	ctx context.Context,
+	metaList []*meta.Meta,
+	q *box.Query,
+) ([]*meta.Meta, error) {
 	mgr.mgrLogger.Debug("SelectMeta", "query", q)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
@@ -172,7 +192,7 @@ func (mgr *Manager) SelectMeta(ctx context.Context, metaSeq []*meta.Meta, q *box
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
 
-	compSearch := q.RetrieveAndCompile(ctx, mgr.index, metaSeq)
+	compSearch := q.RetrieveAndCompile(ctx, mgr.index, metaList)
 	if result := compSearch.Result(); result != nil {
 		logging.LogTrace(mgr.mgrLogger, "found without ApplyMeta", "count", len(result))
 		return result, nil
