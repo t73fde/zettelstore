@@ -206,7 +206,7 @@ func (cs *configService) doUpdate(p box.BaseBox) error {
 	}
 	m := z.Meta
 	cs.mxService.Lock()
-	for key := range cs.orig.All() {
+	for key := range cs.orig.AllUser() {
 		var setErr error
 		if val, ok := m.Get(key); ok {
 			setErr = cs.SetConfig(key, string(val))

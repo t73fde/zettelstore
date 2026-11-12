@@ -29,12 +29,12 @@ func (mgr *Manager) Enrich(ctx context.Context, m *meta.Meta, boxName string) {
 	if _, hasCreated := m.Get(meta.KeyCreated); !hasCreated {
 		m.Set(meta.KeyCreated, computeCreated(m.Zid))
 	}
+	if _, hasBoxName := m.Get(meta.KeyBoxName); !hasBoxName && boxName != "" {
+		m.Set(meta.KeyBoxName, meta.Value(boxName))
+	}
 
 	if box.DoEnrich(ctx) {
 		computePublished(m)
-		if boxName != "" {
-			m.Set(meta.KeyBoxName, meta.Value(boxName))
-		}
 		mgr.index.Enrich(m)
 	}
 }

@@ -147,7 +147,7 @@ func encodeKeysArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, act 
 }
 
 func encodeMetaKeyArrangement(w io.Writer, enc zettelEncoder, ml []*meta.Meta, key string, minVal, maxVal int) error {
-	arr0 := meta.CreateArrangement(ml, key)
+	arr0 := meta.CreateArrangement(slices.Values(ml), key)
 	arr := make(meta.Arrangement, len(arr0))
 	for k0, ml0 := range arr0 {
 		if len(ml0) < minVal || (maxVal > 0 && len(ml0) > maxVal) {

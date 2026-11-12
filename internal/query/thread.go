@@ -63,7 +63,7 @@ func (spec *ThreadSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port
 		}
 		result = append(result, m)
 
-		for key, val := range m.ComputedRest() {
+		for key, val := range m.RestComputed() {
 			tasks.addPair(ctx, key, val, level, dir, spec)
 		}
 	}

@@ -15,6 +15,7 @@ package usecase
 
 import (
 	"context"
+	"slices"
 
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
@@ -48,7 +49,7 @@ func (uc ListSyntax) Run(ctx context.Context) (meta.Arrangement, error) {
 	if err != nil {
 		return nil, err
 	}
-	result := meta.CreateArrangement(metas, meta.KeySyntax)
+	result := meta.CreateArrangement(slices.Values(metas), meta.KeySyntax)
 	for syn := range parser.Syntaxes() {
 		if _, found := result[syn]; !found {
 			delete(result, syn)
@@ -81,5 +82,5 @@ func (uc ListRoles) Run(ctx context.Context) (meta.Arrangement, error) {
 	if err != nil {
 		return nil, err
 	}
-	return meta.CreateArrangement(metas, meta.KeyRole), nil
+	return meta.CreateArrangement(slices.Values(metas), meta.KeyRole), nil
 }

@@ -62,7 +62,7 @@ func (uc GetReferences) RunByExternal(blocks *sx.Pair) iter.Seq[*sx.Pair] {
 // RunByMeta returns all URLs that are stored in the metadata.
 func (uc GetReferences) RunByMeta(m *meta.Meta) iter.Seq[string] {
 	return func(yield func(string) bool) {
-		for key, val := range m.All() {
+		for key, val := range m.AllUser() {
 			if meta.Type(key) == meta.TypeURL && !yield(string(val)) {
 				return
 			}

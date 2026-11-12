@@ -93,7 +93,7 @@ func (*CreateZettel) PrepareNew(origZettel zettel.Zettel, newTitle string) zette
 	updateMetaRoleTagsSyntax(m, om)
 
 	const prefixLen = len(meta.NewPrefix)
-	for key, val := range om.Rest() {
+	for key, val := range om.RestUser() {
 		if len(key) > prefixLen && key[0:prefixLen] == meta.NewPrefix {
 			m.Set(key[prefixLen:], val)
 		}

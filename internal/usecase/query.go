@@ -160,7 +160,7 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	for _, m := range metaSeq {
 		metaZids.Insert(m.Zid)
 		refZids.Insert(m.Zid)
-		for key, val := range m.ComputedRest() {
+		for key, val := range m.RestComputed() {
 			switch meta.Type(key) {
 			case meta.TypeID:
 				if zid, errParse := id.Parse(string(val)); errParse == nil {

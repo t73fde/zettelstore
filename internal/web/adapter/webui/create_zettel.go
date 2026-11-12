@@ -102,7 +102,7 @@ func (wui *WebUI) renderZettelForm(
 	m := ztl.Meta
 
 	var sb strings.Builder
-	for key, val := range m.Rest() {
+	for key, val := range m.RestUser() {
 		sb.WriteString(key)
 		sb.WriteString(": ")
 		sb.WriteString(string(val))

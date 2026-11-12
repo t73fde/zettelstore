@@ -247,7 +247,7 @@ func (ap *actionPara) prepareCatAction(key string, buf *bytes.Buffer) (meta.Coun
 	if len(ap.ml) == 0 {
 		return nil, 0
 	}
-	ccs := meta.CreateArrangement(ap.ml, key).Counted()
+	ccs := meta.CreateArrangement(slices.Values(ap.ml), key).Counted()
 	if len(ccs) == 0 {
 		return nil, 0
 	}

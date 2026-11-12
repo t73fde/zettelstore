@@ -30,7 +30,7 @@ func genConfigZettelM(zid id.Zid) *meta.Meta {
 func genConfigZettelC() []byte {
 	var buf bytes.Buffer
 	second := false
-	for key, val := range myConfig.All() {
+	for key, val := range myConfig.AllUser() {
 		if second {
 			buf.WriteByte('\n')
 		}

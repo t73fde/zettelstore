@@ -121,7 +121,7 @@ func (wui *WebUI) identifierSetAsLinks(m *meta.Meta, key string, getTextTitle ge
 
 func metaURLAssoc(m *meta.Meta) *sx.Pair {
 	var result sx.ListBuilder
-	for key, val := range m.Rest() {
+	for key, val := range m.RestUser() {
 		if strings.HasSuffix(key, meta.SuffixKeyURL) {
 			if val != "" {
 				result.Add(sx.Cons(sx.MakeString(capitalizeMetaKey(key)), sx.MakeString(string(val))))
@@ -177,7 +177,7 @@ func (wui *WebUI) zidLinksSxn(values iter.Seq[string], getTextTitle getTextTitle
 func contentFromMetadata(m *meta.Meta) *sx.Pair {
 	var lbDescription sx.ListBuilder
 	lbDescription.AddN(zsx.SymDescription, nil)
-	for key, val := range m.All() {
+	for key, val := range m.AllUser() {
 		dt := meta.Type(key)
 
 		seq := zeroiter.OneSeq(string(val))
