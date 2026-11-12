@@ -21,6 +21,8 @@
      identifier. These are rendered in the WebUI as an unordered list under the
      heading &ldquo;See also&rdquo;.
      (minor: webui)
+  *  Improved pretty-print of zettel with <code>syntax:sxn</code>.
+     (minor: webui)
   *  Add runtime configuration value <code>min-zid-search-digits</code> which
      specifies the minimum number of digits a number need to have to be include
      in searching a zid fragment.
