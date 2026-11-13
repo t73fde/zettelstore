@@ -125,7 +125,7 @@ func (MetadataKeyInfo) getData(dk meta.DescriptionKey) webapi.MetadataKeyInfo {
 		Name:       dk.Name,
 		Type:       dt.Name,
 		IsSet:      dt.IsSet,
-		IsComputed: dk.IsComputed(),
+		IsManaged:  dk.IsManaged(),
 		IsProperty: dk.IsProperty(),
 	}
 }

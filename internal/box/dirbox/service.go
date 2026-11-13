@@ -234,7 +234,7 @@ func writeMetaFile(metaPath string, m *meta.Meta) error {
 	}
 	defer metaFile.RollbackIfNeeded()
 	writeFileZid(metaFile, m.Zid)
-	_, _ = m.WriteComputed(metaFile)
+	_, _ = m.WriteManaged(metaFile)
 	return metaFile.Close()
 }
 
@@ -253,7 +253,7 @@ var newline = []byte{'\n'}
 
 func writeMetaHeader(w io.Writer, m *meta.Meta) {
 	writeFileZid(w, m.Zid)
-	_, _ = m.WriteComputed(w)
+	_, _ = m.WriteManaged(w)
 	_, _ = w.Write(newline)
 }
 

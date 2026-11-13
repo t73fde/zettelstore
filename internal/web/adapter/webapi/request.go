@@ -114,7 +114,7 @@ func buildZettelFromData(r *http.Request, zid id.Zid) (zettel.Zettel, error) {
 
 	m := meta.New(zid)
 	for k, v := range zd.Meta {
-		if !meta.IsComputed(k) {
+		if meta.IsUser(k) {
 			m.Set(meta.RemoveNonGraphic(k), meta.Value(meta.RemoveNonGraphic(v)))
 		}
 	}

@@ -78,7 +78,7 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 		}
 		result = append(result, m)
 
-		for key, val := range m.RestComputed() {
+		for key, val := range m.RestAny() {
 			tasks.addPair(ctx, key, val, cost, level, dir, spec)
 		}
 		if spec.full {

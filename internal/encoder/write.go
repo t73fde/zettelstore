@@ -81,7 +81,7 @@ func (w *encWriter) WriteSpace() {
 //
 //	key: val
 func (w *encWriter) WriteMeta(m *meta.Meta) {
-	for key, val := range m.AllComputed() {
+	for key, val := range m.AllAny() {
 		w.WriteStrings(key, ": ", string(val), "\n")
 	}
 }

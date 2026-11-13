@@ -133,7 +133,7 @@ func (a *WebAPI) writeMetaType(w http.ResponseWriter, md []webapi.MetadataKeyInf
 			sx.MakeString(kd.Name),
 			sx.MakeString(kd.Type),
 			sx.MakeBoolean(kd.IsSet),
-			sx.MakeBoolean(kd.IsComputed),
+			sx.MakeBoolean(kd.IsManaged),
 			sx.MakeBoolean(kd.IsProperty),
 		))
 	}

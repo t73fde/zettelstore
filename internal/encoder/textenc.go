@@ -41,7 +41,7 @@ func (te *TextEncoder) WriteZettel(w io.Writer, zn *zettel.ParsedZettel) error {
 // WriteMeta encodes metadata as text.
 func (te *TextEncoder) WriteMeta(w io.Writer, m *meta.Meta) error {
 	buf := newEncWriter(w)
-	for key, val := range m.AllComputed() {
+	for key, val := range m.AllAny() {
 		if meta.Type(key) == meta.TypeTagSet {
 			writeTagSet(&buf, val.Elems())
 		} else {

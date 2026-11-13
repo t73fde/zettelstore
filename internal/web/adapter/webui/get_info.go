@@ -63,7 +63,7 @@ func (wui *WebUI) MakeGetInfoHandler(
 
 		getTextTitle := wui.makeGetTextTitle(ctx, ucGetZettel)
 		var lbMetadata sx.ListBuilder
-		for key, val := range zn.Meta.AllComputed() {
+		for key, val := range zn.Meta.AllAny() {
 			sxval := wui.writeHTMLMetaValue(key, val, getTextTitle)
 			lbMetadata.Add(sx.Cons(sx.MakeString(key), sxval))
 		}

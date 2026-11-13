@@ -549,12 +549,12 @@ func TestMetadataKeysInfo(t *testing.T) {
 		t.Errorf("no error should happen: %T/%v", err, err)
 	}
 	exp := []webapi.MetadataKeyInfo{
-		{Name: meta.KeyTitle, Type: "EString", IsSet: false, IsComputed: false, IsProperty: false},
-		{Name: "a-refs", Type: "IdentifierSet", IsSet: true, IsComputed: false, IsProperty: false},
+		{Name: meta.KeyTitle, Type: "EString", IsSet: false, IsManaged: false, IsProperty: false},
+		{Name: "a-refs", Type: "IdentifierSet", IsSet: true, IsManaged: false, IsProperty: false},
 	}
 	ok := slices.EqualFunc(exp, infos, func(a, b webapi.MetadataKeyInfo) bool {
 		return a.Name == b.Name && a.Type == b.Type && a.IsSet == b.IsSet &&
-			a.IsComputed == b.IsComputed && a.IsProperty == b.IsProperty
+			a.IsManaged == b.IsManaged && a.IsProperty == b.IsProperty
 	})
 	if !ok {
 		t.Errorf("\nexpected: %v\ngot     : %v", exp, infos)

@@ -36,11 +36,11 @@ func genKeysC() []byte {
 		meta.KeyDescriptionSeq(),
 		func(a, b meta.DescriptionKey) int { return strings.Compare(a.Name, b.Name) })
 	var buf []byte
-	buf = append(buf, "|=Name<|=Type<|=Computed?:|=Property?:\n"...)
+	buf = append(buf, "|=Name<|=Type<|=Managed?:|=Property?:\n"...)
 	for _, kd := range keys {
 		buf = fmt.Appendf(buf,
 			"|[[%v|query:%v?]]|%v|%v|%v\n", kd.Name, kd.Name,
-			kd.Type.Name, kd.IsComputed(), kd.IsProperty())
+			kd.Type.Name, kd.IsManaged(), kd.IsProperty())
 	}
 	return buf
 }

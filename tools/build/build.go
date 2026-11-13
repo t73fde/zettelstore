@@ -224,7 +224,7 @@ func createManualZipEntry(path string, entry fs.DirEntry, zipWriter *zip.Writer)
 	if _, err = fmt.Fprintf(&buf, "id: %s\n", versionZid); err != nil {
 		return err
 	}
-	if _, err = m.WriteComputed(&buf); err != nil {
+	if _, err = m.WriteManaged(&buf); err != nil {
 		return err
 	}
 	if _, err = fmt.Fprintf(&buf, "\n%s", getVersion()); err != nil {
