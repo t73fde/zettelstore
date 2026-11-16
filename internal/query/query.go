@@ -356,22 +356,19 @@ func (ct *conjTerms) retrieveAndCompileTerm(
 	startSet roster.Roster[id.Zid],
 ) CompiledTerm {
 	match := ct.compileMeta() // Match might add some searches
-	var pred index.RetrievePredicate
-	if searcher != nil {
-		pred = ct.retrieveIndex(ctx, searcher)
-		if !startSet.IsEmpty() {
-			if pred == nil {
-				pred = startSet.Contains
-			} else {
-				var predSet roster.Roster[id.Zid]
-				predSet.Grow(startSet.Count())
-				for zid := range startSet.Values() {
-					if pred(zid) {
-						predSet.Insert(zid)
-					}
+	pred := ct.retrieveIndex(ctx, searcher)
+	if !startSet.IsEmpty() {
+		if pred == nil {
+			pred = startSet.Contains
+		} else {
+			var predSet roster.Roster[id.Zid]
+			predSet.Grow(startSet.Count())
+			for zid := range startSet.Values() {
+				if pred(zid) {
+					predSet.Insert(zid)
 				}
-				pred = predSet.Contains // predSet is known to be non-nil
 			}
+			pred = predSet.Contains // predSet is known to be non-nil
 		}
 	}
 	return CompiledTerm{Match: match, Retrieve: pred}

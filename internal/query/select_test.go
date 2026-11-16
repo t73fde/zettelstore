@@ -21,13 +21,14 @@ import (
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
 
+	"zettelstore.de/z/internal/index"
 	"zettelstore.de/z/internal/query"
 )
 
 func TestMatchZidNegate(t *testing.T) {
 	q := query.Parse(meta.KeyID + webapi.SearchOperatorHasNot + id.ZidVersion.String() + " " +
 		meta.KeyID + webapi.SearchOperatorHasNot + id.ZidLicense.String())
-	compiled := q.RetrieveAndCompile(context.Background(), nil, nil)
+	compiled := q.RetrieveAndCompile(context.Background(), noSearcher{}, nil)
 
 	testCases := []struct {
 		zid id.Zid
@@ -48,3 +49,10 @@ func TestMatchZidNegate(t *testing.T) {
 		}
 	}
 }
+
+type noSearcher struct{}
+
+func (noSearcher) SearchEqual(context.Context, string) *index.Result    { return nil }
+func (noSearcher) SearchPrefix(context.Context, string) *index.Result   { return nil }
+func (noSearcher) SearchSuffix(context.Context, string) *index.Result   { return nil }
+func (noSearcher) SearchContains(context.Context, string) *index.Result { return nil }
