@@ -234,6 +234,7 @@ func (uc *Query) filterCandidates(
 
 		ulv.found = false
 		zsx.WalkIt(&ulv, zn.Blocks, nil)
+		ulv.checkWords()
 		if ulv.found {
 			result = append(result, cand)
 		}
@@ -243,6 +244,7 @@ func (uc *Query) filterCandidates(
 
 type unlinkedVisitor struct {
 	phraseWords []string
+	collWords   []string
 	found       bool
 }
 
@@ -251,21 +253,38 @@ func (v *unlinkedVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 		return true
 	}
 	switch sym := zsx.NodeSymbol(node); sym {
+	case zsx.SymText:
+		v.collWords = append(v.collWords, zerostrings.SplitWords(zsx.GetText(node))...)
+		return true
+	case zsx.SymSoft, zsx.SymHard:
+		return true
 	case zsx.SymHeading,
 		zsx.SymLink, zsx.SymEmbed, zsx.SymEmbedBLOB, zsx.SymCite:
-		// No further search.
-		return true
-	case zsx.SymText:
-		// TODO: this is way too simple. For example, two text nodes may
-		// be separated by a SOFT or HARD node.
-		textWords := zerostrings.SplitWords(zsx.GetText(node))
-		for i := 0; i+len(v.phraseWords) <= len(textWords); i++ {
-			if slices.Equal(v.phraseWords, textWords[i:i+len(v.phraseWords)]) {
-				v.found = true
-				return true
-			}
-		}
+		v.checkWords()
+		return true // No further search.
+	default:
+		v.checkWords()
+		return false
 	}
-	return false
 }
 func (*unlinkedVisitor) VisitItAfter(*sx.Pair, *sx.Pair) {}
+
+// checkWords tries to match phrase-words as part of the collected words
+func (v *unlinkedVisitor) checkWords() {
+	if len(v.collWords) == 0 {
+		return
+	}
+	if v.found {
+		v.collWords = v.collWords[:0]
+		return
+	}
+
+	for i := 0; i+len(v.phraseWords) <= len(v.collWords); i++ {
+		if slices.Equal(v.phraseWords, v.collWords[i:i+len(v.phraseWords)]) {
+			v.collWords = v.collWords[:0]
+			v.found = true
+			return
+		}
+	}
+	v.collWords = v.collWords[:0]
+}
