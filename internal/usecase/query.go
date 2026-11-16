@@ -152,7 +152,7 @@ func (uc *Query) processUnlinkedDirective(
 		if i > 0 {
 			sb.WriteByte(' ')
 		}
-		sb.WriteString(webapi.SearchOperatorHas)
+		sb.WriteString(webapi.SearchOperatorEqual)
 		sb.WriteString(word)
 	}
 	q := query.Parse(sb.String())
