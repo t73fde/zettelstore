@@ -19,11 +19,11 @@ import (
 	"strings"
 
 	"t73f.de/r/sx"
-	"t73f.de/r/zero/roster"
 	zerostrings "t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/sz"
+	"t73f.de/r/zsc/webapi"
 	"t73f.de/r/zsx"
 
 	"zettelstore.de/z/internal/collect"
@@ -138,14 +138,21 @@ func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, 
 	return result
 }
 
-func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.UnlinkedSpec, metaSeq []*meta.Meta) []*meta.Meta {
-	words := spec.GetWords(metaSeq)
+func (uc *Query) processUnlinkedDirective(
+	ctx context.Context,
+	spec *query.UnlinkedSpec,
+	metaList []*meta.Meta,
+) []*meta.Meta {
+	words := spec.GetWords(metaList)
 	if len(words) == 0 {
-		return metaSeq
+		return metaList
 	}
 	var sb strings.Builder
-	for _, word := range words {
-		sb.WriteString(" :")
+	for i, word := range words {
+		if i > 0 {
+			sb.WriteByte(' ')
+		}
+		sb.WriteString(webapi.SearchOperatorHas)
 		sb.WriteString(word)
 	}
 	q := query.Parse(sb.String())
@@ -153,36 +160,33 @@ func (uc *Query) processUnlinkedDirective(ctx context.Context, spec *query.Unlin
 	if err != nil {
 		return nil
 	}
-	var metaZids roster.Roster[id.Zid]
-	metaZids.Grow(len(metaSeq))
-	var refZids roster.Roster[id.Zid]
-	refZids.Grow(len(metaSeq) * 4) // Assumption: there are four zids per zettel
-	for _, m := range metaSeq {
-		metaZids.Insert(m.Zid)
-		refZids.Insert(m.Zid)
+
+	ignoreZids := make(map[id.Zid]struct{}, len(metaList)*4) // Assumption: there are four zids per zettel
+	for _, m := range metaList {
+		ignoreZids[m.Zid] = struct{}{}
 		for key, val := range m.RestAny() {
 			switch meta.Type(key) {
 			case meta.TypeID:
 				if zid, errParse := id.Parse(string(val)); errParse == nil {
-					refZids.Insert(zid)
+					ignoreZids[zid] = struct{}{}
 				}
 			case meta.TypeIDSet:
 				for val := range val.Fields() {
 					if zid, errParse := id.Parse(val); errParse == nil {
-						refZids.Insert(zid)
+						ignoreZids[zid] = struct{}{}
 					}
 				}
 			}
 		}
 	}
-	candidates = filterByZid(candidates, refZids)
+	candidates = filterByZid(candidates, ignoreZids)
 	return uc.filterCandidates(ctx, candidates, words)
 }
 
-func filterByZid(candidates []*meta.Meta, ignoreSeq roster.Roster[id.Zid]) []*meta.Meta {
+func filterByZid(candidates []*meta.Meta, ignoreZids map[id.Zid]struct{}) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
 	for _, m := range candidates {
-		if !ignoreSeq.Contains(m.Zid) {
+		if _, found := ignoreZids[m.Zid]; !found {
 			result = append(result, m)
 		}
 	}

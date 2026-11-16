@@ -40,7 +40,7 @@ func (spec *UnlinkedSpec) GetWords(metaSeq []*meta.Meta) []string {
 		copy(result, words)
 		return result
 	}
-	result := make([]string, 0, len(metaSeq)*4) // Assumption: four words per title
+	result := make([]string, 0, len(metaSeq)*6) // Assumption: six words per title
 	for _, m := range metaSeq {
 		title, hasTitle := m.Get(meta.KeyTitle)
 		if !hasTitle {
