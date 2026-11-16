@@ -62,73 +62,93 @@ func (uc *Query) Run(ctx context.Context, q *query.Query) ([]*meta.Meta, error) 
 	if len(zids) == 0 {
 		return nil, nil
 	}
-	metaSeq := uc.getMetaZid(ctx, zids)
-	if metaSeq = uc.processDirectives(ctx, metaSeq, q.GetDirectives()); len(metaSeq) > 0 {
-		return uc.port.SelectMeta(ctx, metaSeq, q)
+	metaList := uc.getMetaZid(ctx, zids)
+	metaList = uc.processDirectives(ctx, metaList, q.GetDirectives())
+	if len(metaList) > 0 {
+		return uc.port.SelectMeta(ctx, metaList, q)
 	}
 	return nil, nil
 }
 
 func (uc *Query) getMetaZid(ctx context.Context, zids []id.Zid) []*meta.Meta {
-	metaSeq := make([]*meta.Meta, 0, len(zids))
+	metaList := make([]*meta.Meta, 0, len(zids))
 	for _, zid := range zids {
 		if m := uc.port.FindMeta(ctx, zid); m != nil {
-			metaSeq = append(metaSeq, m)
+			metaList = append(metaList, m)
 		}
 	}
-	return metaSeq
+	return metaList
 }
 
-func (uc *Query) processDirectives(ctx context.Context, metaSeq []*meta.Meta, directives []query.Directive) []*meta.Meta {
+func (uc *Query) processDirectives(
+	ctx context.Context,
+	metaList []*meta.Meta,
+	directives []query.Directive,
+) []*meta.Meta {
 	if len(directives) == 0 {
-		return metaSeq
+		return metaList
 	}
 	for _, dir := range directives {
-		if len(metaSeq) == 0 {
+		if len(metaList) == 0 {
 			return nil
 		}
 		switch ds := dir.(type) {
 		case *query.ContextSpec:
-			metaSeq = uc.processContextDirective(ctx, ds, metaSeq)
+			metaList = uc.processContextDirective(ctx, ds, metaList)
 		case *query.ThreadSpec:
-			metaSeq = uc.processThreadDirective(ctx, ds, metaSeq)
+			metaList = uc.processThreadDirective(ctx, ds, metaList)
 		case *query.IdentSpec:
 			// Nothing to do.
 		case *query.ItemsSpec:
-			metaSeq = uc.processItemsDirective(ctx, ds, metaSeq)
+			metaList = uc.processItemsDirective(ctx, ds, metaList)
 		case *query.UnlinkedSpec:
-			metaSeq = uc.processUnlinkedDirective(ctx, ds, metaSeq)
+			metaList = uc.processUnlinkedDirective(ctx, ds, metaList)
 		default:
 			// Assume IDENT directive, it will not hurt
 		}
 	}
-	if len(metaSeq) == 0 {
+	if len(metaList) == 0 {
 		return nil
 	}
-	return metaSeq
+	return metaList
 }
 
-func (uc *Query) processContextDirective(ctx context.Context, spec *query.ContextSpec, metaSeq []*meta.Meta) []*meta.Meta {
-	return spec.Execute(ctx, metaSeq, uc.port)
+func (uc *Query) processContextDirective(
+	ctx context.Context,
+	spec *query.ContextSpec,
+	metaList []*meta.Meta,
+) []*meta.Meta {
+	return spec.Execute(ctx, metaList, uc.port)
 }
 
-func (uc *Query) processThreadDirective(ctx context.Context, spec *query.ThreadSpec, metaSeq []*meta.Meta) []*meta.Meta {
-	return spec.Execute(ctx, metaSeq, uc.port)
+func (uc *Query) processThreadDirective(
+	ctx context.Context,
+	spec *query.ThreadSpec,
+	metaList []*meta.Meta,
+) []*meta.Meta {
+	return spec.Execute(ctx, metaList, uc.port)
 }
 
-func (uc *Query) processItemsDirective(ctx context.Context, _ *query.ItemsSpec, metaSeq []*meta.Meta) []*meta.Meta {
-	result := make([]*meta.Meta, 0, len(metaSeq))
-	for _, m := range metaSeq {
-		zn, err := uc.ucEvaluate.Run(ctx, m.Zid, string(m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)))
+func (uc *Query) processItemsDirective(
+	ctx context.Context,
+	_ *query.ItemsSpec,
+	metaList []*meta.Meta,
+) []*meta.Meta {
+	result := make([]*meta.Meta, 0, len(metaList))
+	for _, m := range metaList {
+		zn, err := uc.ucEvaluate.Run(
+			ctx, m.Zid, string(m.GetDefault(meta.KeySyntax, meta.DefaultSyntax)))
 		if err != nil {
 			continue
 		}
 		for ln := range collect.Order(zn.Blocks).Pairs() {
 			_, ref, _ := zsx.GetLink(ln.Head())
-			if refSym, refVal := zsx.GetReference(ref); sz.SymRefStateZettel.IsEqualSymbol(refSym) {
+			refSym, refVal := zsx.GetReference(ref)
+			if sz.SymRefStateZettel.IsEqualSymbol(refSym) {
 				val, _ := sz.SplitFragment(refVal)
 				if collectedZid, err2 := id.Parse(val); err2 == nil {
-					if collectedMeta := uc.port.FindMeta(ctx, collectedZid); collectedMeta != nil {
+					collectedMeta := uc.port.FindMeta(ctx, collectedZid)
+					if collectedMeta != nil {
 						result = append(result, collectedMeta)
 					}
 				}
@@ -143,12 +163,12 @@ func (uc *Query) processUnlinkedDirective(
 	spec *query.UnlinkedSpec,
 	metaList []*meta.Meta,
 ) []*meta.Meta {
-	words := spec.GetWords(metaList)
-	if len(words) == 0 {
+	phraseWords := spec.GetPhraseWords(metaList)
+	if len(phraseWords) == 0 {
 		return metaList
 	}
 	var sb strings.Builder
-	for i, word := range words {
+	for i, word := range phraseWords {
 		if i > 0 {
 			sb.WriteByte(' ')
 		}
@@ -180,7 +200,7 @@ func (uc *Query) processUnlinkedDirective(
 		}
 	}
 	candidates = filterByZid(candidates, ignoreZids)
-	return uc.filterCandidates(ctx, candidates, words)
+	return uc.filterCandidates(ctx, candidates, phraseWords)
 }
 
 func filterByZid(candidates []*meta.Meta, ignoreZids map[id.Zid]struct{}) []*meta.Meta {
@@ -193,9 +213,13 @@ func filterByZid(candidates []*meta.Meta, ignoreZids map[id.Zid]struct{}) []*met
 	return result
 }
 
-func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, words []string) []*meta.Meta {
+func (uc *Query) filterCandidates(
+	ctx context.Context,
+	candidates []*meta.Meta,
+	phraseWords []string,
+) []*meta.Meta {
 	result := make([]*meta.Meta, 0, len(candidates))
-	ulv := unlinkedVisitor{words: words}
+	ulv := unlinkedVisitor{phraseWords: phraseWords}
 	for _, cand := range candidates {
 		zettel, err := uc.port.GetZettel(ctx, cand.Zid)
 		if err != nil {
@@ -218,8 +242,8 @@ func (uc *Query) filterCandidates(ctx context.Context, candidates []*meta.Meta, 
 }
 
 type unlinkedVisitor struct {
-	words []string
-	found bool
+	phraseWords []string
+	found       bool
 }
 
 func (v *unlinkedVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
@@ -235,8 +259,8 @@ func (v *unlinkedVisitor) VisitItBefore(node *sx.Pair, _ *sx.Pair) bool {
 		// TODO: this is way too simple. For example, two text nodes may
 		// be separated by a SOFT or HARD node.
 		textWords := zerostrings.SplitWords(zsx.GetText(node))
-		for i := 0; i+len(v.words) <= len(textWords); i++ {
-			if slices.Equal(v.words, textWords[i:i+len(v.words)]) {
+		for i := 0; i+len(v.phraseWords) <= len(textWords); i++ {
+			if slices.Equal(v.phraseWords, textWords[i:i+len(v.phraseWords)]) {
 				v.found = true
 				return true
 			}

@@ -53,8 +53,12 @@ type ThreadPort interface {
 }
 
 // Execute the specification.
-func (spec *ThreadSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port ThreadPort) []*meta.Meta {
-	tasks := newThreadQueue(startSeq, spec.maxCount, port)
+func (spec *ThreadSpec) Execute(
+	ctx context.Context,
+	startList []*meta.Meta,
+	port ThreadPort,
+) []*meta.Meta {
+	tasks := newThreadQueue(startList, spec.maxCount, port)
 	result := make([]*meta.Meta, 0, 16)
 	for {
 		m, level, dir := tasks.next()

@@ -57,7 +57,11 @@ func (spec *ContextSpec) Print(pe *PrintEnv) {
 }
 
 // Execute the specification.
-func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, port ContextPort) []*meta.Meta {
+func (spec *ContextSpec) Execute(
+	ctx context.Context,
+	startList []*meta.Meta,
+	port ContextPort,
+) []*meta.Meta {
 	maxCost := float64(spec.maxCost)
 	if maxCost <= 0 {
 		maxCost = 17
@@ -66,7 +70,7 @@ func (spec *ContextSpec) Execute(ctx context.Context, startSeq []*meta.Meta, por
 	if maxCount <= 0 {
 		maxCount = 200
 	}
-	tasks := newContextQueue(startSeq, maxCost, maxCount, spec.minCount, port)
+	tasks := newContextQueue(startList, maxCost, maxCount, spec.minCount, port)
 	result := make([]*meta.Meta, 0, max(spec.minCount, 16))
 	for {
 		m, cost, level, dir := tasks.next()
@@ -154,7 +158,12 @@ type contextTask struct {
 	metaZid  map[id.Zid]*meta.Meta            // maps zid to meta for all meta retrieved with tags
 }
 
-func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount int, port ContextPort) *contextTask {
+func newContextQueue(
+	startList []*meta.Meta,
+	maxCost float64,
+	maxCount, minCount int,
+	port ContextPort,
+) *contextTask {
 	result := &contextTask{
 		port:     port,
 		seen:     roster.Roster[id.Zid]{},
@@ -166,8 +175,8 @@ func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount 
 		metaZid:  make(map[id.Zid]*meta.Meta),
 	}
 
-	queue := make(ztlCtxQueue, 0, len(startSeq))
-	for _, m := range startSeq {
+	queue := make(ztlCtxQueue, 0, len(startList))
+	for _, m := range startList {
 		queue = append(queue, ztlCtxItem{cost: 1, meta: m})
 	}
 	heap.Init(&queue)
@@ -175,7 +184,15 @@ func newContextQueue(startSeq []*meta.Meta, maxCost float64, maxCount, minCount 
 	return result
 }
 
-func (ct *contextTask) addPair(ctx context.Context, key string, value meta.Value, curCost float64, level uint, dir int, spec *ContextSpec) {
+func (ct *contextTask) addPair(
+	ctx context.Context,
+	key string,
+	value meta.Value,
+	curCost float64,
+	level uint,
+	dir int,
+	spec *ContextSpec,
+) {
 	if key == meta.KeyBack {
 		return
 	}
@@ -249,7 +266,13 @@ func contextCost(key string) float64 {
 	return 4
 }
 
-func (ct *contextTask) addID(ctx context.Context, newCost float64, level uint, dir int, value meta.Value) {
+func (ct *contextTask) addID(
+	ctx context.Context,
+	newCost float64,
+	level uint,
+	dir int,
+	value meta.Value,
+) {
 	if zid, errParse := id.Parse(string(value)); errParse == nil {
 		if m := ct.port.FindMeta(ctx, zid); m != nil {
 			ct.addMeta(m, newCost, level, dir)
@@ -263,7 +286,13 @@ func (ct *contextTask) addMeta(m *meta.Meta, newCost float64, level uint, dir in
 	}
 }
 
-func (ct *contextTask) addIDSet(ctx context.Context, newCost float64, level uint, dir int, value meta.Value) {
+func (ct *contextTask) addIDSet(
+	ctx context.Context,
+	newCost float64,
+	level uint,
+	dir int,
+	value meta.Value,
+) {
 	elems := value.AsSlice()
 	refCost := referenceCost(newCost, len(elems))
 	for _, val := range elems {
@@ -276,8 +305,14 @@ func referenceCost(baseCost float64, numReferences int) float64 {
 	return nRefs*math.Log2(nRefs+1) + baseCost - 1
 }
 
-func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], baseCost float64, level uint, dir int) {
-	tags := slices.Collect(tagiter)
+func (ct *contextTask) addTags(
+	ctx context.Context,
+	tagSeq iter.Seq[string],
+	baseCost float64,
+	level uint,
+	dir int,
+) {
+	tags := slices.Collect(tagSeq)
 	var zidSet roster.Roster[id.Zid]
 	for _, tag := range tags {
 		zs := ct.updateTagData(ctx, tag)
@@ -300,11 +335,15 @@ func (ct *contextTask) addTags(ctx context.Context, tagiter iter.Seq[string], ba
 	}
 }
 
-func (ct *contextTask) updateTagData(ctx context.Context, tag string) (zids roster.Roster[id.Zid]) {
+func (ct *contextTask) updateTagData(
+	ctx context.Context,
+	tag string,
+) (zids roster.Roster[id.Zid]) {
 	if _, found := ct.tagMetas[tag]; found {
 		return ct.tagZids[tag]
 	}
-	q := Parse(meta.KeyTags + webapi.SearchOperatorHas + tag + " ORDER REVERSE " + meta.KeyID)
+	q := Parse(meta.KeyTags + webapi.SearchOperatorHas + tag +
+		" " + webapi.OrderDirective + " " + webapi.ReverseDirective + " " + meta.KeyID)
 	ml, err := ct.port.SelectMeta(ctx, nil, q)
 	if err != nil {
 		ml = nil

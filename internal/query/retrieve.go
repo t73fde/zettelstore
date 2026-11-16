@@ -66,7 +66,10 @@ func (scm searchCallMap) addSearch(s string, op compareOp, sf searchFunc) {
 	scm[searchOp{s: s, op: op}] = sf
 }
 
-func prepareRetrieveCalls(searcher index.Searcher, search []expValue) (normCalls, plainCalls, negCalls searchCallMap) {
+func prepareRetrieveCalls(
+	searcher index.Searcher,
+	search []expValue,
+) (normCalls, plainCalls, negCalls searchCallMap) {
 	normCalls = make(searchCallMap, len(search))
 	negCalls = make(searchCallMap, len(search))
 	for _, val := range search {
@@ -105,7 +108,10 @@ func hasConflictingCalls(normCalls, plainCalls, negCalls searchCallMap) bool {
 	return false
 }
 
-func retrievePositives(ctx context.Context, normCalls, plainCalls searchCallMap) *index.Result {
+func retrievePositives(
+	ctx context.Context,
+	normCalls, plainCalls searchCallMap,
+) *index.Result {
 	if isSuperset(normCalls, plainCalls) {
 		var normResult *index.Result
 		for c, sf := range normCalls {
@@ -172,7 +178,10 @@ func isSuperset(normCalls, plainCalls searchCallMap) bool {
 	return true
 }
 
-func retrieveNegatives(ctx context.Context, negCalls searchCallMap) (negatives *index.Result) {
+func retrieveNegatives(
+	ctx context.Context,
+	negCalls searchCallMap,
+) (negatives *index.Result) {
 	for val, sf := range negCalls {
 		as := sf(ctx, val.s)
 		if negatives == nil {

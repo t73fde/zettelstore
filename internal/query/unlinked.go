@@ -14,6 +14,8 @@
 package query
 
 import (
+	"slices"
+
 	"t73f.de/r/zero/strings"
 	"t73f.de/r/zsc/domain/meta"
 	"t73f.de/r/zsc/webapi"
@@ -21,27 +23,28 @@ import (
 
 // UnlinkedSpec contains all specification values to calculate unlinked references.
 type UnlinkedSpec struct {
-	words []string
+	phraseWords []string
 }
 
 // Print the spec on the given print environment.
 func (spec *UnlinkedSpec) Print(pe *PrintEnv) {
 	pe.printSpace()
 	pe.writeString(webapi.UnlinkedDirective)
-	for _, word := range spec.words {
-		pe.writeStrings(" ", webapi.PhraseDirective, " ", word)
+	for _, phrase := range spec.phraseWords {
+		pe.writeStrings(" ", webapi.PhraseDirective, " ", phrase)
 	}
 }
 
-// GetWords returns all title words of a given query result.
-func (spec *UnlinkedSpec) GetWords(metaSeq []*meta.Meta) []string {
-	if words := spec.words; len(words) > 0 {
-		result := make([]string, len(words))
-		copy(result, words)
-		return result
+// GetPhraseWords returns all phrase words of a "UNLINKED" query.
+func (spec *UnlinkedSpec) GetPhraseWords(metaList []*meta.Meta) []string {
+	if words := spec.phraseWords; len(words) > 0 {
+		// Found an explicit phrase
+		return slices.Clone(words)
 	}
-	result := make([]string, 0, len(metaSeq)*6) // Assumption: six words per title
-	for _, m := range metaSeq {
+
+	// Calculate phrase out of zettel title.
+	result := make([]string, 0, len(metaList)*6) // Assumption: six words per title
+	for _, m := range metaList {
 		title, hasTitle := m.Get(meta.KeyTitle)
 		if !hasTitle {
 			continue

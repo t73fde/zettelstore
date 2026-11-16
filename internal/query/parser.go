@@ -334,7 +334,7 @@ func (ps *parserState) parseUnlinked(q *Query) *Query {
 		pos := inp.Pos
 		if ps.acceptKwArgs(webapi.PhraseDirective) {
 			if word := ps.scanWord(); len(word) > 0 {
-				spec.words = append(spec.words, string(word))
+				spec.phraseWords = append(spec.phraseWords, string(word))
 				continue
 			}
 		}

@@ -238,7 +238,8 @@ func (q *Query) GetSeed() (int, bool) {
 	return q.seed, q.seed > 0
 }
 
-// SetDeterministic signals that the result should be the same if the seed is the same.
+// SetDeterministic signals that the result should be the same if the seed is
+// the same.
 func (q *Query) SetDeterministic() {
 	if q.seed <= 0 {
 		q.seed = rand.IntN(10000) + 1
@@ -270,7 +271,8 @@ func (q *Query) EnrichNeeded() bool {
 		return true
 	}
 	if len(q.actions) > 0 {
-		// Unknown, what an action may use. For examples: KEYS action uses all metadata.
+		// Unknown, what an action may use. For examples: KEYS action uses all
+		// metadata.
 		return true
 	}
 	for _, term := range q.terms {
@@ -298,7 +300,7 @@ func (q *Query) EnrichNeeded() bool {
 func (q *Query) RetrieveAndCompile(
 	ctx context.Context,
 	searcher index.Searcher,
-	metaSeq []*meta.Meta,
+	metaList []*meta.Meta,
 ) Compiled {
 	newQ := q.Clone()
 
@@ -307,14 +309,14 @@ func (q *Query) RetrieveAndCompile(
 		preMatch = matchAlways
 	}
 
-	startSet := metaList2idSet(metaSeq)
+	startSet := metaList2idSet(metaList)
 	result := Compiled{
 		seed:      newQ.seed,
 		pick:      newQ.pick,
 		order:     newQ.order,
 		offset:    newQ.offset,
 		limit:     newQ.limit,
-		startMeta: metaSeq,
+		startList: metaList,
 		PreMatch:  preMatch,
 		Terms:     []CompiledTerm{},
 	}
@@ -376,7 +378,10 @@ func (ct *conjTerms) retrieveAndCompileTerm(
 }
 
 // retrieveIndex and return a predicate to ask for results.
-func (ct *conjTerms) retrieveIndex(ctx context.Context, searcher index.Searcher) index.RetrievePredicate {
+func (ct *conjTerms) retrieveIndex(
+	ctx context.Context,
+	searcher index.Searcher,
+) index.RetrievePredicate {
 	if len(ct.search) == 0 {
 		return nil
 	}

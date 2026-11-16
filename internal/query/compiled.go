@@ -30,7 +30,7 @@ type Compiled struct {
 	offset int // <= 0: no offset
 	limit  int // <= 0: no limit
 
-	startMeta []*meta.Meta
+	startList []*meta.Meta
 	PreMatch  MetaMatchFunc // Precondition for Match and Retrieve
 	Terms     []CompiledTerm
 
@@ -59,13 +59,13 @@ func (c *Compiled) isDeterministic() bool { return c.seed > 0 }
 // Result returns a result of the compiled search, that is achievable without
 // iterating through boxes.
 func (c *Compiled) Result() []*meta.Meta {
-	if len(c.startMeta) == 0 {
+	if len(c.startList) == 0 {
 		// nil -> no directive
 		// empty slice -> nothing found
-		return c.startMeta
+		return c.startList
 	}
-	result := make([]*meta.Meta, 0, len(c.startMeta))
-	for _, m := range c.startMeta {
+	result := make([]*meta.Meta, 0, len(c.startList))
+	for _, m := range c.startList {
 		for _, term := range c.Terms {
 			if c.PreMatch(m) && term.Retrieve(m.Zid) && term.Match(m) {
 				result = append(result, m)
@@ -97,7 +97,10 @@ func (c *Compiled) AfterSearch(metaList []*meta.Meta) []*meta.Meta {
 // If alreadySorted is false, the order of metaList is arbitrary. Then a
 // deterministic query sorts it first, so that picking and random ordering
 // with a seed yield the same result every time.
-func (c *Compiled) pickSortWindow(metaList []*meta.Meta, alreadySorted bool) []*meta.Meta {
+func (c *Compiled) pickSortWindow(
+	metaList []*meta.Meta,
+	alreadySorted bool,
+) []*meta.Meta {
 	hasOrder := len(c.order) > 0
 	randomOrder := hasOrder && c.order[0].isRandom()
 	explicitOrder := hasOrder && !randomOrder
@@ -147,7 +150,11 @@ func (c *Compiled) pickSortWindow(metaList []*meta.Meta, alreadySorted bool) []*
 // original relative order (selection sampling, Knuth's Algorithm S). Every
 // subset of size k is equally likely. The list is modified in place; it
 // requires 0 < k <= len(metaList).
-func pickInOrder(metaList []*meta.Meta, k int, rnd interface{ IntN(int) int }) []*meta.Meta {
+func pickInOrder(
+	metaList []*meta.Meta,
+	k int,
+	rnd *rand.Rand,
+) []*meta.Meta {
 	n := len(metaList)
 	w := 0 // number of picked elements, also the write position
 	for i, m := range metaList {
