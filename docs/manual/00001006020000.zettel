@@ -4,12 +4,39 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20261104133638
+modified: 20261119142209
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
-See the [[computed list of supported metadata keys|00000000000090]] for details.
+See the computed [[list of supported metadata keys|00000000000090]] for details.
 
 Most keys conform to a [[type|00001006030000]].
+
+Every metadata key belongs to exactly one of three categories:
+
+; ""user""
+: The value is set by the user.
+  This is the category of most keys, including all user-defined keys.
+; ""managed""
+: The value is set and maintained by Zettelstore and is stored in the zettel.
+  Managed metadata is not shown as ordinary metadata in the web user interface.
+  How a stored value is used depends on the key:
+  [[''created''|#created]] is taken from the zettel if it is stored there, and is calculated otherwise.
+  [[''modified''|#modified]] is set to the current time whenever the zettel is stored.
+  [[''id''|#id]] is derived from the box that contains the zettel, e.g. from the name of the file.
+; ""property""
+: The value is always calculated by Zettelstore and is never stored.
+  A value that is stored in a zettel is ignored.
+  An example is [[''folge''|#folge]], which is calculated from the metadata [[''precursor''|#precursor]] of all zettel that reference this zettel.
+
+The following user keys are __invertible__: for each of them, Zettelstore calculates the inverse references as a property.
+
+|=User key       |=Calculated property
+|''precursor''   |''folge''
+|''predecessor'' |''successor''
+|''prequel''     |''sequel''
+|''superordinate'' |''subordinate''
+
+The following list describes the supported metadata keys in alphabetical order.
 
 ; [!author|''author'']
 : A string value describing the author of a zettel.
@@ -22,14 +49,16 @@ Most keys conform to a [[type|00001006030000]].
   References within invertible values are not included here, e.g. [[''precursor''|#precursor]].
 ; [!box-name|''box-name'']
 : A word that names the [[box|00001004011200]] from which the zettel was retrieved.
+
+  This is a property.
 ; [!copyright|''copyright'']
 : Defines a copyright string that will be encoded.
-  If not given, the value ''default-copyright'' from the  [[configuration zettel|00001004020000#default-copyright]] will be used.
+  If not given, the value ''default-copyright'' from the [[configuration zettel|00001004020000#default-copyright]] will be used.
 ; [!created|''created'']
 : Date and time when a zettel was created through Zettelstore.
   If you create a zettel with an editor software outside Zettelstore, you should set it manually to an appropriate value.
 
-  This is a computed value.
+  This is a managed value.
   There is no need to set it via Zettelstore.
 
   If it is not stored within a zettel, it will be computed based on the value of the [[Zettel Identifier|00001006050000]]: if it contains a value >= 19700101000000, it will be coerced to a date/time; otherwise the version time of the running software will be used.
@@ -38,7 +67,7 @@ Most keys conform to a [[type|00001006030000]].
   When calculating a zettel identifier, Zettelstore tries to set the second value to zero, if possible.
 ; [!credential|''credential'']
 : Contains the hashed password, as it was emitted by [[``zettelstore password``|00001004051400]].
-  It is internally created by hashing the password, the [[zettel identifier|00001006050000]], and the value of the ''ident'' key.
+  It is internally created by hashing the password, the [[zettel identifier|00001006050000]], and the value of the [[''user-id''|#user-id]] key.
 
   It is only used for zettel with a ''role'' value of ""user"".
 ; [!dead|''dead'']
@@ -60,16 +89,25 @@ Most keys conform to a [[type|00001006030000]].
 : Property that contains all references that identify another zettel within the content of the zettel.
 ; [!id|''id'']
 : Contains the [[zettel identifier|00001006050000]], as given by the Zettelstore.
-  It cannot be set manually, because it is a computed value.
+  It is a managed value and cannot be set manually.
+  The box that contains the zettel determines the identifier.
+  If the zettel is stored in a file, the identifier is taken from the name of the file.
+
+  Whenever Zettelstore stores the zettel, it also writes the identifier into the metadata of the zettel.
+  This stored value is only a fallback, for the case that the file is renamed in such a way that its name no longer contains an identifier.
+  If the name of the file contains an identifier, that one is used and the stored value is ignored.
 ; [!index-state|''index-state'']
-: Is a computed property that is set only if the search index cannot provide computed values for the zettel.
-  In this case, no other properties are calculated.
-  If the key is not present, computed values are complete.
-  There is no need to set it via Zettelstore.
+: Is a property that is set only if the search index cannot provide all property values for the zettel.
+  If it is set, the properties that depend on the search index are not calculated.
+  If the key is not present, the property values are complete.
+  A value that is stored in the zettel is ignored.
 
-  The value ""incomplete"" signals that the search index is not yet ready, e.g. because it is still being built during Zettelstore startup.
+  The following values are possible:
 
-  The value ""unindexed"" signals that the zettel is not known to the search index.
+  ''incomplete'': The search index is not yet ready, e.g. because it is still being built during Zettelstore startup.
+  See [[Retrieve administrative data|00001012070500]] for how to find out whether the index is ready.
+
+  ''unindexed'': The zettel is not known to the search index.
 ; [!lang|''lang'']
 : Language for the zettel.
   Mostly used for HTML rendering of the zettel.
@@ -84,7 +122,7 @@ Most keys conform to a [[type|00001006030000]].
 : Date and time when a zettel was modified through Zettelstore.
   If you edit a zettel with an editor software outside Zettelstore, you should set it manually to an appropriate value.
 
-  This is a computed value.
+  This is a managed value.
   There is no need to set it via Zettelstore.
 ; [!precursor|''precursor'']
 : References zettel for which this zettel is a __Folgezettel__ / follow-up zettel.
@@ -105,7 +143,7 @@ Most keys conform to a [[type|00001006030000]].
 
   It can be used for [[sorting|00001007700000]] zettel based on their publication date.
 
-  It is a computed value.
+  It is a property.
   There is no need to set it via Zettelstore.
 ; [!query|''query'']
 : Stores the [[query|00001007031140]] that was used to create the zettel.
@@ -119,7 +157,7 @@ Most keys conform to a [[type|00001006030000]].
   See [[supported zettel roles|00001006020100]].
   If not given, it is ignored.
 ; [!see-also|''see-also'']
-: References other zettel, that might be relevant.
+: References other zettel that might be relevant.
   The WebUI renders these zettel as an unordered list under the heading ""See also"".
 ; [!sequel|''sequel'']
 : Is a property that contains identifiers of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
@@ -154,6 +192,8 @@ Most keys conform to a [[type|00001006030000]].
 : Contains the file names that are rejected to serve the content of a zettel.
   Is used for [[directory boxes|00001004011400]] and [[file boxes|00001004011200#file]].
   If a zettel is deleted, these files will also be deleted.
+
+  This is a property.
 ; [!user-id|''user-id'']
 : Provides some unique user identification for an [[user zettel|00001010040200]].
   It is used as a user name for authentication.

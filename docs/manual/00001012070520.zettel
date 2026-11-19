@@ -4,11 +4,11 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220304164242
-modified: 20261109130608
+modified: 20261119141919
 
 Zettelstore starts its web service before the initial indexing of all zettel is complete.
-Until then, search results and some computed metadata may be incomplete.
-Zettel metadata evaluated in this phase contains the key ''index-state'' with the value ''incomplete''.
+Until then, search results and some calculated metadata may be incomplete.
+Zettel metadata evaluated in this phase contains the key [[''index-state''|00001006020000#index-state]] with the value ''incomplete''.
 
 To find out whether the box service is completely ready, send an HTTP GET request to the endpoint ''/x'' with the query parameter ''data=ready''.
 

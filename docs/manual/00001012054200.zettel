@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20210713150005
-modified: 20260608153632
+modified: 20261119142025
 
 Updating metadata and content of a zettel is technically quite similar to [[creating a new one|00001012053200]].
 In both cases, you must provide the data for the new or updated zettel in the body of the HTTP request.
@@ -25,7 +25,7 @@ Alternatively, you may encode the zettel as a parseable object / a [[symbolic ex
 The encoding is the same as the data output encoding when you [[retrieve a zettel|00001012053300#data-output]].
 
 The encoding for [[access rights|00001012921200]] must be given, but is ignored.
-You may encode computed or property [[metadata keys|00001006020000]], but these are also ignored.
+You may encode property [[metadata keys|00001006020000]], but these are also ignored.
 
 === HTTP Status codes
 ; ''204''
