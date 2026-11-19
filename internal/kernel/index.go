@@ -80,11 +80,12 @@ func (is *indexService) GetStatistics() []KeyValue {
 		{Key: "Ready", Value: fmt.Sprint(st.Ready)},
 		{Key: "Building", Value: fmt.Sprint(st.Building)},
 		{Key: "Build duration", Value: st.BuildDuration.String()},
+		{Key: "Build number", Value: strconv.FormatUint(st.NumRebuild, 10)},
 		{Key: "Build failed", Value: strconv.Itoa(st.BuildFailed)},
-		{Key: "Dropped zettel", Value: strconv.FormatUint(st.DroppedZettel, 10)},
 		{Key: "Failure", Value: st.Failure},
 		{Key: "Rebuild failure", Value: st.RebuildFailure},
 		{Key: "Zettel", Value: strconv.Itoa(st.NumZettel)},
+		{Key: "Dropped zettel", Value: strconv.FormatUint(st.DroppedZettel, 10)},
 		{Key: "Words / Fragments", Value: strconv.Itoa(st.NumWords)},
 		{Key: "Long Word Store", Value: strconv.Itoa(st.Vocabulary)},
 		{Key: "URLs", Value: strconv.Itoa(st.NumURLs)},
@@ -92,7 +93,6 @@ func (is *indexService) GetStatistics() []KeyValue {
 		{Key: "Removed zettel", Value: strconv.FormatUint(st.RemovedZettel, 10)},
 		{Key: "Enrichments", Value: strconv.FormatUint(st.EnrichCount, 10)},
 		{Key: "Failed enrichments", Value: strconv.FormatUint(st.EnrichMissed, 10)},
-		{Key: "Rebuilds", Value: strconv.FormatUint(st.NumRebuild, 10)},
 	}...)
 
 	sizes := slices.Collect(maps.Keys(st.WordCount))

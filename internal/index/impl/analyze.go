@@ -55,7 +55,7 @@ type analyzedZettel struct {
 	metaForward []metaZid
 }
 
-type metaZid struct { // TODO: remove alignment by creating metaZids{[]WordID;[]forward}
+type metaZid struct {
 	keyID   vocab.WordID
 	forward roster.Roster[denseZid]
 }

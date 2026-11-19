@@ -50,7 +50,6 @@ func (a *WebAPI) MakeGetDataHandler(
 			a.writeSiteInfo(w, siteInfo)
 
 		case "meta-type":
-			// TODO: check for login
 			if keys := q["key"]; len(keys) > 0 {
 				dks := make([]webapi.MetadataKeyInfo, 0, len(keys))
 				for _, key := range keys {

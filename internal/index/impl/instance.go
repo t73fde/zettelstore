@@ -31,7 +31,7 @@ import (
 	"zettelstore.de/z/internal/index"
 )
 
-const defaultWordsHint = 2000 // TODO: configurable
+const defaultWordsHint = 4000 // TODO: configurable
 
 // sizeHints dimension a new instance.
 type sizeHints struct {
@@ -89,9 +89,10 @@ func (in *instance) start(cfg config.Config, retriever index.Retriever) {
 		},
 	}
 
-	storeCh := make(chan storeData, 4)     // TODO: configurable?
-	analyzeCh := make(chan analyzeData, 4) // TODO: configurable?
-	parseCh := make(chan parseData, 4)     // TODO: configurable?
+	// A channel buffer of 4 seems to be ok in most situations.
+	storeCh := make(chan storeData, 4)
+	analyzeCh := make(chan analyzeData, 4)
+	parseCh := make(chan parseData, 4)
 
 	storeSrv := storeService{
 		logger:  in.logger.With("service", "store"),
