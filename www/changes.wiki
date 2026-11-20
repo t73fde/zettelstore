@@ -3,30 +3,36 @@
 <a id="3_1"></a>
 <h2>Changes for Version 3.1.0 (pending)</h2>
   *  Replace the previous search index with a new one, which is much more
-     maintainable and reliable.
+     maintainable and reliable. Building the index is twice as fast, and it
+     normally needs only half the space of the previous one. While the index is
+     rebuilt, searches continue to use the old index until the new one is
+     complete and replaces it in a single step. Whether the index is completely
+     built can be queried with <code>/x?data=ready</code>.
      (major: index)
   *  Add new predefined metadata key <code>index-state</code>. It is used if
-     the search index cannot provide computed values for the given zettel.
-     (minor: box, api)
-  *  Add WebAPI <code>/x?data=ready</code> to retrieve the ready state of
-     Zettelstore.
-     (minor: api)
-  *  Add WebAPI function <code>/x?data=site-info</code> to retrieve some
-     information about the Zettelstore instance.
-     (minor: api)
-  *  Add WebAPI function <code>/x?data=meta-type</code> to retrieve some
-     information about metadata keys and their types.
-     (minor: api)
-  *  Add support for metadata <code>see-also</code>, a set of zettel
-     identifier. These are rendered in the WebUI as an unordered list under the
-     heading &ldquo;See also&rdquo;.
-     (minor: webui)
-  *  Improved pretty-print of zettel with <code>syntax:sxn</code>.
-     (minor: webui)
-  *  Add runtime configuration value <code>min-zid-search-digits</code> which
-     specifies the minimum number of digits a number need to have to be include
-     in searching a zid fragment.
+     the search index cannot provide computed values (e.g. backward references)
+     for the given zettel, e.g. because the zettel is not yet indexed.
      (minor)
+  *  Add WebAPI function <code>/x?data=ready</code> to retrieve the ready state
+     of Zettelstore, i.e. whether startup and index build are completed.
+     (minor: api)
+  *  Add WebAPI function <code>/x?data=site-info</code> to retrieve information
+     about the Zettelstore instance, e.g. site title and home zettel.
+     (minor: api)
+  *  Add WebAPI function <code>/x?data=meta-type</code> to retrieve the
+     metadata keys and their types.
+     (minor: api)
+  *  Add support for metadata key <code>see-also</code>, a set of zettel
+     identifiers. These are rendered in the WebUI as an unordered list under
+     the heading &ldquo;See also&rdquo;.
+     (minor: webui)
+  *  Improve pretty-print of zettel with <code>syntax:sxn</code>: update
+     line breaking and indentation to show the zettel structure more clearly
+     (minor: webui)
+  *  Add runtime configuration value <code>min-zid-search-digits</code>,
+     which specifies the minimum number of digits a number needs to have to be
+     included in a search for a zid fragment. Default: 4.
+     (minor: index)
 
 <a id="3_0"></a>
 <h2>Changes for Version 3.0.0 (2026-09-25)</h2>
