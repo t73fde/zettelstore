@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220304164242
-modified: 20261109131032
+modified: 20261121173100
 
 The [[endpoint|00001012920000]] ''/x'' allows you to retrieve some (administrative) data.
 The query parameter ''data'' selects the kind of data:
@@ -12,7 +12,7 @@ The query parameter ''data'' selects the kind of data:
 ; ''version''
 : [[Zettelstore version data|00001012070510]]
 ; ''ready''
-: [[Whether the box service is ready for use|00001012070520]]
+: [[Whether Zettelstore has completed its initial indexing|00001012070520]] and is ready to use.
 ; ''site-info''
 : [[Some base information about the Zettelstore site|00001012070530]]
 ; ''meta-type''

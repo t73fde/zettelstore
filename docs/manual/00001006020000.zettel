@@ -4,7 +4,7 @@ role: manual
 tags: #manual #meta #reference #zettel #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20261119142209
+modified: 20261121201152
 
 Although you are free to define your own metadata, by using any key (according to the [[syntax|00001006010000]]), some keys have a special meaning that is enforced by Zettelstore.
 See the computed [[list of supported metadata keys|00000000000090]] for details.
@@ -18,6 +18,8 @@ Every metadata key belongs to exactly one of three categories:
   This is the category of most keys, including all user-defined keys.
 ; ""managed""
 : The value is set and maintained by Zettelstore and is stored in the zettel.
+  Zettelstore maintains the value only for zettel that are created or changed through Zettelstore.
+  If a zettel is created or changed outside of Zettelstore, e.g. with an editor, the value of [[''created''|#created]] and [[''modified''|#modified]] should be set manually.
   Managed metadata is not shown as ordinary metadata in the web user interface.
   How a stored value is used depends on the key:
   [[''created''|#created]] is taken from the zettel if it is stored there, and is calculated otherwise.
@@ -59,7 +61,7 @@ The following list describes the supported metadata keys in alphabetical order.
   If you create a zettel with an editor software outside Zettelstore, you should set it manually to an appropriate value.
 
   This is a managed value.
-  There is no need to set it via Zettelstore.
+  If you work through Zettelstore, the value is set automatically.
 
   If it is not stored within a zettel, it will be computed based on the value of the [[Zettel Identifier|00001006050000]]: if it contains a value >= 19700101000000, it will be coerced to a date/time; otherwise the version time of the running software will be used.
 
@@ -71,7 +73,8 @@ The following list describes the supported metadata keys in alphabetical order.
 
   It is only used for zettel with a ''role'' value of ""user"".
 ; [!dead|''dead'']
-: Property that contains all references that do __not__ identify a zettel.
+: Property that contains all references of the zettel that point to a zettel identifier for which no zettel exists.
+  References to external resources, e.g. URLs, are not included.
 ; [!expire|''expire'']
 : A user-entered timestamp that records the point in time when the zettel should expire.
   When a zettel expires, Zettelstore does nothing.
@@ -84,14 +87,14 @@ The following list describes the supported metadata keys in alphabetical order.
 
   It is used to reference __Folgezettel__, those that develop the idea of the current zettel a bit further, following a ""train of thought.""
 ; [!folge-role|''folge-role'']
-: Specifies a suggested [[''role''|#role]] the zettel should use in the future, if zettel currently has a preliminary role.
+: Serves as a reminder of the [[''role''|#role]] that this zettel should get later, if its current role is only preliminary.
 ; [!forward|''forward'']
 : Property that contains all references that identify another zettel within the content of the zettel.
 ; [!id|''id'']
 : Contains the [[zettel identifier|00001006050000]], as given by the Zettelstore.
-  It is a managed value and cannot be set manually.
+  It is a managed value.
   The box that contains the zettel determines the identifier.
-  If the zettel is stored in a file, the identifier is taken from the name of the file.
+  A value entered by hand in the metadata does not change the identifier of a zettel whose file name contains an identifier.
 
   Whenever Zettelstore stores the zettel, it also writes the identifier into the metadata of the zettel.
   This stored value is only a fallback, for the case that the file is renamed in such a way that its name no longer contains an identifier.
@@ -104,10 +107,11 @@ The following list describes the supported metadata keys in alphabetical order.
 
   The following values are possible:
 
-  ''incomplete'': The search index is not yet ready, e.g. because it is still being built during Zettelstore startup.
-  See [[Retrieve administrative data|00001012070500]] for how to find out whether the index is ready.
+  ''incomplete'': The initial indexing of all zettel after the start of Zettelstore is not yet complete.
+  A later rebuild of the index does not lead to this value, because the previous index continues to serve requests.
+  See [[Retrieve administrative data|00001012070500]] for how to find out whether the initial indexing is complete.
 
-  ''unindexed'': The zettel is not known to the search index.
+  ''unindexed'': The initial indexing is complete, but the search index does not know this zettel, e.g. because the zettel was created or changed just now.
 ; [!lang|''lang'']
 : Language for the zettel.
   Mostly used for HTML rendering of the zettel.
@@ -123,13 +127,16 @@ The following list describes the supported metadata keys in alphabetical order.
   If you edit a zettel with an editor software outside Zettelstore, you should set it manually to an appropriate value.
 
   This is a managed value.
-  There is no need to set it via Zettelstore.
+  If you work through Zettelstore, the value is set automatically.
 ; [!precursor|''precursor'']
-: References zettel for which this zettel is a __Folgezettel__ / follow-up zettel.
-  Basically the inverse of key [[''folge''|#folge]].
+: References the zettel that this zettel continues directly, i.e. this zettel is a __Folgezettel__ of the referenced zettel: it develops the idea of the referenced zettel further, following a ""train of thought.""
+  The inverse relation is calculated as property [[''folge''|#folge]].
+  Use [[''predecessor''|#predecessor]] for a looser follow-up relation.
 ; [!predecessor|''predecessor'']
-: References zettel for which this zettel is a follow-up zettel.
-  Basically the inverse of key [[''successor''|#successor]].
+: References zettel of which this zettel is a later version, a result, or a continuation.
+  Use it if the relation does not form a train of thought, or if the referenced zettel cannot or should not be changed to link to this zettel.
+  The inverse relation is calculated as property [[''successor''|#successor]].
+  Use [[''precursor''|#precursor]] for a direct continuation of an idea.
 ; [!prequel|''prequel'']
 : Specifies one or more zettel that are conceptually a prequel zettel.
   These are zettel that occurred somehow before the current zettel.
@@ -159,6 +166,20 @@ The following list describes the supported metadata keys in alphabetical order.
 ; [!see-also|''see-also'']
 : References other zettel that might be relevant.
   The WebUI renders these zettel as an unordered list under the heading ""See also"".
+
+; [!see-also|''see-also'']
+: A set of [[zettel identifiers|00001006050000]] of zettel that belong to an extended context of this zettel, possibly of a different topic.
+  It is a systematic alternative to a list of references in the content of the zettel.
+  Duplicate and invalid identifiers are ignored.
+
+  The references are handled as if they were given in the content of the zettel.
+  They are part of [[''forward''|#forward]], and the referenced zettel contain this zettel in [[''backward''|#backward]] and [[''back''|#back]].
+  Identifiers of non-existing zettel are not shown, but are part of [[''dead''|#dead]].
+  There is no inverse property, the relation is intentionally one-sided.
+
+  The web user interface shows the titles of the referenced zettel as a list under the heading ""See also"", ordered by zettel identifier.
+
+  In contrast to [[''precursor''|#precursor]], [[''predecessor''|#predecessor]], [[''prequel''|#prequel]] and [[''superordinate''|#superordinate]], ''see-also'' does not express a specific relation between the zettel.
 ; [!sequel|''sequel'']
 : Is a property that contains identifiers of all zettel that reference this zettel through the [[''prequel''|#prequel]] value.
 

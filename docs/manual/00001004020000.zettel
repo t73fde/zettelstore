@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20261104201503
+modified: 20261121173917
 show-back-links: false
 
 You can configure a running Zettelstore by modifying the special zettel with the ID [[00000000000100]].
@@ -42,9 +42,11 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
   Default: (an invalid zettel identifier)
 ; [!home-zettel|''home-zettel'']
 : Specifies the identifier of the zettel that should be presented for the default view / home view.
-  If not given or if the identifier does not identify a zettel, the zettel with the identifier ''00010000000000'' is shown.
+  If not given or if the identifier does not identify a zettel, the zettel with the default value is shown.
 
   May be [[overwritten|00001004020200]] in a user zettel.
+
+  Default: ""00010000000000""
 ; [!lang|''lang'']
 : Language to be used when displaying content.
 
@@ -79,7 +81,11 @@ See the full list of [[metadata that may be overwritten|00001004020200]].
 
   Default: ""1024"".
 ; [!min-zid-search-digits|''min-zid-search-digits'']
-: Minimum number of digits that a search value must contain, if it is compared with a [[zettel identifier|00001006050000]] by the operators "match" (''~''), "prefix" (''[''), or "suffix ('']''), or by their negated forms.
+: Minimum number of digits that a search value must contain to be compared with a [[zettel identifier|00001006050000]] by the operators ""match"" (''~''), ""prefix"" (''[''), or ""suffix"" ('']''), or by their negated forms.
+  A search value with fewer digits is not compared with zettel identifiers.
+  It is still compared with other values, e.g. the title of a zettel.
+  A higher value avoids that short numbers match a large number of zettel identifiers.
+
   See [[Identifier Key Type|00001006032000]] for details.
 
   Allowed values are integers from ""1"" to ""14"".
