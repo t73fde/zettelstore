@@ -99,8 +99,8 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		rb.bindString("endnotes", endnotes)
 		wui.bindLinks(ctx, &rb, "folge", zn.InhMeta, meta.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinate, "", getTextTitle)
-		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, meta.KeySuccessor, "", getTextTitle)
+		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinate, config.KeyShowSubordinateLinks, getTextTitle)
+		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, meta.KeySuccessor, config.KeyShowSuccessorLinks, getTextTitle)
 		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
 		rb.bindRoleSpecific(zn.InhMeta)
 		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, title, &zn.Content)
@@ -131,19 +131,24 @@ func metaURLAssoc(m *meta.Meta) *sx.Pair {
 	return result.List()
 }
 
-func (wui *WebUI) bindLinks(ctx context.Context, rb *renderBinder, varPrefix string, m *meta.Meta, key, configKey string, getTextTitle getTextTitleFunc) {
-	varLinks := varPrefix + "-links"
+func (wui *WebUI) bindLinks(
+	ctx context.Context,
+	rb *renderBinder,
+	varPrefix string,
+	m *meta.Meta,
+	metaKey, configKey string,
+	getTextTitle getTextTitleFunc,
+) {
+	var varLinks = varPrefix + "-links"
 	var symOpen sx.Object = shtml.SymAttrOpen
-	if configKey != "" {
-		switch wui.getConfig(ctx, m, configKey) {
-		case "false":
-			rb.bindString(varLinks, sx.Nil())
-			return
-		case "close":
-			symOpen = sx.Nil()
-		}
+	switch wui.getConfig(ctx, m, configKey) {
+	case "false":
+		rb.bindString(varLinks, sx.Nil())
+		return
+	case "close":
+		symOpen = sx.Nil()
 	}
-	lstLinks := wui.zettelLinksSxn(m, key, getTextTitle)
+	lstLinks := wui.zettelLinksSxn(m, metaKey, getTextTitle)
 	rb.bindString(varLinks, lstLinks)
 	if sx.IsNil(lstLinks) {
 		return
@@ -151,8 +156,8 @@ func (wui *WebUI) bindLinks(ctx context.Context, rb *renderBinder, varPrefix str
 	rb.bindString(varPrefix+"-open", symOpen)
 }
 
-func (wui *WebUI) zettelLinksSxn(m *meta.Meta, key string, getTextTitle getTextTitleFunc) *sx.Pair {
-	return wui.zidLinksSxn(m.GetFields(key), getTextTitle)
+func (wui *WebUI) zettelLinksSxn(m *meta.Meta, metaKey string, getTextTitle getTextTitleFunc) *sx.Pair {
+	return wui.zidLinksSxn(m.GetFields(metaKey), getTextTitle)
 }
 
 func (wui *WebUI) zidLinksSxn(values iter.Seq[string], getTextTitle getTextTitleFunc) *sx.Pair {

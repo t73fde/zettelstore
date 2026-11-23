@@ -22,12 +22,14 @@ import (
 
 // Key values that are supported by Config.Get
 const (
-	KeyFooterZettel    = "footer-zettel"
-	KeyHomeZettel      = "home-zettel"
-	KeyListsMenuZettel = "lists-menu-zettel"
-	KeyShowBackLinks   = "show-back-links"
-	KeyShowFolgeLinks  = "show-folge-links"
-	KeyShowSequelLinks = "show-sequel-links"
+	KeyFooterZettel         = "footer-zettel"
+	KeyHomeZettel           = "home-zettel"
+	KeyListsMenuZettel      = "lists-menu-zettel"
+	KeyShowBackLinks        = "show-back-links"
+	KeyShowFolgeLinks       = "show-folge-links"
+	KeyShowSequelLinks      = "show-sequel-links"
+	KeyShowSubordinateLinks = "show-subordinate-links"
+	KeyShowSuccessorLinks   = "show-successor-links"
 	// api.KeyLang
 )
 
