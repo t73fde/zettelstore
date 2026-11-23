@@ -14,7 +14,6 @@
 package webui
 
 import (
-	"context"
 	"iter"
 	"net/http"
 	"strings"
@@ -97,13 +96,13 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		rb.bindString("content", content)
 		rb.bindString("see-also", wui.zettelLinksSxn(zn.InhMeta, meta.KeySeeAlso, getTextTitle))
 		rb.bindString("endnotes", endnotes)
-		wui.bindLinks(ctx, &rb, "folge", zn.InhMeta, meta.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "subordinate", zn.InhMeta, meta.KeySubordinate, config.KeyShowSubordinateLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "successor", zn.InhMeta, meta.KeySuccessor, config.KeyShowSuccessorLinks, getTextTitle)
-		wui.bindLinks(ctx, &rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
+		wui.bindLinks(&rb, "folge", zn.InhMeta, meta.KeyFolge, config.KeyShowFolgeLinks, getTextTitle)
+		wui.bindLinks(&rb, "sequel", zn.InhMeta, meta.KeySequel, config.KeyShowSequelLinks, getTextTitle)
+		wui.bindLinks(&rb, "subordinate", zn.InhMeta, meta.KeySubordinate, config.KeyShowSubordinateLinks, getTextTitle)
+		wui.bindLinks(&rb, "successor", zn.InhMeta, meta.KeySuccessor, config.KeyShowSuccessorLinks, getTextTitle)
+		wui.bindLinks(&rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
 		rb.bindRoleSpecific(zn.InhMeta)
-		wui.bindCommonZettelData(ctx, &rb, user, zn.InhMeta, title, &zn.Content)
+		wui.bindCommonZettelData(&rb, user, zn.InhMeta, title, &zn.Content)
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidZettelTemplate, env)
 		} else {
@@ -132,7 +131,6 @@ func metaURLAssoc(m *meta.Meta) *sx.Pair {
 }
 
 func (wui *WebUI) bindLinks(
-	ctx context.Context,
 	rb *renderBinder,
 	varPrefix string,
 	m *meta.Meta,
@@ -141,7 +139,7 @@ func (wui *WebUI) bindLinks(
 ) {
 	var varLinks = varPrefix + "-links"
 	var symOpen sx.Object = shtml.SymAttrOpen
-	switch wui.getConfig(ctx, m, configKey) {
+	switch wui.getConfig(rb.ctx, m, configKey) {
 	case "false":
 		rb.bindString(varLinks, sx.Nil())
 		return

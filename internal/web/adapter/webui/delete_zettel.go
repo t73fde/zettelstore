@@ -61,7 +61,7 @@ func (wui *WebUI) MakeGetDeleteZettelHandler(
 			rb.bindString("incoming",
 				wui.encodeIncoming(m, currZid, wui.makeGetTextTitle(ctx, getZettel)))
 		}
-		wui.bindCommonZettelData(ctx, &rb, user, m, "", nil)
+		wui.bindCommonZettelData(&rb, user, m, "", nil)
 
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidDeleteTemplate, env)

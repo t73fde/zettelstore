@@ -169,11 +169,15 @@ func (wui *WebUI) getParentBinding(ctx context.Context) (*sxeval.Binding, error)
 
 // createRenderEnvironment creates a new environment and populates it with all
 // relevant data for the base template.
-func (wui *WebUI) createRenderEnvironment(ctx context.Context, name, lang, title string, user *meta.Meta) (*sxeval.Environment, renderBinder) {
+func (wui *WebUI) createRenderEnvironment(
+	ctx context.Context,
+	name, lang, title string,
+	user *meta.Meta,
+) (*sxeval.Environment, renderBinder) {
 	userIsValid, userZettelURL, userIdent := wui.getUserRenderData(user)
 	parentBind, err := wui.getParentBinding(ctx)
 	bind := parentBind.MakeChildBinding(name, 128)
-	rb := makeRenderBinder(bind, err)
+	rb := makeRenderBinder(ctx, bind, err)
 	rb.bindString("lang", sx.MakeString(lang))
 	rb.bindString("css-base-url", sx.MakeString(wui.cssBaseURL))
 	rb.bindString("css-user-url", sx.MakeString(wui.cssUserURL))
@@ -250,12 +254,13 @@ func (clh *computeLogHandler) Compute(env *sxeval.Environment, expr sxeval.Expr,
 func (clh *computeLogHandler) Reset() { clh.next.Reset() }
 
 type renderBinder struct {
+	ctx     context.Context
 	err     error
 	binding *sxeval.Binding
 }
 
-func makeRenderBinder(bind *sxeval.Binding, err error) renderBinder {
-	return renderBinder{binding: bind, err: err}
+func makeRenderBinder(ctx context.Context, bind *sxeval.Binding, err error) renderBinder {
+	return renderBinder{ctx: ctx, binding: bind, err: err}
 }
 func (rb *renderBinder) bindString(key string, obj sx.Object) {
 	if rb.err == nil {
@@ -293,28 +298,34 @@ func (rb *renderBinder) bindRoleSpecific(m *meta.Meta) {
 	}
 }
 
-func (wui *WebUI) bindCommonZettelData(ctx context.Context, rb *renderBinder, user, m *meta.Meta, title string, content *zettel.Content) {
+func (wui *WebUI) bindCommonZettelData(
+	rb *renderBinder,
+	user,
+	m *meta.Meta,
+	title string,
+	content *zettel.Content,
+) {
 	zid := m.Zid
 	strZid := zid.String()
 	newURLBuilder := wui.NewURLBuilder
 
 	rb.bindString("zid", sx.MakeString(strZid))
 	rb.bindString("web-url", sx.MakeString(newURLBuilder('h').SetZid(zid).String()))
-	if content != nil && wui.canWrite(ctx, user, m, *content) {
+	if content != nil && wui.canWrite(rb.ctx, user, m, *content) {
 		rb.bindString("edit-url", sx.MakeString(newURLBuilder('e').SetZid(zid).String()))
 	}
 	if title != "" {
 		rb.bindString("data-ref", sx.MakeString("[["+zmk.EscapeZmkSyntax(title)+"|"+strZid+"]]"))
 	}
 	rb.bindString("info-url", sx.MakeString(newURLBuilder('i').SetZid(zid).String()))
-	if wui.canCreate(ctx, user) {
+	if wui.canCreate(rb.ctx, user) {
 		if content != nil && !content.IsBinary() {
 			wui.bindCreateURL(rb, zid, "copy-url", valueActionCopy)
 		}
 		wui.bindCreateURL(rb, zid, "sequel-url", valueActionSequel)
 		wui.bindCreateURL(rb, zid, "folge-url", valueActionFolge)
 	}
-	if wui.canDelete(ctx, user, m) {
+	if wui.canDelete(rb.ctx, user, m) {
 		rb.bindString("delete-url", sx.MakeString(newURLBuilder('d').SetZid(zid).String()))
 	}
 	if val, found := m.Get(meta.KeyUselessFiles); found {
