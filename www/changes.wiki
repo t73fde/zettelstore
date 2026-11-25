@@ -4,6 +4,11 @@
 <h2>Changes for Version 3.2.0 (pending)</h2>
 
 <a id="3_1"></a>
+<h2>Changes for Version 3.1.2 (2026-11-25)</h2>
+  *  Add metadata (WebUI) to control summary/detail of subordinate and
+     successor.
+     (minor: webui)
+
 <h2>Changes for Version 3.1.1 (2026-11-23)</h2>
   *  Update manual to remove ambiguous statements.
      (minor: docs)
