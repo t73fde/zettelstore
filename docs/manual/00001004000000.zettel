@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20251208180106
+modified: 20261126123536
 
 There are several ways to customize the behavior and appearance of Zettelstore, ranging from basic to advanced configurations:
 
@@ -18,5 +18,5 @@ There are several ways to customize the behavior and appearance of Zettelstore, 
   For example, you can set the default language for your Zettelstore.
 #* [[Configure a running Zettelstore|00001004020000]]
 
-If you have enabled the administrator console, either through [[command-line parameters|00001004050000#a]] or the [[startup configuration file|00001004010000#admin-port]], you can gain even more control over the internal workings of Zettelstore.
+If you have enabled the administrator console, either through the [[""run"" sub-command|00001004051000#a]] or the [[startup configuration file|00001004010000#admin-port]], you can gain even more control over the internal workings of Zettelstore.
 * [[Zettelstore Administrator Console|00001004100000]]

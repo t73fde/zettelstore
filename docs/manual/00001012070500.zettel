@@ -4,7 +4,7 @@ role: manual
 tags: #api #manual #zettelstore
 syntax: zmk
 created: 20220304164242
-modified: 20261121173100
+modified: 20261126132958
 
 The [[endpoint|00001012920000]] ''/x'' allows you to retrieve some (administrative) data.
 The query parameter ''data'' selects the kind of data:
@@ -20,5 +20,4 @@ The query parameter ''data'' selects the kind of data:
 
 If the query parameter ''data'' is missing or empty, the version data is returned, as if ''data=version'' were given.
 If ''data'' is given more than once, the first value is used.
-Other query parameters are ignored.
 If the value of ''data'' is unknown, the request is rejected with status code ''400''.

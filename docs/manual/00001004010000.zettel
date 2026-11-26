@@ -4,7 +4,7 @@ role: manual
 tags: #configuration #manual #zettelstore
 syntax: zmk
 created: 20210126175322
-modified: 20260612164907
+modified: 20261126133532
 
 The configuration file, specified by the ''-c CONFIGFILE'' [[command line option|00001004051000]], allows you to specify some startup options.
 These cannot be stored in a [[configuration zettel|00001004020000]] because they are needed before Zettelstore can start or because of security reasons.
@@ -22,7 +22,7 @@ The following keys are supported:
   A value of ""0"" (the default) disables it.
   The administrator console will only be enabled if Zettelstore is started with the [[''run'' sub-command|00001004051000]].
 
-  On most operating systems, the value must be greater than ""1024"" unless you start Zettelstore with the full privileges of a system administrator (which is not recommended).
+  On many operating systems, the value must be greater than ""1023"" unless you start Zettelstore with the full privileges of a system administrator (which is not recommended).
 
   Default: ""0""
 ; [!asset-dir|''asset-dir'']

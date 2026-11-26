@@ -4,7 +4,7 @@ role: manual
 tags: #manual #zettelstore
 syntax: zmk
 created: 20220803170112
-modified: 20250627133713
+modified: 20261126123250
 
 === Welcome Zettel
 * **Problem:** You want to put your Zettelstore into the public and need a starting zettel for your users.
@@ -77,4 +77,4 @@ modified: 20250627133713
   If you update the same zettel on multiple computers at nearly the same time, iCloud will not be able to synchronize the different versions in a safe manner.
   Zettelstore is intentionally not aware of any synchronization within its zettel boxes.
 
-  If Zettelstore behaves strangely after a synchronization took place, the page about [[Troubleshooting|00001018000000#working-with-files]] might contain some useful information.
+  If Zettelstore behaves strangely after a synchronization took place, the page about [[Troubleshooting|00001018000000#working-with-zettel-files]] might contain some useful information.
