@@ -299,7 +299,10 @@ func (mgr *Manager) DeleteZettel(ctx context.Context, zid id.Zid) error {
 				mgr.enqueueAndWait(ctx, zid)
 				return nil
 			}
-			if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr && !errors.Is(err, box.ErrReadOnly) {
+			if errors.Is(err, box.ErrReadOnly) {
+				return nil
+			}
+			if _, isErr := errors.AsType[box.ErrZettelNotFound](err); !isErr {
 				return err
 			}
 		}
