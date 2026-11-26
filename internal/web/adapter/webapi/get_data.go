@@ -53,7 +53,7 @@ func (a *WebAPI) MakeGetDataHandler(
 			if keys := q["key"]; len(keys) > 0 {
 				dks := make([]webapi.MetadataKeyInfo, 0, len(keys))
 				for _, key := range keys {
-					key = strings.ToLower(strings.TrimSpace(key))
+					key = strings.TrimSpace(key)
 					if key == "" {
 						http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 						return

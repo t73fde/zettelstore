@@ -15,6 +15,7 @@ package usecase
 
 import (
 	"context"
+	"strings"
 
 	"t73f.de/r/zsc/domain/id"
 	"t73f.de/r/zsc/domain/meta"
@@ -104,7 +105,7 @@ func (uc MetadataKeyInfo) Run(ctx context.Context, key string) (result webapi.Me
 	if user := auth.GetCurrentUser(ctx); uc.port.GetUserRole(user) < meta.UserRoleReader {
 		return result, box.NewErrNotAllowed("GetMetadataKeyInfo", user, id.Invalid)
 	}
-	dk := meta.GetDescription(key)
+	dk := meta.GetDescription(strings.ToLower(key))
 	return uc.getData(dk), nil
 }
 

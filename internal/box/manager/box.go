@@ -103,7 +103,7 @@ func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (box.Zettel, erro
 }
 
 // GetAllZettel retrieves a specific zettel from all managed boxes.
-func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) (result []box.Zettel, err error) {
+func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) (result []box.Zettel, _ error) {
 	mgr.mgrLogger.Debug("GetAllZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
