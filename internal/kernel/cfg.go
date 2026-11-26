@@ -112,10 +112,7 @@ func (cs *configService) Initialize(levelVar *slog.LevelVar, logger *slog.Logger
 			"Minimum Zid search digits",
 			func(val string) (any, error) {
 				i, err := strconv.Atoi(val)
-				if err != nil {
-					return i, err
-				}
-				if 1 <= i && i <= 14 {
+				if err == nil && 1 <= i && i <= 14 {
 					return i, nil
 				}
 				return defaultMinZidSearchDigits, nil

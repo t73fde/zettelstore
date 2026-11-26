@@ -65,7 +65,24 @@ func (pp *polBox) GetZettel(ctx context.Context, zid id.Zid) (box.Zettel, error)
 }
 
 func (pp *polBox) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel, error) {
-	return pp.box.GetAllZettel(ctx, zid)
+	zs, err := pp.box.GetAllZettel(ctx, zid)
+	if err != nil {
+		return nil, err
+	}
+	// err == nil --> len(zs) > 0
+
+	user := auth.GetCurrentUser(ctx)
+	if pp.policy.CanRead(user, zs[0].Meta) {
+		result := make([]box.Zettel, 0, len(zs))
+		result = append(result, zs[0])
+		for _, z := range zs[1:] {
+			if pp.policy.CanRead(user, z.Meta) {
+				result = append(result, z)
+			}
+		}
+		return result, err
+	}
+	return nil, box.NewErrNotAllowed("GetAllZettel", user, zid)
 }
 
 func (pp *polBox) FindMeta(ctx context.Context, zid id.Zid) *meta.Meta {

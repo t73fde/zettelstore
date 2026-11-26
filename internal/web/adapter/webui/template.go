@@ -304,6 +304,7 @@ func (wui *WebUI) bindCommonZettelData(
 	m *meta.Meta,
 	title string,
 	content *zettel.Content,
+	showCredentials bool,
 ) {
 	zid := m.Zid
 	strZid := zid.String()
@@ -357,7 +358,9 @@ func (wui *WebUI) bindCommonZettelData(
 	rb.bindKeyValue(meta.KeySyntax, m.GetDefault(meta.KeySyntax, meta.DefaultSyntax))
 	var metaPairs sx.ListBuilder
 	for key, val := range m.AllAny() {
-		metaPairs.Add(sx.Cons(sx.MakeString(key), sx.MakeString(string(val))))
+		if showCredentials || m.Type(key) != meta.TypeCredential {
+			metaPairs.Add(sx.Cons(sx.MakeString(key), sx.MakeString(string(val))))
+		}
 		rb.bindKeyValue(key, val)
 	}
 	rb.bindString("metapairs", metaPairs.List())

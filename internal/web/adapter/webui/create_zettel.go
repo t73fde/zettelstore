@@ -117,7 +117,7 @@ func (wui *WebUI) renderZettelForm(
 	if !ztl.Content.IsBinary() {
 		rb.bindString("content", sx.MakeString(ztl.Content.AsString()))
 	}
-	wui.bindCommonZettelData(&rb, user, m, "", &ztl.Content)
+	wui.bindCommonZettelData(&rb, user, m, "", &ztl.Content, false)
 	if rb.err == nil {
 		rb.err = wui.renderSxnTemplate(ctx, w, id.ZidFormTemplate, env)
 	}

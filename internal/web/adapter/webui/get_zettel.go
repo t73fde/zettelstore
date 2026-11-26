@@ -102,7 +102,7 @@ func (wui *WebUI) MakeGetHTMLZettelHandler(
 		wui.bindLinks(&rb, "successor", zn.InhMeta, meta.KeySuccessor, config.KeyShowSuccessorLinks, getTextTitle)
 		wui.bindLinks(&rb, "back", zn.InhMeta, meta.KeyBack, config.KeyShowBackLinks, getTextTitle)
 		rb.bindRoleSpecific(zn.InhMeta)
-		wui.bindCommonZettelData(&rb, user, zn.InhMeta, title, &zn.Content)
+		wui.bindCommonZettelData(&rb, user, zn.InhMeta, title, &zn.Content, true)
 		if rb.err == nil {
 			err = wui.renderSxnTemplate(ctx, w, id.ZidZettelTemplate, env)
 		} else {

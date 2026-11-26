@@ -71,7 +71,7 @@ func (mgr *Manager) CreateZettel(ctx context.Context, ztl box.Zettel) (id.Zid, e
 	if createBox, isCreateBox := mgr.boxes[0].(box.CreateBox); isCreateBox {
 		ztl.Meta = mgr.cleanMetaProperties(ztl.Meta)
 		zid, err := createBox.CreateZettel(ctx, ztl)
-		if err != nil {
+		if err == nil {
 			mgr.enqueueAndWait(ctx, zid)
 		}
 		return zid, err
@@ -103,19 +103,21 @@ func (mgr *Manager) getZettel(ctx context.Context, zid id.Zid) (box.Zettel, erro
 }
 
 // GetAllZettel retrieves a specific zettel from all managed boxes.
-func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) ([]box.Zettel, error) {
+func (mgr *Manager) GetAllZettel(ctx context.Context, zid id.Zid) (result []box.Zettel, err error) {
 	mgr.mgrLogger.Debug("GetAllZettel", "zid", zid)
 	if err := mgr.checkContinue(ctx); err != nil {
 		return nil, err
 	}
 	mgr.mgrMx.RLock()
 	defer mgr.mgrMx.RUnlock()
-	var result []box.Zettel
 	for _, p := range mgr.boxes {
 		if z, err := p.GetZettel(ctx, zid); err == nil {
 			mgr.Enrich(ctx, z.Meta, p.Name())
 			result = append(result, z)
 		}
+	}
+	if len(result) == 0 {
+		return nil, box.ErrZettelNotFound{Zid: zid}
 	}
 	return result, nil
 }
