@@ -199,7 +199,7 @@ func (ct *contextTask) addPair(
 	newDir := 0
 	newCost := curCost + contextCost(key)
 	if key == meta.KeyBackward {
-		if spec.isBackward {
+		if spec.isBackward && dir <= 0 {
 			if spec.isDirected {
 				newDir = -1
 			}
@@ -208,9 +208,9 @@ func (ct *contextTask) addPair(
 		return
 	}
 	if key == meta.KeyForward {
-		if spec.isForward {
+		if spec.isForward && dir >= 0 {
 			if spec.isDirected {
-				newDir = -1
+				newDir = 1
 			}
 			ct.addIDSet(ctx, newCost, level, newDir, value)
 		}
