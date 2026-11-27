@@ -4,6 +4,9 @@
 <h2>Changes for Version 3.2.0 (pending)</h2>
 
 <a id="3_1"></a>
+<h2>Changes for Version 3.1.5 (pending)</h2>
+  *  Smaller bug fixes and improvements; found by my students
+
 <h2>Changes for Version 3.1.4 (2026-11-26)</h2>
   *  Check auth when asking the user to delete a zettel.
      (minor: webui)
